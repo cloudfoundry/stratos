@@ -12,7 +12,7 @@ export class NoContentMessageComponent implements OnInit {
   @Input('secondLine') secondLine: {
     link: string;
     linkText: string;
-    text; string;
+    text: string;
   };
 
   constructor() { }

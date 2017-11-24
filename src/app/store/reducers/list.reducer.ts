@@ -16,7 +16,7 @@ import { Observable } from 'rxjs/Observable';
 import { mergeState } from '../helpers/reducer.helper';
 
 
-export type ListsState = Map<string, ListState>;
+export class ListsState { [key: string]: ListState }
 
 export interface ListState {
   view: ListView;
@@ -25,7 +25,7 @@ export interface ListState {
   filter: ListFilter;
 }
 
-const defaultListsState = new Map<string, ListState>();
+const defaultListsState = {} as ListsState;
 
 export function listReducer(state = defaultListsState, action): ListsState {
   switch (action.type) {
@@ -48,10 +48,6 @@ export function listReducer(state = defaultListsState, action): ListsState {
       };
     case ListStateActionTypes.SET_VIEW:
       const listView = (action as SetListViewAction).view;
-      // const newState = { ...state };
-
-      // newState[action.key].view = listView;
-      // return newState;
       return mergeListState(state, action.key, 'view', listView ? listView.toString() : '');
     case ListStateActionTypes.SET_PAGINATION:
       return mergeListState(state, action.key, 'pagination', (action as SetListPaginationAction).pagination);

@@ -1,23 +1,5 @@
 import { IListDataSource } from '../../data-sources/list-data-source';
-import { CardEventComponent } from './custom-cards/card-app-event/card-app-event.component';
-import { CardAppVariableComponent } from './custom-cards/card-app-variable/card-app-variable.component';
 import { TableCellComponent } from '../table/table-cell/table-cell.component';
-import { TableCellSelectComponent } from '../table/table-cell-select/table-cell-select.component';
-import { TableHeaderSelectComponent } from '../table/table-header-select/table-header-select.component';
-import { TableCellEditComponent } from '../table/table-cell-edit/table-cell-edit.component';
-import {
-  TableCellEditVariableComponent,
-} from '../table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
-import {
-  TableCellEventTimestampComponent,
-} from '../table/custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import { TableCellEventTypeComponent } from '../table/custom-cells/table-cell-event-type/table-cell-event-type.component';
-import {
-  TableCellEventActionComponent,
-} from '../table/custom-cells/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from '../table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { EventTabActorIconPipe } from '../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
 import { it } from '@angular/cli/lib/ast-tools/spec-utils';
@@ -30,6 +12,7 @@ import { CoreModule } from '../../../core/core.module';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../store/reducers.module';
 import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { CardEntryPoints, TableCellEntryPoints } from '../../../test-framework/list-table-helper';
 
 describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;
@@ -40,17 +23,9 @@ describe('CardsComponent', () => {
       declarations: [
         CardsComponent,
         CardComponent,
-        CardEventComponent,
-        CardAppVariableComponent,
         TableCellComponent,
-        TableCellSelectComponent,
-        TableHeaderSelectComponent,
-        TableCellEditComponent,
-        TableCellEditVariableComponent,
-        TableCellEventTimestampComponent,
-        TableCellEventTypeComponent,
-        TableCellEventActionComponent,
-        TableCellEventDetailComponent,
+        ...CardEntryPoints,
+        ...TableCellEntryPoints,
         EventTabActorIconPipe,
         ValuesPipe,
       ],

@@ -1,21 +1,5 @@
-import { IListDataSource } from '../../data-sources/list-data-source';
+import { IListDataSource, ListActions } from '../../data-sources/list-data-source';
 import { TableCellComponent } from '../table/table-cell/table-cell.component';
-import { TableCellSelectComponent } from '../table/table-cell-select/table-cell-select.component';
-import { TableHeaderSelectComponent } from '../table/table-header-select/table-header-select.component';
-import { TableCellEditComponent } from '../table/table-cell-edit/table-cell-edit.component';
-import {
-  TableCellEditVariableComponent,
-} from '../table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
-import {
-  TableCellEventTimestampComponent,
-} from '../table/custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import { TableCellEventTypeComponent } from '../table/custom-cells/table-cell-event-type/table-cell-event-type.component';
-import {
-  TableCellEventActionComponent,
-} from '../table/custom-cells/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from '../table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { EventTabActorIconPipe } from '../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
 import { it } from '@angular/cli/lib/ast-tools/spec-utils';
@@ -27,8 +11,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ListComponent } from './list.component';
 import { CoreModule } from '../../../core/core.module';
 import { CardsComponent } from '../cards/cards.component';
-import { CardEventComponent } from '../cards/custom-cards/card-app-event/card-app-event.component';
-import { CardAppVariableComponent } from '../cards/custom-cards/card-app-variable/card-app-variable.component';
 import { async } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../store/reducers.module';
@@ -36,6 +18,10 @@ import { getInitialTestStoreState } from '../../../test-framework/store-test-hel
 import { Observable } from 'rxjs/Observable';
 import { ListPagination, ListFilter, ListSort } from '../../../store/actions/list.actions';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { TableCellActionsComponent } from '../table/table-cell-actions/table-cell-actions.component';
+import { CardAppComponent } from '../cards/custom-cards/card-app/card-app.component';
+import { TableCellAppNameComponent } from '../table/custom-cells/table-cell-app-name/table-cell-app-name.component';
+import { TableCellEntryPoints, CardEntryPoints } from '../../../test-framework/list-table-helper';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -45,23 +31,15 @@ describe('ListComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
+        ...TableCellEntryPoints,
+        ...CardEntryPoints,
         ListComponent,
         CardsComponent,
         CardComponent,
-        CardEventComponent,
-        CardAppVariableComponent,
         TableCellComponent,
-        TableCellSelectComponent,
-        TableHeaderSelectComponent,
-        TableCellEditComponent,
-        TableCellEditVariableComponent,
-        TableCellEventTimestampComponent,
-        TableCellEventTypeComponent,
-        TableCellEventActionComponent,
-        TableCellEventDetailComponent,
         EventTabActorIconPipe,
         ValuesPipe,
-        TableComponent
+        TableComponent,
       ],
       imports: [
         CoreModule,
@@ -84,6 +62,7 @@ describe('ListComponent', () => {
       filter$: Observable.of({} as ListFilter),
       sort$: Observable.of({} as ListSort),
       selectedRows: {},
+      actions: new ListActions<any>(),
     } as IListDataSource<EntityInfo>;
     component.columns = [];
     component.paginator.pageSizeOptions = [];

@@ -1,21 +1,28 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellAppNameComponent } from './table-cell-app-name.component';
+import { CoreModule } from '../../../../../core/core.module';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('TableCellAppNameComponent', () => {
-  let component: TableCellAppNameComponent;
-  let fixture: ComponentFixture<TableCellAppNameComponent>;
+  let component: TableCellAppNameComponent<any>;
+  let fixture: ComponentFixture<TableCellAppNameComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellAppNameComponent ]
+      declarations: [TableCellAppNameComponent],
+      imports: [
+        CoreModule,
+        RouterTestingModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppNameComponent);
     component = fixture.componentInstance;
+    component.row = { entity: {} };
     fixture.detectChanges();
   });
 
