@@ -1,12 +1,9 @@
 import { Observable, Subscription } from 'rxjs/Rx';
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, OnDestroy, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { AuthState } from '../../../../store/reducers/auth.reducer';
-import { CNSISState } from '../../../../store/types/cnsis.types';
 import { MdSnackBar, MdSnackBarRef, SimpleSnackBar } from '@angular/material';
-import { EndpointsService } from '../../../../core/endpoints.service';
-import { UserService } from '../../../../core/user.service';
+import { UserService } from '../../../core/user.service';
+import { EndpointsService } from '../../../core/endpoints.service';
 
 @Component({
   selector: 'app-endpoints-missing',
@@ -15,7 +12,9 @@ import { UserService } from '../../../../core/user.service';
 })
 export class EndpointsMissingComponent implements OnInit, OnDestroy {
 
-  showMissing: boolean;
+  @Output('showNoneRegistered') showNoneRegistered: boolean;
+  @Output('showNoneConnected') showNoneConnected: boolean;
+
   subscription: Subscription;
 
   private _snackBar: MdSnackBarRef<SimpleSnackBar>;
@@ -27,7 +26,8 @@ export class EndpointsMissingComponent implements OnInit, OnDestroy {
       this.endpointService.haveRegistered$,
       this.endpointService.haveConnected$
     ).subscribe(([haveRegistered, haveConnected]) => {
-      this.showMissing = !haveRegistered;
+      this.showNoneRegistered = !haveRegistered;
+      this.showNoneConnected = !haveConnected;
       const showSnack = haveRegistered && !haveConnected;
       if (!this._snackBar && showSnack) {
         this._snackBar = this.snackBar.open(`To access your cloud native workloads and other related third party services, connect with

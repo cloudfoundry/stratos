@@ -58,9 +58,6 @@ export class EndpointsPageComponent implements OnInit {
 
   ngOnInit() {
     this.dataSource = new EndpointsDataSource(this.store);
-    this.showTable$ = this.dataSource.pagination$.map(pagination => {
-      return pagination.totalResults > 0;
-    });
   }
 
 }

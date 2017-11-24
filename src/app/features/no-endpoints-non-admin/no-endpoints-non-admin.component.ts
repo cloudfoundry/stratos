@@ -10,13 +10,9 @@ import { AppState } from '../../store/app-state';
 })
 export class NoEndpointsNonAdminComponent implements OnInit {
 
-  constructor(private store: Store<AppState>) { }
+  constructor() { }
 
   ngOnInit() {
-  }
-
-  logout() {
-    this.store.dispatch(new Logout());
   }
 
 }
