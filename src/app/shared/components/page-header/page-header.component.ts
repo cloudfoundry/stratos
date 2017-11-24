@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
@@ -11,6 +11,8 @@ import { Logout } from '../../../store/actions/auth.actions';
   styleUrls: ['./page-header.component.scss']
 })
 export class PageHeaderComponent implements OnInit {
+
+  @Input('hideSideNavButton') hideSideNavButton = false;
 
   constructor(private store: Store<AppState>) { }
 

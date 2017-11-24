@@ -20170,7 +20170,7 @@ const testInitialStoreState: AppState = {
       }
     },
     actionHistory: [],
-    lists: new Map<string, ListState>(),
+    lists: { },
     routerReducer: {
       state: '',
       navigationId: 1

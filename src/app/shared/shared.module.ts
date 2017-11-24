@@ -45,6 +45,7 @@ import { TableCellActionsComponent } from './components/table/table-cell-actions
 import { CardAppComponent } from './components/cards/custom-cards/card-app/card-app.component';
 import { TableCellAppNameComponent } from './components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
+import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 
 
 @NgModule({
@@ -90,6 +91,7 @@ import { NoContentMessageComponent } from './components/no-content-message/no-co
     CardAppComponent,
     TableCellAppNameComponent,
     NoContentMessageComponent,
+    EndpointsMissingComponent,
   ],
   exports: [
     FormsModule,
@@ -112,6 +114,7 @@ import { NoContentMessageComponent } from './components/no-content-message/no-co
     ListComponent,
     CardsComponent,
     NoContentMessageComponent,
+    EndpointsMissingComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent]
 })

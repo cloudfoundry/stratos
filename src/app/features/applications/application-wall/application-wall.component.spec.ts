@@ -9,24 +9,30 @@ import { SharedModule } from '../../../shared/shared.module';
 import { entitiesReducer } from '../../../store/reducers/entity.reducer';
 import { paginationReducer } from '../../../store/reducers/pagination.reducer';
 import { ApplicationWallComponent } from './application-wall.component';
+import { DatePipe } from '@angular/common';
+import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { appReducers } from '../../../store/reducers.module';
 
 describe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
   let fixture: ComponentFixture<ApplicationWallComponent>;
+  const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ApplicationWallComponent],
       imports: [
-        RouterTestingModule,
         BrowserAnimationsModule,
-        StoreModule.forRoot({
-          entities: entitiesReducer,
-          pagination: paginationReducer
-        }),
-        MDAppModule,
+        StoreModule.forRoot(appReducers,
+          {
+            initialState
+          }),
+        CoreModule,
         SharedModule,
-        CoreModule
+        RouterTestingModule,
+      ],
+      providers: [
+        DatePipe
       ]
     })
       .compileComponents();

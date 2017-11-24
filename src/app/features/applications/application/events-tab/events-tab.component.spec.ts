@@ -22,7 +22,7 @@ class ApplicationServiceMock {
 describe('EventsTabComponent', () => {
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
-  const initialState = getInitialTestStoreState();
+  const initialState = { ...getInitialTestStoreState() };
   initialState.pagination = {
     event: {
       ['app-events:mockCfGuidmockAppGuid']: {

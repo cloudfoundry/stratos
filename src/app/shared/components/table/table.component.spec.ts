@@ -27,6 +27,9 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { appReducers } from '../../../store/reducers.module';
 import { StoreModule } from '@ngrx/store';
 import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
+import { TableCellAppNameComponent } from './custom-cells/table-cell-app-name/table-cell-app-name.component';
+import { TableCellEntryPoints } from '../../../test-framework/list-table-helper';
 
 describe('TableComponent', () => {
   let component: TableComponent<AppEnvVar>;
@@ -36,16 +39,9 @@ describe('TableComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
+        ...TableCellEntryPoints,
         TableComponent,
         TableCellComponent,
-        TableCellSelectComponent,
-        TableHeaderSelectComponent,
-        TableCellEditComponent,
-        TableCellEditVariableComponent,
-        TableCellEventTimestampComponent,
-        TableCellEventTypeComponent,
-        TableCellEventActionComponent,
-        TableCellEventDetailComponent,
         EventTabActorIconPipe,
         ValuesPipe,
       ],
