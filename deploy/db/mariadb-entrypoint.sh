@@ -44,6 +44,4 @@ fi
 
 mkdir /var/run/mysql
 
-# chown -R mysql:mysql "$MYSQL_DATADIR"
-
 exec "$@"
