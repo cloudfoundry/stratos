@@ -46,6 +46,7 @@ import { CardAppComponent } from './components/cards/custom-cards/card-app/card-
 import { TableCellAppNameComponent } from './components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { CardEndpointComponent } from './components/cards/custom-cards/card-endpoint/card-endpoint.component';
 
 
 @NgModule({
@@ -92,6 +93,7 @@ import { EndpointsMissingComponent } from './components/endpoints-missing/endpoi
     TableCellAppNameComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
+    CardEndpointComponent,
   ],
   exports: [
     FormsModule,

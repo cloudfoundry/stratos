@@ -4,6 +4,7 @@ import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card
 import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
 import { IListDataSource } from '../../../data-sources/list-data-source';
 import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
+import { CardEndpointComponent } from '../custom-cards/card-endpoint/card-endpoint.component';
 
 @Component({
   selector: 'app-card',
@@ -13,6 +14,7 @@ import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
     CardEventComponent,
     CardAppVariableComponent,
     CardAppComponent,
+    CardEndpointComponent,
   ]
 })
 export class CardComponent<T> implements OnInit {

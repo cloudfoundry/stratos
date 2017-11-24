@@ -12,6 +12,7 @@ import { TableHeaderSelectComponent } from '../../../shared/components/table/tab
 import { TableCellSelectComponent } from '../../../shared/components/table/table-cell-select/table-cell-select.component';
 import { TableCellEditComponent } from '../../../shared/components/table/table-cell-edit/table-cell-edit.component';
 import { EndpointsDataSource } from '../../../shared/data-sources/endpoints-data-source';
+import { CardEndpointComponent } from '../../../shared/components/cards/custom-cards/card-endpoint/card-endpoint.component';
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
   return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
@@ -51,16 +52,12 @@ export class EndpointsPageComponent implements OnInit {
       columnId: 'edit', headerCell: () => 'Actions', cellComponent: TableCellActionsComponent, class: 'table-column-edit', cellFlex: '1'
     },
   ];
-
-  showTable$: Observable<boolean>;
+  cardComponent = CardEndpointComponent;
 
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
     this.dataSource = new EndpointsDataSource(this.store);
-    this.showTable$ = this.dataSource.pagination$.map(pagination => {
-      return pagination.totalResults > 0;
-    });
   }
 
 }

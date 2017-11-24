@@ -1,0 +1,23 @@
+.card-endpoint {
+  &__status-true .mat-card-title {
+    border-bottom: 3px solid green;
+  }
+  &__status-false .mat-card-title {
+    border-bottom: 3px solid red;
+  }
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.mat-card {
+  &-title {
+    border-bottom: 3px solid yellow;
+    padding-bottom: 10px;
+    margin-left: -16px; //Remove margin of original .mat-card-title
+  }
+  &-header-text {
+    margin: 0;
+  }
+}

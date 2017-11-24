@@ -1,0 +1,11 @@
+<md-card [ngClass]="'card-endpoint__status-' + row.registered">
+  <md-card-header>
+    <div class="mat-card-title">{{ row.name }}</div>
+  </md-card-header>
+  <md-card-content>
+    <div class="card-endpoint__meta">
+      <b>Type: </b> {{ getEndpointTypeString(row) }}</div>
+    <div class="card-endpoint__meta">
+      <b>Address: </b>{{ row.api_endpoint.Scheme }}://{{row.api_endpoint.Host}}</div>
+  </md-card-content>
+</md-card>
