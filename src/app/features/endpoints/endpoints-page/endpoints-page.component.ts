@@ -13,6 +13,7 @@ import { TableCellSelectComponent } from '../../../shared/components/table/table
 import { TableCellEditComponent } from '../../../shared/components/table/table-cell-edit/table-cell-edit.component';
 import { EndpointsDataSource } from '../../../shared/data-sources/endpoints-data-source';
 import { CardEndpointComponent } from '../../../shared/components/cards/custom-cards/card-endpoint/card-endpoint.component';
+import { TableCellEndpointStatusComponent } from '../../../shared/components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
   return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
@@ -36,7 +37,7 @@ export class EndpointsPageComponent implements OnInit {
       columnId: 'name', headerCell: () => 'Name', cell: (row: CNSISModel) => `${row.name}`, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'connection', headerCell: () => 'Connection', cell: (row: CNSISModel) => `${row.registered}`, sort: true, cellFlex: '1'
+      columnId: 'connection', headerCell: () => 'Status', cellComponent: TableCellEndpointStatusComponent, sort: true, cellFlex: '1'
     },
     {
       columnId: 'type', headerCell: () => 'Type', cell: getEndpointTypeString, sort: true, cellFlex: '2'

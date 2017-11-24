@@ -12,6 +12,7 @@ import { TableCellEventDetailComponent } from '../custom-cells/table-cell-event-
 import { IListDataSource } from '../../../data-sources/list-data-source';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/table-cell-app-name.component';
+import { TableCellEndpointStatusComponent } from '../custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 @Component({
   selector: 'app-table-cell',
@@ -30,6 +31,7 @@ import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/t
     TableCellEventDetailComponent,
     TableCellActionsComponent,
     TableCellAppNameComponent,
+    TableCellEndpointStatusComponent,
   ],
 })
 export class TableCellComponent<T> implements OnInit {

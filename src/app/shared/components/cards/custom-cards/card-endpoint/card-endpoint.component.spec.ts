@@ -3,6 +3,9 @@ import { CoreModule } from '../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CardEndpointComponent } from './card-endpoint.component';
+import {
+  TableCellEndpointStatusComponent
+} from '../../../table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 describe('CardEndpointComponent', () => {
   let component: CardEndpointComponent;
@@ -10,7 +13,7 @@ describe('CardEndpointComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CardEndpointComponent],
+      declarations: [CardEndpointComponent, TableCellEndpointStatusComponent],
       imports: [
         CoreModule
       ]
