@@ -1,3 +1,4 @@
+import { EndpointsService } from '../../../core/endpoints.service';
 import { timeout } from 'rxjs/operator/timeout';
 import { TableCellActionsComponent } from '../../../shared/components/table/table-cell-actions/table-cell-actions.component';
 import { CNSISModel, CNSISState } from '../../../store/types/cnsis.types';
@@ -55,7 +56,7 @@ export class EndpointsPageComponent implements OnInit {
   ];
   cardComponent = CardEndpointComponent;
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, public endpointsService: EndpointsService) { }
 
   ngOnInit() {
     this.dataSource = new EndpointsDataSource(this.store);

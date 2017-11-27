@@ -14,6 +14,7 @@ import { EntityInfo, APIResource } from '../../../store/types/api.types';
 import { TableCellAppNameComponent } from '../../../shared/components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { CardAppComponent } from '../../../shared/components/cards/custom-cards/card-app/card-app.component';
 import { UtilsService } from '../../../core/utils.service';
+import { EndpointsService } from '../../../core/endpoints.service';
 
 
 @Component({
@@ -36,7 +37,8 @@ import { UtilsService } from '../../../core/utils.service';
 export class ApplicationWallComponent implements OnInit, OnDestroy {
 
 
-  constructor(private store: Store<AppState>, private datePipe: DatePipe, private utilsService: UtilsService) { }
+  constructor(private store: Store<AppState>, private datePipe: DatePipe, private utilsService: UtilsService,
+    public endpointsService: EndpointsService) { }
 
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [

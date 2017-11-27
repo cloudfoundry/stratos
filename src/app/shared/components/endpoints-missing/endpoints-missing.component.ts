@@ -1,3 +1,4 @@
+import { concat } from 'rxjs/observable/concat';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Component, OnInit, Input, OnDestroy, Output, AfterViewInit } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -14,8 +15,11 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
 
   @Input('showSnackForNoneConnected') showSnackForNoneConnected = false;
 
-  @Output('showNoneRegistered') showNoneRegistered = false;
-  @Output('showNoneConnected') showNoneConnected = false;
+  showNoneRegistered = false;
+  showNoneConnected = false;
+  firstLine;
+  secondLine;
+  hide = false;
 
   snackBarText = {
     message: `To access your cloud native workloads and other related third party services, connect with
@@ -56,9 +60,15 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
       this.endpointService.haveRegistered$,
       this.endpointService.haveConnected$
     ).subscribe(([haveRegistered, haveConnected]) => {
-      this.showNoneRegistered = !haveRegistered;
-      this.showNoneConnected = !this.showSnackForNoneConnected && haveRegistered && !haveConnected;
-      setTimeout(() => this.showSnackBar(this.showSnackForNoneConnected && haveRegistered && !haveConnected), 0);
+      const showNoneRegistered = !haveRegistered;
+      const showNoneConnected = !this.showSnackForNoneConnected && haveRegistered && !haveConnected;
+
+      setTimeout(() => {
+        this.firstLine = showNoneConnected ? this.noneConnectedText.firstLineText : this.noneRegisteredText.firstLineText;
+        this.secondLine = showNoneConnected ? this.noneConnectedText.secondLineText : this.noneRegisteredText.secondLineText;
+        this.hide = !showNoneRegistered && !showNoneConnected;
+        this.showSnackBar(this.showSnackForNoneConnected && haveRegistered && !haveConnected);
+      });
     });
   }
 
