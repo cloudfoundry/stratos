@@ -15,11 +15,9 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
 
   @Input('showSnackForNoneConnected') showSnackForNoneConnected = false;
 
-  showNoneRegistered = false;
-  showNoneConnected = false;
   firstLine;
   secondLine;
-  hide = false;
+  hide = true;
 
   snackBarText = {
     message: `To access your cloud native workloads and other related third party services, connect with

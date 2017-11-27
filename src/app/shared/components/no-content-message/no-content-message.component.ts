@@ -10,8 +10,8 @@ export class NoContentMessageComponent implements OnInit {
   @Input('icon') icon: string;
   @Input('firstLine') firstLine: string;
   @Input('secondLine') secondLine: {
-    link: string;
-    linkText: string;
+    link?: string;
+    linkText?: string;
     text: string;
   };
 
