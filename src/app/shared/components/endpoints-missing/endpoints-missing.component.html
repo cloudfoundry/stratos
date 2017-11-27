@@ -1,6 +1,2 @@
-<app-no-content-message [hidden]="!showNoneRegistered" [icon]="'device_hub'" [firstLine]="'There are no registered endpoints'"
-  [secondLine]="{
-    link: '/endpoints/new',
-    linkText: 'Register an endpoint',
-    text: ' to make it available to developers.'
-  }"></app-no-content-message>
+<app-no-content-message [icon]="'device_hub'" [hidden]="!showNoneRegistered && !showNoneConnected" [firstLine]="showNoneConnected ? noneConnectedText.firstLineText : noneRegisteredText.firstLineText"
+  [secondLine]="showNoneConnected ? noneConnectedText.secondLineText : noneRegisteredText.secondLineText"></app-no-content-message>

@@ -2,7 +2,7 @@
   <h1>Endpoints</h1>
 </app-page-header>
 
-<app-endpoints-missing #appEndpointsMissing></app-endpoints-missing>
+<app-endpoints-missing #appEndpointsMissing showSnackForNoneConnected="true"></app-endpoints-missing>
 
 <app-list [dataSource]="dataSource" [columns]="columns" [text]="{ title: 'Endpoints', filter: 'Filter Endpoints'}" [enableFilter]="true"
-  [cardComponent]="cardComponent" [hidden]="appEndpointsMissing.showNoneRegistered || appEndpointsMissing.showNoneConnected"></app-list>
+  [cardComponent]="cardComponent" [hidden]="appEndpointsMissing.showNoneRegistered"></app-list>
