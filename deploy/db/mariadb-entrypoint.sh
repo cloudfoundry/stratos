@@ -11,7 +11,11 @@ if [ ! -d "$MYSQL_DATADIR/mysql" ]; then
   # fi
 
   echo 'Running mysql_install_db ...'
+<<<<<<< Updated upstream
   mysql_install_db --user=root --datadir="$MYSQL_DATADIR"
+=======
+  mysql_install_db --user=mysql --datadir="$MYSQL_DATADIR"
+>>>>>>> Stashed changes
   echo 'Finished mysql_install_db'
 
   # These statements _must_ be on individual lines, and _must_ end with
@@ -42,6 +46,12 @@ EOSQL
   set -- "$@" --init-file="$tempSqlFile"
 fi
 
+<<<<<<< Updated upstream
 mkdir /var/run/mysql
+=======
+chown -R mysql:mysql "$MYSQL_DATADIR"
+mkdir /var/run/mysql
+chown -R mysql:mysql /var/run/mysql
+>>>>>>> Stashed changes
 
 exec "$@"

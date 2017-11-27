@@ -6,4 +6,8 @@ COPY mariadb-entrypoint.sh /docker-entrypoint.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 3306
+<<<<<<< Updated upstream
 CMD ["mysqld", "--user=root"]
+=======
+CMD ["mysqld", "--user=mysql"]
+>>>>>>> Stashed changes
