@@ -1,3 +1,4 @@
+import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { EventTabActorIconPipe } from './components/table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -47,7 +48,9 @@ import { TableCellAppNameComponent } from './components/table/custom-cells/table
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { CardEndpointComponent } from './components/cards/custom-cards/card-endpoint/card-endpoint.component';
-import { TableCellEndpointStatusComponent } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import {
+  TableCellEndpointStatusComponent
+} from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 
 @NgModule({
@@ -57,7 +60,8 @@ import { TableCellEndpointStatusComponent } from './components/table/custom-cell
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    VirtualScrollModule
+    VirtualScrollModule,
+    CfAuthModule
   ],
   declarations: [
     LoadingPageComponent,

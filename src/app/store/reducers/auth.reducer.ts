@@ -82,3 +82,7 @@ export function authReducer(state: AuthState = defaultState, action) {
       return state;
   }
 }
+
+export function selectSessionData() {
+  return (state) => state.auth.sessionData;
+}

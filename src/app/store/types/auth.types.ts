@@ -2,7 +2,15 @@ export interface SessionData {
   endpoints?: {
     [type: string]: {
       [guid: string]: {
-        [key: string]: any
+        guid: string;
+        name: string;
+        version: string;
+        user: {
+          admin: boolean,
+          guid: string,
+          name: string
+        },
+        type: string;
       }
     }
   };
