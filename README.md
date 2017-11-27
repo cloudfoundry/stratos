@@ -36,6 +36,12 @@ We very much welcome developers who would like to get involved and contribute to
 
 For information to help getting started with development, please read the [Developer's Guide](docs/development.md).
 
+## Support and feedback
+
+We have a channel (#stratos) on the Cloud Foundy Slack where you can ask questions, get support or give us feedback. We'd love to hear from you if you are using Stratos.
+
+You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - and then join the #stratos channel.
+
 ## License
 
 The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE.md).
