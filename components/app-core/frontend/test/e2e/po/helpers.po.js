@@ -298,13 +298,19 @@
    * @returns {Promise} A promise
    */
   function sendRequest(req, options, body, formData) {
+
     return new Promise(function (resolve, reject) {
+      console.log('-------------------');
+      console.log('sendRequest: ' + options.url);
+
       options.url = getHost() + '/' + options.url;
       if (body) {
         options.body = JSON.stringify(body);
       } else if (formData) {
         options.formData = formData;
       }
+
+      console.log(options);
 
       var data = '';
       var rejected;
