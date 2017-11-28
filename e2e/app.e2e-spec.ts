@@ -1,14 +1,17 @@
 import { AppPage } from './app.po';
+import { LoginPage } from './login/login.po';
 
-describe('stra2ous-ui App', () => {
+describe('App', () => {
   let page: AppPage;
+  let loginPage: LoginPage;
 
   beforeEach(() => {
     page = new AppPage();
+    loginPage = new LoginPage();
   });
 
-  it('should display welcome message', () => {
+  it('- should reach log in page', () => {
     page.navigateTo();
-    expect(page.getParagraphText()).toEqual('Welcome to app!');
+    expect<any>(loginPage.isLoginPage()).toBeTruthy();
   });
 });
