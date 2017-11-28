@@ -6,6 +6,12 @@ import { protractor } from 'protractor/built';
 import { getConsole } from '@ngrx/effects/src/effects_module';
 import { e2eSecrets } from '../e2e.secrets';
 import { browser, element, by, ElementArrayFinder, promise } from 'protractor';
+import { LoginPage } from '../login/login.po';
+
+export enum ConsoleUserType {
+  admin = 1,
+  user = 2
+}
 
 export class E2EHelpers {
 
@@ -37,11 +43,22 @@ export class E2EHelpers {
     return browser.forkNewDriverInstance(true);
   }
 
-  loadApp(keepCookies): promise.Promise<any> {
+  setupApp(loginUser?: ConsoleUserType, keepCookies?: boolean) {
+    this.setBrowserNormal();
     if (!keepCookies) {
       browser.manage().deleteAllCookies();
     }
-    return browser.get('/');
+    if (loginUser) {
+      // TODO: All the cnsi reset stuff, ensure cf users are present and orgs/spaces, etc
+
+      // Guide through login pages
+      const loginPage = new LoginPage();
+      if (loginUser as ConsoleUserType === ConsoleUserType.admin) {
+        return loginPage.login(this.getConsoleAdminUsername(), this.getConsoleAdminPassword());
+      } else {
+        return loginPage.login(this.getConsoleNonAdminUsername(), this.getConsoleNonAdminPassword());
+      }
+    }
   }
 
   setBrowserNormal() {

@@ -1,5 +1,6 @@
+import { userInfo } from 'os';
 import { E2EHelpers } from '../helpers/e2e-helpers';
-import { element, by, browser, promise } from 'protractor';
+import { element, by, browser, promise, protractor } from 'protractor';
 
 export class LoginPage {
 
@@ -31,5 +32,18 @@ export class LoginPage {
 
   getLoginError() {
     return element(by.css('.login-message.login-message--show.login-message-error')).getText();
+  }
+
+  login(username: string, password: string) {
+    this.navigateTo();
+    this.enterLogin(username, password);
+    this.loginButton().click();
+    // Wait for the backend to catch up
+    this.waitForLoggedIn();
+  }
+
+  waitForLoggedIn() {
+    const until = protractor.ExpectedConditions;
+    return browser.wait(until.presenceOf(element(by.css('app-dashboard-base'))), 5000);
   }
 }

@@ -12,6 +12,6 @@ describe('App', () => {
 
   it('- should reach log in page', () => {
     page.navigateTo();
-    expect<any>(loginPage.isLoginPage()).toBeTruthy();
+    expect(loginPage.isLoginPage()).toBeTruthy();
   });
 });
