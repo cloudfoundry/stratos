@@ -1,3 +1,4 @@
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { AppState } from '../../../../store/app-state';
 import { Store } from '@ngrx/store';
 import { Component, OnInit, ViewChild, AfterContentInit } from '@angular/core';
@@ -5,13 +6,7 @@ import { NgForm, NgModel } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 import { CNSISState } from '../../../../store/types/cnsis.types';
 import { UtilsService } from '../../../../core/utils.service';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-
-// TODO: RC MOVE ME
-export interface IStepperStep {
-  validate: Observable<boolean>;
-  onNext: StepOnNextFunction;
-}
+import { StepOnNextFunction, IStepperStep } from '../../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',

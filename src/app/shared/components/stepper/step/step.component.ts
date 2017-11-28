@@ -4,6 +4,11 @@ import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core'
 import { ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
+export interface IStepperStep {
+  validate: Observable<boolean>;
+  onNext: StepOnNextFunction;
+}
+
 export type StepOnNextFunction = () => Observable<{
   success: boolean,
   message?: string
