@@ -11,9 +11,6 @@ export class DashboardPage {
 
   isDashboardPage(strictCheck: boolean = true): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
-      console.log(url);
-      console.log(strictCheck ? browser.baseUrl + '/dashboard' : browser.baseUrl + '/');
-      console.log(browser.baseUrl + '/dashboard');
       return url === browser.baseUrl + '/dashboard' || (strictCheck && url === browser.baseUrl + '/');
     });
   }
