@@ -11,42 +11,6 @@ export const createEntitySelector = (entity: string) => {
   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
 };
 
-export function selectEntity(type: string, guid: string) {
-  return compose(
-    getEntityById<APIResource>(guid),
-    getEntityType(type),
-    getEntityState
-  );
-}
-
-export function selectEntityDeletionInfo(type: string, entityGuid: string) {
-  return compose(
-    getEntityDeleteSections,
-    getEntityById<EntityRequestState>(entityGuid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-export function selectEntityUpdateInfo(type: string, entityGuid: string, updatingGuid: string) {
-  return compose(
-    getUpdateSectionById(updatingGuid),
-    getEntityUpdateSections,
-    getEntityById<EntityRequestState>(entityGuid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-export function selectEntityRequestInfo(type: string, guid: string) {
-  return compose(
-    getEntityById<EntityRequestState>(guid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-
 export function getEntityState(state: AppState) {
   return state.entities;
 }
@@ -84,4 +48,39 @@ export const getAPIResourceGuid = compose(
 
 export function getAPIRequestInfoState(state: AppState) {
   return state.apiRequest || {};
+}
+
+export function selectEntity(type: string, guid: string) {
+  return compose(
+    getEntityById<APIResource>(guid),
+    getEntityType(type),
+    getEntityState
+  );
+}
+
+export function selectEntityDeletionInfo(type: string, entityGuid: string) {
+  return compose(
+    getEntityDeleteSections,
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
+  );
+}
+
+export function selectEntityUpdateInfo(type: string, entityGuid: string, updatingGuid: string) {
+  return compose(
+    getUpdateSectionById(updatingGuid),
+    getEntityUpdateSections,
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
+  );
+}
+
+export function selectEntityRequestInfo(type: string, guid: string) {
+  return compose(
+    getEntityById<EntityRequestState>(guid),
+    getEntityType(type),
+    getAPIRequestInfoState,
+  );
 }
