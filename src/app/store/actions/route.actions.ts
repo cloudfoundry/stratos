@@ -1,9 +1,10 @@
+import { CFAction, IAPIAction } from '../types/request.types';
+
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
-import { APIAction } from '../types/api.types';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -19,8 +20,9 @@ export interface NewRoute {
   host: string;
 }
 
-export class CreateRoute implements APIAction {
+export class CreateRoute extends CFAction implements IAPIAction {
   constructor(public guid: string, public cnis: string, route: NewRoute) {
+    super();
     this.options = new RequestOptions();
     this.options.url = 'routes';
     this.options.method = 'post';
@@ -41,8 +43,9 @@ export class CreateRoute implements APIAction {
 }
 
 
-export class CheckRouteExists implements APIAction {
+export class CheckRouteExists extends CFAction implements IAPIAction {
   constructor(public guid: string, public cnis: string, route: NewRoute) {
+    super();
     this.options = new RequestOptions();
     this.options.url = 'routes';
     this.options.method = 'post';

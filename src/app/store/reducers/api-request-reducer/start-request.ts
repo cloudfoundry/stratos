@@ -1,3 +1,4 @@
+import { RequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
   getRequestTypeFromMethod,
@@ -5,7 +6,6 @@ import {
   modifyRequestWithRequestType,
   setEntityRequestState,
 } from './request-helpers';
-import { APIAction, RequestAction } from '../../types/api.types';
 
 export function startRequest(state, action) {
   if (!action.apiAction.guid) {

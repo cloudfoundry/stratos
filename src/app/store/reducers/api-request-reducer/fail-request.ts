@@ -1,4 +1,4 @@
-import { APIAction, RequestAction } from '../../types/api.types';
+import { RequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
   getRequestTypeFromMethod,

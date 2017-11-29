@@ -1,9 +1,9 @@
+import { RequestAction } from '../types/request.types';
 import { RequestOptions } from '@angular/http';
 import { Schema, schema } from 'normalizr';
 import { Action, createSelector } from '@ngrx/store';
 
 import { AppState } from '../app-state';
-import { RequestAction } from '../types/api.types';
 
 export const GET_CNSIS = '[CNSIS] Get all';
 export const GET_CNSIS_LOGIN = '[CNSIS] Get all at login';
@@ -29,11 +29,11 @@ export class GetAllCNSISFailed implements Action {
   type = GET_CNSIS_FAILED;
 }
 
-export class ConnectCnis implements RequestAction {
+export class ConnectCnis implements Action {
+  constructor(
+    public cnsiGuid: string,
+    public username: string,
+    public password: string,
+  ) { }
   type = CONNECT_CNSIS;
-  options = new RequestOptions({
-    method: 'get'
-  });
-  entityKey = 'cnis';
-  updatingKey: 'connecting';
 }

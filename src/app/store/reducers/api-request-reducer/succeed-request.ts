@@ -1,4 +1,4 @@
-import { APIAction, WrapperAPIActionSuccess } from '../../types/api.types';
+import { CFAction, IAPIAction, WrapperCFActionSuccess } from '../../types/request.types';
 import {
   createRequestStateFromResponse,
   getEntityRequestState,
@@ -10,9 +10,9 @@ import { mergeState } from '../../helpers/reducer.helper';
 
 export function succeedRequest(state, action) {
   if (action.apiAction.guid) {
-    const apiAction = action.apiAction as APIAction;
+    const apiAction = action.apiAction as IAPIAction;
     const requestTypeSuccess = getRequestTypeFromMethod(apiAction.options.method);
-    const successAction = action as WrapperAPIActionSuccess;
+    const successAction = action as WrapperCFActionSuccess;
 
     const requestSuccessState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {

@@ -47,22 +47,14 @@ export class CNSISEffect {
   @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
     .flatMap(action => {
 
-      // DISPATCH THE NONEAPIACTION THINGY
-      return Observable.zip(
-        this.http.get('/pp/v1/cnsis'),
-        this.http.get('/pp/v1/cnsis/registered'),
-        (all, registered) => {
-          const allCnsis: CNSISModel[] = all.json();
-          const registeredCnsis: CNSISModel[] = registered.json();
-
-          return allCnsis.map(c => {
-            c.registered = !!registeredCnsis.find(r => r.guid === c.guid);
-            return c;
-          });
+      return this.http.post('/pp/v1/auth/login/cnsi', {}, {
+        params: {
+          cnsi_guid: action.cnsiGuid,
+          username: action.username,
+          password: action.password
         }
-      )
-        .map(data => new GetAllCNSISSuccess(data, action.login))
-        .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
+      }).do(() => {
 
+      });
     });
 }

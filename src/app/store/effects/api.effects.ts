@@ -1,3 +1,10 @@
+import {
+  CFAction,
+  IAPIAction,
+  StartCFAction,
+  WrapperCFActionFailed,
+  WrapperCFActionSuccess,
+} from '../types/request.types';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
@@ -14,13 +21,8 @@ import {
   ApiActionTypes
 } from './../actions/request.actions';
 import {
-  APIAction,
-
   APIResource,
   NormalizedResponse,
-  StartAPIAction,
-  WrapperAPIActionFailed,
-  WrapperAPIActionSuccess,
 } from './../types/api.types';
 import { AppState } from './../app-state';
 import {
@@ -43,12 +45,12 @@ export class APIEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
+  @Effect() apiRequestStart$ = this.actions$.ofType<IAPIAction>(ApiActionTypes.API_REQUEST)
     .map(apiAction => {
-      return new StartAPIAction(apiAction);
+      return new StartCFAction(apiAction);
     });
 
-  @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
+  @Effect() apiRequest$ = this.actions$.ofType<StartCFAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
 
@@ -119,7 +121,7 @@ export class APIEffect {
           };
 
           const actions = [];
-          actions.push(new WrapperAPIActionSuccess(
+          actions.push(new WrapperCFActionSuccess(
             apiAction.actions[1],
             entities,
             apiAction,
@@ -136,7 +138,7 @@ export class APIEffect {
           return actions;
         })
         .catch(err => {
-          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err.message, apiAction));
+          return Observable.of(new WrapperCFActionFailed(apiAction.actions[2], err.message, apiAction));
         });
     });
 
@@ -165,7 +167,7 @@ export class APIEffect {
       });
   }
 
-  getEntities(apiAction: APIAction, data): {
+  getEntities(apiAction: IAPIAction, data): {
     entities: NormalizedResponse
     totalResults: number
   } {

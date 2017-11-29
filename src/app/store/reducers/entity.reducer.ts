@@ -1,9 +1,9 @@
+import { WrapperCFActionSuccess } from '../types/request.types';
 import { EntitiesState } from '../types/entity.types';
 import { RequestMethod } from '@angular/http';
 
 import { ApiActionTypes } from './../actions/request.actions';
 import { mergeState } from './../helpers/reducer.helper';
-import { WrapperAPIActionSuccess } from '../types/api.types';
 
 
 export const defaultEntitiesState = {
@@ -15,8 +15,9 @@ export const defaultEntitiesState = {
   event: {}
 };
 
-export function entitiesReducer(state: EntitiesState = defaultEntitiesState, action: WrapperAPIActionSuccess) {
-  switch (action.apiType) {
+export function entitiesReducer(state: EntitiesState = defaultEntitiesState, action: WrapperCFActionSuccess) {
+  const type = action.apiAction ? action.apiAction.type : action.type;
+  switch (type) {
     case ApiActionTypes.API_REQUEST_SUCCESS:
       if (action.apiAction.options.method === 'delete' || action.apiAction.options.method === RequestMethod.Delete) {
         const newState = { ...state };

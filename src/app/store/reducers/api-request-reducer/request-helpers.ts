@@ -1,4 +1,4 @@
-import { APIAction, SingleEntityAction, RequestAction } from '../../types/api.types';
+import { RequestAction, SingleEntityAction } from '../../types/request.types';
 import { EntitiesState } from '../../types/entity.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';

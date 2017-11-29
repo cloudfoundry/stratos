@@ -1,3 +1,4 @@
+import { IAPIAction } from '../store/types/request.types';
 import { interval } from 'rxjs/observable/interval';
 import { ActionState, RequestState, UpdatingSection } from '../store/reducers/api-request-reducer/types';
 import { composeFn } from './../store/helpers/reducer.helper';
@@ -5,7 +6,7 @@ import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
-import { APIAction, APIResource, EntityInfo } from '../store/types/api.types';
+import { APIResource, EntityInfo } from '../store/types/api.types';
 import {
   getEntityState,
   getEntityUpdateSections,
@@ -29,7 +30,7 @@ export class EntityService {
     public entityKey: string,
     public schema: Schema,
     public id: string,
-    public action: APIAction
+    public action: IAPIAction
   ) {
     this.entitySelect$ = store.select(selectEntity(entityKey, id));
     this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id));
@@ -80,50 +81,51 @@ export class EntityService {
 
   entityObs$: Observable<EntityInfo>;
 
-  isFetchingEntity$: Observable<boolean>;
+isFetchingEntity$: Observable<boolean>;
 
-  isDeletingEntity$: Observable<boolean>;
+isDeletingEntity$: Observable<boolean>;
 
-  waitForEntity$: Observable<EntityInfo>;
+waitForEntity$: Observable<EntityInfo>;
 
-  updatingSection$: Observable<UpdatingSection>;
+updatingSection$: Observable<UpdatingSection>;
 
   private getEntityObservable = (
-    schema: Schema,
-    actionDispatch: Function,
-    entitySelect$: Observable<APIResource>,
-    entityRequestSelect$: Observable<RequestState>
-  ): Observable<EntityInfo> => {
-    // This fetching var needs to end up in the state
-    return Observable.combineLatest(
-      this.store.select(getEntityState),
-      entitySelect$,
-      entityRequestSelect$
-    )
-      .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, RequestState]) => {
-        if (
-          !entityRequestInfo ||
-          !entity &&
-          !entityRequestInfo.fetching &&
-          !entityRequestInfo.error &&
-          !entityRequestInfo.deleting.busy &&
-          !entityRequestInfo.deleting.deleted
-        ) {
-          actionDispatch();
-        }
-      })
+  schema: Schema,
+  actionDispatch: Function,
+  entitySelect$: Observable<APIResource>,
+  entityRequestSelect$: Observable<RequestState>
+): Observable<EntityInfo> => {
+  // This fetching var needs to end up in the state
+  return Observable.combineLatest(
+    this.store.select(getEntityState),
+    entitySelect$,
+    entityRequestSelect$
+  )
+    .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, RequestState]) => {
+      if (
+        !entityRequestInfo ||
+        !entity &&
+        !entityRequestInfo.fetching &&
+        !entityRequestInfo.error &&
+        !entityRequestInfo.deleting.busy &&
+        !entityRequestInfo.deleting.deleted
+      ) {
+        actionDispatch();
+      }
+    })
+
       .filter(([entities, entity, entityRequestInfo]) => {
-        return !!entityRequestInfo;
-      })
-      .map(([entities, entity, entityRequestInfo]) => {
-        return {
-          entityRequestInfo,
-          entity: entity ? {
-            entity: denormalize(entity, schema, entities).entity,
-            metadata: entity.metadata
-          } : null
-        };
-      });
+    return !!entityRequestInfo;
+  })
+    .map(([entities, entity, entityRequestInfo]) => {
+      return {
+        entityRequestInfo,
+        entity: entity ? {
+          entity: denormalize(entity, schema, entities).entity,
+          metadata: entity.metadata
+        } : null
+      };
+    });
   }
   /**
    * @param interval - The polling interval in ms.

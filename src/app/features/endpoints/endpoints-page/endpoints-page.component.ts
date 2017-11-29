@@ -25,7 +25,7 @@ export class EndpointsPageComponent implements OnInit {
 
   dataSource: EndpointsDataSource;
 
-  columns: Array<ITableColumn<CNSISModel>> = [
+  columns: ITableColumn<CNSISModel>[] = [
     {
       columnId: 'select',
       headerCellComponent: TableHeaderSelectComponent,
@@ -35,14 +35,14 @@ export class EndpointsPageComponent implements OnInit {
     {
       columnId: 'name',
       headerCell: () => 'Name',
-      cell: (row: CNSISModel) => `${row.name}`,
+      cell: row => row.name,
       sort: true,
       cellFlex: '2'
     },
     {
       columnId: 'connection',
       headerCell: () => 'Connection',
-      cell: (row: CNSISModel) => row.api_endpoint.User ? 'Connected' : 'Disconnected',
+      cell: row => row.registered ? 'Connected' : 'Disconnected',
       sort: true, cellFlex: '1'
     },
     {
@@ -55,7 +55,7 @@ export class EndpointsPageComponent implements OnInit {
     {
       columnId: 'address',
       headerCell: () => 'Address',
-      cell: (row: CNSISModel) => `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}`,
+      cell: row => `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}`,
       sort: true,
       cellFlex: '5'
     },

@@ -1,3 +1,4 @@
+import { CFAction, IAPIAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
@@ -5,7 +6,7 @@ import { schema } from 'normalizr';
 import { ApiActionTypes } from './request.actions';
 import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
-import { ActionMergeFunction, APIAction } from '../types/api.types';
+import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { NewApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
@@ -76,8 +77,9 @@ export class GetAllApplications implements PaginatedAction {
   };
 }
 
-export class GetApplication implements APIAction {
+export class GetApplication extends CFAction implements IAPIAction {
   constructor(public guid: string, public cnis: string) {
+    super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'get';
@@ -97,8 +99,9 @@ export class GetApplication implements APIAction {
   options: RequestOptions;
 }
 
-export class CreateNewApplication implements APIAction {
+export class CreateNewApplication extends CFAction implements IAPIAction {
   constructor(public guid: string, public cnis: string, application: NewApplication) {
+    super();
     this.options = new RequestOptions();
     this.options.url = `apps`;
     this.options.method = 'post';
@@ -118,8 +121,9 @@ export class CreateNewApplication implements APIAction {
   options: RequestOptions;
 }
 
-export class AssociateRouteWithAppApplication implements APIAction {
+export class AssociateRouteWithAppApplication extends CFAction implements IAPIAction {
   constructor(public guid: string, public routeGuid: string, public cnis: string) {
+    super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}/routes/${routeGuid}`;
     this.options.method = 'put';
@@ -148,10 +152,11 @@ export interface UpdateApplication {
 
 // declare function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K>;
 
-export class UpdateExistingApplication implements APIAction {
+export class UpdateExistingApplication extends CFAction implements IAPIAction {
   static updateKey = 'Updating-Existing-Application';
 
   constructor(public guid: string, public cnis: string, application: UpdateApplication) {
+    super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'put';
@@ -178,10 +183,11 @@ export class UpdateExistingApplication implements APIAction {
   }
 }
 
-export class DeleteApplication implements APIAction {
+export class DeleteApplication extends CFAction implements IAPIAction {
   static updateKey = 'Deleting-Existing-Application';
 
   constructor(public guid: string, public cnis: string) {
+    super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'delete';
