@@ -3,25 +3,19 @@ import { CoreModule } from '../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellActionsComponent } from './table-cell-actions.component';
-import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../store/reducers.module';
-import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { IListDataSource, ListActions } from '../../../data-sources/list-data-source';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;
   let fixture: ComponentFixture<TableCellActionsComponent<any>>;
-  const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellActionsComponent],
       imports: [
         CoreModule,
-        StoreModule.forRoot(appReducers,
-          {
-            initialState
-          })
+        createBasicStoreModule(),
       ]
     })
       .compileComponents();

@@ -40,9 +40,6 @@ describe('EventsTabComponent', () => {
     }
   };
 
-
-
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [EventsTabComponent],

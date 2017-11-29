@@ -49,7 +49,8 @@ export class E2EHelpers {
       browser.manage().deleteAllCookies();
     }
     if (loginUser) {
-      // TODO: All the cnsi reset stuff, ensure cf users are present and orgs/spaces, etc
+      // When required we should check that the PP is setup correctly (contains correct endpoints with correct state) before running
+      // attempting to log in.
 
       // Guide through login pages
       const loginPage = new LoginPage();
@@ -109,11 +110,8 @@ export class E2EHelpers {
    * @createReqAndSession
    * @description
    * @param {object?} optionalReq - convenience, wraps in promise as if req did not exist
-   * @param {string?} username -
-   * @param {string?} password -
-   * @returns {Promise} A promise containing req
    */
-  createReqAndSession(optionalReq, username, password): promise.Promise<any> {
+  createReqAndSession(optionalReq, username: string, password: string): promise.Promise<any> {
     let req;
 
     if (!optionalReq) {
@@ -133,7 +131,6 @@ export class E2EHelpers {
   /**
    * @newRequest
    * @description Create a new request
-   * @returns {object} A newly created request
    */
   newRequest() {
     const cookieJar = request.jar();
@@ -169,7 +166,6 @@ export class E2EHelpers {
    * @param {object} options -
    * @param {object?} body - the request body
    * @param {object?} formData - the form data
-   * @returns {Promise} A promise
    */
   sendRequest(req, options, body, formData): promise.Promise<any> {
     return new promise.Promise((resolve, reject) => {
@@ -207,11 +203,8 @@ export class E2EHelpers {
    * @createSession
    * @description Create a session
    * @param {object} req - the request
-   * @param {string} username - the console username
-   * @param {string} password - the console password
-   * @returns {Promise} A promise
    */
-  createSession(req, username, password): promise.Promise<any> {
+  createSession(req, username: string, password: string): promise.Promise<any> {
     return new promise.Promise((resolve, reject) => {
       const options = {
         formData: {
@@ -235,9 +228,8 @@ export class E2EHelpers {
   /**
    * @isSetupMode
    * @description Check if console is in setup mode
-   * @returns {Promise} A promise
    */
-  isSetupMode() {
+  isSetupMode(): Promise<any> {
     const req = this.newRequest();
     return new Promise((resolve, reject) => {
       return req.post(this.getHost() + '/pp/v1/auth/login/uaa', {})
@@ -255,11 +247,8 @@ export class E2EHelpers {
   /**
    * @forceDate
    * @description Force the Date constructor to always return a given YEAR/MONTH/DAY
-   * @param {number} year - the year
-   * @param {number} month - the month
-   * @param {number} day - the day
    */
-  forceDate(year, month, day) {
+  forceDate(year: number, month: number, day: number) {
     browser.driver.executeScript('' +
       '__forceDate_oldDate=Date; Date = function(){ return new __forceDate_oldDate(' + year + ', ' + month + ',' + day + ')};'
     );

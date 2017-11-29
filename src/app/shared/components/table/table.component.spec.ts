@@ -24,17 +24,14 @@ import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/ev
 import { ValuesPipe } from '../../pipes/values.pipe';
 import { IListDataSource } from '../../data-sources/list-data-source';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { appReducers } from '../../../store/reducers.module';
-import { StoreModule } from '@ngrx/store';
-import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellAppNameComponent } from './custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEntryPoints } from '../../../test-framework/list-table-helper';
+import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 
 describe('TableComponent', () => {
   let component: TableComponent<AppEnvVar>;
   let fixture: ComponentFixture<TableComponent<AppEnvVar>>;
-  const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -48,10 +45,7 @@ describe('TableComponent', () => {
       imports: [
         CoreModule,
         NoopAnimationsModule,
-        StoreModule.forRoot(appReducers,
-          {
-            initialState
-          })
+        createBasicStoreModule(),
       ]
     })
       .compileComponents();

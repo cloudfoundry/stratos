@@ -94,7 +94,6 @@ export class EntityService {
     entitySelect$: Observable<APIResource>,
     entityRequestSelect$: Observable<EntityRequestState>
   ): Observable<EntityInfo> => {
-    // This fetching var needs to end up in the state
     return Observable.combineLatest(
       this.store.select(getEntityState),
       entitySelect$,

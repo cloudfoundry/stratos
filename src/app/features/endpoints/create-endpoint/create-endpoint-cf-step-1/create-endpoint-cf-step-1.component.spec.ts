@@ -3,15 +3,12 @@ import { CoreModule } from '../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
-import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
-import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../../store/reducers.module';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('CreateEndpointCfStep1Component', () => {
   let component: CreateEndpointCfStep1Component;
   let fixture: ComponentFixture<CreateEndpointCfStep1Component>;
-  const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -19,10 +16,7 @@ describe('CreateEndpointCfStep1Component', () => {
       imports: [
         CoreModule,
         SharedModule,
-        StoreModule.forRoot(appReducers,
-          {
-            initialState
-          }),
+        createBasicStoreModule(),
         NoopAnimationsModule
       ]
     })

@@ -13,8 +13,7 @@ import { CoreModule } from '../../../core/core.module';
 import { CardsComponent } from '../cards/cards.component';
 import { async } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../../store/reducers.module';
-import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { Observable } from 'rxjs/Observable';
 import { ListPagination, ListFilter, ListSort } from '../../../store/actions/list.actions';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -26,7 +25,6 @@ import { TableCellEntryPoints, CardEntryPoints } from '../../../test-framework/l
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
   let fixture: ComponentFixture<ListComponent<EntityInfo>>;
-  const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -43,10 +41,7 @@ describe('ListComponent', () => {
       ],
       imports: [
         CoreModule,
-        StoreModule.forRoot(appReducers,
-          {
-            initialState
-          }),
+        createBasicStoreModule(),
         NoopAnimationsModule
       ]
     })

@@ -4,12 +4,9 @@ import { CoreModule } from './core.module';
 import { TestBed, inject } from '@angular/core/testing';
 
 import { LoggerService } from './logger.service';
-import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../store/reducers.module';
-import { getInitialTestStoreState } from '../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../test-framework/store-test-helper';
 
 describe('LoggerService', () => {
-  const initialState = getInitialTestStoreState();
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -17,12 +14,7 @@ describe('LoggerService', () => {
         LoggerService
       ],
       imports: [
-        StoreModule.forRoot(
-          appReducers,
-          {
-            initialState
-          }
-        ),
+        createBasicStoreModule(),
       ]
     });
   });
