@@ -9,7 +9,7 @@ import { AppEnvVar } from '../../data-sources/cf-app-variables-data-source';
 import { TableCellComponent } from './table-cell/table-cell.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableComponent, ITableColumn } from './table.component';
+import { TableComponent } from './table.component';
 import { CoreModule } from '../../../core/core.module';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
@@ -22,12 +22,13 @@ import { TableCellEventActionComponent } from './custom-cells/table-cell-event-a
 import { TableCellEventDetailComponent } from './custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
-import { IListDataSource } from '../../data-sources/list-data-source';
+import { IListDataSource } from '../../data-sources/list=data-source-types';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellAppNameComponent } from './custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEntryPoints } from '../../../test-framework/list-table-helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { ITableColumn } from './table.types';
 
 describe('TableComponent', () => {
   let component: TableComponent<AppEnvVar>;
@@ -60,29 +61,6 @@ describe('TableComponent', () => {
       connect() { return Observable.of([]); },
       sort$: Observable.of({} as ListSort),
     } as IListDataSource<AppEnvVar>;
-    // connect() { return Observable.of([]); },
-    // initialise(paginator: MdPaginator, sort: MdSort, filter$: Observable<string>) { },
-    // selectedRows: new Map(),
-    // mdPaginator: new MdPaginator(mdPaginatorIntl, {} as ChangeDetectorRef),
-    // listStateKey: 'listKey',
-    // view$: Observable.of('table' as ListView),
-    // state$: Observable.of({} as ListState),
-    // pagination$: Observable.of({} as ListPagination),
-    // sort$: Observable.of({} as ListSort),
-    // filter$: Observable.of({} as ListFilter),
-    // page$: Observable.of(new Array<AppEnvVar>()),
-    // addItem: null,
-    // isAdding$: new BehaviorSubject(false),
-    // isSelecting$: new BehaviorSubject(false),
-    // editRow: null,
-    // selectAllChecked: false,
-    // selectAllFilteredRows: () => { },
-    // selectedRowToggle: (row: AppEnvVar) => { },
-    // startEdit: (row: AppEnvVar) => { },
-    // saveEdit: () => { },
-    // cancelEdit: () => { },
-    // destroy: () => { }
-
     component.columns = new Array<ITableColumn<any>>();
 
     fixture.detectChanges();

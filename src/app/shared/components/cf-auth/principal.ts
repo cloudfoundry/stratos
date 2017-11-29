@@ -22,8 +22,8 @@ export class CfAuthPrinciple {
     public userSummary: CfAuthUserSummaryMapped,
     private featureFlags: CFFeatureFlags) {
     this.isAdmin = session.endpoints.cf[cnsiGuid].user.admin;
-    this.isAdminReadOnly = false; // TODO: RC Calculate according to scope
-    this.isGlobalAuditor = false; // TODO: RC Calculate according to scope
+    this.isAdminReadOnly = false; // WIP: RC Calculate according to scope
+    this.isGlobalAuditor = false; // WIP: RC Calculate according to scope
   }
 
   /**

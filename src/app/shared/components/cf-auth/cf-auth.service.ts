@@ -23,17 +23,17 @@ export class CfAuthService {
 
   endpoints$: Observable<CNSISModel[]>;
   sessionData$: Observable<SessionData>;
-  // TODO: RC initialise previously released promise when all init requests finished. For the time being use this, then make selector
+  // WIP: RC Initialise previously released promise when all init requests finished. For the time being use this, then make selector
   initialised$: Observable<boolean>;
-  // TODO: RC This should come from the store and populated using standard entity/non entity methods
+  // WIP: RC This should come from the store and populated using standard entity/non entity methods
   featureFlags$: {
     [key: string]: Observable<CFFeatureFlags>
   };
-  // TODO: RC This should be in the store
+  // WIP: RC This should be in the store
   principals: {
     [key: string]: CfAuthPrinciple;
   };
-  // TODO: RC This should come from the store and populated using standard entity/non entity methods
+  // WIP: RC This should come from the store and populated using standard entity/non entity methods
   userSummaries$: {
     [cnsiGuid: string]: {
       [userGuid: string]: Observable<CfAuthUserSummary>;
@@ -41,7 +41,7 @@ export class CfAuthService {
   };
 
 
-  // TODO: Async/Sync calls. Need to review once store stuff done
+  // WIP: Async/Sync calls. Need to review once store stuff done
   session: SessionData;
 
   constructor(private store: Store<AppState>) {
@@ -69,9 +69,9 @@ export class CfAuthService {
   }
 
   /**
- * @name isAllowed
- * @description is user allowed the certain action
- */
+   * @name isAllowed
+   * @description is user allowed the certain action
+   */
   isAllowed(cnsiGuid: string, resourceType: CFAuthResource, action: CFAuthAction, ...args: any[]): boolean {
     if (!this.isInitialized(cnsiGuid)) {
       return false;
@@ -129,10 +129,10 @@ export class CfAuthService {
     const isAdmin = sessionData.endpoints.cf[cnsiGuid].user.admin;
 
     if (isAdmin) {
-      // TODO: RC Update user summary
+      // WIP: RC Fetch user role data using the user summary endpoint
       // User is an admin, therefore, we will use the more efficient userSummary request
     } else {
-      // TODO: RC Updating using slower call all
+      // WIP: RC Fetch user role data using seperate org/space requests
       // promises = promises.concat(_addOrganisationRolePromisesForUser(cnsiGuid, userId));
       // promises = promises.concat(_addSpaceRolePromisesForUser(cnsiGuid, userId));
     }

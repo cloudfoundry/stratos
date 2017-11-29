@@ -1,3 +1,4 @@
+import { LoggerService } from '../../../core/logger.service';
 import { Component, OnInit, Input, Inject, ElementRef, ViewChild } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
 
@@ -9,7 +10,7 @@ import { DOCUMENT } from '@angular/platform-browser';
 export class CodeBlockComponent implements OnInit {
   private _document: Document;
 
-  constructor( @Inject(DOCUMENT) document: Document) {
+  constructor( @Inject(DOCUMENT) document: Document, private logService: LoggerService) {
     this._document = document;
   }
 
@@ -53,8 +54,7 @@ export class CodeBlockComponent implements OnInit {
       this._copySuccessWait = true;
       setTimeout(() => this._copySuccessWait = false, 2000);
     } catch (err) {
-      // TODO: Log/update once logging framework decided
-      console.log('Failed to copy to clipboard');
+      this.logService.warn('Failed to copy to clipboard');
     }
 
     this._document.body.removeChild(textArea);

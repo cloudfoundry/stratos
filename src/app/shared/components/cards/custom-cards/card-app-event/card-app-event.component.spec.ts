@@ -6,7 +6,6 @@ import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { CoreModule } from '../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { CardEventComponent } from './card-app-event.component';
-import { AppEvent } from '../../../../data-sources/cf-app-events-data-source';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../../store/reducers.module';

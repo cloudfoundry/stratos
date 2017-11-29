@@ -1,5 +1,4 @@
 import { Component, ComponentFactoryResolver, Input, OnInit, Type, ViewContainerRef, ViewChild } from '@angular/core';
-import { ITableColumn } from '../table.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
@@ -9,10 +8,10 @@ import { TableCellEventTimestampComponent } from '../custom-cells/table-cell-eve
 import { TableCellEventTypeComponent } from '../custom-cells/table-cell-event-type/table-cell-event-type.component';
 import { TableCellEventActionComponent } from '../custom-cells/table-cell-event-action/table-cell-event-action.component';
 import { TableCellEventDetailComponent } from '../custom-cells/table-cell-event-detail/table-cell-event-detail.component';
-import { IListDataSource } from '../../../data-sources/list-data-source';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEndpointStatusComponent } from '../custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { IListDataSource } from '../../../data-sources/list=data-source-types';
 
 @Component({
   selector: 'app-table-cell',

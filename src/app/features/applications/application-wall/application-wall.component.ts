@@ -9,12 +9,12 @@ import { AppState } from '../../../store/app-state';
 import { getPaginationObservables } from './../../../store/reducers/pagination.reducer';
 import { getAPIResourceEntity } from '../../../store/selectors/api.selectors';
 import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-source';
-import { ITableColumn } from '../../../shared/components/table/table.component';
 import { EntityInfo, APIResource } from '../../../store/types/api.types';
 import { TableCellAppNameComponent } from '../../../shared/components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { CardAppComponent } from '../../../shared/components/cards/custom-cards/card-app/card-app.component';
 import { UtilsService } from '../../../core/utils.service';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { ITableColumn } from '../../../shared/components/table/table.types';
 
 
 @Component({

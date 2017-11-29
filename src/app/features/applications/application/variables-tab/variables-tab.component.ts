@@ -16,12 +16,12 @@ import { NgModel } from '@angular/forms';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 import { EntityInfo } from '../../../../store/types/api.types';
 import { CfAppEvnVarsDataSource, AppEnvVar } from '../../../../shared/data-sources/cf-app-variables-data-source';
-import { ITableColumn } from '../../../../shared/components/table/table.component';
 import { TableCellEditComponent } from '../../../../shared/components/table/table-cell-edit/table-cell-edit.component';
 import {
   TableCellEditVariableComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
 import { CardAppVariableComponent } from '../../../../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
+import { ITableColumn } from '../../../../shared/components/table/table.types';
 
 
 @Component({

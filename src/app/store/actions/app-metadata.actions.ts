@@ -82,7 +82,6 @@ export class WrapperAppMetadataFailed implements Action {
     public response: any,
     public appMetadataAction: GetAppMetadataAction
   ) {
-    // TODO: Make this standard over all CF responses
     this.appMetedataError = response._body ? JSON.parse(response._body) : response;
     this.message = this.appMetedataError.description || this.appMetedataError.message;
   }

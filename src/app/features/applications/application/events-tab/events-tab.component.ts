@@ -10,8 +10,7 @@ import { Observable } from 'rxjs/Observable';
 import { AddParams, SetPage } from '../../../../store/actions/pagination.actions';
 import { EventSchema, GetAllAppEvents } from '../../../../store/actions/app-event.actions';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { CfAppEventsDataSource, AppEvent } from '../../../../shared/data-sources/cf-app-events-data-source';
-import { ITableColumn } from '../../../../shared/components/table/table.component';
+import { CfAppEventsDataSource } from '../../../../shared/data-sources/cf-app-events-data-source';
 import {
   TableCellEventTypeComponent
 } from '../../../../shared/components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
@@ -26,6 +25,7 @@ import {
 } from '../../../../shared/components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { CardEventComponent } from '../../../../shared/components/cards/custom-cards/card-app-event/card-app-event.component';
 import { CfListDataSource } from '../../../../shared/data-sources/list-data-source-cf';
+import { ITableColumn } from '../../../../shared/components/table/table.types';
 
 @Component({
   selector: 'app-events-tab',

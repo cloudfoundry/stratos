@@ -1,4 +1,3 @@
-import { IListDataSource, ListActions } from '../../data-sources/list-data-source';
 import { TableCellComponent } from '../table/table-cell/table-cell.component';
 import { EventTabActorIconPipe } from '../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
@@ -21,6 +20,7 @@ import { TableCellActionsComponent } from '../table/table-cell-actions/table-cel
 import { CardAppComponent } from '../cards/custom-cards/card-app/card-app.component';
 import { TableCellAppNameComponent } from '../table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../test-framework/list-table-helper';
+import { ListActions, IListDataSource } from '../../data-sources/list=data-source-types';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;

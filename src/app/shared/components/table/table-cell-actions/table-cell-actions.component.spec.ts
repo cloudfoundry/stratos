@@ -3,8 +3,8 @@ import { CoreModule } from '../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellActionsComponent } from './table-cell-actions.component';
-import { IListDataSource, ListActions } from '../../../data-sources/list-data-source';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { ListActions, IListDataSource } from '../../../data-sources/list=data-source-types';
 
 describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;
