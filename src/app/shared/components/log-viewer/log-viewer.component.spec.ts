@@ -9,6 +9,15 @@ import { LogViewerComponent } from './log-viewer.component';
 import { Component, ViewChild } from '@angular/core';
 
 describe('LogViewerComponent', () => {
+  @Component({
+    selector: `app-host-component`,
+    template: `<app-log-viewer></app-log-viewer>`
+  })
+  class TestHostComponent {
+    @ViewChild(LogViewerComponent)
+    public logViewer: LogViewerComponent;
+  }
+
   let component: TestHostComponent;
   let fixture: ComponentFixture<TestHostComponent>;
   let stream: Subject<String>;
@@ -103,12 +112,4 @@ describe('LogViewerComponent', () => {
     });
   });
 
-  @Component({
-    selector: `app-host-component`,
-    template: `<app-log-viewer></app-log-viewer>`
-  })
-  class TestHostComponent {
-    @ViewChild(LogViewerComponent)
-    public logViewer: LogViewerComponent;
-  }
 });

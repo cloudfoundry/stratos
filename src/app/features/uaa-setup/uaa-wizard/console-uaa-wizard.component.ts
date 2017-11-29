@@ -84,13 +84,6 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       adminPassword: new FormControl('', [<any>Validators.required]),
     });
 
-    if (environment.uaaSetup) {
-      this.uaaForm.get('apiUrl').setValue(environment.uaaSetup.apiUrl || '');
-      this.uaaForm.get('clientId').setValue(environment.uaaSetup.clientId || '');
-      this.uaaForm.get('adminPassword').setValue(environment.uaaSetup.adminPassword || '');
-      this.uaaForm.get('adminUsername').setValue(environment.uaaSetup.adminUsername || '');
-    }
-
     let observer;
     this.validateUAAForm = Observable.create((_observer) => {
       observer = _observer;

@@ -116,6 +116,22 @@ function getMetadataById(appId: string) {
   };
 }
 
+export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
+  return compose(
+    getMetadataType<any>(metadataType),
+    getMetadataById(appId),
+    getAppMetadata
+  );
+};
+
+export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
+  return compose(
+    getMetadataType<AppMetadataRequestState>(metadataType),
+    getMetadataById(appId),
+    getAppRequestMetadata
+  );
+};
+
 export const getAppMetadataObservable = (
   store: Store<AppState>,
   appId: string,
@@ -141,18 +157,3 @@ export const getAppMetadataObservable = (
     });
 };
 
-export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<any>(metadataType),
-    getMetadataById(appId),
-    getAppMetadata
-  );
-};
-
-export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<AppMetadataRequestState>(metadataType),
-    getMetadataById(appId),
-    getAppRequestMetadata
-  );
-};

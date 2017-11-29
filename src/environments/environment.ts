@@ -10,12 +10,6 @@ export const environment = {
   production: false,
   proxyAPIVersion: 'v1',
   cfAPIVersion: 'v2',
-  uaaSetup: {
-    apiUrl: 'http://uaa:8080',
-    clientId: 'console',
-    adminUsername: 'admin',
-    adminPassword: 'hscadmin'
-  },
   logLevel: LogLevel.DEBUG,
   logToConsole: true,
   logEnableConsoleActions: true,

@@ -25,4 +25,4 @@
 - [ ] My code follows the code style of this project.
 - [ ] My change requires a change to the documentation.
 - [ ] I have updated the documentation accordingly.
-- [ ] I have followed the guidelines in CONTRIBUTING.md, including the required formatting of the commit message
+- [ ] I have followed the guidelines in `docs/contributing.md`, including the required formatting of the commit message
