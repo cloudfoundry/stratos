@@ -81,6 +81,6 @@ run:
       done
       TIMESTAMP=$(date +%s)
       tar -czf $TIMESTAMP.tar.gz e2e-output/*
-      scp -i /id_rsa $TIMESTAMP.tar.gz ${SCP_LOCATION}
+      scp -o StrictHostKeyChecking=no -i /id_rsa $TIMESTAMP.tar.gz ${SCP_LOCATION}
       echo "Download logs from: http://${WEB_SERVER_URI}/$TIMESTAMP.tar.gz"
       sh ./ci/scripts/check_tests.sh
