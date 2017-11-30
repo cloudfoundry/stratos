@@ -16,8 +16,8 @@ export const defaultEntitiesState = {
 };
 
 export function entitiesReducer(state: EntitiesState = defaultEntitiesState, action: WrapperCFActionSuccess) {
-  const type = action.apiAction ? action.apiAction.type : action.type;
-  switch (type) {
+  const type = action.type;
+  switch (action.type) {
     case ApiActionTypes.API_REQUEST_SUCCESS:
       if (action.requestType === 'delete') {
         const newState = { ...state };

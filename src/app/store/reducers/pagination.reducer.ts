@@ -186,7 +186,7 @@ function removeEmptyParams(params: PaginationParam) {
 }
 
 function getActionType(action) {
-  return action.apiAction ? action.apiAction.type : action.type;
+  return action.type;
 }
 
 function getAction(action): PaginatedAction {
