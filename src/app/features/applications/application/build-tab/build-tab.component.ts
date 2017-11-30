@@ -5,7 +5,6 @@ import { Observable } from 'rxjs/Rx';
 import { ApplicationData, ApplicationService } from '../../application.service';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 
-// TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
 @Component({
   selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',

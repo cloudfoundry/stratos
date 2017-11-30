@@ -107,7 +107,6 @@ const updatePagination =
         return {
           ...state,
           params: removeEmptyParams({
-            // TODO: Every time we call SET_PARAMS this will reset to default. Should this change to 'INIT_PARAMS'?
             [resultPerPageParam]: resultPerPageParamDefault,
             ...setParamAction.params,
             q: getUniqueQParams(setParamAction, state)

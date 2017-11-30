@@ -33,7 +33,7 @@ export class UpdateAppEffects {
     .mergeMap((action: WrapperAPIActionSuccess) => {
 
       const actions = [
-        // TODO: RC REMOVE. At the moment this is done so the app metadata env vars environment_json matches that of the app
+        // This is done so the app metadata env vars environment_json matches that of the app
         new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
 
       return actions;
