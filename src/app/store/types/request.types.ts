@@ -73,7 +73,6 @@ export class StartCFAction extends CFStartAction implements IStartRequestAction 
 
 export class WrapperCFActionSuccess extends CFSuccessAction implements ISuccessRequestAction {
   constructor(
-    public type: string,
     public response: NormalizedResponse,
     public apiAction: IAPIAction | PaginatedAction,
     public requestType: ApiRequestTypes,
@@ -83,9 +82,8 @@ export class WrapperCFActionSuccess extends CFSuccessAction implements ISuccessR
   }
 }
 
-export class WrapperCFActionFailed extends CFSuccessAction implements IFailedRequestAction {
+export class WrapperCFActionFailed extends CFFailedAction implements IFailedRequestAction {
   constructor(
-    public type: string,
     public message: string,
     public apiAction: IAPIAction | PaginatedAction,
     public requestType: ApiRequestTypes

@@ -128,8 +128,8 @@ export class APIEffect {
           };
 
           const actions = [];
+          actions.push({ type: apiAction.actions[1], apiAction });
           actions.push(new WrapperCFActionSuccess(
-            apiAction.actions[1],
             entities,
             apiAction,
             action.requestType,
@@ -146,14 +146,14 @@ export class APIEffect {
           return actions;
         })
         .catch(err => {
-          return Observable.of(
+          return [
+            { type: apiAction.actions[1], apiAction },
             new WrapperCFActionFailed(
-              apiAction.actions[2],
               err.message,
               apiAction,
               action.requestType
             )
-          );
+          ];
         });
     });
 
