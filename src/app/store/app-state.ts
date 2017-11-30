@@ -11,14 +11,23 @@ import { ActionHistoryState } from './reducers/action-history-reducer';
 import { UAASetupState } from './types/uaa-setup.types';
 import { ListsState } from './reducers/list.reducer';
 
-export interface AppState {
-  actionHistory: ActionHistoryState;
+export interface IStateHasEntities {
   entities: EntitiesState;
+}
+
+export interface IRequestState extends IStateHasEntities {
+  other: {
+    cnis: any;
+  };
+}
+
+export interface AppState extends IStateHasEntities {
+  actionHistory: ActionHistoryState;
   auth: AuthState;
   uaaSetup: UAASetupState;
   cnsis: CNSISState;
   pagination: PaginationState;
-  apiRequest: EntitiesState;
+  request: IRequestState;
   dashboard: DashboardState;
   appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;

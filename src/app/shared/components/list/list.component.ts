@@ -24,7 +24,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @Input('text') text = null as ITableText;
   @Input('enableFilter') enableFilter = false;
   @Input('tableFixedRowHeight') tableFixedRowHeight = false;
-
   @Input('cardComponent') cardComponent: Type<{}>;
   @Input('addForm') addForm: NgForm;
 
@@ -72,7 +71,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       .debounceTime(500)
       .distinctUntilChanged()
       .map(value => value as string)
-      .do((stFilter: string) => {
+      .do((stFilter) => {
         this._store.dispatch(new SetListFilterAction(
           this.dataSource.listStateKey,
           {

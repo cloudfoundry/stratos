@@ -1,11 +1,19 @@
 import { Observable } from 'rxjs/Rx';
-import { GET_CNSIS, GetAllCNSIS, GetAllCNSISFailed, GetAllCNSISSuccess } from './../actions/cnsis.actions';
+import {
+  CONNECT_CNSIS,
+  ConnectCnis,
+  GET_CNSIS,
+  GetAllCNSIS,
+  GetAllCNSISFailed,
+  GetAllCNSISSuccess,
+} from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { CNSISModel } from '../types/cnsis.types';
+import { IAPIAction, StartNoneCFAction, WrapperNoneCFActionFailed } from '../types/request.types';
 
 
 @Injectable()
@@ -35,5 +43,28 @@ export class CNSISEffect {
         .map(data => new GetAllCNSISSuccess(data, action.login))
         .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
 
+    });
+
+  @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
+    .flatMap(action => {
+      const actionType = 'update';
+      const apiAction = {
+        entityKey: 'cnis',
+        guid: action.cnsiGuid,
+        updatingKey: 'connecting',
+      } as IAPIAction;
+      this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
+      return this.http.post('/pp/v1/auth/login/cnsi', {}, {
+        params: {
+          cnsi_guid: action.cnsiGuid,
+          username: action.username,
+          password: action.password
+        }
+      }).do(() => {
+        // return this.store.dispatch(new WrapperNoneCFActionFailed('Could not connect', apiAction));
+      })
+        .catch(e => {
+          return [new WrapperNoneCFActionFailed('Could not connect', apiAction, actionType)];
+        });
     });
 }

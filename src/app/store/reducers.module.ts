@@ -1,10 +1,10 @@
+import { ApiActionTypes, NonApiActionTypes } from './actions/request.actions';
 import { combineReducers, StoreModule, ActionReducerMap, State } from '@ngrx/store';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
 
 import { environment } from '../../environments/environment';
 import { AppState } from './app-state';
-import { apiRequestReducer } from './reducers/api-request-reducer';
 import { appMetadataRequestReducer } from './reducers/app-metadata-request.reducer';
 import { appMetadataReducer } from './reducers/app-metadata.reducer';
 import { authReducer } from './reducers/auth.reducer';
@@ -21,6 +21,7 @@ import { RouterStateSnapshot, Params } from '@angular/router';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { MetadataState } from './types/app-metadata.types';
 import { listReducer } from './reducers/list.reducer';
+import { requestReducerFactory } from './reducers/api-request-reducer/request-reducer.factory';
 
 
 export function logger(reducer): any {
@@ -38,13 +39,37 @@ export function appMetaDataReducer(state, action): MetadataState {
   return combineReducers<MetadataState>(appMetadataReducers)(state, action);
 }
 
+export function responseReducer(state, action) {
+  return combineReducers({
+    entities: requestReducerFactory([
+      'application',
+      'stack',
+      'space',
+      'organization',
+      'route',
+      'event'
+    ], [
+        ApiActionTypes.API_REQUEST_START,
+        ApiActionTypes.API_REQUEST_SUCCESS,
+        ApiActionTypes.API_REQUEST_FAILED,
+      ]),
+    other: requestReducerFactory([
+      'cnis'
+    ], [
+        NonApiActionTypes.START,
+        NonApiActionTypes.SUCCESS,
+        NonApiActionTypes.FAILED
+      ])
+  })(state, action);
+}
+
 export const appReducers = {
   entities: entitiesReducer,
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   cnsis: cnsisReducer,
   pagination: paginationReducer,
-  apiRequest: apiRequestReducer,
+  request: responseReducer,
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   appMetadata: appMetaDataReducer,

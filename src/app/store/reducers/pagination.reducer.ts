@@ -3,7 +3,7 @@ import { error } from 'util';
 import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 
-import { ApiActionTypes } from '../actions/api.actions';
+import { ApiActionTypes } from '../actions/request.actions';
 import {
   ADD_PARAMS,
   AddParams,
@@ -60,7 +60,7 @@ const [requestType, successType, failureType] = types;
 
 const updatePagination =
   function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
-    switch (actionType) {
+    switch (action.type) {
       case requestType:
         return {
           ...state,
@@ -185,7 +185,7 @@ function removeEmptyParams(params: PaginationParam) {
 }
 
 function getActionType(action) {
-  return action.apiType || action.type;
+  return action.type;
 }
 
 function getAction(action): PaginatedAction {

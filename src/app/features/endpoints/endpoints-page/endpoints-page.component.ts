@@ -31,26 +31,47 @@ export class EndpointsPageComponent implements OnInit {
 
   dataSource: EndpointsDataSource;
 
-  columns: Array<ITableColumn<CNSISModel>> = [
+  columns: ITableColumn<CNSISModel>[] = [
     {
-      columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
+      columnId: 'select',
+      headerCellComponent: TableHeaderSelectComponent,
+      cellComponent: TableCellSelectComponent,
       class: 'table-column-select', cellFlex: '1'
     },
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row: CNSISModel) => `${row.name}`, sort: true, cellFlex: '2'
+      columnId: 'name',
+      headerCell: () => 'Name',
+      cell: row => row.name,
+      sort: true,
+      cellFlex: '2'
     },
     {
-      columnId: 'connection', headerCell: () => 'Status', cellComponent: TableCellEndpointStatusComponent, sort: true, cellFlex: '1'
+      columnId: 'connection',
+      headerCell: () => 'Status',
+      cellComponent: TableCellEndpointStatusComponent,
+      sort: true,
+      cellFlex: '1'
     },
     {
-      columnId: 'type', headerCell: () => 'Type', cell: getEndpointTypeString, sort: true, cellFlex: '2'
+      columnId: 'type',
+      headerCell: () => 'Type',
+      cell: getEndpointTypeString,
+      sort: true,
+      cellFlex: '2'
     },
     {
-      columnId: 'address', headerCell: () => 'Address', cell: (row: CNSISModel) => `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}`,
-      sort: true, cellFlex: '5'
+      columnId: 'address',
+      headerCell: () => 'Address',
+      cell: row => `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}`,
+      sort: true,
+      cellFlex: '5'
     },
     {
-      columnId: 'edit', headerCell: () => 'Actions', cellComponent: TableCellActionsComponent, class: 'table-column-edit', cellFlex: '1'
+      columnId: 'edit',
+      headerCell: () => 'Actions',
+      cellComponent: TableCellActionsComponent,
+      class: 'table-column-edit',
+      cellFlex: '1'
     },
   ];
   cardComponent = CardEndpointComponent;

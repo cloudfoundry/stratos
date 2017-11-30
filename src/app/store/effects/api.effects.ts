@@ -1,3 +1,13 @@
+import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import {
+  CFAction,
+  CFStartAction,
+  IAPIAction,
+  ICFAction,
+  StartCFAction,
+  WrapperCFActionFailed,
+  WrapperCFActionSuccess,
+} from '../types/request.types';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
@@ -12,15 +22,10 @@ import { ClearPaginationOfType, SetParams } from '../actions/pagination.actions'
 import { environment } from './../../../environments/environment';
 import {
   ApiActionTypes
-} from './../actions/api.actions';
+} from './../actions/request.actions';
 import {
-  APIAction,
-
   APIResource,
   NormalizedResponse,
-  StartAPIAction,
-  WrapperAPIActionFailed,
-  WrapperAPIActionSuccess,
 } from './../types/api.types';
 import { AppState } from './../app-state';
 import {
@@ -43,23 +48,27 @@ export class APIEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() apiRequestStart$ = this.actions$.ofType<APIAction>(ApiActionTypes.API_REQUEST)
+  @Effect() apiRequestStart$ = this.actions$.ofType<ICFAction>(ApiActionTypes.API_REQUEST)
     .map(apiAction => {
-      return new StartAPIAction(apiAction);
+      return new StartCFAction(
+        apiAction,
+        getRequestTypeFromMethod(apiAction.options.method)
+      );
     });
 
-  @Effect() apiRequest$ = this.actions$.ofType<StartAPIAction>(ApiActionTypes.API_REQUEST_START)
+  @Effect() apiRequest$ = this.actions$.ofType<StartCFAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
 
       const paramsObject = {};
-      const apiAction = { ...action.apiAction };
+      const _apiAction = { ...action.apiAction };
+      const apiAction = _apiAction as ICFAction;
+      const paginatedAction = _apiAction as PaginatedAction;
       const options = { ...apiAction.options };
 
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
       // Apply the params from the store
-      const paginatedAction = (apiAction as PaginatedAction);
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();
         const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state));
@@ -118,10 +127,11 @@ export class APIEffect {
           };
 
           const actions = [];
-          actions.push(new WrapperAPIActionSuccess(
-            apiAction.actions[1],
+          actions.push({ type: apiAction.actions[1], apiAction });
+          actions.push(new WrapperCFActionSuccess(
             entities,
             apiAction,
+            action.requestType,
             totalResults
           ));
 
@@ -135,7 +145,14 @@ export class APIEffect {
           return actions;
         })
         .catch(err => {
-          return Observable.of(new WrapperAPIActionFailed(apiAction.actions[2], err.message, apiAction));
+          return [
+            { type: apiAction.actions[1], apiAction },
+            new WrapperCFActionFailed(
+              err.message,
+              apiAction,
+              action.requestType
+            )
+          ];
         });
     });
 
@@ -164,7 +181,7 @@ export class APIEffect {
       });
   }
 
-  getEntities(apiAction: APIAction, data): {
+  getEntities(apiAction: IAPIAction, data): {
     entities: NormalizedResponse
     totalResults: number
   } {

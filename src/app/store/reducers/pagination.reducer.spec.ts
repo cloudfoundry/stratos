@@ -3,7 +3,7 @@ import { RequestOptions } from '@angular/http';
 
 import {
   ApiActionTypes,
-} from './../actions/api.actions';
+} from './../actions/request.actions';
 import { defaultPaginationState, paginationReducer } from './pagination.reducer';
 import { PaginatedAction } from '../types/pagination.types';
 import { StartAPIAction, WrapperAPIActionSuccess, WrapperAPIActionFailed } from '../types/api.types';

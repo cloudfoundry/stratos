@@ -1,5 +1,5 @@
 import { Action } from '@ngrx/store';
-import { ApiActionTypes } from './api.actions';
+import { ApiActionTypes } from './request.actions';
 import { SessionData } from '../types/auth.types';
 
 export const LOGIN = '[Auth] Login';

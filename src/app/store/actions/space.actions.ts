@@ -1,9 +1,9 @@
+import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
-import { ApiActionTypes } from './api.actions';
-import { APIAction } from '../types/api.types';
+import { ApiActionTypes } from './request.actions';
 
 export const GET_ALL = '[Space] Get all';
 export const GET_ALL_SUCCESS = '[Space] Get all success';
@@ -13,8 +13,9 @@ export const SpaceSchema = new schema.Entity('space', {}, {
   idAttribute: getAPIResourceGuid
 });
 
-export class GetAllSpaces implements APIAction {
+export class GetAllSpaces extends CFAction implements ICFAction {
   constructor(public paginationKey?: string) {
+    super();
     this.options = new RequestOptions();
     this.options.url = 'space';
     this.options.method = 'get';

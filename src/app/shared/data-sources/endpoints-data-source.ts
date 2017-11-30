@@ -1,3 +1,4 @@
+import { ConnectCnis } from '../../store/actions/cnsis.actions';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { CNSISModel, CNSISState } from '../../store/types/cnsis.types';
@@ -17,8 +18,8 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
     icon: 'delete',
     label: 'Unregister',
     description: 'Remove the endpoint',
-    visible: (row: CNSISModel) => true,
-    enabled: (row: CNSISModel) => true,
+    visible: row => true,
+    enabled: row => true,
   };
   private static listActionAdd: ListActionConfig<CNSISModel> = {
     createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
@@ -27,8 +28,8 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
     icon: 'add',
     label: 'Add',
     description: '',
-    visible: (row: CNSISModel) => true,
-    enabled: (row: CNSISModel) => true,
+    visible: row => true,
+    enabled: row => true,
   };
   private static listActionDisconnect: ListActionConfig<CNSISModel> = {
     createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
@@ -37,18 +38,22 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
     icon: 'remove_from_queue',
     label: 'Disconnect',
     description: `Disconnect but don't delete`,
-    visible: (row: CNSISModel) => true,
-    enabled: (row: CNSISModel) => true,
+    visible: row => row.registered,
+    enabled: row => true,
   };
   private static listActionConnect: ListActionConfig<CNSISModel> = {
     createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
-      return null;
+      return new ConnectCnis(
+        'asdasdasdasd',
+        'username',
+        'password'
+      );
     },
-    icon: 'add_from_queue',
+    icon: 'add_to_queue',
     label: 'Connect',
     description: '',
-    visible: (row: CNSISModel) => true,
-    enabled: (row: CNSISModel) => true,
+    visible: row => !row.registered,
+    enabled: row => true,
   };
 
   private static _storeKey = 'endpoints';

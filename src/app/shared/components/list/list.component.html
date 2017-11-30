@@ -18,31 +18,41 @@
               <ng-container *ngFor="let action of dataSource.actions.multiActions">
                 <button md-icon-button *ngIf="action.visible(row)" (click)="executeActionMultiple(action)" [disabled]="!action.enabled(row)"
                   mdTooltip="{{action.description}}" mdTooltipShowDelay="2000">
-                      <md-icon>{{action.icon}}</md-icon>
-                    </button>
+                  <md-icon>{{action.icon}}</md-icon>
+                </button>
               </ng-container>
             </div>
             <div [hidden]="(dataSource.isSelecting$ | async)">
               <ng-container *ngFor="let action of dataSource.actions.globalActions">
                 <button md-icon-button *ngIf="action.visible(row)" (click)="executeActionGlobal(action)" [disabled]="!action.enabled(row)"
                   mdTooltip="{{action.description}}" mdTooltipShowDelay="2000">
-                        <md-icon>{{action.icon}}</md-icon>
-                      </button>
+                  <md-icon>{{action.icon}}</md-icon>
+                </button>
               </ng-container>
             </div>
             <div [hidden]="!(dataSource.isAdding$ | async)" class="add-container">
               <div class="spacer"></div>
               <ng-content select="[app-table-add]"></ng-content>
-              <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid"><md-icon>done</md-icon></button>
-              <button md-icon-button (click)="dataSource.cancelAdd()"><md-icon>clear</md-icon></button>
+              <button md-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid">
+                <md-icon>done</md-icon>
+              </button>
+              <button md-icon-button (click)="dataSource.cancelAdd()">
+                <md-icon>clear</md-icon>
+              </button>
             </div>
             <div [hidden]="(dataSource.isSelecting$ | async)">
               <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="addForm && !(dataSource.isAdding$ | async)"
-                (click)="safeAddForm().reset();dataSource.startAdd();"><md-icon>add</md-icon></button>
+                (click)="safeAddForm().reset();dataSource.startAdd();">
+                <md-icon>add</md-icon>
+              </button>
             </div>
             <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
-              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'"><md-icon>grid_on</md-icon></button>
-              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'"><md-icon>list</md-icon></button>
+              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'">
+                <md-icon>grid_on</md-icon>
+              </button>
+              <button md-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'">
+                <md-icon>list</md-icon>
+              </button>
             </div>
           </div>
         </div>
@@ -50,9 +60,13 @@
           <div class="listComponent__header__right">
             <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <button md-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)"
-                *ngIf="headerSortDirection==='asc'"><md-icon>sort</md-icon></button>
+                *ngIf="headerSortDirection==='asc'">
+                <md-icon>sort</md-icon>
+              </button>
               <button md-icon-button (click)="updateListSort(headerSortField.value, 'asc')" [disabled]="(dataSource.isLoadingPage$ | async)"
-                *ngIf="headerSortDirection==='desc'"><md-icon style="transform: rotate(180deg);">sort</md-icon></button>
+                *ngIf="headerSortDirection==='desc'">
+                <md-icon style="transform: rotate(180deg);">sort</md-icon>
+              </button>
               <md-select mdInput #headerSortField shouldPlaceholderFloat="false" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="updateListSort($event.value, headerSortDirection)">
                 <md-option *ngFor="let column of sortColumns" [value]="column.columnId">
                   {{column.headerCell()}}

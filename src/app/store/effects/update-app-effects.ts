@@ -1,3 +1,4 @@
+import { WrapperCFActionSuccess } from '../types/request.types';
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -13,9 +14,8 @@ import {
 } from '../actions/create-applications-page.actions';
 import { AppState } from './../app-state';
 import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
-import { ApiActionTypes } from '../actions/api.actions';
+import { ApiActionTypes } from '../actions/request.actions';
 import { GetAppMetadataAction, AppMetadataProperties } from '../actions/app-metadata.actions';
-import { WrapperAPIActionSuccess } from '../types/api.types';
 import { AppMetadataType } from '../types/app-metadata.types';
 
 
@@ -29,8 +29,8 @@ export class UpdateAppEffects {
   ) {
   }
 
-  @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperAPIActionSuccess>(UPDATE_SUCCESS)
-    .mergeMap((action: WrapperAPIActionSuccess) => {
+  @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperCFActionSuccess>(UPDATE_SUCCESS)
+    .mergeMap((action: WrapperCFActionSuccess) => {
 
       const actions = [
         // This is done so the app metadata env vars environment_json matches that of the app

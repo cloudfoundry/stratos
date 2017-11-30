@@ -1,8 +1,8 @@
+import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
-import { ApiActionTypes } from './api.actions';
+import { ApiActionTypes } from './request.actions';
 import { RequestOptions } from '@angular/http';
-import { APIAction } from '../types/api.types';
 
 export const GET = '[Organisation] Get one';
 export const GET_SUCCESS = '[Organisation] Get one success';
@@ -12,8 +12,9 @@ export const OrganisationSchema = new schema.Entity('organization', {}, {
   idAttribute: getAPIResourceGuid
 });
 
-export class GetOrganisation implements APIAction {
+export class GetOrganisation extends CFAction implements ICFAction {
   constructor(public guid: string, public cnis: string) {
+    super();
     this.options = new RequestOptions();
     this.options.url = `organization/${guid}`;
     this.options.method = 'get';

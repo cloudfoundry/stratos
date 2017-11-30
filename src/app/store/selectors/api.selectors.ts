@@ -1,8 +1,8 @@
 import { EntitiesState } from '../types/entity.types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
-import { ActionState, EntityRequestState, UpdatingSection } from '../reducers/api-request-reducer';
-import { AppState } from '../app-state';
+import { AppState, IRequestState, IStateHasEntities } from '../app-state';
+import { ActionState, RequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
 
 
 export const selectEntities = createFeatureSelector<EntitiesState>('entities');
@@ -11,13 +11,61 @@ export const createEntitySelector = (entity: string) => {
   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
 };
 
-export function getEntityState(state: AppState) {
+export function selectEntity(type: string, guid: string) {
+  return compose(
+    getEntityById<APIResource>(guid),
+    getRequestType(type),
+    getEntityState
+  );
+}
+
+export function selectDeletionInfo(type: string, entityGuid: string, section?: string) {
+  return compose(
+    getEntityDeleteSections,
+    getEntityById<RequestState>(entityGuid),
+    getRequestType(type),
+    getRequestBySection(section),
+  );
+}
+
+export function selectUpdateInfo(type: string, entityGuid: string, updatingGuid: string, section?: string) {
+  return compose(
+    getUpdateSectionById(updatingGuid),
+    getEntityUpdateSections,
+    getEntityById<RequestState>(entityGuid),
+    getRequestType(type),
+    getRequestBySection(section),
+  );
+}
+
+export function selectRequestInfo(type: string, guid: string, section?: string) {
+  return compose(
+    getEntityById<RequestState>(guid),
+    getRequestType(type),
+    getRequestBySection(section)
+  );
+}
+
+export function getRequestBySection(section?: string) {
+  return compose(
+    getRequestState(section),
+    getAPIRequestInfoState
+  );
+}
+
+function getRequestState(section = 'entities') {
+  return function (state) {
+    return state[section];
+  };
+}
+
+export function getEntityState(state: IStateHasEntities) {
   return state.entities;
 }
 
-export function getEntityType(typeString: string) {
-  return (entityState) => {
-    return entityState[typeString] || {};
+export function getRequestType(typeString: string) {
+  return (requestSection) => {
+    return requestSection[typeString] || {};
   };
 }
 
@@ -25,11 +73,11 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
 
-export const getEntityUpdateSections = (request: EntityRequestState): UpdatingSection => {
+export const getEntityUpdateSections = (request: RequestState): UpdatingSection => {
   return request ? request.updating : null;
 };
 
-export const getEntityDeleteSections = (request: EntityRequestState) => {
+export const getEntityDeleteSections = (request: RequestState) => {
   return request.deleting;
 };
 
@@ -46,41 +94,7 @@ export const getAPIResourceGuid = compose(
   getAPIResourceMetadata
 );
 
+
 export function getAPIRequestInfoState(state: AppState) {
-  return state.apiRequest || {};
-}
-
-export function selectEntity(type: string, guid: string) {
-  return compose(
-    getEntityById<APIResource>(guid),
-    getEntityType(type),
-    getEntityState
-  );
-}
-
-export function selectEntityDeletionInfo(type: string, entityGuid: string) {
-  return compose(
-    getEntityDeleteSections,
-    getEntityById<EntityRequestState>(entityGuid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-export function selectEntityUpdateInfo(type: string, entityGuid: string, updatingGuid: string) {
-  return compose(
-    getUpdateSectionById(updatingGuid),
-    getEntityUpdateSections,
-    getEntityById<EntityRequestState>(entityGuid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
-}
-
-export function selectEntityRequestInfo(type: string, guid: string) {
-  return compose(
-    getEntityById<EntityRequestState>(guid),
-    getEntityType(type),
-    getAPIRequestInfoState,
-  );
+  return state.request;
 }

@@ -1,4 +1,3 @@
-import { EntityRequestState } from '../../../../store/reducers/api-request-reducer';
 import { Observable } from 'rxjs/Rx';
 import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
