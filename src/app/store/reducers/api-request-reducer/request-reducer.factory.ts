@@ -8,8 +8,7 @@ export function requestReducerFactory(entityList = [], actions: IRequestAction) 
   const [startAction, successAction, failedAction] = actions;
   const defaultState = generateDefaultState(entityList);
   return function apiRequestReducer(state = defaultState, action) {
-    const actionType = action.apiAction && action.apiAction.type ? action.apiAction.type : action.type;
-    switch (actionType) {
+    switch (action.type) {
       case startAction:
         return startRequest(state, action);
       case successAction:
