@@ -18,7 +18,7 @@ fi
 npm install --production
 export PATH=$PATH:$WORK_DIR/node_modules/.bin
 
-# Change the bower file to build with different components, if specified
+# Change the bower file to build with different components, if specified (used for SUSE/OS builds)
 if [ ! -z "${STRATOS_BOWER}" ]; then
   BOWER_OVERRIDE=./deploy/${STRATOS_BOWER}/bower.json
   if [ -f $BOWER_OVERRIDE ]; then
