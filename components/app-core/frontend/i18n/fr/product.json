@@ -1,0 +1,17 @@
+{
+  "product": {
+    "name": "Cloud Foundry",
+    "console": "Cloud Foundry Console",
+    "logo": "",
+    "www-link": ""
+  },
+  "company": {
+    "name": "SUSE",
+    "logo": "images/brand_company_logo.png",
+    "about-logo": "@:company.logo",
+    "www-link": "http://www.suse.com",
+    "terms-href": "",
+    "privacy-href": "",
+    "product-family-href": ""
+  }
+}
