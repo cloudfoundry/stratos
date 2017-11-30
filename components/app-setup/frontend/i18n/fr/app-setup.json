@@ -1,0 +1,72 @@
+{
+  "app-setup": {
+    "intro-title": "[[@:product.console]] Installation",
+    "step-intro": {
+      "title": "Introduction",
+      "p1": "Bienvenue à [[@:product.console]].",
+      "p2": "[[@:product.console]] est une interface utilisateur Web Open Source (Console) pour la gestion de Cloud Foundry. Elle permet aux utilisateurs et aux administrateurs de gérer les applications exécutées dans le cluster Cloud Foundry et d'effectuer des tâches de gestion de cluster.",
+      "p3": "Avant d'accéder à la console pour la première fois, des informations de configuration sont requises.",
+      "p4": "Appuyez sur <b>SUIVANT</b> pour commencer.",
+      "p5": ""
+    },
+    "step-1": {
+      "title": "UAA Endpoint",
+      "p1": "[[@:product.console]] authentifie les utilisateurs avec un compte utilisateur Cloud Foundry et une authentification qui utilise le service UAA. La console doit être configurée avec les détails nécessaires pour communiquer avec l'UAA.",
+      "p2": "L'adresse du endpoint de l'api de l'UAA doit être fournie et si la validation SSL doit être appliquée.",
+      "p3": "Les informations d'identification du client sont obligatoires, notamment un nom d'utilisateur et un mot de passe d'administrateur UAA.",
+      "p4": "La configuration sera validée avant de passer à l'étape suivante.",
+      "p5": "Pour plus d'informations sur Cloud Foundry UAA voir <a href=\"https://docs.cloudfoundry.org/concepts/architecture/uaa.html\" rel=\"noopener noreferrer\" target=\"_blank\">ici</a>.",
+      "p6": "Pour plus d'informations sur la console et UAA dans les différents types de déploiement, voir <a href=\"https://github.com/SUSE/stratos-ui/blob/master/docs/access.md\" rel=\"noopener noreferrer\" target=\"_blank\">ici</a>.",
+      "busy-message": "Validation ...",
+      "uaa-intro": "UAA Endpoint",
+      "uaa-url": {
+        "label": "URL API",
+        "placeholder": "L'URL de l'API",
+        "error-required": "L'Url est requis",
+        "error-pattern": "URL invalide"
+      },
+      "uaa-url-skip-ssl": {
+        "label": "Ignorer la validation SSL pour l'endpoint"
+      },
+      "console-intro": "Informations d'identification de la console pour l'UAA",
+      "console-client": {
+        "label": "Id Client",
+        "placeholder": "",
+        "error-required": "Id est requis"
+      },
+      "console-secret": {
+        "label": "Client Secret",
+        "placeholder": ""
+      },
+      "console-admin": {
+        "label": "Nom d'utilisateur de l'administrateur",
+        "placeholder": "",
+        "error-required": "Le Nom d'utilisateur est requis"
+      },
+      "console-password": {
+        "label": "Mot de passe administrateur",
+        "placeholder": "",
+        "error-required": "Le mot de passe est requis"
+      },
+      "error-request": "Impossible d'envoyer les informations de configuration. Si cette erreur persiste, veuillez contacter l'administrateur.",
+      "error-request-reason": "[[@:app-setup.step-1.error-request]]. La cause: {{reason}}."
+    },
+    "step-2": {
+      "title": "La console d'administrateur",
+      "p1": "La configuration de base a été validée et un ensemble de portées UAA a été découvert.",
+      "p2": "La console utilise une portée pour identifier les administrateurs de console à partir des utilisateurs réguliers.",
+      "p3": "Veuillez sélectionner la portée que vous souhaitez utiliser pour cette.",
+      "p4": "",
+      "p5": "",
+      "busy-message": "Application de la configuration ...",
+      "intro": "La portée de la console d'administrateur",
+      "console-scope": {
+        "label": "La portée",
+        "placeholder": "Portée d'administration UAA identifiant l'administrateur de la console "
+      },
+      "error-request": "Impossible d'envoyer les informations de configuration. Si cette erreur persiste, veuillez contacter l'administrateur.",
+      "error-request-reason": "[[@:app-setup.step-2.error-request]]. La cause: {{reason}}."
+    },
+    "buttonComplete": "Terminer"
+  }
+}
