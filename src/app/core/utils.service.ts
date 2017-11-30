@@ -9,7 +9,7 @@ export class UtilsService {
      * Passes the following criteria: https://mathiasbynens.be/demo/url-regex
      *
      */
-  urlValidationExpression =
+  public urlValidationExpression =
   '^' +
   // protocol identifier
   'http(s)?://' +

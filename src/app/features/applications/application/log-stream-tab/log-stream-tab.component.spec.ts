@@ -7,8 +7,8 @@ import { paginationReducer } from '../../../../store/reducers/pagination.reducer
 import { entitiesReducer } from '../../../../store/reducers/entity.reducer';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from '../../../../shared/shared.module';
-import { ApplicationEnvVarsService } from '../summary-tab/application-env-vars.service';
-import { ApplicationStateService } from '../summary-tab/application-state/application-state.service';
+import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
+import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
 import { AppStoreModule } from '../../../../store/store.module';
 import { ApplicationService } from '../../application.service';
 import { CommonModule } from '@angular/common';

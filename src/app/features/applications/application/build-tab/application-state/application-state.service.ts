@@ -164,7 +164,6 @@ export class ApplicationStateService {
 * optionally its instance metadata.
 * @param {object} summary - the application summary metadata (either from summary or entity)
 * @param {object} appInstances - the application instances metadata (from the app stats API call)
-* @returns {object} Object representing the state metadata for the application
 */
   get(summary: any, appInstances: any): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
@@ -228,9 +227,8 @@ export class ApplicationStateService {
  * @description Gets the package state based on the application summary metadata
  * @param {string} appState - the application state
  * @param {object} summary - the application summary
- * @returns {string} Package summary state
  */
-  private getPackageState(appState: string, summary: any) {
+  private getPackageState(appState: string, summary: any): string {
     let pkgState = (summary ? summary.package_state : '') || '*NONE*';
     // Tweak package state based on extra info in package_updated_at if needed (for now, only if stopped)
     if (appState === 'STOPPED' && pkgState === 'PENDING') {
@@ -276,9 +274,8 @@ export class ApplicationStateService {
 * @param {number} value - the value to use directly or undefined if not available
 * @param {object} appInstances - the application instances metadata (from the app stats API call)
 * @param {string} instanceState - the instance state to use when filtering the app instance metadata
-* @returns {number} Count of instances in the desired state
 */
-  private getCount(value: number, appInstances: any, instanceState: string) {
+  private getCount(value: number, appInstances: any, instanceState: string): number {
     // Use a value if one available
     if (value) {
       return value;
@@ -294,9 +291,8 @@ export class ApplicationStateService {
   /**
  * @description Format a numeric count into a string to be used for state matching
  * @param {number} value - the value to use directly or undefined if not available
- * @returns {string} String representation of value for state matching
  */
-  private formatCount(value: number) {
+  private formatCount(value: number): string {
     if (value === 0) {
       return '0';
     } else if (value > 0) {

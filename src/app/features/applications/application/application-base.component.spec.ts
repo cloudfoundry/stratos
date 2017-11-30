@@ -11,15 +11,15 @@ import { entitiesReducer } from '../../../store/reducers/entity.reducer';
 import { paginationReducer } from '../../../store/reducers/pagination.reducer';
 import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { ApplicationBaseComponent } from './application-base.component';
-import { ApplicationEnvVarsService } from './summary-tab/application-env-vars.service';
+import { ApplicationEnvVarsService } from './build-tab/application-env-vars.service';
 import {
   ApplicationStateIconComponent,
-} from './summary-tab/application-state/application-state-icon/application-state-icon.component';
+} from './build-tab/application-state/application-state-icon/application-state-icon.component';
 import {
   ApplicationStateIconPipe,
-} from './summary-tab/application-state/application-state-icon/application-state-icon.pipe';
-import { ApplicationStateComponent } from './summary-tab/application-state/application-state.component';
-import { ApplicationStateService } from './summary-tab/application-state/application-state.service';
+} from './build-tab/application-state/application-state-icon/application-state-icon.pipe';
+import { ApplicationStateComponent } from './build-tab/application-state/application-state.component';
+import { ApplicationStateService } from './build-tab/application-state/application-state.service';
 
 describe('ApplicationBaseComponent', () => {
   let component: ApplicationBaseComponent;

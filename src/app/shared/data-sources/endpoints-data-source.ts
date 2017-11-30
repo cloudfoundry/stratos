@@ -6,8 +6,8 @@ import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/li
 import { filter } from 'rxjs/operator/filter';
 import { Observable } from 'rxjs/Rx';
 import { LocalListDataSource } from './list-data-source-local';
-import { ListActionConfig, ListActions } from './list-data-source';
 import { RouterNav } from '../../store/actions/router.actions';
+import { ListActionConfig, ListActions } from './list=data-source-types';
 
 
 export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
@@ -108,33 +108,6 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
 
   }
 
-  // saveAdd() {
-  //   // const updateApp = this._createUpdateApplication(false);
-  //   // updateApp.environment_json[this.addItem.name] = this.addItem.value;
-  //   // this._appService.UpdateApplicationEvVars(updateApp);
-
-  //   // super.saveAdd();
-  // }
-
-  // selectedDelete() {
-  //   // const updateApp = this._createUpdateApplication(true);
-  //   // this._appService.UpdateApplicationEvVars(updateApp);
-
-  //   // super.selectedDelete();
-  // }
-
-  startEdit(row: CNSISModel) {
-    // super.startEdit({ ...row });
-  }
-
-  saveEdit() {
-    // const updateApp = this._createUpdateApplication(false);
-    // updateApp.environment_json[this.editRow.name] = this.editRow.value;
-    // this._appService.UpdateApplicationEvVars(updateApp);
-
-    // super.saveEdit();
-  }
-
   connect(): Observable<CNSISModel[]> {
     this.isLoadingPage$ = this._eStore.select('cnsis').map((cnsis: CNSISState) => cnsis.loading);
     this.data$ = this._eStore.select('cnsis').map((cnsis: CNSISState) => cnsis.entities);
@@ -160,7 +133,6 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
           endpoint.cnsi_type.indexOf(filter.filter) >= 0 ||
           endpoint.api_endpoint.Scheme.indexOf(filter.filter) >= 0 ||
           endpoint.api_endpoint.Host.indexOf(filter.filter) >= 0) {
-          // TODO: RC Connection  + type
           this.filteredRows.push(endpoint);
         }
       } else {

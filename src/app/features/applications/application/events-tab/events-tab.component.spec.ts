@@ -9,8 +9,8 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../store/reducers.module';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../application.service';
-import { ApplicationStateService } from '../summary-tab/application-state/application-state.service';
-import { ApplicationEnvVarsService } from '../summary-tab/application-env-vars.service';
+import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
+import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
 import { ApplicationsModule } from '../../applications.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -22,7 +22,7 @@ class ApplicationServiceMock {
 describe('EventsTabComponent', () => {
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
-  const initialState = getInitialTestStoreState();
+  const initialState = { ...getInitialTestStoreState() };
   initialState.pagination = {
     event: {
       ['app-events:mockCfGuidmockAppGuid']: {
@@ -39,9 +39,6 @@ describe('EventsTabComponent', () => {
       }
     }
   };
-
-
-
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

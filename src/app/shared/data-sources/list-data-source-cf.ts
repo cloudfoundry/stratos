@@ -13,7 +13,8 @@ import { PaginationEntityState, PaginatedAction, QParam } from '../../store/type
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../../store/actions/pagination.actions';
-import { ListDataSource, IListDataSource, getRowUniqueId } from './list-data-source';
+import { ListDataSource } from './list-data-source';
+import { IListDataSource, getRowUniqueId } from './list=data-source-types';
 
 export abstract class CfListDataSource<T extends object> extends ListDataSource<T> implements IListDataSource<T> {
 

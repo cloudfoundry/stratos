@@ -59,11 +59,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   spaceList$: Observable<any>;
 
-  selectedCF: any;
+  selectedCF: any = null;
 
-  selectedOrg: any;
+  selectedOrg: any = null;
 
-  selectedSpace: any;
+  selectedSpace: any = null;
 
   onNext = () => {
     this.store.dispatch(new SetCFDetails({

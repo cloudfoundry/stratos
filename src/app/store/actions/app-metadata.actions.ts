@@ -82,7 +82,6 @@ export class WrapperAppMetadataFailed implements Action {
     public response: any,
     public appMetadataAction: GetAppMetadataAction
   ) {
-    // TODO: Make this standard over all CF responses
     this.appMetedataError = response._body ? JSON.parse(response._body) : response;
     this.message = this.appMetedataError.description || this.appMetedataError.message;
   }
@@ -116,6 +115,22 @@ function getMetadataById(appId: string) {
   };
 }
 
+export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
+  return compose(
+    getMetadataType<any>(metadataType),
+    getMetadataById(appId),
+    getAppMetadata
+  );
+};
+
+export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
+  return compose(
+    getMetadataType<AppMetadataRequestState>(metadataType),
+    getMetadataById(appId),
+    getAppRequestMetadata
+  );
+};
+
 export const getAppMetadataObservable = (
   store: Store<AppState>,
   appId: string,
@@ -141,18 +156,3 @@ export const getAppMetadataObservable = (
     });
 };
 
-export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<any>(metadataType),
-    getMetadataById(appId),
-    getAppMetadata
-  );
-};
-
-export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<AppMetadataRequestState>(metadataType),
-    getMetadataById(appId),
-    getAppRequestMetadata
-  );
-};

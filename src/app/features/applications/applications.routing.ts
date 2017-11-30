@@ -7,7 +7,7 @@ import { EventsTabComponent } from './application/events-tab/events-tab.componen
 import { LogStreamTabComponent } from './application/log-stream-tab/log-stream-tab.component';
 import { ServicesTabComponent } from './application/services-tab/services-tab.component';
 import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
-import { SummaryTabComponent } from './application/summary-tab/summary-tab.component';
+import { BuildTabComponent } from './application/build-tab/build-tab.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
 import { CreateApplicationModule } from './create-application/create-application.module';
@@ -29,8 +29,8 @@ const appplicationsRoutes: Routes = [
         path: ':cfId/:id',
         component: ApplicationBaseComponent,
         children: [
-          { path: '', redirectTo: 'summary', pathMatch: 'full' },
-          { path: 'summary', component: SummaryTabComponent },
+          { path: '', redirectTo: 'build', pathMatch: 'full' },
+          { path: 'build', component: BuildTabComponent },
           { path: 'log-stream', component: LogStreamTabComponent },
           { path: 'services', component: ServicesTabComponent },
           { path: 'variables', component: VariablesTabComponent },

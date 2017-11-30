@@ -1,6 +1,5 @@
 import { Subscription } from 'rxjs/Rx';
 import { CfListDataSource } from './list-data-source-cf';
-import { ListActions } from './list-data-source';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';
@@ -9,6 +8,7 @@ import { SortDirection } from '@angular/material';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { APIResource } from '../../store/types/api.types';
+import { ListActions } from './list=data-source-types';
 
 
 export class CfAppsDataSource extends CfListDataSource<APIResource> {

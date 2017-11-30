@@ -10,7 +10,6 @@ import { EndpointsPageComponent } from './endpoints-page/endpoints-page.componen
 import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 import { CreateEndpointModule } from './create-endpoint/create-endpoint.module';
 
-
 @NgModule({
   imports: [
     CoreModule,

@@ -161,10 +161,6 @@ export class UpdateExistingApplication extends CFAction implements ICFAction {
     this.options.url = `apps/${guid}`;
     this.options.method = 'put';
     this.options.body = application;
-    // TODO: Ensure all failure style information is captured in non-passthrough result
-    // this.options.headers = new Headers();
-    // const cnsiPassthroughHeader = 'x-cap-passthrough';
-    // this.options.headers.set(cnsiPassthroughHeader, 'true');
   }
   actions = [
     UPDATE,

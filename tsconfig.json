@@ -11,6 +11,7 @@
     "types": [
       "hammerjs",
       "jasmine",
+      "jasminewd2",
       "karma"
     ],
     "typeRoots": [

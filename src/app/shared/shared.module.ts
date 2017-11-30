@@ -1,3 +1,4 @@
+import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { EventTabActorIconPipe } from './components/table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -44,6 +45,12 @@ import { ListComponent } from './components/list/list.component';
 import { TableCellActionsComponent } from './components/table/table-cell-actions/table-cell-actions.component';
 import { CardAppComponent } from './components/cards/custom-cards/card-app/card-app.component';
 import { TableCellAppNameComponent } from './components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
+import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
+import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { CardEndpointComponent } from './components/cards/custom-cards/card-endpoint/card-endpoint.component';
+import {
+  TableCellEndpointStatusComponent
+} from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 
 @NgModule({
@@ -53,7 +60,8 @@ import { TableCellAppNameComponent } from './components/table/custom-cells/table
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    VirtualScrollModule
+    VirtualScrollModule,
+    CfAuthModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -88,6 +96,10 @@ import { TableCellAppNameComponent } from './components/table/custom-cells/table
     TableCellActionsComponent,
     CardAppComponent,
     TableCellAppNameComponent,
+    NoContentMessageComponent,
+    EndpointsMissingComponent,
+    CardEndpointComponent,
+    TableCellEndpointStatusComponent,
   ],
   exports: [
     FormsModule,
@@ -109,6 +121,8 @@ import { TableCellAppNameComponent } from './components/table/custom-cells/table
     LogViewerComponent,
     ListComponent,
     CardsComponent,
+    NoContentMessageComponent,
+    EndpointsMissingComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent]
 })

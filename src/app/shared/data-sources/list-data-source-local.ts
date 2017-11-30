@@ -7,8 +7,9 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { ListDataSource, IListDataSource, getRowUniqueId } from './list-data-source';
+import { ListDataSource } from './list-data-source';
 import { AppState } from '../../store/app-state';
+import { IListDataSource, getRowUniqueId } from './list=data-source-types';
 
 
 export abstract class LocalListDataSource<T extends object> extends ListDataSource<T> implements IListDataSource<T> {
@@ -38,7 +39,6 @@ export abstract class LocalListDataSource<T extends object> extends ListDataSour
         this.filter$,
       )
         .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
-          // TODO: RC caching?? catch no-ops?
           if (pagination.totalResults !== collection.length) {
             this._dStore.dispatch(new SetListPaginationAction(this.listStateKey, {
               ...pagination,

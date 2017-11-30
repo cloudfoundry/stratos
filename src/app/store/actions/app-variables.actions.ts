@@ -1,4 +1,3 @@
-import { IListDataSource } from '../../shared/data-sources/list-data-source';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
 

@@ -2,8 +2,9 @@ import { Component, OnInit, Type, Input, ViewChild, ViewContainerRef, ComponentF
 import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
 import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
 import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
-import { IListDataSource } from '../../../data-sources/list-data-source';
 import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
+import { CardEndpointComponent } from '../custom-cards/card-endpoint/card-endpoint.component';
+import { IListDataSource } from '../../../data-sources/list=data-source-types';
 
 @Component({
   selector: 'app-card',
@@ -13,6 +14,7 @@ import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
     CardEventComponent,
     CardAppVariableComponent,
     CardAppComponent,
+    CardEndpointComponent,
   ]
 })
 export class CardComponent<T> implements OnInit {

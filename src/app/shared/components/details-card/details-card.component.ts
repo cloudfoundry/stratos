@@ -16,8 +16,6 @@ export class DetailsCardComponent implements OnInit {
   @Input('busy')
   busy: boolean;
 
-
-
   ngOnInit() {
   }
 

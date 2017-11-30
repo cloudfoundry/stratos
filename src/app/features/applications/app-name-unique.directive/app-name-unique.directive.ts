@@ -7,9 +7,11 @@ import { IsNewAppNameFree } from '../../../store/actions/create-applications-pag
 import { AppState } from '../../../store/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
 
+/* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
   provide: NG_ASYNC_VALIDATORS, useExisting: forwardRef(() => AppNameUniqueDirective), multi: true
 };
+/* tslint:enable */
 
 @Directive({
   selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique][formControl],[appApplicationNameUnique][ngModel]',

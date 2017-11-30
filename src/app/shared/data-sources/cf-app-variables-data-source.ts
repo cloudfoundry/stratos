@@ -10,8 +10,8 @@ import { ApplicationService } from '../../features/applications/application.serv
 import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
-import { ListActions, ListActionConfig } from './list-data-source';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
+import { ListActionConfig, ListActions } from './list=data-source-types';
 
 export interface AppEnvVar {
   name: string;
@@ -35,8 +35,7 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   private rowNames: Array<string> = new Array<string>();
   // Only needed for update purposes
   public rows = new Array<AppEnvVar>();
-  // Default sort shizzle
-  // private _defaultSortParmas: MdSortable;
+
   public cfGuid: string;
   public appGuid: string;
 
@@ -98,29 +97,15 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   }
 
   saveAdd() {
-    // const updateApp = this._createUpdateApplication(false);
-    // updateApp.environment_json[this.addItem.name] = this.addItem.value;
-    // this._appService.UpdateApplicationEvVars(updateApp);
     this._cfStore.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.rows, this.addItem));
     super.saveAdd();
   }
-
-  // TODO: RC DELETE
-  // selectedDelete() {
-  //   const updateApp = this._createUpdateApplication(true);
-  //   this._appService.UpdateApplicationEvVars(updateApp);
-
-  //   super.selectClear();
-  // }
 
   startEdit(row: AppEnvVar) {
     super.startEdit({ ...row });
   }
 
   saveEdit() {
-    // const updateApp = this._createUpdateApplication(false);
-    // updateApp.environment_json[this.editRow.name] = this.editRow.value;
-    // this._appService.UpdateApplicationEvVars(updateApp);
     this._cfStore.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.rows, this.editRow));
     super.saveEdit();
   }
@@ -168,7 +153,6 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
 
   listSort(envVars: Array<AppEnvVar>, sort: ListSort): AppEnvVar[] {
     return envVars.slice().sort((a, b) => {
-      // TODO: RC lower case strings?
       const [propertyA, propertyB] = [a[sort.field], b[sort.field]];
       const valueA = isNaN(+propertyA) ? propertyA : +propertyA;
       const valueB = isNaN(+propertyB) ? propertyB : +propertyB;
@@ -176,6 +160,4 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
       return (valueA < valueB ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
     });
   }
-
-
 }

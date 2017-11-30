@@ -5,9 +5,7 @@ import { CoreModule } from '../core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { MdDialogRef, MD_DIALOG_DATA, MdDialogModule } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
-import { appReducers } from '../../store/reducers.module';
-import { getInitialTestStoreState } from '../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../test-framework/store-test-helper';
 
 describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
@@ -20,8 +18,6 @@ describe('LogOutDialogComponent', () => {
     data: '';
   }
 
-  const initialState = getInitialTestStoreState();
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -33,10 +29,7 @@ describe('LogOutDialogComponent', () => {
         SharedModule,
         MdDialogModule,
         NoopAnimationsModule,
-        StoreModule.forRoot(appReducers,
-          {
-            initialState
-          })
+        createBasicStoreModule(),
       ]
     })
       .compileComponents();

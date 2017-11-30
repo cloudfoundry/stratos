@@ -10,11 +10,9 @@ import { AppComponent } from './app.component';
 import { LoggedInService } from './logged-in.service';
 import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
-import { appReducers } from './store/reducers.module';
-import { getInitialTestStoreState } from './test-framework/store-test-helper';
+import { createBasicStoreModule } from './test-framework/store-test-helper';
 
 describe('AppComponent', () => {
-  const initialState = getInitialTestStoreState();
 
   class LoggedInServiceMock {
   }
@@ -31,12 +29,7 @@ describe('AppComponent', () => {
         // CoreModule,
         SharedModule,
         RouterTestingModule,
-        StoreModule.forRoot(
-          appReducers,
-          {
-            initialState
-          }
-        )
+        createBasicStoreModule(),
       ]
     }).compileComponents();
   }));

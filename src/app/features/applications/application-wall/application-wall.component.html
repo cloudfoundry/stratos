@@ -6,8 +6,8 @@
     </button>
   </div>
 </app-page-header>
+<app-endpoints-missing #appEndpointsMissing></app-endpoints-missing>
 <app-loading-page [isLoading]="appsDataSource.isLoadingPage$" [text]="'Fetching your applications'">
   <!-- <p *ngIf="error">We're sorry, we couldn't fetch all of your applications. Please try again later.</p> -->
   <app-list [dataSource]="appsDataSource" [columns]="columns" [text]="{ title: '', filter: 'Filter Applications'}" [enableFilter]="true"
-    [cardComponent]="cardComponent">
-  </app-list>
+    [cardComponent]="cardComponent" [hidden]="!(endpointsService.haveRegistered$ | async) || !(endpointsService.haveConnected$ | async)"></app-list>

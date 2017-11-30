@@ -15,23 +15,8 @@ import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Subscription } from 'rxjs/Subscription';
-import { IListDataSource } from '../../data-sources/list-data-source';
-
-export interface ITableColumn<T> {
-  columnId: string;
-  cell?: (row: T) => string; // Either cell OR cellComponent should be defined
-  cellComponent?: any;
-  headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
-  headerCellComponent?: any;
-  class?: string;
-  sort?: boolean;
-  cellFlex?: string;
-}
-
-export interface ITableText {
-  title: string;
-  filter?: string;
-}
+import { IListDataSource } from '../../data-sources/list=data-source-types';
+import { ITableColumn, ITableText } from './table.types';
 
 @Component({
   selector: 'app-table',
@@ -42,7 +27,6 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
 
-  // @ViewChild(MdPaginator) paginator: MdPaginator;
   @ViewChild(MdSort) sort: MdSort;
 
 

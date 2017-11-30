@@ -10,7 +10,7 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { appReducers } from '../../../../store/reducers.module';
 import { AppStoreModule } from '../../../../store/store.module';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
-import { SummaryTabComponent } from './summary-tab.component';
+import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
 import { ApplicationService } from '../../application.service';
 import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
@@ -19,14 +19,14 @@ import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { APIResource } from '../../../../store/types/api.types';
 
 describe('SummaryTabComponent', () => {
-  let component: SummaryTabComponent;
-  let fixture: ComponentFixture<SummaryTabComponent>;
+  let component: BuildTabComponent;
+  let fixture: ComponentFixture<BuildTabComponent>;
   const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        SummaryTabComponent,
+        BuildTabComponent,
         ViewBuildpackComponent
       ],
       imports: [
@@ -55,7 +55,7 @@ describe('SummaryTabComponent', () => {
     const cfGuid = initialState.cnsis.entities[0].guid;
     const appGuid = (Object.values(initialState.entities.application)[0] as APIResource).metadata.guid;
     applicationService.setApplication(cfGuid, appGuid);
-    fixture = TestBed.createComponent(SummaryTabComponent);
+    fixture = TestBed.createComponent(BuildTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

@@ -5,13 +5,12 @@ import { Observable } from 'rxjs/Rx';
 import { ApplicationData, ApplicationService } from '../../application.service';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 
-// TODO: RENAME FROM summary TO somtehing BUILD/DEPLY ish
 @Component({
-  selector: 'app-summary-tab',
-  templateUrl: './summary-tab.component.html',
-  styleUrls: ['./summary-tab.component.scss']
+  selector: 'app-build-tab',
+  templateUrl: './build-tab.component.html',
+  styleUrls: ['./build-tab.component.scss']
 })
-export class SummaryTabComponent implements OnInit {
+export class BuildTabComponent implements OnInit {
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
 
   appService = this.applicationService;

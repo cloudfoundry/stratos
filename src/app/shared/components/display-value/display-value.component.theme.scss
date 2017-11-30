@@ -1,8 +1,5 @@
 @import '~@angular/material/theming';
 @mixin display-value-theme($theme, $app-theme) {
-  // $primary: map-get($theme, primary);
-  // $accent: map-get($theme, accent);
-  // $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
   .display-value {
     $foreground-colors: map-get($theme, foreground);

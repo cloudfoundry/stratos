@@ -1,4 +1,3 @@
-<!-- TODO: Error cases for both-->
 <div class="listComponent">
   <div class="listComponent__header" [ngClass]="{'selected': (dataSource.isSelecting$ | async) }">
     <md-card>
@@ -10,7 +9,7 @@
           </div>
           <div class="listComponent__header__right">
             <div [hidden]="(dataSource.isAdding$ | async) || (dataSource.isSelecting$ | async)">
-              <!-- No way to disable an md-paginator yet -->
+              <!-- No way to disable an md-paginator yet, so just hide -->
               <md-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize"
                 [pageSizeOptions]="[]">
               </md-paginator>

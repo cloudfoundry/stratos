@@ -1,6 +1,6 @@
 <div class="page-header">
   <md-toolbar color="primary">
-    <button md-icon-button>
+    <button md-icon-button *ngIf="!hideSideNavButton">
       <md-icon class="page-header__nav-toggle" (click)="toggleSidenav()">menu</md-icon>
     </button>
     <ng-content></ng-content>

@@ -18,11 +18,11 @@ import {
 } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
 
-import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/summary-tab/application-env-vars.service';
+import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/build-tab/application-env-vars.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
-} from './application/summary-tab/application-state/application-state.service';
+} from './application/build-tab/application-state/application-state.service';
 import { EntityInfo } from '../../store/types/api.types';
 import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType } from '../../store/types/app-metadata.types';
 
@@ -194,11 +194,4 @@ export class ApplicationService {
     ));
   }
 
-  // UpdateApplicationEvVars(updatedApplication: UpdateApplication) {
-  //   this.store.dispatch(new UpdateExistingApplication(
-  //     this.appGuid,
-  //     this.cfGuid,
-  //     { ...updatedApplication }
-  //   ));
-  // }
 }

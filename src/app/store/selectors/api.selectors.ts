@@ -1,8 +1,8 @@
 import { EntitiesState } from '../types/entity.types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
-import { AppState, IRequestState, IStateHasEntities } from '../app-state';
-import { ActionState, RequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
+import { ActionState, EntityRequestState, UpdatingSection } from '../reducers/api-request-reducer';
+import { AppState } from '../app-state';
 
 
 export const selectEntities = createFeatureSelector<EntitiesState>('entities');
@@ -14,58 +14,46 @@ export const createEntitySelector = (entity: string) => {
 export function selectEntity(type: string, guid: string) {
   return compose(
     getEntityById<APIResource>(guid),
-    getRequestType(type),
+    getEntityType(type),
     getEntityState
   );
 }
 
-export function selectDeletionInfo(type: string, entityGuid: string, section?: string) {
+export function selectEntityDeletionInfo(type: string, entityGuid: string) {
   return compose(
     getEntityDeleteSections,
-    getEntityById<RequestState>(entityGuid),
-    getRequestType(type),
-    getRequestBySection(section),
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
   );
 }
 
-export function selectUpdateInfo(type: string, entityGuid: string, updatingGuid: string, section?: string) {
+export function selectEntityUpdateInfo(type: string, entityGuid: string, updatingGuid: string) {
   return compose(
     getUpdateSectionById(updatingGuid),
     getEntityUpdateSections,
-    getEntityById<RequestState>(entityGuid),
-    getRequestType(type),
-    getRequestBySection(section),
+    getEntityById<EntityRequestState>(entityGuid),
+    getEntityType(type),
+    getAPIRequestInfoState,
   );
 }
 
-export function selectRequestInfo(type: string, guid: string, section?: string) {
+export function selectEntityRequestInfo(type: string, guid: string) {
   return compose(
-    getEntityById<RequestState>(guid),
-    getRequestType(type),
-    getRequestBySection(section)
+    getEntityById<EntityRequestState>(guid),
+    getEntityType(type),
+    getAPIRequestInfoState,
   );
 }
 
-export function getRequestBySection(section?: string) {
-  return compose(
-    getRequestState(section),
-    getAPIRequestInfoState
-  );
-}
 
-function getRequestState(section = 'entities') {
-  return function (state) {
-    return state[section];
-  };
-}
-
-export function getEntityState(state: IStateHasEntities) {
+export function getEntityState(state: AppState) {
   return state.entities;
 }
 
-export function getRequestType(typeString: string) {
-  return (requestSection) => {
-    return requestSection[typeString] || {};
+export function getEntityType(typeString: string) {
+  return (entityState) => {
+    return entityState[typeString] || {};
   };
 }
 
@@ -73,11 +61,11 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
 
-export const getEntityUpdateSections = (request: RequestState): UpdatingSection => {
+export const getEntityUpdateSections = (request: EntityRequestState): UpdatingSection => {
   return request ? request.updating : null;
 };
 
-export const getEntityDeleteSections = (request: RequestState) => {
+export const getEntityDeleteSections = (request: EntityRequestState) => {
   return request.deleting;
 };
 
@@ -94,7 +82,6 @@ export const getAPIResourceGuid = compose(
   getAPIResourceMetadata
 );
 
-
 export function getAPIRequestInfoState(state: AppState) {
-  return state.request;
+  return state.apiRequest || {};
 }

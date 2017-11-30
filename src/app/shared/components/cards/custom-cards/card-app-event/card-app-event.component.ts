@@ -8,7 +8,6 @@ import {
 import {
   TableCellEventActionComponent,
 } from '../../../table/custom-cells/table-cell-event-action/table-cell-event-action.component';
-import { AppEvent } from '../../../../data-sources/cf-app-events-data-source';
 import { Component, OnInit } from '@angular/core';
 import { TableCellCustom } from '../../../table/table-cell/table-cell-custom';
 import {

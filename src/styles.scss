@@ -10,7 +10,7 @@ body {
 
 body,
 html {
-  min-height: 100vh;
+  height: 100%;
 }
 
 .inline-icon {
@@ -35,4 +35,8 @@ html {
 *:before,
 *:after {
   box-sizing: inherit;
+}
+
+button.mat-simple-snackbar-action {
+  margin-left: 0;
 }

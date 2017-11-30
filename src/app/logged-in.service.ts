@@ -1,4 +1,4 @@
-import { Injectable, Inject, HostListener } from '@angular/core';
+import { HostListener, Inject, Injectable, NgZone } from '@angular/core';
 import { DOCUMENT } from '@angular/platform-browser';
 import { Subscription } from 'rxjs/Rx';
 import { Store } from '@ngrx/store';
@@ -40,6 +40,7 @@ export class LoggedInService {
     @Inject(DOCUMENT) private document: Document,
     private store: Store<AppState>,
     private dialog: MdDialog,
+    ngZone: NgZone
   ) {
 
     const eventStreams = this._userActiveEvents.map((eventName) => {
@@ -51,7 +52,15 @@ export class LoggedInService {
         this._sessionData = auth.sessionData;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
           if (!this._sessionChecker) {
-            this._sessionChecker = setInterval(() => { this._checkSession(); }, this._checkSessionInterval);
+            ngZone.runOutsideAngular(() => {
+              // Run outside of zone to allow protractor to finish
+              this._sessionChecker = setInterval(() => {
+                ngZone.run(() => {
+                  // Run inside zone for change detection
+                  this._checkSession();
+                });
+              }, this._checkSessionInterval);
+            });
           }
           if (!this._userInteractionChecker) {
             this._userInteractionChecker = Observable.merge(...eventStreams).subscribe(() => {

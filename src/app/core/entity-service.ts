@@ -95,7 +95,6 @@ updatingSection$: Observable<UpdatingSection>;
   entitySelect$: Observable<APIResource>,
   entityRequestSelect$: Observable<RequestState>
 ): Observable<EntityInfo> => {
-  // This fetching var needs to end up in the state
   return Observable.combineLatest(
     this.store.select(getEntityState),
     entitySelect$,

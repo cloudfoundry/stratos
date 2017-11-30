@@ -15,7 +15,6 @@ export class FocusDirective implements OnInit, OnDestroy {
     this.sub = this.appFocus.subscribe(event => {
       // this.renderer.invokeElementMethod(this.element.nativeElement, 'focus', []);
       // this.element.nativeElement.focus();
-      // TODO: RC Check type of nativeElement
       this.renderer.invokeElementMethod(this.element.nativeElement, 'focus');
     });
   }
