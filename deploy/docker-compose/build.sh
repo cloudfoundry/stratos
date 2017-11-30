@@ -8,7 +8,10 @@ DOCKER_ORG=splatform
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:dl" opt; do
+STRATOS_BOWER=""
+NO_PUSH="false"
+
+while getopts ":ho:r:t:dlu:n" opt; do
   case $opt in
     h)
       echo
@@ -30,8 +33,14 @@ while getopts ":ho:r:t:dl" opt; do
     l)
       TAG_LATEST="true"
       ;;
-    d)
-      BUILD_DOCKER_COMPOSE_IMAGES="true"
+    o)
+      DOCKER_ORG="${OPTARG}"
+      ;;
+    u)
+      STRATOS_BOWER="${OPTARG}"
+      ;;
+    n)
+      NO_PUSH="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -49,6 +58,10 @@ echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
 echo "REGISTRY: ${DOCKER_REGISTRY}"
 echo "ORG: ${DOCKER_ORG}"
 echo "TAG: ${TAG}"
+
+if [ "${NO_PUSH}" != "false" ]; then
+  echo "Images will NOT be pushed"
+fi
 
 echo
 echo "Starting build"
@@ -103,11 +116,17 @@ function buildAndPublishImage {
 
   docker tag ${NAME} ${IMAGE_URL}
 
-  echo Pushing Docker Image ${IMAGE_URL}
-  docker push  ${IMAGE_URL}
+  if [ "${NO_PUSH}" = "false" ]; then
+    echo Pushing Docker Image ${IMAGE_URL}
+    docker push  ${IMAGE_URL}
+  fi
+
   if [ "${TAG_LATEST}" = "true" ]; then
     docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
-    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    if [ "${NO_PUSH}" = "false" ]; then
+      echo Pushing Docker Image ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+      docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    fi
   fi
 
   # Update values.yaml
@@ -212,6 +231,7 @@ function buildUI {
     -e USER_NAME=$(id -nu) \
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
+    -e STRATOS_BOWER="${STRATOS_BOWER}" \
     -w /usr/src/app \
     splatform/stratos-ui-build-base:opensuse \
     /bin/bash ./deploy/provision.sh

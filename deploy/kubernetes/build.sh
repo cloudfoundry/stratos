@@ -10,7 +10,8 @@ OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
 TAG_LATEST="false"
-while getopts ":ho:r:t:dTclb:O" opt; do
+STRATOS_BOWER=""
+while getopts ":ho:r:t:dTclb:Ou:" opt; do
   case $opt in
     h)
       echo
@@ -36,9 +37,6 @@ while getopts ":ho:r:t:dTclb:O" opt; do
       TAG="$(git describe $(git rev-list --tags --max-count=1))"
       RELEASE_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       ;;
-    d)
-      BUILD_DOCKER_COMPOSE_IMAGES="true"
-      ;;
     c)
       CONCOURSE_BUILD="true"
       ;;
@@ -47,6 +45,9 @@ while getopts ":ho:r:t:dTclb:O" opt; do
       ;;
     l)
       TAG_LATEST="true"
+      ;;
+    u)
+      STRATOS_BOWER="${OPTARG}"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -281,6 +282,7 @@ function buildUI {
     -e USER_NAME=$(id -nu) \
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
+    -e STRATOS_BOWER="${STRATOS_BOWER}" \
     -w /usr/src/app \
     ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-ui-build-base:${BASE_IMAGE_TAG} \
     /bin/bash ./deploy/provision.sh
