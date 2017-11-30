@@ -1,5 +1,5 @@
+import { IAPIAction } from './request.types';
 import { Action } from '@ngrx/store';
-import { APIAction } from './api.types';
 
 export class QParam {
   constructor(
@@ -26,7 +26,7 @@ export class PaginationEntityState {
 }
 
 // An action that is intended to begin a
-export interface PaginatedAction extends PaginationAction, APIAction {
+export interface PaginatedAction extends PaginationAction, IAPIAction {
   initialParams?: PaginationParam;
 }
 export interface PaginationAction extends Action {
