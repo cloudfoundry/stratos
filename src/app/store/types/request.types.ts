@@ -1,3 +1,4 @@
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { Schema } from 'normalizr';
 import { ApiActionTypes, NonApiActionTypes } from '../actions/request.actions';
 import { PaginatedAction } from './pagination.types';
@@ -9,7 +10,6 @@ export interface SingleEntityAction {
   entityKey: string;
   // For single entity requests
   guid?: string;
-  options?: RequestOptions;
 }
 
 export interface RequestAction extends Action, SingleEntityAction {
@@ -18,22 +18,27 @@ export interface RequestAction extends Action, SingleEntityAction {
 }
 
 export interface IAPIAction extends RequestAction {
-  actions: string[];
-  options: RequestOptions;
-  entity: Schema;
+  entity?: Schema;
   entityKey: string;
   // For single entity requests
   guid?: string;
 }
 
+export interface ICFAction extends IAPIAction {
+  options: RequestOptions;
+  actions: string[];
+}
+
 export interface IStartRequestAction {
   apiAction: IAPIAction | PaginatedAction;
+  requestType: ApiRequestTypes;
 }
 
 export interface ISuccessRequestAction {
   type: string;
   response: NormalizedResponse;
   apiAction: IAPIAction | PaginatedAction;
+  requestType: ApiRequestTypes;
   totalResults?: number;
 }
 
@@ -41,6 +46,7 @@ export interface IFailedRequestAction {
   type: string;
   message: string;
   apiAction: IAPIAction | PaginatedAction;
+  requestType: ApiRequestTypes;
 }
 
 export abstract class CFStartAction implements Action {
@@ -58,7 +64,8 @@ export abstract class CFFailedAction implements Action {
 
 export class StartCFAction extends CFStartAction implements IStartRequestAction {
   constructor(
-    public apiAction: IAPIAction | PaginatedAction
+    public apiAction: ICFAction | PaginatedAction,
+    public requestType: ApiRequestTypes
   ) {
     super();
   }
@@ -69,6 +76,7 @@ export class WrapperCFActionSuccess extends CFSuccessAction implements ISuccessR
     public type: string,
     public response: NormalizedResponse,
     public apiAction: IAPIAction | PaginatedAction,
+    public requestType: ApiRequestTypes,
     public totalResults?: number
   ) {
     super();
@@ -79,7 +87,8 @@ export class WrapperCFActionFailed extends CFSuccessAction implements IFailedReq
   constructor(
     public type: string,
     public message: string,
-    public apiAction: IAPIAction | PaginatedAction
+    public apiAction: IAPIAction | PaginatedAction,
+    public requestType: ApiRequestTypes
   ) {
     super();
   }
@@ -97,7 +106,8 @@ export abstract class NoneCFFailedAction implements Action {
 
 export class StartNoneCFAction extends NoneCFAction implements IStartRequestAction {
   constructor(
-    public apiAction: IAPIAction | PaginatedAction
+    public apiAction: IAPIAction | PaginatedAction,
+    public requestType: ApiRequestTypes
   ) {
     super();
   }
@@ -105,9 +115,9 @@ export class StartNoneCFAction extends NoneCFAction implements IStartRequestActi
 
 export class WrapperNoneCFActionSuccess extends NoneCFSuccessAction implements ISuccessRequestAction {
   constructor(
-    public type: string,
     public response: NormalizedResponse,
     public apiAction: IAPIAction | PaginatedAction,
+    public requestType: ApiRequestTypes,
     public totalResults?: number
   ) {
     super();
@@ -116,9 +126,9 @@ export class WrapperNoneCFActionSuccess extends NoneCFSuccessAction implements I
 
 export class WrapperNoneCFActionFailed extends NoneCFFailedAction implements IFailedRequestAction {
   constructor(
-    public type: string,
     public message: string,
-    public apiAction: IAPIAction | PaginatedAction
+    public apiAction: IAPIAction | PaginatedAction,
+    public requestType: ApiRequestTypes
   ) {
     super();
   }

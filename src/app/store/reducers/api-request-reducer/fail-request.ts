@@ -1,4 +1,4 @@
-import { RequestAction } from '../../types/request.types';
+import { RequestAction, IFailedRequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
   getRequestTypeFromMethod,
@@ -6,11 +6,9 @@ import {
   setEntityRequestState,
 } from './request-helpers';
 
-export function failRequest(state, action) {
+export function failRequest(state, action: IFailedRequestAction) {
   if (action.apiAction.guid) {
     const apiAction = action.apiAction as RequestAction;
-    const requestTypeFailed = getRequestTypeFromMethod(apiAction.options.method);
-
     const requestFailedState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {
       requestFailedState.updating = mergeUpdatingState(
@@ -22,7 +20,7 @@ export function failRequest(state, action) {
           message: action.message
         }
       );
-    } else if (requestTypeFailed === 'delete') {
+    } else if (action.requestType === 'delete') {
       requestFailedState.deleting.busy = false;
       requestFailedState.deleting.deleted = false;
       requestFailedState.deleting.error = true;

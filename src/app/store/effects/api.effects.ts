@@ -1,6 +1,9 @@
+import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import {
   CFAction,
+  CFStartAction,
   IAPIAction,
+  ICFAction,
   StartCFAction,
   WrapperCFActionFailed,
   WrapperCFActionSuccess,
@@ -45,9 +48,12 @@ export class APIEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() apiRequestStart$ = this.actions$.ofType<IAPIAction>(ApiActionTypes.API_REQUEST)
+  @Effect() apiRequestStart$ = this.actions$.ofType<ICFAction>(ApiActionTypes.API_REQUEST)
     .map(apiAction => {
-      return new StartCFAction(apiAction);
+      return new StartCFAction(
+        apiAction,
+        getRequestTypeFromMethod(apiAction.options.method)
+      );
     });
 
   @Effect() apiRequest$ = this.actions$.ofType<StartCFAction>(ApiActionTypes.API_REQUEST_START)
@@ -55,13 +61,14 @@ export class APIEffect {
     .mergeMap(([action, state]) => {
 
       const paramsObject = {};
-      const apiAction = { ...action.apiAction };
+      const _apiAction = { ...action.apiAction };
+      const apiAction = _apiAction as ICFAction;
+      const paginatedAction = _apiAction as PaginatedAction;
       const options = { ...apiAction.options };
 
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
       // Apply the params from the store
-      const paginatedAction = (apiAction as PaginatedAction);
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();
         // TODO: q params may also come from a standard api request
@@ -125,6 +132,7 @@ export class APIEffect {
             apiAction.actions[1],
             entities,
             apiAction,
+            action.requestType,
             totalResults
           ));
 
@@ -138,7 +146,14 @@ export class APIEffect {
           return actions;
         })
         .catch(err => {
-          return Observable.of(new WrapperCFActionFailed(apiAction.actions[2], err.message, apiAction));
+          return Observable.of(
+            new WrapperCFActionFailed(
+              apiAction.actions[2],
+              err.message,
+              apiAction,
+              action.requestType
+            )
+          );
         });
     });
 

@@ -1,4 +1,4 @@
-import { CFAction, IAPIAction } from '../types/request.types';
+import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
@@ -77,7 +77,7 @@ export class GetAllApplications implements PaginatedAction {
   };
 }
 
-export class GetApplication extends CFAction implements IAPIAction {
+export class GetApplication extends CFAction implements ICFAction {
   constructor(public guid: string, public cnis: string) {
     super();
     this.options = new RequestOptions();
@@ -99,7 +99,7 @@ export class GetApplication extends CFAction implements IAPIAction {
   options: RequestOptions;
 }
 
-export class CreateNewApplication extends CFAction implements IAPIAction {
+export class CreateNewApplication extends CFAction implements ICFAction {
   constructor(public guid: string, public cnis: string, application: NewApplication) {
     super();
     this.options = new RequestOptions();
@@ -121,7 +121,7 @@ export class CreateNewApplication extends CFAction implements IAPIAction {
   options: RequestOptions;
 }
 
-export class AssociateRouteWithAppApplication extends CFAction implements IAPIAction {
+export class AssociateRouteWithAppApplication extends CFAction implements ICFAction {
   constructor(public guid: string, public routeGuid: string, public cnis: string) {
     super();
     this.options = new RequestOptions();
@@ -152,7 +152,7 @@ export interface UpdateApplication {
 
 // declare function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K>;
 
-export class UpdateExistingApplication extends CFAction implements IAPIAction {
+export class UpdateExistingApplication extends CFAction implements ICFAction {
   static updateKey = 'Updating-Existing-Application';
 
   constructor(public guid: string, public cnis: string, application: UpdateApplication) {
@@ -183,7 +183,7 @@ export class UpdateExistingApplication extends CFAction implements IAPIAction {
   }
 }
 
-export class DeleteApplication extends CFAction implements IAPIAction {
+export class DeleteApplication extends CFAction implements ICFAction {
   static updateKey = 'Deleting-Existing-Application';
 
   constructor(public guid: string, public cnis: string) {

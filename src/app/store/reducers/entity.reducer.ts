@@ -19,7 +19,7 @@ export function entitiesReducer(state: EntitiesState = defaultEntitiesState, act
   const type = action.apiAction ? action.apiAction.type : action.type;
   switch (type) {
     case ApiActionTypes.API_REQUEST_SUCCESS:
-      if (action.apiAction.options.method === 'delete' || action.apiAction.options.method === RequestMethod.Delete) {
+      if (action.requestType === 'delete') {
         const newState = { ...state };
         delete newState[action.apiAction.entityKey][action.apiAction.guid];
         return newState;

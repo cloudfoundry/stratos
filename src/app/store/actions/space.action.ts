@@ -1,4 +1,4 @@
-import { CFAction, IAPIAction } from '../types/request.types';
+import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
 import { ApiActionTypes } from './request.actions';
@@ -17,7 +17,7 @@ export const SpaceSchema = new schema.Entity('space', {
     idAttribute: getAPIResourceGuid
   });
 
-export class GetSpace extends CFAction implements IAPIAction {
+export class GetSpace extends CFAction implements ICFAction {
   constructor(public guid: string, public cnis: string) {
     super();
     this.options = new RequestOptions();

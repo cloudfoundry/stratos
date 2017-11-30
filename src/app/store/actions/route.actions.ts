@@ -1,4 +1,4 @@
-import { CFAction, IAPIAction } from '../types/request.types';
+import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions } from '@angular/http';
@@ -20,7 +20,7 @@ export interface NewRoute {
   host: string;
 }
 
-export class CreateRoute extends CFAction implements IAPIAction {
+export class CreateRoute extends CFAction implements ICFAction {
   constructor(public guid: string, public cnis: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();
@@ -43,7 +43,7 @@ export class CreateRoute extends CFAction implements IAPIAction {
 }
 
 
-export class CheckRouteExists extends CFAction implements IAPIAction {
+export class CheckRouteExists extends CFAction implements ICFAction {
   constructor(public guid: string, public cnis: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();

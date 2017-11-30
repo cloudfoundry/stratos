@@ -30,7 +30,7 @@ export function createRequestStateFromResponse(entities, state) {
   let newState = { ...state };
   Object.keys(entities).forEach(entityKey => {
     Object.keys(entities[entityKey]).forEach(guid => {
-      const entState = getEntityRequestState(state, { entityKey, guid });
+      const entState = getEntityRequestState(state, { entityKey, guid } as SingleEntityAction);
       entState.fetching = false;
       entState.error = false;
       entState.deleting = { ...defaultDeletingActionState };

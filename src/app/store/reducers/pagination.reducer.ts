@@ -60,7 +60,7 @@ const [requestType, successType, failureType] = types;
 
 const updatePagination =
   function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
-    switch (actionType) {
+    switch (action.type) {
       case requestType:
         return {
           ...state,
