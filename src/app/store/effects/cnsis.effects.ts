@@ -1,3 +1,4 @@
+import { NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
@@ -13,7 +14,7 @@ import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { CNSISModel } from '../types/cnsis.types';
-import { IAPIAction, StartNoneCFAction, WrapperNoneCFActionFailed } from '../types/request.types';
+import { IAPIAction, NoneCFSuccessAction, StartNoneCFAction, WrapperNoneCFActionFailed, WrapperNoneCFActionSuccess } from '../types/request.types';
 
 
 @Injectable()
@@ -40,7 +41,25 @@ export class CNSISEffect {
           });
         }
       )
-        .map(data => new GetAllCNSISSuccess(data, action.login))
+
+        .mergeMap(data => {
+          const mappedData = {
+            entities: {
+              cnsis: {}
+            },
+            result: []
+          };
+          data.forEach(cnsi => {
+            mappedData.entities.cnsis[cnsi.guid] = cnsi;
+            mappedData.result.push(cnsi.guid);
+          });
+          const apiAction = {
+            entityKey: 'cnsis',
+          } as IAPIAction;
+
+          // TODO: RC Remove GetAllCNSISSuccess
+          return [new GetAllCNSISSuccess(data, action.login), new WrapperNoneCFActionSuccess(mappedData, apiAction, 'fetch')];
+        })
         .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
 
     });
@@ -49,7 +68,7 @@ export class CNSISEffect {
     .flatMap(action => {
       const actionType = 'update';
       const apiAction = {
-        entityKey: 'cnis',
+        entityKey: 'cnsis',
         guid: action.cnsiGuid,
         updatingKey: 'connecting',
       } as IAPIAction;

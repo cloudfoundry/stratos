@@ -17892,7 +17892,7 @@ const testInitialStoreState: AppState = {
     },
     request: {
       other: {
-        cnis: {
+        cnsis: {
           '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
             fetching: false,
             updating: {
@@ -20118,6 +20118,19 @@ const testInitialStoreState: AppState = {
         route: {},
         event: {},
       }
+    },
+    requestData: {
+      entities: {
+        application: {},
+        stack: {},
+        space: {},
+        organization: {},
+        route: {},
+        event: {},
+      },
+      other: {
+        cnsis: {}
+      },
     },
     actionHistory: [],
     lists: {},

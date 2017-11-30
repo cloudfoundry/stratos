@@ -1,21 +1,21 @@
-import { EntitiesState } from '../types/entity.types';
+import { CfEntitiesState } from '../types/entity.types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState, IRequestState, IStateHasEntities } from '../app-state';
 import { ActionState, RequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
 
 
-export const selectEntities = createFeatureSelector<EntitiesState>('entities');
+// export const selectEntities = createFeatureSelector<EntitiesState>('entities');
 
-export const createEntitySelector = (entity: string) => {
-  return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
-};
+// export const createEntitySelector = (entity: string) => {
+//   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
+// };
 
-export function selectEntity(type: string, guid: string) {
+export function selectEntity(type: string, guid: string, section = 'cf') {
   return compose(
     getEntityById<APIResource>(guid),
     getRequestType(type),
-    getEntityState
+    getEntityState(section)
   );
 }
 
@@ -53,14 +53,16 @@ export function getRequestBySection(section?: string) {
   );
 }
 
-function getRequestState(section = 'entities') {
+function getRequestState(section = 'cf') {
   return function (state) {
     return state[section];
   };
 }
 
-export function getEntityState(state: IStateHasEntities) {
-  return state.entities;
+export function getEntityState(section = 'cf') {
+  return function (state) {
+    return state.requestData[section];
+  };
 }
 
 export function getRequestType(typeString: string) {
@@ -98,3 +100,7 @@ export const getAPIResourceGuid = compose(
 export function getAPIRequestInfoState(state: AppState) {
   return state.request;
 }
+
+// export function getAPIRequestDataState(state: AppState) {
+//   return state.requestData;
+// }

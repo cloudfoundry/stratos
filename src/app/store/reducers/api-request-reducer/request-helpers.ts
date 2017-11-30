@@ -1,5 +1,5 @@
 import { RequestAction, SingleEntityAction } from '../../types/request.types';
-import { EntitiesState } from '../../types/entity.types';
+import { CfEntitiesState } from '../../types/entity.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
 import { defaultDeletingActionState, defaultRequestState, RequestState, rootUpdatingKey } from './types';
