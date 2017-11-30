@@ -1,0 +1,40 @@
+language: node_js
+node_js:
+  - "6"
+sudo: required
+dist: trusty
+services:
+  - docker
+addons:
+  chrome: stable  
+install:
+  - npm install
+filter_secrets: false
+cache:
+  directories:
+    - /home/travis/.cache/bower/
+    - /home/travis/.npm/
+jobs:
+  include:
+    - stage: e2e tests
+      before_script:
+        - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
+        - npm install -g bower
+        - bower install
+      script:
+        - ./deploy/ci/travis/run-e2e-tests.sh
+    - stage: back-end
+      before_script:
+        - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+        - chmod +x ~/bin/gimme
+        - eval "$(gimme 1.9)"
+        - curl https://glide.sh/get | sh
+      script:
+        - npm run test-backend
+    - stage: front-end
+      before_script:
+        - npm install -g bower
+        - bower install
+      script:
+        - npm build
+        - npm run gate-check
