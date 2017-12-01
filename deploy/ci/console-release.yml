@@ -3,8 +3,7 @@ resources:
   type: git
   source:
     branch: {{stratos-ui-branch}}
-    private_key: {{github-private-key}}
-    uri: git@github.com:suse/stratos-ui.git
+    uri: https://github.com/SUSE/stratos-ui.git
     tag_filter: "[0-9]*"
 - name: helm-chart-values
   type: s3
