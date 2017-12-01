@@ -11,7 +11,7 @@ TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
 TAG_LATEST="false"
 STRATOS_BOWER=""
-while getopts ":ho:r:t:dTclb:Ou:" opt; do
+while getopts ":ho:r:t:Tclb:Ou:" opt; do
   case $opt in
     h)
       echo
