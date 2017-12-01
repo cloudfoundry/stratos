@@ -73,6 +73,4 @@ docker-compose logs proxy
 docker-compose down
 popd
 
-cat ./build/secrets.json
-
 exit $RESULT
