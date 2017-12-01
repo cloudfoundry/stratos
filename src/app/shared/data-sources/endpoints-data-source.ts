@@ -13,8 +13,6 @@ import { ListActionConfig, ListActions } from './list=data-source-types';
 export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   private static _storeKey = 'endpoints';
 
-  // Only needed for unique filter when adding new env vars
-  private rowNames: Array<string> = new Array<string>();
   // Only needed for update purposes
   private rows = new Array<CNSISModel>();
 
@@ -69,12 +67,10 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   listFilter(endpoints: CNSISModel[], filter: ListFilter): CNSISModel[] {
     this.filteredRows.length = 0;
     this.rows.length = 0;
-    this.rowNames.length = 0;
 
     for (const endpoint of endpoints) {
       const { name } = endpoint;
       this.rows.push(endpoint);
-      this.rowNames.push(name);
 
       if (filter && filter.filter && filter.filter.length > 0) {
         if (endpoint.name.indexOf(filter.filter) >= 0 ||

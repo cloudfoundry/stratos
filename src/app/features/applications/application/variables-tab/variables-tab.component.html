@@ -6,7 +6,7 @@
         <form #addForm="ngForm" novalidate>
           <md-form-field floatPlaceholder="never">
             <input mdInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name" [(ngModel)]="envVarsDataSource.addItem.name"
-              required [appUnique]="envVarsDataSource.rowNames">
+              required [appUnique]="this.envVars$ | async">
             <md-error *ngIf="envVarName.errors && envVarName.errors.required">Name is required</md-error>
             <md-error *ngIf="envVarName.errors && envVarName.errors.appUnique">{{envVarName.errors.appUnique.message}}</md-error>
           </md-form-field>

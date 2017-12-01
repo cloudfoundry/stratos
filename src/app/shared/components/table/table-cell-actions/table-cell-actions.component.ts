@@ -19,8 +19,4 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> {
   ) {
     super();
   }
-
-  // execute(action: ListActionConfig<T>, row: T) {
-  //   this.store.dispatch(action.createAction(this.dataSource, [row]));
-  // }
 }

@@ -20,8 +20,6 @@ export interface AppEnvVar {
 
 export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
 
-  // Only needed for unique filter when adding new env vars
-  private rowNames: Array<string> = new Array<string>();
   // Only needed for update purposes
   public rows = new Array<AppEnvVar>();
 
@@ -117,12 +115,11 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   listFilter(envVars: AppEnvVar[], filter: ListFilter): AppEnvVar[] {
     this.filteredRows.length = 0;
     this.rows.length = 0;
-    this.rowNames.length = 0;
 
     for (const envVar of envVars) {
       const { name, value } = envVar;
       this.rows.push(envVar);
-      this.rowNames.push(name);
+
 
       if (filter && filter.filter && filter.filter.length > 0) {
         if (name.indexOf(filter.filter) >= 0 || value.indexOf(filter.filter) >= 0) {
