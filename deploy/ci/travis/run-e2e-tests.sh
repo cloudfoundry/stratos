@@ -57,12 +57,9 @@ docker-compose up -d
 popd
 
 # The build cleared node_modules, so move back the one we kept
+#npm install
 rm -rf ./node_modules
 mv /tmp/node_modules ./node_modules
-
-ls -al
-ls node_modules
-#npm install
 
 set +e
 echo "Running e2e tests"
