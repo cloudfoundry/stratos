@@ -40,7 +40,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   currentOrg: any;
 
-  cfList$ = this.store.select(cnsisRegisteredEntitiesSelector).first();
+  cfList$ = this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis));
 
   org = getPaginationObservables({
     store: this.store,

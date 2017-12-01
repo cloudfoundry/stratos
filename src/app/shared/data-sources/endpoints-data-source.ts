@@ -114,7 +114,7 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   connect(): Observable<CNSISModel[]> {
     this.isLoadingPage$ = this.isLoadingPage$ || this._eStore.select(cnsisStatusSelector).map((cnsis: CNSISState) => cnsis.loading);
     this.data$ = this.data$ || this._eStore.select(cnsisEntitiesSelector)
-      .map((cnsis: APIEntities<CNSISModel>) => Object.keys(cnsis).map(cnsiGuid => cnsis[cnsiGuid]));
+      .map((cnsis: APIEntities<CNSISModel>) => Object.values(cnsis));
     return super.connect();
   }
 

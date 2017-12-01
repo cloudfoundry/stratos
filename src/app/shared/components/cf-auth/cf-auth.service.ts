@@ -57,8 +57,7 @@ export class CfAuthService {
       this.sessionData$,
     ).subscribe(([cnsis, session]: [APIEntities<CNSISModel>, SessionData]) => {
       this.session = session;
-      Object.keys(cnsis).forEach(cnsiGuid => {
-        const cnsi = cnsis[cnsiGuid];
+      Object.values(cnsis).forEach(cnsi => {
         if (cnsi.registered) {
           // User hasn't connected to this endpoint
           return;

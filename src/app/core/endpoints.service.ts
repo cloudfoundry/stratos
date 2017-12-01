@@ -7,7 +7,7 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angul
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
 import { RouterNav } from '../store/actions/router.actions';
-import { cnsisEntitiesSelector } from '../store/selectors/cnsis.selectors';
+import { cnsisEntitiesSelector, cnsisStatusSelector } from '../store/selectors/cnsis.selectors';
 import { APIEntities } from '../store/types/api.types';
 
 @Injectable()
@@ -34,17 +34,21 @@ export class EndpointsService implements CanActivate {
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
     // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
-    return this.store.select('auth')
-      .skipWhile((state: AuthState) => {
-        return !state.loggedIn && !state.error;
+    return Observable.combineLatest(
+      this.store.select('auth'),
+      this.store.select(cnsisStatusSelector)
+    )
+      .skipWhile(([state, cnsiState]: [AuthState, CNSISState]) => {
+        return !state.loggedIn || cnsiState.loading;
       })
       .withLatestFrom(
       this.haveRegistered$,
       this.haveConnected$,
       this.userService.isAdmin$,
     )
-      .map(([state, haveRegistered, haveConnected, isAdmin]: [AuthState, boolean, boolean, boolean]) => {
-        if (state.sessionData.valid) {
+      .map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, CNSISState], boolean, boolean, boolean]) => {
+        const [authState, cnsisState] = state;
+        if (authState.sessionData.valid) {
           // Redirect to endpoints if there's no connected endpoints
           let redirect: string;
           if (!haveRegistered) {

@@ -221,7 +221,6 @@ export class APIEffect {
     if (typeof cnsis === 'string') {
       headers.set(cnsiHeader, cnsis);
     } else {
-
       const registeredCNSIGuids = [];
       Object.keys(cnsis).forEach(cnsiGuid => {
         const cnsi = cnsis[cnsiGuid];

@@ -26,7 +26,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
   constructor(store: Store<AppState>, private utilsService: UtilsService) {
     this.endpointNames = store.select(cnsisEntitiesSelector)
-      .map((cnsis: APIEntities<CNSISModel>) => Object.keys(cnsis).map(cnsiGuid => cnsis[cnsiGuid].name));
+      .map((cnsis: APIEntities<CNSISModel>) => Object.values(cnsis).map(cnsi => cnsi.name));
   }
 
   ngOnInit() {

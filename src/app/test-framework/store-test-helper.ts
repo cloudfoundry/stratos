@@ -20014,7 +20014,12 @@ const testInitialStoreState: AppState = {
         event: {},
       },
       other: {
-        cnsis: {}
+        cnsis: {
+          '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
+            guid: '57ab08d8-86cc-473a-8818-25d5e8d0ea23',
+            api_endpoint: {}
+          }
+        }
       },
     },
     actionHistory: [],

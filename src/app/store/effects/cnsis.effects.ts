@@ -59,14 +59,16 @@ export class CNSISEffect {
             mappedData.entities.cnsis[cnsi.guid] = cnsi;
             mappedData.result.push(cnsi.guid);
           });
+          // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
+          // (cnsi success)
           return [
+            new WrapperNoneCFActionSuccess(mappedData, apiAction, actionType),
             new GetAllCNSISSuccess(data, action.login),
-            new WrapperNoneCFActionSuccess(mappedData, apiAction, actionType)
           ];
         })
         .catch((err, caught) => [
+          new WrapperNoneCFActionFailed(err.message, apiAction, actionType),
           new GetAllCNSISFailed(err.message, action.login),
-          new WrapperNoneCFActionFailed(err.message, apiAction, actionType)
         ]);
 
     });
