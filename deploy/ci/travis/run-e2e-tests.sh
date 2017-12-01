@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -e
+set -e
 
 echo "Running e2e tests..."
 
@@ -44,7 +44,7 @@ export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
 
 # Move the node_modules folder - the docker build will remove it anyway
-#mv node_modules .keep_node_modules
+mv ./node_modules /tmp/node_modules
 
 echo "Building images locally"
 ./deploy/docker-compose/build.sh -n -l
@@ -57,19 +57,25 @@ docker-compose up -d
 popd
 
 # The build cleared node_modules, so move back the one we kept
-#mv .keep_node_modules node_modules 
+rm -rf ./node_modules
+mv /tmp/node_modules ./node_modules
 
-npm install
+ls -al
+ls node_modules
+#npm install
 
+set +e
 echo "Running e2e tests"
 npm run e2e:nocov
 RESULT=$?
+set -e
 
 pushd deploy/ci/travis
-docker-compose stop
-docker-compose logs mariadb
-docker-compose logs goose
-docker-compose logs proxy 
+# Uncomment to copy logs to the travis log
+#docker-compose stop
+#docker-compose logs mariadb
+#docker-compose logs goose
+#docker-compose logs proxy 
 docker-compose down
 popd
 
