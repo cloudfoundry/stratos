@@ -1,4 +1,4 @@
-/* eslint-disable angular/log,no-console,no-process-env,no-sync */
+/* eslint-disable angular/log,no-console,no-process-env,no-process-exit,no-sync */
 (function () {
   'use strict';
 
