@@ -43,6 +43,9 @@ echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
 
+# Move the node_modules folder - the docker build will remove it anyway
+mv node_modules .keep_node_modules
+
 echo "Building images locally"
 ./deploy/docker-compose/build.sh -n -l
 echo "Build Finished"
@@ -53,8 +56,8 @@ pushd deploy/ci/travis
 docker-compose up -d
 popd
 
-# The build cleared node_modules, so install again (should be from cache)
-npm install
+# The build cleared node_modules, so move back the one we kept
+mv .keep_node_modules node_modules 
 
 echo "Running e2e tests"
 npm run e2e:nocov
