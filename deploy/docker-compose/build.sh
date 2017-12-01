@@ -217,7 +217,6 @@ function buildProxy {
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
   buildAndPublishImage stratos-dc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
-  echo "-- Finished"
 }
 
 
