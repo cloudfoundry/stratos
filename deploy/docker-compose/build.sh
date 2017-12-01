@@ -2,7 +2,6 @@
 set -eu
 
 # set defaults
-PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
 
@@ -15,9 +14,13 @@ while getopts ":ho:r:t:dlu:n" opt; do
   case $opt in
     h)
       echo
-      echo "--- To build images of the Console: "
+      echo "--- To build images of Stratos UI: "
       echo
       echo " ./build.sh -t 1.0.13"
+      echo
+      echo "--- To build images locally of Stratos UI: "
+      echo
+      echo " ./build.sh -l -n"
       echo
       exit 0
       ;;
@@ -54,7 +57,10 @@ while getopts ":ho:r:t:dlu:n" opt; do
 done
 
 echo
-echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
+echo "=============================================================================="
+echo "Stratos UI Docker Compose Build"
+echo "=============================================================================="
+echo
 echo "REGISTRY: ${DOCKER_REGISTRY}"
 echo "ORG: ${DOCKER_ORG}"
 echo "TAG: ${TAG}"
@@ -68,7 +74,7 @@ echo "Starting build"
 
 # Copy values template
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-STRATOS_UI_PATH=${__DIRNAME}/../../../stratos-ui
+STRATOS_UI_PATH=${__DIRNAME}/../../
 
 # Proxy support
 BUILD_ARGS=""
@@ -209,6 +215,7 @@ function buildProxy {
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
   buildAndPublishImage stratos-dc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
+  echo "-- Finished"
 }
 
 
@@ -216,7 +223,7 @@ function buildGoose {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-    buildAndPublishImage stratos-dc-goose deploy/db/Dockerfile.goose.dev ${STRATOS_UI_PATH}
+  buildAndPublishImage stratos-dc-goose deploy/db/Dockerfile.goose.dev ${STRATOS_UI_PATH}
 }
 
 function buildUI {
@@ -267,9 +274,13 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
+echo "-------------------------- 1"
 buildGoose
+echo "-------------------------- 2"
 buildUI
+echo "-------------------------- 3"
 buildMariaDb
+echo "-------------------------- 4"
 
 # Done
 echo
