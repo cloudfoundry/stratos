@@ -44,7 +44,7 @@ export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
 
 # Move the node_modules folder - the docker build will remove it anyway
-mv node_modules .keep_node_modules
+#mv node_modules .keep_node_modules
 
 echo "Building images locally"
 ./deploy/docker-compose/build.sh -n -l
@@ -57,7 +57,9 @@ docker-compose up -d
 popd
 
 # The build cleared node_modules, so move back the one we kept
-mv .keep_node_modules node_modules 
+#mv .keep_node_modules node_modules 
+
+npm install
 
 echo "Running e2e tests"
 npm run e2e:nocov
@@ -70,5 +72,7 @@ docker-compose logs goose
 docker-compose logs proxy 
 docker-compose down
 popd
+
+cat ./build/secrets.json
 
 exit $RESULT
