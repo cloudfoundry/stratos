@@ -32,6 +32,11 @@ export interface PaginationAction extends Action {
 
 export interface PaginatedAction extends PaginationAction, IAPIAction {
   initialParams?: PaginationParam;
+  options: {
+    params?: {
+      paramsMap: any;
+    }
+  };
 }
 
 export interface PaginationEntityTypeState {

@@ -76,6 +76,7 @@ describe('PaginationReducer', () => {
   });
 
   it('should return success state', () => {
+
     const entityKey = 'EntityKey';
     const paginationKey = 'PaginationKey';
 
@@ -91,7 +92,8 @@ describe('PaginationReducer', () => {
         entityKey,
         paginationKey,
         type: 'type',
-        entity: {}
+        entity: {},
+        options: {}
       },
       'fetch'
     );
