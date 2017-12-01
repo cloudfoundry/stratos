@@ -68,7 +68,13 @@
   gulp.task('e2e:nocov', function () {
     e2eConfigFile = './build/protractor.conf.js';
     runSequence(
-      'e2e:tests'
+      'e2e:tests',
+      function (err) {
+        //if any error happened in the previous tasks, exit with a code > 0
+        if (err) {
+          return process.exit(1);
+        }
+      }
     );
   });
 
@@ -87,8 +93,8 @@
     }
 
     var c = fork(cmd, args, options);
-    c.on('close', function () {
-      cb();
+    c.on('close', function (code) {
+      cb(code);
     });
   });
 
