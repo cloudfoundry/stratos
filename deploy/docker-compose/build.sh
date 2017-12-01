@@ -10,7 +10,7 @@ TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 STRATOS_BOWER=""
 NO_PUSH="false"
 
-while getopts ":ho:r:t:dlu:n" opt; do
+while getopts ":ho:r:t:lu:n" opt; do
   case $opt in
     h)
       echo
