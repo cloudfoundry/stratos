@@ -1,0 +1,13 @@
+<md-dialog-content class="logout-dialog--content">
+  <div>
+    Connect your endpoint.
+  </div>
+  <form>
+    <md-form-field class="md-form-field__spinner">
+      <input [(ngModel)]="guid" required mdInput placeholder="Endpoint guid" name="guid">
+    </md-form-field>
+  </form>
+</md-dialog-content>
+<md-dialog-actions class="logout-dialog--actions">
+  <button md-button color="primary" [md-dialog-close]="true">connect</button>
+</md-dialog-actions>

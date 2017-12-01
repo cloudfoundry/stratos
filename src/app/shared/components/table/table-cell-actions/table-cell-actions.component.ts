@@ -1,3 +1,4 @@
+import { ListConfig } from '../../list/list.component';
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191/ */
 import { Component, OnInit } from '@angular/core';
 import { TableCellCustom } from '../table-cell/table-cell-custom';
@@ -12,11 +13,14 @@ import { ListActionConfig } from '../../../data-sources/list=data-source-types';
 })
 export class TableCellActionsComponent<T> extends TableCellCustom<T> {
 
-  constructor(private store: Store<AppState>) {
+  constructor(
+    private store: Store<AppState>,
+    private listConfig: ListConfig
+  ) {
     super();
   }
 
-  execute(action: ListActionConfig<T>, row: T) {
-    this.store.dispatch(action.createAction(this.dataSource, [row]));
-  }
+  // execute(action: ListActionConfig<T>, row: T) {
+  //   this.store.dispatch(action.createAction(this.dataSource, [row]));
+  // }
 }

@@ -20,17 +20,6 @@ export interface AppEnvVar {
 
 export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
 
-  private static listActionDelete: ListActionConfig<AppEnvVar> = {
-    createAction: (dataSource: CfAppEvnVarsDataSource, items: AppEnvVar[]): Action => {
-      return new AppVariablesDelete(dataSource.cfGuid, dataSource.appGuid, dataSource.rows, Array.from(dataSource.selectedRows.values()));
-    },
-    icon: 'delete',
-    label: 'Delete',
-    description: '',
-    visible: (row: AppEnvVar) => true,
-    enabled: (row: AppEnvVar) => true,
-  };
-
   // Only needed for unique filter when adding new env vars
   private rowNames: Array<string> = new Array<string>();
   // Only needed for update purposes
@@ -42,8 +31,6 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   filteredRows = new Array<AppEnvVar>();
   isLoadingPage$: Observable<boolean>;
   data$: any;
-
-  actions = new ListActions();
 
   private static key(_cfGuid: string, _appGuid: string) {
     return `app-variables:${_cfGuid}:${_appGuid}`;
@@ -58,10 +45,10 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
       (object: AppEnvVar) => {
         return object.name;
       },
-      {
+      () => ({
         name: '',
         value: '',
-      },
+      } as AppEnvVar),
       { active: 'name', direction: 'asc' },
       CfAppEvnVarsDataSource.key(_appService.cfGuid, _appService.appGuid)
     );
@@ -85,8 +72,6 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
       {
         filter: ''
       }));
-
-    this.actions.multiActions.push(CfAppEvnVarsDataSource.listActionDelete);
 
     this.isLoadingPage$ = _appService.isFetchingApp$.combineLatest(
       _appService.isFetchingEnvVars$,

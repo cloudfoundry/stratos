@@ -1,4 +1,9 @@
+import { IListDataSource } from '../../data-sources/list=data-source-types';
+import { ITableColumn, ITableText } from '../table/table.types';
+import { LocalListDataSource } from '../../data-sources/list-data-source-local';
+import { CfListDataSource } from '../../data-sources/list-data-source-cf';
 import { Component, Input, OnInit, Type, OnDestroy, ViewChild, EventEmitter, ChangeDetectorRef, AfterViewInit } from '@angular/core';
+
 import { NgForm, NgModel } from '@angular/forms';
 import {
   ListView, SetListViewAction, ListFilter, SetListFilterAction, ListPagination, SetListPaginationAction, SetListSortAction, ListSort
@@ -8,19 +13,53 @@ import { AppState } from '../../../store/app-state';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from '@angular/material';
-import { IListDataSource, ListActionConfig } from '../../data-sources/list=data-source-types';
-import { ITableColumn, ITableText } from '../table/table.types';
+
+export class ListConfig implements IListConfig<any> {
+  getGlobalActions = () => null;
+  getMultiActions = () => null;
+  getSingleActions = () => null;
+  getColumns = () => null;
+  getDataSource = () => null;
+}
+
+export interface IListConfig<T> {
+  getGlobalActions: () => IGlobalListAction<T>[];
+  getMultiActions: () => IMultiListAction<T>[];
+  getSingleActions: () => IListAction<T>[];
+  getColumns: () => ITableColumn<T>[];
+  getDataSource: () => CfListDataSource<T> | LocalListDataSource<T>;
+}
+
+export interface IBaseListAction<T> {
+  icon: string;
+  label: string;
+  description: string;
+  visible: (row: T) => boolean;
+  enabled: (row: T) => boolean;
+}
+
+export interface IListAction<T> extends IBaseListAction<T> {
+  action: (item: T) => void;
+}
+
+export interface IMultiListAction<T> extends IBaseListAction<T> {
+  action: (items: T[]) => void;
+}
+
+export interface IGlobalListAction<T> extends IBaseListAction<T> {
+  action: () => void;
+}
+
 
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
   styleUrls: ['./list.component.scss']
 })
+
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
-  @Input('dataSource') dataSource = null as IListDataSource<T>;
-  @Input('columns') columns = null as ITableColumn<T>[];
   @Input('text') text = null as ITableText;
   @Input('enableFilter') enableFilter = false;
   @Input('tableFixedRowHeight') tableFixedRowHeight = false;
@@ -36,15 +75,31 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   headerSortDirection: SortDirection = 'asc';
   headerSortDirectionChanged = new EventEmitter<SortDirection>();
 
+  globalActions: IListAction<T>[];
+  multiActions: IMultiListAction<T>[];
+  singleActions: IListAction<T>[];
+  columns: ITableColumn<T>[];
+  dataSource: IListDataSource<T>;
+
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
     return this.addForm || {};
   }
 
-  constructor(private _store: Store<AppState>, private cd: ChangeDetectorRef) { }
+  constructor(
+    private _store: Store<AppState>,
+    private cd: ChangeDetectorRef,
+    private listConfigService: ListConfig
+  ) { }
 
   ngOnInit() {
+
+    this.globalActions = this.listConfigService.getGlobalActions();
+    this.multiActions = this.listConfigService.getMultiActions();
+    this.singleActions = this.listConfigService.getSingleActions();
+    this.columns = this.listConfigService.getColumns();
+    this.dataSource = this.listConfigService.getDataSource();
 
     const paginationStoreToWidget = this.dataSource.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
@@ -123,13 +178,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     ));
   }
 
-  executeActionMultiple(action: ListActionConfig<T>) {
-    this._store.dispatch(action.createAction(this.dataSource, Array.from(this.dataSource.selectedRows.values())));
+  executeActionMultiple(action: IMultiListAction<T>['action']) {
+    action(Array.from(this.dataSource.selectedRows.values()));
     this.dataSource.selectClear();
   }
 
-  executeActionGlobal(action: ListActionConfig<T>) {
-    this._store.dispatch(action.createAction(this.dataSource, []));
+  executeActionGlobal(action: IGlobalListAction<T>['action']) {
+    action();
   }
 
 }

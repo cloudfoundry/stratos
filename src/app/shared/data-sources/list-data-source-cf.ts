@@ -16,7 +16,7 @@ import { AddParams, SetPage } from '../../store/actions/pagination.actions';
 import { ListDataSource } from './list-data-source';
 import { IListDataSource, getRowUniqueId } from './list=data-source-types';
 
-export abstract class CfListDataSource<T extends object> extends ListDataSource<T> implements IListDataSource<T> {
+export abstract class CfListDataSource<T> extends ListDataSource<T> implements IListDataSource<T> {
 
   private cfUberSub: Subscription;
 
@@ -35,10 +35,10 @@ export abstract class CfListDataSource<T extends object> extends ListDataSource<
     protected action: PaginatedAction,
     protected sourceScheme: schema.Entity,
     protected _cfGetRowUniqueId: getRowUniqueId,
-    protected _cfEmptyType: T,
+    getEmptyType: () => T,
     private _cfListStateKey: string,
   ) {
-    super(_cfStore, _cfGetRowUniqueId, _cfEmptyType, _cfListStateKey);
+    super(_cfStore, _cfGetRowUniqueId, getEmptyType, _cfListStateKey);
 
     const { pagination$, entities$ } = getPaginationObservables({
       store: this._cfStore,

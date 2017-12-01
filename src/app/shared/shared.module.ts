@@ -41,7 +41,7 @@ import { CardEventComponent } from './components/cards/custom-cards/card-app-eve
 import {
   AppEventDetailDialogComponentComponent
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-import { ListComponent } from './components/list/list.component';
+import { ListComponent, ListConfig } from './components/list/list.component';
 import { TableCellActionsComponent } from './components/table/table-cell-actions/table-cell-actions.component';
 import { CardAppComponent } from './components/cards/custom-cards/card-app/card-app.component';
 import { TableCellAppNameComponent } from './components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
@@ -124,6 +124,7 @@ import {
     NoContentMessageComponent,
     EndpointsMissingComponent,
   ],
-  entryComponents: [AppEventDetailDialogComponentComponent]
+  entryComponents: [AppEventDetailDialogComponentComponent],
+  providers: [ListConfig]
 })
 export class SharedModule { }

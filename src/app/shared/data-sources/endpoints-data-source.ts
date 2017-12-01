@@ -11,51 +11,6 @@ import { ListActionConfig, ListActions } from './list=data-source-types';
 
 
 export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
-  private static listActionDelete: ListActionConfig<CNSISModel> = {
-    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
-      return null;
-    },
-    icon: 'delete',
-    label: 'Unregister',
-    description: 'Remove the endpoint',
-    visible: row => true,
-    enabled: row => true,
-  };
-  private static listActionAdd: ListActionConfig<CNSISModel> = {
-    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
-      return new RouterNav({ path: ['endpoints', 'new'] });
-    },
-    icon: 'add',
-    label: 'Add',
-    description: '',
-    visible: row => true,
-    enabled: row => true,
-  };
-  private static listActionDisconnect: ListActionConfig<CNSISModel> = {
-    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
-      return null;
-    },
-    icon: 'remove_from_queue',
-    label: 'Disconnect',
-    description: `Disconnect but don't delete`,
-    visible: row => row.registered,
-    enabled: row => true,
-  };
-  private static listActionConnect: ListActionConfig<CNSISModel> = {
-    createAction: (dataSource: EndpointsDataSource, items: CNSISModel[]): Action => {
-      return new ConnectCnis(
-        'asdasdasdasd',
-        'username',
-        'password'
-      );
-    },
-    icon: 'add_to_queue',
-    label: 'Connect',
-    description: '',
-    visible: row => !row.registered,
-    enabled: row => true,
-  };
-
   private static _storeKey = 'endpoints';
 
   // Only needed for unique filter when adding new env vars
@@ -67,8 +22,6 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   isLoadingPage$: Observable<boolean>;
   data$: any;
 
-  actions = new ListActions();
-
   constructor(
     private _eStore: Store<AppState>,
   ) {
@@ -77,17 +30,12 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
       (object: CNSISModel) => {
         return object.guid;
       },
-      {
+      () => ({
         name: ''
-      },
+      }),
       { active: 'name', direction: 'asc' },
       EndpointsDataSource._storeKey
     );
-
-    this.actions.singleActions.push(EndpointsDataSource.listActionDisconnect,
-      EndpointsDataSource.listActionConnect, EndpointsDataSource.listActionDelete);
-    this.actions.multiActions.push(EndpointsDataSource.listActionDelete);
-    this.actions.globalActions.push(EndpointsDataSource.listActionAdd);
 
     _eStore.dispatch(new SetListStateAction(
       EndpointsDataSource._storeKey,

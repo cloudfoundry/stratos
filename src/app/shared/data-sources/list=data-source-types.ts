@@ -39,8 +39,6 @@ export interface IListDataSource<T> {
   sort$: Observable<ListSort>;
   filter$: Observable<ListFilter>;
 
-  actions: ListActions<T>;
-
   page$: Observable<T[]>;
 
   addItem: T;

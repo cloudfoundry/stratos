@@ -2,7 +2,6 @@
   <h1>Endpoints</h1>
 </app-page-header>
 
-<app-endpoints-missing [showSnackForNoneConnected]="true"></app-endpoints-missing>
-
-<app-list [dataSource]="dataSource" [columns]="columns" [text]="{ title: 'Endpoints', filter: 'Filter Endpoints'}" [enableFilter]="true"
-  [cardComponent]="cardComponent" [hidden]="!(endpointsService.haveRegistered$ | async)"></app-list>
+<app-list [text]="{ title: 'Endpoints', filter: 'Filter Endpoints'}" [enableFilter]="true" [cardComponent]="cardComponent"
+  [tableFixedRowHeight]="true">
+</app-list>

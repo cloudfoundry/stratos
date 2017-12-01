@@ -10,9 +10,40 @@ import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
 import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
-import { IListDataSource, ListActions, getRowUniqueId } from './list=data-source-types';
 
-export abstract class ListDataSource<T extends object> extends DataSource<T> implements IListDataSource<T> {
+export interface IListDataSource<T> {
+  listStateKey: string;
+  view$: Observable<ListView>;
+  state$: Observable<ListState>;
+  pagination$: Observable<ListPagination>;
+  sort$: Observable<ListSort>;
+  filter$: Observable<ListFilter>;
+
+  page$: Observable<T[]>;
+
+  addItem: T;
+  isAdding$: BehaviorSubject<boolean>;
+  isSelecting$: BehaviorSubject<boolean>;
+
+  editRow: T; // Edit items - remove once ng-content can exist in md-table
+
+  selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
+  selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
+  selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
+  selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
+  selectClear();
+
+  startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
+  saveEdit(); // Edit items - remove once ng-content can exist in md-table
+  cancelEdit(); // Edit items - remove once ng-content can exist in md-table
+
+  connect(): Observable<T[]>;
+  destroy();
+}
+
+export type getRowUniqueId = (T) => string;
+
+export abstract class ListDataSource<T> extends DataSource<T> implements IListDataSource<T> {
 
   public view$: Observable<ListView>;
   public state$: Observable<ListState>;
@@ -21,7 +52,6 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   public filter$: Observable<ListFilter>;
   public page$: Observable<T[]>;
 
-  public abstract actions: ListActions<T>;
 
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
@@ -38,11 +68,11 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   constructor(
     private _store: Store<AppState>,
     private _getRowUniqueId: getRowUniqueId,
-    private _emptyType: T,
+    private getEmptyType: () => T,
     public listStateKey: string,
   ) {
     super();
-    this.addItem = { ... (_emptyType as object) } as T;
+    this.addItem = this.getEmptyType();
 
     this.state$ = getListStateObservable(this._store, listStateKey);
     const { view, pagination, sort, filter } = getListStateObservables(this._store, listStateKey);
@@ -59,7 +89,7 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   destroy() { }
 
   startAdd() {
-    this.addItem = { ... (this._emptyType as object) } as T;
+    this.addItem = this.getEmptyType();
     this.isAdding$.next(true);
   }
   saveAdd() {
