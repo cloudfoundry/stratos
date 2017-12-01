@@ -1,6 +1,8 @@
+import { cnsisStoreNames } from './cnsis.types';
+
 export interface OtherEntitiesState {
-  cnsis: any;
+  'cnsis': any;
 }
 export const OtherEntityStateNames = [
-  'cnsis'
+  cnsisStoreNames.type
 ];

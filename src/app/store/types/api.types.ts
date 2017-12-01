@@ -24,10 +24,12 @@ export interface APIResourceMetadata {
   url: string;
 }
 
+export interface APIEntities<T> {
+  [key: string]: T;
+}
+
 export interface NormalizedResponse {
-  entities: {
-    [key: string]: any
-  };
+  entities: APIEntities<any>;
   result: any[];
 }
 

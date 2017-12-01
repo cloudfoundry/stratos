@@ -20,6 +20,13 @@ export const getUpdateSectionById = (guid: string) => (updating): ActionState =>
   return updating[guid];
 };
 
+export function selectEntities(type: string, section = 'cf') {
+  return compose(
+    getRequestType(type),
+    getEntityState(section)
+  );
+}
+
 export function selectEntity(type: string, guid: string, section = 'cf') {
   return compose(
     getEntityById<APIResource>(guid),

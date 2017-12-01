@@ -13,7 +13,7 @@ import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
-import { CNSISModel } from '../types/cnsis.types';
+import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
 import {
   IAPIAction, NoneCFSuccessAction, StartNoneCFAction, WrapperNoneCFActionFailed, WrapperNoneCFActionSuccess
 } from '../types/request.types';
@@ -30,6 +30,11 @@ export class CNSISEffect {
 
   @Effect() getAllCNSIS$ = this.actions$.ofType<GetAllCNSIS>(GET_CNSIS)
     .flatMap(action => {
+      const actionType = 'fetch';
+      const apiAction = {
+        entityKey: cnsisStoreNames.type,
+      } as IAPIAction;
+      this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),
         this.http.get('/pp/v1/cnsis/registered'),
@@ -43,7 +48,6 @@ export class CNSISEffect {
           });
         }
       )
-
         .mergeMap(data => {
           const mappedData = {
             entities: {
@@ -55,14 +59,15 @@ export class CNSISEffect {
             mappedData.entities.cnsis[cnsi.guid] = cnsi;
             mappedData.result.push(cnsi.guid);
           });
-          const apiAction = {
-            entityKey: 'cnsis',
-          } as IAPIAction;
-
-          // TODO: RC Remove GetAllCNSISSuccess
-          return [new GetAllCNSISSuccess(data, action.login), new WrapperNoneCFActionSuccess(mappedData, apiAction, 'fetch')];
+          return [
+            new GetAllCNSISSuccess(data, action.login),
+            new WrapperNoneCFActionSuccess(mappedData, apiAction, actionType)
+          ];
         })
-        .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
+        .catch((err, caught) => [
+          new GetAllCNSISFailed(err.message, action.login),
+          new WrapperNoneCFActionFailed(err.message, apiAction, actionType)
+        ]);
 
     });
 
@@ -70,7 +75,7 @@ export class CNSISEffect {
     .flatMap(action => {
       const actionType = 'update';
       const apiAction = {
-        entityKey: 'cnsis',
+        entityKey: cnsisStoreNames.type,
         guid: action.cnsiGuid,
         updatingKey: 'connecting',
       } as IAPIAction;

@@ -35,7 +35,7 @@ import {
 } from '../reducers/pagination.reducer';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
-import { CNSISModel } from '../types/cnsis.types';
+import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -95,7 +95,10 @@ export class APIEffect {
       }
 
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
-      options.headers = this.addBaseHeaders(apiAction.cnis || state.cnsis.entities, options.headers);
+      options.headers = this.addBaseHeaders(
+        apiAction.cnis ||
+        state.requestData[cnsisStoreNames.section][cnsisStoreNames.type], options.headers
+      );
 
       return this.http.request(new Request(options))
         .mergeMap(response => {
@@ -218,7 +221,15 @@ export class APIEffect {
     if (typeof cnsis === 'string') {
       headers.set(cnsiHeader, cnsis);
     } else {
-      headers.set(cnsiHeader, cnsis.filter(c => c.registered).map(c => c.guid));
+
+      const registeredCNSIGuids = [];
+      Object.keys(cnsis).forEach(cnsiGuid => {
+        const cnsi = cnsis[cnsiGuid];
+        if (cnsi.registered) {
+          registeredCNSIGuids.push(cnsi.guid);
+        }
+      });
+      headers.set(cnsiHeader, registeredCNSIGuids);
     }
     return headers;
   }

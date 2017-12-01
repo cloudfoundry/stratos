@@ -1,26 +1,35 @@
 import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
-import { CNSISState, CNSISModel } from '../store/types/cnsis.types';
+import { CNSISState, CNSISModel, cnsisStoreNames } from '../store/types/cnsis.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
 import { RouterNav } from '../store/actions/router.actions';
+import { cnsisEntitiesSelector } from '../store/selectors/cnsis.selectors';
+import { APIEntities } from '../store/types/api.types';
 
 @Injectable()
 export class EndpointsService implements CanActivate {
 
-  endpoints$: Observable<CNSISModel[]>;
+  endpoints$: Observable<APIEntities<CNSISModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
     private userService: UserService, ) {
-    this.endpoints$ = store.select(s => s.cnsis).map((cnsis: CNSISState) => cnsis.entities);
-    this.haveRegistered$ = this.endpoints$.map(cnsis => !!cnsis.length);
-    this.haveConnected$ = this.endpoints$.map(cnsis => !!cnsis.find(cnsi => cnsi.registered));
+    this.endpoints$ = store.select(cnsisEntitiesSelector);
+    this.haveRegistered$ = this.endpoints$.map(cnsis => !!Object.keys(cnsis).length);
+    this.haveConnected$ = this.endpoints$.map(cnsis => {
+      for (const cnsi in cnsis) {
+        if (cnsis[cnsi].registered) {
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
