@@ -61,12 +61,14 @@ echo "==========================================================================
 echo "Stratos UI Docker Compose Build"
 echo "=============================================================================="
 echo
-echo "REGISTRY: ${DOCKER_REGISTRY}"
-echo "ORG: ${DOCKER_ORG}"
 echo "TAG: ${TAG}"
 
 if [ "${NO_PUSH}" != "false" ]; then
   echo "Images will NOT be pushed"
+else
+  echo "Images will be pushed"
+  echo "  REGISTRY: ${DOCKER_REGISTRY}"
+  echo "  ORG: ${DOCKER_ORG}"
 fi
 
 echo
@@ -274,17 +276,17 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-echo "-------------------------- 1"
 buildGoose
-echo "-------------------------- 2"
 buildUI
-echo "-------------------------- 3"
 buildMariaDb
-echo "-------------------------- 4"
 
 # Done
 echo
 echo "Build complete...."
-echo "Registry: ${DOCKER_REGISTRY}"
-echo "Org: ${DOCKER_ORG}"
+
+if [ "${NO_PUSH}" == "false" ]; then
+  echo "Registry: ${DOCKER_REGISTRY}"
+  echo "Org: ${DOCKER_ORG}"
+fi
+
 echo "Tag: ${TAG}"
