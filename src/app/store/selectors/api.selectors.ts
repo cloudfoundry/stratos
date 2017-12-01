@@ -4,12 +4,21 @@ import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState, IRequestState, IStateHasEntities } from '../app-state';
 import { ActionState, RequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
 
+export const getEntityById = <T>(guid: string) => (entities): T => {
+  return entities[guid];
+};
 
-// export const selectEntities = createFeatureSelector<EntitiesState>('entities');
+export const getEntityDeleteSections = (request: RequestState) => {
+  return request.deleting;
+};
 
-// export const createEntitySelector = (entity: string) => {
-//   return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
-// };
+export const getEntityUpdateSections = (request: RequestState): UpdatingSection => {
+  return request ? request.updating : null;
+};
+
+export const getUpdateSectionById = (guid: string) => (updating): ActionState => {
+  return updating[guid];
+};
 
 export function selectEntity(type: string, guid: string, section = 'cf') {
   return compose(
@@ -60,9 +69,10 @@ function getRequestState(section = 'cf') {
 }
 
 export function getEntityState(section = 'cf') {
-  return function (state) {
-    return state.requestData[section];
-  };
+  return compose(
+    getRequestState(section),
+    getAPIRequestDataState
+  );
 }
 
 export function getRequestType(typeString: string) {
@@ -70,22 +80,6 @@ export function getRequestType(typeString: string) {
     return requestSection[typeString] || {};
   };
 }
-
-export const getEntityById = <T>(guid: string) => (entities): T => {
-  return entities[guid];
-};
-
-export const getEntityUpdateSections = (request: RequestState): UpdatingSection => {
-  return request ? request.updating : null;
-};
-
-export const getEntityDeleteSections = (request: RequestState) => {
-  return request.deleting;
-};
-
-export const getUpdateSectionById = (guid: string) => (updating): ActionState => {
-  return updating[guid];
-};
 
 const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;
 export const getAPIResourceMetadata = (resource: APIResource): APIResourceMetadata => getValueOrNull(resource, 'metadata');
@@ -101,6 +95,6 @@ export function getAPIRequestInfoState(state: AppState) {
   return state.request;
 }
 
-// export function getAPIRequestDataState(state: AppState) {
-//   return state.requestData;
-// }
+export function getAPIRequestDataState(state: AppState) {
+  return state.requestData;
+}

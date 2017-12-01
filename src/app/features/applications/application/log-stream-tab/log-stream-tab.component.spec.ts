@@ -1,10 +1,10 @@
+import { appReducers } from '../../../../store/reducers.module';
 import { AppState } from '../../../../store/app-state';
 import { EntityService } from '../../../../core/entity-service';
 import { ApplicationSchema, GetApplication } from '../../../../store/actions/application.actions';
 import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { paginationReducer } from '../../../../store/reducers/pagination.reducer';
-import { entitiesReducer } from '../../../../store/reducers/entity.reducer';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from '../../../../shared/shared.module';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
@@ -47,12 +47,9 @@ describe('LogStreamTabComponent', () => {
         BrowserAnimationsModule,
         RouterTestingModule,
         MDAppModule,
-        StoreModule.forRoot({
-          entities: entitiesReducer,
-          pagination: paginationReducer,
-        }, {
-            initialState: getInitialTestStoreState()
-          })
+        StoreModule.forRoot(appReducers, {
+          initialState: getInitialTestStoreState()
+        })
       ],
       declarations: [
         LogViewerComponent,

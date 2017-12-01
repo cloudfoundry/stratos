@@ -1,3 +1,4 @@
+import { appReducers } from '../../../store/reducers.module';
 import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -7,7 +8,6 @@ import { StoreModule } from '@ngrx/store';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { entitiesReducer } from '../../../store/reducers/entity.reducer';
 import { paginationReducer } from '../../../store/reducers/pagination.reducer';
 import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { ApplicationBaseComponent } from './application-base.component';
@@ -40,10 +40,9 @@ describe('ApplicationBaseComponent', () => {
         BrowserAnimationsModule,
         RouterTestingModule,
         MDAppModule,
-        StoreModule.forRoot({
-          entities: entitiesReducer,
-          pagination: paginationReducer,
-        }, {
+        StoreModule.forRoot(
+          appReducers
+          , {
             initialState: getInitialTestStoreState()
           })
       ],

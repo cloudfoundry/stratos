@@ -14,7 +14,9 @@ import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { CNSISModel } from '../types/cnsis.types';
-import { IAPIAction, NoneCFSuccessAction, StartNoneCFAction, WrapperNoneCFActionFailed, WrapperNoneCFActionSuccess } from '../types/request.types';
+import {
+  IAPIAction, NoneCFSuccessAction, StartNoneCFAction, WrapperNoneCFActionFailed, WrapperNoneCFActionSuccess
+} from '../types/request.types';
 
 
 @Injectable()

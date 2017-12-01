@@ -12,7 +12,7 @@ import { UAASetupState } from './types/uaa-setup.types';
 import { ListsState } from './reducers/list.reducer';
 
 export interface IStateHasEntities {
-  entities: CfEntitiesState;
+  cf: CfEntitiesState;
 }
 
 export interface IRequestState extends IStateHasEntities {
@@ -21,7 +21,7 @@ export interface IRequestState extends IStateHasEntities {
   };
 }
 
-export interface AppState extends IStateHasEntities {
+export interface AppState {
   actionHistory: ActionHistoryState;
   auth: AuthState;
   uaaSetup: UAASetupState;

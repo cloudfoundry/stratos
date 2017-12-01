@@ -25,13 +25,13 @@ export class PaginationEntityState {
   message: string;
 }
 
-// An action that is intended to begin a
-export interface PaginatedAction extends PaginationAction, IAPIAction {
-  initialParams?: PaginationParam;
-}
 export interface PaginationAction extends Action {
   entityKey: string;
   paginationKey: string;
+}
+
+export interface PaginatedAction extends PaginationAction, IAPIAction {
+  initialParams?: PaginationParam;
 }
 
 export interface PaginationEntityTypeState {

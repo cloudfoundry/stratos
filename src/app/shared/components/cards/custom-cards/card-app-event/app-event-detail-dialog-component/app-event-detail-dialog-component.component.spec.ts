@@ -5,7 +5,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppEventDetailDialogComponentComponent } from './app-event-detail-dialog-component.component';
 import { MdDialogRef, MD_DIALOG_DATA } from '@angular/material';
-import { EntityRequestState } from '../../../../../../store/reducers/api-request-reducer';
+import { RequestState } from '../../../../../../store/reducers/api-request-reducer/types';
 
 describe('AppEventDetailDialogComponentComponent', () => {
   let component: AppEventDetailDialogComponentComponent;
@@ -19,7 +19,7 @@ describe('AppEventDetailDialogComponentComponent', () => {
       entity: {
         metadata: {}
       },
-      entityRequestInfo: {} as EntityRequestState
+      entityRequestInfo: {} as RequestState
     };
   }
 
