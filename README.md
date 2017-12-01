@@ -1,5 +1,4 @@
-> **NOTE** This is a WIP angular 2.x project and should not be distributed, reviewed, ran or prodded. It will eventually replace the
-existing angular 1.x based stratos-ui project at [https://github.com/SUSE/stratos-ui](https://github.com/SUSE/stratos-ui)
+> **NOTE** This is a work-in-progress Angular 2.x version of Stratos UI. For the current Angular 1 based version see [https://github.com/SUSE/stratos-ui](https://github.com/SUSE/stratos-ui). This version is at an early development stage and we welcome feedback, input and contributions. This version does not have feature parity with the Angular 1 version.
 
 # Stratos
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage
