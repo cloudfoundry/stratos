@@ -178,13 +178,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     ));
   }
 
-  executeActionMultiple(action: IMultiListAction<T>['action']) {
-    action(Array.from(this.dataSource.selectedRows.values()));
+  executeActionMultiple(listActionConfig: IMultiListAction<T>) {
+    listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
     this.dataSource.selectClear();
   }
 
-  executeActionGlobal(action: IGlobalListAction<T>['action']) {
-    action();
+  executeActionGlobal(listActionConfig: IGlobalListAction<T>) {
+    listActionConfig.action();
   }
 
 }
