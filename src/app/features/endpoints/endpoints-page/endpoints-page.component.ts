@@ -1,3 +1,4 @@
+import { ConnectEndpointDialogComponent } from '../connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { CNSISModel } from '../../../store/types/cnsis.types';
 import { ListConfig } from '../../../shared/components/list/list.component';
 import { EndpointsListConfigService } from '../../../shared/list-configs/endpoints-list-config.service';

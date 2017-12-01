@@ -31,7 +31,7 @@ export class GetAllCNSISFailed implements Action {
 
 export class ConnectCnis implements Action {
   constructor(
-    public cnsiGuid: string,
+    public guid: string,
     public username: string,
     public password: string,
   ) { }

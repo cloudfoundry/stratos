@@ -22,5 +22,8 @@ import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connec
     EndpointsPageComponent,
     ConnectEndpointDialogComponent,
   ],
+  entryComponents: [
+    ConnectEndpointDialogComponent
+  ]
 })
 export class EndpointsModule { }

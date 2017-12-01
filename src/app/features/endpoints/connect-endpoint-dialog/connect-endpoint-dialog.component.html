@@ -2,12 +2,18 @@
   <div>
     Connect your endpoint.
   </div>
-  <form>
+  <form [formGroup]="endpointForm" (ngSubmit)="submit($event)">
     <md-form-field class="md-form-field__spinner">
-      <input [(ngModel)]="guid" required mdInput placeholder="Endpoint guid" name="guid">
+      <input mdInput placeholder="Endpoint guid" formControlName="guid">
     </md-form-field>
+    <md-form-field class="md-form-field__spinner">
+      <input mdInput placeholder="Endpoint username" formControlName="username">
+    </md-form-field>
+    <md-form-field class="md-form-field__spinner">
+      <input mdInput placeholder="Endpoint password" type="password" formControlName="password">
+    </md-form-field>
+    <button type="submit" md-button color="primary">connect</button>
   </form>
 </md-dialog-content>
 <md-dialog-actions class="logout-dialog--actions">
-  <button md-button color="primary" [md-dialog-close]="true">connect</button>
 </md-dialog-actions>

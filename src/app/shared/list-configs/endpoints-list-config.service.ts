@@ -1,3 +1,6 @@
+import {
+  ConnectEndpointDialogComponent,
+} from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { ITableColumn } from '../components/table/table.types';
 import { AppState } from '../../store/app-state';
 import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
@@ -10,6 +13,7 @@ import { ConnectCnis } from '../../store/actions/cnsis.actions';
 import { EndpointsDataSource } from '../data-sources/endpoints-data-source';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { Injectable } from '@angular/core';
+import { MdDialog } from '@angular/material';
 
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
@@ -18,7 +22,6 @@ function getEndpointTypeString(endpoint: CNSISModel): string {
 
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<CNSISModel> {
-
 
   private listActionDelete: IListAction<CNSISModel> = {
     action: (item) => {
@@ -66,11 +69,14 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionConnect: IListAction<CNSISModel> = {
     action: (item) => {
-      this.store.dispatch(new ConnectCnis(
-        'asdasdasdasd',
-        'username',
-        'password'
-      ));
+      const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
+        data: {
+          guid: item.guid,
+          username: 'username',
+          password: 'password'
+        },
+        disableClose: true
+      });
     },
     icon: 'add_to_queue',
     label: 'Connect',
@@ -137,7 +143,10 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   dataSource: EndpointsDataSource;
 
-  constructor(private store: Store<AppState>) {
+  constructor(
+    private store: Store<AppState>,
+    private dialog: MdDialog
+  ) {
     this.dataSource = new EndpointsDataSource(this.store);
   }
 
