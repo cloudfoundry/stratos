@@ -58,3 +58,10 @@ npm install
 
 echo "Running e2e tests"
 npm run e2e:nocov
+
+pushd deploy/ci/travis
+docker-compose stop
+docker-compose logs mariadb
+docker-compose logs proxy 
+docker-compose down
+popd
