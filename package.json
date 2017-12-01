@@ -21,6 +21,8 @@
     "e2e": "gulp e2e:run",
     "pree2e-on-target": "npm run update-webdriver",
     "e2e-on-target": "gulp e2e:tests",
+    "pree2e:nocov": "npm run update-webdriver",
+    "e2e:nocov": "gulp e2e:nocov",
     "preheadless-e2e": "npm run pree2e",
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js",
     "pretest": "gulp unit:prepare",
