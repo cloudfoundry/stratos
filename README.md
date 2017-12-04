@@ -1,6 +1,6 @@
 # Stratos UI
 
-[![Build Status](https://travis-ci.org/SUSE/stratos-ui.svg?branch=master)](https://travis-ci.org/kubernetes/dashboard)
+[![Build Status](https://travis-ci.org/SUSE/stratos-ui.svg?branch=master)](https://travis-ci.org/SUSE/stratos-ui)
 [![GitHub release](https://img.shields.io/github/release/SUSE/stratos-ui.svg)](https://github.com/SUSE/stratos-ui/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/SUSE/stratos-ui/blob/master/LICENSE.md)
 
