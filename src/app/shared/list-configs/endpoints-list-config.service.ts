@@ -71,9 +71,8 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     action: (item) => {
       const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
-          guid: item.guid,
-          username: 'username',
-          password: 'password'
+          name: item.name,
+          guid: item.guid
         },
         disableClose: true
       });

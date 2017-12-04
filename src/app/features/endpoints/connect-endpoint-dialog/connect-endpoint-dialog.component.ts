@@ -19,18 +19,19 @@ export class ConnectEndpointDialogComponent {
   busy$: Observable<boolean>;
   error$: Observable<boolean>;
   done$: Observable<ActionState>;
+  valid$: Observable<boolean>;
+  canSubmit$: Observable<boolean>;
 
   constructor(
     public store: Store<AppState>,
     public fb: FormBuilder,
     public dialogRef: MdDialogRef<ConnectEndpointDialogComponent>,
     @Inject(MD_DIALOG_DATA) public data: {
-      guid: string,
-      username: string,
-      password: string
+      name: string,
+      guid: string
     }
   ) {
-
+    console.log(this.data.guid);
     const update$ = this.store.select(
       selectUpdateInfo(
         EndpointSchema.key,
@@ -50,12 +51,21 @@ export class ConnectEndpointDialogComponent {
         console.log('done');
       });
 
+    this.valid$ = this.endpointForm.valueChanges
+      .map(() => this.endpointForm.valid);
+
+    this.canSubmit$ = Observable.combineLatest(
+      this.busy$.startWith(false),
+      this.valid$.startWith(false)
+    )
+      .map(([busy, valid]) => !busy && valid);
+
   }
   public endpointForm = this.fb.group({
-    guid: new FormControl({ value: this.data.guid, disabled: true }, Validators.required),
     username: ['', Validators.required],
     password: ['', Validators.required]
   });
+
   submit(event) {
     const { guid, username, password } = this.endpointForm.value;
     this.store.dispatch(new ConnectCnis(

@@ -7,6 +7,7 @@
 @import '../app//shared/components/code-block/code-block.component.theme.scss';
 @import '../app/features/applications/application/application-base.component.theme.scss';
 @import '../app/shared/components/cards/cards.components.theme.scss';
+@import '../app/shared/components/dialog-error/dialog-error.component.theme.scss';
 @mixin app-theme($theme) {
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
@@ -26,6 +27,7 @@
     background-color: $app-background-color;
   }
   $app-theme: ( app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65));
+  @include dialog-error-theme($theme, $app-theme);
   @include login-page-theme($theme, $app-theme);
   @include side-nav-theme($theme, $app-theme);
   @include dashboard-page-theme($theme, $app-theme);

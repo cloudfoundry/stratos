@@ -51,6 +51,7 @@ import { CardEndpointComponent } from './components/cards/custom-cards/card-endp
 import {
   TableCellEndpointStatusComponent
 } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
 
 
 @NgModule({
@@ -100,11 +101,13 @@ import {
     EndpointsMissingComponent,
     CardEndpointComponent,
     TableCellEndpointStatusComponent,
+    DialogErrorComponent,
   ],
   exports: [
     FormsModule,
     ReactiveFormsModule,
     LoadingPageComponent,
+    DialogErrorComponent,
     PageHeaderModule,
     DisplayValueComponent,
     EditableDisplayValueComponent,

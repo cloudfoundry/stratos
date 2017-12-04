@@ -1,20 +1,24 @@
-<md-dialog-content class="logout-dialog--content">
-  <div>
-    Connect your endpoint.
-  </div>
-  {{(this.busy$ | async) ? 'Busy' : 'NOT' }} {{(this.error$ | async) ? 'ERROR' : 'NOT' }}
-  <form [formGroup]="endpointForm" (ngSubmit)="submit($event)">
-    <md-form-field class="md-form-field__spinner">
-      <input mdInput placeholder="Endpoint guid" formControlName="guid">
-    </md-form-field>
-    <md-form-field class="md-form-field__spinner">
-      <input mdInput placeholder="Endpoint username" formControlName="username">
-    </md-form-field>
-    <md-form-field class="md-form-field__spinner">
-      <input mdInput placeholder="Endpoint password" type="password" formControlName="password">
-    </md-form-field>
-    <button type="submit" md-button color="primary">connect</button>
+<div class="connection-dialog__loading-wrapper">
+  <md-progress-bar class="connection-dialog__loading" [color]="(error$ | async) && !(busy$ | async) ? 'warn' : 'primary'" [mode]="(busy$ | async) ? 'query' : 'solid'">
+  </md-progress-bar>
+</div>
+<div class="connection-dialog">
+  <h2 md-dialog-title>
+    Connect to {{ data.name }}
+  </h2>
+  <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
+    <md-dialog-content class="connection-dialog__content">
+      <md-form-field>
+        <input mdInput placeholder="Username" formControlName="username">
+      </md-form-field>
+      <md-form-field>
+        <input mdInput placeholder="Password" type="password" formControlName="password">
+      </md-form-field>
+    </md-dialog-content>
+    <app-dialog-error message="Could not connect, please try again." [show]="error$ | async"></app-dialog-error>
+    <md-dialog-actions>
+      <button type="submit" [disabled]="!(canSubmit$ | async)" md-button color="primary">Connect</button>
+      <button [mat-dialog-close]="true" md-button color="warn">Cancel</button>
+    </md-dialog-actions>
   </form>
-</md-dialog-content>
-<md-dialog-actions class="logout-dialog--actions">
-</md-dialog-actions>
+</div>
