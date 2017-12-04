@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from '@angular/material';
 import { IListDataSource, ListActionConfig } from '../../data-sources/list=data-source-types';
 import { ITableColumn, ITableText } from '../table/table.types';
+import { APIEntities } from '../../../store/types/api.types';
 
 @Component({
   selector: 'app-list',
@@ -124,12 +125,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   executeActionMultiple(action: ListActionConfig<T>) {
-    this._store.dispatch(action.createAction(this.dataSource, Array.from(this.dataSource.selectedRows.values())));
+    this._store.dispatch(action.createAction(this.dataSource, this.dataSource.selectedRows as APIEntities<any>));
     this.dataSource.selectClear();
   }
 
   executeActionGlobal(action: ListActionConfig<T>) {
-    this._store.dispatch(action.createAction(this.dataSource, []));
+    this._store.dispatch(action.createAction(this.dataSource, {}));
   }
 
 }

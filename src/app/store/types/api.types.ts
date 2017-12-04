@@ -5,7 +5,7 @@ import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 import { ApiActionTypes } from '../actions/request.actions';
 import { PaginatedAction } from './pagination.types';
-import { EntitiesState } from './entity.types';
+import { CfEntitiesState } from './entity.types';
 
 export interface EntityInfo {
   entityRequestInfo: RequestState;
@@ -24,14 +24,16 @@ export interface APIResourceMetadata {
   url: string;
 }
 
+export interface APIEntities<T> {
+  [key: string]: T;
+}
+
 export interface NormalizedResponse {
-  entities: {
-    [key: string]: any
-  };
+  entities: APIEntities<any>;
   result: any[];
 }
 
-export type ActionMergeFunction = (oldEntities: EntitiesState, newEntities: NormalizedResponseEntities)
+export type ActionMergeFunction = (oldEntities: CfEntitiesState, newEntities: NormalizedResponseEntities)
   => NormalizedResponseEntities;
 export interface NormalizedResponseEntities {
   [key: string]: string;

@@ -1,12 +1,14 @@
 import { SessionData } from '../../../store/types/auth.types';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { CNSISModel, CNSISState } from '../../../store/types/cnsis.types';
+import { CNSISModel, CNSISState, cnsisStoreNames } from '../../../store/types/cnsis.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { AuthUser, selectSessionData } from '../../../store/reducers/auth.reducer';
 import { CfAuthPrinciple } from './principal';
 import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';
+import { cnsisEntitiesSelector } from '../../../store/selectors/cnsis.selectors';
+import { APIEntities } from '../../../store/types/api.types';
 
 /**
  * NOTE - WIP
@@ -21,7 +23,7 @@ import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMappe
 export class CfAuthService {
 
 
-  endpoints$: Observable<CNSISModel[]>;
+  endpoints$: Observable<APIEntities<CNSISModel>>;
   sessionData$: Observable<SessionData>;
   // WIP: RC Initialise previously released promise when all init requests finished. For the time being use this, then make selector
   initialised$: Observable<boolean>;
@@ -45,7 +47,7 @@ export class CfAuthService {
   session: SessionData;
 
   constructor(private store: Store<AppState>) {
-    this.endpoints$ = store.select(s => s.cnsis).map((cnsis: CNSISState) => cnsis.entities);
+    this.endpoints$ = store.select(cnsisEntitiesSelector);
     this.sessionData$ = store.select<SessionData>(selectSessionData());
   }
 
@@ -53,9 +55,9 @@ export class CfAuthService {
     Observable.combineLatest(
       this.endpoints$.take(1),
       this.sessionData$,
-    ).subscribe(([cnsis, session]: [CNSISModel[], SessionData]) => {
+    ).subscribe(([cnsis, session]: [APIEntities<CNSISModel>, SessionData]) => {
       this.session = session;
-      for (const cnsi of cnsis) {
+      Object.values(cnsis).forEach(cnsi => {
         if (cnsi.registered) {
           // User hasn't connected to this endpoint
           return;
@@ -64,7 +66,7 @@ export class CfAuthService {
           return;
         }
         this.initializeForEndpoint(cnsi.guid, session);
-      }
+      });
     });
   }
 

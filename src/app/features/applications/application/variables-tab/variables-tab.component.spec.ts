@@ -6,12 +6,11 @@ import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { StoreModule } from '@ngrx/store';
 import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
-import { entitiesReducer } from '../../../../store/reducers/entity.reducer';
 import { paginationReducer } from '../../../../store/reducers/pagination.reducer';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../application.service';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
-import { appMetaDataReducer } from '../../../../store/reducers.module';
+import { appMetaDataReducer, appReducers } from '../../../../store/reducers.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
 
@@ -29,13 +28,9 @@ describe('VariablesTabComponent', () => {
         SharedModule,
         MDAppModule,
         BrowserAnimationsModule,
-        StoreModule.forRoot({
-          entities: entitiesReducer,
-          pagination: paginationReducer,
-          appMetadata: appMetaDataReducer,
-        }, {
-            initialState: getInitialTestStoreState()
-          })
+        StoreModule.forRoot(appReducers, {
+          initialState: getInitialTestStoreState()
+        })
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

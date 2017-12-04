@@ -19,9 +19,9 @@ import {
 import { AppState } from '../app-state';
 import { mergeState } from './../helpers/reducer.helper';
 import { Observable } from 'rxjs/Observable';
-import { defaultEntitiesState } from './entity.reducer';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { getEntityState } from '../selectors/api.selectors';
+import { defaultCfEntitiesState } from '../types/entity.types';
 
 
 export const resultPerPageParam = 'results-per-page';
@@ -40,7 +40,7 @@ const defaultPaginationEntityState = {
   message: ''
 };
 
-export const defaultPaginationState = { ...defaultEntitiesState };
+export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 export function qParamsToString(params: QParam[]) {
   return params.map(joinQParam);
@@ -238,7 +238,7 @@ export const getPaginationObservables = (function () {
       .filter(pagination => {
         return isPageReady(pagination);
       })
-      .withLatestFrom(store.select(getEntityState))
+      .withLatestFrom(store.select(getEntityState()))
       .map(([paginationEntity, entities]) => {
         const page = paginationEntity.ids[paginationEntity.currentPage];
         return page ? denormalize(page, schema, entities) : null;

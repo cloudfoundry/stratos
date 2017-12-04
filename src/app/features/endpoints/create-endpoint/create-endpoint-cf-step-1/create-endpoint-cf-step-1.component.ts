@@ -4,9 +4,11 @@ import { Store } from '@ngrx/store';
 import { Component, OnInit, ViewChild, AfterContentInit } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
-import { CNSISState } from '../../../../store/types/cnsis.types';
+import { CNSISModel, CNSISState, cnsisStoreNames } from '../../../../store/types/cnsis.types';
 import { UtilsService } from '../../../../core/utils.service';
 import { StepOnNextFunction, IStepperStep } from '../../../../shared/components/stepper/step/step.component';
+import { cnsisEntitiesSelector } from '../../../../store/selectors/cnsis.selectors';
+import { APIEntities } from '../../../../store/types/api.types';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
@@ -23,7 +25,8 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   validate: Observable<boolean>;
 
   constructor(store: Store<AppState>, private utilsService: UtilsService) {
-    this.endpointNames = store.select('cnsis').map((cnsis: CNSISState) => cnsis.entities.map(cnsi => cnsi.name));
+    this.endpointNames = store.select(cnsisEntitiesSelector)
+      .map((cnsis: APIEntities<CNSISModel>) => Object.values(cnsis).map(cnsi => cnsi.name));
   }
 
   ngOnInit() {

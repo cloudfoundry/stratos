@@ -1,3 +1,4 @@
+import { NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
@@ -12,8 +13,10 @@ import { Injectable } from '@angular/core';
 import { Headers, Http, URLSearchParams } from '@angular/http';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
-import { CNSISModel } from '../types/cnsis.types';
-import { IAPIAction, StartNoneCFAction, WrapperNoneCFActionFailed } from '../types/request.types';
+import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
+import {
+  IAPIAction, NoneCFSuccessAction, StartNoneCFAction, WrapperNoneCFActionFailed, WrapperNoneCFActionSuccess
+} from '../types/request.types';
 
 
 @Injectable()
@@ -27,6 +30,11 @@ export class CNSISEffect {
 
   @Effect() getAllCNSIS$ = this.actions$.ofType<GetAllCNSIS>(GET_CNSIS)
     .flatMap(action => {
+      const actionType = 'fetch';
+      const apiAction = {
+        entityKey: cnsisStoreNames.type,
+      } as IAPIAction;
+      this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),
         this.http.get('/pp/v1/cnsis/registered'),
@@ -40,8 +48,28 @@ export class CNSISEffect {
           });
         }
       )
-        .map(data => new GetAllCNSISSuccess(data, action.login))
-        .catch((err, caught) => [new GetAllCNSISFailed(err.message, action.login)]);
+        .mergeMap(data => {
+          const mappedData = {
+            entities: {
+              cnsis: {}
+            },
+            result: []
+          };
+          data.forEach(cnsi => {
+            mappedData.entities.cnsis[cnsi.guid] = cnsi;
+            mappedData.result.push(cnsi.guid);
+          });
+          // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
+          // (cnsi success)
+          return [
+            new WrapperNoneCFActionSuccess(mappedData, apiAction, actionType),
+            new GetAllCNSISSuccess(data, action.login),
+          ];
+        })
+        .catch((err, caught) => [
+          new WrapperNoneCFActionFailed(err.message, apiAction, actionType),
+          new GetAllCNSISFailed(err.message, action.login),
+        ]);
 
     });
 
@@ -49,7 +77,7 @@ export class CNSISEffect {
     .flatMap(action => {
       const actionType = 'update';
       const apiAction = {
-        entityKey: 'cnis',
+        entityKey: cnsisStoreNames.type,
         guid: action.cnsiGuid,
         updatingKey: 'connecting',
       } as IAPIAction;
