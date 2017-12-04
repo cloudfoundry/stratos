@@ -1,5 +1,9 @@
 # Stratos UI
 
+[![Build Status](https://travis-ci.org/SUSE/stratos-ui.svg?branch=master)](https://travis-ci.org/SUSE/stratos-ui)
+[![GitHub release](https://img.shields.io/github/release/SUSE/stratos-ui.svg)](https://github.com/SUSE/stratos-ui/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/SUSE/stratos-ui/blob/master/LICENSE.md)
+
 Stratos UI is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
 ![Stratos UI Application view](docs/images/stratos-ui.png)
