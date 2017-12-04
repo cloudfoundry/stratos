@@ -11,7 +11,6 @@ import { authReducer } from './reducers/auth.reducer';
 import { cnsisReducer } from './reducers/cnsis.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
-import { entitiesReducer } from './reducers/entity.reducer';
 import { paginationReducer } from './reducers/pagination.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { NgModule } from '@angular/core';
@@ -21,7 +20,10 @@ import { RouterStateSnapshot, Params } from '@angular/router';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { MetadataState } from './types/app-metadata.types';
 import { listReducer } from './reducers/list.reducer';
-import { requestReducerFactory } from './reducers/api-request-reducer/request-reducer.factory';
+import { generateDefaultState } from './reducers/api-request-reducer/request-helpers';
+import { CfEntityStateNames } from './types/entity.types';
+import { OtherEntityStateNames } from './types/other-entity.types';
+import { requestReducer, requestDataReducer } from './reducers/api-request-reducer/request-reducer.factories';
 
 
 export function logger(reducer): any {
@@ -39,37 +41,13 @@ export function appMetaDataReducer(state, action): MetadataState {
   return combineReducers<MetadataState>(appMetadataReducers)(state, action);
 }
 
-export function responseReducer(state, action) {
-  return combineReducers({
-    entities: requestReducerFactory([
-      'application',
-      'stack',
-      'space',
-      'organization',
-      'route',
-      'event'
-    ], [
-        ApiActionTypes.API_REQUEST_START,
-        ApiActionTypes.API_REQUEST_SUCCESS,
-        ApiActionTypes.API_REQUEST_FAILED,
-      ]),
-    other: requestReducerFactory([
-      'cnis'
-    ], [
-        NonApiActionTypes.START,
-        NonApiActionTypes.SUCCESS,
-        NonApiActionTypes.FAILED
-      ])
-  })(state, action);
-}
-
 export const appReducers = {
-  entities: entitiesReducer,
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   cnsis: cnsisReducer,
   pagination: paginationReducer,
-  request: responseReducer,
+  request: requestReducer,
+  requestData: requestDataReducer,
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   appMetadata: appMetaDataReducer,

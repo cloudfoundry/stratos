@@ -1,3 +1,8 @@
+export const cnsisStoreNames = {
+  section: 'other',
+  type: 'cnsis'
+};
+
 export interface CNSISModel {
   api_endpoint?: {
     ForceQuery: boolean,
@@ -22,7 +27,6 @@ export interface CNSISModel {
 }
 
 export interface CNSISState {
-  entities: CNSISModel[];
   loading: boolean;
   error: boolean;
   message: string;

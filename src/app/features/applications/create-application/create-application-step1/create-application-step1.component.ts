@@ -1,4 +1,4 @@
-import { registeredCnsisEntitySelector } from '../../../../store/selectors/cnsis.selectors';
+import { cnsisRegisteredEntitiesSelector } from '../../../../store/selectors/cnsis.selectors';
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -40,7 +40,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   currentOrg: any;
 
-  cfList$ = this.store.select(registeredCnsisEntitySelector).first();
+  cfList$ = this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis));
 
   org = getPaginationObservables({
     store: this.store,

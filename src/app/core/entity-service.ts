@@ -15,7 +15,7 @@ import {
   selectRequestInfo,
   selectUpdateInfo,
 } from '../store/selectors/api.selectors';
-import { EntitiesState } from '../store/types/entity.types';
+import { CfEntitiesState } from '../store/types/entity.types';
 import { Inject, Injectable } from '@angular/core';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
@@ -30,10 +30,11 @@ export class EntityService {
     public entityKey: string,
     public schema: Schema,
     public id: string,
-    public action: IAPIAction
+    public action: IAPIAction,
+    public entitySection = 'cf'
   ) {
-    this.entitySelect$ = store.select(selectEntity(entityKey, id));
-    this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id));
+    this.entitySelect$ = store.select(selectEntity(entityKey, id, entitySection));
+    this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id, entitySection));
     this.actionDispatch = (updatingKey) => {
       if (updatingKey) {
         action.updatingKey = updatingKey;
@@ -81,50 +82,50 @@ export class EntityService {
 
   entityObs$: Observable<EntityInfo>;
 
-isFetchingEntity$: Observable<boolean>;
+  isFetchingEntity$: Observable<boolean>;
 
-isDeletingEntity$: Observable<boolean>;
+  isDeletingEntity$: Observable<boolean>;
 
-waitForEntity$: Observable<EntityInfo>;
+  waitForEntity$: Observable<EntityInfo>;
 
-updatingSection$: Observable<UpdatingSection>;
+  updatingSection$: Observable<UpdatingSection>;
 
   private getEntityObservable = (
-  schema: Schema,
-  actionDispatch: Function,
-  entitySelect$: Observable<APIResource>,
-  entityRequestSelect$: Observable<RequestState>
-): Observable<EntityInfo> => {
-  return Observable.combineLatest(
-    this.store.select(getEntityState),
-    entitySelect$,
-    entityRequestSelect$
-  )
-    .do(([entities, entity, entityRequestInfo]: [EntitiesState, APIResource, RequestState]) => {
-      if (
-        !entityRequestInfo ||
-        !entity &&
-        !entityRequestInfo.fetching &&
-        !entityRequestInfo.error &&
-        !entityRequestInfo.deleting.busy &&
-        !entityRequestInfo.deleting.deleted
-      ) {
-        actionDispatch();
-      }
-    })
+    schema: Schema,
+    actionDispatch: Function,
+    entitySelect$: Observable<APIResource>,
+    entityRequestSelect$: Observable<RequestState>
+  ): Observable<EntityInfo> => {
+    return Observable.combineLatest(
+      this.store.select(getEntityState(this.entitySection)),
+      entitySelect$,
+      entityRequestSelect$
+    )
+      .do(([entities, entity, entityRequestInfo]: [CfEntitiesState, APIResource, RequestState]) => {
+        if (
+          !entityRequestInfo ||
+          !entity &&
+          !entityRequestInfo.fetching &&
+          !entityRequestInfo.error &&
+          !entityRequestInfo.deleting.busy &&
+          !entityRequestInfo.deleting.deleted
+        ) {
+          actionDispatch();
+        }
+      })
 
       .filter(([entities, entity, entityRequestInfo]) => {
-    return !!entityRequestInfo;
-  })
-    .map(([entities, entity, entityRequestInfo]) => {
-      return {
-        entityRequestInfo,
-        entity: entity ? {
-          entity: denormalize(entity, schema, entities).entity,
-          metadata: entity.metadata
-        } : null
-      };
-    });
+        return !!entityRequestInfo;
+      })
+      .map(([entities, entity, entityRequestInfo]) => {
+        return {
+          entityRequestInfo,
+          entity: entity ? {
+            entity: denormalize(entity, schema, entities).entity,
+            metadata: entity.metadata
+          } : null
+        };
+      });
   }
   /**
    * @param interval - The polling interval in ms.

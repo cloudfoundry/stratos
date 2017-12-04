@@ -1,13 +1,16 @@
 import { ConnectCnis } from '../../store/actions/cnsis.actions';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { CNSISModel, CNSISState } from '../../store/types/cnsis.types';
+import { CNSISModel, CNSISState, cnsisStoreNames } from '../../store/types/cnsis.types';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { filter } from 'rxjs/operator/filter';
 import { Observable } from 'rxjs/Rx';
 import { LocalListDataSource } from './list-data-source-local';
 import { RouterNav } from '../../store/actions/router.actions';
 import { ListActionConfig, ListActions } from './list=data-source-types';
+import { selectEntities } from '../../store/selectors/api.selectors';
+import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
+import { APIEntities } from '../../store/types/api.types';
 
 
 export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
@@ -55,8 +58,9 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   }
 
   connect(): Observable<CNSISModel[]> {
-    this.isLoadingPage$ = this._eStore.select('cnsis').map((cnsis: CNSISState) => cnsis.loading);
-    this.data$ = this._eStore.select('cnsis').map((cnsis: CNSISState) => cnsis.entities);
+    this.isLoadingPage$ = this.isLoadingPage$ || this._eStore.select(cnsisStatusSelector).map((cnsis: CNSISState) => cnsis.loading);
+    this.data$ = this.data$ || this._eStore.select(cnsisEntitiesSelector)
+      .map((cnsis: APIEntities<CNSISModel>) => Object.values(cnsis));
     return super.connect();
   }
 

@@ -1,21 +1,37 @@
-import { EntitiesState } from '../types/entity.types';
+import { CfEntitiesState } from '../types/entity.types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState, IRequestState, IStateHasEntities } from '../app-state';
 import { ActionState, RequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
 
-
-export const selectEntities = createFeatureSelector<EntitiesState>('entities');
-
-export const createEntitySelector = (entity: string) => {
-  return createSelector(selectEntities, (state: EntitiesState) => state[entity]);
+export const getEntityById = <T>(guid: string) => (entities): T => {
+  return entities[guid];
 };
 
-export function selectEntity(type: string, guid: string) {
+export const getEntityDeleteSections = (request: RequestState) => {
+  return request.deleting;
+};
+
+export const getEntityUpdateSections = (request: RequestState): UpdatingSection => {
+  return request ? request.updating : null;
+};
+
+export const getUpdateSectionById = (guid: string) => (updating): ActionState => {
+  return updating[guid];
+};
+
+export function selectEntities(type: string, section = 'cf') {
+  return compose(
+    getRequestType(type),
+    getEntityState(section)
+  );
+}
+
+export function selectEntity(type: string, guid: string, section = 'cf') {
   return compose(
     getEntityById<APIResource>(guid),
     getRequestType(type),
-    getEntityState
+    getEntityState(section)
   );
 }
 
@@ -53,14 +69,17 @@ export function getRequestBySection(section?: string) {
   );
 }
 
-function getRequestState(section = 'entities') {
+function getRequestState(section = 'cf') {
   return function (state) {
     return state[section];
   };
 }
 
-export function getEntityState(state: IStateHasEntities) {
-  return state.entities;
+export function getEntityState(section = 'cf') {
+  return compose(
+    getRequestState(section),
+    getAPIRequestDataState
+  );
 }
 
 export function getRequestType(typeString: string) {
@@ -68,22 +87,6 @@ export function getRequestType(typeString: string) {
     return requestSection[typeString] || {};
   };
 }
-
-export const getEntityById = <T>(guid: string) => (entities): T => {
-  return entities[guid];
-};
-
-export const getEntityUpdateSections = (request: RequestState): UpdatingSection => {
-  return request ? request.updating : null;
-};
-
-export const getEntityDeleteSections = (request: RequestState) => {
-  return request.deleting;
-};
-
-export const getUpdateSectionById = (guid: string) => (updating): ActionState => {
-  return updating[guid];
-};
 
 const getValueOrNull = (object, key) => object ? object[key] ? object[key] : null : null;
 export const getAPIResourceMetadata = (resource: APIResource): APIResourceMetadata => getValueOrNull(resource, 'metadata');
@@ -97,4 +100,8 @@ export const getAPIResourceGuid = compose(
 
 export function getAPIRequestInfoState(state: AppState) {
   return state.request;
+}
+
+export function getAPIRequestDataState(state: AppState) {
+  return state.requestData;
 }

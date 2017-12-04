@@ -77,4 +77,3 @@ export interface AppEnvVarsState {
   staging_env_json?: any;
   system_env_json?: any;
 }
-

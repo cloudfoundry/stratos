@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
 import { LocalListDataSource } from './list-data-source-local';
 import { ApplicationService } from '../../features/applications/application.service';
-import { EntityInfo } from '../../store/types/api.types';
+import { EntityInfo, APIEntities } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';

@@ -17,8 +17,9 @@ import { ApplicationServiceMock } from '../../../../test-framework/application-s
 import { ApplicationStateService } from './application-state/application-state.service';
 import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { APIResource } from '../../../../store/types/api.types';
+import { cnsisStoreNames } from '../../../../store/types/cnsis.types';
 
-describe('SummaryTabComponent', () => {
+describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
   let fixture: ComponentFixture<BuildTabComponent>;
   const initialState = getInitialTestStoreState();
@@ -52,8 +53,8 @@ describe('SummaryTabComponent', () => {
   }));
 
   beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
-    const cfGuid = initialState.cnsis.entities[0].guid;
-    const appGuid = (Object.values(initialState.entities.application)[0] as APIResource).metadata.guid;
+    const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.section][cnsisStoreNames.type])[0];
+    const appGuid = Object.keys(initialState.requestData.cf.application)[0];
     applicationService.setApplication(cfGuid, appGuid);
     fixture = TestBed.createComponent(BuildTabComponent);
     component = fixture.componentInstance;

@@ -6,7 +6,7 @@ import {
 } from './../actions/request.actions';
 import { defaultPaginationState, paginationReducer } from './pagination.reducer';
 import { PaginatedAction } from '../types/pagination.types';
-import { StartAPIAction, WrapperAPIActionSuccess, WrapperAPIActionFailed } from '../types/api.types';
+import { StartCFAction, WrapperCFActionSuccess, WrapperCFActionFailed } from '../types/request.types';
 
 
 class MockPagAction implements PaginatedAction {
@@ -39,7 +39,7 @@ describe('PaginationReducer', () => {
     apiAction.entityKey = entityKey;
     apiAction.paginationKey = paginationKey;
 
-    const startApiAction = new StartAPIAction(apiAction);
+    const startApiAction = new StartCFAction(apiAction, 'fetch');
     const newState = paginationReducer(
       {
         ...defaultPaginationState,
@@ -76,11 +76,11 @@ describe('PaginationReducer', () => {
   });
 
   it('should return success state', () => {
+
     const entityKey = 'EntityKey';
     const paginationKey = 'PaginationKey';
 
-    const successApiAction = new WrapperAPIActionSuccess(
-      '[News] Get all',
+    const successApiAction = new WrapperCFActionSuccess(
       {
         entities: {},
         result: [
@@ -91,11 +91,11 @@ describe('PaginationReducer', () => {
       {
         entityKey,
         paginationKey,
-        actions: [],
         type: 'type',
-        options: new RequestOptions,
-        entity: {}
-      }
+        entity: {},
+        options: {}
+      },
+      'fetch'
     );
     const newState = paginationReducer({
       ...defaultPaginationState,
@@ -140,17 +140,15 @@ describe('PaginationReducer', () => {
     const paginationKey = 'PaginationKey';
     const message = 'Failed';
 
-    const failedApiAction = new WrapperAPIActionFailed(
-      '[News] Get all Failed',
+    const failedApiAction = new WrapperCFActionFailed(
       message,
       {
         entityKey,
         paginationKey,
-        actions: [],
         type: 'type',
-        options: new RequestOptions,
         entity: {}
-      }
+      },
+      'fetch'
     );
     const newState = paginationReducer({
       ...defaultPaginationState,
