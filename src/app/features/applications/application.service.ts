@@ -1,5 +1,5 @@
 import { EntityService } from '../../core/entity-service';
-import { cnsisEntitySelector } from '../../store/selectors/cnsis.selectors';
+import { cnsisEntitiesSelector } from '../../store/selectors/cnsis.selectors';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -131,7 +131,7 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
-      this.store.select(cnsisEntitySelector),
+      this.store.select(cnsisEntitiesSelector),
     )
       .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid && entity.entity.space && entity.entity.space.entity.organization;
@@ -143,9 +143,7 @@ export class ApplicationService {
           space: entity.entity.space,
           organisation: entity.entity.space.entity.organization,
           stack: entity.entity.stack,
-          cf: cnsis.find((CNSIModel) => {
-            return CNSIModel.guid === entity.entity.cfGuid;
-          }),
+          cf: cnsis[entity.entity.cfGuid],
         };
       });
 

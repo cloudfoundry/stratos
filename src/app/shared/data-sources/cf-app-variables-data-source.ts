@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
 import { LocalListDataSource } from './list-data-source-local';
 import { ApplicationService } from '../../features/applications/application.service';
-import { EntityInfo } from '../../store/types/api.types';
+import { EntityInfo, APIEntities } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
@@ -21,7 +21,7 @@ export interface AppEnvVar {
 export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
 
   private static listActionDelete: ListActionConfig<AppEnvVar> = {
-    createAction: (dataSource: CfAppEvnVarsDataSource, items: AppEnvVar[]): Action => {
+    createAction: (dataSource: CfAppEvnVarsDataSource, items: APIEntities<AppEnvVar>): Action => {
       return new AppVariablesDelete(dataSource.cfGuid, dataSource.appGuid, dataSource.rows, Array.from(dataSource.selectedRows.values()));
     },
     icon: 'delete',
