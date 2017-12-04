@@ -10,6 +10,9 @@ addons:
 install:
 - npm install
 filter_secrets: false
+branches:
+  only:
+  - master
 cache:
   directories:
   - "/home/travis/.cache/bower/"
