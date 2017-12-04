@@ -2,6 +2,7 @@
   <div>
     Connect your endpoint.
   </div>
+  {{(this.busy$ | async) ? 'Busy' : 'NOT' }} {{(this.error$ | async) ? 'ERROR' : 'NOT' }}
   <form [formGroup]="endpointForm" (ngSubmit)="submit($event)">
     <md-form-field class="md-form-field__spinner">
       <input mdInput placeholder="Endpoint guid" formControlName="guid">

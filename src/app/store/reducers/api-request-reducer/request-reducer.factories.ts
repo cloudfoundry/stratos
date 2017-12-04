@@ -2,7 +2,7 @@ import { Action, combineReducers, ActionReducerMap } from '@ngrx/store';
 import { startRequest } from './start-request';
 import { succeedRequest } from './succeed-request';
 import { failRequest } from './fail-request';
-import { IRequestAction } from './types';
+import { IRequestAction, RequestSectionKeys } from './types';
 import { generateDefaultState } from './request-helpers';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -58,13 +58,14 @@ const nonApiActions = [
   NonApiActionTypes.FAILED
 ] as [string, string, string];
 
+
 const entitiesForReducer = [
   {
-    name: 'cf',
+    name: RequestSectionKeys.CF,
     actions: apiActions,
     entityNames: CfEntityStateNames
   }, {
-    name: 'other',
+    name: RequestSectionKeys.Other,
     actions: nonApiActions,
     entityNames: OtherEntityStateNames
   }
@@ -72,15 +73,16 @@ const entitiesForReducer = [
 
 const requestReducers: ActionReducerMap<any> = {};
 const requestDataReducers: ActionReducerMap<any> = {};
-for (const entity of entitiesForReducer) {
+
+entitiesForReducer.forEach(entity => {
   requestReducers[entity.name] = requestReducerFactory(entity.entityNames, entity.actions);
   requestDataReducers[entity.name] = requestDataReducerFactory(entity.entityNames, entity.actions);
-}
+});
 
 export function requestReducer(state, action): any {
-  return combineReducers<any>(requestReducers)(state, action);
+  return combineReducers(requestReducers)(state, action);
 }
 
 export function requestDataReducer(state, action): any {
-  return combineReducers<any>(requestDataReducers)(state, action);
+  return combineReducers(requestDataReducers)(state, action);
 }

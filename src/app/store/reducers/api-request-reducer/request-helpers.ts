@@ -2,7 +2,7 @@ import { RequestAction, SingleEntityAction } from '../../types/request.types';
 import { CfEntitiesState } from '../../types/entity.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
-import { defaultDeletingActionState, defaultRequestState, RequestState, rootUpdatingKey } from './types';
+import { defaultActionState, defaultDeletingActionState, defaultRequestState, RequestState, rootUpdatingKey } from './types';
 
 
 export function getEntityRequestState(state, action: SingleEntityAction): RequestState {
@@ -88,10 +88,19 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
   };
 }
 
-export function generateDefaultState(keys: Array<string>) {
+export function generateDefaultState(keys: Array<string>, initialSections?: {
+  [key: string]: string[];
+}) {
   const defaultState = {};
+
   keys.forEach(key => {
     defaultState[key] = {};
+    if (initialSections && initialSections[key] && initialSections[key].length) {
+      console.log(initialSections);
+      initialSections[key].forEach(sectionKey => {
+        defaultState[key][sectionKey] = { ...defaultActionState };
+      });
+    }
   });
   return defaultState;
 }

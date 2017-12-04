@@ -1,6 +1,12 @@
 import { IAPIAction } from '../store/types/request.types';
 import { interval } from 'rxjs/observable/interval';
-import { ActionState, RequestState, UpdatingSection } from '../store/reducers/api-request-reducer/types';
+import {
+  ActionState,
+  RequestSectionKeys,
+  RequestState,
+  TRequestSectionKeys,
+  UpdatingSection,
+} from '../store/reducers/api-request-reducer/types';
 import { composeFn } from './../store/helpers/reducer.helper';
 import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
@@ -31,7 +37,7 @@ export class EntityService {
     public schema: Schema,
     public id: string,
     public action: IAPIAction,
-    public entitySection = 'cf'
+    public entitySection: TRequestSectionKeys = RequestSectionKeys.CF
   ) {
     this.entitySelect$ = store.select(selectEntity(entityKey, id, entitySection));
     this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id, entitySection));

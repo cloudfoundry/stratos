@@ -14,6 +14,10 @@ export const CONNECT_CNSIS = '[CNSIS] Connect';
 export const CONNECT_CNSIS_SUCCESS = '[CNSIS] Connect succeed';
 export const CONNECT_CNSIS_FAILED = '[CNSIS] Connect failed';
 
+export const EndpointSchema = new schema.Entity('endpoint', {}, {
+  idAttribute: 'guid'
+});
+
 export class GetAllCNSIS implements Action {
   constructor(public login = false) { }
   type = GET_CNSIS;

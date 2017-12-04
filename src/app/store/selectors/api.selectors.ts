@@ -2,7 +2,13 @@ import { CfEntitiesState } from '../types/entity.types';
 import { APIResource, APIResourceMetadata } from '../types/api.types';
 import { compose, createFeatureSelector, createSelector } from '@ngrx/store';
 import { AppState, IRequestState, IStateHasEntities } from '../app-state';
-import { ActionState, RequestState, UpdatingSection } from '../reducers/api-request-reducer/types';
+import {
+  ActionState,
+  RequestSectionKeys,
+  RequestState,
+  TRequestSectionKeys,
+  UpdatingSection,
+} from '../reducers/api-request-reducer/types';
 
 export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
@@ -20,14 +26,14 @@ export const getUpdateSectionById = (guid: string) => (updating): ActionState =>
   return updating[guid];
 };
 
-export function selectEntities(type: string, section = 'cf') {
+export function selectEntities(type: string, section: TRequestSectionKeys = RequestSectionKeys.CF) {
   return compose(
     getRequestType(type),
     getEntityState(section)
   );
 }
 
-export function selectEntity(type: string, guid: string, section = 'cf') {
+export function selectEntity(type: string, guid: string, section: TRequestSectionKeys = RequestSectionKeys.CF) {
   return compose(
     getEntityById<APIResource>(guid),
     getRequestType(type),
@@ -35,47 +41,47 @@ export function selectEntity(type: string, guid: string, section = 'cf') {
   );
 }
 
-export function selectDeletionInfo(type: string, entityGuid: string, section?: string) {
+export function selectDeletionInfo(entityKey: string, entityGuid: string, section?: TRequestSectionKeys) {
   return compose(
     getEntityDeleteSections,
     getEntityById<RequestState>(entityGuid),
-    getRequestType(type),
+    getRequestType(entityKey),
     getRequestBySection(section),
   );
 }
 
-export function selectUpdateInfo(type: string, entityGuid: string, updatingGuid: string, section?: string) {
+export function selectUpdateInfo(entityKey: string, entityGuid: string, updatingKey: string, section?: TRequestSectionKeys) {
   return compose(
-    getUpdateSectionById(updatingGuid),
+    getUpdateSectionById(updatingKey),
     getEntityUpdateSections,
     getEntityById<RequestState>(entityGuid),
-    getRequestType(type),
+    getRequestType(entityKey),
     getRequestBySection(section),
   );
 }
 
-export function selectRequestInfo(type: string, guid: string, section?: string) {
+export function selectRequestInfo(entityKey: string, guid: string, section?: TRequestSectionKeys) {
   return compose(
     getEntityById<RequestState>(guid),
-    getRequestType(type),
+    getRequestType(entityKey),
     getRequestBySection(section)
   );
 }
 
-export function getRequestBySection(section?: string) {
+export function getRequestBySection(section?: TRequestSectionKeys) {
   return compose(
     getRequestState(section),
     getAPIRequestInfoState
   );
 }
 
-function getRequestState(section = 'cf') {
+function getRequestState(section: TRequestSectionKeys = RequestSectionKeys.CF) {
   return function (state) {
     return state[section];
   };
 }
 
-export function getEntityState(section = 'cf') {
+export function getEntityState(section: TRequestSectionKeys = RequestSectionKeys.CF) {
   return compose(
     getRequestState(section),
     getAPIRequestDataState

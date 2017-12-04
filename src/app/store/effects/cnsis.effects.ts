@@ -3,6 +3,7 @@ import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
   ConnectCnis,
+  EndpointSchema,
   GET_CNSIS,
   GetAllCNSIS,
   GetAllCNSISFailed,
@@ -24,6 +25,8 @@ import {
 
 @Injectable()
 export class CNSISEffect {
+
+  static connectingKey = 'connecting';
 
   constructor(
     private http: Http,
@@ -54,12 +57,12 @@ export class CNSISEffect {
         .mergeMap(data => {
           const mappedData = {
             entities: {
-              cnsis: {}
+              [cnsisStoreNames.type]: {}
             },
             result: []
           };
           data.forEach(cnsi => {
-            mappedData.entities.cnsis[cnsi.guid] = cnsi;
+            mappedData.entities[cnsisStoreNames.type][cnsi.guid] = cnsi;
             mappedData.result.push(cnsi.guid);
           });
           // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
@@ -81,8 +84,9 @@ export class CNSISEffect {
       const actionType = 'update';
       const apiAction = {
         entityKey: cnsisStoreNames.type,
-        guid: action.cnsiGuid,
-        updatingKey: 'connecting',
+        guid: action.guid,
+        type: action.type,
+        updatingKey: CNSISEffect.connectingKey,
       } as IAPIAction;
 
       const headers = new Headers();

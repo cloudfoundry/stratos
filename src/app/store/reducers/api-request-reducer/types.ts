@@ -1,3 +1,10 @@
+export const enum RequestSectionKeys {
+  CF = 'cf',
+  Other = 'other'
+}
+
+export type TRequestSectionKeys = RequestSectionKeys.CF | RequestSectionKeys.Other;
+
 export const rootUpdatingKey = '_root_';
 export interface ActionState {
   busy: boolean;

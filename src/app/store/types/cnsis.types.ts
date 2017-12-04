@@ -1,7 +1,13 @@
-export const cnsisStoreNames = {
-  section: 'other',
-  type: 'cnsis'
-};
+import { RequestSectionKeys, TRequestSectionKeys } from '../reducers/api-request-reducer/types';
+import { EndpointSchema } from '../actions/cnsis.actions';
+
+export const cnsisStoreNames: {
+  section: TRequestSectionKeys,
+  type: string
+} = {
+    section: RequestSectionKeys.Other,
+    type: EndpointSchema.key
+  };
 
 export interface CNSISModel {
   api_endpoint?: {

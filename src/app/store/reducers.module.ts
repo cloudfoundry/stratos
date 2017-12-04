@@ -1,3 +1,5 @@
+import { CNSISEffect } from './effects/cnsis.effects';
+import { EndpointSchema } from './actions/cnsis.actions';
 import { ApiActionTypes, NonApiActionTypes } from './actions/request.actions';
 import { combineReducers, StoreModule, ActionReducerMap, State } from '@ngrx/store';
 import { storeFreeze } from 'ngrx-store-freeze';
