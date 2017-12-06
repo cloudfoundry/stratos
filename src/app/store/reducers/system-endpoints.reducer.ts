@@ -5,7 +5,6 @@ export function systemEndpointsReducer(state: {
 }, action: GetSystemSuccess) {
     if (action.type === GET_SYSTEM_INFO_SUCCESS) {
         const newState = { ...state };
-
         Object.keys(action.payload.endpoints.cf).forEach(guid => {
             newState[guid] = {
                 ...newState[guid],
