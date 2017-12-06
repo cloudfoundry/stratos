@@ -3,6 +3,8 @@ import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
   ConnectCnis,
+  DISCONNECT_CNSIS,
+  DisconnectCnis,
   EndpointSchema,
   GET_CNSIS,
   GetAllCNSIS,
@@ -27,6 +29,7 @@ import {
 export class CNSISEffect {
 
   static connectingKey = 'connecting';
+  static disconnectingKey = 'disconnecting';
 
   constructor(
     private http: Http,

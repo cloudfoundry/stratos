@@ -1,3 +1,4 @@
+import { SystemInfoEndpoint } from './system.types';
 import { RequestSectionKeys, TRequestSectionKeys } from '../reducers/api-request-reducer/types';
 import { EndpointSchema } from '../actions/cnsis.actions';
 
@@ -30,6 +31,7 @@ export interface CNSISModel {
   token_endpoint?: string;
   // This is generated client side when we login
   registered?: boolean;
+  info?: SystemInfoEndpoint;
 }
 
 export interface CNSISState {

@@ -1,3 +1,6 @@
+import { systemEndpointsReducer } from '../system-endpoints.reducer';
+import { GetSystemSuccess, GET_SYSTEM_INFO_SUCCESS } from './../../actions/system.actions';
+import { cnsisStoreNames } from './../../types/cnsis.types';
 import { Action, combineReducers, ActionReducerMap } from '@ngrx/store';
 import { startRequest } from './start-request';
 import { succeedRequest } from './succeed-request';
@@ -50,16 +53,25 @@ const apiActions = [
   ApiActionTypes.API_REQUEST_START,
   ApiActionTypes.API_REQUEST_SUCCESS,
   ApiActionTypes.API_REQUEST_FAILED,
-] as [string, string, string];
+] as IRequestAction;
 
 const nonApiActions = [
   NonApiActionTypes.START,
   NonApiActionTypes.SUCCESS,
   NonApiActionTypes.FAILED
-] as [string, string, string];
+] as IRequestAction;
 
 
-const entitiesForReducer = [
+interface ReducerConfig {
+  name: RequestSectionKeys;
+  actions: IRequestAction;
+  entityNames: string[];
+  extraReducers?: {
+    [entityName: string]: ((state: any, action: Action) => any)[]
+  };
+}
+
+const entitiesForReducer: ReducerConfig[] = [
   {
     name: RequestSectionKeys.CF,
     actions: apiActions,
@@ -67,7 +79,12 @@ const entitiesForReducer = [
   }, {
     name: RequestSectionKeys.Other,
     actions: nonApiActions,
-    entityNames: OtherEntityStateNames
+    entityNames: OtherEntityStateNames,
+    extraReducers: {
+      [cnsisStoreNames.type]: [
+        systemEndpointsReducer
+      ]
+    }
   }
 ];
 
@@ -76,7 +93,16 @@ const requestDataReducers: ActionReducerMap<any> = {};
 
 entitiesForReducer.forEach(entity => {
   requestReducers[entity.name] = requestReducerFactory(entity.entityNames, entity.actions);
-  requestDataReducers[entity.name] = requestDataReducerFactory(entity.entityNames, entity.actions);
+  const baseDataReducer = requestDataReducerFactory(entity.entityNames, entity.actions);
+
+  if (entity.extraReducers) {
+    requestDataReducers[entity.name] = chainReducers(
+      baseDataReducer,
+      entity.extraReducers
+    );
+  } else {
+    requestDataReducers[entity.name] = baseDataReducer;
+  }
 });
 
 export function requestReducer(state, action): any {
@@ -85,4 +111,24 @@ export function requestReducer(state, action): any {
 
 export function requestDataReducer(state, action): any {
   return combineReducers(requestDataReducers)(state, action);
+}
+
+function chainReducers(baseReducer, extraReducers) {
+  return function (state, action) {
+    let newState = baseReducer(state, action);
+    let nextState;
+    Object.keys(extraReducers).forEach(key => {
+      nextState = extraReducers[key].reduce((_state, reducer) => {
+        return reducer(_state, action);
+      }, newState[key]);
+      if (nextState !== newState[key]) {
+        newState = {
+          ...newState, ...{
+            [key]: nextState
+          }
+        };
+      }
+    });
+    return newState;
+  };
 }

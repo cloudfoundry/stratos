@@ -1,3 +1,4 @@
+import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
 import { GET_CNSIS, GET_CNSIS_FAILED, GET_CNSIS_SUCCESS } from './../actions/cnsis.actions';
 import { CNSISState } from '../types/cnsis.types';
 
@@ -13,7 +14,13 @@ export function cnsisReducer(state: CNSISState = {
       return { ...state, loading: false, message: '', error: false };
     case GET_CNSIS_FAILED:
       return { ...state, loading: false, message: action.message || 'Failed to get cnsis', error: true };
+    case GET_SYSTEM_INFO_SUCCESS:
+      return;
     default:
       return state;
   }
+}
+
+function mergeSystemInfo(state) {
+
 }
