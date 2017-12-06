@@ -35,7 +35,7 @@
   };
 
   function goToApp(clusterGuid, appGuid) {
-    var url = helpers.getHost() + '/#/cf/applications/' + clusterGuid + '/app/' + appGuid + '/summary';
+    var url = helpers.getHost() + '/#!/cf/applications/' + clusterGuid + '/app/' + appGuid + '/summary';
     return browser.get(url)
       .then(function () {
         return browser.getCurrentUrl();

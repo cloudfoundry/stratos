@@ -6,9 +6,9 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.ngrok.io:80/concourse-dcind
+   repository:  ci-registry.capbristol.com:5000/concourse-dcind
    tag: "latest"
-   insecure_registries: [ "ci-registry.ngrok.io:80" ]
+   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 run:
   path: sh
@@ -17,8 +17,8 @@ run:
     - |
       source /docker-lib.sh
       start_docker
-      # Move dev-certs
-      ls .
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
       mv dev-certs-output/dev-certs stratos-ui/dev-certs
       cd stratos-ui/deploy/docker-compose/
-      ./build.sh -t test -r ci-registry.ngrok.io:80
+      ./build.sh -l -t test
+

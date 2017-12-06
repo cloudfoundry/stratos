@@ -178,6 +178,10 @@
     }
   };
 
+  if (secrets.headless) {
+    exports.config.capabilities.chromeOptions.args = [ '--headless', '--allow-insecure-localhost', '--disable-gpu', '--window-size=1366,768', '--no-sandbox' ];
+  }
+
   var componentTestFiles = components.removeEmptyGlobs(components.getGlobs(['test/e2e/**/*.spec.js']).local);
   exports.config.suites.components = _.map(componentTestFiles, function (glob) {
     return '../' + glob;

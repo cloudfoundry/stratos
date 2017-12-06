@@ -130,7 +130,7 @@ described in the [deploy](../deploy/README.md) instructions.
 
 #### Configuration
 The Console frontend must know the address of the backend. This can be
-set by creating the file ./build/dev_config.js
+set by creating the file ./build/dev_config.json
 with contents such as
 ```
 {
@@ -145,6 +145,12 @@ the following configuration should be used
 {
   "pp": "https://localhost/pp"
 }
+```
+Run the following commands to install the dependencies
+```
+$ npm install
+$ bower install
+
 ```
 
 #### Run
@@ -226,11 +232,11 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 #### Running "like a dev"
 
 1. Set up developer certs
-    - Execute `deploy/ci/scripts/generate_cert.sh`
-    - Copy `deploy/ci/scripts/portal-proxy-output/dev-certs` to `./`
+    - Execute `deploy/tools/generate_cert.sh`
+    - Copy `portal-proxy-output/dev-certs` to `./`
 1. Update `build/dev_config.json` with `"localDevBuild": true`
-1. cd ./outputs
 1. Run `gulp local-dev-build`
+1. cd ./outputs
 1. Run `gulp build-backend`
 1. Update `config.propeties` and ensure that..
     - the UAA points to a valid instance

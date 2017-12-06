@@ -10,31 +10,28 @@ image_resource:
   type: docker-image
   source:
   # Generated using Dockerfile.stratos-helm
-   repository:  ci-registry.ngrok.io:80/stratos-helm
+   repository:  ci-registry.capbristol.com:5000/stratos-helm
    tag: "latest"
-   insecure_registries: [ "ci-registry.ngrok.io:80" ]
+   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 run:
   path: sh
   args:
     - -exc
     - |
-
       # Expect this command to fail since k8s isn't available but it will initialise helm locally
       helm init || true
       ROOT_DIR=$PWD
       STRATOS_UI=${ROOT_DIR}/stratos-ui
       cd ${STRATOS_UI}/deploy/kubernetes/
-      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)"
-      SHORT_GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
 
       cp -f ${ROOT_DIR}/helm-chart-values/values.yaml* console/values.yaml
       cp -f ${ROOT_DIR}/helm-chart-Chart/Chart.yaml* console/Chart.yaml
 
       # Generate Helm package
-      helm dep build console
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${SHORT_GIT_TAG}.tgz
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
       if [ -f ${STRATOS_UI}/index.yaml ]; then
         cp ${STRATOS_UI}/index.yaml ${ROOT_DIR}/helm-chart/
@@ -42,7 +39,7 @@ run:
       fi
 
       # Update Helm Repository
-      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${SHORT_GIT_TAG}/
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
       cp index.yaml ${STRATOS_UI}/
       cd ${STRATOS_UI}
       git config --global user.name ${GIT_USER}
@@ -51,9 +48,9 @@ run:
       mkdir -p /root/.ssh/
       echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
       chmod 600 /root/.ssh/id_rsa
-
-      # Update Helm repo
+      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
+      # Commit Helm Repository change
       git add index.yaml
-      git commit -m "Helm repository updated for tag: ${SHORT_GIT_TAG}"
+      git commit -m "Helm repository updated for tag: ${GIT_TAG}"
       git config --global push.default simple
       git push origin HEAD:master

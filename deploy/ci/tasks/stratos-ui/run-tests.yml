@@ -8,9 +8,9 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.ngrok.io:80/concourse-dcind
+   repository:  ci-registry.capbristol.com:5000/concourse-dcind
    tag: "latest"
-   insecure_registries: [ "ci-registry.ngrok.io:80" ]
+   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 run:
   path: sh
@@ -49,13 +49,19 @@ run:
             "password": "${CONSOLE_USER_PASSWORD}"
           }
         },
+        "uaa": {
+            "url": "http://uaa:8080",
+            "clientId": "console",
+            "adminUsername": "admin",
+            "adminPassword": "hscadmin"
+          },
         "githubPat": "${GITHUB_TOKEN}"
       }
       EOF
 
       cat ../build/secrets.json
 
-      for image in splatform/stratos-goose-base:opensuse  splatform/stratos-bk-base:opensuse splatform/stratos-nginx-base:opensuse splatform/stratos-uaa splatform/stratos-concourse; do
+      for image in splatform/stratos-bk-base:opensuse splatform/stratos-nginx-base:opensuse splatform/stratos-uaa splatform/stratos-concourse; do
         docker pull ${REGISTRY_NAME}/$image
         docker tag  ${REGISTRY_NAME}/$image $image
       done

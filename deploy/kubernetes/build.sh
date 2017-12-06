@@ -6,9 +6,12 @@ PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
 BASE_IMAGE_TAG=opensuse
+OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
-
-while getopts ":ho:r:t:dTcb:" opt; do
+ADD_OFFICIAL_TAG="false"
+TAG_LATEST="false"
+STRATOS_BOWER=""
+while getopts ":ho:r:t:Tclb:Ou:" opt; do
   case $opt in
     h)
       echo
@@ -34,11 +37,17 @@ while getopts ":ho:r:t:dTcb:" opt; do
       TAG="$(git describe $(git rev-list --tags --max-count=1))"
       RELEASE_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       ;;
-    d)
-      BUILD_DOCKER_COMPOSE_IMAGES="true"
-      ;;
     c)
       CONCOURSE_BUILD="true"
+      ;;
+    O)
+      ADD_OFFICIAL_TAG="true"
+      ;;
+    l)
+      TAG_LATEST="true"
+      ;;
+    u)
+      STRATOS_BOWER="${OPTARG}"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -111,6 +120,10 @@ function buildAndPublishImage {
   echo Pushing Docker Image ${IMAGE_URL}
   docker push  ${IMAGE_URL}
 
+  if [ "${TAG_LATEST}" = "true" ]; then
+    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+  fi
   unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
 
   popd > /dev/null 2>&1
@@ -130,8 +143,6 @@ function cleanup {
   echo
   echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
-
-  rm -f ${STRATOS_UI_PATH}/goose
 
 }
 
@@ -153,6 +164,9 @@ function updateTagForRelease {
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
   TAG="${TAG}-g${GIT_HASH}"
+  if [ "${ADD_OFFICIAL_TAG}" = "true" ]; then
+  TAG=${OFFICIAL_TAG}-${TAG}
+  fi
   echo "New TAG: ${TAG}"
   popd > /dev/null 2>&1
 }
@@ -226,31 +240,34 @@ function buildProxy {
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
   buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.k8s ${STRATOS_UI_PATH}
-  # Build merged preflight & proxy image, used when deploying into multi-node k8s cluster without a shared storage backend
-  buildAndPublishImage stratos-proxy-noshared deploy/Dockerfile.bk-preflight.dev ${STRATOS_UI_PATH}
-}
-
-function buildPreflightJob {
-  # Build the preflight container
-  echo
-  echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
 }
 
 function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
+  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   docker run \
              ${RUN_ARGS} \
              -it \
              --rm \
-             --name postflight-builder \
-             --volume $(pwd):/go/bin/ \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-postflight-builder:${BASE_IMAGE_TAG}
-  mv goose  ${STRATOS_UI_PATH}/
+             -e USER_NAME=$(id -nu) \
+             -e USER_ID=$(id -u)  \
+             -e GROUP_ID=$(id -g) \
+             -e BUILD_DB_MIGRATOR="true" \
+             --name stratos-proxy-builder \
+             --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}
   buildAndPublishImage stratos-postflight-job deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
-  rm -f ${STRATOS_UI_PATH}/goose
+  popd > /dev/null 2>&1
+
+}
+
+function buildMariaDb {
+  echo
+  echo "-- Building/publishing MariaDB"
+  # Download and retag image to save bandwidth
+  buildAndPublishImage stratos-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
 }
 
 function buildUI {
@@ -265,6 +282,7 @@ function buildUI {
     -e USER_NAME=$(id -nu) \
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
+    -e STRATOS_BOWER="${STRATOS_BOWER}" \
     -w /usr/src/app \
     ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-ui-build-base:${BASE_IMAGE_TAG} \
     /bin/bash ./deploy/provision.sh
@@ -294,8 +312,8 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-buildPreflightJob
 buildPostflightJob
+buildMariaDb
 buildUI
 
 if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
@@ -306,6 +324,9 @@ if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
   sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
 else
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
+  sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' console/values.yaml
+  sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
+  
   sed -i -e 's/version: 0.1.0/version: '"${RELEASE_TAG}"'/g' console/Chart.yaml
 fi
 

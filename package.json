@@ -1,6 +1,6 @@
 {
   "name": "stratos-ui",
-  "version": "0.9.5",
+  "version": "0.9.8",
   "description": "Stratos UI Console",
   "main": "index.js",
   "scripts": {
@@ -10,6 +10,7 @@
     "build-migrator": "gulp build-migrator",
     "cf-get-backend-deps": "gulp cf-get-backend-deps",
     "cf-build-backend": "gulp cf-build-backend",
+    "bosh-build-backend": "gulp bosh-build-backend",
     "build-cf": "gulp deploy:cf",
     "precoverage": "npm run update-webdriver",
     "coverage": "npm test && gulp e2e:run && gulp coverage-combine",
@@ -20,6 +21,8 @@
     "e2e": "gulp e2e:run",
     "pree2e-on-target": "npm run update-webdriver",
     "e2e-on-target": "gulp e2e:tests",
+    "pree2e:nocov": "npm run update-webdriver",
+    "e2e:nocov": "gulp e2e:nocov",
     "preheadless-e2e": "npm run pree2e",
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js",
     "pretest": "gulp unit:prepare",
@@ -55,7 +58,7 @@
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
     "lodash": "^4.13.1",
-    "merge-dirs": "^0.2.1",
+    "stratos-merge-dirs": "^0.2.1",
     "mktemp": "^0.4.0",
     "minimatch": "^3.0.2",
     "q": "^1.4.1",

@@ -1,8 +1,8 @@
-FROM splatform/stratos-goose-base:opensuse
+FROM splatform/stratos-bk-base:opensuse
 
-RUN zypper -n in postgresql mariadb-client
-RUN go get github.com/go-sql-driver/mysql
-COPY goose /usr/local/bin/
+RUN zypper -n in mariadb-client
+COPY outputs/stratos-dbmigrator /usr/local/bin/
+RUN chmod +x /usr/local/bin/stratos-dbmigrator
 COPY deploy/db/dbconf.yml db/dbconf.yml
 COPY deploy/db/migrations db/migrations
 COPY deploy/db/scripts/run-postflight-job.k8s.sh /run-postflight-job.sh

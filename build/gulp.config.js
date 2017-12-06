@@ -79,6 +79,7 @@
     // Files that should be run through the linter
     lintFiles: [
       paths.components + '**/*.js',
+      '!' + paths.components + '**/backend/**',
       '!' + paths.components + '**/*.mock.js',
       paths.build + '*.js',
       paths.e2e + '**/*.js'

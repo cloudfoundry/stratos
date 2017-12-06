@@ -6,7 +6,7 @@
   var path = require('path');
   var gulp = require('gulp');
   var _ = require('lodash');
-  var mergeDirs = require('merge-dirs');
+  var mergeDirs = require('stratos-merge-dirs');
   var runSequence = require('run-sequence');
   var Q = require('q');
 
@@ -330,6 +330,14 @@
       'write-plugins-yaml',
       'delete-temp',
       'local-dev-build'
+    );
+  });
+
+  gulp.task('bosh-build-backend', function () {
+    // Doesn't perform a `go build -i` buiild
+    prepareBuild.setNoGoInstall(true);
+    return runSequence(
+      'build-backend'
     );
   });
 

@@ -44,4 +44,6 @@ outputs/
 deploy/kubernetes/console/charts/
 deploy/stratos-ui-release/.dev_builds
 deploy/stratos-ui-release/blobs
+deploy/stratos-ui-release/.blobs
 deploy/stratos-ui-release/dev_releases/
+output/fissile
