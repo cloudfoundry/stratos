@@ -1,8 +1,15 @@
+<a href="https://zenhub.com"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"></a>
+
 > **NOTE** This is a work-in-progress Angular 2.x version of Stratos UI. For the current Angular 1 based version see [https://github.com/SUSE/stratos-ui](https://github.com/SUSE/stratos-ui). This version is at an early development stage and we welcome feedback, input and contributions. This version does not have feature parity with the Angular 1 version.
 
 # Stratos
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage
 applications running in the Cloud Foundry cluster and perform cluster management tasks.
+
+# Project Planing
+We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/SUSE/stratos#boards)
+tab and have a look through our pipelines and milestones. Please note in order to view the ZenHub Boards tab you will need the [ZenHub
+browser extension](https://www.zenhub.com/extension)
 
 # Deploying Stratos
 Please see the [Development Guide](docs/developers-guide.md).
