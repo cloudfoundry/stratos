@@ -98,11 +98,6 @@ export class CNSISEffect {
       params.append('cnsi_guid', action.guid);
       params.append('username', action.username);
       params.append('password', action.password);
-      // const params = {
-      //   cnsi_guid: action.guid,
-      //   username: action.username,
-      //   password: action.password
-      // };
 
       this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
       return this.http.post('/pp/v1/auth/login/cnsi', params, {

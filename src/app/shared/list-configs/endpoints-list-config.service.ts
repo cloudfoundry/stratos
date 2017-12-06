@@ -111,8 +111,9 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     {
       columnId: 'connection',
       headerCell: () => 'Connection',
-      cell: row => row.registered ? 'Connected' : 'Disconnected',
-      sort: true, cellFlex: '1'
+      cell: row => row.info ? row.info.user ? 'Connected' : 'Disconnected' : 'Loading...',
+      sort: true,
+      cellFlex: '1'
     },
     {
       columnId: 'type',
