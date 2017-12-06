@@ -3,7 +3,8 @@
     "name": "SUSE Cloud Foundry",
     "console": "SUSE Cloud Foundry Console",
     "cf": "Cloud Foundry",
-    "ce": "Code Engine"
+    "ce": "Code Engine",
+    "eula": "eula.html"
   },
   "company": {
     "name": "SUSE",

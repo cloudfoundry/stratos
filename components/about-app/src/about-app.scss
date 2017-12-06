@@ -1,6 +1,40 @@
 $about-title-font-size: 24px;
 $about-color-bg: $page-footer-color-bg;
 $about-color-fg: $page-footer-color-fg;
+$about-action-bar-height: $console-unit-space * 3;
+$eula-min-size: 300px;
+
+.about-panel {
+  flex: 1 1 0;
+  height: calc(100% - #{$about-action-bar-height});
+  display: flex;
+  flex-direction: column;
+}
+
+.cluster-settings.user-summary.about-summary {
+  flex: 0 0 auto;
+}
+
+.eula {
+  flex: 1 0 auto;
+  overflow-y: scroll;
+  height: 0;
+  min-height: $eula-min-size;
+  border: 1px solid $gray-light;
+  padding: 4px;
+  margin-top: $console-half-space;
+}
+
+.eula-message {
+  flex: 0 0 auto;
+  margin-top: $console-half-space;
+  font-weight: $console-font-weight-bold;
+  font-size: $font-size-medium;
+}
+
+page-footer.about-branding {
+  flex: 0 0 48px;
+}
 
 .cluster-settings.user-summary {
   .cluster.row {
