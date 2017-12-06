@@ -112,23 +112,22 @@
       element(by.css('.app-instance-item')).click();
 
       var term = element(by.css('.terminal.xterm'));
+      browser.driver.sleep(5000);
       //term.sendKeys('ls -al\n');
       term.sendKeys('top\n');
-
+      browser.driver.sleep(2000);
       screenshot('app-ssh', 'Application SSH');
     });
 
     it('show cloud foundry dashboard', function () {
       endpointsListCf.showCfEndpoints();
+      browser.driver.sleep(2000);
       screenshot('cloud-foundry', 'Cloud Foundry Cluster Management');
-
-      endpointsOrgsSpace.goToOrg(ORG_NAME);
-      endpointsOrgsSpace.goToSpace(SPACE_NAME);
-      screenshot('cloud-foundry-space', 'Cloud Foundry Space Management');
     });
 
     it('show cloud foundry spaces', function () {
       endpointsOrgsSpace.goToOrg(ORG_NAME);
+      browser.driver.sleep(2000);
       endpointsOrgsSpace.goToSpace(SPACE_NAME);
       screenshot('cloud-foundry-space', 'Cloud Foundry Space Management');
     });
