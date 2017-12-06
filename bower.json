@@ -15,7 +15,7 @@
     "app-theme": "./components/app-theme",
     "app-framework": "./components/app-framework",
     "app-core": "./components/app-core",
-    "suse-branding": "./components/suse-branding",
+    "os-branding": "./components/os-branding",
     "about-app": "./components/about-app",
     "endpoints-dashboard": "./components/endpoints-dashboard",
     "cloud-foundry": "./components/cloud-foundry",

@@ -1,0 +1,39 @@
+// SUSE Brand primary colour
+$suse-primary: #02D35F;
+$suse-dark-blue: #06253A;
+$suse-blue: #073155;
+$suse-primary-light: #16696A;
+
+// Secondary blue colour
+$suse-secondary: #00243e;
+$suse-text: #fff;
+
+$login-form-border-color: lighten($suse-secondary, 10%);
+
+// Colours for the header bar
+$page-header-fg: #fff !default;
+$page-header-bg: #3171B8 !default;
+$page-header-active-fg: #000 !default;
+
+$page-header-active-fg: #75c7ff;
+
+// Set the primary brand colour
+$brand-primary: #2D85C6;
+
+$console-primary: $brand-primary;
+
+// Hide welcome text panel on the login page
+$login-page-text-panel-display: none;
+
+// The normal status-okay green is close to suse primary, so just use it instead
+$status-okay: $suse-primary;
+
+.sort-asc-desc-btn svg {
+  .st0 {
+    fill: $brand-primary;
+  }
+}
+
+@import "dark-form";
+@import "login";
+@import "about";
