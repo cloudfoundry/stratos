@@ -63,7 +63,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     icon: 'remove_from_queue',
     label: 'Disconnect',
     description: `Disconnect but don't delete`,
-    visible: row => row.registered,
+    visible: row => !!(row.info && row.info.user),
     enabled: row => true,
   };
 
@@ -80,7 +80,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     icon: 'add_to_queue',
     label: 'Connect',
     description: '',
-    visible: row => !row.registered,
+    visible: row => !!(row.info && !row.info.user),
     enabled: row => true,
   };
 
