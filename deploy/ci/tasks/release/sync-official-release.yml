@@ -1,0 +1,95 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+- name: helm-chart-Chart-sle
+- name: helm-chart-values-sle
+- name: helm-charts-repository
+image_resource:
+  type: docker-image
+  source:
+   repository:  ci-registry.capbristol.com:5000/concourse-dcind
+   tag: "latest"
+   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      source /docker-lib.sh
+      start_docker
+      cat /etc/docker/daemon.json
+      # Login to Staging repository
+      docker login -u ${STAGING_REPOSITORY_USERNAME} -p ${STAGING_REPOSITORY_PASSWORD} ${STAGING_REPOSITORY};
+      # Login to Release repository
+      docker login -u ${RELEASE_REPOSITORY_USERNAME} -p ${RELEASE_REPOSITORY_PASSWORD} ${RELEASE_REPOSITORY};
+
+      ROOT_DIR=${PWD}
+
+      git config --global user.name ${GIT_USER}
+      git config --global user.email ${GIT_EMAIL}
+
+      # Sync the release images and make a PR for the Helm Chart Release
+      
+      # Fetch the sync script - this will fail if we can not get the script
+      curl --fail -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Accept: application/vnd.github.v3.raw' -O -L ${RELEASE_SCRIPT}
+      chmod +x release.sh
+
+      # The script uses these environment variables:
+      # INTERNAL_REGISTRY, PUBLIC_REGISTRY, PUBLIC_REGISTRY_ORGANIZATION
+      export INTERNAL_REGISTRY=${STAGING_REPOSITORY}
+      export PUBLIC_REGISTRY=${RELEASE_REPOSITORY}
+      export PUBLIC_REGISTRY_ORGANIZATION=${RELEASE_REPOSITORY_ORG}
+
+      # Sync the images
+      ./release.sh show-images stratos
+      echo 'y' | ./release.sh publish-release stratos
+
+      # Now create a PR for the helm chart
+      STRATOS_UI=${ROOT_DIR}/stratos-ui
+      cd ${STRATOS_UI}
+
+      # This will be the version number, e.g. 0.9.8
+      GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
+      echo "Release: ${GIT_TAG}"
+
+      # Copy the Helm chart contents into the correct folder - use rsync so that we remove any files that have gone
+      cd ${STRATOS_UI}/deploy/kubernetes/
+
+      # Copy in the values and Chart
+      cp -f ${ROOT_DIR}/helm-chart-values-sle/values.yaml* console/values.yaml
+      cp -f ${ROOT_DIR}/helm-chart-Chart-sle/Chart.yaml* console/Chart.yaml
+
+      # Patch values file
+      echo "Updating Helm Chart Docker Registry Org : ${STAGING_REPOSITORY_ORG} --> ${RELEASE_REPOSITORY_ORG}"
+      echo "Updating Helm Chart Docker Registry Host: ${STAGING_REPOSITORY} --> ${RELEASE_REPOSITORY}"
+      sed -i -e 's/organization: '"${STAGING_REPOSITORY_ORG}"'/organization: '"${RELEASE_REPOSITORY_ORG}"'/g' console/values.yaml
+      sed -i -e 's/hostname: '"${STAGING_REPOSITORY}"'/hostname: '"${RELEASE_REPOSITORY}"'/g' console/values.yaml
+      
+      # Show the values
+      echo "== Helm Chart Values =="
+      cat console/values.yaml
+
+      # Create a new branch
+      BRANCH="stratos-ui-release-${GIT_TAG}"
+      HELM_REPO=${ROOT_DIR}/helm-charts-repository
+      cd ${HELM_REPO}
+      git checkout -b ${BRANCH}
+
+      # Sync
+      rsync -v -r --delete ${STRATOS_UI}/deploy/kubernetes/console ${HELM_REPO}/${RELEASE_HELM_STABLE_FOLDER}
+
+      # Show the changes that have been made
+      git status
+
+      # Add the changes
+      git add ${RELEASE_HELM_STABLE_FOLDER}/console
+      git status
+      git commit -m "Stratos UI Console Helm Chart for release ${GIT_TAG}"
+
+      # Create the branch upsteram
+      git push origin ${BRANCH}
+
+      # TODO: Automatically create a PR
+      echo "Please manually create a PR from the branch ${BRANCH}"
