@@ -1,0 +1,16 @@
+{
+  "name": "os-branding",
+  "description": "",
+  "license": "Apache-2.0",
+  "moduleType": [],
+  "homepage": "",
+  "main": [
+    "src/brand.scss"
+  ],
+  "ignore": [
+    ".*"
+  ],
+  "dependencies": {
+  }
+
+}

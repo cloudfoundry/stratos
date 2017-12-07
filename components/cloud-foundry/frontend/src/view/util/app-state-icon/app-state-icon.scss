@@ -1,3 +1,5 @@
+$app-state-tentative-color: $status-unknown !default;
+
 app-state-icon {
   line-height: normal;
   font-size: $font-size-base;
@@ -13,9 +15,8 @@ app-state-icon {
 }
 
 .text-tentative {
-  color: $console-primary;
+  color: $app-state-tentative-color;
 }
-
 
 span.material-icons.app-status {
   font-size: $icon-font-size-base;
