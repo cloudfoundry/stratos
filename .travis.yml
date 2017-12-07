@@ -16,7 +16,7 @@ cache:
 stages:
   - Lint
   - Unit Tests
-  - e2e Tests
+  - name: e2e Tests
     if: false
 
 jobs:
