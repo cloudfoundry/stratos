@@ -1,5 +1,18 @@
 # Change Log
 
+## 0.9.9 Release Candidate 1 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.8...0.9.9)
+
+This is the first Release Candidate of the Stratos UI Console. It contains the following improvements:
+
+**Improvements:**
+
+- Open Source build now uses a generic theme [\#1403](https://github.com/SUSE/stratos-ui/pull/1403)
+- SUSE build uses SUSE theme and contains EULA in the about screen [\#1404](https://github.com/SUSE/stratos-ui/pull/1404)
+- Run Mariadb mysqld process as mysql user [\#1397](https://github.com/SUSE/stratos-ui/pull/1397)
+
+
 ## 0.9.8 Beta-3 Release 2
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.7...0.9.8)
