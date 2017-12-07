@@ -1,3 +1,4 @@
+import { cnsisEntitiesSelector, cnsisStatusSelector } from '../store/selectors/cnsis.selectors';
 import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import { CNSISState, CNSISModel, cnsisStoreNames } from '../store/types/cnsis.types';
@@ -7,13 +8,12 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angul
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
 import { RouterNav } from '../store/actions/router.actions';
-import { cnsisEntitiesSelector, cnsisStatusSelector } from '../store/selectors/cnsis.selectors';
-import { APIEntities } from '../store/types/api.types';
+
 
 @Injectable()
 export class EndpointsService implements CanActivate {
 
-  endpoints$: Observable<APIEntities<CNSISModel>>;
+  endpoints$: any;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
 

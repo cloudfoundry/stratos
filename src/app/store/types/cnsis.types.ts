@@ -1,9 +1,9 @@
 import { SystemInfoEndpoint } from './system.types';
-import { RequestSectionKeys, TRequestSectionKeys } from '../reducers/api-request-reducer/types';
+import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 import { EndpointSchema } from '../actions/cnsis.actions';
 
 export const cnsisStoreNames: {
-  section: TRequestSectionKeys,
+  section: TRequestTypeKeys,
   type: string
 } = {
     section: RequestSectionKeys.Other,

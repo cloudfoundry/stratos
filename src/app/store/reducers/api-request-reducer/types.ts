@@ -3,7 +3,7 @@ export const enum RequestSectionKeys {
   Other = 'other'
 }
 
-export type TRequestSectionKeys = RequestSectionKeys.CF | RequestSectionKeys.Other;
+export type TRequestTypeKeys = RequestSectionKeys.CF | RequestSectionKeys.Other;
 
 export const rootUpdatingKey = '_root_';
 export interface ActionState {
@@ -33,7 +33,7 @@ export interface UpdatingSection {
   _root_: ActionState;
   [key: string]: ActionState;
 }
-export interface RequestState {
+export interface RequestInfoState {
   fetching: boolean;
   updating: UpdatingSection;
   creating: boolean;

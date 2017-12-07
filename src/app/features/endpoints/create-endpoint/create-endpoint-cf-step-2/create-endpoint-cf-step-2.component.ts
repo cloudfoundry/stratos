@@ -8,7 +8,6 @@ import { UtilsService } from '../../../../core/utils.service';
 import { CNSISModel, CNSISState, cnsisStoreNames } from '../../../../store/types/cnsis.types';
 import { NgForm, NgModel } from '@angular/forms';
 import { cnsisEntitiesSelector } from '../../../../store/selectors/cnsis.selectors';
-import { APIEntities } from '../../../../store/types/api.types';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-2',
@@ -27,7 +26,9 @@ export class CreateEndpointCfStep2Component implements OnInit, IStepperStep, Aft
 
   constructor(store: Store<AppState>, public utilsService: UtilsService) {
     this.endpointUrls = store.select(cnsisEntitiesSelector)
-      .map((cnsis: APIEntities<CNSISModel>) => Object.values(cnsis).map(cnsi => `${cnsi.api_endpoint.Scheme}://${cnsi.api_endpoint.Host}`));
+      .map(cnsis => Object.values(cnsis).map(cnsi => {
+        return `${cnsi.api_endpoint.Scheme}://${cnsi.api_endpoint.Host}`;
+      }));
   }
 
   ngOnInit() {

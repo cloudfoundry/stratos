@@ -1,5 +1,6 @@
 <div class="connection-dialog__loading-wrapper">
-  <md-progress-bar class="connection-dialog__loading" [color]="(error$ | async) && !(busy$ | async) ? 'warn' : 'primary'" [mode]="(busy$ | async) ? 'query' : 'solid'">
+  <md-progress-bar class="connection-dialog__loading" [color]="(connectingError$ | async) && !(connecting$ | async) ? 'warn' : 'primary'"
+    [mode]="(connecting$ | async) ? 'query' : 'solid'">
   </md-progress-bar>
 </div>
 <div class="connection-dialog">
@@ -15,7 +16,7 @@
         <input mdInput placeholder="Password" type="password" formControlName="password">
       </md-form-field>
     </md-dialog-content>
-    <app-dialog-error message="Could not connect, please try again." [show]="error$ | async"></app-dialog-error>
+    <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>
     <md-dialog-actions>
       <button type="submit" [disabled]="!(canSubmit$ | async)" md-button color="primary">Connect</button>
       <button [mat-dialog-close]="true" md-button color="warn">Cancel</button>

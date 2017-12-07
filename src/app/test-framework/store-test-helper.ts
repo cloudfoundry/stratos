@@ -364,7 +364,7 @@ const testInitialStoreState: AppState = {
     },
     request: {
       other: {
-        cnsis: {
+        endpoints: {
           '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
             fetching: false,
             updating: {
@@ -373,6 +373,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -392,6 +398,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -405,6 +417,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -420,6 +438,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -433,6 +457,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -448,6 +478,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -461,6 +497,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -476,6 +518,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -489,6 +537,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -504,6 +558,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -517,6 +577,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -532,6 +598,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -545,6 +617,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -560,6 +638,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -573,6 +657,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -588,6 +678,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -601,6 +697,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -616,6 +718,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -629,6 +737,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -644,6 +758,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -657,6 +777,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -672,6 +798,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -685,6 +817,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -700,6 +838,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -713,6 +857,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -728,6 +878,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -741,6 +897,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -756,6 +918,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -769,6 +937,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -784,6 +958,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -797,6 +977,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -812,6 +998,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -825,6 +1017,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -840,6 +1038,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -853,6 +1057,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -868,6 +1078,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -881,6 +1097,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -896,6 +1118,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -909,6 +1137,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -924,6 +1158,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -937,6 +1177,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -952,6 +1198,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -965,6 +1217,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -980,6 +1238,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -993,6 +1257,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1008,6 +1278,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1021,6 +1297,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1036,6 +1318,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1049,6 +1337,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1064,6 +1358,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1077,6 +1377,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1092,6 +1398,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1105,6 +1417,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1120,6 +1438,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1133,6 +1457,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1148,6 +1478,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1161,6 +1497,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1176,6 +1518,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1189,6 +1537,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1204,6 +1558,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1217,6 +1577,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1232,6 +1598,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1245,6 +1617,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1260,6 +1638,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1273,6 +1657,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1288,6 +1678,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1301,6 +1697,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1316,6 +1718,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1329,6 +1737,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1344,6 +1758,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1357,6 +1777,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1372,6 +1798,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1385,6 +1817,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1400,6 +1838,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1413,6 +1857,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1428,6 +1878,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1441,6 +1897,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1456,6 +1918,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1469,6 +1937,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1484,6 +1958,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1497,6 +1977,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1512,6 +1998,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1525,6 +2017,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1540,6 +2038,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1553,6 +2057,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1568,6 +2078,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1581,6 +2097,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1596,6 +2118,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1609,6 +2137,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1624,6 +2158,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1637,6 +2177,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1652,6 +2198,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1665,6 +2217,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1680,6 +2238,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1693,6 +2257,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1708,6 +2278,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1721,6 +2297,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1736,6 +2318,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1749,6 +2337,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1764,6 +2358,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1777,6 +2377,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1792,6 +2398,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1805,6 +2417,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1820,6 +2438,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1833,6 +2457,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1848,6 +2478,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1861,6 +2497,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1876,6 +2518,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1889,6 +2537,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1904,6 +2558,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1917,6 +2577,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1932,6 +2598,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1945,6 +2617,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1960,6 +2638,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -1973,6 +2657,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -1988,6 +2678,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2001,6 +2697,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2016,6 +2718,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2029,6 +2737,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2044,6 +2758,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2057,6 +2777,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2072,6 +2798,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2085,6 +2817,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2100,6 +2838,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2113,6 +2857,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2128,6 +2878,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2141,6 +2897,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2156,6 +2918,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2169,6 +2937,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2184,6 +2958,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2197,6 +2977,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2212,6 +2998,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2225,6 +3017,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2240,6 +3038,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2253,6 +3057,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2268,6 +3078,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2282,6 +3098,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2295,6 +3117,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2312,6 +3140,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2325,6 +3159,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2340,6 +3180,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2353,6 +3199,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2368,6 +3220,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2381,6 +3239,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2396,6 +3260,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2410,6 +3280,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2423,6 +3299,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2440,6 +3322,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2453,6 +3341,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2468,6 +3362,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2481,6 +3381,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2496,6 +3402,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2509,6 +3421,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2524,6 +3442,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2537,6 +3461,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -2552,6 +3482,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2566,6 +3502,12 @@ const testInitialStoreState: AppState = {
                 message: ''
               }
             },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
+            },
             creating: false,
             error: false,
             response: null,
@@ -2579,6 +3521,12 @@ const testInitialStoreState: AppState = {
                 error: false,
                 message: ''
               }
+            },
+            deleting: {
+              busy: false,
+              error: false,
+              message: '',
+              deleted: false
             },
             creating: false,
             error: false,
@@ -14637,57 +15585,6 @@ const testInitialStoreState: AppState = {
             }
           }
         },
-        // applicationSummary: {
-        //   '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
-        //     entity: {
-        //       guid: '4e4858c4-24ab-4caf-87a8-7703d1da58a0',
-        //       name: 'go-env',
-        //       routes: [],
-        //       running_instances: 1,
-        //       services: [],
-        //       available_domains: [
-        //         {
-        //           guid: 'ffaa691e-2092-4ed4-8cb2-eb97fa5b34f1',
-        //           name: 'cf-dev.io',
-        //           router_group_guid: null,
-        //           router_group_type: null
-        //         }
-        //       ],
-        //       production: false,
-        //       space_guid: 'd87ba175-51ec-4cc9-916c-bee26d00e498',
-        //       stack_guid: '57ab08d8-86cc-473a-8818-25d5e8d0ea23',
-        //       buildpack: null,
-        //       detected_buildpack: 'Go',
-        //       detected_buildpack_guid: '4775ecbe-494f-4f1f-a0ea-24a8a816e05f',
-        //       environment_json: {},
-        //       memory: 16,
-        //       instances: 1,
-        //       disk_quota: 16,
-        //       state: 'STARTED',
-        //       version: '2dc814c5-2dbf-4bb0-9203-78ec06ef465c',
-        //       command: null,
-        //       console: false,
-        //       debug: null,
-        //       staging_task_id: 'e7736632-0cde-4dbb-b660-195d99dda9c9',
-        //       package_state: 'STAGED',
-        //       health_check_type: 'process',
-        //       health_check_timeout: null,
-        //       health_check_http_endpoint: null,
-        //       staging_failed_reason: null,
-        //       staging_failed_description: null,
-        //       diego: true,
-        //       docker_image: null,
-        //       package_updated_at: '2017-10-10T09:30:15Z',
-        //       detected_start_command: 'go-env',
-        //       enable_ssh: true,
-        //       ports: null,
-        //       cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
-        //     },
-        //     metadata: {
-        //       guid: '4e4858c4-24ab-4caf-87a8-7703d1da58a0'
-        //     }
-        //   }
-        // },
         stack: {
           '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
             metadata: {
@@ -20014,10 +20911,10 @@ const testInitialStoreState: AppState = {
         event: {},
       },
       other: {
-        cnsis: {
-          '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
-            guid: '57ab08d8-86cc-473a-8818-25d5e8d0ea23',
-            api_endpoint: {}
+        endpoints: {
+          '01ccda9d-8f40-4dd0-bc39-08eea68e364f': {
+            guid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f',
+            name: 'SCF-2.2.0-beta'
           }
         }
       },

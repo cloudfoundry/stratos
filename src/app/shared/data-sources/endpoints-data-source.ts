@@ -10,7 +10,6 @@ import { RouterNav } from '../../store/actions/router.actions';
 import { ListActionConfig, ListActions } from './list=data-source-types';
 import { selectEntities } from '../../store/selectors/api.selectors';
 import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
-import { APIEntities } from '../../store/types/api.types';
 
 
 export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
@@ -58,9 +57,9 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   }
 
   connect(): Observable<CNSISModel[]> {
-    this.isLoadingPage$ = this.isLoadingPage$ || this._eStore.select(cnsisStatusSelector).map((cnsis: CNSISState) => cnsis.loading);
+    this.isLoadingPage$ = this.isLoadingPage$ || this._eStore.select(cnsisStatusSelector).map((cnsis => cnsis.loading));
     this.data$ = this.data$ || this._eStore.select(cnsisEntitiesSelector)
-      .map((cnsis: APIEntities<CNSISModel>) => Object.values(cnsis));
+      .map(cnsis => Object.values(cnsis));
     return super.connect();
   }
 

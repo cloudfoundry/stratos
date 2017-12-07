@@ -1,4 +1,4 @@
-import { NormalizedResponse } from '../types/api.types';
+import { APIResource, NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
@@ -63,7 +63,8 @@ export class CNSISEffect {
               [cnsisStoreNames.type]: {}
             },
             result: []
-          };
+          } as NormalizedResponse;
+
           data.forEach(cnsi => {
             mappedData.entities[cnsisStoreNames.type][cnsi.guid] = cnsi;
             mappedData.result.push(cnsi.guid);

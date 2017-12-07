@@ -1,9 +1,9 @@
+import { IRequestEntityTypeState } from '../../store/app-state';
 import { Action } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { ListView, ListPagination, ListSort, ListFilter } from '../../store/actions/list.actions';
 import { ListState } from '../../store/reducers/list.reducer';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { APIEntities } from '../../store/types/api.types';
 
 export interface AppEvent {
   actee_name: string;
@@ -20,7 +20,7 @@ export interface AppEvent {
 }
 
 export class ListActionConfig<T> {
-  createAction: (dataSource: IListDataSource<T>, items: APIEntities<T>) => Action;
+  createAction: (dataSource: IListDataSource<T>, items: IRequestEntityTypeState<T>) => Action;
   icon: string;
   label: string;
   description: string;

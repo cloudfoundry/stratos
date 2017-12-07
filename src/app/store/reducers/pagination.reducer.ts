@@ -20,7 +20,7 @@ import { AppState } from '../app-state';
 import { mergeState } from './../helpers/reducer.helper';
 import { Observable } from 'rxjs/Observable';
 import { selectPaginationState } from '../selectors/pagination.selectors';
-import { getEntityState } from '../selectors/api.selectors';
+import { getRequestDataTypeState } from '../selectors/api.selectors';
 import { defaultCfEntitiesState } from '../types/entity.types';
 
 
@@ -238,7 +238,7 @@ export const getPaginationObservables = (function () {
       .filter(pagination => {
         return isPageReady(pagination);
       })
-      .withLatestFrom(store.select(getEntityState()))
+      .withLatestFrom(store.select(getRequestDataTypeState()))
       .map(([paginationEntity, entities]) => {
         const page = paginationEntity.ids[paginationEntity.currentPage];
         return page ? denormalize(page, schema, entities) : null;
