@@ -17,7 +17,7 @@ stages:
   - Lint
   - Unit Tests
   - name: e2e Tests
-    if: false
+    if: 1 = 2
 
 jobs:
   include:
@@ -32,3 +32,6 @@ jobs:
   - stage: e2e Tests
     script:
     - npm run e2e
+
+notifications:
+  email: false
