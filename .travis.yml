@@ -6,11 +6,22 @@ branches:
   only:
     - travis
 
-before_script:
-  - npm install
+install:
+- npm install
 
-script:
-  - npm test
+cache:
+  directories:
+  - "/home/travis/.npm/"
 
-after_success:
-  - echo woopde
+jobs:
+  include:
+  - stage: e2e Tests
+    script:
+    - npm run e2e
+  - stage: Unit Tests
+    script:
+    - npm test
+  - stage: Lint
+    script:
+    - npm build
+    - npm run lint
