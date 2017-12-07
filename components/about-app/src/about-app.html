@@ -1,4 +1,4 @@
-<div class="action-bar col-md-12 panel-less">
+<div class="about-action-panel action-bar col-md-12 panel-less">
   <div ng-if="!applicationsListCtrl.needAdminSetup" class="applications-header font-semi-bold pull-left" translate>about</div>
 </div>
 
@@ -26,6 +26,12 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+  <div class="eula-message" translate-cloak="product.eula-message" translate>product.eula-message</div>
+  <div class="eula" translate-cloak="product.eula">
+    <div>
+      <div ng-if="('product.eula' | translate) !== 'product.eula'" ng-include="'product.eula' | translate"></div>
     </div>
   </div>
   <page-footer context="about.footer" class="about-branding"></page-footer>
