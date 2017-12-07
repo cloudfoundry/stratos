@@ -74,6 +74,7 @@ groups:
   - update-repo
   - create-sle-chart
   - update-github-release
+  - sync-sle-release
 
 jobs:
 - name: build-opensuse-helm-images
