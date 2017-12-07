@@ -1,8 +1,12 @@
 # Stratos UI
 
+[![Build Status](https://travis-ci.org/SUSE/stratos-ui.svg?branch=master)](https://travis-ci.org/SUSE/stratos-ui)
+[![GitHub release](https://img.shields.io/github/release/SUSE/stratos-ui.svg)](https://github.com/SUSE/stratos-ui/releases/latest)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/SUSE/stratos-ui/blob/master/LICENSE.md)
+
 Stratos UI is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
-![Stratos UI Application view](docs/images/stratos-ui.png)
+![Stratos UI Application view](docs/images/screenshots/app-wall.png)
 
 ## Deploying Stratos UI
 
@@ -35,6 +39,12 @@ Get an [Overview](docs/overview.md) of Stratos UI, its components and the differ
 We very much welcome developers who would like to get involved and contribute to the development of the Stratos UI project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
 
 For information to help getting started with development, please read the [Developer's Guide](docs/development.md).
+
+## Support and feedback
+
+We have a channel (#stratos) on the Cloud Foundy Slack where you can ask questions, get support or give us feedback. We'd love to hear from you if you are using Stratos.
+
+You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - and then join the #stratos channel.
 
 ## License
 

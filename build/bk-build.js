@@ -6,7 +6,7 @@
   var path = require('path');
   var gulp = require('gulp');
   var _ = require('lodash');
-  var mergeDirs = require('merge-dirs');
+  var mergeDirs = require('stratos-merge-dirs');
   var runSequence = require('run-sequence');
   var Q = require('q');
 

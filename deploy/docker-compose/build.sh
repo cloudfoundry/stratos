@@ -2,19 +2,25 @@
 set -eu
 
 # set defaults
-PROD_RELEASE=false
 DOCKER_REGISTRY=docker.io
 DOCKER_ORG=splatform
 
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
-while getopts ":ho:r:t:d" opt; do
+STRATOS_BOWER=""
+NO_PUSH="false"
+
+while getopts ":ho:r:t:lu:n" opt; do
   case $opt in
     h)
       echo
-      echo "--- To build images of the Console: "
+      echo "--- To build images of Stratos UI: "
       echo
       echo " ./build.sh -t 1.0.13"
+      echo
+      echo "--- To build images locally of Stratos UI: "
+      echo
+      echo " ./build.sh -l -n"
       echo
       exit 0
       ;;
@@ -27,8 +33,17 @@ while getopts ":ho:r:t:d" opt; do
     t)
       TAG="${OPTARG}"
       ;;
-    d)
-      BUILD_DOCKER_COMPOSE_IMAGES="true"
+    l)
+      TAG_LATEST="true"
+      ;;
+    o)
+      DOCKER_ORG="${OPTARG}"
+      ;;
+    u)
+      STRATOS_BOWER="${OPTARG}"
+      ;;
+    n)
+      NO_PUSH="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -42,17 +57,26 @@ while getopts ":ho:r:t:d" opt; do
 done
 
 echo
-echo "PRODUCTION BUILD/RELEASE: ${PROD_RELEASE}"
-echo "REGISTRY: ${DOCKER_REGISTRY}"
-echo "ORG: ${DOCKER_ORG}"
+echo "=============================================================================="
+echo "Stratos UI Docker Compose Build"
+echo "=============================================================================="
+echo
 echo "TAG: ${TAG}"
+
+if [ "${NO_PUSH}" != "false" ]; then
+  echo "Images will NOT be pushed"
+else
+  echo "Images will be pushed"
+  echo "  REGISTRY: ${DOCKER_REGISTRY}"
+  echo "  ORG: ${DOCKER_ORG}"
+fi
 
 echo
 echo "Starting build"
 
 # Copy values template
 __DIRNAME="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-STRATOS_UI_PATH=${__DIRNAME}/../../../stratos-ui
+STRATOS_UI_PATH=${__DIRNAME}/../../
 
 # Proxy support
 BUILD_ARGS=""
@@ -100,8 +124,18 @@ function buildAndPublishImage {
 
   docker tag ${NAME} ${IMAGE_URL}
 
-  echo Pushing Docker Image ${IMAGE_URL}
-  docker push  ${IMAGE_URL}
+  if [ "${NO_PUSH}" = "false" ]; then
+    echo Pushing Docker Image ${IMAGE_URL}
+    docker push  ${IMAGE_URL}
+  fi
+
+  if [ "${TAG_LATEST}" = "true" ]; then
+    docker tag ${IMAGE_URL} ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    if [ "${NO_PUSH}" = "false" ]; then
+      echo Pushing Docker Image ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+      docker push ${DOCKER_REGISTRY}/${DOCKER_ORG}/${NAME}:latest
+    fi
+  fi
 
   # Update values.yaml
 
@@ -190,8 +224,7 @@ function buildGoose {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-    buildAndPublishImage stratos-dc-goose ./db/Dockerfile.goose.dev ${STRATOS_UI_PATH}/deploy
-  rm -f ${STRATOS_UI_PATH}/goose
+  buildAndPublishImage stratos-dc-goose deploy/db/Dockerfile.goose.dev ${STRATOS_UI_PATH}
 }
 
 function buildUI {
@@ -199,7 +232,6 @@ function buildUI {
   CURRENT_USER=$
   echo
   echo "-- Provision the UI"
-  preloadImage splatform/stratos-nginx-base:opensuse
   docker run --rm \
     ${RUN_ARGS} \
     -v ${STRATOS_UI_PATH}:/usr/src/app \
@@ -207,8 +239,9 @@ function buildUI {
     -e USER_NAME=$(id -nu) \
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
+    -e STRATOS_BOWER="${STRATOS_BOWER}" \
     -w /usr/src/app \
-    splatform/stratos-nginx-base:opensuse \
+    splatform/stratos-ui-build-base:opensuse \
     /bin/bash ./deploy/provision.sh
 
   # Copy the artifacts from the above to the nginx container
@@ -219,8 +252,14 @@ function buildUI {
   # Build and push an image based on the nginx container
   echo
   echo "-- Building/publishing the runtime container image for the Console web server"
-  preloadImage splatform/stratos-nginx-base:opensuse
   buildAndPublishImage stratos-dc-console Dockerfile.dc ${STRATOS_UI_PATH}/deploy/containers/nginx
+}
+
+function buildMariaDb {
+  echo
+  echo "-- Building/publishing MariaDB"
+  # Download and retag image to save bandwidth
+  buildAndPublishImage stratos-dc-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
 }
 
 # MAIN ------------------------------------------------------
@@ -238,10 +277,15 @@ updateTagForRelease
 buildProxy
 buildGoose
 buildUI
+buildMariaDb
 
 # Done
 echo
 echo "Build complete...."
-echo "Registry: ${DOCKER_REGISTRY}"
-echo "Org: ${DOCKER_ORG}"
+
+if [ "${NO_PUSH}" == "false" ]; then
+  echo "Registry: ${DOCKER_REGISTRY}"
+  echo "Org: ${DOCKER_ORG}"
+fi
+
 echo "Tag: ${TAG}"

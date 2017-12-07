@@ -64,31 +64,24 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 
 	// If we found a service, then use it
 	if len(service.Name) > 0 {
+		dbCredentials := service.Credentials
+		db.Username = fmt.Sprintf("%v", dbCredentials["username"])
+		db.Password = fmt.Sprintf("%v", dbCredentials["password"])
+		db.Host = fmt.Sprintf("%v", dbCredentials["hostname"])
+		db.SSLMode = "disable"
+		db.Port, _ = strconv.Atoi(fmt.Sprintf("%v", dbCredentials["port"]))
 		if isPostgresService(service) {
-			dbCredentials := service.Credentials
 			db.DatabaseProvider = "pgsql"
-			db.Username = fmt.Sprintf("%v", dbCredentials["username"])
-			db.Password = fmt.Sprintf("%v", dbCredentials["password"])
 			db.Database = fmt.Sprintf("%v", dbCredentials["dbname"])
-			db.Host = fmt.Sprintf("%v", dbCredentials["hostname"])
-			db.Port, _ = strconv.Atoi(fmt.Sprintf("%v", dbCredentials["port"]))
-			db.SSLMode = "disable"
 			log.Infof("Discovered Cloud Foundry postgres service and applied config")
 			return true
 		} else if isMySQLService(service) {
-			dbCredentials := service.Credentials
 			db.DatabaseProvider = "mysql"
-			db.Username = fmt.Sprintf("%v", dbCredentials["username"])
-			db.Password = fmt.Sprintf("%v", dbCredentials["password"])
 			db.Database = fmt.Sprintf("%v", dbCredentials["name"])
-			db.Host = fmt.Sprintf("%v", dbCredentials["hostname"])
-			db.Port = (int)(dbCredentials["port"].(float64))
-			db.SSLMode = "disable"
 			log.Infof("Discovered Cloud Foundry mysql service and applied config")
 			return true
 		}
 	}
-
 	return false
 }
 

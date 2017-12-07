@@ -1,7 +1,43 @@
 # Change Log
+
+## 0.9.9 Release Candidate 1 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.8...0.9.9)
+
+This is the first Release Candidate of the Stratos UI Console. It contains the following improvements:
+
+**Improvements:**
+
+- Open Source build now uses a generic theme [\#1403](https://github.com/SUSE/stratos-ui/pull/1403)
+- SUSE build uses SUSE theme and contains EULA in the about screen [\#1404](https://github.com/SUSE/stratos-ui/pull/1404)
+- Run Mariadb mysqld process as mysql user [\#1397](https://github.com/SUSE/stratos-ui/pull/1397)
+
+
+## 0.9.8 Beta-3 Release 2
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.7...0.9.8)
+
+This is an update of the third beta release of the Stratos UI Console. It contains the following bug fixes and improvements:
+
+**Improvements:**
+
+- Improve display of byte usage information for small numbers [\#1388](https://github.com/SUSE/stratos-ui/pull/1388)
+- Remove the yellow autocomplete background in dark form fields [\#1372](https://github.com/SUSE/stratos-ui/pull/1372)
+- Helm Chart: Create Image pull secret for secure repositories [\#1387](https://github.com/SUSE/stratos-ui/pull/1387)
+- Helm Chart: Remove `shared` mode [\#1385](https://github.com/SUSE/stratos-ui/pull/1385)
+
+**Fixes:**
+
+- Fix link shown on cf dashboard when no endpoints connected [\#1369](https://github.com/SUSE/stratos-ui/pull/1369)
+- Fix leak of Persistent volume claims when deleting Helm deployed release [\#1368](https://github.com/SUSE/stratos-ui/pull/1368)
+- Remove legacy images and associated files [\#1390](https://github.com/SUSE/stratos-ui/pull/1390)
+- Fix unsafe casting for mysql Service [\#1381](https://github.com/SUSE/stratos-ui/pull/1381)
+
 ## 0.9.7 Beta-3 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.6...0.9.7)
+
+This is the third beta release of the Stratos UI Console. It contains the following bug fixes:
 
 **Fixes:**
 - Updated Helm Chart to remove delete job when running in noShared mode [\#1364](https://github.com/SUSE/stratos-ui/pull/1364)

@@ -13,7 +13,7 @@ spec:
         component: "console"
     spec:
       containers:
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
         env:
         - name: ENCRYPTION_KEY_VOLUME
@@ -32,8 +32,7 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
-     {{- if .Values.noShared }}
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
         name: "postflight"
         env:
         - name: DB_HOST
@@ -83,8 +82,7 @@ spec:
             name: "{{ .Release.Name }}-upgrade-volume"
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
-     {{- end }}
-      - image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
         name: proxy
         env:
         - name: DB_USER
@@ -123,7 +121,6 @@ spec:
           value: "{{ .Release.Name }}-encryption-key-volume"
         - name: ENCRYPTION_KEY_FILENAME
           value: key
-        {{- if .Values.noShared }}
         {{- if .Values.consoleCert }}
         - name: CONSOLE_CERT
           value: | 
@@ -134,15 +131,12 @@ spec:
           value: |
 {{ .Values.consoleCertKey | indent 12 }}
         {{- end }}
-        {{- end }}
         - name: CONSOLE_PROXY_CERT_PATH
           value: "/{{ .Release.Name }}-encryption-key-volume/console.crt" 
         - name: CONSOLE_PROXY_CERT_KEY_PATH
           value: "/{{ .Release.Name }}-encryption-key-volume/console.key" 
         - name: NO_SHARED_MODE
-        {{- if .Values.noShared }}
           value: "true"
-        {{- end }}
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
           value: {{.Values.httpProxy}}
@@ -200,7 +194,7 @@ spec:
         - mountPath: /etc/secrets/
           name: "{{ .Release.Name }}-secret"
           readOnly: true
-      {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}
@@ -229,7 +223,7 @@ spec:
     spec:
       containers:
       - name: mariadb
-        image: {{.Values.dockerRegistry}}/{{.Values.dockerOrg}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
         env:
         {{- if .Values.mariadb.usePassword }}
         - name: MYSQL_ROOT_PASSWORD
@@ -274,7 +268,7 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /var/lib/mysql
-      {{- if .Values.dockerRegistrySecret }}
+      {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
       - name: {{.Values.dockerRegistrySecret}}
       {{- end }}

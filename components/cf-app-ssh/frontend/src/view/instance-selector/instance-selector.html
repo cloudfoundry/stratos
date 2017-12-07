@@ -21,7 +21,7 @@
           <td>{{ instance.state }}</td>
           <td class="instance-percent-gauge">
             <percent-gauge value="{{ instance.stats.usage.mem / instance.stats.mem_quota }}"
-                          value-text="{{ [instance.stats.usage.mem, instance.stats.mem_quota] | usageBytes:0 }}"/>
+                          value-text="{{ [instance.stats.usage.mem, instance.stats.mem_quota] | usageBytes }}"/>
           </td>
           <td class="instance-percent-gauge">
             <percent-gauge value="{{ instance.stats.usage.disk / instance.stats.disk_quota }}"

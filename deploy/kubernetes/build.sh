@@ -10,7 +10,8 @@ OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
 TAG_LATEST="false"
-while getopts ":ho:r:t:dTclb:O" opt; do
+STRATOS_BOWER=""
+while getopts ":ho:r:t:Tclb:Ou:" opt; do
   case $opt in
     h)
       echo
@@ -36,9 +37,6 @@ while getopts ":ho:r:t:dTclb:O" opt; do
       TAG="$(git describe $(git rev-list --tags --max-count=1))"
       RELEASE_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       ;;
-    d)
-      BUILD_DOCKER_COMPOSE_IMAGES="true"
-      ;;
     c)
       CONCOURSE_BUILD="true"
       ;;
@@ -47,6 +45,9 @@ while getopts ":ho:r:t:dTclb:O" opt; do
       ;;
     l)
       TAG_LATEST="true"
+      ;;
+    u)
+      STRATOS_BOWER="${OPTARG}"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -241,14 +242,6 @@ function buildProxy {
   buildAndPublishImage stratos-proxy deploy/Dockerfile.bk.k8s ${STRATOS_UI_PATH}
 }
 
-
-function buildPreflightJob {
-  # Build the preflight container
-  echo
-  echo "-- Build & publish the runtime container image for the preflight job"
-  buildAndPublishImage stratos-preflight-job ./deploy/db/Dockerfile.preflight-job ${STRATOS_UI_PATH}
-}
-
 function buildPostflightJob {
   # Build the postflight container
   echo
@@ -289,6 +282,7 @@ function buildUI {
     -e USER_NAME=$(id -nu) \
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
+    -e STRATOS_BOWER="${STRATOS_BOWER}" \
     -w /usr/src/app \
     ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-ui-build-base:${BASE_IMAGE_TAG} \
     /bin/bash ./deploy/provision.sh
@@ -318,7 +312,6 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-buildPreflightJob
 buildPostflightJob
 buildMariaDb
 buildUI
@@ -331,8 +324,8 @@ if [ ${CONCOURSE_BUILD:-"not-set"} == "not-set" ]; then
   sed -i -e 's/DOCKER_ORGANISATION/'"${DOCKER_ORG}"'/g' values.yaml
 else
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
-  sed -i -e 's/dockerOrg: splatform/dockerOrg: '"${DOCKER_ORG}"'/g' console/values.yaml
-  sed -i -e 's/dockerRegistry: docker.io/dockerRegistry: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
+  sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' console/values.yaml
+  sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
   
   sed -i -e 's/version: 0.1.0/version: '"${RELEASE_TAG}"'/g' console/Chart.yaml
 fi
