@@ -4,6 +4,10 @@
   &.endpoints-dashboard {
     .endpoints-table {
 
+      .endpoint-connected {
+        color: $state-success-text;
+      }
+
       .endpoint-table-connected {
         padding-top: 3px;
         padding-bottom: 0;
