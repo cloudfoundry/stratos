@@ -1,26 +1,17 @@
 language: node_js
 node_js:
-  - "8.4"
-
+- '8.4'
 branches:
   only:
-    - travis
-
+  - master
 install:
 - npm install
-
 cache:
   directories:
   - "/home/travis/.npm/"
-
 stages:
-  - Lint
-  - Unit Tests
-
-env:
-  global:
-    - CC_TEST_REPORTER_ID=90a5c9072bb9f64db6b04d02cffc2061b036ff6975a6d0559daa83b19679091b
-
+- Lint
+- Unit Tests
 jobs:
   include:
   - stage: Lint
@@ -29,14 +20,15 @@ jobs:
   - stage: Unit Tests
     env:
     - CI_ENV=true
+    - CC_TEST_REPORTER_ID=90a5c9072bb9f64db6b04d02cffc2061b036ff6975a6d0559daa83b19679091b
     before_script:
     - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
     - chmod +x ./cc-test-reporter
-    - ./cc-test-reporter before-build
+    - "./cc-test-reporter before-build"
     script:
     - npm test
     after_script:
-    - ./cc-test-reporter after-build -t lcov --exit-code $TRAVIS_TEST_RESULT
-
+    - "./cc-test-reporter after-build -t lcov --exit-code $TRAVIS_TEST_RESULT"
 notifications:
-  email: false
+  slack:
+    secure: WJrHbl0RE1HB8I2OySslBL9dMZFKBrc/R4zvyruKKRJhgxO1ZND5c+0xSH95vsv9gIbuEwQhPfK7awdQYgyvoTtoHcjSW9+Zap3GxU4dlAxqwo7xiAgPP8AkRFG+JLXJz68H7dLN2eGxSmG9DUVXQNTEUGtVdfIq73mz8dGEInjsTXPIeuSBtYVT3nQX2kaoyU9eWq/Nbxzo4qqua+h4GCunG0mBDr2P/1m3gqLOKFQ3tywWKE7nU7+yqB7FvGRUYLEFBh2VBCHL7oP5xT9Ex/J4Y5r/AEGxnda/lgAdx5L8IDLiiNUZtyxVR1dod++KafijE2Elrct1unwIYiHhwCQm67nb02KjZbNw1+ewcDym+maNbVP8jj2S1d3HhsMmMuR2Ka3PkEm7EamibQQt54TfIcVbQLztwJEJcgF2tGRpIVd3B7hIFf3vFYy1JEFQxbGeuVZRoGAHnxLMwlfo2EH06tOlB1gMIF66/9QZHrSNMsIeb+IWiakvEd3Fr+18/jEeso65KI4LzLmA2/gu8TVzQoFHqzApVtXuAdvnW9yqLqUJOVkbrQLe5aGMnl3NFWli4prTEjO9HVqgH/U/12eBFPSGb5w17DQnlP8wUuXyvr/jG7ch7vMicQH54cFkIM0aYsXMwjJZK5Hr1VpLQk6tqVhpApYPwoAsJfO9t28=
