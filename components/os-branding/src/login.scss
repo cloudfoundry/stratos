@@ -1,0 +1,70 @@
+$login-padding: 24px;
+$login-logo-size: 128px;
+$login-panel-width: 380px;
+$login-bg-color: #eee;
+
+.brand {
+
+  .landing-container {
+    .landing-content>.landing-spacer-content {
+      display: flex;
+      justify-content: center;
+      align-self: center;
+    }
+
+    login-form {
+      .login-form-spinner {
+        color: #333;
+
+        bounce-spinner > .bounce-spinner-sm > div {
+          background-color: #333;
+        }
+      }
+    }
+
+    .login-page {
+
+      justify-content: center;
+      margin-top: 0;
+
+      .login-left {
+        display: none
+      }
+
+      .login-right {
+        background-color: #f8f8f8;
+        padding: 24px 0;
+        border: 2px solid #ddd;
+        box-shadow: #ddd 0 0 20px 4px;
+
+        .login-form {
+          display: flex;
+          flex-direction: column;
+
+          .login-form-logo-image {
+            width: 280px;
+            align-self: center;
+            margin-top: 12px;
+            margin-bottom: 24px;
+          }
+
+          h1.login-form-title {
+            //display: none;
+            text-align: center;
+            font-weight: 500;
+          }
+        }
+      }
+    }
+  }
+
+  .landing-footer {
+    > .page-footer-items {
+      display: none;
+    }
+
+    .product-name .secondary {
+      color: $suse-blue;
+    }
+  }
+}

@@ -71,7 +71,7 @@
 
           <!--Endpoint Connection Status-->
           <td ng-switch="endpoint.getStatus()" class="endpoint-table-connected">
-            <span class="material-icons app-icon-lg text-primary endpoint-connected-icon"
+            <span class="material-icons app-icon-lg endpoint-connected endpoint-connected-icon"
                   ng-switch-when="connected">check_circle</span>
             <div ng-switch-when="unconnected"
                  uib-popover="{{ 'endpoints-dashboard.table.connection-disconnected' | translate }}"
