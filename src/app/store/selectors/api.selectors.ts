@@ -42,6 +42,7 @@ export function selectUpdateInfo(
     getUpdateSectionById(updatingKey),
     getEntityUpdateSections,
     getEntityById<RequestInfoState>(entityGuid),
+    getRequestEntityType<RequestInfoState>(entityType),
     getRequestInfoByRequestType(requestType),
   );
 }

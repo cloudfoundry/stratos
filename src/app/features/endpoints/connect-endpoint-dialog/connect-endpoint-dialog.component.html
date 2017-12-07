@@ -1,6 +1,6 @@
 <div class="connection-dialog__loading-wrapper">
-  <md-progress-bar class="connection-dialog__loading" [color]="(connectingError$ | async) && !(connecting$ | async) ? 'warn' : 'primary'"
-    [mode]="(connecting$ | async) ? 'query' : 'solid'">
+  <md-progress-bar class="connection-dialog__loading" [color]="(connectingError$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
+    [mode]="(isBusy$ | async) ? 'query' : 'solid'">
   </md-progress-bar>
 </div>
 <div class="connection-dialog">

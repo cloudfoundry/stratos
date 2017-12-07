@@ -1,7 +1,7 @@
 import { GetSystemInfo } from '../../../store/actions/system.actions';
 import { SystemEffects } from '../../../store/effects/system.effects';
 import { systemStoreNames } from '../../../store/types/system.types';
-import { cnsisStoreNames } from '../../../store/types/cnsis.types';
+import { cnsisStoreNames, CNSISModel } from '../../../store/types/cnsis.types';
 import { ActionState, RequestSectionKeys } from '../../../store/reducers/api-request-reducer/types';
 import { CNSISEffect } from '../../../store/effects/cnsis.effects';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
@@ -27,6 +27,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   endpointConnected$: Observable<boolean>;
   valid$: Observable<boolean>;
   canSubmit$: Observable<boolean>;
+
+  isBusy$: Observable<boolean>;
 
   connectingSub: Subscription;
   fetchSub: Subscription;
@@ -58,7 +60,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     ).map(request => request.fetching);
 
     this.endpointConnected$ = this.store.select(
-      selectEntity(
+      selectEntity<CNSISModel>(
         cnsisStoreNames.type,
         this.data.guid,
         cnsisStoreNames.section
@@ -67,19 +69,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       .do(request => {
         console.log(request);
       })
-      .filter(request => !!request)
-      .map(request => request.entity && request.entity.info && request.entity.info.user);
+      .map(request => !!(request && request.info && request.info.user));
 
     this.connecting$ =
-      update$.map(update => update.busy);
+      update$
+        .map(update => update.busy);
     this.connectingError$ = update$.map(update => update.error);
-    // this.endpointConnected$ = this.connecting$
-    //   .filter(busy => busy)
-    //   .distinctUntilChanged()
-    //   .mergeMap(() => update$.filter(update => !update.busy && !update.error))
-    //   .do(() => {
-    //     console.log('done');
-    //   });
 
     this.fetchSub = update$
       .pairwise()
@@ -99,12 +94,18 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.valid$ = this.endpointForm.valueChanges
       .map(() => this.endpointForm.valid);
 
+    this.isBusy$ = Observable.combineLatest(
+      this.connecting$.startWith(false),
+      this.fetchingInfo$.startWith(false)
+    )
+      .map(([connecting, fetchingInfo]) => connecting || fetchingInfo);
+
     this.canSubmit$ = Observable.combineLatest(
       this.connecting$.startWith(false),
       this.fetchingInfo$.startWith(false),
       this.valid$.startWith(false)
     )
-      .map(([connecting, gettingInfo, valid]) => !connecting && !gettingInfo && valid);
+      .map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid);
 
   }
   public endpointForm = this.fb.group({
