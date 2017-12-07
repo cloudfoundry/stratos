@@ -27,7 +27,11 @@ export class CreateEndpointCfStep2Component implements OnInit, IStepperStep, Aft
   constructor(store: Store<AppState>, public utilsService: UtilsService) {
     this.endpointUrls = store.select(cnsisEntitiesSelector)
       .map(cnsis => Object.values(cnsis).map(cnsi => {
-        return `${cnsi.api_endpoint.Scheme}://${cnsi.api_endpoint.Host}`;
+        if (cnsi.api_endpoint) {
+          return `${cnsi.api_endpoint.Scheme}://${cnsi.api_endpoint.Host}`;
+        } else {
+          return 'Unknown';
+        }
       }));
   }
 

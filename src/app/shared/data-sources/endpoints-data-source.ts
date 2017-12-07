@@ -78,8 +78,12 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
       if (filter && filter.filter && filter.filter.length > 0) {
         if (endpoint.name.indexOf(filter.filter) >= 0 ||
           endpoint.cnsi_type.indexOf(filter.filter) >= 0 ||
-          endpoint.api_endpoint.Scheme.indexOf(filter.filter) >= 0 ||
-          endpoint.api_endpoint.Host.indexOf(filter.filter) >= 0) {
+          (
+            endpoint.api_endpoint &&
+            endpoint.api_endpoint.Scheme.indexOf(filter.filter) >= 0 ||
+            endpoint.api_endpoint.Host.indexOf(filter.filter) >= 0
+          )
+        ) {
           this.filteredRows.push(endpoint);
         }
       } else {

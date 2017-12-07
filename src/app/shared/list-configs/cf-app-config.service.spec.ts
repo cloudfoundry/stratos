@@ -1,3 +1,10 @@
+import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { StoreModule } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../core/core.module';
+import { SharedModule } from '../shared.module';
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+import { DatePipe } from '@angular/common';
 import { TestBed, inject } from '@angular/core/testing';
 
 import { CfAppConfigService } from './cf-app-config.service';
@@ -5,7 +12,16 @@ import { CfAppConfigService } from './cf-app-config.service';
 describe('CfAppConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfAppConfigService]
+      providers: [
+        CfAppConfigService,
+        DatePipe
+      ],
+      imports: [
+        CommonModule,
+        CoreModule,
+        SharedModule,
+        createBasicStoreModule()
+      ]
     });
   });
 

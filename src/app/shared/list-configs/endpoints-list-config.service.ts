@@ -125,7 +125,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     {
       columnId: 'address',
       headerCell: () => 'Address',
-      cell: row => `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}`,
+      cell: row => row.api_endpoint ? `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}` : 'Unknown',
       sort: true,
       cellFlex: '5'
     },

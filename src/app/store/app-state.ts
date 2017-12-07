@@ -23,13 +23,13 @@ export interface IRequestEntityTypeState<T> {
 export interface IRequestDataState {
   cf: CfEntityDataState;
   other: {
-    endpoints: IRequestEntityTypeState<CNSISModel>;
+    endpoint: IRequestEntityTypeState<CNSISModel>;
   };
 }
 export interface IRequestState {
   cf: CfEntityRequestState;
   other: {
-    endpoints: IRequestEntityTypeState<RequestInfoState>
+    endpoint: IRequestEntityTypeState<RequestInfoState>
   };
 }
 

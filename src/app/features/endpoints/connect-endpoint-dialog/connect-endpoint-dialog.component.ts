@@ -57,7 +57,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         SystemEffects.guid,
         systemStoreNames.section
       )
-    ).map(request => request.fetching);
+    )
+      .filter(request => !!request)
+      .map(request => request.fetching);
 
     this.endpointConnected$ = this.store.select(
       selectEntity<CNSISModel>(
