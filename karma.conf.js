@@ -28,8 +28,8 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: process.env.CONCOURSE_ENV ? ['ChromeHeadless'] : ['Chrome'],
-    singleRun: false,
+    browsers: process.env.CI_ENV ? ['ChromeHeadless'] : ['Chrome'],
+    singleRun: process.env.CI_ENV ? true : false,
     files: [{
         pattern: './src/**/*.spec.ts',
         watched: false

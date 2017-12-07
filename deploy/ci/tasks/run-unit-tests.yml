@@ -16,7 +16,7 @@ run:
   args:
     - -exc
     - |
-      export CONCOURSE_ENV="true"
+      export CI_ENV="true"
       cd stra2ous/
       npm install
       npm test
