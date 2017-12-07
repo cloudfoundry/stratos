@@ -13,15 +13,22 @@ cache:
   directories:
   - "/home/travis/.npm/"
 
+stages:
+  - Lint
+  - Unit Tests
+  - e2e Tests
+    if: false
+
 jobs:
   include:
+  - stage: Lint
+    script:
+    - npm run lint
+  - stage: Unit Tests
+    env:
+    - CI_ENV=true
+    script:
+    - npm test
   - stage: e2e Tests
     script:
     - npm run e2e
-  - stage: Unit Tests
-    script:
-    - npm test
-  - stage: Lint
-    script:
-    - npm build
-    - npm run lint
