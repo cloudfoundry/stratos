@@ -3,9 +3,14 @@ resources:
   type: git
   source:
     branch: {{stratos-ui-branch}}
-    private_key: {{github-private-key}}
-    uri: git@github.com:suse/stratos-ui.git
+    uri: https://github.com/SUSE/stratos-ui.git
     tag_filter: "[0-9]*"
+- name: helm-charts-repository
+  type: git
+  source:
+    branch: master
+    private_key: {{github-private-key}}
+    uri: {{release-helm-repo}}
 - name: helm-chart-values
   type: s3
   source:
@@ -69,6 +74,7 @@ groups:
   - update-repo
   - create-sle-chart
   - update-github-release
+  - sync-sle-release
 
 jobs:
 - name: build-opensuse-helm-images
@@ -192,3 +198,34 @@ jobs:
         CHANDLER_GITHUB_API_TOKEN: {{github-access-token}}
         GITHUB_USER: {{github-organization}}
         GITHUB_REPO: {{github-repository}}
+
+- name: sync-sle-release
+  plan:
+  - get: stratos-ui
+    passed: [create-sle-chart]
+    trigger: true
+  - get: helm-charts-repository
+  - get: helm-chart-Chart-sle
+    passed: [build-sle-helm-images]
+  - get: helm-chart-values-sle
+    passed: [build-sle-helm-images]
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/release/sync-official-release.yml
+      params:
+        GITHUB_TOKEN: {{github-access-token}}
+        GIT_USER: {{concourse-user}}
+        GIT_EMAIL: {{concourse-email}}
+        GIT_PRIVATE_KEY: {{github-private-key}}
+        STAGING_REPOSITORY: {{staging-repository}}
+        STAGING_REPOSITORY_USERNAME: {{staging-repository-username}}
+        STAGING_REPOSITORY_PASSWORD: {{staging-repository-password}}
+        STAGING_REPOSITORY_ORG: {{staging-repository-organization}}
+        RELEASE_REPOSITORY: {{release-repository}}
+        RELEASE_REPOSITORY_USERNAME: {{release-repository-username}}
+        RELEASE_REPOSITORY_PASSWORD: {{release-repository-password}}
+        RELEASE_REPOSITORY_ORG: {{release-repository-organization}}
+        RELEASE_HELM_STABLE_FOLDER: {{release-helm-stable-folder}}
+        RELEASE_SCRIPT: {{release-script}}
