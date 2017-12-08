@@ -96,7 +96,6 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
   keys.forEach(key => {
     defaultState[key] = {};
     if (initialSections && initialSections[key] && initialSections[key].length) {
-      console.log(initialSections);
       initialSections[key].forEach(sectionKey => {
         defaultState[key][sectionKey] = { ...defaultActionState };
       });

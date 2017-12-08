@@ -29,13 +29,18 @@ export class VariablesTabComponent implements OnInit {
     this.envVarsDataSource = listConfig.getDataSource() as CfAppEvnVarsDataSource;
   }
 
+  envVarsNames$: Observable<String[]>;
   envVars$: Observable<any>;
   cardComponent = CardAppVariableComponent;
   envVarsDataSource: CfAppEvnVarsDataSource;
+  envVarNames: string[];
 
   ngOnInit() {
-    this.envVars$ = this.appService.waitForAppEntity$.map(app => {
+    this.envVarsNames$ = this.appService.waitForAppEntity$.map(app => {
       return app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [];
+    });
+    this.envVars$ = this.appService.waitForAppEntity$.map(app => {
+      return app.entity.entity.environment_json || {};
     });
   }
 

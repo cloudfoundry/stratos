@@ -35,7 +35,7 @@ export class SystemEffects {
         .mergeMap((info: SystemInfo) => {
           return [new GetSystemSuccess(info), new WrapperNoneCFActionSuccess({ entities: {}, result: [] }, apiAction)];
         }).catch((e) => {
-          return [new GetSystemFailed(), new WrapperNoneCFActionFailed('Could not connect', apiAction)];
+          return [new GetSystemFailed(), new WrapperNoneCFActionFailed('Could not fetch system info', apiAction)];
         });
     });
 }

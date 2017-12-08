@@ -3,6 +3,7 @@ import { CfAppConfigService } from '../../../shared/list-configs/cf-app-config.s
 import { CardAppComponent } from '../../../shared/components/cards/custom-cards/card-app/card-app.component';
 import { Component } from '@angular/core';
 import { animate, query, style, transition, trigger } from '@angular/animations';
+import { EndpointsService } from '../../../core/endpoints.service';
 @Component({
   selector: 'app-application-wall',
   templateUrl: './application-wall.component.html',
@@ -26,6 +27,6 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 })
 export class ApplicationWallComponent {
 
-  constructor() { }
+  constructor(public endpointsService: EndpointsService) { }
   cardComponent = CardAppComponent;
 }

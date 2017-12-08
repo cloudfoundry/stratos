@@ -7,6 +7,7 @@ import { ListConfig } from '../../../shared/components/list/list.component';
 import { EndpointsListConfigService } from '../../../shared/list-configs/endpoints-list-config.service';
 import { Component } from '@angular/core';
 import { AppState } from '../../../store/app-state';
+import { EndpointsService } from '../../../core/endpoints.service';
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
   return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
@@ -23,7 +24,7 @@ function getEndpointTypeString(endpoint: CNSISModel): string {
 })
 export class EndpointsPageComponent {
   cardComponent = CardComponent;
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppState>, public endpointsService: EndpointsService) {
     this.store.dispatch(new GetSystemInfo());
   }
 }
