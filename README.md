@@ -17,7 +17,7 @@ browser extension](https://www.zenhub.com/extension)
 # Deploying Stratos
 Please see the [Development Guide](docs/developers-guide.md).
 
-# Further reading
+# Further Reading
 Get an [overview](docs/overview.md) of Stratos and it's components.
 
 Browse through features and issues in the project's [issues](https://github.com/SUSE/stratos/issues) page or [Zenhub Board](https://github.com/SUSE/stratos#boards).
@@ -27,7 +27,7 @@ Get started with development via the [Development Guide](docs/developers-guide.m
 
 What kind of code is in Stratos? We've integrated [Code Climate](https://codeclimate.com) for some code quality and maintainability metrics. Take a stroll around the [project page](https://codeclimate.com/github/SUSE/stratos)
 
-# Support and feedback
+# Support and Feedback
 
 We have a channel (#stratos) on the Cloud Foundy Slack where you can ask questions, get support or give us feedback. We'd love to hear from you if you are using Stratos.
 
