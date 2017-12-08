@@ -2,6 +2,14 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v1
+    created: 2017-12-08T13:21:38.611521378Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 8e8994171cf7ba37c4b37564c8efa07f1fd66dda347900b592ebfaae5407bf3d
+    name: console
+    urls:
+    - https://github.com/SUSE/stratos-ui/releases/download/0.9.9/console-helm-chart-0.9.9.tgz
+    version: 0.9.9
+  - apiVersion: v1
     created: 2017-11-23T16:31:10.781104928Z
     description: A Helm chart for deploying Stratos UI Console
     digest: 97bdf40f53053815016e223d49082ba16984b9b5a0a5a2d237ef45bb42183ad8
@@ -57,4 +65,4 @@ entries:
     urls:
     - https://github.com/suse/stratos-ui/releases/download/0.9.0/console-helm-chart-0.9.0.tgz
     version: 0.9.0
-generated: 2017-11-23T16:31:10.780380577Z
+generated: 2017-12-08T13:21:38.610522311Z
