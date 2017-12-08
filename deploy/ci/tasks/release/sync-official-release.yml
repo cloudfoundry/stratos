@@ -33,7 +33,7 @@ run:
       # Sync the release images and make a PR for the Helm Chart Release
       
       # Fetch the sync script - this will fail if we can not get the script
-      curl --fail -H 'Authorization: token ${GITHUB_TOKEN}' -H 'Accept: application/vnd.github.v3.raw' -O -L ${RELEASE_SCRIPT}
+      curl --fail -H "Authorization: token ${GITHUB_TOKEN}" -H 'Accept: application/vnd.github.v3.raw' -O -L ${RELEASE_SCRIPT}
       chmod +x release.sh
 
       # The script uses these environment variables:
@@ -89,6 +89,7 @@ run:
       git commit -m "Stratos UI Console Helm Chart for release ${GIT_TAG}"
 
       # Create the branch upsteram
+      git config --global push.default simple
       git push origin ${BRANCH}
 
       # TODO: Automatically create a PR

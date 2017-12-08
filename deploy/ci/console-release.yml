@@ -3,7 +3,8 @@ resources:
   type: git
   source:
     branch: {{stratos-ui-branch}}
-    uri: https://github.com/SUSE/stratos-ui.git
+    uri: git@github.com:SUSE/stratos-ui.git
+    private_key: {{github-private-key}}
     tag_filter: "[0-9]*"
 - name: helm-charts-repository
   type: git
@@ -205,6 +206,7 @@ jobs:
     passed: [create-sle-chart]
     trigger: true
   - get: helm-charts-repository
+    passed: [update-github-release]
   - get: helm-chart-Chart-sle
     passed: [build-sle-helm-images]
   - get: helm-chart-values-sle
