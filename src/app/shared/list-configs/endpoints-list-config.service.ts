@@ -20,6 +20,7 @@ import { GetSystemInfo } from '../../store/actions/system.actions';
 import {
   TableCellEndpointStatusComponent
 } from '../components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { ShowSnackBar } from '../../store/actions/snackBar.actions';
 
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
@@ -77,6 +78,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
         .subscribe(([oldVal, newVal]) => {
           if (!newVal.error && (oldVal.busy && !newVal.busy)) {
             // Has finished fetching
+            this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
             this.store.dispatch(new GetSystemInfo());
             disSub.unsubscribe();
           }

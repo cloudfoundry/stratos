@@ -13,7 +13,7 @@ export class SnackBarEffects {
   ) { }
   @Effect({ dispatch: false }) getInfo$ = this.actions$.ofType<ShowSnackBar>(SHOW_SNACK_BAR)
     .map(action => {
-      const snackBarRef = this.snackBar.open(action.message, 'OK', {
+      const snackBarRef = this.snackBar.open(action.message, null, {
         duration: 5000
       });
     });

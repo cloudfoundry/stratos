@@ -10,10 +10,11 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ConnectCnis, EndpointSchema } from '../../../store/actions/cnsis.actions';
 import { Store } from '@ngrx/store';
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { MdDialogRef, MD_DIALOG_DATA } from '@angular/material';
+import { MdDialogRef, MD_DIALOG_DATA, MdSnackBar } from '@angular/material';
 import { AppState } from '../../../store/app-state';
 import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
+import { ShowSnackBar } from '../../../store/actions/snackbar.actions';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -44,6 +45,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     public store: Store<AppState>,
     public fb: FormBuilder,
     public dialogRef: MdDialogRef<ConnectEndpointDialogComponent>,
+    public snackBar: MdSnackBar,
     @Inject(MD_DIALOG_DATA) public data: {
       name: string,
       guid: string
@@ -66,6 +68,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.connectingSub = this.endpointConnected$
       .filter(connected => connected)
       .subscribe(() => {
+        this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
       });
   }
