@@ -17,7 +17,6 @@ import { ApplicationServiceMock } from '../../../../test-framework/application-s
 describe('VariablesTabComponent', () => {
   let component: VariablesTabComponent;
   let fixture: ComponentFixture<VariablesTabComponent>;
-  let appService: ApplicationService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -44,9 +43,6 @@ describe('VariablesTabComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(VariablesTabComponent);
     component = fixture.componentInstance;
-
-    appService = fixture.debugElement.injector.get(ApplicationService);
-    appService.setApplication('01ccda9d-8f40-4dd0-bc39-08eea68e364f', '4e4858c4-24ab-4caf-87a8-7703d1da58a0');
 
     fixture.detectChanges();
   });

@@ -39,54 +39,12 @@ export interface ApplicationData {
 export class ApplicationService {
 
   constructor(
+    public cfGuid: string,
+    public appGuid: string,
     private store: Store<AppState>,
     private entityService: EntityService,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsService) {
-  }
-
-  // NJ: This needs to be cleaned up. So much going on!
-  isFetchingApp$: Observable<boolean>;
-  isUpdatingApp$: Observable<boolean>;
-
-  isDeletingApp$: Observable<boolean>;
-
-  isFetchingEnvVars$: Observable<boolean>;
-  isUpdatingEnvVars$: Observable<boolean>;
-  isFetchingStats$: Observable<boolean>;
-
-  app$: Observable<EntityInfo>;
-  waitForAppEntity$: Observable<EntityInfo>;
-  appSummary$: Observable<AppMetadataInfo>;
-  appStatsGated$: Observable<null | AppMetadataInfo>;
-  appEnvVars$: Observable<AppMetadataInfo>;
-
-  application$: Observable<ApplicationData>;
-  applicationStratProject$: Observable<EnvVarStratosProject>;
-  applicationState$: Observable<ApplicationStateData>;
-
-  appGuid: string;
-  cfGuid: string;
-
-  isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
-    if (requestInfo) {
-      return !requestInfo.fetching;
-    } else {
-      return !!value;
-    }
-  }
-
-  isMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
-    if (requestInfo) {
-      return !requestInfo.fetching;
-    } else {
-      return !!value;
-    }
-  }
-
-  setApplication(cfGuid, appGuid) {
-    this.appGuid = appGuid;
-    this.cfGuid = cfGuid;
 
     // First set up all the base observables
     this.app$ = this.entityService.entityObs$;
@@ -181,7 +139,42 @@ export class ApplicationService {
 
     this.isFetchingStats$ =
       this.appStatsGated$.map(appStats => appStats ? appStats.metadataRequestState.updating.busy : false).startWith(false);
+  }
 
+  // NJ: This needs to be cleaned up. So much going on!
+  isFetchingApp$: Observable<boolean>;
+  isUpdatingApp$: Observable<boolean>;
+
+  isDeletingApp$: Observable<boolean>;
+
+  isFetchingEnvVars$: Observable<boolean>;
+  isUpdatingEnvVars$: Observable<boolean>;
+  isFetchingStats$: Observable<boolean>;
+
+  app$: Observable<EntityInfo>;
+  waitForAppEntity$: Observable<EntityInfo>;
+  appSummary$: Observable<AppMetadataInfo>;
+  appStatsGated$: Observable<null | AppMetadataInfo>;
+  appEnvVars$: Observable<AppMetadataInfo>;
+
+  application$: Observable<ApplicationData>;
+  applicationStratProject$: Observable<EnvVarStratosProject>;
+  applicationState$: Observable<ApplicationStateData>;
+
+  isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
+    if (requestInfo) {
+      return !requestInfo.fetching;
+    } else {
+      return !!value;
+    }
+  }
+
+  isMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
+    if (requestInfo) {
+      return !requestInfo.fetching;
+    } else {
+      return !!value;
+    }
   }
 
   updateApplication(updatedApplication: UpdateApplication) {

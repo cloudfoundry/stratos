@@ -46,7 +46,6 @@ export class ApplicationServiceMock {
       }
     }
   } as EntityInfo);
-  setApplication() { }
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
@@ -57,12 +56,13 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
     applicationEnvVarsService: ApplicationEnvVarsService
   ) => {
     const appService = new ApplicationService(
+      cfGuid,
+      appGuid,
       store,
       entityService,
       applicationStateService,
       applicationEnvVarsService
     );
-    appService.setApplication(cfGuid, appGuid);
     return appService;
   };
   return {

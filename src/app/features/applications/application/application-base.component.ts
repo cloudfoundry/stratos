@@ -1,3 +1,4 @@
+import { ApplicationEnvVarsService } from './build-tab/application-env-vars.service';
 import { AppMetadataType } from '../../../store/types/app-metadata.types';
 import { AppMetadataProperties, GetAppMetadataAction } from '../../../store/actions/app-metadata.actions';
 import { EntityService } from '../../../core/entity-service';
@@ -11,6 +12,25 @@ import { DeleteApplication, GetApplication, UpdateApplication, ApplicationSchema
 import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
 import { RouterNav } from '../../../store/actions/router.actions';
+import { ApplicationStateService } from './build-tab/application-state/application-state.service';
+
+const applicationServiceFactory = (
+  store: Store<AppState>,
+  activatedRoute: ActivatedRoute,
+  entityService: EntityService,
+  appStateService: ApplicationStateService,
+  appEnvVarsService: ApplicationEnvVarsService
+) => {
+  const { id, cfId } = activatedRoute.snapshot.params;
+  return new ApplicationService(
+    cfId,
+    id,
+    store,
+    entityService,
+    appStateService,
+    appEnvVarsService,
+  );
+};
 
 const entityServiceFactory = (
   store: Store<AppState>,
@@ -33,6 +53,11 @@ const entityServiceFactory = (
   styleUrls: ['./application-base.component.scss'],
   providers: [
     ApplicationService,
+    {
+      provide: ApplicationService,
+      useFactory: applicationServiceFactory,
+      deps: [Store, ActivatedRoute, EntityService, ApplicationStateService, ApplicationEnvVarsService]
+    },
     {
       provide: EntityService,
       useFactory: entityServiceFactory,
@@ -138,15 +163,13 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.setAppDefaults();
 
-    this.route.params.first().subscribe(params => {
-      const { id, cfId } = params;
-      this.applicationService.setApplication(cfId, id);
-      this.isFetching$ = this.applicationService.isFetchingApp$;
-      // Auto refresh
-      this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
-        this.store.dispatch(new GetAppMetadataAction(id, cfId, AppMetadataProperties.SUMMARY as AppMetadataType));
-      }).subscribe());
-    });
+    const { cfGuid, appGuid } = this.applicationService;
+    this.isFetching$ = this.applicationService.isFetchingApp$;
+
+    // Auto refresh
+    this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
+      this.store.dispatch(new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType));
+    }).subscribe());
 
     const initialFetch$ = Observable.combineLatest(
       this.applicationService.isFetchingApp$,
