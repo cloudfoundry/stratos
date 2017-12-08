@@ -14,20 +14,20 @@ import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from '@angular/material';
 
-export class ListConfig implements IListConfig<any> {
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
-  getColumns = () => null;
-  getDataSource = () => null;
-}
-
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
   getMultiActions: () => IMultiListAction<T>[];
   getSingleActions: () => IListAction<T>[];
   getColumns: () => ITableColumn<T>[];
   getDataSource: () => CfListDataSource<T> | LocalListDataSource<T>;
+}
+
+export class ListConfig implements IListConfig<any> {
+  getGlobalActions = () => null;
+  getMultiActions = () => null;
+  getSingleActions = () => null;
+  getColumns = () => null;
+  getDataSource = () => null;
 }
 
 export interface IBaseListAction<T> {

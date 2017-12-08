@@ -1,3 +1,4 @@
+import { CardComponent } from '../../../shared/components/cards/card/card.component';
 import { GetSystemInfo } from './../../../store/actions/system.actions';
 import { SystemEffects } from './../../../store/effects/system.effects';
 import { Store } from '@ngrx/store';
@@ -21,6 +22,7 @@ function getEndpointTypeString(endpoint: CNSISModel): string {
   }]
 })
 export class EndpointsPageComponent {
+  cardComponent = CardComponent;
   constructor(private store: Store<AppState>) {
     this.store.dispatch(new GetSystemInfo());
   }

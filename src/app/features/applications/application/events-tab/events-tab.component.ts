@@ -1,3 +1,4 @@
+import { CardComponent } from '../../../../shared/components/cards/card/card.component';
 import { CfAppEventsConfigService } from '../../../../shared/list-configs/cf-app-events-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component';
 import { Component } from '@angular/core';
@@ -13,6 +14,6 @@ import { Component } from '@angular/core';
 })
 
 export class EventsTabComponent {
-
+  cardComponent = CardComponent;
   constructor() { }
 }
