@@ -3,12 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { CNSISModel, CNSISState, cnsisStoreNames } from '../../../store/types/cnsis.types';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { AppState, IRequestEntityTypeState } from '../../../store/app-state';
 import { AuthUser, selectSessionData } from '../../../store/reducers/auth.reducer';
 import { CfAuthPrinciple } from './principal';
 import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';
 import { cnsisEntitiesSelector } from '../../../store/selectors/cnsis.selectors';
-import { APIEntities } from '../../../store/types/api.types';
 
 /**
  * NOTE - WIP
@@ -23,7 +22,7 @@ import { APIEntities } from '../../../store/types/api.types';
 export class CfAuthService {
 
 
-  endpoints$: Observable<APIEntities<CNSISModel>>;
+  endpoints$: Observable<IRequestEntityTypeState<CNSISModel>>;
   sessionData$: Observable<SessionData>;
   // WIP: RC Initialise previously released promise when all init requests finished. For the time being use this, then make selector
   initialised$: Observable<boolean>;
@@ -55,7 +54,7 @@ export class CfAuthService {
     Observable.combineLatest(
       this.endpoints$.take(1),
       this.sessionData$,
-    ).subscribe(([cnsis, session]: [APIEntities<CNSISModel>, SessionData]) => {
+    ).subscribe(([cnsis, session]: [IRequestEntityTypeState<CNSISModel>, SessionData]) => {
       this.session = session;
       Object.values(cnsis).forEach(cnsi => {
         if (cnsi.registered) {

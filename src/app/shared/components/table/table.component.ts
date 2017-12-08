@@ -15,7 +15,7 @@ import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Subscription } from 'rxjs/Subscription';
-import { IListDataSource } from '../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from './table.types';
 
 @Component({

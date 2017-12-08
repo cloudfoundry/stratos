@@ -10,7 +10,6 @@ import { AppState } from '../../store/app-state';
   styleUrls: ['./log-out-dialog.component.scss']
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
-
   constructor(
     public dialogRef: MdDialogRef<LogOutDialogComponent>,
     @Optional() @Inject(MD_DIALOG_DATA) public data: any,

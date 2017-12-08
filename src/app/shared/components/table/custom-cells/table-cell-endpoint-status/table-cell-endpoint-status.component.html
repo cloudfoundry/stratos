@@ -1,4 +1,4 @@
 <div>
-  <md-icon *ngIf="row.registered === true">cloud_done</md-icon>
-  <md-icon *ngIf="row.registered === false">cloud_off</md-icon>
+  <md-icon *ngIf="row.info && row.info.user">cloud_done</md-icon>
+  <md-icon *ngIf="!row.info || !row.info.user">cloud_off</md-icon>
 </div>

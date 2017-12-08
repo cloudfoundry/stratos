@@ -1,8 +1,11 @@
-import { NormalizedResponse } from '../types/api.types';
+import { APIResource, NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
   ConnectCnis,
+  DISCONNECT_CNSIS,
+  DisconnectCnis,
+  EndpointSchema,
   GET_CNSIS,
   GetAllCNSIS,
   GetAllCNSISFailed,
@@ -15,12 +18,18 @@ import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
 import {
-  IAPIAction, NoneCFSuccessAction, StartNoneCFAction, WrapperNoneCFActionFailed, WrapperNoneCFActionSuccess
+  IAPIAction,
+  StartNoneCFAction,
+  WrapperNoneCFActionFailed,
+  WrapperNoneCFActionSuccess,
 } from '../types/request.types';
 
 
 @Injectable()
 export class CNSISEffect {
+
+  static connectingKey = 'connecting';
+  static disconnectingKey = 'disconnecting';
 
   constructor(
     private http: Http,
@@ -51,12 +60,13 @@ export class CNSISEffect {
         .mergeMap(data => {
           const mappedData = {
             entities: {
-              cnsis: {}
+              [cnsisStoreNames.type]: {}
             },
             result: []
-          };
+          } as NormalizedResponse;
+
           data.forEach(cnsi => {
-            mappedData.entities.cnsis[cnsi.guid] = cnsi;
+            mappedData.entities[cnsisStoreNames.type][cnsi.guid] = cnsi;
             mappedData.result.push(cnsi.guid);
           });
           // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
@@ -78,18 +88,23 @@ export class CNSISEffect {
       const actionType = 'update';
       const apiAction = {
         entityKey: cnsisStoreNames.type,
-        guid: action.cnsiGuid,
-        updatingKey: 'connecting',
+        guid: action.guid,
+        type: action.type,
+        updatingKey: CNSISEffect.connectingKey,
       } as IAPIAction;
+
+      const headers = new Headers();
+      headers.append('Content-Type', 'application/x-www-form-urlencoded');
+      const params: URLSearchParams = new URLSearchParams();
+      params.append('cnsi_guid', action.guid);
+      params.append('username', action.username);
+      params.append('password', action.password);
+
       this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
-      return this.http.post('/pp/v1/auth/login/cnsi', {}, {
-        params: {
-          cnsi_guid: action.cnsiGuid,
-          username: action.username,
-          password: action.password
-        }
-      }).do(() => {
-        // return this.store.dispatch(new WrapperNoneCFActionFailed('Could not connect', apiAction));
+      return this.http.post('/pp/v1/auth/login/cnsi', params, {
+        headers
+      }).map(endpoint => {
+        return new WrapperNoneCFActionSuccess({ entities: {}, result: [] }, apiAction, 'update');
       })
         .catch(e => {
           return [new WrapperNoneCFActionFailed('Could not connect', apiAction, actionType)];

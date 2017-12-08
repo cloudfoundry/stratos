@@ -8,14 +8,12 @@ import { SortDirection } from '@angular/material';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { APIResource } from '../../store/types/api.types';
-import { ListActions } from './list=data-source-types';
+import { ListActions } from './list-data-source-types';
 
 
 export class CfAppsDataSource extends CfListDataSource<APIResource> {
 
   cfFilterSub: Subscription;
-
-  actions: ListActions<APIResource>;
 
   constructor(
     _store: Store<AppState>,
@@ -30,11 +28,10 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
       (object: APIResource) => {
         return object.entity.metadata ? object.entity.metadata.guid : null;
       },
-      {} as APIResource,
+      () => ({} as APIResource),
       paginationKey
     );
 
-    this.actions = new ListActions();
     _store.dispatch(new SetListStateAction(
       paginationKey,
       'cards',

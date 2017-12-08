@@ -1,11 +1,11 @@
 import { RequestAction, SingleEntityAction } from '../../types/request.types';
-import { CfEntitiesState } from '../../types/entity.types';
+import { CfEntityDataState } from '../../types/entity.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
-import { defaultDeletingActionState, defaultRequestState, RequestState, rootUpdatingKey } from './types';
+import { defaultActionState, defaultDeletingActionState, defaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 
 
-export function getEntityRequestState(state, action: SingleEntityAction): RequestState {
+export function getEntityRequestState(state, action: SingleEntityAction): RequestInfoState {
   const { entityKey, guid } = action;
   const requestState = { ...state[entityKey][guid] };
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
@@ -68,7 +68,7 @@ export function getRequestTypeFromMethod(method): ApiRequestTypes {
   return 'fetch';
 }
 
-export function modifyRequestWithRequestType(requestState: RequestState, type: ApiRequestTypes) {
+export function modifyRequestWithRequestType(requestState: RequestInfoState, type: ApiRequestTypes) {
   if (type === 'fetch') {
     requestState.fetching = true;
   } else if (type === 'create') {
@@ -88,10 +88,18 @@ export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
   };
 }
 
-export function generateDefaultState(keys: Array<string>) {
+export function generateDefaultState(keys: Array<string>, initialSections?: {
+  [key: string]: string[];
+}) {
   const defaultState = {};
+
   keys.forEach(key => {
     defaultState[key] = {};
+    if (initialSections && initialSections[key] && initialSections[key].length) {
+      initialSections[key].forEach(sectionKey => {
+        defaultState[key][sectionKey] = { ...defaultActionState };
+      });
+    }
   });
   return defaultState;
 }

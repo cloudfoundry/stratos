@@ -1,4 +1,4 @@
-import { IListDataSource } from '../../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../../data-sources/list-data-source-types';
 
 export abstract class TableCellCustom<T> {
   dataSource: IListDataSource<T>;

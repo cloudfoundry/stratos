@@ -1,25 +1,38 @@
+import { RequestInfoState } from './reducers/api-request-reducer/types';
+import { APIResource } from './types/api.types';
 import { RouterReducerState } from '@ngrx/router-store';
 import { RouterStateSnapshot } from '@angular/router';
-import { CNSISState } from './types/cnsis.types';
+import { CNSISState, CNSISModel } from './types/cnsis.types';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { PaginationState } from './types/pagination.types';
 import { MetadataState } from './types/app-metadata.types';
 import { CreateNewApplicationState } from './types/create-application.types';
-import { CfEntitiesState } from './types/entity.types';
+import { CfEntityDataState, CfEntityRequestState } from './types/entity.types';
 import { ActionHistoryState } from './reducers/action-history-reducer';
 import { UAASetupState } from './types/uaa-setup.types';
 import { ListsState } from './reducers/list.reducer';
 
-export interface IStateHasEntities {
-  cf: CfEntitiesState;
+export interface IRequestTypeState {
+  [entityKey: string]: IRequestEntityTypeState<any>;
+}
+export interface IRequestEntityTypeState<T> {
+  [guid: string]: T;
 }
 
-export interface IRequestState extends IStateHasEntities {
+export interface IRequestDataState {
+  cf: CfEntityDataState;
   other: {
-    cnsis: any;
+    endpoint: IRequestEntityTypeState<CNSISModel>;
   };
 }
+export interface IRequestState {
+  cf: CfEntityRequestState;
+  other: {
+    endpoint: IRequestEntityTypeState<RequestInfoState>
+  };
+}
+
 
 export interface AppState {
   actionHistory: ActionHistoryState;
@@ -28,7 +41,7 @@ export interface AppState {
   cnsis: CNSISState;
   pagination: PaginationState;
   request: IRequestState;
-  requestData: IRequestState;
+  requestData: IRequestDataState;
   dashboard: DashboardState;
   appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;

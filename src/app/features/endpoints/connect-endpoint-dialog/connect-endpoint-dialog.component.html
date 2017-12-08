@@ -1,0 +1,25 @@
+<div class="connection-dialog__loading-wrapper">
+  <md-progress-bar class="connection-dialog__loading" [color]="(connectingError$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
+    [mode]="(isBusy$ | async) ? 'query' : 'solid'">
+  </md-progress-bar>
+</div>
+<div class="connection-dialog">
+  <h2 md-dialog-title>
+    Connect to {{ data.name }}
+  </h2>
+  <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
+    <md-dialog-content class="connection-dialog__content">
+      <md-form-field>
+        <input mdInput placeholder="Username" formControlName="username">
+      </md-form-field>
+      <md-form-field>
+        <input mdInput placeholder="Password" type="password" formControlName="password">
+      </md-form-field>
+    </md-dialog-content>
+    <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>
+    <md-dialog-actions>
+      <button type="submit" [disabled]="!(canSubmit$ | async)" md-button color="primary">Connect</button>
+      <button [mat-dialog-close]="true" md-button color="warn">Cancel</button>
+    </md-dialog-actions>
+  </form>
+</div>

@@ -7,11 +7,11 @@ import { Observable } from 'rxjs/Observable';
 import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
 import { LocalListDataSource } from './list-data-source-local';
 import { ApplicationService } from '../../features/applications/application.service';
-import { EntityInfo, APIEntities } from '../../store/types/api.types';
+import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
-import { ListActionConfig, ListActions } from './list=data-source-types';
+import { ListActionConfig, ListActions } from './list-data-source-types';
 
 export interface AppEnvVar {
   name: string;
@@ -20,19 +20,6 @@ export interface AppEnvVar {
 
 export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
 
-  private static listActionDelete: ListActionConfig<AppEnvVar> = {
-    createAction: (dataSource: CfAppEvnVarsDataSource, items: APIEntities<AppEnvVar>): Action => {
-      return new AppVariablesDelete(dataSource.cfGuid, dataSource.appGuid, dataSource.rows, Array.from(dataSource.selectedRows.values()));
-    },
-    icon: 'delete',
-    label: 'Delete',
-    description: '',
-    visible: (row: AppEnvVar) => true,
-    enabled: (row: AppEnvVar) => true,
-  };
-
-  // Only needed for unique filter when adding new env vars
-  private rowNames: Array<string> = new Array<string>();
   // Only needed for update purposes
   public rows = new Array<AppEnvVar>();
 
@@ -42,8 +29,6 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   filteredRows = new Array<AppEnvVar>();
   isLoadingPage$: Observable<boolean>;
   data$: any;
-
-  actions = new ListActions();
 
   private static key(_cfGuid: string, _appGuid: string) {
     return `app-variables:${_cfGuid}:${_appGuid}`;
@@ -58,9 +43,11 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
       (object: AppEnvVar) => {
         return object.name;
       },
-      {
-        name: '',
-        value: '',
+      (): AppEnvVar => {
+        return {
+          name: '',
+          value: '',
+        };
       },
       { active: 'name', direction: 'asc' },
       CfAppEvnVarsDataSource.key(_appService.cfGuid, _appService.appGuid)
@@ -86,14 +73,8 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
         filter: ''
       }));
 
-    this.actions.multiActions.push(CfAppEvnVarsDataSource.listActionDelete);
-
-    this.isLoadingPage$ = _appService.isFetchingApp$.combineLatest(
-      _appService.isFetchingEnvVars$,
-      _appService.isUpdatingEnvVars$
-    ).map(([isFetchingApp, isFetchingEnvVars, isUpdatingEnvVars]: [boolean, boolean, boolean]) => {
-      return isFetchingApp || isFetchingEnvVars || isUpdatingEnvVars;
-    });
+    // The _appService may not have been set up yet, create the actual observable on 'connect'
+    this.isLoadingPage$ = Observable.of(true);
   }
 
   saveAdd() {
@@ -111,6 +92,13 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   }
 
   connect(): Observable<AppEnvVar[]> {
+    this.isLoadingPage$ = this._appService.isFetchingApp$.combineLatest(
+      this._appService.isFetchingEnvVars$,
+      this._appService.isUpdatingEnvVars$
+    ).map(([isFetchingApp, isFetchingEnvVars, isUpdatingEnvVars]: [boolean, boolean, boolean]) => {
+      return isFetchingApp === null || isFetchingApp || isFetchingEnvVars || isUpdatingEnvVars;
+    });
+
     this.data$ = this._appService.waitForAppEntity$.map((app: EntityInfo) => {
       const rows = new Array<AppEnvVar>();
       const envVars = app.entity.entity.environment_json;
@@ -132,12 +120,11 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   listFilter(envVars: AppEnvVar[], filter: ListFilter): AppEnvVar[] {
     this.filteredRows.length = 0;
     this.rows.length = 0;
-    this.rowNames.length = 0;
 
     for (const envVar of envVars) {
       const { name, value } = envVar;
       this.rows.push(envVar);
-      this.rowNames.push(name);
+
 
       if (filter && filter.filter && filter.filter.length > 0) {
         if (name.indexOf(filter.filter) >= 0 || value.indexOf(filter.filter) >= 0) {

@@ -1,6 +1,12 @@
 import { IAPIAction } from '../store/types/request.types';
 import { interval } from 'rxjs/observable/interval';
-import { ActionState, RequestState, UpdatingSection } from '../store/reducers/api-request-reducer/types';
+import {
+  ActionState,
+  RequestSectionKeys,
+  RequestInfoState,
+  TRequestTypeKeys,
+  UpdatingSection,
+} from '../store/reducers/api-request-reducer/types';
 import { composeFn } from './../store/helpers/reducer.helper';
 import { Action, compose, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
@@ -8,14 +14,14 @@ import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import {
-  getEntityState,
+  getRequestDataTypeState,
   getEntityUpdateSections,
   getUpdateSectionById,
   selectEntity,
   selectRequestInfo,
   selectUpdateInfo,
 } from '../store/selectors/api.selectors';
-import { CfEntitiesState } from '../store/types/entity.types';
+import { CfEntityDataState } from '../store/types/entity.types';
 import { Inject, Injectable } from '@angular/core';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
@@ -31,7 +37,7 @@ export class EntityService {
     public schema: Schema,
     public id: string,
     public action: IAPIAction,
-    public entitySection = 'cf'
+    public entitySection: TRequestTypeKeys = RequestSectionKeys.CF
   ) {
     this.entitySelect$ = store.select(selectEntity(entityKey, id, entitySection));
     this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id, entitySection));
@@ -75,7 +81,7 @@ export class EntityService {
   refreshKey = 'updating';
 
   private entitySelect$: Observable<APIResource>;
-  private entityRequestSelect$: Observable<RequestState>;
+  private entityRequestSelect$: Observable<RequestInfoState>;
   private actionDispatch: Function;
 
   updateEntity: Function;
@@ -94,14 +100,14 @@ export class EntityService {
     schema: Schema,
     actionDispatch: Function,
     entitySelect$: Observable<APIResource>,
-    entityRequestSelect$: Observable<RequestState>
+    entityRequestSelect$: Observable<RequestInfoState>
   ): Observable<EntityInfo> => {
     return Observable.combineLatest(
-      this.store.select(getEntityState(this.entitySection)),
+      this.store.select(getRequestDataTypeState(this.entitySection)),
       entitySelect$,
       entityRequestSelect$
     )
-      .do(([entities, entity, entityRequestInfo]: [CfEntitiesState, APIResource, RequestState]) => {
+      .do(([entities, entity, entityRequestInfo]: [CfEntityDataState, APIResource, RequestInfoState]) => {
         if (
           !entityRequestInfo ||
           !entity &&

@@ -1,7 +1,14 @@
-export const cnsisStoreNames = {
-  section: 'other',
-  type: 'cnsis'
-};
+import { SystemInfoEndpoint } from './system.types';
+import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
+import { EndpointSchema } from '../actions/cnsis.actions';
+
+export const cnsisStoreNames: {
+  section: TRequestTypeKeys,
+  type: string
+} = {
+    section: RequestSectionKeys.Other,
+    type: EndpointSchema.key
+  };
 
 export interface CNSISModel {
   api_endpoint?: {
@@ -24,6 +31,7 @@ export interface CNSISModel {
   token_endpoint?: string;
   // This is generated client side when we login
   registered?: boolean;
+  info?: SystemInfoEndpoint;
 }
 
 export interface CNSISState {

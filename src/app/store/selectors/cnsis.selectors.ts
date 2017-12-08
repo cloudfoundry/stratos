@@ -1,4 +1,3 @@
-import { APIEntities } from '../types/api.types';
 import { register } from 'ts-node/dist';
 import { createSelector } from '@ngrx/store';
 import { AppState } from '../app-state';
@@ -9,9 +8,9 @@ import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors
 export const cnsisStatusSelector = (state: AppState): CNSISState => state.cnsis;
 
 // All CNSI request data
-export const cnsisEntitiesSelector = selectEntities(cnsisStoreNames.type, cnsisStoreNames.section);
+export const cnsisEntitiesSelector = selectEntities<CNSISModel>(cnsisStoreNames.type, cnsisStoreNames.section);
 // All Registered  CNSI request data
-export const cnsisRegisteredEntitiesSelector = createSelector<AppState, CNSISModel[], APIEntities<CNSISModel>>(
+export const cnsisRegisteredEntitiesSelector = createSelector(
   cnsisEntitiesSelector,
   cnsis => {
     const registered = {};

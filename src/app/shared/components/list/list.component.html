@@ -15,7 +15,7 @@
               </md-paginator>
             </div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">
-              <ng-container *ngFor="let action of dataSource.actions.multiActions">
+              <ng-container *ngFor="let action of multiActions">
                 <button md-icon-button *ngIf="action.visible(row)" (click)="executeActionMultiple(action)" [disabled]="!action.enabled(row)"
                   mdTooltip="{{action.description}}" mdTooltipShowDelay="2000">
                   <md-icon>{{action.icon}}</md-icon>
@@ -23,7 +23,7 @@
               </ng-container>
             </div>
             <div [hidden]="(dataSource.isSelecting$ | async)">
-              <ng-container *ngFor="let action of dataSource.actions.globalActions">
+              <ng-container *ngFor="let action of globalActions">
                 <button md-icon-button *ngIf="action.visible(row)" (click)="executeActionGlobal(action)" [disabled]="!action.enabled(row)"
                   mdTooltip="{{action.description}}" mdTooltipShowDelay="2000">
                   <md-icon>{{action.icon}}</md-icon>

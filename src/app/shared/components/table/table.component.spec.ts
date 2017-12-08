@@ -22,7 +22,7 @@ import { TableCellEventActionComponent } from './custom-cells/table-cell-event-a
 import { TableCellEventDetailComponent } from './custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
-import { IListDataSource } from '../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellAppNameComponent } from './custom-cells/table-cell-app-name/table-cell-app-name.component';

@@ -1,5 +1,4 @@
 import { ListFilter, ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
-import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
 import { Sort, MdPaginator, MdSort } from '@angular/material';
@@ -9,10 +8,10 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { ListDataSource } from './list-data-source';
 import { AppState } from '../../store/app-state';
-import { IListDataSource, getRowUniqueId } from './list=data-source-types';
+import { IListDataSource, getRowUniqueId } from './list-data-source-types';
 
 
-export abstract class LocalListDataSource<T extends object> extends ListDataSource<T> implements IListDataSource<T> {
+export abstract class LocalListDataSource<T> extends ListDataSource<T> implements IListDataSource<T> {
 
   abstract filteredRows: Array<T>;
   abstract isLoadingPage$: Observable<boolean>;
@@ -23,7 +22,7 @@ export abstract class LocalListDataSource<T extends object> extends ListDataSour
   constructor(
     private _dStore: Store<AppState>,
     private _dGetRowUniqueId: getRowUniqueId,
-    private _dEmptyType: T,
+    _dEmptyType: () => T,
     private _defaultSort: Sort,
     private _dlistStateKey: string,
   ) {

@@ -4,7 +4,7 @@ import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card
 import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
 import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
 import { CardEndpointComponent } from '../custom-cards/card-endpoint/card-endpoint.component';
-import { IListDataSource } from '../../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../../data-sources/list-data-source-types';
 
 @Component({
   selector: 'app-card',

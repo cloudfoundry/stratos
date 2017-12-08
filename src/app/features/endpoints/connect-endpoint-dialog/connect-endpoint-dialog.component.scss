@@ -1,0 +1,22 @@
+.connection-dialog {
+  $dialog-padding: 24px;
+  &__content {
+    display: flex;
+    flex-direction: column;
+  }
+  &__loading {
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    &-wrapper {
+      position: relative;
+      margin: 0 -24px;
+      transform: translateY(-24px);
+    }
+  }
+}
+
+app-connect-endpoint-dialog {
+  position: relative;
+}

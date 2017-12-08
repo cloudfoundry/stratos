@@ -5,7 +5,7 @@
     &-message {
       color: map-get($app-theme, app-background-text-color);
       &-error {
-	color: mat-color($warn)
+        color: mat-color($warn)
       }
     }
   }

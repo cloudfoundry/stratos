@@ -1,3 +1,4 @@
+import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
 import { GET_CNSIS, GET_CNSIS_FAILED, GET_CNSIS_SUCCESS } from './../actions/cnsis.actions';
 import { CNSISState } from '../types/cnsis.types';
 

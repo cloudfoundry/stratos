@@ -1,5 +1,5 @@
+import { IListDataSource } from './list-data-source-types';
 import { Type } from '@angular/core';
-import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
 import { Sort, MdPaginator, MdSort } from '@angular/material';
@@ -10,9 +10,9 @@ import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
 import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
-import { IListDataSource, ListActions, getRowUniqueId } from './list=data-source-types';
+export type getRowUniqueId = (T) => string;
 
-export abstract class ListDataSource<T extends object> extends DataSource<T> implements IListDataSource<T> {
+export abstract class ListDataSource<T> extends DataSource<T> implements IListDataSource<T> {
 
   public view$: Observable<ListView>;
   public state$: Observable<ListState>;
@@ -21,7 +21,6 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   public filter$: Observable<ListFilter>;
   public page$: Observable<T[]>;
 
-  public abstract actions: ListActions<T>;
 
   public abstract isLoadingPage$: Observable<boolean>;
   public abstract filteredRows: Array<T>;
@@ -38,11 +37,11 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   constructor(
     private _store: Store<AppState>,
     private _getRowUniqueId: getRowUniqueId,
-    private _emptyType: T,
+    private getEmptyType: () => T,
     public listStateKey: string,
   ) {
     super();
-    this.addItem = { ... (_emptyType as object) } as T;
+    this.addItem = this.getEmptyType();
 
     this.state$ = getListStateObservable(this._store, listStateKey);
     const { view, pagination, sort, filter } = getListStateObservables(this._store, listStateKey);
@@ -59,7 +58,7 @@ export abstract class ListDataSource<T extends object> extends DataSource<T> imp
   destroy() { }
 
   startAdd() {
-    this.addItem = { ... (this._emptyType as object) } as T;
+    this.addItem = this.getEmptyType();
     this.isAdding$.next(true);
   }
   saveAdd() {

@@ -65,7 +65,7 @@ export abstract class CFFailedAction implements Action {
 export class StartCFAction extends CFStartAction implements IStartRequestAction {
   constructor(
     public apiAction: ICFAction | PaginatedAction,
-    public requestType: ApiRequestTypes
+    public requestType: ApiRequestTypes = 'fetch'
   ) {
     super();
   }
@@ -75,7 +75,7 @@ export class WrapperCFActionSuccess extends CFSuccessAction implements ISuccessR
   constructor(
     public response: NormalizedResponse,
     public apiAction: IAPIAction | PaginatedAction,
-    public requestType: ApiRequestTypes,
+    public requestType: ApiRequestTypes = 'fetch',
     public totalResults?: number
   ) {
     super();
@@ -86,7 +86,7 @@ export class WrapperCFActionFailed extends CFFailedAction implements IFailedRequ
   constructor(
     public message: string,
     public apiAction: IAPIAction | PaginatedAction,
-    public requestType: ApiRequestTypes
+    public requestType: ApiRequestTypes = 'fetch'
   ) {
     super();
   }
@@ -105,7 +105,7 @@ export abstract class NoneCFFailedAction implements Action {
 export class StartNoneCFAction extends NoneCFAction implements IStartRequestAction {
   constructor(
     public apiAction: IAPIAction | PaginatedAction,
-    public requestType: ApiRequestTypes
+    public requestType: ApiRequestTypes = 'fetch'
   ) {
     super();
   }
@@ -115,7 +115,7 @@ export class WrapperNoneCFActionSuccess extends NoneCFSuccessAction implements I
   constructor(
     public response: NormalizedResponse,
     public apiAction: IAPIAction | PaginatedAction,
-    public requestType: ApiRequestTypes,
+    public requestType: ApiRequestTypes = 'fetch',
     public totalResults?: number
   ) {
     super();
@@ -126,7 +126,7 @@ export class WrapperNoneCFActionFailed extends NoneCFFailedAction implements IFa
   constructor(
     public message: string,
     public apiAction: IAPIAction | PaginatedAction,
-    public requestType: ApiRequestTypes
+    public requestType: ApiRequestTypes = 'fetch'
   ) {
     super();
   }

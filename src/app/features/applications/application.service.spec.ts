@@ -1,3 +1,4 @@
+import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { ApplicationSchema, GetApplication } from '../../store/actions/application.actions';
@@ -12,18 +13,6 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 const appId = '1';
 const cfId = '2';
-const entityServiceFactory = (
-  store: Store<AppState>
-) => {
-  return new EntityService(
-    store,
-    ApplicationSchema.key,
-    ApplicationSchema,
-    appId,
-    new GetApplication(appId, cfId)
-  );
-};
-
 
 describe('ApplicationService', () => {
   beforeEach(() => {
@@ -34,11 +23,11 @@ describe('ApplicationService', () => {
         RouterTestingModule,
       ],
       providers: [
-        {
-          provide: EntityService,
-          useFactory: entityServiceFactory,
-          deps: [Store]
-        }
+        generateTestEntityServiceProvider(
+          appId,
+          ApplicationSchema,
+          new GetApplication(appId, cfId)
+        )
       ]
     });
   });

@@ -1,3 +1,10 @@
+export const enum RequestSectionKeys {
+  CF = 'cf',
+  Other = 'other'
+}
+
+export type TRequestTypeKeys = RequestSectionKeys.CF | RequestSectionKeys.Other;
+
 export const rootUpdatingKey = '_root_';
 export interface ActionState {
   busy: boolean;
@@ -26,7 +33,7 @@ export interface UpdatingSection {
   _root_: ActionState;
   [key: string]: ActionState;
 }
-export interface RequestState {
+export interface RequestInfoState {
   fetching: boolean;
   updating: UpdatingSection;
   creating: boolean;

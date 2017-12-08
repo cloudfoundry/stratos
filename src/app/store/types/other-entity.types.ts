@@ -1,8 +1,10 @@
+import { systemStoreNames } from './system.types';
 import { cnsisStoreNames } from './cnsis.types';
 
 export interface OtherEntitiesState {
-  'cnsis': any;
+  endpoint: any;
 }
 export const OtherEntityStateNames = [
-  cnsisStoreNames.type
+  cnsisStoreNames.type,
+  systemStoreNames.type
 ];

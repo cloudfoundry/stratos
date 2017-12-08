@@ -1,3 +1,5 @@
+import { HttpClientModule } from '@angular/common/http';
+import { SystemEffects } from './effects/system.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
@@ -24,6 +26,7 @@ import { RouterEffect } from './effects/router.effects';
   imports: [
     AppReducersModule,
     HttpModule,
+    HttpClientModule,
     EffectsModule.forRoot([
       APIEffect,
       AuthEffect,
@@ -36,6 +39,7 @@ import { RouterEffect } from './effects/router.effects';
       ActionHistoryEffect,
       AppVariablesEffect,
       RouterEffect,
+      SystemEffects,
     ]),
   ]
 })

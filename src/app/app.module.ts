@@ -61,7 +61,7 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
     UAASetupModule,
     LoginModule,
     HomeModule,
-    DashboardModule,
+    DashboardModule
     // StoreRouterConnectingModule // Create action for router navigation
   ],
   providers: [

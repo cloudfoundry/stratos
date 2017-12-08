@@ -1,7 +1,6 @@
 import { ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
 import { EntityInfo } from '../../store/types/api.types';
 import { fileExists } from 'ts-node/dist';
-import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
 import { Sort, MdPaginator, MdSort } from '@angular/material';
@@ -14,9 +13,9 @@ import { AppState } from '../../store/app-state';
 import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../../store/actions/pagination.actions';
 import { ListDataSource } from './list-data-source';
-import { IListDataSource, getRowUniqueId } from './list=data-source-types';
+import { IListDataSource, getRowUniqueId } from './list-data-source-types';
 
-export abstract class CfListDataSource<T extends object> extends ListDataSource<T> implements IListDataSource<T> {
+export abstract class CfListDataSource<T> extends ListDataSource<T> implements IListDataSource<T> {
 
   private cfUberSub: Subscription;
 
@@ -35,10 +34,10 @@ export abstract class CfListDataSource<T extends object> extends ListDataSource<
     protected action: PaginatedAction,
     protected sourceScheme: schema.Entity,
     protected _cfGetRowUniqueId: getRowUniqueId,
-    protected _cfEmptyType: T,
+    getEmptyType: () => T,
     private _cfListStateKey: string,
   ) {
-    super(_cfStore, _cfGetRowUniqueId, _cfEmptyType, _cfListStateKey);
+    super(_cfStore, _cfGetRowUniqueId, getEmptyType, _cfListStateKey);
 
     const { pagination$, entities$ } = getPaginationObservables({
       store: this._cfStore,
