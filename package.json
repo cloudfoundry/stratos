@@ -7,7 +7,8 @@
     "start": "ng serve --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "build": "ng build",
     "test-debug": "ng test",
-    "test": "ng test --code-coverage --sourcemaps=false",
+    "test": "ng test --code-coverage --sourcemaps=false -sr",
+    "posttest": "codecov -f coverage/*.json",
     "lint": "ng lint --type-check --format stylish",
     "e2e": "ng e2e --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "gate-check": "npm run lint && npm test -- --browsers ChromeHeadless --single-run"
@@ -15,13 +16,13 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "^4.3.6",
-    "@angular/cdk": "^2.0.0-beta.10",
+    "@angular/cdk": "2.0.0-beta.10",
     "@angular/common": "^4.4.6",
     "@angular/compiler": "^4.4.6",
     "@angular/core": "^4.4.6",
     "@angular/forms": "^4.4.6",
     "@angular/http": "^4.4.6",
-    "@angular/material": "^2.0.0-beta.10",
+    "@angular/material": "2.0.0-beta.10",
     "@angular/platform-browser": "^4.4.6",
     "@angular/platform-browser-dynamic": "^4.4.6",
     "@angular/router": "^4.4.6",
@@ -62,6 +63,7 @@
     "karma-spec-reporter": "0.0.31",
     "ngrx-store-freeze": "^0.2.0",
     "protractor": "~5.1.2",
+    "codecov": "^3.0.0",
     "ts-node": "~3.2.0",
     "tslint": "~5.3.2",
     "typescript": "~2.6.0"

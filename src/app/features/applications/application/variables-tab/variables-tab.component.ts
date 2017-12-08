@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 import {
   CardAppVariableComponent,
 } from '../../../../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
@@ -29,14 +29,18 @@ export class VariablesTabComponent implements OnInit {
     this.envVarsDataSource = listConfig.getDataSource() as CfAppEvnVarsDataSource;
   }
 
-  envVars$: Observable<any>;
+  envVars$: Observable<{
+    names: String[],
+    values: {}
+  }>;
   cardComponent = CardAppVariableComponent;
   envVarsDataSource: CfAppEvnVarsDataSource;
 
   ngOnInit() {
-    this.envVars$ = this.appService.waitForAppEntity$.map(app => {
-      return app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [];
-    });
+    this.envVars$ = this.appService.waitForAppEntity$.map(app => ({
+      names: app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [],
+      values: app.entity.entity.environment_json || {}
+    }));
   }
 
 }

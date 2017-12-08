@@ -11,13 +11,15 @@ import { Injectable } from '@angular/core';
 import { EntityInfo } from '../../store/types/api.types';
 import { IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { AppState } from '../../store/app-state';
+import { UtilsService } from '../../core/utils.service';
 
 @Injectable()
 export class CfAppConfigService implements IListConfig<APIResource> {
 
   constructor(
     private datePipe: DatePipe,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private utilsService: UtilsService
   ) {
     this.appsDataSource = new CfAppsDataSource(this.store);
   }
@@ -33,10 +35,12 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       columnId: 'instances', headerCell: () => 'Instances', cell: (row: APIResource) => `${row.entity.instances}`, cellFlex: '1'
     },
     {
-      columnId: 'disk', headerCell: () => 'Disk Quota', cell: (row: APIResource) => ``, cellFlex: '1'
+      columnId: 'disk', headerCell: () => 'Disk Quota',
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`, cellFlex: '1'
     },
     {
-      columnId: 'memory', headerCell: () => 'Memory', cell: (row: APIResource) => ``, cellFlex: '1'
+      columnId: 'memory', headerCell: () => 'Memory',
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`, cellFlex: '1'
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',

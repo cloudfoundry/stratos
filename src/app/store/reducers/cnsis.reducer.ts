@@ -18,7 +18,3 @@ export function cnsisReducer(state: CNSISState = {
       return state;
   }
 }
-
-function mergeSystemInfo(state) {
-
-}

@@ -17,6 +17,9 @@ import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '.
 import { Injectable } from '@angular/core';
 import { MdDialog } from '@angular/material';
 import { GetSystemInfo } from '../../store/actions/system.actions';
+import {
+  TableCellEndpointStatusComponent
+} from '../components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
@@ -129,8 +132,8 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     },
     {
       columnId: 'connection',
-      headerCell: () => 'Connection',
-      cell: row => row.info ? row.info.user ? 'Connected' : 'Disconnected' : 'Loading...',
+      headerCell: () => 'Status',
+      cellComponent: TableCellEndpointStatusComponent,
       sort: true,
       cellFlex: '1'
     },

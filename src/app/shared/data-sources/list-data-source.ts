@@ -1,6 +1,5 @@
 import { IListDataSource } from './list-data-source-types';
 import { Type } from '@angular/core';
-import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
 import { Sort, MdPaginator, MdSort } from '@angular/material';

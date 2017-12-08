@@ -43,10 +43,12 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
       (object: AppEnvVar) => {
         return object.name;
       },
-      () => ({
-        name: '',
-        value: '',
-      } as AppEnvVar),
+      (): AppEnvVar => {
+        return {
+          name: '',
+          value: '',
+        };
+      },
       { active: 'name', direction: 'asc' },
       CfAppEvnVarsDataSource.key(_appService.cfGuid, _appService.appGuid)
     );
@@ -71,12 +73,8 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
         filter: ''
       }));
 
-    this.isLoadingPage$ = _appService.isFetchingApp$.combineLatest(
-      _appService.isFetchingEnvVars$,
-      _appService.isUpdatingEnvVars$
-    ).map(([isFetchingApp, isFetchingEnvVars, isUpdatingEnvVars]: [boolean, boolean, boolean]) => {
-      return isFetchingApp || isFetchingEnvVars || isUpdatingEnvVars;
-    });
+    // The _appService may not have been set up yet, create the actual observable on 'connect'
+    this.isLoadingPage$ = Observable.of(true);
   }
 
   saveAdd() {
@@ -94,6 +92,13 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   }
 
   connect(): Observable<AppEnvVar[]> {
+    this.isLoadingPage$ = this._appService.isFetchingApp$.combineLatest(
+      this._appService.isFetchingEnvVars$,
+      this._appService.isUpdatingEnvVars$
+    ).map(([isFetchingApp, isFetchingEnvVars, isUpdatingEnvVars]: [boolean, boolean, boolean]) => {
+      return isFetchingApp === null || isFetchingApp || isFetchingEnvVars || isUpdatingEnvVars;
+    });
+
     this.data$ = this._appService.waitForAppEntity$.map((app: EntityInfo) => {
       const rows = new Array<AppEnvVar>();
       const envVars = app.entity.entity.environment_json;
