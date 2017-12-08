@@ -1,5 +1,5 @@
 <a href="https://travis-ci.org/SUSE/stratos"><img src="https://travis-ci.org/SUSE/stratos.svg?branch=master"></a>
-<a href="https://api.codeclimate.com/v1/badges/6e2e1a7e92ef9f458525/maintainability"><img src="https://api.codeclimate.com/v1/badges/6e2e1a7e92ef9f458525/maintainability"></a>
+<a href="https://api.codeclimate.com/v1/badges/6e2e1a7e92ef9f458525/maintainability"><img src="https://img.shields.io/codeclimate/maintainability/SUSE/stratos.svg"></a>
 <a href="https://zenhub.com"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"/></a>
 <a href="https://codecov.io/gh/SUSE/stratos"><img src="https://codecov.io/gh/SUSE/stratos/branch/master/graph/badge.svg"/></a>
 
@@ -38,3 +38,5 @@ You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - a
 The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE.md).
 
 
+https://codeclimate.com/github/codeclimate/codeclimate-services/badges/coverage.svg
+https://codeclimate.com/github/codeclimate/codeclimate-services/badges/membrane.png
