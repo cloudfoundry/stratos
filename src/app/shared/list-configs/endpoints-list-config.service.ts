@@ -14,7 +14,9 @@ import { EndpointsDataSource } from '../data-sources/endpoints-data-source';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { Injectable } from '@angular/core';
 import { MdDialog } from '@angular/material';
-import { TableCellEndpointStatusComponent } from '../components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import {
+  TableCellEndpointStatusComponent
+} from '../components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 
 function getEndpointTypeString(endpoint: CNSISModel): string {

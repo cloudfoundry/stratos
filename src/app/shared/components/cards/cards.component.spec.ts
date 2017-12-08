@@ -10,7 +10,6 @@ import { CardComponent } from './card/card.component';
 import { CoreModule } from '../../../core/core.module';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../store/reducers.module';
-import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { CardEntryPoints, TableCellEntryPoints } from '../../../test-framework/list-table-helper';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 

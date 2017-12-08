@@ -6,7 +6,6 @@ import { EntityInfo } from '../../../../store/types/api.types';
 import { TableCellComponent } from '../../table/table-cell/table-cell.component';
 import { EventTabActorIconPipe } from '../../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../../pipes/values.pipe';
-import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../store/reducers.module';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../../test-framework/list-table-helper';
