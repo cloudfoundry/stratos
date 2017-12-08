@@ -1,3 +1,4 @@
+import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { cnsisStoreNames } from '../../store/types/cnsis.types';
 import { ApplicationsModule } from '../../features/applications/applications.module';
 
@@ -21,17 +22,6 @@ const initialState = getInitialTestStoreState();
 
 const appId = '1';
 const cfId = '2';
-const entityServiceFactory = (
-  store: Store<AppState>
-) => {
-  return new EntityService(
-    store,
-    ApplicationSchema.key,
-    ApplicationSchema,
-    appId,
-    new GetApplication(appId, cfId)
-  );
-};
 
 const applicationServiceFactory = (
   store: Store<AppState>,
@@ -56,11 +46,11 @@ describe('CfAppEventsConfigService', () => {
     TestBed.configureTestingModule({
       providers: [
         CfAppEventsConfigService,
-        {
-          provide: EntityService,
-          useFactory: entityServiceFactory,
-          deps: [Store]
-        },
+        generateTestEntityServiceProvider(
+          appId,
+          ApplicationSchema,
+          new GetApplication(appId, cfId)
+        ),
         {
           provide: ApplicationService,
           useFactory: applicationServiceFactory,

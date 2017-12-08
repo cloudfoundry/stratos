@@ -1,3 +1,4 @@
+import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
 import { appReducers } from '../../../../store/reducers.module';
 import { AppState } from '../../../../store/app-state';
 import { EntityService } from '../../../../core/entity-service';
@@ -23,17 +24,6 @@ import { LogStreamTabComponent } from './log-stream-tab.component';
 
 const appId = '1';
 const cfId = '2';
-const entityServiceFactory = (
-  store: Store<AppState>
-) => {
-  return new EntityService(
-    store,
-    ApplicationSchema.key,
-    ApplicationSchema,
-    appId,
-    new GetApplication(appId, cfId)
-  );
-};
 
 describe('LogStreamTabComponent', () => {
   let component: LogStreamTabComponent;
@@ -56,11 +46,11 @@ describe('LogStreamTabComponent', () => {
         LogStreamTabComponent
       ],
       providers: [
-        {
-          provide: EntityService,
-          useFactory: entityServiceFactory,
-          deps: [Store]
-        },
+        generateTestEntityServiceProvider(
+          appId,
+          ApplicationSchema,
+          new GetApplication(appId, cfId)
+        ),
         ApplicationService,
         AppStoreModule,
         ApplicationStateService,

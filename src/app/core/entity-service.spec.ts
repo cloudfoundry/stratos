@@ -1,3 +1,4 @@
+import { generateTestEntityServiceProvider } from '../test-framework/entity-service.helper';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ResponseOptions, XHRBackend, HttpModule } from '@angular/http';
 import { MockBackend } from '@angular/http/testing';
@@ -12,27 +13,16 @@ import { createBasicStoreModule } from '../test-framework/store-test-helper';
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
 const cfId = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
-const entityServiceFactory = (
-  store: Store<AppState>
-) => {
-  return new EntityService(
-    store,
-    ApplicationSchema.key,
-    ApplicationSchema,
-    appId,
-    new GetApplication(appId, cfId)
-  );
-};
 
 describe('EntityServiceService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        {
-          provide: EntityService,
-          useFactory: entityServiceFactory,
-          deps: [Store]
-        },
+        generateTestEntityServiceProvider(
+          appId,
+          ApplicationSchema,
+          new GetApplication(appId, cfId)
+        ),
         {
           provide: XHRBackend,
           useClass: MockBackend
