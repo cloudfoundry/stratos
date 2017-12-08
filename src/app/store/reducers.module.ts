@@ -1,3 +1,4 @@
+import { requestDataReducer, requestReducer } from './reducers/api-request-reducers.generator';
 import { CNSISEffect } from './effects/cnsis.effects';
 import { EndpointSchema } from './actions/cnsis.actions';
 import { ApiActionTypes, NonApiActionTypes } from './actions/request.actions';
@@ -25,7 +26,6 @@ import { listReducer } from './reducers/list.reducer';
 import { generateDefaultState } from './reducers/api-request-reducer/request-helpers';
 import { CfEntityStateNames } from './types/entity.types';
 import { OtherEntityStateNames } from './types/other-entity.types';
-import { requestReducer, requestDataReducer } from './reducers/api-request-reducer/request-reducer.factories';
 
 
 export function logger(reducer): any {

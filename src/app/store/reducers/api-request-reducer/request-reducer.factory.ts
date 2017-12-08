@@ -4,11 +4,9 @@ import { failRequest } from './fail-request';
 import { IRequestAction } from './types';
 import { generateDefaultState } from './request-helpers';
 
-export function requestReducerFactory(entityList = [], actions: IRequestAction, initialSections?: {
-  [key: string]: string[]
-}) {
+export function requestReducerFactory(entityList = [], actions: IRequestAction) {
   const [startAction, successAction, failedAction] = actions;
-  const defaultState = generateDefaultState(entityList, initialSections);
+  const defaultState = generateDefaultState(entityList);
   return function apiRequestReducer(state = defaultState, action) {
     switch (action.type) {
       case startAction:
