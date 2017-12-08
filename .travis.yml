@@ -18,8 +18,7 @@ cache:
   - "/home/travis/.cache/bower/"
   - "/home/travis/.npm/"
 stages:
-  - name: coverage
-    if: branch = coverage
+  - coverage
   - front-end  
   - back-end  
   - e2e tests
