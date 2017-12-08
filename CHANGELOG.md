@@ -11,7 +11,7 @@ This is the first Release Candidate of the Stratos UI Console. It contains the f
 - Open Source build now uses a generic theme [\#1403](https://github.com/SUSE/stratos-ui/pull/1403)
 - SUSE build uses SUSE theme and contains EULA in the about screen [\#1404](https://github.com/SUSE/stratos-ui/pull/1404)
 - Run Mariadb mysqld process as mysql user [\#1397](https://github.com/SUSE/stratos-ui/pull/1397)
-
+- Helm Chart: Persistent Volume size increased from 1Mi to 20Mi to avoid issues with some storage providers [\#1409](https://github.com/SUSE/stratos-ui/pull/1409)
 
 ## 0.9.8 Beta-3 Release 2
 
