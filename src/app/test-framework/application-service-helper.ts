@@ -49,25 +49,24 @@ export class ApplicationServiceMock {
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
-  const applicationServiceFactory = (
-    store: Store<AppState>,
-    entityService: EntityService,
-    applicationStateService: ApplicationStateService,
-    applicationEnvVarsService: ApplicationEnvVarsService
-  ) => {
-    const appService = new ApplicationService(
-      cfGuid,
-      appGuid,
-      store,
-      entityService,
-      applicationStateService,
-      applicationEnvVarsService
-    );
-    return appService;
-  };
   return {
     provide: ApplicationService,
-    useFactory: applicationServiceFactory,
+    useFactory: (
+      store: Store<AppState>,
+      entityService: EntityService,
+      applicationStateService: ApplicationStateService,
+      applicationEnvVarsService: ApplicationEnvVarsService
+    ) => {
+      const appService = new ApplicationService(
+        cfGuid,
+        appGuid,
+        store,
+        entityService,
+        applicationStateService,
+        applicationEnvVarsService
+      );
+      return appService;
+    },
     deps: [
       Store,
       EntityService,
