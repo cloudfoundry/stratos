@@ -26,14 +26,7 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
 
   private multiListActionDelete: IMultiListAction<AppEnvVar> = {
     action: (items: AppEnvVar[]) => {
-      this.store.dispatch(
-        new AppVariablesDelete(
-          this.envVarsDataSource.cfGuid,
-          this.envVarsDataSource.appGuid,
-          this.envVarsDataSource.rows,
-          Array.from(this.envVarsDataSource.selectedRows.values()
-          ))
-      );
+      this.dispatchDeleteAction();
     },
     icon: 'delete',
     label: 'Delete',
@@ -44,14 +37,7 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
 
   private listActionDelete: IListAction<AppEnvVar> = {
     action: (item: AppEnvVar) => {
-      this.store.dispatch(
-        new AppVariablesDelete(
-          this.envVarsDataSource.cfGuid,
-          this.envVarsDataSource.appGuid,
-          this.envVarsDataSource.rows,
-          Array.from(this.envVarsDataSource.selectedRows.values()
-          ))
-      );
+      this.dispatchDeleteAction();
     },
     icon: 'delete',
     label: 'Delete',
@@ -76,6 +62,17 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
     },
   ];
 
+
+  private dispatchDeleteAction() {
+    this.store.dispatch(
+      new AppVariablesDelete(
+        this.envVarsDataSource.cfGuid,
+        this.envVarsDataSource.appGuid,
+        this.envVarsDataSource.rows,
+        Array.from(this.envVarsDataSource.selectedRows.values()
+        ))
+    );
+  }
 
   getGlobalActions = () => null;
   getMultiActions = () => [this.multiListActionDelete];
