@@ -8,7 +8,7 @@ import { SortDirection } from '@angular/material';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { APIResource } from '../../store/types/api.types';
-import { ListActions } from './list=data-source-types';
+import { ListActions } from './list-data-source-types';
 
 
 export class CfAppsDataSource extends CfListDataSource<APIResource> {

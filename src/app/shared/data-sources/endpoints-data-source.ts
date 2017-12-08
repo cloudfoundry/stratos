@@ -7,7 +7,7 @@ import { filter } from 'rxjs/operator/filter';
 import { Observable } from 'rxjs/Rx';
 import { LocalListDataSource } from './list-data-source-local';
 import { RouterNav } from '../../store/actions/router.actions';
-import { ListActionConfig, ListActions } from './list=data-source-types';
+import { ListActionConfig, ListActions } from './list-data-source-types';
 import { selectEntities } from '../../store/selectors/api.selectors';
 import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
 

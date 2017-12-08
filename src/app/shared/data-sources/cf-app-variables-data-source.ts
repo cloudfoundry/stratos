@@ -11,7 +11,7 @@ import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
-import { ListActionConfig, ListActions } from './list=data-source-types';
+import { ListActionConfig, ListActions } from './list-data-source-types';
 
 export interface AppEnvVar {
   name: string;

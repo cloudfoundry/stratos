@@ -14,7 +14,7 @@ import { AppState } from '../../store/app-state';
 import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../../store/actions/pagination.actions';
 import { ListDataSource } from './list-data-source';
-import { IListDataSource, getRowUniqueId } from './list=data-source-types';
+import { IListDataSource, getRowUniqueId } from './list-data-source-types';
 
 export abstract class CfListDataSource<T> extends ListDataSource<T> implements IListDataSource<T> {
 

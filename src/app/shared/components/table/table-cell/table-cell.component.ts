@@ -11,7 +11,7 @@ import { TableCellEventDetailComponent } from '../custom-cells/table-cell-event-
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEndpointStatusComponent } from '../custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { IListDataSource } from '../../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../../data-sources/list-data-source-types';
 
 @Component({
   selector: 'app-table-cell',

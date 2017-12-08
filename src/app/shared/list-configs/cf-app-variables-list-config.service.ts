@@ -11,7 +11,6 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { AppEnvVar, CfAppEvnVarsDataSource } from '../data-sources/cf-app-variables-data-source';
 import { Injectable } from '@angular/core';
-import { IListDataSource } from '../data-sources/list-data-source';
 import { EntityInfo } from '../../store/types/api.types';
 import {
   IBaseListAction,

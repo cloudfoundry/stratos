@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { ListDataSource } from './list-data-source';
 import { AppState } from '../../store/app-state';
-import { IListDataSource, getRowUniqueId } from './list=data-source-types';
+import { IListDataSource, getRowUniqueId } from './list-data-source-types';
 
 
 export abstract class LocalListDataSource<T> extends ListDataSource<T> implements IListDataSource<T> {

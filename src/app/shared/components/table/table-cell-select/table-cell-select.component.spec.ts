@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellSelectComponent } from './table-cell-select.component';
 import { CoreModule } from '../../../../core/core.module';
-import { IListDataSource } from '../../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../../data-sources/list-data-source-types';
 
 describe('TableCellSelectComponent', () => {
   let component: TableCellSelectComponent<any>;

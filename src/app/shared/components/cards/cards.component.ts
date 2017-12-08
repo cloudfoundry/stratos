@@ -1,6 +1,6 @@
 import { CfAppEventsDataSource } from '../../data-sources/cf-app-events-data-source';
 import { Component, Input, OnInit, Type, ViewContainerRef, ComponentFactoryResolver, ViewChild } from '@angular/core';
-import { IListDataSource } from '../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../data-sources/list-data-source-types';
 
 
 @Component({

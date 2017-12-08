@@ -1,4 +1,4 @@
-import { IListDataSource } from '../../data-sources/list=data-source-types';
+import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from '../table/table.types';
 import { LocalListDataSource } from '../../data-sources/list-data-source-local';
 import { CfListDataSource } from '../../data-sources/list-data-source-cf';

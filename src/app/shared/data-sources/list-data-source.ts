@@ -1,3 +1,4 @@
+import { IListDataSource } from './list-data-source-types';
 import { Type } from '@angular/core';
 import { ObserveOnSubscriber } from 'rxjs/operator/observeOn';
 import { DataSource } from '@angular/cdk/table';
@@ -10,37 +11,6 @@ import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
 import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
-
-export interface IListDataSource<T> {
-  listStateKey: string;
-  view$: Observable<ListView>;
-  state$: Observable<ListState>;
-  pagination$: Observable<ListPagination>;
-  sort$: Observable<ListSort>;
-  filter$: Observable<ListFilter>;
-
-  page$: Observable<T[]>;
-
-  addItem: T;
-  isAdding$: BehaviorSubject<boolean>;
-  isSelecting$: BehaviorSubject<boolean>;
-
-  editRow: T; // Edit items - remove once ng-content can exist in md-table
-
-  selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
-  selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
-  selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
-  selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
-  selectClear();
-
-  startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
-  saveEdit(); // Edit items - remove once ng-content can exist in md-table
-  cancelEdit(); // Edit items - remove once ng-content can exist in md-table
-
-  connect(): Observable<T[]>;
-  destroy();
-}
-
 export type getRowUniqueId = (T) => string;
 
 export abstract class ListDataSource<T> extends DataSource<T> implements IListDataSource<T> {

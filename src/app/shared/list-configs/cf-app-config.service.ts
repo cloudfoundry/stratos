@@ -8,7 +8,6 @@ import {
 import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
 import { APIResource } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
-import { IListDataSource } from '../data-sources/list-data-source';
 import { EntityInfo } from '../../store/types/api.types';
 import { IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { AppState } from '../../store/app-state';

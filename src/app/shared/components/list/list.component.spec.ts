@@ -21,7 +21,7 @@ import { TableCellActionsComponent } from '../table/table-cell-actions/table-cel
 import { CardAppComponent } from '../cards/custom-cards/card-app/card-app.component';
 import { TableCellAppNameComponent } from '../table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../test-framework/list-table-helper';
-import { ListActions, IListDataSource } from '../../data-sources/list=data-source-types';
+import { ListActions, IListDataSource } from '../../data-sources/list-data-source-types';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
