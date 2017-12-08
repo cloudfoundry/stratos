@@ -5,10 +5,10 @@
     flex-direction: column;
   }
   &__loading {
-    position: absolute;
-    top: 0;
     left: 0;
+    position: absolute;
     right: 0;
+    top: 0;
     &-wrapper {
       position: relative;
       margin: 0 -24px;

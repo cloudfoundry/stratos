@@ -1,13 +1,13 @@
 @import '../app/features/dashboard/side-nav/side-nav.component.theme';
 @import '../app/features/dashboard/dashboard-base/dashboard-base.component.theme';
 @import '../app/features/login/login-page/login-page.component.theme';
-@import '../app/shared/components/display-value/display-value.component.theme.scss';
+@import '../app/shared/components/display-value/display-value.component.theme';
 @import '../app/shared/components/stepper/steppers/steppers.component.theme';
-@import '../app/shared/components/list/list.component.theme.scss';
-@import '../app//shared/components/code-block/code-block.component.theme.scss';
-@import '../app/features/applications/application/application-base.component.theme.scss';
-@import '../app/shared/components/cards/cards.components.theme.scss';
-@import '../app/shared/components/dialog-error/dialog-error.component.theme.scss';
+@import '../app/shared/components/list/list.component.theme';
+@import '../app//shared/components/code-block/code-block.component.theme';
+@import '../app/features/applications/application/application-base.component.theme';
+@import '../app/shared/components/cards/cards.components.theme';
+@import '../app/shared/components/dialog-error/dialog-error.component.theme';
 @mixin app-theme($theme) {
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
