@@ -19,8 +19,6 @@ cat << EOF > ./build/secrets.json
     }
   },
   "console": {
-    "host": "localhost",
-    "port": "443",
     "admin": {
       "username": "${CONSOLE_ADMIN_USER}",
       "password": "${CONSOLE_ADMIN_PASSWORD}"
