@@ -20,15 +20,8 @@ jobs:
   - stage: Unit Tests
     env:
     - CI_ENV=true
-    - CC_TEST_REPORTER_ID=90a5c9072bb9f64db6b04d02cffc2061b036ff6975a6d0559daa83b19679091b
-    before_script:
-    - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-    - chmod +x ./cc-test-reporter
-    - "./cc-test-reporter before-build"
     script:
     - npm test
-    after_script:
-    - "./cc-test-reporter after-build -t lcov --exit-code $TRAVIS_TEST_RESULT"
 notifications:
   slack:
     rooms:
