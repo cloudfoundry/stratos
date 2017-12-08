@@ -26,8 +26,8 @@ export class PaginationEffects {
   ) { }
 
   @Effect() clearPaginationOnParamChange$ =
-  this.actions$.ofType<SetParams | AddParams | RemoveParams>(SET_PARAMS, ADD_PARAMS, REMOVE_PARAMS)
-    .map(action => {
-      return new ClearPagination(action.entityKey, action.paginationKey);
-    });
+    this.actions$.ofType<SetParams | AddParams | RemoveParams>(SET_PARAMS, ADD_PARAMS, REMOVE_PARAMS)
+      .map(action => {
+        return new ClearPagination(action.entityKey, action.paginationKey);
+      });
 }

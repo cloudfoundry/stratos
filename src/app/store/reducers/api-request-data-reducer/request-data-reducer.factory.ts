@@ -15,8 +15,10 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestActi
           const newState = { ...state };
           delete newState[success.apiAction.entityKey][success.apiAction.guid];
           return newState;
+        } else if (success.response) {
+          return mergeState(state, success.response.entities);
         }
-        return mergeState(state, success.response.entities);
+        return state;
       default:
         return state;
     }

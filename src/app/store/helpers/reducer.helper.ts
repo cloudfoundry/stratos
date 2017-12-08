@@ -1,4 +1,6 @@
-export const mergeState = (state, newState) => {
+import { IRequestTypeState } from '../app-state';
+
+export const mergeState = (state: IRequestTypeState, newState: IRequestTypeState) => {
   const baseState = { ...state };
 
   Object.keys(newState).forEach(entityKey => {

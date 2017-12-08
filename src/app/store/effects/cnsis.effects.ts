@@ -83,6 +83,7 @@ export class CNSISEffect {
 
     });
 
+
   @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
     .flatMap(action => {
       const actionType = 'update';
@@ -92,22 +93,51 @@ export class CNSISEffect {
         type: action.type,
         updatingKey: CNSISEffect.connectingKey,
       } as IAPIAction;
-
-      const headers = new Headers();
-      headers.append('Content-Type', 'application/x-www-form-urlencoded');
       const params: URLSearchParams = new URLSearchParams();
       params.append('cnsi_guid', action.guid);
       params.append('username', action.username);
       params.append('password', action.password);
 
-      this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
-      return this.http.post('/pp/v1/auth/login/cnsi', params, {
-        headers
-      }).map(endpoint => {
-        return new WrapperNoneCFActionSuccess({ entities: {}, result: [] }, apiAction, 'update');
-      })
-        .catch(e => {
-          return [new WrapperNoneCFActionFailed('Could not connect', apiAction, actionType)];
-        });
+      return this.doCnisAction(
+        apiAction,
+        '/pp/v1/auth/login/cnsi',
+        params
+      );
     });
+
+  @Effect() disconnect$ = this.actions$.ofType<DisconnectCnis>(DISCONNECT_CNSIS)
+    .flatMap(action => {
+
+      const apiAction = {
+        entityKey: cnsisStoreNames.type,
+        guid: action.guid,
+        type: action.type,
+        updatingKey: CNSISEffect.disconnectingKey,
+      } as IAPIAction;
+
+      const params: URLSearchParams = new URLSearchParams();
+      params.append('cnsi_guid', action.guid);
+
+      return this.doCnisAction(
+        apiAction,
+        '/pp/v1/auth/logout/cnsi',
+        params
+      );
+    });
+
+
+  private doCnisAction(apiAction: IAPIAction, url: string, params: URLSearchParams) {
+    const actionType = 'update';
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded');
+    this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
+    return this.http.post(url, params, {
+      headers
+    }).map(endpoint => {
+      return new WrapperNoneCFActionSuccess(null, apiAction, 'update');
+    })
+      .catch(e => {
+        return [new WrapperNoneCFActionFailed('Could not connect', apiAction, 'update')];
+      });
+  }
 }

@@ -9,7 +9,7 @@ import { TableHeaderSelectComponent } from '../components/table/table-header-sel
 import { Action, Store } from '@ngrx/store';
 import { CNSISModel } from '../../store/types/cnsis.types';
 import { RouterNav } from '../../store/actions/router.actions';
-import { ConnectCnis } from '../../store/actions/cnsis.actions';
+import { ConnectCnis, DisconnectCnis } from '../../store/actions/cnsis.actions';
 import { EndpointsDataSource } from '../data-sources/endpoints-data-source';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { Injectable } from '@angular/core';
@@ -58,7 +58,9 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionDisconnect: IListAction<CNSISModel> = {
     action: (item) => {
-      return null;
+      this.store.dispatch(new DisconnectCnis(
+        item.guid
+      ));
     },
     icon: 'remove_from_queue',
     label: 'Disconnect',
