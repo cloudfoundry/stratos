@@ -1,3 +1,4 @@
+import { generateTestApplicationServiceProvider } from '../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
 import { cnsisStoreNames } from '../../store/types/cnsis.types';
 import { AppState } from '../../store/app-state';
@@ -21,27 +22,8 @@ import { ApplicationEnvVarsService } from '../../features/applications/applicati
 
 const initialState = getInitialTestStoreState();
 
-const appId = '1';
-const cfId = '2';
-const applicationServiceFactory = (
-  store: Store<AppState>,
-  entityService: EntityService,
-  applicationStateService: ApplicationStateService,
-  applicationEnvVarsService: ApplicationEnvVarsService
-) => {
-  const appService = new ApplicationService(
-    store,
-    entityService,
-    applicationStateService,
-    applicationEnvVarsService
-  );
-  const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.section][cnsisStoreNames.type])[0];
-  const appGuid = Object.keys(initialState.requestData.cf.application)[0];
-  appService.setApplication(cfGuid, appGuid);
-  return appService;
-};
-
-
+const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.section][cnsisStoreNames.type])[0];
+const appGuid = Object.keys(initialState.requestData.cf.application)[0];
 
 describe('CfAppVariablesListConfigService', () => {
   beforeEach(() => {
@@ -49,20 +31,11 @@ describe('CfAppVariablesListConfigService', () => {
       providers: [
         CfAppVariablesListConfigService,
         generateTestEntityServiceProvider(
-          appId,
+          appGuid,
           ApplicationSchema,
-          new GetApplication(appId, cfId)
+          new GetApplication(appGuid, cfGuid)
         ),
-        {
-          provide: ApplicationService,
-          useFactory: applicationServiceFactory,
-          deps: [
-            Store,
-            EntityService,
-            ApplicationStateService,
-            ApplicationEnvVarsService
-          ]
-        }
+        generateTestApplicationServiceProvider(appGuid, cfGuid)
       ],
       imports: [
         CommonModule,
