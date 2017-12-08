@@ -1,5 +1,24 @@
 $app-setup-wizard-step-label-padding: 10px;
 
+$app-setup-btn-bg: $brand-primary !default;
+$app-setup-btn-fg: $text-color !default;
+$app-setup-btn-cancel-bg: $text-color !default;
+$app-setup-btn-cancel-fg: $brand-secondary !default;
+$app-setup-wizard-nav-border: $brand-secondary !default;
+/*
+.btn-default.cancel, .btn-default.back {
+  float: left;
+  background-color: $text-color;
+  color: $brand-secondary;
+}
+
+.btn-primary.next {
+  background-color: $brand-primary;
+  color: $text-color;
+}
+}
+*/
+
 app-setup-wizard {
   align-self: stretch;
   display: flex;
@@ -30,7 +49,8 @@ app-setup-wizard {
             .wizard-nav {
               flex-shrink: 0;
               margin-bottom: 0;
-              border-bottom-color: $brand-secondary;
+              border-bottom-color: $app-setup-wizard-nav-border;
+              border-top-color: $app-setup-wizard-nav-border;
               padding: $console-unit-space / 2 0;
 
               &.nav-stacked > li.disabled {
@@ -127,13 +147,13 @@ app-setup-wizard {
 
             .btn-default.cancel, .btn-default.back {
               float: left;
-              background-color: $text-color;
-              color: $brand-secondary;
+              background-color: $app-setup-btn-cancel-bg;
+              color: $app-setup-btn-cancel-fg;
             }
 
             .btn-primary.next {
-              background-color: $brand-primary;
-              color: $text-color;
+              background-color: $app-setup-btn-bg;
+              color: $app-setup-btn-fg;
             }
           }
 

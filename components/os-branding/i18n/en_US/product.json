@@ -1,10 +1,8 @@
 {
   "product": {
-    "name": "SUSE Cloud Foundry",
-    "console": "SUSE Cloud Foundry Console",
-    "cf": "Cloud Foundry",
-    "ce": "Code Engine",
-    "eula": "eula.html"
+    "name": "Cloud Foundry Console",
+    "console": "Cloud Foundry Console",
+    "cf": "Cloud Foundry"
   },
   "company": {
     "name": "SUSE",
@@ -16,21 +14,22 @@
   },
   "about": {
     "footer": {
-      "company.logo": "images/suse_logo_light_bg.png",
+      "company.logo": "images/OpenSUSE_Logo.png",
       "company.terms-href": "",
       "company.privacy-href": ""
     }
   },
   "navbar": {
-    "title": "@:product.name",
+    "title": "Stratos UI",
     "logo": "svg:SUSE_Geeko.svg"
   },
   "login": {
     "title":"Sign in",
-    "console": "SUSE<br>Cloud Foundry Console"
+    "console": "Cloud Foundry Console"
   },
   "landing": {
     "footer": {
+      "company.logo": "images/OpenSUSE_Logo.png",
       "company.terms-href": "",
       "company.privacy-href": ""
     }
