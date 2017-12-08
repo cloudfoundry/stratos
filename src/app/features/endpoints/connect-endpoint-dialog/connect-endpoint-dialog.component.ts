@@ -28,10 +28,17 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   valid$: Observable<boolean>;
   canSubmit$: Observable<boolean>;
 
+  private update$: Observable<ActionState>;
+
   isBusy$: Observable<boolean>;
 
   connectingSub: Subscription;
   fetchSub: Subscription;
+  public endpointForm = this.fb.group({
+    username: ['', Validators.required],
+    password: ['', Validators.required]
+  });
+
 
   constructor(
     public store: Store<AppState>,
@@ -42,43 +49,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       guid: string
     }
   ) {
-    const update$ = this.store.select(
-      selectUpdateInfo(
-        cnsisStoreNames.type,
-        this.data.guid,
-        CNSISEffect.connectingKey,
-        cnsisStoreNames.section
-      )
-    ).filter(update => !!update);
+    this.setupObservables();
+    this.setupSubscriptions();
+  }
 
-    this.fetchingInfo$ = this.store.select(
-      selectRequestInfo(
-        systemStoreNames.type,
-        SystemEffects.guid,
-        systemStoreNames.section
-      )
-    )
-      .filter(request => !!request)
-      .map(request => request.fetching);
-
-    this.endpointConnected$ = this.store.select(
-      selectEntity<CNSISModel>(
-        cnsisStoreNames.type,
-        this.data.guid,
-        cnsisStoreNames.section
-      )
-    )
-      .do(request => {
-        console.log(request);
-      })
-      .map(request => !!(request && request.info && request.info.user));
-
-    this.connecting$ =
-      update$
-        .map(update => update.busy);
-    this.connectingError$ = update$.map(update => update.error);
-
-    this.fetchSub = update$
+  setupSubscriptions() {
+    this.fetchSub = this.update$
       .pairwise()
       .subscribe(([oldVal, newVal]) => {
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
@@ -92,10 +68,36 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       .subscribe(() => {
         this.dialogRef.close();
       });
+  }
+
+  setupObservables() {
+    this.update$ = this.store.select(
+      this.getUpdateSelector()
+    ).filter(update => !!update);
+
+    this.fetchingInfo$ = this.store.select(
+      this.getRequestSelector()
+    )
+      .filter(request => !!request)
+      .map(request => request.fetching);
+
+    this.endpointConnected$ = this.store.select(
+      this.getEntitySelector()
+    )
+      .map(request => !!(request && request.info && request.info.user));
+
+    this.connecting$ =
+      this.update$
+        .map(update => update.busy);
+    this.connectingError$ = this.update$.map(update => update.error);
 
     this.valid$ = this.endpointForm.valueChanges
       .map(() => this.endpointForm.valid);
 
+    this.setupCombinedObservables();
+  }
+
+  setupCombinedObservables() {
     this.isBusy$ = Observable.combineLatest(
       this.connecting$.startWith(false),
       this.fetchingInfo$.startWith(false)
@@ -108,12 +110,32 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.valid$.startWith(false)
     )
       .map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid);
-
   }
-  public endpointForm = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required]
-  });
+
+  private getUpdateSelector() {
+    return selectUpdateInfo(
+      cnsisStoreNames.type,
+      this.data.guid,
+      CNSISEffect.connectingKey,
+      cnsisStoreNames.section
+    );
+  }
+
+  private getRequestSelector() {
+    return selectRequestInfo(
+      systemStoreNames.type,
+      SystemEffects.guid,
+      systemStoreNames.section
+    );
+  }
+
+  private getEntitySelector() {
+    return selectEntity<CNSISModel>(
+      cnsisStoreNames.type,
+      this.data.guid,
+      cnsisStoreNames.section
+    );
+  }
 
   submit(event) {
     const { guid, username, password } = this.endpointForm.value;
