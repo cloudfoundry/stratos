@@ -32,10 +32,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionDelete: IListAction<CNSISModel> = {
     action: (item) => {
-      this.store.dispatch(new UnregisterCnis(
-        item.guid
-      ));
-
+      this.store.dispatch(new UnregisterCnis(item.guid));
       this.handleAction(item, CNSISEffect.unregisteringKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
         this.store.dispatch(new GetAllCNSIS());
@@ -72,9 +69,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionDisconnect: IListAction<CNSISModel> = {
     action: (item) => {
-      this.store.dispatch(new DisconnectCnis(
-        item.guid
-      ));
+      this.store.dispatch(new DisconnectCnis(item.guid));
       this.handleAction(item, CNSISEffect.disconnectingKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
         this.store.dispatch(new GetSystemInfo());
