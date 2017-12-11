@@ -1,3 +1,7 @@
+import { CommonModule } from '@angular/common';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../../shared/shared.module';
+import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { inject, TestBed } from '@angular/core/testing';
 import { Store, StoreModule } from '@ngrx/store';
 
@@ -14,6 +18,9 @@ describe('AppNameUniqueDirective', () => {
     TestBed.configureTestingModule({
       imports: [
         AppStoreModule,
+        CommonModule,
+        CoreModule,
+        SharedModule,
         RouterTestingModule,
         MdDialogModule,
         createBasicStoreModule(),

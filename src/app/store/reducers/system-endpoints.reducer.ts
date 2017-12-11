@@ -2,6 +2,7 @@ import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { CNSISModel } from '../types/cnsis.types';
 import { GetSystemSuccess, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
+
 export function systemEndpointsReducer(state: IRequestEntityTypeState<CNSISModel>, action: GetSystemSuccess) {
   if (action.type === GET_SYSTEM_INFO_SUCCESS) {
     const newState = { ...state };

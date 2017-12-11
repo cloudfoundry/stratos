@@ -20,6 +20,7 @@ import { UpdateAppEffects } from './effects/update-app-effects';
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { RouterEffect } from './effects/router.effects';
+import { SnackBarEffects } from './effects/snackBar.effects';
 
 
 @NgModule({
@@ -40,6 +41,7 @@ import { RouterEffect } from './effects/router.effects';
       AppVariablesEffect,
       RouterEffect,
       SystemEffects,
+      SnackBarEffects,
     ]),
   ]
 })

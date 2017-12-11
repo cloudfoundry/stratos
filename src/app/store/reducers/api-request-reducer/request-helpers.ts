@@ -1,11 +1,13 @@
+import { NormalizedResponse } from '../../types/api.types';
 import { RequestAction, SingleEntityAction } from '../../types/request.types';
 import { CfEntityDataState } from '../../types/entity.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
 import { defaultActionState, defaultDeletingActionState, defaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
+import { IRequestTypeState } from '../../app-state';
 
 
-export function getEntityRequestState(state, action: SingleEntityAction): RequestInfoState {
+export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {
   const { entityKey, guid } = action;
   const requestState = { ...state[entityKey][guid] };
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
@@ -14,7 +16,7 @@ export function getEntityRequestState(state, action: SingleEntityAction): Reques
   return { ...defaultRequestState };
 }
 
-export function setEntityRequestState(state, requestState, { entityKey, guid }: RequestAction) {
+export function setEntityRequestState(state: IRequestTypeState, requestState, { entityKey, guid }: RequestAction) {
   const newState = {
     [entityKey]: {
       [guid]: {
@@ -26,7 +28,11 @@ export function setEntityRequestState(state, requestState, { entityKey, guid }: 
 }
 
 
-export function createRequestStateFromResponse(entities, state) {
+export function createRequestStateFromResponse(response: NormalizedResponse, state: IRequestTypeState) {
+  if (!response || !response.entities) {
+    return state;
+  }
+  const { entities } = response;
   let newState = { ...state };
   Object.keys(entities).forEach(entityKey => {
     Object.keys(entities[entityKey]).forEach(guid => {

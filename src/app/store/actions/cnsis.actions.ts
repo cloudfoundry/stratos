@@ -50,5 +50,5 @@ export class DisconnectCnis implements Action {
   constructor(
     public guid: string
   ) { }
-  type = CONNECT_CNSIS;
+  type = DISCONNECT_CNSIS;
 }

@@ -7,8 +7,9 @@ import {
   setEntityRequestState,
 } from './request-helpers';
 import { mergeState } from '../../helpers/reducer.helper';
+import { IRequestTypeState } from '../../app-state';
 
-export function succeedRequest(state, action: ISuccessRequestAction) {
+export function succeedRequest(state: IRequestTypeState, action: ISuccessRequestAction) {
   if (action.apiAction.guid) {
     const apiAction = action.apiAction as IAPIAction;
     const successAction = action as WrapperCFActionSuccess;
@@ -35,14 +36,14 @@ export function succeedRequest(state, action: ISuccessRequestAction) {
     }
 
     const newState = mergeState(
-      createRequestStateFromResponse(successAction.response.entities, state),
+      createRequestStateFromResponse(successAction.response, state),
       setEntityRequestState(state, requestSuccessState, action.apiAction)
     );
 
     return newState;
   } else if (action.response && action.response.entities) {
     const { entities } = action.response;
-    return createRequestStateFromResponse(entities, state);
+    return createRequestStateFromResponse(action.response, state);
   }
   return state;
 }
