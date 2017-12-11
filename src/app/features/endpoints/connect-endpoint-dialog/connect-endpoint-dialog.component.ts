@@ -14,7 +14,7 @@ import { MdDialogRef, MD_DIALOG_DATA, MdSnackBar } from '@angular/material';
 import { AppState } from '../../../store/app-state';
 import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
-import { ShowSnackBar } from '../../../store/actions/snackbar.actions';
+import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',

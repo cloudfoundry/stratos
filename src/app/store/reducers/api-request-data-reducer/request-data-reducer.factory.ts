@@ -24,7 +24,19 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestActi
 }
 
 function deleteEntity(state, entityKey, guid) {
-  const newState = { ...state };
-  delete newState[entityKey][guid];
+  const newState = {};
+  for (const entityTypeKey in state) {
+
+    if (entityTypeKey === entityKey) {
+      newState[entityTypeKey] = {};
+      for (const entityGuid in state[entityTypeKey]) {
+        if (entityGuid !== guid) {
+          newState[entityTypeKey][entityGuid] = state[entityTypeKey][entityGuid];
+        }
+      }
+    } else {
+      newState[entityTypeKey] = state[entityTypeKey]
+    }
+  }
   return newState;
 }

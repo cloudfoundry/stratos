@@ -11,7 +11,7 @@ import { TableHeaderSelectComponent } from '../components/table/table-header-sel
 import { Action, Store } from '@ngrx/store';
 import { CNSISModel, cnsisStoreNames } from '../../store/types/cnsis.types';
 import { RouterNav } from '../../store/actions/router.actions';
-import { ConnectCnis, DisconnectCnis } from '../../store/actions/cnsis.actions';
+import { ConnectCnis, DisconnectCnis, UnregisterCnis, GetAllCNSIS } from '../../store/actions/cnsis.actions';
 import { EndpointsDataSource } from '../data-sources/endpoints-data-source';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { Injectable } from '@angular/core';
@@ -32,7 +32,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionDelete: IListAction<CNSISModel> = {
     action: (item) => {
-      return null;
+      this.unregister(item);
     },
     icon: 'delete',
     label: 'Unregister',
@@ -153,9 +153,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       sort: true,
       cellFlex: '5'
     },
-    // {
-    //   columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'table-column-edit', cellFlex: '1'
-    // },
     {
       columnId: 'edit',
       headerCell: () => 'Actions',
@@ -166,6 +163,31 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   ];
 
   dataSource: EndpointsDataSource;
+
+  private unregister(endpoint: CNSISModel) {
+    this.store.dispatch(new UnregisterCnis(
+      endpoint.guid
+    ));
+    const disSub = this.store.select(selectUpdateInfo(
+      cnsisStoreNames.type,
+      endpoint.guid,
+      CNSISEffect.unregisteringKey,
+      cnsisStoreNames.section
+    ))
+      .pairwise()
+      .subscribe(([oldVal, newVal]) => {
+        if (oldVal.busy && !newVal.busy) {
+          // Has finished fetching
+          if (newVal.error) {
+            // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to unregister X')
+          } else {
+            this.store.dispatch(new ShowSnackBar(`Unregistered ${endpoint.name}`));
+          }
+        }
+        this.store.dispatch(new GetAllCNSIS());
+        disSub.unsubscribe();
+      });
+  }
 
   constructor(
     private store: Store<AppState>,

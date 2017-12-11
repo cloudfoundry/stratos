@@ -1,5 +1,3 @@
-import { IRequestTypeState } from '../app-state';
-
 export const mergeState = (state, newState) => {
   const baseState = { ...state };
 

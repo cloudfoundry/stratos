@@ -10,6 +10,8 @@ import {
   GetAllCNSIS,
   GetAllCNSISFailed,
   GetAllCNSISSuccess,
+  UNREGISTER_CNSIS,
+  UnregisterCnis,
 } from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
@@ -23,6 +25,7 @@ import {
   WrapperNoneCFActionFailed,
   WrapperNoneCFActionSuccess,
 } from '../types/request.types';
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 
 
 @Injectable()
@@ -30,6 +33,7 @@ export class CNSISEffect {
 
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
+  static unregisteringKey = 'unregistering';
 
   constructor(
     private http: Http,
@@ -115,6 +119,22 @@ export class CNSISEffect {
       );
     });
 
+  @Effect() unregister$ = this.actions$.ofType<UnregisterCnis>(UNREGISTER_CNSIS)
+    .flatMap(action => {
+
+      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.unregisteringKey);
+
+      const params: URLSearchParams = new URLSearchParams();
+      params.append('cnsi_guid', action.guid);
+
+      return this.doCnisAction(
+        apiAction,
+        '/pp/v1/unregister',
+        params,
+        'delete'
+      );
+    });
+
   private getEndpointAction(guid, type, updatingKey) {
     return {
       entityKey: cnsisStoreNames.type,
@@ -125,18 +145,17 @@ export class CNSISEffect {
   }
 
 
-  private doCnisAction(apiAction: IAPIAction, url: string, params: URLSearchParams) {
-    const actionType = 'update';
+  private doCnisAction(apiAction: IAPIAction, url: string, params: URLSearchParams, apiActionType: ApiRequestTypes = 'update') {
     const headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
-    this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
+    this.store.dispatch(new StartNoneCFAction(apiAction, apiActionType));
     return this.http.post(url, params, {
       headers
     }).map(endpoint => {
-      return new WrapperNoneCFActionSuccess(null, apiAction, 'update');
+      return new WrapperNoneCFActionSuccess(null, apiAction, apiActionType);
     })
       .catch(e => {
-        return [new WrapperNoneCFActionFailed('Could not connect', apiAction, 'update')];
+        return [new WrapperNoneCFActionFailed('Could not connect', apiAction, apiActionType)];
       });
   }
 }
