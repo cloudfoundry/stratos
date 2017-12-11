@@ -87,12 +87,7 @@ export class CNSISEffect {
   @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
     .flatMap(action => {
       const actionType = 'update';
-      const apiAction = {
-        entityKey: cnsisStoreNames.type,
-        guid: action.guid,
-        type: action.type,
-        updatingKey: CNSISEffect.connectingKey,
-      } as IAPIAction;
+      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.connectingKey);
       const params: URLSearchParams = new URLSearchParams();
       params.append('cnsi_guid', action.guid);
       params.append('username', action.username);
@@ -108,12 +103,7 @@ export class CNSISEffect {
   @Effect() disconnect$ = this.actions$.ofType<DisconnectCnis>(DISCONNECT_CNSIS)
     .flatMap(action => {
 
-      const apiAction = {
-        entityKey: cnsisStoreNames.type,
-        guid: action.guid,
-        type: action.type,
-        updatingKey: CNSISEffect.disconnectingKey,
-      } as IAPIAction;
+      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.disconnectingKey);
 
       const params: URLSearchParams = new URLSearchParams();
       params.append('cnsi_guid', action.guid);
@@ -124,6 +114,15 @@ export class CNSISEffect {
         params
       );
     });
+
+  private getEndpointAction(guid, type, updatingKey) {
+    return {
+      entityKey: cnsisStoreNames.type,
+      guid,
+      type,
+      updatingKey,
+    } as IAPIAction;
+  }
 
 
   private doCnisAction(apiAction: IAPIAction, url: string, params: URLSearchParams) {

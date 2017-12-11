@@ -12,9 +12,7 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestActi
       case successAction:
         const success = action as ISuccessRequestAction;
         if (success.requestType === 'delete') {
-          const newState = { ...state };
-          delete newState[success.apiAction.entityKey][success.apiAction.guid];
-          return newState;
+          return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
           return mergeState(state, success.response.entities);
         }
@@ -23,4 +21,10 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestActi
         return state;
     }
   };
+}
+
+function deleteEntity(state, entityKey, guid) {
+  const newState = { ...state };
+  delete newState[entityKey][guid];
+  return newState;
 }
