@@ -89,7 +89,7 @@ export class ApplicationService {
       ));
 
     // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
-    const appStats$ =
+    this.appStats$ =
       this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
         this.store,
         this.appGuid,
