@@ -32,7 +32,14 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionDelete: IListAction<CNSISModel> = {
     action: (item) => {
-      this.unregister(item);
+      this.store.dispatch(new UnregisterCnis(
+        item.guid
+      ));
+
+      this.handleAction(item, CNSISEffect.unregisteringKey, ([oldVal, newVal]) => {
+        this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+        this.store.dispatch(new GetAllCNSIS());
+      });
     },
     icon: 'delete',
     label: 'Unregister',
@@ -68,21 +75,10 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       this.store.dispatch(new DisconnectCnis(
         item.guid
       ));
-      const disSub = this.store.select(selectUpdateInfo(
-        cnsisStoreNames.type,
-        item.guid,
-        CNSISEffect.disconnectingKey,
-        cnsisStoreNames.section
-      ))
-        .pairwise()
-        .subscribe(([oldVal, newVal]) => {
-          if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-            // Has finished fetching
-            this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
-            this.store.dispatch(new GetSystemInfo());
-            disSub.unsubscribe();
-          }
-        });
+      this.handleAction(item, CNSISEffect.disconnectingKey, ([oldVal, newVal]) => {
+        this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
+        this.store.dispatch(new GetSystemInfo());
+      });
     },
     icon: 'remove_from_queue',
     label: 'Disconnect',
@@ -164,28 +160,20 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   dataSource: EndpointsDataSource;
 
-  private unregister(endpoint: CNSISModel) {
-    this.store.dispatch(new UnregisterCnis(
-      endpoint.guid
-    ));
+  private handleAction(item, effectKey, handleChange) {
     const disSub = this.store.select(selectUpdateInfo(
       cnsisStoreNames.type,
-      endpoint.guid,
-      CNSISEffect.unregisteringKey,
+      item.guid,
+      effectKey,
       cnsisStoreNames.section
     ))
       .pairwise()
       .subscribe(([oldVal, newVal]) => {
-        if (oldVal.busy && !newVal.busy) {
-          // Has finished fetching
-          if (newVal.error) {
-            // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to unregister X')
-          } else {
-            this.store.dispatch(new ShowSnackBar(`Unregistered ${endpoint.name}`));
-          }
+        // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
+        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+          handleChange([oldVal, newVal]);
+          disSub.unsubscribe();
         }
-        this.store.dispatch(new GetAllCNSIS());
-        disSub.unsubscribe();
       });
   }
 
