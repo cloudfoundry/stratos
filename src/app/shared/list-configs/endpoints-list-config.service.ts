@@ -11,7 +11,7 @@ import { TableHeaderSelectComponent } from '../components/table/table-header-sel
 import { Action, Store } from '@ngrx/store';
 import { CNSISModel, cnsisStoreNames } from '../../store/types/cnsis.types';
 import { RouterNav } from '../../store/actions/router.actions';
-import { ConnectCnis, DisconnectCnis } from '../../store/actions/cnsis.actions';
+import { ConnectCnis, DisconnectCnis, UnregisterCnis, GetAllCNSIS } from '../../store/actions/cnsis.actions';
 import { EndpointsDataSource } from '../data-sources/endpoints-data-source';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { Injectable } from '@angular/core';
@@ -32,7 +32,11 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionDelete: IListAction<CNSISModel> = {
     action: (item) => {
-      return null;
+      this.store.dispatch(new UnregisterCnis(item.guid));
+      this.handleAction(item, CNSISEffect.unregisteringKey, ([oldVal, newVal]) => {
+        this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+        this.store.dispatch(new GetAllCNSIS());
+      });
     },
     icon: 'delete',
     label: 'Unregister',
@@ -65,24 +69,11 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionDisconnect: IListAction<CNSISModel> = {
     action: (item) => {
-      this.store.dispatch(new DisconnectCnis(
-        item.guid
-      ));
-      const disSub = this.store.select(selectUpdateInfo(
-        cnsisStoreNames.type,
-        item.guid,
-        CNSISEffect.disconnectingKey,
-        cnsisStoreNames.section
-      ))
-        .pairwise()
-        .subscribe(([oldVal, newVal]) => {
-          if (!newVal.error && (oldVal.busy && !newVal.busy)) {
-            // Has finished fetching
-            this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
-            this.store.dispatch(new GetSystemInfo());
-            disSub.unsubscribe();
-          }
-        });
+      this.store.dispatch(new DisconnectCnis(item.guid));
+      this.handleAction(item, CNSISEffect.disconnectingKey, ([oldVal, newVal]) => {
+        this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
+        this.store.dispatch(new GetSystemInfo());
+      });
     },
     icon: 'remove_from_queue',
     label: 'Disconnect',
@@ -153,9 +144,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       sort: true,
       cellFlex: '5'
     },
-    // {
-    //   columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'table-column-edit', cellFlex: '1'
-    // },
     {
       columnId: 'edit',
       headerCell: () => 'Actions',
@@ -166,6 +154,23 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   ];
 
   dataSource: EndpointsDataSource;
+
+  private handleAction(item, effectKey, handleChange) {
+    const disSub = this.store.select(selectUpdateInfo(
+      cnsisStoreNames.type,
+      item.guid,
+      effectKey,
+      cnsisStoreNames.section
+    ))
+      .pairwise()
+      .subscribe(([oldVal, newVal]) => {
+        // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
+        if (!newVal.error && (oldVal.busy && !newVal.busy)) {
+          handleChange([oldVal, newVal]);
+          disSub.unsubscribe();
+        }
+      });
+  }
 
   constructor(
     private store: Store<AppState>,
