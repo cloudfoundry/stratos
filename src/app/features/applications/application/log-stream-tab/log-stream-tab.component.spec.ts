@@ -21,13 +21,14 @@ import { Store, StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
 import { LogStreamTabComponent } from './log-stream-tab.component';
-
-const appId = '1';
-const cfId = '2';
+import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
 
 describe('LogStreamTabComponent', () => {
   let component: LogStreamTabComponent;
   let fixture: ComponentFixture<LogStreamTabComponent>;
+
+  const appId = '1';
+  const cfId = '2';
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -51,7 +52,7 @@ describe('LogStreamTabComponent', () => {
           ApplicationSchema,
           new GetApplication(appId, cfId)
         ),
-        ApplicationService,
+        generateTestApplicationServiceProvider(cfId, appId),
         AppStoreModule,
         ApplicationStateService,
         ApplicationEnvVarsService

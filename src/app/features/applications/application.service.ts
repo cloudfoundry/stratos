@@ -39,11 +39,19 @@ export interface ApplicationData {
 export class ApplicationService {
 
   constructor(
+    public cfGuid: string,
+    public appGuid: string,
     private store: Store<AppState>,
     private entityService: EntityService,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsService) {
+    this.constructCoreObservables();
+    this.constructAmalgamatedObservables();
+    this.constructStatusObservables();
   }
+
+  // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
+  private appStats$: Observable<null | AppMetadataInfo>;
 
   // NJ: This needs to be cleaned up. So much going on!
   isFetchingApp$: Observable<boolean>;
@@ -65,29 +73,7 @@ export class ApplicationService {
   applicationStratProject$: Observable<EnvVarStratosProject>;
   applicationState$: Observable<ApplicationStateData>;
 
-  appGuid: string;
-  cfGuid: string;
-
-  isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
-    if (requestInfo) {
-      return !requestInfo.fetching;
-    } else {
-      return !!value;
-    }
-  }
-
-  isMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
-    if (requestInfo) {
-      return !requestInfo.fetching;
-    } else {
-      return !!value;
-    }
-  }
-
-  setApplication(cfGuid, appGuid) {
-    this.appGuid = appGuid;
-    this.cfGuid = cfGuid;
-
+  private constructCoreObservables() {
     // First set up all the base observables
     this.app$ = this.entityService.entityObs$;
 
@@ -98,32 +84,34 @@ export class ApplicationService {
     this.appSummary$ =
       this.waitForAppEntity$.mergeMap(() => getAppMetadataObservable(
         this.store,
-        appGuid,
-        new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType)
+        this.appGuid,
+        new GetAppMetadataAction(this.appGuid, this.cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType)
       ));
 
     // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
-    const appStats$ =
+    this.appStats$ =
       this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
         this.store,
-        appGuid,
-        new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.INSTANCES as AppMetadataType)
+        this.appGuid,
+        new GetAppMetadataAction(this.appGuid, this.cfGuid, AppMetadataProperties.INSTANCES as AppMetadataType)
       ));
 
     this.appEnvVars$ =
       this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
         this.store,
-        appGuid,
-        new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType)
+        this.appGuid,
+        new GetAppMetadataAction(this.appGuid, this.cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType)
       ));
+  }
 
+  private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
 
     this.appStatsGated$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity)
       .mergeMap(ai => {
         if (ai.entity.entity.state === 'STARTED') {
-          return appStats$;
+          return this.appStats$;
         } else {
           return Observable.of(null);
         }
@@ -156,8 +144,9 @@ export class ApplicationService {
     this.applicationStratProject$ = this.appEnvVars$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
     });
+  }
 
-
+  private constructStatusObservables() {
     /**
      * An observable based on the core application entity
     */
@@ -181,7 +170,22 @@ export class ApplicationService {
 
     this.isFetchingStats$ =
       this.appStatsGated$.map(appStats => appStats ? appStats.metadataRequestState.updating.busy : false).startWith(false);
+  }
 
+  isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
+    if (requestInfo) {
+      return !requestInfo.fetching;
+    } else {
+      return !!value;
+    }
+  }
+
+  isMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
+    if (requestInfo) {
+      return !requestInfo.fetching;
+    } else {
+      return !!value;
+    }
   }
 
   updateApplication(updatedApplication: UpdateApplication) {

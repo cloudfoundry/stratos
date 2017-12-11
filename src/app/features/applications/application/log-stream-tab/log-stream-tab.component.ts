@@ -11,6 +11,7 @@ import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
 import { MdInput } from '@angular/material';
 import * as moment from 'moment';
+import { LoggerService } from '../../../../core/logger.service';
 
 interface LogItem {
   message: string;
@@ -34,7 +35,7 @@ export class LogStreamTabComponent implements OnInit {
 
   streamTitle$: Observable<string>;
 
-  constructor(private applicationService: ApplicationService, private store: Store<AppState>) {
+  constructor(private applicationService: ApplicationService, private store: Store<AppState>, private logService: LoggerService) {
 
     this.streamTitle$ = store
       .select(selectEntity(ApplicationSchema.key, applicationService.appGuid))
@@ -74,6 +75,10 @@ export class LogStreamTabComponent implements OnInit {
         new QueueingSubject<string>()
       )
         .messages
+        .catch(e => {
+          this.logService.error('Error while connecting to socket: ' + JSON.stringify(e));
+          return [];
+        })
         .share()
         .map(message => {
           const json = JSON.parse(message);
