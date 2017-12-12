@@ -46,68 +46,66 @@ const defaultPaginationEntityState = {
 
 export const defaultPaginationState = { ...defaultCfEntitiesState };
 
-const types = [
-  ApiActionTypes.API_REQUEST_START,
-  ApiActionTypes.API_REQUEST_SUCCESS,
-  ApiActionTypes.API_REQUEST_FAILED
-];
+export function createPaginationReducer(types: [string, string, string]) {
+  const updatePagination = getPaginationUpdater(types);
+  const [requestType, successType, failureType] = types;
+  return function paginationReducer(state, action) {
+    state = state || defaultPaginationState;
+    if (action.type === ApiActionTypes.API_REQUEST) {
+      return state;
+    }
 
-const [requestType, successType, failureType] = types;
-export function paginationReducer(state, action) {
-  state = state || defaultPaginationState;
-  if (action.type === ApiActionTypes.API_REQUEST) {
-    return state;
-  }
+    if (action.type === CLEAR_PAGES) {
+      if (state[action.entityKey] && state[action.entityKey][action.paginationKey]) {
+        const newState = { ...state };
+        const entityState = {
+          ...newState[action.entityKey],
+          [action.paginationKey]: {
+            ...newState[action.entityKey][action.paginationKey],
+            ids: {},
+            fetching: false,
+            pageCount: 0,
+            currentPage: 1,
+            totalResults: 0,
+            error: false,
+            message: ''
+          }
+        };
+        return {
+          ...newState,
+          [action.entityKey]: entityState
+        };
+      }
+    }
 
-  if (action.type === CLEAR_PAGES) {
-    if (state[action.entityKey] && state[action.entityKey][action.paginationKey]) {
+    if (action.type === CLEAR_PAGINATION_OF_TYPE) {
+      if (state[action.entityKey]) {
+        const clearState = { ...state };
+        clearState[action.entityKey] = {};
+        return clearState;
+      }
+      return state;
+    }
+
+    const actionType = getActionType(action);
+    const key = getActionKey(action);
+    const paginationKey = getPaginationKey(action);
+    if (actionType && key && paginationKey) {
       const newState = { ...state };
-      const entityState = {
-        ...newState[action.entityKey],
-        [action.paginationKey]: {
-          ...newState[action.entityKey][action.paginationKey],
-          ids: {},
-          fetching: false,
-          pageCount: 0,
-          currentPage: 1,
-          totalResults: 0,
-          error: false,
-          message: ''
-        }
-      };
-      return {
-        ...newState,
-        [action.entityKey]: entityState
-      };
+      const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
+      newState[key] = mergeState(newState[key], {
+        [paginationKey]: updatedPaginationState
+      });
+      return newState;
+    } else {
+      return state;
     }
-  }
-
-  if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-    if (state[action.entityKey]) {
-      const clearState = { ...state };
-      clearState[action.entityKey] = {};
-      return clearState;
-    }
-    return state;
-  }
-
-  const actionType = getActionType(action);
-  const key = getActionKey(action);
-  const paginationKey = getPaginationKey(action);
-  if (actionType && key && paginationKey) {
-    const newState = { ...state };
-    const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
-    newState[key] = mergeState(newState[key], {
-      [paginationKey]: updatedPaginationState
-    });
-    return newState;
-  } else {
-    return state;
-  }
+  };
 }
 
-const updatePagination =
-  function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
+const getPaginationUpdater = function (types: [string, string, string]) {
+  const [requestType, successType, failureType] = types;
+  return function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
         return {
@@ -191,4 +189,6 @@ const updatePagination =
         return state;
     }
   };
+};
+
 

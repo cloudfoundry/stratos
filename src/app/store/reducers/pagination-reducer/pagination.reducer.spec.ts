@@ -4,10 +4,17 @@ import { RequestOptions } from '@angular/http';
 import {
   ApiActionTypes,
 } from '../../actions/request.actions';
-import { defaultPaginationState, paginationReducer } from './pagination.reducer';
+import { createPaginationReducer, defaultPaginationState } from './pagination.reducer';
 import { PaginatedAction } from '../../types/pagination.types';
 import { StartCFAction, WrapperCFActionSuccess, WrapperCFActionFailed } from '../../types/request.types';
 
+function getReducer() {
+  return createPaginationReducer([
+    ApiActionTypes.API_REQUEST_START,
+    ApiActionTypes.API_REQUEST_SUCCESS,
+    ApiActionTypes.API_REQUEST_FAILED
+  ]);
+}
 
 class MockPagAction implements PaginatedAction {
   actions = ['ONE', 'TWO', 'THREE'];
@@ -28,11 +35,17 @@ function checkState({ newState, expectedNewState, entityKey, paginationKey }) {
 
 describe('PaginationReducer', () => {
   it('should return empty state', () => {
+    const paginationReducer = getReducer();
     expect(paginationReducer(null, { type: 'FAKE_NEWS' })).toEqual(defaultPaginationState);
     expect(paginationReducer(null, { type: ApiActionTypes.API_REQUEST })).toEqual(defaultPaginationState);
   });
 
   it('should return fetching state', () => {
+    const paginationReducer = createPaginationReducer([
+      ApiActionTypes.API_REQUEST_START,
+      ApiActionTypes.API_REQUEST_SUCCESS,
+      ApiActionTypes.API_REQUEST_FAILED
+    ]);
     const entityKey = ApplicationSchema.key;
     const paginationKey = 'PaginationKey';
     const apiAction = new MockPagAction();
@@ -76,6 +89,8 @@ describe('PaginationReducer', () => {
   });
 
   it('should return success state', () => {
+
+    const paginationReducer = getReducer();
 
     const entityKey = 'EntityKey';
     const paginationKey = 'PaginationKey';
@@ -136,6 +151,9 @@ describe('PaginationReducer', () => {
 
 
   it('should return failed state', () => {
+
+    const paginationReducer = getReducer();
+
     const entityKey = 'EntityKey';
     const paginationKey = 'PaginationKey';
     const message = 'Failed';

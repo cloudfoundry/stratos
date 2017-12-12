@@ -14,7 +14,7 @@ import { authReducer } from './reducers/auth.reducer';
 import { cnsisReducer } from './reducers/cnsis.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
-import { paginationReducer } from './reducers/pagination-reducer/pagination.reducer';
+import { createPaginationReducer } from './reducers/pagination-reducer/pagination.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { NgModule } from '@angular/core';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -47,7 +47,11 @@ export const appReducers = {
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   cnsis: cnsisReducer,
-  pagination: paginationReducer,
+  pagination: createPaginationReducer([
+    ApiActionTypes.API_REQUEST_START,
+    ApiActionTypes.API_REQUEST_SUCCESS,
+    ApiActionTypes.API_REQUEST_FAILED
+  ]),
   request: requestReducer,
   requestData: requestDataReducer,
   dashboard: dashboardReducer,
