@@ -1,3 +1,5 @@
+import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
+import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import {
   CFAction,
@@ -28,11 +30,6 @@ import {
   NormalizedResponse,
 } from './../types/api.types';
 import { AppState } from './../app-state';
-import {
-  qParamsToString,
-  resultPerPageParam,
-  resultPerPageParamDefault,
-} from '../reducers/pagination-reducer/pagination.reducer';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
