@@ -1,4 +1,4 @@
-import { IAPIAction } from '../store/types/request.types';
+import { IRequestAction } from '../store/types/request.types';
 import { interval } from 'rxjs/observable/interval';
 import {
   ActionState,
@@ -14,14 +14,13 @@ import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import {
-  getRequestDataTypeState,
+  getAPIRequestDataState,
   getEntityUpdateSections,
   getUpdateSectionById,
   selectEntity,
   selectRequestInfo,
   selectUpdateInfo,
 } from '../store/selectors/api.selectors';
-import { CfEntityDataState } from '../store/types/entity.types';
 import { Inject, Injectable } from '@angular/core';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
@@ -36,11 +35,11 @@ export class EntityService {
     public entityKey: string,
     public schema: Schema,
     public id: string,
-    public action: IAPIAction,
+    public action: IRequestAction,
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF
   ) {
-    this.entitySelect$ = store.select(selectEntity(entityKey, id, entitySection));
-    this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id, entitySection));
+    this.entitySelect$ = store.select(selectEntity(entityKey, id));
+    this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id));
     this.actionDispatch = (updatingKey) => {
       if (updatingKey) {
         action.updatingKey = updatingKey;
@@ -103,11 +102,11 @@ export class EntityService {
     entityRequestSelect$: Observable<RequestInfoState>
   ): Observable<EntityInfo> => {
     return Observable.combineLatest(
-      this.store.select(getRequestDataTypeState(this.entitySection)),
+      this.store.select(getAPIRequestDataState),
       entitySelect$,
       entityRequestSelect$
     )
-      .do(([entities, entity, entityRequestInfo]: [CfEntityDataState, APIResource, RequestInfoState]) => {
+      .do(([entities, entity, entityRequestInfo]) => {
         if (
           !entityRequestInfo ||
           !entity &&

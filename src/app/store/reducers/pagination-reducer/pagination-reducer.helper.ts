@@ -1,3 +1,4 @@
+import { getAPIRequestDataState } from '../../selectors/api.selectors';
 import { AddParams, CLEAR_PAGES, CLEAR_PAGINATION_OF_TYPE, SetParams } from '../../actions/pagination.actions';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { Store } from '@ngrx/store';
@@ -5,7 +6,6 @@ import { AppState } from '../../app-state';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { getRequestDataTypeState } from '../../selectors/api.selectors';
 import { defaultPaginationState } from './pagination.reducer';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -112,7 +112,7 @@ export const getPaginationObservables = (function () {
             .filter(pagination => {
                 return isPageReady(pagination);
             })
-            .withLatestFrom(store.select(getRequestDataTypeState()))
+            .withLatestFrom(store.select(getAPIRequestDataState))
             .map(([paginationEntity, entities]) => {
                 const page = paginationEntity.ids[paginationEntity.currentPage];
                 return page ? denormalize(page, schema, entities) : null;

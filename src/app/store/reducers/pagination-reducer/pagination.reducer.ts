@@ -28,7 +28,6 @@ import { AppState } from '../../app-state';
 import { mergeState } from '../../helpers/reducer.helper';
 import { Observable } from 'rxjs/Observable';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { getRequestDataTypeState } from '../../selectors/api.selectors';
 import { defaultCfEntitiesState } from '../../types/entity.types';
 
 const defaultPaginationEntityState = {
@@ -51,9 +50,9 @@ export function createPaginationReducer(types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
   return function paginationReducer(state, action) {
     state = state || defaultPaginationState;
-    if (action.type === ApiActionTypes.API_REQUEST) {
-      return state;
-    }
+    // if (action.type === ApiActionTypes.API_REQUEST) {
+    //   return state;
+    // }
 
     if (action.type === CLEAR_PAGES) {
       if (state[action.entityKey] && state[action.entityKey][action.paginationKey]) {

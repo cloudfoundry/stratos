@@ -114,7 +114,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private getUpdateSelector() {
     return selectUpdateInfo(
-      cnsisStoreNames.type,
       this.data.guid,
       CNSISEffect.connectingKey,
       cnsisStoreNames.section
@@ -123,7 +122,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private getRequestSelector() {
     return selectRequestInfo(
-      systemStoreNames.type,
       SystemEffects.guid,
       systemStoreNames.section
     );
@@ -131,7 +129,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private getEntitySelector() {
     return selectEntity<CNSISModel>(
-      cnsisStoreNames.type,
       this.data.guid,
       cnsisStoreNames.section
     );

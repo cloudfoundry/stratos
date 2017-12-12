@@ -1,3 +1,4 @@
+import { IRequestAction, StartCFAction } from './../types/request.types';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
@@ -18,10 +19,9 @@ import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
 import {
-  IAPIAction,
-  StartNoneCFAction,
-  WrapperNoneCFActionFailed,
-  WrapperNoneCFActionSuccess,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
 } from '../types/request.types';
 
 
@@ -42,8 +42,8 @@ export class CNSISEffect {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: cnsisStoreNames.type,
-      } as IAPIAction;
-      this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
+      } as IRequestAction;
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),
         this.http.get('/pp/v1/cnsis/registered'),
@@ -72,12 +72,12 @@ export class CNSISEffect {
           // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
           // (cnsi success)
           return [
-            new WrapperNoneCFActionSuccess(mappedData, apiAction, actionType),
+            new WrapperRequestActionSuccess(mappedData, apiAction, actionType),
             new GetAllCNSISSuccess(data, action.login),
           ];
         })
         .catch((err, caught) => [
-          new WrapperNoneCFActionFailed(err.message, apiAction, actionType),
+          new WrapperRequestActionFailed(err.message, apiAction, actionType),
           new GetAllCNSISFailed(err.message, action.login),
         ]);
 
@@ -91,7 +91,7 @@ export class CNSISEffect {
         guid: action.guid,
         type: action.type,
         updatingKey: CNSISEffect.connectingKey,
-      } as IAPIAction;
+      } as IRequestAction;
 
       const headers = new Headers();
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
@@ -100,14 +100,14 @@ export class CNSISEffect {
       params.append('username', action.username);
       params.append('password', action.password);
 
-      this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return this.http.post('/pp/v1/auth/login/cnsi', params, {
         headers
       }).map(endpoint => {
-        return new WrapperNoneCFActionSuccess({ entities: {}, result: [] }, apiAction, 'update');
+        return new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction, 'update');
       })
         .catch(e => {
-          return [new WrapperNoneCFActionFailed('Could not connect', apiAction, actionType)];
+          return [new WrapperRequestActionFailed('Could not connect', apiAction, actionType)];
         });
     });
 }

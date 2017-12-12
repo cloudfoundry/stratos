@@ -1,3 +1,4 @@
+import { CFStartAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
 
@@ -21,20 +22,16 @@ export const EventSchema = new schema.Entity('event', {
   });
 
 
-export class GetAllAppEvents implements PaginatedAction {
+export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
   private static sortField = 'timestamp'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
   constructor(public paginationKey: string, public appGuid: string, public cnis) {
+    super();
     this.options = new RequestOptions();
     this.options.url = 'events';
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.options.params.append('', '');
-
-    // order-direction:desc
-    // page:1
-    // q:actee:e7ba6dbe-dc71-4d40-b2a4-087f139fbf81
-    // results-per-page:10
   }
   actions = [
     AppGetAllEvents.GET_ALL,
@@ -42,7 +39,6 @@ export class GetAllAppEvents implements PaginatedAction {
     AppGetAllEvents.GET_ALL_FAILED
   ];
 
-  type = ApiActionTypes.API_REQUEST;
   entity = [EventSchema];
   entityKey = EventSchema.key;
   options: RequestOptions;

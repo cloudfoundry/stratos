@@ -1,4 +1,4 @@
-import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
+import { CFStartAction, IRequestAction, ICFAction } from '../types/request.types';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions } from '@angular/http';
@@ -20,7 +20,7 @@ export interface NewRoute {
   host: string;
 }
 
-export class CreateRoute extends CFAction implements ICFAction {
+export class CreateRoute extends CFStartAction implements ICFAction {
   constructor(public guid: string, public cnis: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();
@@ -36,14 +36,13 @@ export class CreateRoute extends CFAction implements ICFAction {
     CREATE_ROUTE_SUCCESS,
     CREATE_ROUTE_ERROR
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
 }
 
 
-export class CheckRouteExists extends CFAction implements ICFAction {
+export class CheckRouteExists extends CFStartAction implements ICFAction {
   constructor(public guid: string, public cnis: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();
@@ -59,7 +58,6 @@ export class CheckRouteExists extends CFAction implements ICFAction {
     CREATE_ROUTE_SUCCESS,
     CREATE_ROUTE_ERROR
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;

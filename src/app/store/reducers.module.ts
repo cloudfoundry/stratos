@@ -1,7 +1,7 @@
 import { requestDataReducer, requestReducer } from './reducers/api-request-reducers.generator';
 import { CNSISEffect } from './effects/cnsis.effects';
 import { EndpointSchema } from './actions/cnsis.actions';
-import { ApiActionTypes, NonApiActionTypes } from './actions/request.actions';
+import { ApiActionTypes, RequestTypes } from './actions/request.actions';
 import { combineReducers, StoreModule, ActionReducerMap, State } from '@ngrx/store';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
@@ -24,7 +24,6 @@ import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { MetadataState } from './types/app-metadata.types';
 import { listReducer } from './reducers/list.reducer';
 import { generateDefaultState } from './reducers/api-request-reducer/request-helpers';
-import { CfEntityStateNames } from './types/entity.types';
 import { OtherEntityStateNames } from './types/other-entity.types';
 
 
@@ -43,17 +42,21 @@ export function appMetaDataReducer(state, action): MetadataState {
   return combineReducers<MetadataState>(appMetadataReducers)(state, action);
 }
 
+export function paginationReducer() {
+  return createPaginationReducer([
+    RequestTypes.START,
+    RequestTypes.SUCCESS,
+    RequestTypes.FAILED
+  ]);
+}
+
 export const appReducers = {
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   cnsis: cnsisReducer,
-  pagination: createPaginationReducer([
-    ApiActionTypes.API_REQUEST_START,
-    ApiActionTypes.API_REQUEST_SUCCESS,
-    ApiActionTypes.API_REQUEST_FAILED
-  ]),
-  request: requestReducer,
-  requestData: requestDataReducer,
+  pagination: paginationReducer(),
+  request: requestReducer(),
+  requestData: requestDataReducer(),
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   appMetadata: appMetaDataReducer,

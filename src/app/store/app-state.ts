@@ -1,3 +1,4 @@
+import { IRequestState, IRequestDataState } from './types/entity.types';
 import { RequestInfoState } from './reducers/api-request-reducer/types';
 import { APIResource } from './types/api.types';
 import { RouterReducerState } from '@ngrx/router-store';
@@ -8,7 +9,6 @@ import { DashboardState } from './reducers/dashboard-reducer';
 import { PaginationState } from './types/pagination.types';
 import { MetadataState } from './types/app-metadata.types';
 import { CreateNewApplicationState } from './types/create-application.types';
-import { CfEntityDataState, CfEntityRequestState } from './types/entity.types';
 import { ActionHistoryState } from './reducers/action-history-reducer';
 import { UAASetupState } from './types/uaa-setup.types';
 import { ListsState } from './reducers/list.reducer';
@@ -19,21 +19,6 @@ export interface IRequestTypeState {
 export interface IRequestEntityTypeState<T> {
   [guid: string]: T;
 }
-
-export interface IRequestDataState {
-  cf: CfEntityDataState;
-  other: {
-    endpoint: IRequestEntityTypeState<CNSISModel>;
-  };
-}
-export interface IRequestState {
-  cf: CfEntityRequestState;
-  other: {
-    endpoint: IRequestEntityTypeState<RequestInfoState>
-  };
-}
-
-
 export interface AppState {
   actionHistory: ActionHistoryState;
   auth: AuthState;

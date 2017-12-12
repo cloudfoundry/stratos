@@ -1,4 +1,4 @@
-import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
+import { CFStartAction, IRequestAction, ICFAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
 import { ApiActionTypes } from './request.actions';
@@ -12,7 +12,7 @@ export const StackSchema = new schema.Entity('stack', {}, {
   idAttribute: getAPIResourceGuid
 });
 
-export class GetStack extends CFAction implements ICFAction {
+export class GetStack extends CFStartAction implements ICFAction {
   constructor(public guid: string, public cnis: string) {
     super();
     this.options = new RequestOptions();
@@ -24,7 +24,6 @@ export class GetStack extends CFAction implements ICFAction {
     GET_SUCCESS,
     GET_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [StackSchema];
   entityKey = StackSchema.key;
   options: RequestOptions;

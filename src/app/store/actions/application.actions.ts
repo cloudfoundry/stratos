@@ -1,4 +1,5 @@
-import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
+import { CFStartAction, RequestAction } from './../types/request.types';
+import { IRequestAction, ICFAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
@@ -50,11 +51,12 @@ export const ApplicationSchema = new schema.Entity('application', ApplicationEnt
   idAttribute: getAPIResourceGuid
 });
 
-export class GetAllApplications implements PaginatedAction {
+export class GetAllApplications extends CFStartAction implements PaginatedAction {
 
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
   constructor(public paginationKey: string) {
+    super();
     this.options = new RequestOptions();
     this.options.url = 'apps';
     this.options.method = 'get';
@@ -64,7 +66,6 @@ export class GetAllApplications implements PaginatedAction {
     GET_ALL_SUCCESS,
     GET_ALL_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
@@ -77,7 +78,7 @@ export class GetAllApplications implements PaginatedAction {
   };
 }
 
-export class GetApplication extends CFAction implements ICFAction {
+export class GetApplication extends CFStartAction implements ICFAction {
   constructor(public guid: string, public cnis: string) {
     super();
     this.options = new RequestOptions();
@@ -93,13 +94,12 @@ export class GetApplication extends CFAction implements ICFAction {
     GET_SUCCESS,
     GET_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
 }
 
-export class CreateNewApplication extends CFAction implements ICFAction {
+export class CreateNewApplication extends CFStartAction implements ICFAction {
   constructor(public guid: string, public cnis: string, application: NewApplication) {
     super();
     this.options = new RequestOptions();
@@ -115,13 +115,12 @@ export class CreateNewApplication extends CFAction implements ICFAction {
     CREATE_SUCCESS,
     CREATE_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
 }
 
-export class AssociateRouteWithAppApplication extends CFAction implements ICFAction {
+export class AssociateRouteWithAppApplication extends CFStartAction implements ICFAction {
   constructor(public guid: string, public routeGuid: string, public cnis: string) {
     super();
     this.options = new RequestOptions();
@@ -133,7 +132,6 @@ export class AssociateRouteWithAppApplication extends CFAction implements ICFAct
     ASSIGN_ROUTE_SUCCESS,
     ASSIGN_ROUTE_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
@@ -152,7 +150,7 @@ export interface UpdateApplication {
 
 // declare function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K>;
 
-export class UpdateExistingApplication extends CFAction implements ICFAction {
+export class UpdateExistingApplication extends CFStartAction implements ICFAction {
   static updateKey = 'Updating-Existing-Application';
 
   constructor(public guid: string, public cnis: string, application: UpdateApplication) {
@@ -167,7 +165,6 @@ export class UpdateExistingApplication extends CFAction implements ICFAction {
     UPDATE_SUCCESS,
     UPDATE_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
@@ -179,7 +176,7 @@ export class UpdateExistingApplication extends CFAction implements ICFAction {
   }
 }
 
-export class DeleteApplication extends CFAction implements ICFAction {
+export class DeleteApplication extends CFStartAction implements ICFAction {
   static updateKey = 'Deleting-Existing-Application';
 
   constructor(public guid: string, public cnis: string) {
@@ -196,7 +193,6 @@ export class DeleteApplication extends CFAction implements ICFAction {
     DELETE_SUCCESS,
     DELETE_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;

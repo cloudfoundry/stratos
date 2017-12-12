@@ -8,7 +8,7 @@ import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors
 export const cnsisStatusSelector = (state: AppState): CNSISState => state.cnsis;
 
 // All CNSI request data
-export const cnsisEntitiesSelector = selectEntities<CNSISModel>(cnsisStoreNames.type, cnsisStoreNames.section);
+export const cnsisEntitiesSelector = selectEntities<CNSISModel>(cnsisStoreNames.type);
 // All Registered  CNSI request data
 export const cnsisRegisteredEntitiesSelector = createSelector(
   cnsisEntitiesSelector,
@@ -25,6 +25,6 @@ export const cnsisRegisteredEntitiesSelector = createSelector(
 );
 
 // Single CNSI request information
-export const cnsisEntityRequestSelector = (guid) => selectRequestInfo(cnsisStoreNames.type, guid, cnsisStoreNames.section);
+export const cnsisEntityRequestSelector = (guid) => selectRequestInfo(cnsisStoreNames.type, guid);
 // Single CNSI request data
-export const cnsisEntityRequestDataSelector = (guid) => selectEntity(cnsisStoreNames.type, guid, cnsisStoreNames.section);
+export const cnsisEntityRequestDataSelector = (guid) => selectEntity(cnsisStoreNames.type, guid);
