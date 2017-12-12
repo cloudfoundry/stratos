@@ -6,7 +6,7 @@ import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { StoreModule } from '@ngrx/store';
 import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
-import { paginationReducer } from '../../../../store/reducers/pagination.reducer';
+import { paginationReducer } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../application.service';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';

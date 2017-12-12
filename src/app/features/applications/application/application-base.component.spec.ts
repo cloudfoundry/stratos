@@ -8,7 +8,7 @@ import { StoreModule } from '@ngrx/store';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { SharedModule } from '../../../shared/shared.module';
-import { paginationReducer } from '../../../store/reducers/pagination.reducer';
+import { paginationReducer } from '../../../store/reducers/pagination-reducer/pagination.reducer';
 import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
 import { ApplicationBaseComponent } from './application-base.component';
 import { ApplicationEnvVarsService } from './build-tab/application-env-vars.service';

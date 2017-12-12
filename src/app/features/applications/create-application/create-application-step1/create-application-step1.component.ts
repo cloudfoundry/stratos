@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Rx';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { GetAllOrganizations, OrganizationSchema } from '../../../../store/actions/organization.actions';
 import { AppState } from '../../../../store/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination.reducer';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
 
 @Component({
   selector: 'app-create-application-step1',

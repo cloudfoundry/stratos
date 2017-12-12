@@ -32,7 +32,7 @@ import {
   qParamsToString,
   resultPerPageParam,
   resultPerPageParamDefault,
-} from '../reducers/pagination.reducer';
+} from '../reducers/pagination-reducer/pagination.reducer';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';

@@ -1,12 +1,12 @@
-import { ApplicationSchema } from '../actions/application.actions';
+import { ApplicationSchema } from '../../actions/application.actions';
 import { RequestOptions } from '@angular/http';
 
 import {
   ApiActionTypes,
-} from './../actions/request.actions';
+} from '../../actions/request.actions';
 import { defaultPaginationState, paginationReducer } from './pagination.reducer';
-import { PaginatedAction } from '../types/pagination.types';
-import { StartCFAction, WrapperCFActionSuccess, WrapperCFActionFailed } from '../types/request.types';
+import { PaginatedAction } from '../../types/pagination.types';
+import { StartCFAction, WrapperCFActionSuccess, WrapperCFActionFailed } from '../../types/request.types';
 
 
 class MockPagAction implements PaginatedAction {
