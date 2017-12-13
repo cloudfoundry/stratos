@@ -29,6 +29,13 @@ import { mergeState } from '../../helpers/reducer.helper';
 import { Observable } from 'rxjs/Observable';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { defaultCfEntitiesState } from '../../types/entity.types';
+import { paginationSuccess } from './pagination-reducer-success';
+import { paginationFailure } from './pagination-reducer.failure';
+import { paginationStart } from './pagination-reducer-start';
+import { paginationSetParams } from './pagination-reducer-set-params';
+import { paginationSetPage } from './pagination-reducer-set-page';
+import { paginationAddParams } from './pagination-reducer-add-params';
+import { paginationRemoveParams } from './pagination-reducer-remove-params';
 
 const defaultPaginationEntityState = {
   fetching: false,
@@ -50,83 +57,19 @@ const getPaginationUpdater = function (types: [string, string, string]) {
   return function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
-        return {
-          ...state,
-          fetching: true,
-          error: false,
-          message: '',
-        };
+        return paginationStart(state);
       case successType:
-        const params = {};
-        const { apiAction } = action;
-        if (apiAction.options.params) {
-          apiAction.options.params.paramsMap.forEach((value, key) => {
-            const paramValue = value.length === 1 ? value[0] : value;
-            params[key] = paramValue;
-          });
-        }
-        return {
-          ...state,
-          fetching: false,
-          error: false,
-          message: '',
-          ids: {
-            ...state.ids,
-            [state.currentPage]: action.response.result
-          },
-          pageCount: state.pageCount + 1,
-          totalResults: action.totalResults || action.response.result.length
-        };
+        return paginationSuccess(state, action);
       case failureType:
-        return {
-          ...state,
-          fetching: false,
-          error: true,
-          message: action.message
-        };
+        return paginationFailure(state, action);
       case SET_PAGE:
-        return {
-          ...state,
-          error: false,
-          currentPage: (action as SetPage).pageNumber
-        };
+        return paginationSetPage(state, action);
       case SET_PARAMS:
-        const setParamAction = action as SetParams;
-        return {
-          ...state,
-          params: removeEmptyParams({
-            [resultPerPageParam]: resultPerPageParamDefault,
-            ...setParamAction.params,
-            q: getUniqueQParams(setParamAction, state)
-          })
-        };
+        return paginationSetParams(state, action);
       case ADD_PARAMS:
-        const addParamAction = action as AddParams;
-        return {
-          ...state,
-          params: removeEmptyParams({
-            ...state.params,
-            ...addParamAction.params,
-            q: getUniqueQParams(addParamAction, state)
-          })
-        };
+        return paginationAddParams(state, action);
       case REMOVE_PARAMS:
-        const removeParamAction = action as RemoveParams;
-        const removeParamsState = {
-          ...state,
-          params: {
-            ...state.params,
-            q: state.params.q.filter((qs: QParam) => {
-              return !removeParamAction.qs.find((removeParamKey: string) => qs.key === removeParamKey);
-            })
-          }
-        };
-        removeParamAction.params.forEach((key) => {
-          if (removeParamsState.params.hasOwnProperty(key)) {
-            delete removeParamsState.params[key];
-          }
-        });
-        return removeParamsState;
+        return paginationRemoveParams(state, action);
       default:
         return state;
     }
