@@ -1,4 +1,4 @@
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 
@@ -96,35 +96,45 @@ export const getPaginationObservables = (function () {
       store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams));
     }
 
-    const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
-
-    const pagination$: Observable<PaginationEntityState> = paginationSelect$
-      .filter(pagination => !!pagination);
-
-    const entities$: Observable<any[]> = paginationSelect$
-      .do(pagination => {
-        if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
-          store.dispatch(action);
-        }
-      })
-      .filter(pagination => {
-        return isPageReady(pagination);
-      })
-      .withLatestFrom(store.select(getAPIRequestDataState))
-      .map(([paginationEntity, entities]) => {
-        const page = paginationEntity.ids[paginationEntity.currentPage];
-        return page ? denormalize(page, schema, entities) : null;
-      });
-
-    const obs = {
-      pagination$,
-      entities$
-    };
+    const obs = getObservables(
+      store,
+      entityKey,
+      paginationKey,
+      action,
+      schema
+    );
 
     mem[_key] = obs;
     return obs;
   };
 })();
+
+function getObservables(store: Store<AppState>, entityKey: string, paginationKey: string, action: Action, schema: Schema) {
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
+
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$
+    .filter(pagination => !!pagination);
+
+  const entities$: Observable<any[]> = paginationSelect$
+    .do(pagination => {
+      if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+        store.dispatch(action);
+      }
+    })
+    .filter(pagination => {
+      return isPageReady(pagination);
+    })
+    .withLatestFrom(store.select(getAPIRequestDataState))
+    .map(([paginationEntity, entities]) => {
+      const page = paginationEntity.ids[paginationEntity.currentPage];
+      return page ? denormalize(page, schema, entities) : null;
+    });
+    
+    return  {
+      pagination$,
+      entities$
+    };
+}
 
 export function isPageReady(pagination: PaginationEntityState) {
   return !!pagination && !!pagination.ids[pagination.currentPage];
