@@ -36,7 +36,7 @@ if [ ! -z "${STRATOS_INSTRUMENT}" ]; then
   # Need dev dependencies to instrument code
   echo "Instrumenting code"
   npm install
-  gulp dev-builds
+  gulp dev-build
   gulp e2e:pre-instrument
   gulp e2e:instrument-source
   rm -rf ./dist
