@@ -34,10 +34,16 @@ npm run build
 # Instrument code if required for e2e tests
 if [ ! -z "${STRATOS_INSTRUMENT}" ]; then
   # Need dev dependencies to instrument code
+  echo "Installing dev dependencies for source code instrumentation"
   npm install
   gulp e2e:pre-instrument
   gulp e2e:instrument-source
-  cp -R tmp/instrumented/* ./dist/
+
+  ls -al ./dist
+  ls -al ./tmp
+  echo "Copying instruments files"
+  rsync -r ./tmp/instrumented/ ./dist/
+  ls -al ./dist
 fi
 
 if [ ! -z "${CREATE_USER}" ]; then
