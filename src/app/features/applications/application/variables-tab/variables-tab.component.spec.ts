@@ -1,18 +1,17 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { VariablesTabComponent } from './variables-tab.component';
-import { MDAppModule } from '../../../../core/md.module';
-import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../../shared/shared.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
-import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
-import { paginationReducer } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
+
+import { CoreModule } from '../../../../core/core.module';
+import { MDAppModule } from '../../../../core/md.module';
+import { SharedModule } from '../../../../shared/shared.module';
+import { appReducers } from '../../../../store/reducers.module';
+import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../application.service';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
-import { appMetaDataReducer, appReducers } from '../../../../store/reducers.module';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
+import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
+import { VariablesTabComponent } from './variables-tab.component';
 
 describe('VariablesTabComponent', () => {
   let component: VariablesTabComponent;

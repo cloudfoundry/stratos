@@ -12,13 +12,13 @@ import { cnsisReducer } from './reducers/cnsis.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { listReducer } from './reducers/list.reducer';
-import { generateRequestPaginationReducer } from './reducers/pagination-reducer.generator';
+import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { appMetaDataReducer } from './reducers/pagination-reducer/app-metadata-reducer.generator';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { ActionReducerMap } from '@ngrx/store/src/models';
 
 
-export function logger(reducer): any {
+export function logger(reducer) {
   // default, no options
   return storeLogger()(reducer);
 }
@@ -27,12 +27,12 @@ export const appReducers = {
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
   cnsis: cnsisReducer,
-  pagination: generateRequestPaginationReducer(),
-  request: requestReducer(),
-  requestData: requestDataReducer(),
+  pagination: requestPaginationReducer,
+  request: requestReducer,
+  requestData: requestDataReducer,
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
-  appMetadata: appMetaDataReducer(),
+  appMetadata: appMetaDataReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer
 } as ActionReducerMap<{}>;

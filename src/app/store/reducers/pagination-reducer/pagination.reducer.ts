@@ -48,11 +48,11 @@ export const defaultPaginationState = { ...defaultCfEntitiesState };
 export function createPaginationReducer(types: [string, string, string]) {
   const updatePagination = getPaginationUpdater(types);
   const [requestType, successType, failureType] = types;
-  return function paginationReducer(state, action) {
+  return function (state, action) {
     state = state || defaultPaginationState;
-    // if (action.type === ApiActionTypes.API_REQUEST) {
-    //   return state;
-    // }
+    if (action.type === ApiActionTypes.API_REQUEST_START) {
+      return state;
+    }
 
     if (action.type === CLEAR_PAGES) {
       if (state[action.entityKey] && state[action.entityKey][action.paginationKey]) {

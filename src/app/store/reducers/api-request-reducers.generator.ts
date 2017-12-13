@@ -52,12 +52,13 @@ const entities = [
   'createApplication',
   'uaaSetup'
 ];
+const _requestReducer = requestReducerFactory(entities, requestActions);
 
-export function requestReducer(): any {
-  return requestReducerFactory(entities, requestActions);
+export function requestReducer(state, action) {
+  return _requestReducer(state, action);
 }
 
-export function requestDataReducer(): any {
+export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
@@ -69,5 +70,5 @@ export function requestDataReducer(): any {
   return chainReducers(
     baseDataReducer,
     extraReducers
-  );
+  )(state, action);
 }

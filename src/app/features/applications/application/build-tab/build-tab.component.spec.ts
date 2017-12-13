@@ -53,8 +53,8 @@ describe('BuildTabComponent', () => {
   }));
 
   beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
-    const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.section][cnsisStoreNames.type])[0];
-    const appGuid = Object.keys(initialState.requestData.cf.application)[0];
+    const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.type])[0];
+    const appGuid = Object.keys(initialState.requestData.application)[0];
     fixture = TestBed.createComponent(BuildTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

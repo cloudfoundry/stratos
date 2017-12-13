@@ -2,17 +2,17 @@ import { ApplicationSchema } from '../../actions/application.actions';
 import { RequestOptions } from '@angular/http';
 
 import {
-  ApiActionTypes,
+  RequestTypes,
 } from '../../actions/request.actions';
 import { createPaginationReducer, defaultPaginationState } from './pagination.reducer';
 import { PaginatedAction } from '../../types/pagination.types';
-import { StartCFAction, WrapperCFActionSuccess, WrapperCFActionFailed } from '../../types/request.types';
+import { StartRequestAction, WrapperRequestActionSuccess, WrapperRequestActionFailed } from '../../types/request.types';
 
 function getReducer() {
   return createPaginationReducer([
-    ApiActionTypes.API_REQUEST_START,
-    ApiActionTypes.API_REQUEST_SUCCESS,
-    ApiActionTypes.API_REQUEST_FAILED
+    RequestTypes.START,
+    RequestTypes.SUCCESS,
+    RequestTypes.FAILED
   ]);
 }
 
@@ -22,7 +22,7 @@ class MockPagAction implements PaginatedAction {
   entity = ApplicationSchema;
   entityKey = ApplicationSchema.key;
   paginationKey = 'PaginationKey';
-  type = ApiActionTypes.API_REQUEST;
+  type = RequestTypes.START;
 }
 
 function checkState({ newState, expectedNewState, entityKey, paginationKey }) {
@@ -37,14 +37,14 @@ describe('PaginationReducer', () => {
   it('should return empty state', () => {
     const paginationReducer = getReducer();
     expect(paginationReducer(null, { type: 'FAKE_NEWS' })).toEqual(defaultPaginationState);
-    expect(paginationReducer(null, { type: ApiActionTypes.API_REQUEST })).toEqual(defaultPaginationState);
+    expect(paginationReducer(null, { type: RequestTypes.START })).toEqual(defaultPaginationState);
   });
 
   it('should return fetching state', () => {
     const paginationReducer = createPaginationReducer([
-      ApiActionTypes.API_REQUEST_START,
-      ApiActionTypes.API_REQUEST_SUCCESS,
-      ApiActionTypes.API_REQUEST_FAILED
+      RequestTypes.START,
+      RequestTypes.SUCCESS,
+      RequestTypes.FAILED
     ]);
     const entityKey = ApplicationSchema.key;
     const paginationKey = 'PaginationKey';
@@ -52,7 +52,7 @@ describe('PaginationReducer', () => {
     apiAction.entityKey = entityKey;
     apiAction.paginationKey = paginationKey;
 
-    const startApiAction = new StartCFAction(apiAction, 'fetch');
+    const startApiAction = new StartRequestAction(apiAction, 'fetch');
     const newState = paginationReducer(
       {
         ...defaultPaginationState,
@@ -95,7 +95,7 @@ describe('PaginationReducer', () => {
     const entityKey = 'EntityKey';
     const paginationKey = 'PaginationKey';
 
-    const successApiAction = new WrapperCFActionSuccess(
+    const successApiAction = new WrapperRequestActionSuccess(
       {
         entities: {},
         result: [
@@ -158,7 +158,7 @@ describe('PaginationReducer', () => {
     const paginationKey = 'PaginationKey';
     const message = 'Failed';
 
-    const failedApiAction = new WrapperCFActionFailed(
+    const failedApiAction = new WrapperRequestActionFailed(
       message,
       {
         entityKey,

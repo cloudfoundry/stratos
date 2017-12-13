@@ -4,9 +4,9 @@ import { appMetadataReducer } from '../app-metadata.reducer';
 import { appMetadataRequestReducer } from '../app-metadata-request.reducer';
 
 
-export function appMetaDataReducer() {
+export function appMetaDataReducer(state, action) {
   // https://github.com/ngrx/platform/issues/116#issuecomment-317297642
-  return combineReducers<MetadataState>(appMetadataReducers);
+  return combineReducers<MetadataState>(appMetadataReducers)(state, action);
 }
 
 const appMetadataReducers: ActionReducerMap<MetadataState> = {
