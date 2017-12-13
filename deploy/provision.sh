@@ -36,11 +36,13 @@ if [ ! -z "${STRATOS_INSTRUMENT}" ]; then
   # Need dev dependencies to instrument code
   echo "Installing dev dependencies for source code instrumentation"
   npm install
+
+  ls -al ./dist
+  
   gulp e2e:pre-instrument
   gulp e2e:instrument-source
 
-  ls -al ./dist
-  ls -al ./tmp
+  ls -al ./tmp/instrumented
   echo "Copying instruments files"
   rsync -r ./tmp/instrumented/ ./dist/
   ls -al ./dist
