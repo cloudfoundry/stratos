@@ -47,9 +47,7 @@
   app.use(function (req, res) {
     // Only proxy requests that start /pp
     if (req.url.indexOf('/pp/') !== 0) {
-      if (!doNotLogRequests) {
-        console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
-      }
+      console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
       res.status(404).send('Not found');
     } else {
       if (!doNotLogRequests) {
@@ -58,6 +56,7 @@
 
       // Remove the /pp
       req.url = req.url.substr(3);
+      console.log(req.url);
       return proxy.web(req, res);
     }
   });
@@ -66,9 +65,7 @@
 
   server.on('upgrade', function (req, socket, head) {
     req.url = req.url.substr(3);
-    if (!doNotLogRequests) {
-      console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
-    }
+    console.log('\x1b[31m%s %s\x1b[0m', req.method, req.url);
     proxy.ws(req, socket, head);
   });
 

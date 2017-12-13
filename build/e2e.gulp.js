@@ -70,7 +70,7 @@
     runSequence(
       'e2e:tests',
       function (err) {
-        // if any error happened in the previous tasks, exit with a code > 0
+        //if any error happened in the previous tasks, exit with a code > 0
         if (err) {
           return process.exit(1);
         }
@@ -131,13 +131,7 @@
       'start-server',
       'e2e:tests',
       'stop-server',
-      'e2e:clean:dist',
-      function (err) {
-        // if any error happened in the previous tasks, exit with a code > 0
-        if (err) {
-          return process.exit(1);
-        }
-      }
+      'e2e:clean:dist'
     );
   });
 
