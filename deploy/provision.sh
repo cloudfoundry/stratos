@@ -31,6 +31,9 @@ fi
 bower install --allow-root --force
 npm run build
 
+# Debugging
+STRATOS_INSTRUMENT=""
+
 # Instrument code if required for e2e tests
 if [ ! -z "${STRATOS_INSTRUMENT}" ]; then
   # Need dev dependencies to instrument code
