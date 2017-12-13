@@ -79,7 +79,7 @@
 
       it('should be showing the log stream', function () {
         // Let the log stream for a short time
-        browser.driver.sleep(500);
+        browser.driver.sleep(5000);
         // Should be scrolling
         var initialScroll = getLogViewerScrollTop();
         browser.driver.sleep(2000);
