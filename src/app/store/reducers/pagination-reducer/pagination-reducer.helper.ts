@@ -129,7 +129,7 @@ function getObservables(store: Store<AppState>, entityKey: string, paginationKey
       const page = paginationEntity.ids[paginationEntity.currentPage];
       return page ? denormalize(page, schema, entities) : null;
     });
-    
+
     return  {
       pagination$,
       entities$
