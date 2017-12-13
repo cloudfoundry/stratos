@@ -46,28 +46,27 @@ export class ApplicationServiceMock {
       }
     }
   } as EntityInfo);
-  setApplication() { }
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
-  const applicationServiceFactory = (
-    store: Store<AppState>,
-    entityService: EntityService,
-    applicationStateService: ApplicationStateService,
-    applicationEnvVarsService: ApplicationEnvVarsService
-  ) => {
-    const appService = new ApplicationService(
-      store,
-      entityService,
-      applicationStateService,
-      applicationEnvVarsService
-    );
-    appService.setApplication(cfGuid, appGuid);
-    return appService;
-  };
   return {
     provide: ApplicationService,
-    useFactory: applicationServiceFactory,
+    useFactory: (
+      store: Store<AppState>,
+      entityService: EntityService,
+      applicationStateService: ApplicationStateService,
+      applicationEnvVarsService: ApplicationEnvVarsService
+    ) => {
+      const appService = new ApplicationService(
+        cfGuid,
+        appGuid,
+        store,
+        entityService,
+        applicationStateService,
+        applicationEnvVarsService
+      );
+      return appService;
+    },
     deps: [
       Store,
       EntityService,

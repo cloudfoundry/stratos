@@ -11,6 +11,8 @@ import {
   GetAllCNSIS,
   GetAllCNSISFailed,
   GetAllCNSISSuccess,
+  UNREGISTER_CNSIS,
+  UnregisterCnis,
 } from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
@@ -23,6 +25,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 
 
 @Injectable()
@@ -30,6 +33,7 @@ export class CNSISEffect {
 
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
+  static unregisteringKey = 'unregistering';
 
   constructor(
     private http: Http,
@@ -83,31 +87,75 @@ export class CNSISEffect {
 
     });
 
+
   @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
     .flatMap(action => {
       const actionType = 'update';
-      const apiAction = {
-        entityKey: cnsisStoreNames.type,
-        guid: action.guid,
-        type: action.type,
-        updatingKey: CNSISEffect.connectingKey,
-      } as IRequestAction;
-
-      const headers = new Headers();
-      headers.append('Content-Type', 'application/x-www-form-urlencoded');
+      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.connectingKey);
       const params: URLSearchParams = new URLSearchParams();
       params.append('cnsi_guid', action.guid);
       params.append('username', action.username);
       params.append('password', action.password);
 
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      return this.http.post('/pp/v1/auth/login/cnsi', params, {
-        headers
-      }).map(endpoint => {
-        return new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction, 'update');
-      })
-        .catch(e => {
-          return [new WrapperRequestActionFailed('Could not connect', apiAction, actionType)];
-        });
+      return this.doCnisAction(
+        apiAction,
+        '/pp/v1/auth/login/cnsi',
+        params
+      );
     });
+
+  @Effect() disconnect$ = this.actions$.ofType<DisconnectCnis>(DISCONNECT_CNSIS)
+    .flatMap(action => {
+
+      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.disconnectingKey);
+
+      const params: URLSearchParams = new URLSearchParams();
+      params.append('cnsi_guid', action.guid);
+
+      return this.doCnisAction(
+        apiAction,
+        '/pp/v1/auth/logout/cnsi',
+        params
+      );
+    });
+
+  @Effect() unregister$ = this.actions$.ofType<UnregisterCnis>(UNREGISTER_CNSIS)
+    .flatMap(action => {
+
+      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.unregisteringKey);
+
+      const params: URLSearchParams = new URLSearchParams();
+      params.append('cnsi_guid', action.guid);
+
+      return this.doCnisAction(
+        apiAction,
+        '/pp/v1/unregister',
+        params,
+        'delete'
+      );
+    });
+
+  private getEndpointAction(guid, type, updatingKey) {
+    return {
+      entityKey: cnsisStoreNames.type,
+      guid,
+      type,
+      updatingKey,
+    } as IRequestAction;
+  }
+
+
+  private doCnisAction(apiAction: IRequestAction, url: string, params: URLSearchParams, apiActionType: ApiRequestTypes = 'update') {
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/x-www-form-urlencoded');
+    this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
+    return this.http.post(url, params, {
+      headers
+    }).map(endpoint => {
+      return new WrapperRequestActionSuccess(null, apiAction, apiActionType);
+    })
+      .catch(e => {
+        return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
+      });
+  }
 }

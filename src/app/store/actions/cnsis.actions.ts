@@ -18,6 +18,8 @@ export const DISCONNECT_CNSIS = '[CNSIS] Disconnect';
 export const DISCONNECT_CNSIS_SUCCESS = '[CNSIS] Disconnect succeed';
 export const DISCONNECT_CNSIS_FAILED = '[CNSIS] Disconnect failed';
 
+export const UNREGISTER_CNSIS = '[CNSIS] Unregister';
+
 export const EndpointSchema = new schema.Entity('endpoint', {}, {
   idAttribute: 'guid'
 });
@@ -50,5 +52,12 @@ export class DisconnectCnis implements Action {
   constructor(
     public guid: string
   ) { }
-  type = CONNECT_CNSIS;
+  type = DISCONNECT_CNSIS;
+}
+
+export class UnregisterCnis implements Action {
+  constructor(
+    public guid: string
+  ) { }
+  type = UNREGISTER_CNSIS;
 }

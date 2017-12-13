@@ -12,6 +12,7 @@ import { CNSISEffect } from './effects/cnsis.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RouterEffect } from './effects/router.effects';
+import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
@@ -36,6 +37,7 @@ import { AppReducersModule } from './reducers.module';
       AppVariablesEffect,
       RouterEffect,
       SystemEffects,
+      SnackBarEffects,
     ]),
   ]
 })
