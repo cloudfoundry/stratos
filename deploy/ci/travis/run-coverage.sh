@@ -19,6 +19,8 @@ cat << EOF > ./build/secrets.json
     }
   },
   "console": {
+    "host": "localhost",
+    "port": 443,
     "admin": {
       "username": "${CONSOLE_ADMIN_USER}",
       "password": "${CONSOLE_ADMIN_PASSWORD}"
@@ -37,12 +39,6 @@ cat << EOF > ./build/secrets.json
 }
 EOF
 
-cat << EOF > ./build/dev_config.json
-{
-  "pp": "https://localhost:443/pp/"
-}
-EOF
-
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
@@ -51,8 +47,8 @@ export CERTS_PATH=./dev-certs
 mv ./node_modules /tmp/node_modules
 mv ./bower_components /tmp/bower_components
 
-echo "Building images locally"
-./deploy/docker-compose/build.sh -n -l
+echo "Building images locally with instrumented front-end code"
+./deploy/docker-compose/build.sh -n -l -i
 echo "Build Finished"
 docker images
 
@@ -70,7 +66,8 @@ mv /tmp/bower_components ./bower_components
 
 echo "Running Front-end Unit Tests"
 set +e
-npm run coverage
+#npm run coverage
+gulp e2e:tests
 RESULT=$?
 set -e
 

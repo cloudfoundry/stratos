@@ -8,9 +8,10 @@ DOCKER_ORG=splatform
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
 STRATOS_BOWER=""
+STRATOS_INSTRUMENT="false"
 NO_PUSH="false"
 
-while getopts ":ho:r:t:lu:n" opt; do
+while getopts ":ho:r:t:lu:ni" opt; do
   case $opt in
     h)
       echo
@@ -44,6 +45,9 @@ while getopts ":ho:r:t:lu:n" opt; do
       ;;
     n)
       NO_PUSH="true"
+      ;;
+    i)
+      STRATOS_INSTRUMENT="true"
       ;;
     \?)
       echo "Invalid option: -${OPTARG}" >&2
@@ -232,6 +236,12 @@ function buildUI {
   CURRENT_USER=$
   echo
   echo "-- Provision the UI"
+
+  INSTRUMENT=""
+  if [ "${STRATOS_INSTRUMENT}" == "true" ]; then
+    INSTRUMENT="-e STRATOS_INSTRUMENT=\"true\""
+  fi
+
   docker run --rm \
     ${RUN_ARGS} \
     -v ${STRATOS_UI_PATH}:/usr/src/app \
@@ -239,7 +249,7 @@ function buildUI {
     -e USER_NAME=$(id -nu) \
     -e USER_ID=$(id -u)  \
     -e GROUP_ID=$(id -g) \
-    -e STRATOS_BOWER="${STRATOS_BOWER}" \
+    -e STRATOS_BOWER="${STRATOS_BOWER}" ${INSTRUMENT} \
     -w /usr/src/app \
     splatform/stratos-ui-build-base:opensuse \
     /bin/bash ./deploy/provision.sh
