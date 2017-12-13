@@ -1,4 +1,4 @@
-import { CFAction, IAPIAction, ISuccessRequestAction, WrapperCFActionSuccess } from '../../types/request.types';
+import { IRequestAction, ISuccessRequestAction, WrapperRequestActionSuccess } from '../../types/request.types';
 import {
   createRequestStateFromResponse,
   getEntityRequestState,
@@ -11,8 +11,8 @@ import { IRequestTypeState } from '../../app-state';
 
 export function succeedRequest(state: IRequestTypeState, action: ISuccessRequestAction) {
   if (action.apiAction.guid) {
-    const apiAction = action.apiAction as IAPIAction;
-    const successAction = action as WrapperCFActionSuccess;
+    const apiAction = action.apiAction as IRequestAction;
+    const successAction = action as WrapperRequestActionSuccess;
 
     const requestSuccessState = getEntityRequestState(state, apiAction);
     if (apiAction.updatingKey) {

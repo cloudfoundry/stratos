@@ -1,6 +1,5 @@
 import { NormalizedResponse } from '../../types/api.types';
 import { RequestAction, SingleEntityAction } from '../../types/request.types';
-import { CfEntityDataState } from '../../types/entity.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
 import { defaultActionState, defaultDeletingActionState, defaultRequestState, RequestInfoState, rootUpdatingKey } from './types';

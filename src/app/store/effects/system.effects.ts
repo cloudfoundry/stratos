@@ -1,8 +1,6 @@
+import { StartRequestAction, WrapperRequestActionSuccess, WrapperRequestActionFailed } from './../types/request.types';
 import {
-  IAPIAction,
-  StartNoneCFAction,
-  WrapperNoneCFActionFailed,
-  WrapperNoneCFActionSuccess,
+  IRequestAction
 } from '../types/request.types';
 import { cnsisStoreNames } from '../types/cnsis.types';
 import { SystemInfo, systemStoreNames } from './../types/system.types';
@@ -29,13 +27,13 @@ export class SystemEffects {
         entityKey: systemStoreNames.type,
         guid: SystemEffects.guid,
         type: action.type,
-      } as IAPIAction;
-      this.store.dispatch(new StartNoneCFAction(apiAction));
+      } as IRequestAction;
+      this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get('/pp/v1/info')
         .mergeMap((info: SystemInfo) => {
-          return [new GetSystemSuccess(info), new WrapperNoneCFActionSuccess({ entities: {}, result: [] }, apiAction)];
+          return [new GetSystemSuccess(info), new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)];
         }).catch((e) => {
-          return [new GetSystemFailed(), new WrapperNoneCFActionFailed('Could not fetch system info', apiAction)];
+          return [new GetSystemFailed(), new WrapperRequestActionFailed('Could not fetch system info', apiAction)];
         });
     });
 }

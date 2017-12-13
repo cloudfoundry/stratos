@@ -1,4 +1,4 @@
-import { CFAction, IAPIAction, ICFAction } from '../types/request.types';
+import { CFStartAction, IRequestAction, ICFAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
@@ -13,7 +13,7 @@ export const SpaceSchema = new schema.Entity('space', {}, {
   idAttribute: getAPIResourceGuid
 });
 
-export class GetAllSpaces extends CFAction implements ICFAction {
+export class GetAllSpaces extends CFStartAction implements ICFAction {
   constructor(public paginationKey?: string) {
     super();
     this.options = new RequestOptions();
@@ -29,7 +29,6 @@ export class GetAllSpaces extends CFAction implements ICFAction {
     GET_ALL_SUCCESS,
     GET_ALL_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [SpaceSchema];
   entityKey = SpaceSchema.key;
   options: RequestOptions;

@@ -1,3 +1,4 @@
+import { IRequestDataState } from './entity.types';
 import { IRequestEntityTypeState } from '../app-state';
 import { stringDistance } from 'codelyzer/util/utils';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
@@ -6,7 +7,6 @@ import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 import { ApiActionTypes } from '../actions/request.actions';
 import { PaginatedAction } from './pagination.types';
-import { CfEntityDataState } from './entity.types';
 
 export interface EntityInfo {
   entityRequestInfo: RequestInfoState;
@@ -30,7 +30,7 @@ export interface NormalizedResponse {
   result: any[];
 }
 
-export type ActionMergeFunction = (oldEntities: CfEntityDataState, newEntities: NormalizedResponseEntities)
+export type ActionMergeFunction = (oldEntities: IRequestDataState, newEntities: NormalizedResponseEntities)
   => NormalizedResponseEntities;
 export interface NormalizedResponseEntities {
   [key: string]: string;

@@ -1,26 +1,27 @@
-import { selectUpdateInfo } from '../../store/selectors/api.selectors';
-import { CNSISEffect } from '../../store/effects/cnsis.effects';
+import { Injectable } from '@angular/core';
+import { MdDialog } from '@angular/material';
+import { Store } from '@ngrx/store';
+
 import {
   ConnectEndpointDialogComponent,
 } from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { ITableColumn } from '../components/table/table.types';
+import { DisconnectCnis, GetAllCNSIS, UnregisterCnis } from '../../store/actions/cnsis.actions';
+import { RouterNav } from '../../store/actions/router.actions';
+import { ShowSnackBar } from '../../store/actions/snackBar.actions';
+import { GetSystemInfo } from '../../store/actions/system.actions';
 import { AppState } from '../../store/app-state';
+import { CNSISEffect } from '../../store/effects/cnsis.effects';
+import { selectUpdateInfo } from '../../store/selectors/api.selectors';
+import { CNSISModel, cnsisStoreNames } from '../../store/types/cnsis.types';
+import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
+import {
+  TableCellEndpointStatusComponent,
+} from '../components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
 import { TableCellSelectComponent } from '../components/table/table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../components/table/table-header-select/table-header-select.component';
-import { Action, Store } from '@ngrx/store';
-import { CNSISModel, cnsisStoreNames } from '../../store/types/cnsis.types';
-import { RouterNav } from '../../store/actions/router.actions';
-import { ConnectCnis, DisconnectCnis, UnregisterCnis, GetAllCNSIS } from '../../store/actions/cnsis.actions';
+import { ITableColumn } from '../components/table/table.types';
 import { EndpointsDataSource } from '../data-sources/endpoints-data-source';
-import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
-import { Injectable } from '@angular/core';
-import { MdDialog } from '@angular/material';
-import { GetSystemInfo } from '../../store/actions/system.actions';
-import {
-  TableCellEndpointStatusComponent
-} from '../components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { ShowSnackBar } from '../../store/actions/snackBar.actions';
 
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
@@ -160,7 +161,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       cnsisStoreNames.type,
       item.guid,
       effectKey,
-      cnsisStoreNames.section
     ))
       .pairwise()
       .subscribe(([oldVal, newVal]) => {
