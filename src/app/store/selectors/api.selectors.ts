@@ -51,7 +51,7 @@ export function selectRequestInfo(entityType: string, entityGuid: string) {
   return compose(
     getEntityById<RequestInfoState>(entityGuid),
     getRequestEntityType<RequestInfoState>(entityType),
-    getAPIRequestDataState
+    getAPIRequestInfoState
   );
 }
 

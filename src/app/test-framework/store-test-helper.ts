@@ -1,8 +1,8 @@
 import { AppState } from '../store/app-state';
 import { ListState } from '../store/reducers/list.reducer';
 import { ModuleWithProviders } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../store/reducers.module';
+import { StoreModule } from '@ngrx/store';
 /* tslint:disable */
 const testInitialStoreState: AppState = {
     auth: {

@@ -27,7 +27,7 @@ import {
   APIResource,
   NormalizedResponse,
 } from './../types/api.types';
-import { AppState } from './../app-state';
+import { AppState, IRequestEntityTypeState } from './../app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
@@ -60,8 +60,9 @@ export class APIEffect {
       const apiAction = action as ICFAction;
       const paginatedAction = action as PaginatedAction;
       const options = { ...apiAction.options };
+      const requestType = getRequestTypeFromMethod(apiAction.options.method);
 
-      this.store.dispatch(new StartRequestAction(action, getRequestTypeFromMethod(apiAction.options.method)));
+      this.store.dispatch(new StartRequestAction(action, requestType));
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
       // Apply the params from the store
@@ -93,7 +94,7 @@ export class APIEffect {
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
       options.headers = this.addBaseHeaders(
         apiAction.cnis ||
-        state.requestData[cnsisStoreNames.section][cnsisStoreNames.type], options.headers
+        state.requestData.endpoint, options.headers
       );
 
       return this.http.request(new Request(options))
@@ -130,7 +131,7 @@ export class APIEffect {
           actions.push(new WrapperRequestActionSuccess(
             entities,
             apiAction,
-            action.requestType,
+            requestType,
             totalResults
           ));
 
@@ -149,7 +150,7 @@ export class APIEffect {
             new WrapperRequestActionFailed(
               err.message,
               apiAction,
-              action.requestType
+              requestType
             )
           ];
         });
@@ -211,7 +212,7 @@ export class APIEffect {
     return { ...entity, ...metadata, cfGuid };
   }
 
-  addBaseHeaders(cnsis: CNSISModel[] | string, header: Headers): Headers {
+  addBaseHeaders(cnsis: IRequestEntityTypeState<CNSISModel> | string, header: Headers): Headers {
     const cnsiHeader = 'x-cap-cnsi-list';
     const headers = header || new Headers();
     if (typeof cnsis === 'string') {

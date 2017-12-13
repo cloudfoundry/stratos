@@ -1,17 +1,15 @@
-import { IRequestState, IRequestDataState } from './types/entity.types';
-import { RequestInfoState } from './reducers/api-request-reducer/types';
-import { APIResource } from './types/api.types';
 import { RouterReducerState } from '@ngrx/router-store';
-import { RouterStateSnapshot } from '@angular/router';
-import { CNSISState, CNSISModel } from './types/cnsis.types';
+
+import { ActionHistoryState } from './reducers/action-history-reducer';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
-import { PaginationState } from './types/pagination.types';
-import { MetadataState } from './types/app-metadata.types';
-import { CreateNewApplicationState } from './types/create-application.types';
-import { ActionHistoryState } from './reducers/action-history-reducer';
-import { UAASetupState } from './types/uaa-setup.types';
 import { ListsState } from './reducers/list.reducer';
+import { MetadataState } from './types/app-metadata.types';
+import { CNSISState } from './types/cnsis.types';
+import { CreateNewApplicationState } from './types/create-application.types';
+import { IRequestDataState, IRequestState } from './types/entity.types';
+import { PaginationState } from './types/pagination.types';
+import { UAASetupState } from './types/uaa-setup.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
