@@ -15,7 +15,7 @@
   }
   $title-left-padding: 25px;
   &__header {
-    md-card-header {
+    mat-card-header {
       padding-left: 14px;
     }
     &__left,
@@ -53,7 +53,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        md-select {
+        mat-select {
           padding-top: 0;
         }
         margin-bottom: 4px;
@@ -63,9 +63,9 @@
       justify-content: flex-end;
       align-items: flex-end;
     }
-    md-card {
+    mat-card {
       padding: 0 10px;
-      md-card-header {
+      mat-card-header {
         display: flex;
         flex-direction: column;
         div:not([hidden]).spacer {
@@ -79,7 +79,7 @@
     .no-rows {
       padding: 20px $title-left-padding;
     }
-    md-card[hidden] {
+    mat-card[hidden] {
       display: none;
     }
   }

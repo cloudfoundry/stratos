@@ -7,7 +7,7 @@ import { ActionHistoryDump } from '../../../store/actions/action-history.actions
 
 export interface SideNavItem {
   text: string;
-  mdIcon: string;
+  matIcon: string;
   link: string;
 }
 

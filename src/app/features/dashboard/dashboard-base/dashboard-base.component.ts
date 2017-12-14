@@ -34,17 +34,17 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
     this.sideNavTabs = [
       {
         text: 'Dashboard',
-        mdIcon: 'assessment',
+        matIcon: 'assessment',
         link: '/dashboard'
       },
       {
         text: 'Applications',
-        mdIcon: 'apps',
+        matIcon: 'apps',
         link: '/applications'
       },
       {
         text: 'Endpoints',
-        mdIcon: 'settings_input_component',
+        matIcon: 'settings_input_component',
         link: '/endpoints'
       }
     ];

@@ -1,17 +1,17 @@
  .app-table {
-   md-card-content {
-     md-table {
+   mat-card-content {
+     mat-table {
        &[hidden] * {
          display: none;
        }
-       md-header-row[hidden] {
+       mat-header-row[hidden] {
          *,
          &.mat-header-row {
            display: none;
          }
        }
-       md-header-cell,
-       md-cell {
+       mat-header-cell,
+       mat-cell {
          flex: 1 1 200px;
          padding: 10px 5px;
        }
@@ -22,18 +22,18 @@
          flex-direction: row;
          justify-content: flex-end;
        }
-       md-row {
+       mat-row {
          min-height: 57px;
          &:hover {
            background-color: rgba(0, 0, 0, 0.05);
          }
-         md-cell {
-           md-form-field {
+         mat-cell {
+           mat-form-field {
              width: 90%;
            }
          }
        }
-       md-row.fixedRowHeight {
+       mat-row.fixedRowHeight {
          height: 57px;
        }
      }

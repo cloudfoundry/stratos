@@ -1,5 +1,5 @@
 @import '~@angular/material/theming';
-@import './md-themes';
+@import './mat-themes';
 @import './all-theme';
 @include mat-core();
 @include angular-material-theme($base-theme);
