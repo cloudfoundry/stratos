@@ -85,7 +85,7 @@ RESULT=$?
 set -e
 
 echo "Running Back-end Unit tests"
-gulp backend-coverage
+gulp test-backend-coverage
 
 pushd deploy/ci/travis
 # Uncomment to copy logs to the travis log
