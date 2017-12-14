@@ -11,12 +11,13 @@ import { createBasicStoreModule, getInitialTestStoreState } from '../../test-fra
 import { SharedModule } from '../shared.module';
 import { CfAppEventsConfigService } from './cf-app-events-config.service';
 
-const initialState = getInitialTestStoreState();
 
-const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.section][cnsisStoreNames.type])[0];
-const appGuid = Object.keys(initialState.requestData.cf.application)[0];
 
 describe('CfAppEventsConfigService', () => {
+  const initialState = getInitialTestStoreState();
+
+  const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.type])[0];
+  const appGuid = Object.keys(initialState.requestData.application)[0];
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [

@@ -1,3 +1,4 @@
+import { IRequestAction, StartCFAction } from './../types/request.types';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
@@ -20,10 +21,9 @@ import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
 import {
-  IAPIAction,
-  StartNoneCFAction,
-  WrapperNoneCFActionFailed,
-  WrapperNoneCFActionSuccess,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 
@@ -46,8 +46,8 @@ export class CNSISEffect {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: cnsisStoreNames.type,
-      } as IAPIAction;
-      this.store.dispatch(new StartNoneCFAction(apiAction, actionType));
+      } as IRequestAction;
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),
         this.http.get('/pp/v1/cnsis/registered'),
@@ -76,12 +76,12 @@ export class CNSISEffect {
           // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
           // (cnsi success)
           return [
-            new WrapperNoneCFActionSuccess(mappedData, apiAction, actionType),
+            new WrapperRequestActionSuccess(mappedData, apiAction, actionType),
             new GetAllCNSISSuccess(data, action.login),
           ];
         })
         .catch((err, caught) => [
-          new WrapperNoneCFActionFailed(err.message, apiAction, actionType),
+          new WrapperRequestActionFailed(err.message, apiAction, actionType),
           new GetAllCNSISFailed(err.message, action.login),
         ]);
 
@@ -141,21 +141,21 @@ export class CNSISEffect {
       guid,
       type,
       updatingKey,
-    } as IAPIAction;
+    } as IRequestAction;
   }
 
 
-  private doCnisAction(apiAction: IAPIAction, url: string, params: URLSearchParams, apiActionType: ApiRequestTypes = 'update') {
+  private doCnisAction(apiAction: IRequestAction, url: string, params: URLSearchParams, apiActionType: ApiRequestTypes = 'update') {
     const headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
-    this.store.dispatch(new StartNoneCFAction(apiAction, apiActionType));
+    this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
     return this.http.post(url, params, {
       headers
     }).map(endpoint => {
-      return new WrapperNoneCFActionSuccess(null, apiAction, apiActionType);
+      return new WrapperRequestActionSuccess(null, apiAction, apiActionType);
     })
       .catch(e => {
-        return [new WrapperNoneCFActionFailed('Could not connect', apiAction, apiActionType)];
+        return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
       });
   }
 }

@@ -1,4 +1,4 @@
-import { IAPIAction } from './request.types';
+import { IRequestAction } from './request.types';
 import { Action } from '@ngrx/store';
 
 export class QParam {
@@ -30,7 +30,7 @@ export interface PaginationAction extends Action {
   paginationKey: string;
 }
 
-export interface PaginatedAction extends PaginationAction, IAPIAction {
+export interface PaginatedAction extends PaginationAction, IRequestAction {
   initialParams?: PaginationParam;
   options: {
     params?: {

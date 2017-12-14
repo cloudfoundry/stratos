@@ -1,3 +1,4 @@
+import { getPaginationObservables } from './../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { cnsisRegisteredEntitiesSelector } from '../../../../store/selectors/cnsis.selectors';
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
@@ -7,7 +8,6 @@ import { Observable } from 'rxjs/Rx';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { GetAllOrganizations, OrganizationSchema } from '../../../../store/actions/organization.actions';
 import { AppState } from '../../../../store/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination.reducer';
 
 @Component({
   selector: 'app-create-application-step1',

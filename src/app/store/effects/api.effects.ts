@@ -1,12 +1,12 @@
+import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
+import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
+import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import {
-  CFAction,
   CFStartAction,
-  IAPIAction,
+  IRequestAction,
   ICFAction,
   StartCFAction,
-  WrapperCFActionFailed,
-  WrapperCFActionSuccess,
 } from '../types/request.types';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
@@ -27,12 +27,7 @@ import {
   APIResource,
   NormalizedResponse,
 } from './../types/api.types';
-import { AppState } from './../app-state';
-import {
-  qParamsToString,
-  resultPerPageParam,
-  resultPerPageParamDefault,
-} from '../reducers/pagination.reducer';
+import { AppState, IRequestEntityTypeState } from './../app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
@@ -48,24 +43,26 @@ export class APIEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() apiRequestStart$ = this.actions$.ofType<ICFAction>(ApiActionTypes.API_REQUEST)
-    .map(apiAction => {
-      return new StartCFAction(
-        apiAction,
-        getRequestTypeFromMethod(apiAction.options.method)
-      );
-    });
+  // @Effect() apiRequestStart$ = this.actions$.ofType<ICFAction>(ApiActionTypes.API_REQUEST)
+  //   .map(apiAction => {
+  // return new StartCFAction(
+  //   apiAction,
+  //   getRequestTypeFromMethod(apiAction.options.method)
+  // );
+  //   });
 
-  @Effect() apiRequest$ = this.actions$.ofType<StartCFAction>(ApiActionTypes.API_REQUEST_START)
+  @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
 
-      const paramsObject = {};
-      const _apiAction = { ...action.apiAction };
-      const apiAction = _apiAction as ICFAction;
-      const paginatedAction = _apiAction as PaginatedAction;
-      const options = { ...apiAction.options };
 
+      const paramsObject = {};
+      const apiAction = action as ICFAction;
+      const paginatedAction = action as PaginatedAction;
+      const options = { ...apiAction.options };
+      const requestType = getRequestTypeFromMethod(apiAction.options.method);
+
+      this.store.dispatch(new StartRequestAction(action, requestType));
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
 
       // Apply the params from the store
@@ -97,7 +94,7 @@ export class APIEffect {
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
       options.headers = this.addBaseHeaders(
         apiAction.cnis ||
-        state.requestData[cnsisStoreNames.section][cnsisStoreNames.type], options.headers
+        state.requestData.endpoint, options.headers
       );
 
       return this.http.request(new Request(options))
@@ -131,10 +128,10 @@ export class APIEffect {
 
           const actions = [];
           actions.push({ type: apiAction.actions[1], apiAction });
-          actions.push(new WrapperCFActionSuccess(
+          actions.push(new WrapperRequestActionSuccess(
             entities,
             apiAction,
-            action.requestType,
+            requestType,
             totalResults
           ));
 
@@ -150,10 +147,10 @@ export class APIEffect {
         .catch(err => {
           return [
             { type: apiAction.actions[1], apiAction },
-            new WrapperCFActionFailed(
+            new WrapperRequestActionFailed(
               err.message,
               apiAction,
-              action.requestType
+              requestType
             )
           ];
         });
@@ -184,7 +181,7 @@ export class APIEffect {
       });
   }
 
-  getEntities(apiAction: IAPIAction, data): {
+  getEntities(apiAction: IRequestAction, data): {
     entities: NormalizedResponse
     totalResults: number
   } {
@@ -215,7 +212,7 @@ export class APIEffect {
     return { ...entity, ...metadata, cfGuid };
   }
 
-  addBaseHeaders(cnsis: CNSISModel[] | string, header: Headers): Headers {
+  addBaseHeaders(cnsis: IRequestEntityTypeState<CNSISModel> | string, header: Headers): Headers {
     const cnsiHeader = 'x-cap-cnsi-list';
     const headers = header || new Headers();
     if (typeof cnsis === 'string') {

@@ -1,3 +1,5 @@
+import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
 import { ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
 import { EntityInfo } from '../../store/types/api.types';
 import { fileExists } from 'ts-node/dist';
@@ -10,7 +12,6 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
-import { getPaginationObservables, resultPerPageParam } from '../../store/reducers/pagination.reducer';
 import { AddParams, SetPage } from '../../store/actions/pagination.actions';
 import { ListDataSource } from './list-data-source';
 import { IListDataSource, getRowUniqueId } from './list-data-source-types';

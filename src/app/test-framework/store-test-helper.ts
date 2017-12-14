@@ -1,8 +1,8 @@
 import { AppState } from '../store/app-state';
 import { ListState } from '../store/reducers/list.reducer';
 import { ModuleWithProviders } from '@angular/core';
-import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../store/reducers.module';
+import { StoreModule } from '@ngrx/store';
 /* tslint:disable */
 const testInitialStoreState: AppState = {
     auth: {
@@ -517,7 +517,6 @@ const testInitialStoreState: AppState = {
       }
     },
     request: {
-      other: {
         endpoint: {
           '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
             fetching: false,
@@ -539,9 +538,7 @@ const testInitialStoreState: AppState = {
             response: null,
             message: ''
           }
-        }
-      },
-      cf: {
+        },
         application: {
           '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
             fetching: false,
@@ -3691,10 +3688,9 @@ const testInitialStoreState: AppState = {
         organization: {},
         route: {},
         event: {},
-      }
+        system: {}
     },
     requestData: {
-      cf: {
         application: {
           '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
             entity: {
@@ -21069,15 +21065,13 @@ const testInitialStoreState: AppState = {
         organization: {},
         route: {},
         event: {},
-      },
-      other: {
         endpoint: {
           '01ccda9d-8f40-4dd0-bc39-08eea68e364f': {
             guid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f',
             name: 'SCF-2.2.0-beta'
           }
-        }
-      },
+        },
+        system: {}
     },
     actionHistory: [],
     lists: {}

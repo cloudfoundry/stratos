@@ -1,26 +1,22 @@
 import { HttpClientModule } from '@angular/common/http';
-import { SystemEffects } from './effects/system.effects';
-import { PaginationEffects } from './effects/pagination.effects';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
 import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
+import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
 import { AppMetadataEffect } from './effects/app-metadata.effects';
+import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CNSISEffect } from './effects/cnsis.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
-import { UAASetupEffect } from './effects/uaa-setup.effects';
-import { AppReducersModule } from './reducers.module';
-import { appMetadataReducer } from './reducers/app-metadata.reducer';
-import { appMetadataRequestReducer } from './reducers/app-metadata-request.reducer';
-import { UpdateAppEffects } from './effects/update-app-effects';
-import { ActionHistoryEffect } from './effects/action-history.effects';
-import { AppVariablesEffect } from './effects/app-variables.effects';
+import { PaginationEffects } from './effects/pagination.effects';
 import { RouterEffect } from './effects/router.effects';
 import { SnackBarEffects } from './effects/snackBar.effects';
+import { SystemEffects } from './effects/system.effects';
+import { UAASetupEffect } from './effects/uaa-setup.effects';
+import { UpdateAppEffects } from './effects/update-app-effects';
+import { AppReducersModule } from './reducers.module';
 
 
 @NgModule({

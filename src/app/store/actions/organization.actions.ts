@@ -1,3 +1,4 @@
+import { CFStartAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
@@ -18,8 +19,9 @@ export const OrganizationSchema = new schema.Entity('organization', {
     idAttribute: getAPIResourceGuid
   });
 
-export class GetAllOrganizations implements PaginatedAction {
+export class GetAllOrganizations extends CFStartAction implements PaginatedAction {
   constructor(public paginationKey: string) {
+    super();
     this.options = new RequestOptions();
     this.options.url = 'organizations';
     this.options.method = 'get';
@@ -29,7 +31,6 @@ export class GetAllOrganizations implements PaginatedAction {
     GET_ALL_SUCCESS,
     GET_ALL_FAILED
   ];
-  type = ApiActionTypes.API_REQUEST;
   entity = [OrganizationSchema];
   entityKey = OrganizationSchema.key;
   options: RequestOptions;
