@@ -38,8 +38,8 @@ cat << EOF > ./build/secrets.json
 EOF
 
 
-    //"host": "localhost",
-//    "port": 443,
+#    //"host": "localhost",
+#//    "port": 443,
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
