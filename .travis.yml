@@ -48,6 +48,10 @@ jobs:
     - "./deploy/ci/travis/run-e2e-tests.sh"
   - stage: coverage
     before_script:
+    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+    - chmod +x ~/bin/gimme
+    - eval "$(gimme 1.9)"
+    - curl https://glide.sh/get | sh
     - chmod +x ./deploy/ci/travis/run-coverage.sh
     - npm install -g bower
     - bower install
