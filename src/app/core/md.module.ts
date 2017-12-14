@@ -1,33 +1,35 @@
+import 'hammerjs';
+
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import 'hammerjs';
 import {
   MatAutocompleteModule,
   MatButtonModule,
+  MatButtonToggleModule,
   MatCardModule,
   MatCheckboxModule,
   MatChipsModule,
+  MatDialogModule,
   MatExpansionModule,
   MatFormFieldModule,
   MatGridListModule,
   MatIconModule,
   MatInputModule,
+  MatListModule,
+  MatMenuModule,
+  MatPaginatorModule,
   MatProgressBarModule,
   MatProgressSpinnerModule,
   MatSelectModule,
   MatSidenavModule,
   MatSliderModule,
   MatSlideToggleModule,
+  MatSnackBarModule,
+  MatSortModule,
   MatTableModule,
   MatTabsModule,
   MatToolbarModule,
   MatTooltipModule,
-  MatPaginatorModule,
-  MatSortModule,
-  MatDialogModule,
-  MatMenuModule,
-  MatButtonToggleModule,
-  MatSnackBarModule
 } from '@angular/material';
 
 const importExport = [
@@ -57,7 +59,8 @@ const importExport = [
   MatDialogModule,
   MatButtonToggleModule,
   MatMenuModule,
-  MatSnackBarModule
+  MatSnackBarModule,
+  MatListModule
 ];
 
 @NgModule({

@@ -1,7 +1,7 @@
-<md-card>
-  <md-form-field>
-    <input mdInput ngModel #searchFilter="ngModel" placeholder="Filter">
-  </md-form-field>
+<mat-card>
+  <mat-form-field>
+    <input matInput ngModel #searchFilter="ngModel" placeholder="Filter">
+  </mat-form-field>
 
   <app-log-viewer [title]="streamTitle$ | async" [logStream]="messages"></app-log-viewer>
-</md-card>
+</mat-card>

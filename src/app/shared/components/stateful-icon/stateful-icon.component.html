@@ -2,9 +2,9 @@
   <span *ngIf="isTemplate(selectedState)">
     <ng-container *ngTemplateOutlet="selectedState.template"></ng-container>
   </span>
-  <md-icon *ngIf="!isTemplate(selectedState)" [color]="selectedState.color">{{ selectedState.icon }}</md-icon>
+  <mat-icon *ngIf="!isTemplate(selectedState)" [color]="selectedState.color">{{ selectedState.icon }}</mat-icon>
 </div>
 
 <ng-template #spinner>
-  <md-spinner></md-spinner>
+  <mat-spinner></mat-spinner>
 </ng-template>

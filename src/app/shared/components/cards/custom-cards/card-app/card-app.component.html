@@ -1,13 +1,13 @@
-<md-card [routerLink]="['/applications', row.entity.cfGuid , row.entity.guid]" [ngClass]="'card-app__card-' + row.entity.state.toLowerCase()">
-  <md-card-header>
+<mat-card [routerLink]="['/applications', row.entity.cfGuid , row.entity.guid]" [ngClass]="'card-app__card-' + row.entity.state.toLowerCase()">
+  <mat-card-header>
     <div class="mat-card-title">{{ row.entity.name }}</div>
-  </md-card-header>
-  <md-card-content>
+  </mat-card-header>
+  <mat-card-content>
     <div class="card-app__meta">
       <b>Instances: </b> {{ row.entity.instances }}</div>
     <div class="card-app__meta">
       <b>State: </b> {{ row.entity.state }}</div>
     <div class="card-app__meta">
       <b>Created at: </b>{{ row.metadata.created_at | date:'medium' }}</div>
-  </md-card-content>
-</md-card>
+  </mat-card-content>
+</mat-card>

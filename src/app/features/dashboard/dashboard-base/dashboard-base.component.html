@@ -1,11 +1,11 @@
-<md-sidenav-container class="dashboard">
-  <md-sidenav #sidenav class="dashboard__side-nav" mode="side">
+<mat-sidenav-container class="dashboard">
+  <mat-sidenav #sidenav class="dashboard__side-nav" mode="side">
     <app-side-nav [tabs]="sideNavTabs">
     </app-side-nav>
-  </md-sidenav>
+  </mat-sidenav>
   <div class="dashboard__inner">
     <div class="dashboard__content">
       <router-outlet></router-outlet>
     </div>
   </div>
-</md-sidenav-container>
+</mat-sidenav-container>
