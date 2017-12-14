@@ -1,5 +1,4 @@
 import { CoreModule } from '../../../../../core/core.module';
- 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CardAppVariableComponent } from './card-app-variable.component';

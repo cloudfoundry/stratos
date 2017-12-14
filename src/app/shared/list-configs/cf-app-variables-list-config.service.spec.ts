@@ -13,19 +13,18 @@ import { Store, StoreModule } from '@ngrx/store';
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../shared.module';
- 
+
 import { TestBed, inject } from '@angular/core/testing';
 
 import { CfAppVariablesListConfigService } from './cf-app-variables-list-config.service';
 import { ApplicationStateService } from '../../features/applications/application/build-tab/application-state/application-state.service';
 import { ApplicationEnvVarsService } from '../../features/applications/application/build-tab/application-env-vars.service';
 
-const initialState = getInitialTestStoreState();
+describe('CfAppVariablesListConfigService', () => {
+  const initialState = getInitialTestStoreState();
 
 const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.section][cnsisStoreNames.type])[0];
 const appGuid = Object.keys(initialState.requestData.cf.application)[0];
-
-describe('CfAppVariablesListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [

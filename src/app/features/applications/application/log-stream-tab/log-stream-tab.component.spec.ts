@@ -3,7 +3,7 @@ import { appReducers } from '../../../../store/reducers.module';
 import { AppState } from '../../../../store/app-state';
 import { EntityService } from '../../../../core/entity-service';
 import { ApplicationSchema, GetApplication } from '../../../../store/actions/application.actions';
- 
+
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { paginationReducer } from '../../../../store/reducers/pagination.reducer';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';

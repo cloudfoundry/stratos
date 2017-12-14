@@ -2,7 +2,7 @@ import { EndpointsListConfigService } from '../../list-configs/endpoints-list-co
 import { TableCellComponent } from '../table/table-cell/table-cell.component';
 import { EventTabActorIconPipe } from '../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
- 
+
 import { CardComponent } from '../cards/card/card.component';
 import { TableComponent } from '../table/table.component';
 import { EntityInfo } from '../../../store/types/api.types';
