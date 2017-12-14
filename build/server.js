@@ -56,7 +56,6 @@
 
       // Remove the /pp
       req.url = req.url.substr(3);
-      console.log(req.url);
       return proxy.web(req, res);
     }
   });
