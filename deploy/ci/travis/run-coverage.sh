@@ -37,6 +37,11 @@ cat << EOF > ./build/secrets.json
 }
 EOF
 
+cat << EOF > ./build/dev_config.json
+{
+  "pp": "https://localhost:443/pp/"
+}
+EOF
 
 #    //"host": "localhost",
 #//    "port": 443,
