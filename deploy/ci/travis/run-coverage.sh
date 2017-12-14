@@ -72,15 +72,15 @@ mv /tmp/node_modules ./node_modules
 rm -rf ./bower_components
 mv /tmp/bower_components ./bower_components
 
-#npm run update-webdriver
+npm run update-webdriver
 
-#echo "Running Front-end Unit Tests"
-#npm run test
+echo "Running Front-end Unit Tests"
+npm run test
 
 echo "Running Front-end Unit and end-to-end tests"
 
 set +e
-npm run coverage
+gulp e2e:run
 RESULT=$?
 set -e
 
