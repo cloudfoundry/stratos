@@ -2,60 +2,116 @@
   <div class="summary__cards">
     <app-details-card class="summary__card" title="Build, Deploy &amp; Host" [busy]="cardTwoFetching$ | async">
       <mat-list>
+        <h3 mat-subheader>Dates</h3>
         <mat-list-item>
-          <app-display-value [label]="'Created'">
-            {{ (appService.application$ | async)?.app.metadata.created_at | date:'medium' }}
-          </app-display-value>
+          <mat-icon mat-list-icon>date_range</mat-icon>
+          <div mat-line>Created</div>
+          <div mat-line> {{ (appService.application$ | async)?.app.metadata.created_at | date:'medium' }} </div>
         </mat-list-item>
         <mat-list-item>
-          <app-display-value [label]="'Modifed'">
-            {{ (appService.application$ | async)?.app.entity.package_updated_at | date:'medium' || '-' }}
-          </app-display-value>
+          <mat-icon mat-list-icon>access_time</mat-icon>
+          <div mat-line>Modifed</div>
+          <div mat-line> {{ (appService.application$ | async)?.app.entity.package_updated_at | date:'medium' || '-' }} </div>
         </mat-list-item>
+        <mat-divider></mat-divider>
+        <h3 mat-subheader>Build</h3>
         <mat-list-item>
-          <app-display-value [label]="'Buildpack'">
+          <mat-icon mat-list-icon>build</mat-icon>
+          <div mat-line>Buildpack</div>
+          <div mat-line>
             <app-view-buildpack [buildPack]="(appService.application$ | async)?.app.entity.buildpack || (appService.application$ | async)?.app.entity.detected_buildpack"></app-view-buildpack>
-          </app-display-value>
+          </div>
         </mat-list-item>
         <mat-list-item>
-          <app-display-value [label]="'Production'" [value]="(appService.application$| async)?.app.entity.production"></app-display-value>
+          <div mat-line>Production</div>
+          <mat-icon mat-list-icon>bug_report</mat-icon>
+          <div mat-line>
+            {{(appService.application$| async)?.app.entity.production ? 'Yes' : 'No'}}
+          </div>
         </mat-list-item>
         <mat-list-item>
-          <app-display-value [label]="'Stack'" [value]="(appService.application$| async)?.stack?.entity.name"></app-display-value>
+          <mat-icon mat-list-icon>code</mat-icon>
+          <div mat-line>Stack</div>
+          <div mat-line>
+            {{(appService.application$| async)?.stack?.entity.name}}
+          </div>
         </mat-list-item>
       </mat-list>
+      <mat-divider></mat-divider>
       <mat-list>
+        <h3 mat-subheader>Cloud Foundary</h3>
         <mat-list-item>
-          <app-display-value [label]="'CF'" [value]="(appService.application$| async)?.cf?.name"></app-display-value>
+          <mat-icon mat-list-icon>title</mat-icon>
+          <div mat-line>Name</div>
+          <div mat-line>
+            {{(appService.application$| async)?.cf?.name}}
+          </div>
         </mat-list-item>
         <mat-list-item>
-          <app-display-value [label]="'CF URL'" [value]="(appService.application$| async)?.cf?.api_endpoint.Scheme + '://' + (appService.application$| async)?.cf?.api_endpoint.Host"></app-display-value>
+          <mat-icon mat-list-icon>http</mat-icon>
+          <div mat-line>URL</div>
+          <div mat-line>
+            {{(appService.application$| async)?.cf?.api_endpoint.Scheme + '://' + (appService.application$| async)?.cf?.api_endpoint.Host}}
+          </div>
         </mat-list-item>
         <mat-list-item>
-          <app-display-value [label]="'Organisation'" [value]="(appService.application$| async)?.organisation.entity.name"></app-display-value>
+          <mat-icon mat-list-icon>location_city</mat-icon>
+          <div mat-line>Organisation</div>
+          <div mat-line>
+            {{(appService.application$| async)?.organisation.entity.name}}
+          </div>
         </mat-list-item>
         <mat-list-item>
-          <app-display-value [label]="'Space'" [value]="(appService.application$| async)?.space.entity.name"></app-display-value>
+          <mat-icon mat-list-icon>language</mat-icon>
+          <div mat-line>Space</div>
+          <div mat-line>
+            {{(appService.application$| async)?.space.entity.name}}
+          </div>
         </mat-list-item>
+        <mat-divider></mat-divider>
         <mat-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
-          <app-display-value [label]="'Console Deploy'" [value]="(appService.applicationStratProject$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'"></app-display-value>
+          <mat-icon mat-list-icon>brightness_1</mat-icon>
+          <div mat-line>Console Deploy</div>
+          <div mat-line>
+            {{(appService.applicationStratProject$| async)?.deploySource.timestamp * 1000 | date:'medium' || '-'}}
+          </div>
         </mat-list-item>
         <mat-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
           <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
-            <app-display-value *ngSwitchCase="'giturl'" [label]="'Console Deploy Source'">
-              <div matTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
-                [matTooltipHideDelay]="1500">
-                {{(appService.applicationStratProject$| async)?.deploySource.url}}
+            <span *ngSwitchCase="'giturl'">
+              <mat-icon mat-list-icon>brightness_1</mat-icon>
+              <div mat-line>Console Deploy</div>
+              <div mat-line>
+                <div matTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
+                  [matTooltipHideDelay]="1500">
+                  {{(appService.applicationStratProject$| async)?.deploySource.url}}
+                </div>
               </div>
-            </app-display-value>
-            <app-display-value *ngSwitchCase="'github'" [label]="'Console Deploy Source'">
-              <a href="{{(appService.applicationStratProject$| async)?.deploySource.url}}/commit/{{(appService.applicationStratProject$| async)?.deploySource.commit}}"
-                rel="noopener noreferrer" target="_blank">
-                {{(appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8}}
-              </a>
-            </app-display-value>
-            <app-display-value *ngSwitchCase="'filefolder'" [label]="'Console Deploy Source'" [value]="'Folder Upload'"></app-display-value>
-            <app-display-value *ngSwitchCase="'archive'" [label]="'Console Deploy Source'" [value]="'Archive File Upload'"></app-display-value>
+            </span>
+            <span *ngSwitchCase="'github'">
+              <mat-icon mat-list-icon>brightness_1</mat-icon>
+              <div mat-line>Console Deploy</div>
+              <div mat-line>
+                <a href="{{(appService.applicationStratProject$| async)?.deploySource.url}}/commit/{{(appService.applicationStratProject$| async)?.deploySource.commit}}"
+                  rel="noopener noreferrer" target="_blank">
+                  {{(appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8}}
+                </a>
+              </div>
+            </span>
+            <span *ngSwitchCase="'filefolder'">
+              <mat-icon mat-list-icon>brightness_1</mat-icon>
+              <div mat-line>Console Deploy Source</div>
+              <div mat-line>
+                Folder Upload
+              </div>
+            </span>
+            <span *ngSwitchCase="'archive'">
+              <mat-icon mat-list-icon>brightness_1</mat-icon>
+              <div mat-line>Console Deploy Source</div>
+              <div mat-line>
+                Archive File Upload
+              </div>
+            </span>
           </span>
         </mat-list-item>
       </mat-list>

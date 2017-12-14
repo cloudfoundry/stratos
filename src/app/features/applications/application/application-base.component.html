@@ -37,7 +37,7 @@
     <app-details-card class="summary__form" title="Summary" [busy]="summaryDataChanging$ | async">
       <form class="summary__form" #summaryForm="ngForm">
         <div>
-          <mat-list dense role='list'>
+          <mat-list role='list'>
             <mat-list-item role="listitem">
               <app-display-value [label]="'Composite State'">
                 <app-application-state [state]="applicationService.applicationState$ | async"></app-application-state>
@@ -52,7 +52,7 @@
               </app-display-value>
             </mat-list-item>
           </mat-list>
-          <mat-list dense role='list'>
+          <mat-list role='list'>
             <mat-list-item role="listitem">
               <app-editable-display-value [edit]="isEditSummary">
                 <div class="display-input__display">
@@ -75,7 +75,7 @@
           </mat-list>
         </div>
         <div>
-          <mat-list dense role='list'>
+          <mat-list role='list'>
             <mat-list-item role="listitem">
               <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(applicationService.application$| async)?.app.entity.memory | mbToHumanSize">
                 <div class="display-input__input">
@@ -90,7 +90,7 @@
               <app-display-value [label]="'Disk quota'" [value]="(applicationService.application$| async)?.app.entity.disk_quota | mbToHumanSize"></app-display-value>
             </mat-list-item>
           </mat-list>
-          <mat-list dense role='list'>
+          <mat-list role='list'>
             <mat-list-item role="listitem">
               <app-editable-display-value [edit]="isEditSummary" [label]="'SSH Enabled'">
                 <div class="display-input__display">
