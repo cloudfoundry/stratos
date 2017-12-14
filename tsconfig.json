@@ -1,7 +1,7 @@
 {
   "compileOnSave": false,
+  "preserveWhitespaces": "off",
   "compilerOptions": {
-    "preserveWhitespaces": "off",
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
