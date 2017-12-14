@@ -46,5 +46,4 @@ export interface AppState {
   appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;
   lists: ListsState;
-  routerReducer: RouterReducerState<any>;
 }

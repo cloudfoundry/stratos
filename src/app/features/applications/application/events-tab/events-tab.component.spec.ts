@@ -14,12 +14,13 @@ import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.ser
 import { ApplicationsModule } from '../../applications.module';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-class ApplicationServiceMock {
-  cfGuid = 'mockCfGuid';
-  appGuid = 'mockAppGuid';
-}
 
 describe('EventsTabComponent', () => {
+  class ApplicationServiceMock {
+    cfGuid = 'mockCfGuid';
+    appGuid = 'mockAppGuid';
+  }
+
   let component: EventsTabComponent;
   let fixture: ComponentFixture<EventsTabComponent>;
   const initialState = { ...getInitialTestStoreState() };

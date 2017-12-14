@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs/Rx';
 import { Map } from 'rxjs/util/Map';
 import { ChangeDetectorRef } from '@angular/core/src/change_detection/change_detector_ref';
 import { ListState } from '../../../store/reducers/list.reducer';
-import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+ 
 import { ListFilter, ListPagination, ListSort, ListView } from '../../../store/actions/list.actions';
 import { AppEnvVar } from '../../data-sources/cf-app-variables-data-source';
 import { TableCellComponent } from './table-cell/table-cell.component';

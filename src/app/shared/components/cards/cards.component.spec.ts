@@ -1,7 +1,7 @@
 import { TableCellComponent } from '../table/table-cell/table-cell.component';
 import { EventTabActorIconPipe } from '../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
-import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+ 
 import { EntityInfo } from '../../../store/types/api.types';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 

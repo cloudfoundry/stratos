@@ -1,4 +1,4 @@
-import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+ 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
