@@ -1,14 +1,8 @@
 .display-value {
-  padding-bottom: 17px; //NOTE: Should match mat-form-field-wrapper however this gives a pixel rounding error
   min-width: 200px;
   &__label {
     font-weight: bold;
     font-size: 14px;
     margin-bottom: 10px;
   }
-}
-
-.display-value {
-  padding-bottom: 17px; //NOTE: Should match mat-form-field-wrapper however this gives a pixel rounding error
-  min-width: 200px;
 }

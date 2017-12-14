@@ -13,7 +13,6 @@
           <div mat-line>Modifed</div>
           <div mat-line> {{ (appService.application$ | async)?.app.entity.package_updated_at | date:'medium' || '-' }} </div>
         </mat-list-item>
-        <mat-divider></mat-divider>
         <h3 mat-subheader>Build</h3>
         <mat-list-item>
           <mat-icon mat-list-icon>build</mat-icon>
@@ -37,7 +36,6 @@
           </div>
         </mat-list-item>
       </mat-list>
-      <mat-divider></mat-divider>
       <mat-list>
         <h3 mat-subheader>Cloud Foundary</h3>
         <mat-list-item>
@@ -68,7 +66,6 @@
             {{(appService.application$| async)?.space.entity.name}}
           </div>
         </mat-list-item>
-        <mat-divider></mat-divider>
         <mat-list-item *ngIf="(appService.applicationStratProject$| async)?.deploySource">
           <mat-icon mat-list-icon>brightness_1</mat-icon>
           <div mat-line>Console Deploy</div>

@@ -1,5 +1,5 @@
 <div class="display-value">
-  <div class="display-value__label">{{label}}</div>
+  <div class="display-value__label" *ngIf="label">{{label}}</div>
   <div class="display-value__value">
     <span *ngIf="displayCustom.children.length === 0">{{value}}</span>
     <div #displayCustom>

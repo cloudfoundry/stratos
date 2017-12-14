@@ -32,83 +32,101 @@
 </app-page-header>
 
 <app-loading-page [isLoading]="isFetching$" [text]="'Getting your application'">
-
   <div class="summary">
     <app-details-card class="summary__form" title="Summary" [busy]="summaryDataChanging$ | async">
       <form class="summary__form" #summaryForm="ngForm">
         <div>
           <mat-list role='list'>
+            <h3 mat-subheader>Application State</h3>
             <mat-list-item role="listitem">
-              <app-display-value [label]="'Composite State'">
+              <mat-icon mat-list-icon></mat-icon>
+              <div mat-line>
                 <app-application-state [state]="applicationService.applicationState$ | async"></app-application-state>
-              </app-display-value>
+              </div>
             </mat-list-item>
             <mat-list-item role="listitem">
-              <app-display-value [label]="'States'">
+              <mat-icon mat-list-icon></mat-icon>
+              <div mat-line>
                 <mat-chip-list aria-orientation="vertical">
                   <mat-chip>App: {{(applicationService.application$ | async)?.app.entity.state}}</mat-chip>
                   <mat-chip>Package: {{(applicationService.application$| async)?.app.entity.package_state}}</mat-chip>
                 </mat-chip-list>
-              </app-display-value>
+              </div>
             </mat-list-item>
           </mat-list>
           <mat-list role='list'>
+            <h3 mat-subheader>Information</h3>
             <mat-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary">
-                <div class="display-input__display">
-                  <app-display-value [label]="'Running Instances'">
-                    {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances
-                    }}
-                  </app-display-value>
-                </div>
-                <div class="display-input__input">
-                  <mat-form-field>
-                    <input matInput name="instances" type="number" placeholder="Required No. Instances" [(ngModel)]="appEdits.instances" required
-                      pattern="[0-9]+" />
-                  </mat-form-field>
-                </div>
-              </app-editable-display-value>
+              <mat-icon mat-list-icon>timeline</mat-icon>
+              <div mat-line>Running Instances</div>
+              <div mat-line>
+                <app-editable-display-value [edit]="isEditSummary">
+                  <div class="display-input__display">
+                    <app-display-value>
+                      {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances
+                      }}
+                    </app-display-value>
+                  </div>
+                  <div class="display-input__input">
+                    <mat-form-field>
+                      <input matInput name="instances" type="number" placeholder="Required No. Instances" [(ngModel)]="appEdits.instances" required
+                        pattern="[0-9]+" />
+                    </mat-form-field>
+                  </div>
+                </app-editable-display-value>
+              </div>
             </mat-list-item>
             <mat-list-item role="listitem">
-              <app-display-value [label]="'Services'" [value]="(applicationService.appSummary$| async)?.metadata?.services?.length || '-'"></app-display-value>
+              <mat-icon mat-list-icon>developer_board</mat-icon>
+              <div mat-line>Services</div>
+              <div mat-line>{{(applicationService.appSummary$| async)?.metadata?.services?.length || '-'}}</div>
             </mat-list-item>
           </mat-list>
         </div>
         <div>
           <mat-list role='list'>
+            <h3 mat-subheader>Usage</h3>
             <mat-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary" [label]="'Memory'" [value]="(applicationService.application$| async)?.app.entity.memory | mbToHumanSize">
-                <div class="display-input__input">
-                  <mat-form-field>
-                    <input matInput name="appMemory" type="number" placeholder="Memory" [(ngModel)]="appEdits.memory" required pattern="[0-9]+"
-                    />
-                  </mat-form-field>
-                </div>
-              </app-editable-display-value>
+              <mat-icon mat-list-icon>memory</mat-icon>
+              <div mat-line>Memory</div>
+              <div mat-line>
+                <app-editable-display-value [edit]="isEditSummary" [value]="(applicationService.application$| async)?.app.entity.memory | mbToHumanSize">
+                  <div class="display-input__input">
+                    <mat-form-field>
+                      <input matInput name="appMemory" type="number" placeholder="Memory" [(ngModel)]="appEdits.memory" required pattern="[0-9]+"
+                      />
+                    </mat-form-field>
+                  </div>
+                </app-editable-display-value>
+              </div>
             </mat-list-item>
             <mat-list-item role="listitem">
-              <app-display-value [label]="'Disk quota'" [value]="(applicationService.application$| async)?.app.entity.disk_quota | mbToHumanSize"></app-display-value>
+              <mat-icon mat-list-icon>storage</mat-icon>
+              <div mat-line>Disk quota</div>
+              <div mat-line>{{(applicationService.application$| async)?.app.entity.disk_quota | mbToHumanSize}}</div>
             </mat-list-item>
           </mat-list>
           <mat-list role='list'>
             <mat-list-item role="listitem">
-              <app-editable-display-value [edit]="isEditSummary" [label]="'SSH Enabled'">
-                <div class="display-input__display">
-                  <app-display-value [label]="'SSH Enabled'">
-                    <mat-slide-toggle name="appSsh" [ngModel]="(applicationService.application$| async)?.app.entity.enable_ssh" [disabled]="true"></mat-slide-toggle>
-                  </app-display-value>
-                </div>
-                <div class="display-input__input">
-
-                  <app-display-value [label]="'SSH Enabled'">
-                    <mat-slide-toggle name="appSsh" [ngModel]="appEdits.enable_ssh"></mat-slide-toggle>
-                  </app-display-value>
-                </div>
-              </app-editable-display-value>
+              <mat-icon mat-list-icon>developer_mode</mat-icon>
+              <div mat-line>SSH Enabled</div>
+              <div mat-line>
+                <app-editable-display-value [edit]="isEditSummary">
+                  <div class="display-input__display">
+                    <app-display-value>
+                      <mat-slide-toggle name="appSsh" [ngModel]="(applicationService.application$| async)?.app.entity.enable_ssh" [disabled]="true"></mat-slide-toggle>
+                    </app-display-value>
+                  </div>
+                  <div class="display-input__input">
+                    <app-display-value>
+                      <mat-slide-toggle name="appSsh" [ngModel]="appEdits.enable_ssh"></mat-slide-toggle>
+                    </app-display-value>
+                  </div>
+                </app-editable-display-value>
+              </div>
             </mat-list-item>
           </mat-list>
         </div>
-
       </form>
     </app-details-card>
   </div>
