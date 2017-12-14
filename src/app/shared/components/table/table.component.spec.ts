@@ -15,7 +15,7 @@ import { TableCellSelectComponent } from './table-cell-select/table-cell-select.
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 import { TableCellEditComponent } from './table-cell-edit/table-cell-edit.component';
 import { TableCellEditVariableComponent } from './custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
-import { MdPaginator, MdSort, MdPaginatorIntl } from '@angular/material';
+import { MatPaginator, MatSort, MatPaginatorIntl } from '@angular/material';
 import { TableCellEventTimestampComponent } from './custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { TableCellEventTypeComponent } from './custom-cells/table-cell-event-type/table-cell-event-type.component';
 import { TableCellEventActionComponent } from './custom-cells/table-cell-event-action/table-cell-event-action.component';
@@ -56,7 +56,7 @@ describe('TableComponent', () => {
     fixture = TestBed.createComponent(TableComponent);
     component = fixture.componentInstance;
 
-    const mdPaginatorIntl: MdPaginatorIntl = new MdPaginatorIntl();
+    const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
     component.dataSource = {
       connect() { return Observable.of([]); },
       sort$: Observable.of({} as ListSort),

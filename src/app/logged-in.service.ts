@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from './store/app-state';
 import { AuthState } from './store/reducers/auth.reducer';
 import { VerifySession } from './store/actions/auth.actions';
-import { MdDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { Observable } from 'rxjs/Observable';
 import { SessionData } from './store/types/auth.types';
@@ -39,7 +39,7 @@ export class LoggedInService {
   constructor(
     @Inject(DOCUMENT) private document: Document,
     private store: Store<AppState>,
-    private dialog: MdDialog,
+    private dialog: MatDialog,
     ngZone: NgZone
   ) {
 

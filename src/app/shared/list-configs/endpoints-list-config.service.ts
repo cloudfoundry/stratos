@@ -15,7 +15,7 @@ import { ConnectCnis, DisconnectCnis, UnregisterCnis, GetAllCNSIS } from '../../
 import { EndpointsDataSource } from '../data-sources/endpoints-data-source';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { Injectable } from '@angular/core';
-import { MdDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { GetSystemInfo } from '../../store/actions/system.actions';
 import {
   TableCellEndpointStatusComponent
@@ -174,7 +174,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   constructor(
     private store: Store<AppState>,
-    private dialog: MdDialog
+    private dialog: MatDialog
   ) {
     this.dataSource = new EndpointsDataSource(this.store);
   }

@@ -2,7 +2,7 @@ import { concat } from 'rxjs/observable/concat';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Component, OnInit, Input, OnDestroy, Output, AfterViewInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { MdSnackBar, MdSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { UserService } from '../../../core/user.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 
@@ -45,9 +45,9 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
 
   subscription: Subscription;
 
-  private _snackBar: MdSnackBarRef<SimpleSnackBar>;
+  private _snackBar: MatSnackBarRef<SimpleSnackBar>;
 
-  constructor(private userService: UserService, private snackBar: MdSnackBar, public endpointService: EndpointsService) { }
+  constructor(private userService: UserService, private snackBar: MatSnackBar, public endpointService: EndpointsService) { }
 
   ngOnInit() {
 

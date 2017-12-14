@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject, OnDestroy, Optional } from '@angular/core';
-import { MdDialogRef, MD_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { Logout } from '../../store/actions/auth.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
@@ -11,8 +11,8 @@ import { AppState } from '../../store/app-state';
 })
 export class LogOutDialogComponent implements OnInit, OnDestroy {
   constructor(
-    public dialogRef: MdDialogRef<LogOutDialogComponent>,
-    @Optional() @Inject(MD_DIALOG_DATA) public data: any,
+    public dialogRef: MatDialogRef<LogOutDialogComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
     private store: Store<AppState>) { }
 
   private _autoLogout: any;

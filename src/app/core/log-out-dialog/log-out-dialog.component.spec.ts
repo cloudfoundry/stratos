@@ -3,7 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { LogOutDialogComponent } from './log-out-dialog.component';
 import { CoreModule } from '../core.module';
 import { SharedModule } from '../../shared/shared.module';
-import { MdDialogRef, MD_DIALOG_DATA, MdDialogModule } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { createBasicStoreModule } from '../../test-framework/store-test-helper';
 
@@ -11,23 +11,23 @@ describe('LogOutDialogComponent', () => {
   let component: LogOutDialogComponent;
   let fixture: ComponentFixture<LogOutDialogComponent>;
 
-  class MdDialogRefMock {
+  class MatDialogRefMock {
   }
 
-  class MdDialogDataMock {
+  class MatDialogDataMock {
     data: '';
   }
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: MdDialogRef, useClass: MdDialogRefMock },
-        { provide: MD_DIALOG_DATA, useClass: MdDialogDataMock },
+        { provide: MatDialogRef, useClass: MatDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
       ],
       imports: [
         CoreModule,
         SharedModule,
-        MdDialogModule,
+        MatDialogModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
       ]

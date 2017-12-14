@@ -9,7 +9,7 @@ import { Observable } from 'rxjs/Rx';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
-import { MdInput } from '@angular/material';
+import { MatInput } from '@angular/material';
 import * as moment from 'moment';
 import { LoggerService } from '../../../../core/logger.service';
 

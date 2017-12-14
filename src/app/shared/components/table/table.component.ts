@@ -9,7 +9,7 @@ import {
 } from '../../../store/actions/list.actions';
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DataSource } from '@angular/cdk/table';
-import { MdPaginator, MdSort, Sort, MdTable, PageEvent } from '@angular/material';
+import { MatPaginator, MatSort, Sort, MatTable, PageEvent } from '@angular/material';
 import { NgModel, NgForm } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
@@ -27,7 +27,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
 
-  @ViewChild(MdSort) sort: MdSort;
+  @ViewChild(MatSort) sort: MatSort;
 
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
@@ -62,7 +62,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
       }
     });
 
-    const sortWidgetToStore = this.sort.mdSortChange.do((sort: Sort) => {
+    const sortWidgetToStore = this.sort.sortChange.do((sort: Sort) => {
       this._store.dispatch(new SetListSortAction(
         this.dataSource.listStateKey,
         {

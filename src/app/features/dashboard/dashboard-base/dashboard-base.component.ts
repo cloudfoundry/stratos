@@ -1,5 +1,5 @@
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
-import { MdDrawer } from '@angular/material';
+import { MatDrawer } from '@angular/material';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../store/app-state';
@@ -24,7 +24,7 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
   ) {
   }
 
-  @ViewChild('sidenav') public sidenav: MdDrawer;
+  @ViewChild('sidenav') public sidenav: MatDrawer;
 
   sideNavTabs: SideNavItem[];
 

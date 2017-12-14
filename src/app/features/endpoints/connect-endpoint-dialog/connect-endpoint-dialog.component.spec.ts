@@ -10,12 +10,12 @@ import { it } from '@angular/cli/lib/ast-tools/spec-utils';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
-import { MD_DIALOG_DATA, MdDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
-class MdDialogRefMock {
+class MatDialogRefMock {
 }
 
-class MdDialogDataMock {
+class MatDialogDataMock {
   guid = '57ab08d8-86cc-473a-8818-25d5e8d0ea23';
   name = 'Test';
 }
@@ -27,8 +27,8 @@ describe('ConnectEndpointDialogComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: MdDialogRef, useClass: MdDialogRefMock },
-        { provide: MD_DIALOG_DATA, useClass: MdDialogDataMock },
+        { provide: MatDialogRef, useClass: MatDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
       ],
       declarations: [ConnectEndpointDialogComponent],
       imports: [

@@ -10,7 +10,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ConnectCnis, EndpointSchema } from '../../../store/actions/cnsis.actions';
 import { Store } from '@ngrx/store';
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { MdDialogRef, MD_DIALOG_DATA, MdSnackBar } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
 import { AppState } from '../../../store/app-state';
 import { FormControl } from '@angular/forms';
 import { Subscription } from 'rxjs/Subscription';
@@ -44,9 +44,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   constructor(
     public store: Store<AppState>,
     public fb: FormBuilder,
-    public dialogRef: MdDialogRef<ConnectEndpointDialogComponent>,
-    public snackBar: MdSnackBar,
-    @Inject(MD_DIALOG_DATA) public data: {
+    public dialogRef: MatDialogRef<ConnectEndpointDialogComponent>,
+    public snackBar: MatSnackBar,
+    @Inject(MAT_DIALOG_DATA) public data: {
       name: string,
       guid: string
     }

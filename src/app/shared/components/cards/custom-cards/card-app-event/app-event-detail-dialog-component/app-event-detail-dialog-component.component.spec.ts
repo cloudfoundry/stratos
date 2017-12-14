@@ -4,17 +4,17 @@ import { ValuesPipe } from '../../../../../pipes/values.pipe';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppEventDetailDialogComponentComponent } from './app-event-detail-dialog-component.component';
-import { MdDialogRef, MD_DIALOG_DATA } from '@angular/material';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material';
 import { RequestInfoState } from '../../../../../../store/reducers/api-request-reducer/types';
 
 describe('AppEventDetailDialogComponentComponent', () => {
   let component: AppEventDetailDialogComponentComponent;
   let fixture: ComponentFixture<AppEventDetailDialogComponentComponent>;
 
-  class MdDialogRefMock {
+  class MatDialogRefMock {
   }
 
-  class MdDialogDataMock {
+  class MatDialogDataMock {
     row = {
       entity: {
         metadata: {}
@@ -26,8 +26,8 @@ describe('AppEventDetailDialogComponentComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: MdDialogRef, useClass: MdDialogRefMock },
-        { provide: MD_DIALOG_DATA, useClass: MdDialogDataMock },
+        { provide: MatDialogRef, useClass: MatDialogRefMock },
+        { provide: MAT_DIALOG_DATA, useClass: MatDialogDataMock },
       ],
       declarations: [
         AppEventDetailDialogComponentComponent,

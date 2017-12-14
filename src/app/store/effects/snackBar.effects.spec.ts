@@ -1,4 +1,4 @@
-import { MdDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { ShowSnackBar } from './../actions/snackBar.actions';
 import { AppState } from '../app-state';
 import { AppStoreModule } from './../store.module';
@@ -28,7 +28,7 @@ describe('EndpointsPageComponent', () => {
   }));
 
   it('Should open a dialog', () => {
-    inject([Store, MdDialog], (store: Store<AppState>, dialog: MdDialog) => {
+    inject([Store, MatDialog], (store: Store<AppState>, dialog: MatDialog) => {
       store.dispatch(new ShowSnackBar('Test'));
       expect(dialog.openDialogs[0]).toBeDefined();
     });

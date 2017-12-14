@@ -4,12 +4,12 @@ import { AppState } from '../app-state';
 import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
 import { ShowSnackBar, SHOW_SNACK_BAR } from '../actions/snackBar.actions';
-import { MdSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material';
 @Injectable()
 export class SnackBarEffects {
   constructor(
     private actions$: Actions,
-    public snackBar: MdSnackBar
+    public snackBar: MatSnackBar
   ) { }
   @Effect({ dispatch: false }) getInfo$ = this.actions$.ofType<ShowSnackBar>(SHOW_SNACK_BAR)
     .map(action => {

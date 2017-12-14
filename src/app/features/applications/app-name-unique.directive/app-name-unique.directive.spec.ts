@@ -10,7 +10,7 @@ import { AppStoreModule } from '../../../store/store.module';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { RouterTestingModule } from '@angular/router/testing';
-import { MdDialogModule } from '@angular/material';
+import { MatDialogModule } from '@angular/material';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -22,7 +22,7 @@ describe('AppNameUniqueDirective', () => {
         CoreModule,
         SharedModule,
         RouterTestingModule,
-        MdDialogModule,
+        MatDialogModule,
         createBasicStoreModule(),
       ]
     });
