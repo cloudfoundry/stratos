@@ -123,8 +123,13 @@
     });
   }
 
-  function test(path) {
-    return spawnProcess('go', ['test', '-v'], path, env);
+  function test(path, coverage) {
+    var args = ['test', '-v'];
+    if (coverage) {
+      args.push('-coverprofile=backend-coverage.txt');
+      args.push('-covermode=atomic');
+    }
+    return spawnProcess('go', args, path, env);
   }
 
   function getVersion() {

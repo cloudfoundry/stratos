@@ -215,7 +215,6 @@
   });
 
   gulp.task('run-tests', ['build-all'], function (done) {
-
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     buildUtils.test(corePath)
       .then(function () {
@@ -224,7 +223,17 @@
       .catch(function (err) {
         done(err);
       });
+  });
 
+  gulp.task('backend-coverage', ['build-all'], function (done) {
+    var corePath = conf.getCorePath(prepareBuild.getSourcePath());
+    buildUtils.test(corePath, true)
+      .then(function () {
+        done();
+      })
+      .catch(function (err) {
+        done(err);
+      });
   });
 
   gulp.task('copy-artefacts', ['build-all', 'build-dbmigrator'], function (done) {

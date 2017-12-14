@@ -67,11 +67,18 @@ mv /tmp/bower_components ./bower_components
 npm run update-webdriver
 
 echo "Running Front-end Unit Tests"
+npm run test
+
+echo "Running end-to-end tests"
+
 set +e
 #npm run coverage
 gulp e2e:tests
 RESULT=$?
 set -e
+
+echo "Running Back-end Unit tests"
+gulp backend-coverage
 
 pushd deploy/ci/travis
 # Uncomment to copy logs to the travis log
