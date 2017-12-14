@@ -19,8 +19,6 @@ cat << EOF > ./build/secrets.json
     }
   },
   "console": {
-    "host": "localhost",
-    "port": 443,
     "admin": {
       "username": "${CONSOLE_ADMIN_USER}",
       "password": "${CONSOLE_ADMIN_PASSWORD}"
@@ -39,6 +37,10 @@ cat << EOF > ./build/secrets.json
 }
 EOF
 
+
+    //"host": "localhost",
+//    "port": 443,
+
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
@@ -47,8 +49,9 @@ export CERTS_PATH=./dev-certs
 mv ./node_modules /tmp/node_modules
 mv ./bower_components /tmp/bower_components
 
-echo "Building images locally with instrumented front-end code"
-./deploy/docker-compose/build.sh -n -l -i
+#echo "Building images locally with instrumented front-end code"
+echo "Building images locally"
+./deploy/docker-compose/build.sh -n -l
 echo "Build Finished"
 docker images
 
@@ -64,16 +67,15 @@ mv /tmp/node_modules ./node_modules
 rm -rf ./bower_components
 mv /tmp/bower_components ./bower_components
 
-npm run update-webdriver
+#npm run update-webdriver
 
-echo "Running Front-end Unit Tests"
-npm run test
+#echo "Running Front-end Unit Tests"
+#npm run test
 
-echo "Running end-to-end tests"
+echo "Running Front-end Unit and end-to-end tests"
 
 set +e
-#npm run coverage
-gulp e2e:tests
+npm run coverage
 RESULT=$?
 set -e
 
