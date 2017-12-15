@@ -1,7 +1,8 @@
-import { debounceTime } from 'rxjs/operators';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { debounceTime } from 'rxjs/operators';
 
 import { AppState } from '../../../store/app-state';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
@@ -9,7 +10,6 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
   selector: 'app-dashboard-base',
