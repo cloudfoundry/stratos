@@ -2,13 +2,13 @@
   height: 100%;
   width: 200px;
   &__top {
-    height: 128px;
+    height: 64px;
     display: flex;
     flex-direction: column;
     &-inner {
       display: flex;
       flex: 1;
-      padding: 35px;
+      padding: 10px;
     }
   }
   &__items {
@@ -25,7 +25,7 @@
     border-top: 1px solid;
     border-bottom: 1px solid;
     border-color: transparent;
-    md-icon {
+    mat-icon {
       margin-right: 15px;
     }
   }

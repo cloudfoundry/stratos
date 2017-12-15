@@ -5,7 +5,7 @@ import { generateTestEntityServiceProvider } from '../../test-framework/entity-s
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { ApplicationSchema, GetApplication } from '../../store/actions/application.actions';
-import { it } from '@angular/cli/lib/ast-tools/spec-utils';
+
 import { EntityService } from '../../core/entity-service';
 import { inject, TestBed } from '@angular/core/testing';
 

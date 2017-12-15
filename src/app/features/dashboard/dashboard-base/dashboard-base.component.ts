@@ -1,5 +1,5 @@
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
-import { MdDrawer } from '@angular/material';
+import { MatDrawer } from '@angular/material';
 import { Store } from '@ngrx/store';
 
 import { AppState } from '../../../store/app-state';
@@ -24,7 +24,7 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
   ) {
   }
 
-  @ViewChild('sidenav') public sidenav: MdDrawer;
+  @ViewChild('sidenav') public sidenav: MatDrawer;
 
   sideNavTabs: SideNavItem[];
 
@@ -34,17 +34,17 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
     this.sideNavTabs = [
       {
         text: 'Dashboard',
-        mdIcon: 'assessment',
+        matIcon: 'assessment',
         link: '/dashboard'
       },
       {
         text: 'Applications',
-        mdIcon: 'apps',
+        matIcon: 'apps',
         link: '/applications'
       },
       {
         text: 'Endpoints',
-        mdIcon: 'settings_input_component',
+        matIcon: 'settings_input_component',
         link: '/endpoints'
       }
     ];

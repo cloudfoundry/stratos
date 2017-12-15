@@ -2,12 +2,12 @@
   Supply the API Url for your Cloud Foundry endpoint
 </p>
 <form #form="ngForm">
-  <md-form-field novalidate>
-    <input mdInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Cloud Foundry API Endpoint"
+  <mat-form-field novalidate>
+    <input matInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Cloud Foundry API Endpoint"
       pattern="{{utilsService.urlValidationExpression}}" [appUnique]="endpointUrls | async">
-    <md-error *ngIf="urlField.errors && urlField.errors.required">URL is required</md-error>
-    <md-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</md-error>
-    <md-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</md-error>
-  </md-form-field>
-  <md-checkbox mdInput name="skipSll" #skipSllField="ngModel" [ngModel]="skipSllValue">Skip SSL validation for the endpoint</md-checkbox>
+    <mat-error *ngIf="urlField.errors && urlField.errors.required">URL is required</mat-error>
+    <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
+    <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
+  </mat-form-field>
+  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" [ngModel]="skipSllValue">Skip SSL validation for the endpoint</mat-checkbox>
 </form>

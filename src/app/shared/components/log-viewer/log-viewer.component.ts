@@ -12,7 +12,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import { MdButton } from '@angular/material';
+import { MatButton } from '@angular/material';
 
 
 @Component({
@@ -47,10 +47,10 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   content: ElementRef;
 
   @ViewChild('pauseButton')
-  pauseButton: MdButton;
+  pauseButton: MatButton;
 
   @ViewChild('followLogButton')
-  followLogButton: MdButton;
+  followLogButton: MatButton;
 
   currentLog = '';
 

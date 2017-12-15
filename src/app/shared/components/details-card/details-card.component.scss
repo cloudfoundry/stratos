@@ -4,17 +4,17 @@
   flex-wrap: wrap;
   width: 100%;
   position: relative;
-  md-card {
+  mat-card {
     padding: $summary-card-spacing * 2
   }
-  md-expansion-panel {
+  mat-expansion-panel {
     padding: $summary-card-spacing;
   }
   .mat-expansion-panel-body {
     padding-bottom: 0;
   }
-  md-card,
-  md-expansion-panel {
+  mat-card,
+  mat-expansion-panel {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -26,20 +26,20 @@
       width: 100%;
       display: flex;
       flex-direction: row;
-      md-list {
+      mat-list {
         flex: 1;
         padding-right: $summary-card-spacing * 2;
         &:last-of-type {
           padding-right: 0;
         }
-        md-slider {
+        mat-slider {
           padding-bottom: 5px;
         }
       }
     }
   }
-  md-chip-list {
-    md-chip {
+  mat-chip-list {
+    mat-chip {
       margin-right: 7px;
       margin-bottom: 5px;
       margin-left: 0;

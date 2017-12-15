@@ -1,7 +1,7 @@
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { MdPaginator, MdSort, Sort, PageEvent, MdSortable } from '@angular/material';
+import { MatPaginator, MatSort, Sort, PageEvent, MatSortable } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';

@@ -4,7 +4,7 @@ import { AppState } from '../../store/app-state';
 import { Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
-import { MdPaginator, PageEvent, MdSort, Sort, SortDirection } from '@angular/material';
+import { MatPaginator, PageEvent, MatSort, Sort, SortDirection } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';

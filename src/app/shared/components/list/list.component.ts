@@ -12,7 +12,7 @@ import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
-import { MdPaginator, PageEvent, MdSelect, MdSelectChange, SortDirection } from '@angular/material';
+import { MatPaginator, PageEvent, MatSelect, MatSelectChange, SortDirection } from '@angular/material';
 
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
@@ -67,11 +67,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @Input('addForm') addForm: NgForm;
 
 
-  @ViewChild(MdPaginator) paginator: MdPaginator;
+  @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
 
   sortColumns: ITableColumn<T>[];
-  @ViewChild('headerSortField') headerSortField: MdSelect;
+  @ViewChild('headerSortField') headerSortField: MatSelect;
   headerSortDirection: SortDirection = 'asc';
   headerSortDirectionChanged = new EventEmitter<SortDirection>();
 

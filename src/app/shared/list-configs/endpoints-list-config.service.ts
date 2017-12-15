@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MdDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 
 import {
@@ -174,7 +174,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   constructor(
     private store: Store<AppState>,
-    private dialog: MdDialog
+    private dialog: MatDialog
   ) {
     this.dataSource = new EndpointsDataSource(this.store);
   }

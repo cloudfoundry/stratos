@@ -1,17 +1,17 @@
 <div class="log-viewer">
-  <md-toolbar class="log-viewer__header" color="primary">
+  <mat-toolbar class="log-viewer__header" color="primary">
     <span>{{title || 'Log'}}</span>
-    <md-icon class="log-viewer__warn-icon" mdTooltip="High throughput stream" *ngIf="isHighThroughput$ | async">warning</md-icon>
+    <mat-icon class="log-viewer__warn-icon" matTooltip="High throughput stream" *ngIf="isHighThroughput$ | async">warning</mat-icon>
     <div class="spacer"></div>
     <div class="log-viewer__actions">
-      <button #pauseButton md-icon-button>
-        <md-icon>{{ ( stopped$ | async ) ? 'play_arrow' : 'stop' }}</md-icon>
+      <button #pauseButton mat-icon-button>
+        <mat-icon>{{ ( stopped$ | async ) ? 'play_arrow' : 'stop' }}</mat-icon>
       </button>
-      <button [disabled]="stopped$ | async" md-icon-button #followLogButton>
-        <md-icon color="{{ ( isLocked$ | async ) ? 'accent' : '' }}">vertical_align_bottom</md-icon>
+      <button [disabled]="stopped$ | async" mat-icon-button #followLogButton>
+        <mat-icon color="{{ ( isLocked$ | async ) ? 'accent' : '' }}">vertical_align_bottom</mat-icon>
       </button>
     </div>
-  </md-toolbar>
+  </mat-toolbar>
   <div class="log-scroller" #container>
     <!--(mousewheel)="wheelHandler" (scroll)="scrollHandler"-->
     <div class="log-scroller__content" #content></div>

@@ -21074,15 +21074,11 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     actionHistory: [],
-    lists: {},
-    routerReducer: {
-      state: '',
-      navigationId: 1
-    }
+    lists: {}
   };
   /* tslint:enable */
 
-export function getInitialTestStoreState(): AppState {
+export function getInitialTestStoreState() {
     return testInitialStoreState;
 }
 

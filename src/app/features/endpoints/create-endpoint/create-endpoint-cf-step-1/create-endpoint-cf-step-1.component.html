@@ -6,9 +6,9 @@
   they are working with.
 </p>
 <form #form="ngForm">
-  <md-form-field>
-    <input mdInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="endpointNames | async">
-    <md-error *ngIf="nameField.errors && nameField.errors.required">Name is required</md-error>
-    <md-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</md-error>
-  </md-form-field>
+  <mat-form-field>
+    <input matInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="endpointNames | async">
+    <mat-error *ngIf="nameField.errors && nameField.errors.required">Name is required</mat-error>
+    <mat-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</mat-error>
+  </mat-form-field>
 </form>

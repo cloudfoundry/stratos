@@ -1,31 +1,31 @@
 <div class="app-table">
   <div>
-    <md-card>
-      <md-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0">
-      </md-card-header>
-      <md-card-content>
-        <md-table #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"
-          [dataSource]="dataSource" mdSort>
-          <ng-container *ngFor="let column of columns" [mdColumnDef]="column.columnId">
+    <mat-card>
+      <mat-card-header [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0">
+      </mat-card-header>
+      <mat-card-content>
+        <mat-table #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"
+          [dataSource]="dataSource" matSort>
+          <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnId">
             <div *ngIf="column.sort">
-              <md-header-cell *mdHeaderCellDef [ngClass]="column.class" md-sort-header disableClear="column.sort.disableClear" [style.flex]="column.cellFlex">
+              <mat-header-cell *matHeaderCellDef [ngClass]="column.class" mat-sort-header disableClear="column.sort.disableClear" [style.flex]="column.cellFlex">
                 <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
-              </md-header-cell>
+              </mat-header-cell>
             </div>
             <div *ngIf="!column.sort">
-              <md-header-cell *mdHeaderCellDef [ngClass]="column.class" [style.flex]="column.cellFlex">
+              <mat-header-cell *matHeaderCellDef [ngClass]="column.class" [style.flex]="column.cellFlex">
                 <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
-              </md-header-cell>
+              </mat-header-cell>
             </div>
-            <md-cell *mdCellDef="let row" [ngClass]="column.class" [style.flex]="column.cellFlex">
+            <mat-cell *matCellDef="let row" [ngClass]="column.class" [style.flex]="column.cellFlex">
               <app-table-cell [component]="column.cellComponent" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
-            </md-cell>
+            </mat-cell>
           </ng-container>
-          <md-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" *mdHeaderRowDef="columnNames"></md-header-row>
-          <md-row *mdRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight"></md-row>
-        </md-table>
-      </md-card-content>
+          <mat-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" *matHeaderRowDef="columnNames"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight"></mat-row>
+        </mat-table>
+      </mat-card-content>
 
-    </md-card>
+    </mat-card>
   </div>
 </div>

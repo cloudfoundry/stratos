@@ -30,7 +30,7 @@ import { Headers, Http, URLSearchParams, RequestOptionsArgs } from '@angular/htt
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
 import { Router } from '@angular/router';
-import { MdDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { SessionData } from '../types/auth.types';
 
 
@@ -42,7 +42,7 @@ export class AuthEffect {
     private actions$: Actions,
     private store: Store<AppState>,
     private router: Router,
-    public dialog: MdDialog
+    public dialog: MatDialog
   ) { }
 
   @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN)

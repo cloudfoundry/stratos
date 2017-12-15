@@ -6,7 +6,7 @@
   </div>
   <ul class="side-nav__items">
     <li *ngFor="let tab of tabs" class="side-nav__item" [routerLink]="[tab.link]" [routerLinkActive]="['side-nav__item--active']">
-      <md-icon>{{ tab.mdIcon }}</md-icon> {{ tab.text }}
+      <mat-icon>{{ tab.matIcon }}</mat-icon> {{ tab.text }}
     </li>
   </ul>
 </nav>

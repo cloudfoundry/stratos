@@ -1,14 +1,14 @@
 <b>Please select a unique name for your application</b>
 <form novalidate #form="ngForm">
   <div>
-    <md-form-field class="md-form-field__spinner">
-      <input [(ngModel)]="name" required mdInput placeholder="Application Name" name="appName" appApplicationNameUnique>
-      <md-error *ngIf="form.controls.appName?.hasError('appNameTaken')">
+    <mat-form-field class="mat-form-field__spinner">
+      <input [(ngModel)]="name" required matInput placeholder="Application Name" name="appName" appApplicationNameUnique>
+      <mat-error *ngIf="form.controls.appName?.hasError('appNameTaken')">
         This name has been taken, please try another.
-      </md-error>
+      </mat-error>
       <div class="inline-icon inline-icon__form">
         <app-stateful-icon [state]="checkingNameState$ | async"></app-stateful-icon>
       </div>
-    </md-form-field>
+    </mat-form-field>
   </div>
 </form>

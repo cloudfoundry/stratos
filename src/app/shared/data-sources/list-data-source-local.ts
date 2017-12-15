@@ -1,7 +1,7 @@
 import { ListFilter, ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
-import { Sort, MdPaginator, MdSort } from '@angular/material';
+import { Sort, MatPaginator, MatSort } from '@angular/material';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';

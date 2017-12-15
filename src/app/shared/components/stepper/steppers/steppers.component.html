@@ -6,7 +6,7 @@
           class="steppers__header">
           <div class="steppers__header-inner">
             <div class="steppers__header-icon">
-              <md-icon *ngIf="step.complete">{{ this.getIconLigature() }}</md-icon>
+              <mat-icon *ngIf="step.complete">{{ this.getIconLigature() }}</mat-icon>
               <div *ngIf="!step.complete">{{ i + 1 }}</div>
             </div>
             <span class="steppers__header-text">{{ step.title }}</span>
@@ -17,10 +17,10 @@
         <span *ngTemplateOutlet="steps[currentIndex].content"></span>
       </div>
       <div class="steppers__navigation">
-        <button color="accent" md-button md-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
+        <button color="accent" mat-button mat-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
         <div>
-          <button color="warn" md-button [routerLink]="cancel" *ngIf="cancel">Cancel</button>
-          <button color="primary" type="submit" md-button md-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex + 1) }}</button>
+          <button color="warn" mat-button [routerLink]="cancel" *ngIf="cancel">Cancel</button>
+          <button color="primary" type="submit" mat-button mat-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex + 1) }}</button>
         </div>
       </div>
     </div>

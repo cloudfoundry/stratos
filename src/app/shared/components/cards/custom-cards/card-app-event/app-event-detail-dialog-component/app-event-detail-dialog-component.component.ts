@@ -1,7 +1,7 @@
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { EntityInfo } from '../../../../../../store/types/api.types';
 import { Component, OnInit, Inject, Optional } from '@angular/core';
-import { MD_DIALOG_DATA, MdDialogRef } from '@angular/material';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material';
 
 @Component({
   selector: 'app-app-event-detail-dialog-component',
@@ -11,7 +11,7 @@ import { MD_DIALOG_DATA, MdDialogRef } from '@angular/material';
 export class AppEventDetailDialogComponentComponent {
 
   constructor(
-    public dialogRef: MdDialogRef<AppEventDetailDialogComponentComponent>,
-    @Optional() @Inject(MD_DIALOG_DATA) public data: any) { }
+    public dialogRef: MatDialogRef<AppEventDetailDialogComponentComponent>,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any) { }
 
 }

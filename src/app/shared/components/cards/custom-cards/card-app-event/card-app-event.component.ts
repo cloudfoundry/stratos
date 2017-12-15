@@ -13,7 +13,7 @@ import { TableCellCustom } from '../../../table/table-cell/table-cell-custom';
 import {
   TableCellEventTimestampComponent
 } from '../../../table/custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import { MdDialog } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { EntityInfo } from '../../../../../store/types/api.types';
 
 @Component({
@@ -26,7 +26,7 @@ export class CardEventComponent extends TableCellCustom<EntityInfo> {
   actorComponent = TableCellEventActionComponent;
   detailComponent = TableCellEventDetailComponent;
 
-  constructor(private dialog: MdDialog) {
+  constructor(private dialog: MatDialog) {
     super();
   }
 

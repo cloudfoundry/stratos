@@ -1,8 +1,8 @@
-<md-card class=cards__card>
-  <md-card-header>
+<mat-card class=cards__card>
+  <mat-card-header>
     {{row.entity.type.split('.').join(' ') | titlecase}}
-  </md-card-header>
-  <md-card-content>
+  </mat-card-header>
+  <mat-card-content>
     <div class="cards__card-row">
       <div>
         Timestamp:
@@ -13,8 +13,8 @@
         <app-table-cell [component]="actorComponent" [row]="row" [dataSource]="dataSource"></app-table-cell>
       </div>
       <div class="event-details">
-        <button md-button (click)="showDetails()">View Details</button>
+        <button mat-button (click)="showDetails()">View Details</button>
       </div>
     </div>
-  </md-card-content>
-</md-card>
+  </mat-card-content>
+</mat-card>

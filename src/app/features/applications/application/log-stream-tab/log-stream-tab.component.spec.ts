@@ -1,5 +1,3 @@
-import { it } from '@angular/cli/lib/ast-tools/spec-utils';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
@@ -16,6 +14,8 @@ import { getInitialTestStoreState } from '../../../../test-framework/store-test-
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
 import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
+import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+
 
 describe('LogStreamTabComponent', () => {
   let component: LogStreamTabComponent;
