@@ -72,7 +72,7 @@ export function getActionKey(action) {
   return apiAction.entityKey || null;
 }
 
-export function getPaginationKey(action) {
+export function getPaginationKey(action: PaginatedAction) {
   const apiAction = getAction(action);
   return apiAction.paginationKey;
 }
@@ -130,10 +130,10 @@ function getObservables(store: Store<AppState>, entityKey: string, paginationKey
       return page ? denormalize(page, schema, entities) : null;
     });
 
-    return  {
-      pagination$,
-      entities$
-    };
+  return {
+    pagination$,
+    entities$
+  };
 }
 
 export function isPageReady(pagination: PaginationEntityState) {

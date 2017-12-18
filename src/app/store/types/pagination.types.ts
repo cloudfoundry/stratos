@@ -32,7 +32,7 @@ export interface PaginationAction extends Action {
 
 export interface PaginatedAction extends PaginationAction, IRequestAction {
   initialParams?: PaginationParam;
-  options: {
+  options?: {
     params?: {
       paramsMap: any;
     }

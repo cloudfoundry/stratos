@@ -26,6 +26,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { PaginatedAction } from '../types/pagination.types';
 
 
 @Injectable()
@@ -46,7 +47,8 @@ export class CNSISEffect {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: cnsisStoreNames.type,
-      } as IRequestAction;
+        paginationKey: 'endpoint-list'
+      } as PaginatedAction;
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),

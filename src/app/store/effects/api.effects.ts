@@ -88,7 +88,6 @@ export class APIEffect {
         if (!options.params.has(resultPerPageParam)) {
           options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
         }
-
       }
 
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;

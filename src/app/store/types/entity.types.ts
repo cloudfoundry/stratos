@@ -31,5 +31,6 @@ export const defaultCfEntitiesState = {
   space: {},
   organization: {},
   route: {},
-  event: {}
+  event: {},
+  endpoint: {}
 };

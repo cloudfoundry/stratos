@@ -1,11 +1,7 @@
-import { register } from 'ts-node/dist';
-import { Observable } from 'rxjs/Rx';
-import { GET_CNSIS, GetAllCNSIS, GetAllCNSISFailed, GetAllCNSISSuccess } from './../actions/cnsis.actions';
-import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
-import { Headers, Http, URLSearchParams } from '@angular/http';
-import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+
 import {
   ADD_PARAMS,
   AddParams,
@@ -15,6 +11,7 @@ import {
   SET_PARAMS,
   SetParams,
 } from '../actions/pagination.actions';
+import { AppState } from './../app-state';
 
 
 @Injectable()
