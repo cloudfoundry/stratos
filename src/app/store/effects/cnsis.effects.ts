@@ -27,6 +27,7 @@ import {
 } from '../types/request.types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { PaginatedAction } from '../types/pagination.types';
+import { WrapperAppMetadataStart } from '../actions/app-metadata.actions';
 
 
 @Injectable()

@@ -1,3 +1,4 @@
+import { OperatorFunction } from 'rxjs/interfaces';
 import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
 import { ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
@@ -37,6 +38,7 @@ export abstract class CfListDataSource<T> extends ListDataSource<T> implements I
     protected _cfGetRowUniqueId: getRowUniqueId,
     getEmptyType: () => T,
     private _cfListStateKey: string,
+    private entityLettable: OperatorFunction<T, T[]> = null
   ) {
     super(_cfStore, _cfGetRowUniqueId, getEmptyType, _cfListStateKey);
 
@@ -89,14 +91,12 @@ export abstract class CfListDataSource<T> extends ListDataSource<T> implements I
   }
 
   connect(): Observable<T[]> {
-    if (!this.page$) {
-      this.page$ = Observable.combineLatest(
-        this.cfPagination$,
-        this.entities$
-      )
-        .map(([listPagination, data]) => {
-          return data;
-        });
+    if (this.entityLettable) {
+      this.page$ = this.entities$.pipe(
+        this.entityLettable
+      );
+    } else {
+      this.page$ = this.entities$;
     }
     return this.page$;
   }

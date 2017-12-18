@@ -1,3 +1,4 @@
+import { CfListDataSource } from './list-data-source-cf';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
@@ -12,13 +13,16 @@ import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
 import { ListActionConfig, ListActions } from './list-data-source-types';
+import { AppMetadataProperties, GetAppMetadataAction, EnvVarsSchema } from '../../store/actions/app-metadata.actions';
+import { AppMetadataType } from '../../store/types/app-metadata.types';
+import { map } from 'rxjs/operators';
 
 export interface AppEnvVar {
   name: string;
   value: string;
 }
 
-export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
+export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar> {
 
   // Only needed for update purposes
   public rows = new Array<AppEnvVar>();
@@ -35,11 +39,13 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   }
 
   constructor(
-    private _cfStore: Store<AppState>,
+    protected _cfStore: Store<AppState>,
     private _appService: ApplicationService,
   ) {
     super(
       _cfStore,
+      new GetAppMetadataAction(_appService.appGuid, _appService.cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType),
+      EnvVarsSchema,
       (object: AppEnvVar) => {
         return object.name;
       },
@@ -49,8 +55,12 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
           value: '',
         };
       },
-      { active: 'name', direction: 'asc' },
-      CfAppEvnVarsDataSource.key(_appService.cfGuid, _appService.appGuid)
+      CfAppEvnVarsDataSource.key(_appService.cfGuid, _appService.appGuid),
+      map((app: AppEnvVar) => {
+        const env = app[0].environment_json;
+        const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
+        return rows;
+      })
     );
 
     this.cfGuid = _appService.cfGuid;
@@ -65,16 +75,10 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
         pageSizeOptions: [5, 10, 15],
         totalResults: 0,
       },
-      {
-        direction: 'asc',
-        field: 'name'
-      },
+      null,
       {
         filter: ''
       }));
-
-    // The _appService may not have been set up yet, create the actual observable on 'connect'
-    this.isLoadingPage$ = Observable.of(true);
   }
 
   saveAdd() {
@@ -89,32 +93,6 @@ export class CfAppEvnVarsDataSource extends LocalListDataSource<AppEnvVar> {
   saveEdit() {
     this._cfStore.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.rows, this.editRow));
     super.saveEdit();
-  }
-
-  connect(): Observable<AppEnvVar[]> {
-    this.isLoadingPage$ = this._appService.isFetchingApp$.combineLatest(
-      this._appService.isFetchingEnvVars$,
-      this._appService.isUpdatingEnvVars$
-    ).map(([isFetchingApp, isFetchingEnvVars, isUpdatingEnvVars]: [boolean, boolean, boolean]) => {
-      return isFetchingApp === null || isFetchingApp || isFetchingEnvVars || isUpdatingEnvVars;
-    });
-
-    this.data$ = this._appService.waitForAppEntity$.map((app: EntityInfo) => {
-      const rows = new Array<AppEnvVar>();
-      const envVars = app.entity.entity.environment_json;
-      for (const envVar in envVars) {
-        if (!envVars.hasOwnProperty(envVar)) { continue; }
-
-        const [name, value] = [envVar, envVars[envVar]];
-        rows.push({ name, value });
-      }
-      return rows;
-    });
-    return super.connect();
-  }
-
-  destroy() {
-    super.destroy();
   }
 
   listFilter(envVars: AppEnvVar[], filter: ListFilter): AppEnvVar[] {

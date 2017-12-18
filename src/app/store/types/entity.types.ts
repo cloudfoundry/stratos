@@ -1,3 +1,4 @@
+import { AppMetadataProperties } from '../actions/app-metadata.actions';
 import { systemStoreNames, SystemInfo } from './system.types';
 import { cnsisStoreNames, CNSISModel } from './cnsis.types';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
@@ -32,5 +33,8 @@ export const defaultCfEntitiesState = {
   organization: {},
   route: {},
   event: {},
-  endpoint: {}
+  endpoint: {},
+  [AppMetadataProperties.ENV_VARS]: {},
+  [AppMetadataProperties.INSTANCES]: {},
+  [AppMetadataProperties.SUMMARY]: {},
 };

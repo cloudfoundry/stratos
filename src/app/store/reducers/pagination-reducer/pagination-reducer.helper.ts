@@ -7,6 +7,8 @@ import { AppState } from '../../app-state';
 import { getAPIRequestDataState } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
+import { combineLatest } from 'rxjs/operator/combineLatest';
+import { CombineLatestOperator } from 'rxjs/operators/combineLatest';
 
 export function qParamsToString(params: QParam[]) {
   return params.map(joinQParam);
@@ -115,20 +117,24 @@ function getObservables(store: Store<AppState>, entityKey: string, paginationKey
   const pagination$: Observable<PaginationEntityState> = paginationSelect$
     .filter(pagination => !!pagination);
 
-  const entities$: Observable<any[]> = paginationSelect$
-    .do(pagination => {
-      if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
-        store.dispatch(action);
-      }
-    })
-    .filter(pagination => {
-      return isPageReady(pagination);
-    })
-    .withLatestFrom(store.select(getAPIRequestDataState))
-    .map(([paginationEntity, entities]) => {
-      const page = paginationEntity.ids[paginationEntity.currentPage];
-      return page ? denormalize(page, schema, entities) : null;
-    });
+  const entities$: Observable<any[]> =
+    Observable.combineLatest(
+      paginationSelect$,
+      store.select(getAPIRequestDataState)
+    )
+      .do(([pagination, entities]) => {
+        if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+          store.dispatch(action);
+        }
+      })
+      .filter(([pagination, entities]) => {
+        return isPageReady(pagination);
+      })
+
+      .map(([paginationEntity, entities]) => {
+        const page = paginationEntity.ids[paginationEntity.currentPage];
+        return page ? denormalize(page, schema, entities) : null;
+      });
 
   return {
     pagination$,

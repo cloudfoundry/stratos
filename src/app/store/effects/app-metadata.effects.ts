@@ -1,3 +1,5 @@
+import { NormalizedResponse } from '../types/api.types';
+import { StartRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
@@ -28,15 +30,11 @@ export class AppMetadataEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() appMetadataRequest$ = this.actions$.ofType<GetAppMetadataAction>(AppMetadataTypes.APP_METADATA)
-    .map(appMetadataAction => {
-      return new WrapperAppMetadataStart(appMetadataAction);
-    });
-
-  @Effect() appMetadataRequestStart$ = this.actions$.ofType<WrapperAppMetadataStart>(AppMetadataTypes.APP_METADATA_START)
-    .withLatestFrom(this.store)
-    .mergeMap(([{ appMetadataAction, type }, appState]) => {
-
+  @Effect() appMetadataRequestStart$ = this.actions$.ofType<GetAppMetadataAction>(AppMetadataTypes.APP_METADATA)
+    .mergeMap(appMetadataAction => {
+      const actionType = 'fetch';
+      this.store.dispatch(new WrapperAppMetadataStart(appMetadataAction));
+      this.store.dispatch(new StartRequestAction(appMetadataAction, actionType));
       const options = { ...appMetadataAction.options };
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${appMetadataAction.options.url}`;
       options.headers =
@@ -44,13 +42,23 @@ export class AppMetadataEffect {
 
       return this.http.request(new Request(options))
         .mergeMap(response => {
+          const data = response.json();
+          const mappedData = {
+            entities: {
+              [appMetadataAction.metadataType]: {
+                [appMetadataAction.guid]: data
+              }
+            },
+            result: [appMetadataAction.guid]
+          } as NormalizedResponse;
 
-          return Observable.of(
+          return [
+            new WrapperRequestActionSuccess(mappedData, appMetadataAction, actionType),
             new WrapperAppMetadataSuccess(
-              response.json(),
+              data,
               appMetadataAction
             )
-          );
+          ];
         })
         .catch(response => {
           return Observable.of(new WrapperAppMetadataFailed(response, appMetadataAction));

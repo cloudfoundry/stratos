@@ -4,6 +4,8 @@ import { Observable } from 'rxjs/Rx';
 
 import { AppState } from '../app-state';
 import { AppMetadataType, AppMetadataRequestState } from '../types/app-metadata.types';
+import { PaginatedAction } from '../types/pagination.types';
+import { schema } from 'normalizr';
 
 export const AppMetadataTypes = {
   APP_METADATA: '[App Metadata] App Metadata',
@@ -18,7 +20,9 @@ export const AppMetadataProperties = {
   SUMMARY: 'summary'
 };
 
-export class GetAppMetadataAction implements Action {
+export const EnvVarsSchema = new schema.Entity(AppMetadataProperties.ENV_VARS);
+
+export class GetAppMetadataAction implements PaginatedAction {
   options: RequestOptions;
 
   constructor(
@@ -27,9 +31,13 @@ export class GetAppMetadataAction implements Action {
     public metadataType: AppMetadataType
   ) {
     this.options = this.getRequestOptions(guid, cnis, metadataType);
+    this.entityKey = metadataType;
+    this.paginationKey = guid;
   }
 
   type = AppMetadataTypes.APP_METADATA;
+  entityKey = EnvVarsSchema.key;
+  paginationKey: string;
 
   private getRequestOptions(guid: string, cnis: string, type: AppMetadataType) {
     let requestObject: RequestOptions;
@@ -57,6 +65,7 @@ export class GetAppMetadataAction implements Action {
     }
     return requestObject;
   }
+
 }
 
 export class WrapperAppMetadataStart implements Action {
