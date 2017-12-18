@@ -1,0 +1,98 @@
+{
+  "app-wall": {
+    "deploy-application": "Déployer l'application"
+  },
+  "deploy-app-dialog": {
+    "title": "Déployer l'application",
+    "button-deploy": "Déployer",
+    "step-destination": {
+      "title": "Destination",
+      "busy": "Mise à jour des données Cloud Foundry",
+      "enter-failed": "Échec de la régénération des données de Cloud Foundry. Veuillez réessayer. Si cette erreur persiste, veuillez contacter l'administrateur."
+    },
+    "step-source": {
+      "title": "Source",
+      "choose-label": "Type de Source",
+      "choose-placeholder": "Selectionner le type de source",
+      "git": {
+        "git": "Git",
+        "github": {
+          "github": "Publique Github",
+          "project-label": "Projet",
+          "project-placeholder": "suse/stratos-ui",
+          "project-not-found": "Projet non trouvé",
+          "branch-label": "Branche",
+          "branch-placeholder": "Selectionner une Branche",
+          "branch-last-commit": "",
+          "branch-last-commit-date": "",
+          "branch-last-commit-committer": ""
+        },
+        "gitUrl": {
+          "gitUrl": "URL Publique Git",
+          "url": {
+            "url": "URL",
+            "placeholder": "URL HTTPS du dépôt git",
+            "error-required": "L'URL est requis",
+            "error-pattern": "URL invalide"
+          },
+          "branch": {
+            "branch": "Nom de la Branche",
+            "placeholder": "Le nom de la branche réduira le temps de clonage",
+            "error-required": "La Branche est requise"
+          }
+        }
+      },
+      "source": {
+        "file": "sélectionner une source ou faire glisser et déposer une URL GitHub ou un fichier d'archive",
+        "folder": "Sélectionner une source ou faire glisser une URL GitHub, un fichier archive ou un dossier"
+      },
+      "local": {
+        "file": {
+          "label": "Fichier d'archive local",
+          "field": "Fichier",
+          "prompt": "Choisir un Fichier d'archive local"
+        },
+        "folder": {
+          "folder": "Dossier",
+          "label": "Fichier d'archive local ou Dossier",
+          "field": "Fichier / Dossier",
+          "prompt": "Choisissez un fichier ou un dossier local"
+        },
+        "info": "{{files}} fichier(s) - {{total}} à déployer",
+        "cfignore": ".cfignore est trouvé found et appliqué"
+      },
+      "scanning": "Recherche de fichiers et de dossiers",
+      "manifest": {
+        "label": "Manifest",
+        "description": "Pour les applications existantes, si le chemin relatif de votre fichier manifest.yml n'est pas dans la racine, veuillez l'indiquer ci-dessous.",
+        "path-label": "Le chemin de votre fichier manifest",
+        "path-placeholder": "le chemin relatif de votre fichier manifest.yml à la racine de votre application"
+      }
+    },
+    "step-deploying": {
+      "title": "Déployer l'application",
+      "busy": "Démarrer le déployement",
+      "title-deploying": "Déployement",
+      "title-deploy-failed": "Échec du déploiement. La cause: {{reason}}",
+      "title-deploy-success": "Déployé",
+      "next-button": "Résumé de l'application",
+      "submit-failed": "Échec du déploiement de l'application. Si cette erreur persiste, veuillez contacter l'administrateur. Reason: {{reason}}.",
+      "uploading": "Téléchargement des fichiers"
+    },
+    "socket": {
+      "event-type": {
+        "CLOSE_FAILED_NO_BRANCH": "Impossible de  à cloner le dépot (aucune branche fournie), assurez-vous que les détails de git sont corrects",
+        "CLOSE_FAILED_CLONE": "Impossible de cloner le dépot, assurez-vous que les détails de git sont corrects et réessayez ",
+        "CLOSE_FAILURE": "Échec inconnu Voir le journal pour plus d'informations.",
+        "CLOSE_INVALID_MANIFEST": "Manifest Invalide",
+        "CLOSE_NO_MANIFEST": "Échec de la recherche du manifest",
+        "CLOSE_PUSH_ERROR": "[[@:cloud-foundry]] pousser sans succès. Voir le journal pour plus de détails.",
+        "CLOSE_NO_SESSION": "Impossible de créer une session",
+        "CLOSE_NO_CNSI": "Instance [[@:cloud-foundry]] inconnue",
+        "CLOSE_NO_CNSI_USERTOKEN": "Token  [[@:cloud-foundry]] invalide"
+      },
+      "failed-connection": "Impossible d'ouvrir la connexion de socket",
+      "failed-unknown": "Echec inconnu"
+    }
+  }
+}
