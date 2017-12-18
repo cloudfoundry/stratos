@@ -35,6 +35,7 @@ jobs:
     script:
     - npm run test-backend
   - stage: e2e tests
+    if: not fork
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     - npm install -g bower
