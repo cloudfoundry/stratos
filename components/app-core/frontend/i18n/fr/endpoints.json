@@ -1,0 +1,37 @@
+{
+  "endpoints": {
+    "unknown": "Inconnu",
+    "unregister": {
+      "unregister": "Annuler la souscription",
+      "title": "Annuler la souscription à l'Endpoint",
+      "confirm": "Etes vous sûr de vouloir nnuler la souscription à l'Endpoint '{{name}}'?",
+      "error": "Opération Echouée: Annuler la souscription à l'Endpoint",
+      "success": "Opération Réussie: Annuler la souscription à l'Endpoint '{{name}}'"
+    },
+    "connect": {
+      "connect-action": "souscrire",
+      "title": "Fournir des informations d'identification",
+      "description": "Entrez votre nom d'utilisateur et votre mot de passe pour vous souscrire à l'Endpoint ci-dessous.",
+      "service-label": "Service",
+      "url-label": "URL",
+      "username-label": "Nom d'utilisateur",
+      "password-label": "Mot de passe",
+      "connect-button": "souscrire",
+      "success-notification": "Opération Réussie: souscription à '{{name}}'",
+      "error-no-connect": "Le serveur d'authentification n'a pas pu répondre. Veuillez réessayer. Si cette erreur persiste, veuillez contacter l'administrateur.",
+      "error-server-failure": "Une erreur de serveur s'est produite lors de la tentative d'enregistrement de votre service. Veuillez réessayer. Si cette erreur persiste, veuillez contacter l'administrateur.",
+      "error-user-input": "Le nom d'utilisateur ou le mot de passe que vous avez utilisé est incorrecte. Veuillez réessayer."
+    },
+    "disconnect": {
+      "disconnect": "Déconnecter",
+      "success": "Endpoint '{{name}}' déconnecté avec succès",
+      "error": "Déconnexion échouée du Endpoint '{{name}}'"
+    },
+    "errors": {
+      "unavailable": "La console n'a pas pu contacter l'endpoint '{{name}}'. Essayez de vous reconnecter à cet Endpoint pour résoudre ce problème.",
+      "multiple": "La console n'a pas pu contacter plusieurs endpoints",
+      "contact": "La console n'a pas pu contacter cet endpoint. Essayez de vous reconnecter à cet endpoint pour résoudre ce problème.",
+      "expired": "Le jeton a expiré. Essayez de vous reconnecter à cet endpoint pour résoudre ce problème."
+    }
+  }
+}
