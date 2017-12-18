@@ -44,7 +44,7 @@ export CERTS_PATH=./dev-certs
 ./deploy/tools/generate_cert.sh
 
 # Move the node_modules folder - the docker build will remove it anyway
-mv ./node_modules /tmp/node_modules
+rsync -a ./node_modules /tmp/node_modules
 
 echo "Building images locally"
 ./deploy/docker-compose/build.sh -n -l
@@ -59,7 +59,7 @@ popd
 # The build cleared node_modules, so move back the one we kept
 #npm install
 rm -rf ./node_modules
-mv /tmp/node_modules ./node_modules
+rsync -a /tmp/node_modules ./node_modules
 
 set +e
 echo "Running e2e tests"
