@@ -36,22 +36,22 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
       paginationKey
     );
 
-    _store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-      {
-        pageIndex: 0,
-        pageSize: 5,
-        pageSizeOptions: [5, 10, 15],
-        totalResults: 0,
-      },
-      {
-        direction: action.initialParams['order-direction'] as SortDirection,
-        field: action.initialParams['order-direction-field'],
-      },
-      {
-        filter: ''
-      }));
+    // _store.dispatch(new SetListStateAction(
+    //   paginationKey,
+    //   'table',
+    //   {
+    //     pageIndex: 0,
+    //     pageSize: 5,
+    //     pageSizeOptions: [5, 10, 15],
+    //     totalResults: 0,
+    //   },
+    //   {
+    //     direction: action.initialParams['order-direction'] as SortDirection,
+    //     field: action.initialParams['order-direction-field'],
+    //   },
+    //   {
+    //     filter: ''
+    //   }));
 
 
     const cfFilter$ = this.filter$.withLatestFrom(this.cfPagination$)

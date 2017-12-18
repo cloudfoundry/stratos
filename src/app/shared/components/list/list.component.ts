@@ -1,18 +1,35 @@
-import { IListDataSource } from '../../data-sources/list-data-source-types';
-import { ITableColumn, ITableText } from '../table/table.types';
-import { LocalListDataSource } from '../../data-sources/list-data-source-local';
-import { CfListDataSource } from '../../data-sources/list-data-source-cf';
-import { Component, Input, OnInit, Type, OnDestroy, ViewChild, EventEmitter, ChangeDetectorRef, AfterViewInit } from '@angular/core';
-
-import { NgForm, NgModel } from '@angular/forms';
 import {
-  ListView, SetListViewAction, ListFilter, SetListFilterAction, ListPagination, SetListPaginationAction, SetListSortAction, ListSort
-} from '../../../store/actions/list.actions';
-import { Store, Action } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Type,
+  ViewChild,
+} from '@angular/core';
+import { NgForm, NgModel } from '@angular/forms';
+import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/material';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
-import { MatPaginator, PageEvent, MatSelect, MatSelectChange, SortDirection } from '@angular/material';
+
+import {
+  ListFilter,
+  ListPagination,
+  ListSort,
+  ListView,
+  SetListFilterAction,
+  SetListPaginationAction,
+  SetListSortAction,
+  SetListViewAction,
+} from '../../../store/actions/list.actions';
+import { AppState } from '../../../store/app-state';
+import { CfListDataSource } from '../../data-sources/list-data-source-cf';
+import { LocalListDataSource } from '../../data-sources/list-data-source-local';
+import { IListDataSource } from '../../data-sources/list-data-source-types';
+import { ITableColumn, ITableText } from '../table/table.types';
 
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];

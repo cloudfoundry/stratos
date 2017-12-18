@@ -1,20 +1,12 @@
-import {
-  ListFilter,
-  ListPagination,
-  ListSort,
-  SetListFilterAction,
-  SetListPaginationAction,
-  SetListSortAction,
-  SetListStateAction,
-} from '../../../store/actions/list.actions';
-import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { DataSource } from '@angular/cdk/table';
-import { MatPaginator, MatSort, Sort, MatTable, PageEvent } from '@angular/material';
-import { NgModel, NgForm } from '@angular/forms';
-import { Observable } from 'rxjs/Observable';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { MatSort, Sort } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
+
+import { ListSort, SetListSortAction } from '../../../store/actions/list.actions';
+import { AppState } from '../../../store/app-state';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from './table.types';
 

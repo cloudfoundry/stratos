@@ -31,6 +31,8 @@ export abstract class CfListDataSource<T> extends ListDataSource<T> implements I
   public isLoadingPage$: Observable<boolean> = Observable.of(false);
   public filteredRows: Array<T>;
 
+  private orderDirectionParam = 'order-direction';
+
   constructor(
     protected _cfStore: Store<AppState>,
     protected action: PaginatedAction,
@@ -54,6 +56,7 @@ export abstract class CfListDataSource<T> extends ListDataSource<T> implements I
     this.listPaginationWithCfPagination$ = this.pagination$.withLatestFrom(pagination$)
       .do(([listPagination, pag]: [ListPagination, PaginationEntityState]) => {
         if (pag.params[resultPerPageParam] !== listPagination.pageSize) {
+          console.log('adding params');
           this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
             [resultPerPageParam]: listPagination.pageSize
           }));
@@ -67,6 +70,7 @@ export abstract class CfListDataSource<T> extends ListDataSource<T> implements I
     this.cfPaginationWithListPagination$ = pagination$.withLatestFrom(this.pagination$)
       .do(([pag, listPagination]: [PaginationEntityState, ListPagination]) => {
         if (pag.totalResults !== listPagination.totalResults) {
+          console.log(pag);
           this._cfStore.dispatch(new SetListPaginationAction(this._cfListStateKey, {
             totalResults: pag.totalResults,
           }));
@@ -74,11 +78,17 @@ export abstract class CfListDataSource<T> extends ListDataSource<T> implements I
       });
 
     // Track changes from listSort to cfPagination
-    this.sortSub$ = this.sort$.do((sortObj: ListSort) => {
-      this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-        'order-direction': sortObj.direction
-      }));
-    });
+    this.sortSub$ = this.sort$
+      .withLatestFrom(pagination$)
+      .do(([sortObj, pagination]) => {
+        const orderParam = pagination.params[this.orderDirectionParam];
+        if (!orderParam || orderParam !== sortObj.direction) {
+          console.log('adding params sprt');
+          this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+            [this.orderDirectionParam]: sortObj.direction
+          }));
+        }
+      });
 
     this.cfUberSub = Observable.combineLatest(
       this.listPaginationWithCfPagination$,
