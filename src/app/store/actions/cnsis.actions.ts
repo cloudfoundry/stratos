@@ -4,6 +4,7 @@ import { Schema, schema } from 'normalizr';
 import { Action, createSelector } from '@ngrx/store';
 
 import { AppState } from '../app-state';
+import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_CNSIS = '[CNSIS] Get all';
 export const GET_CNSIS_LOGIN = '[CNSIS] Get all at login';
@@ -24,8 +25,10 @@ export const EndpointSchema = new schema.Entity('endpoint', {}, {
   idAttribute: 'guid'
 });
 
-export class GetAllCNSIS implements Action {
+export class GetAllCNSIS implements PaginatedAction {
   constructor(public login = false) { }
+  entityKey = EndpointSchema.key;
+  paginationKey = 'endpoint-list';
   type = GET_CNSIS;
 }
 

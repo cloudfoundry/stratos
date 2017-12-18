@@ -1,18 +1,16 @@
-import { ConnectCnis } from '../../store/actions/cnsis.actions';
-import { Store, Action } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { CNSISModel, CNSISState, cnsisStoreNames } from '../../store/types/cnsis.types';
-import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
+import { Store } from '@ngrx/store';
 import { filter } from 'rxjs/operator/filter';
 import { Observable } from 'rxjs/Rx';
-import { LocalListDataSource } from './list-data-source-local';
-import { RouterNav } from '../../store/actions/router.actions';
-import { ListActionConfig, ListActions } from './list-data-source-types';
-import { selectEntities } from '../../store/selectors/api.selectors';
+
+import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
+import { AppState } from '../../store/app-state';
 import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
+import { CNSISModel } from '../../store/types/cnsis.types';
+import { CfListDataSource } from './list-data-source-cf';
+import { EndpointSchema, GetAllCNSIS } from '../../store/actions/cnsis.actions';
 
 
-export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
+export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
   private static _storeKey = 'endpoints';
 
   // Only needed for update purposes
@@ -27,13 +25,14 @@ export class EndpointsDataSource extends LocalListDataSource<CNSISModel> {
   ) {
     super(
       _eStore,
+      new GetAllCNSIS(),
+      EndpointSchema,
       (object: CNSISModel) => {
         return object.guid;
       },
       () => ({
         name: ''
       }),
-      { active: 'name', direction: 'asc' },
       EndpointsDataSource._storeKey
     );
 
