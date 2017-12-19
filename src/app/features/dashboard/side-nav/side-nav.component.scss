@@ -2,7 +2,7 @@
   height: 100%;
   width: 200px;
   &__top {
-    height: 64px;
+    height: 56px;
     display: flex;
     flex-direction: column;
     &-inner {
@@ -13,18 +13,20 @@
   }
   &__items {
     list-style-type: none;
-    padding: 0;
+    padding: 10px 0 0 0;
     margin: 0;
   }
   &__item {
     align-items: center;
     display: flex;
     font-size: 15px;
-    padding: 20px;
+    padding: 10PX 20px;
     cursor: pointer;
     border-top: 1px solid;
     border-bottom: 1px solid;
     border-color: transparent;
+    outline: 0;
+    letter-spacing: 0.01em;
     mat-icon {
       margin-right: 15px;
     }
@@ -35,11 +37,13 @@
     background-size: contain;
     background-position: center;
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     &-text {
       text-transform: uppercase;
       text-align: center;
-      font-size: 16px;
-      padding: 10px 0;
+      padding: 0;
     }
   }
 }
