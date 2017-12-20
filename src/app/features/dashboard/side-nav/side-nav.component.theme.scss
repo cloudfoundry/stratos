@@ -13,12 +13,13 @@
     &__item {
       border-bottom: 1px solid $border-color;
       color: map-get($foreground-colors, secondary-text);
-      transition: color ease 0.3s;      
+      transition: color ease .3s;
       &:hover {
         background-color: map-get($background-colors, hover);
         color: map-get($foreground-colors, text);
       }
-      &--active, &--active:hover {
+      &--active,
+      &--active:hover {
         color: mat-color($primary);
       }
     }
