@@ -81,11 +81,11 @@ export function getPaginationKey(action: PaginatedAction) {
 
 export const getPaginationObservables = (function () {
   const mem = {};
-  return function (
+  return function <T = any>(
     { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
     uid?: string
   ): {
-      entities$: Observable<any[]>,
+      entities$: Observable<T[]>,
       pagination$: Observable<PaginationEntityState>
     } {
     const _key = action.entityKey + action.paginationKey + (uid || '');

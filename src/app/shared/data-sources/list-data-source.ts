@@ -1,3 +1,4 @@
+import { PaginationState, PaginationEntityState } from './../../store/types/pagination.types';
 import { IListDataSource } from './list-data-source-types';
 import { Type } from '@angular/core';
 import { DataSource } from '@angular/cdk/table';
@@ -16,10 +17,13 @@ export abstract class ListDataSource<T> extends DataSource<T> implements IListDa
 
   public view$: Observable<ListView>;
   public state$: Observable<ListState>;
-  public pagination$: Observable<ListPagination>;
+  public pagination$: Observable<PaginationEntityState>;
   public sort$: Observable<ListSort>;
   public filter$: Observable<ListFilter>;
   public page$: Observable<T[]>;
+
+  public entityKey: string;
+  public paginationKey: string;
 
 
   public abstract isLoadingPage$: Observable<boolean>;
@@ -46,7 +50,7 @@ export abstract class ListDataSource<T> extends DataSource<T> implements IListDa
     this.state$ = getListStateObservable(this._store, listStateKey);
     const { view, pagination, sort, filter } = getListStateObservables(this._store, listStateKey);
     this.view$ = view;
-    this.pagination$ = pagination.filter(x => !!x);
+    // this.clientPagination$ = pagination.filter(x => !!x);
     this.sort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
       return x.direction === y.direction && x.field === y.field;
     });

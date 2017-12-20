@@ -1,3 +1,5 @@
+import { IPaginationController, PaginationControllerConfig } from './../../list-controllers/base.pagination-controller';
+import { ServerPagination } from './../../list-controllers/server.pagination-controller';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -8,6 +10,7 @@ import {
   OnInit,
   Type,
   ViewChild,
+  Injector,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/material';
@@ -30,6 +33,8 @@ import { CfListDataSource } from '../../data-sources/list-data-source-cf';
 import { LocalListDataSource } from '../../data-sources/list-data-source-local';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from '../table/table.types';
+import { ClientPagination } from '../../list-controllers/client.pagination-controller';
+import { StaticInjector } from '@angular/core/src/di/injector';
 
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
@@ -98,6 +103,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
 
+  paginationController: IPaginationController;
+
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
@@ -118,49 +125,76 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.columns = this.listConfigService.getColumns();
     this.dataSource = this.listConfigService.getDataSource();
 
-    const paginationStoreToWidget = this.dataSource.pagination$.do((pagination: ListPagination) => {
+    const listPagination$ = this.dataSource.pagination$.map(pag => ({
+      totalResults: pag.totalResults,
+      pageSize: pag.params['results-per-page'] || 5,
+      pageIndex: pag.currentPage,
+    })
+    );
+
+    const controllerConfig = new PaginationControllerConfig(
+      this.dataSource.listStateKey,
+      listPagination$,
+      this.dataSource.paginationKey,
+      this.dataSource.entityKey
+    );
+
+    this.paginationController = this.dataSource.isLocal ?
+      new ClientPagination(this._store, controllerConfig) :
+      new ServerPagination(this._store, controllerConfig);
+
+    // const paginationStoreToWidget = this.dataSource.clientPagination$.do((pagination: ListPagination) => {
+    //   this.paginator.length = pagination.totalResults;
+    //   this.paginator.pageIndex = pagination.pageIndex;
+    //   this.paginator.pageSize = pagination.pageSize;
+    //   this.paginator.pageSizeOptions = pagination.pageSizeOptions;
+    // });
+    this.paginator.pageSizeOptions = [5, 10, 20];
+    const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
-      this.paginator.pageIndex = pagination.pageIndex;
+      this.paginator.pageIndex = pagination.pageIndex - 1;
       this.paginator.pageSize = pagination.pageSize;
-      this.paginator.pageSizeOptions = pagination.pageSizeOptions;
     });
 
-    const paginationWidgetToStore = this.paginator.page.do((page: PageEvent) => {
-      this._store.dispatch(new SetListPaginationAction(
-        this.dataSource.listStateKey,
-        {
-          pageSize: page.pageSize,
-          pageIndex: page.pageIndex,
-        }
-      ));
-    });
+    const paginationWidgetToStore = this.paginator.page.do(page => this.paginationController.page(page));
 
-    const filterStoreToWidget = this.dataSource.filter$.do((filter: ListFilter) => {
-      this.filter.model = filter.filter;
-    });
+
+
+    // const filterWidgeToStore = this.filter.valueChanges
+    //   .debounceTime(500)
+    //   .distinctUntilChanged()
+    //   .map(value => value as string)
+    //   .do((stFilter) => {
+    //     this._store.dispatch(new SetListFilterAction(
+    //       this.dataSource.listStateKey,
+    //       {
+    //         filter: stFilter
+    //       }
+    //     ));
+    //   });
 
     const filterWidgeToStore = this.filter.valueChanges
       .debounceTime(500)
       .distinctUntilChanged()
       .map(value => value as string)
-      .do((stFilter) => {
-        this._store.dispatch(new SetListFilterAction(
-          this.dataSource.listStateKey,
-          {
-            filter: stFilter
-          }
-        ));
-      });
+      .do(this.paginationController.filter);
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
-    const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
-      this.headerSortField.value = sort.field;
-      this.headerSortDirection = sort.direction;
+
+    // const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
+    //   this.headerSortField.value = sort.field;
+    //   this.headerSortDirection = sort.direction;
+    // });
+    const sortStoreToWidget = this.dataSource.sort$.do(sort => this.paginationController.sort(sort));
+
+    const filterStoreToWidget = this.dataSource.filter$.do((filter: ListFilter) => {
+      this.filter.model = filter.filter;
     });
 
     this.uberSub = Observable.combineLatest(
+      this.dataSource.page$,
       paginationStoreToWidget,
       paginationWidgetToStore,
       filterStoreToWidget,
@@ -168,7 +202,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       sortStoreToWidget,
     ).subscribe();
 
-    this.dataSource.connect();
+    // this.dataSource.connect();
   }
 
   ngAfterViewInit() {

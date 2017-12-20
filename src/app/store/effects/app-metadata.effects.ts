@@ -33,8 +33,8 @@ export class AppMetadataEffect {
   @Effect() appMetadataRequestStart$ = this.actions$.ofType<GetAppMetadataAction>(AppMetadataTypes.APP_METADATA)
     .mergeMap(appMetadataAction => {
       const actionType = 'fetch';
-      this.store.dispatch(new WrapperAppMetadataStart(appMetadataAction));
       this.store.dispatch(new StartRequestAction(appMetadataAction, actionType));
+      this.store.dispatch(new WrapperAppMetadataStart(appMetadataAction));
       const options = { ...appMetadataAction.options };
       options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${appMetadataAction.options.url}`;
       options.headers =

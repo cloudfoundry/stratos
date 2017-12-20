@@ -4,7 +4,6 @@ import { SortDirection } from '@angular/material';
 export class ListPagination {
   public totalResults?= 0;
   public pageSize?= 5;
-  public pageSizeOptions?= [5, 10, 15];
   public pageIndex?= 0;
 }
 

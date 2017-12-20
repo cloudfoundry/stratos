@@ -42,7 +42,6 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
       {
         pageIndex: 0,
         pageSize: 5,
-        pageSizeOptions: [5, 10, 15],
         totalResults: 0,
       },
       {

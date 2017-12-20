@@ -1,4 +1,5 @@
 <div class="listComponent">
+  {{ paginator.length }} {{ paginator.pageIndex }} {{ paginator.pageSize }}
   <div class="listComponent__header" [ngClass]="{'selected': (dataSource.isSelecting$ | async) }">
     <mat-card>
       <mat-card-header>

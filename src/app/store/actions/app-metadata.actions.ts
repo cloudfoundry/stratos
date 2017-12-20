@@ -1,11 +1,16 @@
 import { RequestOptions } from '@angular/http';
 import { Action, compose, Store } from '@ngrx/store';
+import { schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 
 import { AppState } from '../app-state';
-import { AppMetadataType, AppMetadataRequestState } from '../types/app-metadata.types';
+import { AppMetadataRequestState, AppMetadataType } from '../types/app-metadata.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { schema } from 'normalizr';
+import { CfAppEvnVarsDataSource } from './../../shared/data-sources/cf-app-variables-data-source';
+
+export function getPaginationKey(metadataType, cnis, guid) {
+  return `${metadataType}:${cnis}:${guid}`;
+}
 
 export const AppMetadataTypes = {
   APP_METADATA: '[App Metadata] App Metadata',
@@ -32,12 +37,11 @@ export class GetAppMetadataAction implements PaginatedAction {
   ) {
     this.options = this.getRequestOptions(guid, cnis, metadataType);
     this.entityKey = metadataType;
-    this.paginationKey = guid;
+    this.paginationKey = getPaginationKey(metadataType, cnis, guid);
   }
-
+  paginationKey: string;
   type = AppMetadataTypes.APP_METADATA;
   entityKey = EnvVarsSchema.key;
-  paginationKey: string;
 
   private getRequestOptions(guid: string, cnis: string, type: AppMetadataType) {
     let requestObject: RequestOptions;
