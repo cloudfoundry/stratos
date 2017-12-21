@@ -1,3 +1,4 @@
+import { RequestTypes } from './../../actions/request.actions';
 import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
@@ -9,6 +10,11 @@ import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { combineLatest } from 'rxjs/operator/combineLatest';
 import { CombineLatestOperator } from 'rxjs/operators/combineLatest';
+
+export interface PaginationObservables<T> {
+  pagination$: Observable<PaginationEntityState>;
+  entities$: Observable<T[]>;
+}
 
 export function qParamsToString(params: QParam[]) {
   return params.map(joinQParam);
@@ -81,13 +87,11 @@ export function getPaginationKey(action: PaginatedAction) {
 
 export const getPaginationObservables = (function () {
   const mem = {};
+
   return function <T = any>(
     { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
     uid?: string
-  ): {
-      entities$: Observable<T[]>,
-      pagination$: Observable<PaginationEntityState>
-    } {
+  ): PaginationObservables<T> {
     const _key = action.entityKey + action.paginationKey + (uid || '');
     if (mem[_key]) {
       return mem[_key];
@@ -98,7 +102,7 @@ export const getPaginationObservables = (function () {
       store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams));
     }
 
-    const obs = getObservables(
+    const obs = getObservables<T>(
       store,
       entityKey,
       paginationKey,
@@ -111,26 +115,35 @@ export const getPaginationObservables = (function () {
   };
 })();
 
-function getObservables(store: Store<AppState>, entityKey: string, paginationKey: string, action: Action, schema: Schema) {
+function getObservables<T = any>(store: Store<AppState>, entityKey: string, paginationKey: string, action: Action, schema: Schema)
+  : PaginationObservables<T> {
+  let hasDispatchedOnce = false;
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
 
   const pagination$: Observable<PaginationEntityState> = paginationSelect$
     .filter(pagination => !!pagination);
 
-  const entities$: Observable<any[]> =
-    Observable.combineLatest(
-      paginationSelect$,
-      store.select(getAPIRequestDataState)
-    )
-      .do(([pagination, entities]) => {
+  const entities$: Observable<T[]> =
+    paginationSelect$
+      .do(pagination => {
+        if (
+          action.type !== RequestTypes.START &&
+          hasDispatchedOnce &&
+          (!pagination || !pagination.fetching)
+        ) {
+          // If we're not dispatching a Request start action then we
+          // assume something will at some point further down the chain so we just wait.
+          return;
+        }
         if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
           store.dispatch(action);
+          hasDispatchedOnce = true;
         }
       })
-      .filter(([pagination, entities]) => {
+      .filter(pagination => {
         return isPageReady(pagination);
       })
-
+      .withLatestFrom(store.select(getAPIRequestDataState))
       .map(([paginationEntity, entities]) => {
         const page = paginationEntity.ids[paginationEntity.currentPage];
         return page ? denormalize(page, schema, entities) : null;

@@ -1,6 +1,7 @@
+import { GetAppSummaryAction } from './../../../store/actions/app-metadata.actions';
 import { ApplicationEnvVarsService } from './build-tab/application-env-vars.service';
 import { AppMetadataType } from '../../../store/types/app-metadata.types';
-import { AppMetadataProperties, GetAppMetadataAction } from '../../../store/actions/app-metadata.actions';
+import { AppMetadataProperties } from '../../../store/actions/app-metadata.actions';
 import { EntityService } from '../../../core/entity-service';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -168,7 +169,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
     // Auto refresh
     this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
-      this.store.dispatch(new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType));
+      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
     }).subscribe());
 
     const initialFetch$ = Observable.combineLatest(

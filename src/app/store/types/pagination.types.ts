@@ -1,4 +1,4 @@
-import { IRequestAction } from './request.types';
+import { IRequestAction, RequestAction } from './request.types';
 import { Action } from '@ngrx/store';
 
 export class QParam {

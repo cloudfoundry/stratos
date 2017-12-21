@@ -1,3 +1,4 @@
+import { IRequestAction } from './../types/request.types';
 import { RequestOptions } from '@angular/http';
 import { Action, compose, Store } from '@ngrx/store';
 import { schema } from 'normalizr';
@@ -7,6 +8,7 @@ import { AppState } from '../app-state';
 import { AppMetadataRequestState, AppMetadataType } from '../types/app-metadata.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CfAppEvnVarsDataSource } from './../../shared/data-sources/cf-app-variables-data-source';
+import { selectEntity, selectRequestInfo } from '../selectors/api.selectors';
 
 export function getPaginationKey(metadataType, cnis, guid) {
   return `${metadataType}:${cnis}:${guid}`;
@@ -27,54 +29,78 @@ export const AppMetadataProperties = {
 
 export const EnvVarsSchema = new schema.Entity(AppMetadataProperties.ENV_VARS);
 
-export class GetAppMetadataAction implements PaginatedAction {
+export interface IGetAppMetadataAction extends IRequestAction {
+  options: RequestOptions;
+  guid: string;
+  cnis: string;
+}
+
+export abstract class AppMetadataAction implements Action {
+  type = AppMetadataTypes.APP_METADATA;
+}
+
+export class GetAppInstancesAction extends AppMetadataAction implements PaginatedAction, IGetAppMetadataAction {
+  options: RequestOptions;
+
+  constructor(
+    public guid: string,
+    public cnis: string
+  ) {
+    super();
+    this.options = new RequestOptions({
+      url: `apps/${guid}/stats`,
+      method: 'get'
+    });
+    this.entityKey = AppMetadataProperties.INSTANCES;
+    this.paginationKey = getPaginationKey(this.entityKey, cnis, guid);
+  }
+  paginationKey: string;
+  type = AppMetadataTypes.APP_METADATA;
+  entityKey: string;
+}
+
+export class GetAppEnvVarsAction extends AppMetadataAction implements PaginatedAction, IGetAppMetadataAction {
   options: RequestOptions;
 
   constructor(
     public guid: string,
     public cnis: string,
-    public metadataType: AppMetadataType
   ) {
-    this.options = this.getRequestOptions(guid, cnis, metadataType);
-    this.entityKey = metadataType;
-    this.paginationKey = getPaginationKey(metadataType, cnis, guid);
+    super();
+    this.options = new RequestOptions({
+      url: `apps/${guid}/env`,
+      method: 'get'
+    });
+    this.entityKey = AppMetadataProperties.ENV_VARS;
+    this.paginationKey = getPaginationKey(this.entityKey, cnis, guid);
   }
   paginationKey: string;
   type = AppMetadataTypes.APP_METADATA;
-  entityKey = EnvVarsSchema.key;
+  entityKey: string;
+}
 
-  private getRequestOptions(guid: string, cnis: string, type: AppMetadataType) {
-    let requestObject: RequestOptions;
-    switch (type) {
-      case AppMetadataProperties.INSTANCES:
-        requestObject = new RequestOptions({
-          url: `apps/${guid}/stats`,
-          method: 'get'
-        });
-        break;
-      case AppMetadataProperties.ENV_VARS:
-        requestObject = new RequestOptions({
-          url: `apps/${guid}/env`,
-          method: 'get'
-        });
-        break;
-      case AppMetadataProperties.SUMMARY:
-        requestObject = new RequestOptions({
-          url: `apps/${guid}/summary`,
-          method: 'get'
-        });
-        break;
-      default:
-        throw new Error(`Unexpected AppMetadataProperties type of ${type}`);
-    }
-    return requestObject;
+export class GetAppSummaryAction extends AppMetadataAction implements IGetAppMetadataAction {
+  options: RequestOptions;
+
+  constructor(
+    public guid: string,
+    public cnis: string,
+  ) {
+    super();
+    this.options = new RequestOptions({
+      url: `apps/${guid}/summary`,
+      method: 'get'
+    });
+    this.entityKey = AppMetadataProperties.SUMMARY;
   }
-
+  paginationKey: string;
+  type = AppMetadataTypes.APP_METADATA;
+  entityKey: string;
 }
 
 export class WrapperAppMetadataStart implements Action {
   constructor(
-    public appMetadataAction: GetAppMetadataAction
+    public appMetadataAction: IGetAppMetadataAction
   ) { }
   type = AppMetadataTypes.APP_METADATA_START;
 }
@@ -82,7 +108,7 @@ export class WrapperAppMetadataStart implements Action {
 export class WrapperAppMetadataSuccess implements Action {
   constructor(
     public metadata: any,
-    public appMetadataAction: GetAppMetadataAction,
+    public appMetadataAction: IGetAppMetadataAction,
   ) { }
   type = AppMetadataTypes.APP_METADATA_SUCCESS;
 }
@@ -93,7 +119,7 @@ export class WrapperAppMetadataFailed implements Action {
 
   constructor(
     public response: any,
-    public appMetadataAction: GetAppMetadataAction
+    public appMetadataAction: IGetAppMetadataAction
   ) {
     this.appMetedataError = response._body ? JSON.parse(response._body) : response;
     this.message = this.appMetedataError.description || this.appMetedataError.message;
@@ -108,64 +134,61 @@ interface AppMetedataError {
   code?: number;
 }
 
-function getAppMetadata(state) {
-  return state.appMetadata.values || {};
-}
+// function getAppMetadata(state) {
+//   return state.appMetadata.values || {};
+// }
 
-function getAppRequestMetadata(state) {
-  return state.appMetadata.requests || {};
-}
+// function getAppRequestMetadata(state) {
+//   return state.appMetadata.requests || {};
+// }
 
-function getMetadataType<T>(metadataType) {
-  return (appMetadata): T => {
-    return appMetadata[metadataType];
-  };
-}
+// function getMetadataType<T>(metadataType) {
+//   return (appMetadata): T => {
+//     return appMetadata[metadataType];
+//   };
+// }
 
-function getMetadataById(appId: string) {
-  return (entities) => {
-    return entities[appId] || {};
-  };
-}
+// function getMetadataById(appId: string) {
+//   return (entities) => {
+//     return entities[appId] || {};
+//   };
+// }
 
-export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<any>(metadataType),
-    getMetadataById(appId),
-    getAppMetadata
-  );
-};
+// export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
+//   return compose(
+//     getMetadataType<any>(metadataType),
+//     getMetadataById(appId),
+//     getAppMetadata
+//   );
+// };
 
-export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<AppMetadataRequestState>(metadataType),
-    getMetadataById(appId),
-    getAppRequestMetadata
-  );
-};
+// export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
+//   return compose(
+//     getMetadataType<AppMetadataRequestState>(metadataType),
+//     getMetadataById(appId),
+//     getAppRequestMetadata
+//   );
+// };
 
 export const getAppMetadataObservable = (
   store: Store<AppState>,
   appId: string,
-  action: GetAppMetadataAction
+  action: IGetAppMetadataAction
 ): Observable<any> => {
-  let dispatched = false;
   return Observable.combineLatest(
-    store.select(selectMetadata(action.metadataType, appId)),
-    store.select(selectMetadataRequest(action.metadataType, appId))
+    store.select(selectEntity(action.entityKey, appId)),
+    store.select(selectRequestInfo(action.entityKey, appId))
   )
-    .mergeMap(([metadata, metadataRequestState]: [any, AppMetadataRequestState]) => {
+    .do(([metadata, metadataRequestState]) => {
       if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) { // && !dispatched
         store.dispatch(action);
-        dispatched = true;
       }
-      return Observable.of({
-        metadata,
-        metadataRequestState
-      });
     })
-    .filter(({ metadata, metadataRequestState }) => {
-      return metadata || metadataRequestState;
-    });
+    .filter(([metadata, metadataRequestState]) => {
+      return !!(metadata || metadataRequestState);
+    })
+    .map(([metadata, metadataRequestState]) => ({
+      metadata, metadataRequestState
+    }));
 };
 

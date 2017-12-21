@@ -1,4 +1,4 @@
-import { getPaginationKey } from './../../store/actions/app-metadata.actions';
+import { getPaginationKey, GetAppEnvVarsAction } from './../../store/actions/app-metadata.actions';
 import { CfListDataSource } from './list-data-source-cf';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
@@ -14,7 +14,7 @@ import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
 import { ListActionConfig, ListActions } from './list-data-source-types';
-import { AppMetadataProperties, GetAppMetadataAction, EnvVarsSchema } from '../../store/actions/app-metadata.actions';
+import { AppMetadataProperties, EnvVarsSchema } from '../../store/actions/app-metadata.actions';
 import { AppMetadataType } from '../../store/types/app-metadata.types';
 import { map } from 'rxjs/operators';
 import { ApplicationEnvVars } from '../../features/applications/application/build-tab/application-env-vars.service';
@@ -42,10 +42,9 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
   ) {
     super(
       _cfStore,
-      new GetAppMetadataAction(
+      new GetAppEnvVarsAction(
         _appService.appGuid,
         _appService.cfGuid,
-        AppMetadataProperties.ENV_VARS as AppMetadataType,
       ),
       EnvVarsSchema,
       (object: AppEnvVar) => {

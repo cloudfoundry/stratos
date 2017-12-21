@@ -1,3 +1,4 @@
+import { GetAppEnvVarsAction } from './../actions/app-metadata.actions';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
@@ -15,7 +16,7 @@ import {
 import { AppState } from './../app-state';
 import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
 import { ApiActionTypes } from '../actions/request.actions';
-import { GetAppMetadataAction, AppMetadataProperties } from '../actions/app-metadata.actions';
+import { AppMetadataProperties } from '../actions/app-metadata.actions';
 import { AppMetadataType } from '../types/app-metadata.types';
 
 
@@ -34,7 +35,7 @@ export class UpdateAppEffects {
 
       const actions = [
         // This is done so the app metadata env vars environment_json matches that of the app
-        new GetAppMetadataAction(action.apiAction.guid, action.apiAction.cnis, AppMetadataProperties.ENV_VARS as AppMetadataType)];
+        new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.cnis)];
 
       return actions;
     });

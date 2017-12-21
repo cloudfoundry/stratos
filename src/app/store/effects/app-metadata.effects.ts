@@ -1,3 +1,4 @@
+import { IGetAppMetadataAction } from './../actions/app-metadata.actions';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import 'rxjs/add/operator/map';
@@ -11,7 +12,7 @@ import { Observable } from 'rxjs/Observable';
 
 import {
   AppMetadataTypes,
-  GetAppMetadataAction,
+  AppMetadataAction,
   WrapperAppMetadataFailed,
   WrapperAppMetadataStart,
   WrapperAppMetadataSuccess,
@@ -30,7 +31,7 @@ export class AppMetadataEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() appMetadataRequestStart$ = this.actions$.ofType<GetAppMetadataAction>(AppMetadataTypes.APP_METADATA)
+  @Effect() appMetadataRequestStart$ = this.actions$.ofType<IGetAppMetadataAction>(AppMetadataTypes.APP_METADATA)
     .mergeMap(appMetadataAction => {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(appMetadataAction, actionType));
@@ -45,19 +46,18 @@ export class AppMetadataEffect {
           const data = response.json();
           const mappedData = {
             entities: {
-              [appMetadataAction.metadataType]: {
+              [appMetadataAction.entityKey]: {
                 [appMetadataAction.guid]: data
               }
             },
             result: [appMetadataAction.guid]
           } as NormalizedResponse;
-
           return [
-            new WrapperRequestActionSuccess(mappedData, appMetadataAction, actionType),
             new WrapperAppMetadataSuccess(
               data,
               appMetadataAction
-            )
+            ),
+            new WrapperRequestActionSuccess(mappedData, appMetadataAction, actionType),
           ];
         })
         .catch(response => {
