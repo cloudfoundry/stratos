@@ -39,7 +39,6 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
         pageIndex: 0,
         pageSize: 50,
         pageSizeOptions: [5, 10, 15, 30, 50, 100],
-        totalResults: 0,
       },
       {
         direction: action.initialParams['order-direction'] as SortDirection,

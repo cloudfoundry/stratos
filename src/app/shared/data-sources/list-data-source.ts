@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { AppState } from '../../store/app-state';
 import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
-import { ListFilter, ListPagination, ListSort, SetListStateAction, ListView } from '../../store/actions/list.actions';
+import { ListFilter, ListPagination, ListSort, ListView } from '../../store/actions/list.actions';
 export type getRowUniqueId = (T) => string;
 
 export abstract class ListDataSource<T> extends DataSource<T> implements IListDataSource<T> {
