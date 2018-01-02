@@ -67,11 +67,13 @@
                 *ngIf="headerSortDirection==='desc'">
                 <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
               </button>
-              <mat-select matInput #headerSortField shouldPlaceholderFloat="false" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="updateListSort($event.value, headerSortDirection)">
-                <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
-                  {{column.headerCell()}}
-                </mat-option>
-              </mat-select>
+              <mat-form-field>
+                <mat-select matInput #headerSortField shouldPlaceholderFloat="false" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="updateListSort($event.value, headerSortDirection)">
+                  <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
+                    {{column.headerCell()}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </div>
             <div class="filter" [hidden]="!enableFilter || ((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
               <mat-form-field floatPlaceholder="never">

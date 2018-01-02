@@ -31,17 +31,21 @@ export function listReducer(state = defaultListsState, action): ListsState {
   switch (action.type) {
     case ListStateActionTypes.SET:
       const setListState = action as SetListStateAction;
+      const originalListState = state[action.key] || {} as ListState;
       return {
         ...state,
         [action.key]: {
-          view: setListState.view ? setListState.view.toString() : '',
+          view: setListState.view ? setListState.view.toString() : originalListState.view,
           pagination: {
+            ...originalListState.pagination,
             ...setListState.pagination,
           },
           sort: {
+            ...originalListState.sort,
             ...setListState.sort,
           },
           filter: {
+            ...originalListState.filter,
             ...setListState.filter,
           }
         }

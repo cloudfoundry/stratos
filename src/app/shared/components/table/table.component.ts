@@ -5,7 +5,6 @@ import {
   SetListFilterAction,
   SetListPaginationAction,
   SetListSortAction,
-  SetListStateAction,
 } from '../../../store/actions/list.actions';
 import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { DataSource } from '@angular/cdk/table';

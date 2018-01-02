@@ -44,20 +44,6 @@
       .mat-paginator {
         padding: 0;
       }
-      .filter {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-      .sort {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        mat-select {
-          padding-top: 0;
-        }
-        margin-bottom: 4px;
-      }
     }
     &__bottom {
       justify-content: flex-end;
