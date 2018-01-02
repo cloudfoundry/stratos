@@ -1,8 +1,8 @@
 <div class="page-header">
   <mat-toolbar color="primary">
     <div class="page-header__nav-toggle-wrapper">
-      <button mat-icon-button *ngIf="!hideSideNavButton">
-        <mat-icon class="page-header__nav-toggle" (click)="toggleSidenav()">menu</mat-icon>
+      <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
+        <mat-icon class="page-header__nav-toggle">menu</mat-icon>
       </button>
     </div>
     <ng-content></ng-content>
