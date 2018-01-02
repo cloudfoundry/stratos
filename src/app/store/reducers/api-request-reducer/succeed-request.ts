@@ -3,6 +3,7 @@ import {
   createRequestStateFromResponse,
   getEntityRequestState,
   getRequestTypeFromMethod,
+  mergeInnerObject,
   mergeUpdatingState,
   setEntityRequestState,
 } from './request-helpers';
@@ -26,8 +27,14 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
         }
       );
     } else if (action.requestType === 'delete') {
-      requestSuccessState.deleting.busy = false;
-      requestSuccessState.deleting.deleted = true;
+      requestSuccessState.deleting = mergeInnerObject(
+        'deleting',
+        requestSuccessState.deleting,
+        {
+          busy: false,
+          deleted: true
+        }
+      );
     } else {
       requestSuccessState.fetching = false;
       requestSuccessState.error = false;
