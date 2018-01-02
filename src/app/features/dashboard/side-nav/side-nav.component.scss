@@ -1,3 +1,7 @@
+$side-nav-padding-h: 20px;
+$side-nav-mat-icon-width: 24px;
+$side-nav-mat-icon-padding-right: 15px;
+$side-nav-header-spacing: $side-nav-padding-h/2+$side-nav-mat-icon-width+$side-nav-mat-icon-padding-right;
 .side-nav {
   height: 100%;
   width: 200px;
@@ -25,19 +29,15 @@
     font-size: 15px;
     letter-spacing: .01em;
     outline: 0;
-    padding: 15px 20px;
+    padding: 15px $side-nav-padding-h;
     mat-icon {
-      margin-right: 15px;
+      margin-right: $side-nav-mat-icon-padding-right;
     }
   }
   &__logo {
     align-items: center;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
     display: flex;
-    flex: 1;
-    justify-content: center;
+    padding-left: $side-nav-header-spacing;
     &-text {
       padding: 0;
       text-align: center;
