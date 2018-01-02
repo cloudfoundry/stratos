@@ -13,7 +13,7 @@ import {
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
 import { Observable } from 'rxjs/Observable';
-import { mergeState } from '../helpers/reducer.helper';
+import { mergeState, pick } from '../helpers/reducer.helper';
 
 
 export class ListsState { [key: string]: ListState }
@@ -30,25 +30,21 @@ const defaultListsState = {} as ListsState;
 export function listReducer(state = defaultListsState, action): ListsState {
   switch (action.type) {
     case ListStateActionTypes.SET:
-      const setListState = action as SetListStateAction;
-      const originalListState = state[action.key] || {} as ListState;
+      const setListState = action as SetListViewAction;
+
+      // Create an object from the action containing only the required parameters of ListState
+      let newListState = action as ListsState;
+      const currentListState = state[action.key] || {};
+      newListState = pick(newListState, Object.keys(currentListState) as [string]);
+
+      // Merge the new list state properties of the action into the new list state
+      const newState = mergeState(state[action.key], setListState);
+      newState.view = setListState.view ? setListState.view.toString() : newState.view;
+
+      // Create the whole new state
       return {
         ...state,
-        [action.key]: {
-          view: setListState.view ? setListState.view.toString() : originalListState.view,
-          pagination: {
-            ...originalListState.pagination,
-            ...setListState.pagination,
-          },
-          sort: {
-            ...originalListState.sort,
-            ...setListState.sort,
-          },
-          filter: {
-            ...originalListState.filter,
-            ...setListState.filter,
-          }
-        }
+        [action.key]: newState
       };
     case ListStateActionTypes.SET_VIEW:
       const listView = (action as SetListViewAction).view;
