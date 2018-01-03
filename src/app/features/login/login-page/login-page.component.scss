@@ -9,10 +9,26 @@
     text-align: center;
   }
   &__card {
-    width: 200px;
+    padding: 0;
+    width: 300px;
     mat-form-field {
       width: 100%;
     }
+  }
+  &__title {
+    display: flex;
+    flex-direction: column;
+    height: 96px;
+    justify-content: center;
+    padding-left: 24px;
+    h1 {
+      letter-spacing: 1px;
+      margin: 0;
+      text-transform: uppercase;
+    }
+  }
+  &__form {
+    padding: 24px;
   }
   &__submit {
     width: 100%;

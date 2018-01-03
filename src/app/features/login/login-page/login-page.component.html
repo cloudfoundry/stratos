@@ -2,8 +2,10 @@
   <mat-card class="login__card">
     <mat-progress-bar class="login-loading-bar" [color]="error ? 'warn' : 'primary'" [mode]="loggingIn ? 'query' : 'solid'">
     </mat-progress-bar>
-    <h1 class="mat-h1">Login</h1>
-    <form name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+    <div class="login__title">
+      <h1 class="mat-h1">Login</h1>
+    </div>
+    <form class="login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
       <mat-form-field>
         <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
       </mat-form-field>

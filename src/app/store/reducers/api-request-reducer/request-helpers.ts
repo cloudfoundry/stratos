@@ -85,12 +85,16 @@ export function modifyRequestWithRequestType(requestState: RequestInfoState, typ
   return requestState;
 }
 
+export function mergeInnerObject(key, state, newState) {
+  return {
+    ...state,
+    ...{ [key]: newState }
+  };
+}
+
 export function mergeUpdatingState(apiAction, updatingState, newUpdatingState) {
   const updateKey = apiAction.updatingKey || rootUpdatingKey;
-  return {
-    ...updatingState,
-    ...{ [updateKey]: newUpdatingState }
-  };
+  return mergeInnerObject(updateKey, updatingState, newUpdatingState);
 }
 
 export function generateDefaultState(keys: Array<string>, initialSections?: {

@@ -1,6 +1,8 @@
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { debounceTime } from 'rxjs/operators';
 
 import { AppState } from '../../../store/app-state';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
@@ -20,7 +22,8 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
   constructor(
     public pageHeaderService: PageHeaderService,
     private store: Store<AppState>,
-    private eventWatcherService: EventWatcherService
+    private eventWatcherService: EventWatcherService,
+    private breakpointObserver: BreakpointObserver
   ) {
   }
 
@@ -50,14 +53,17 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
     ];
   }
   ngAfterContentInit() {
-    this.eventWatcherService.resizeEvent$.subscribe(({ innerWidth }) => {
-      if (innerWidth && innerWidth < 980) {
-        this.store.dispatch(new ChangeSideNavMode('over'));
-        this.store.dispatch(new CloseSideNav());
-      } else {
-        this.store.dispatch(new ChangeSideNavMode('side'));
-      }
-    });
+    this.breakpointObserver.observe([
+      Breakpoints.Handset
+    ]).pipe(
+      debounceTime(250)
+      ).subscribe(result => {
+        if (result.matches) {
+          this.store.dispatch(new ChangeSideNavMode('over'));
+        } else {
+          this.store.dispatch(new ChangeSideNavMode('side'));
+        }
+      });
 
     this.sidenav.onClose.subscribe(() => {
       this.store.dispatch(new CloseSideNav());

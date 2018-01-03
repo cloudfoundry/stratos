@@ -12,13 +12,22 @@
     }
     &__item {
       border-bottom: 1px solid $border-color;
-      &--active {
+      color: map-get($foreground-colors, secondary-text);
+      transition: color ease .3s;
+      &:hover {
+        background-color: map-get($background-colors, hover);
+        color: map-get($foreground-colors, text);
+      }
+      &--active,
+      &--active:hover {
         color: mat-color($primary);
       }
     }
-    &__items,
-    &__logo-text {
+    &__items {
       color: map-get($app-theme, app-background-text-color);
+    }
+    &__logo-text {
+      color: mat-contrast($primary, 500);
     }
   }
 }

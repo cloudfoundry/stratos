@@ -1,5 +1,4 @@
 import { ITableColumn } from '../components/table/table.types';
-import { CfListDataSource } from '../data-sources/list-data-source-cf';
 import { DatePipe } from '@angular/common';
 import { Store } from '@ngrx/store';
 import {
