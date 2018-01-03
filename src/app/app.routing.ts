@@ -24,7 +24,8 @@ const appRoutes: Routes = [
       { path: 'dashboard', component: HomePageComponent },
       { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule' },
       { path: 'endpoints', loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule' },
-      { path: 'service-catalogue', loadChildren: 'app/features/service-catalogue/service-catalogue.module#ServiceCatalogueModule' }
+      { path: 'service-catalogue', loadChildren: 'app/features/service-catalogue/service-catalogue.module#ServiceCatalogueModule' },
+      { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' }
     ]
   },
   {

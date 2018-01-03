@@ -46,6 +46,11 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
         link: '/applications'
       },
       {
+        text: 'Cloud Foundry',
+        matIcon: 'cloud',
+        link: '/cloud-foundry'
+      },
+      {
         text: 'Endpoints',
         matIcon: 'settings_input_component',
         link: '/endpoints'
