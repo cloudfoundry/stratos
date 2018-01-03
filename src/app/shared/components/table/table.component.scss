@@ -1,40 +1,44 @@
  .app-table {
-   mat-card-content {
-     mat-table {
-       &[hidden] * {
-         display: none;
-       }
-       mat-header-row[hidden] {
-         *,
-         &.mat-header-row {
+   mat-card {
+     padding: 0;
+     padding-top: 24px;
+     &-content {
+       mat-table {
+         &[hidden] * {
            display: none;
          }
-       }
-       mat-header-cell,
-       mat-cell {
-         flex: 1 1 200px;
-         padding: 10px 5px;
-       }
-       .table-column-edit {
-         flex-grow: 0;
-         min-width: inherit;
-         display: flex;
-         flex-direction: row;
-         justify-content: flex-end;
-       }
-       mat-row {
-         min-height: 57px;
-         &:hover {
-           background-color: rgba(0, 0, 0, 0.05);
-         }
-         mat-cell {
-           mat-form-field {
-             width: 90%;
+         mat-header-row[hidden] {
+           *,
+           &.mat-header-row {
+             display: none;
            }
          }
-       }
-       mat-row.fixedRowHeight {
-         height: 57px;
+         mat-header-cell,
+         mat-cell {
+           flex: 1 1 200px;
+           padding: 10px 5px;
+         }
+         .table-column-edit {
+           flex-grow: 0;
+           min-width: inherit;
+           display: flex;
+           flex-direction: row;
+           justify-content: flex-end;
+         }
+         mat-row {
+           min-height: 57px;
+           &:hover {
+             background-color: rgba(0, 0, 0, 0.05);
+           }
+           mat-cell {
+             mat-form-field {
+               width: 90%;
+             }
+           }
+         }
+         mat-row.fixedRowHeight {
+           height: 57px;
+         }
        }
      }
    }
