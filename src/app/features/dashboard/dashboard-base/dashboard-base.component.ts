@@ -36,11 +36,6 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
   ngOnInit() {
     this.sideNavTabs = [
       {
-        text: 'Dashboard',
-        matIcon: 'assessment',
-        link: '/dashboard'
-      },
-      {
         text: 'Applications',
         matIcon: 'apps',
         link: '/applications'

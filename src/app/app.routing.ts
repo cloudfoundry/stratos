@@ -13,7 +13,7 @@ import { SharedModule } from './shared/shared.module';
 import { EndpointsService } from './core/endpoints.service';
 
 const appRoutes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'applications', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'login', loadChildren: 'app/features/login/login.module#LoginModule' },
   {
