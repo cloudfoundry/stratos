@@ -42,9 +42,11 @@ export interface IListConfig<T> {
   getSingleActions: () => IListAction<T>[];
   getColumns: () => ITableColumn<T>[];
   getDataSource: () => CfListDataSource<T> | LocalListDataSource<T>;
+  isLocal?: boolean;
 }
 
 export class ListConfig implements IListConfig<any> {
+  isLocal = false;
   getGlobalActions = () => null;
   getMultiActions = () => null;
   getSingleActions = () => null;
@@ -139,7 +141,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.dataSource.entityKey
     );
 
-    this.paginationController = this.dataSource.isLocal ?
+    this.paginationController = this.listConfigService.isLocal ?
       new ClientPagination(this._store, controllerConfig) :
       new ServerPagination(this._store, controllerConfig);
 

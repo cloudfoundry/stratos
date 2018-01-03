@@ -48,7 +48,6 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
         filter: ''
       }));
 
-
     // const cfFilter$ = this.filter$.withLatestFrom(this.pag$)
     //   .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
     //     if (filter && filter.filter && filter.filter.length) {

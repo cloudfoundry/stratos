@@ -27,7 +27,8 @@ export const AppMetadataProperties = {
   SUMMARY: 'summary'
 };
 
-export const EnvVarsSchema = new schema.Entity(AppMetadataProperties.ENV_VARS);
+export const EnvVarSchema = new schema.Entity(AppMetadataProperties.ENV_VARS);
+export const EnvVarsSchema = new schema.Array(EnvVarSchema);
 
 export interface IGetAppMetadataAction extends IRequestAction {
   options: RequestOptions;

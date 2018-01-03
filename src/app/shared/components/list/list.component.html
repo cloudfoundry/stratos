@@ -9,12 +9,6 @@
             <div [hidden]="!(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           </div>
           <div class="listComponent__header__right">
-            <div [hidden]="(dataSource.isAdding$ | async) || (dataSource.isSelecting$ | async)">
-              <!-- No way to disable an mat-paginator yet, so just hide -->
-              <mat-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize"
-                [pageSizeOptions]="[]">
-              </mat-paginator>
-            </div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">
               <ng-container *ngFor="let action of multiActions">
                 <button mat-icon-button *ngIf="action.visible(row)" (click)="executeActionMultiple(action)" [disabled]="!action.enabled(row)"
@@ -94,6 +88,9 @@
     <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [columns]="columns" [text]="text"
       [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
     </app-table>
+    <mat-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize"
+      [pageSizeOptions]="[]">
+    </mat-paginator>
     <mat-card [hidden]="(dataSource.isLoadingPage$ | async) || (dataSource.pagination$ | async)?.totalResults > 0">
       <mat-card-content>
         <div class="no-rows">There are no entries.</div>

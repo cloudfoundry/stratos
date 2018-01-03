@@ -1,4 +1,4 @@
-import { getPaginationKey, GetAppEnvVarsAction } from './../../store/actions/app-metadata.actions';
+import { EnvVarSchema, GetAppEnvVarsAction, getPaginationKey } from './../../store/actions/app-metadata.actions';
 import { CfListDataSource } from './list-data-source-cf';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
@@ -46,7 +46,7 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
         _appService.appGuid,
         _appService.cfGuid,
       ),
-      EnvVarsSchema,
+      EnvVarSchema,
       (object: AppEnvVar) => {
         return object.name;
       },

@@ -73,7 +73,7 @@ export class ApplicationService {
   waitForAppEntity$: Observable<EntityInfo>;
   appSummary$: Observable<AppMetadataInfo>;
   appStatsGated$: Observable<null | AppMetadataInfo>;
-  appEnvVars$: Observable<AppMetadataInfo>;
+  appEnvVars: PaginationObservables<AppEnvVarsState>;
 
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
@@ -102,22 +102,11 @@ export class ApplicationService {
         new GetAppInstancesAction(this.appGuid, this.cfGuid)
       ));
 
-    const appEnvObs = getPaginationObservables<AppEnvVarsState[]>({
+    this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
       store: this.store,
       action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
       schema: EnvVarsSchema
     });
-
-    this.appEnvVars$ =
-      this.waitForAppEntity$.take(1)
-        .mergeMap(() => Observable.combineLatest(
-          appEnvObs.entities$,
-          appEnvObs.pagination$
-        ))
-        .map(([ent, pag]) => ({
-          metadata: ent,
-          metadataRequestState: pag
-        }));
   }
 
   private constructAmalgamatedObservables() {
@@ -157,8 +146,8 @@ export class ApplicationService {
         return this.appStateService.get(appInfo.entity.entity, appStats ? appStats.metadata : null);
       });
 
-    this.applicationStratProject$ = this.appEnvVars$.map(applicationEnvVars => {
-      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
+    this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
+      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
     });
   }
 
@@ -180,9 +169,9 @@ export class ApplicationService {
         return updatingSection.busy || false;
       });
 
-    this.isFetchingEnvVars$ = this.appEnvVars$.map(ev => ev.pagination$).startWith(false);
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching).startWith(false);
 
-    this.isUpdatingEnvVars$ = this.appEnvVars$.map(ev => ev.metadataRequestState.updating.busy).startWith(false);
+    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching && ev.ids[ev.currentPage]).startWith(false);
 
     this.isFetchingStats$ =
       this.appStatsGated$.map(appStats => appStats ? appStats.metadataRequestState.updating.busy : false).startWith(false);

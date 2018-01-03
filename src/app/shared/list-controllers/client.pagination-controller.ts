@@ -8,21 +8,23 @@ import { SetListFilterAction } from './../../store/actions/list.actions';
 import { IPaginationController, PaginationControllerConfig } from './base.pagination-controller';
 
 export class ClientPagination implements IPaginationController {
-    constructor(
-        private store: Store<AppState>,
-        public config: PaginationControllerConfig
-    ) {
-        this.pagination$ = config.pagination$;
-    }
-    sort: (listSort: ListSort) => void;
-    page: (pageEvent: PageEvent) => void;
-    pagination$: Observable<ListPagination>;
-    filter = filterString => {
-        this.store.dispatch(new SetListFilterAction(
-            this.config.listStateKey,
-            {
-                filter: filterString
-            }
-        ));
-    }
+  constructor(
+    private store: Store<AppState>,
+    public config: PaginationControllerConfig
+  ) {
+    this.pagination$ = config.pagination$;
+  }
+  page: (pageEvent: PageEvent) => void;
+  pagination$: Observable<ListPagination>;
+  sort = (listSort: ListSort) => {
+    console.log('sorting');
+  }
+  filter = filterString => {
+    this.store.dispatch(new SetListFilterAction(
+      this.config.listStateKey,
+      {
+        filter: filterString
+      }
+    ));
+  }
 }

@@ -23,6 +23,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   ) {
     this.appsDataSource = new CfAppsDataSource(this.store);
   }
+  isLocal = true;
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
     {
