@@ -1,10 +1,14 @@
+$side-nav-padding-h: 20px;
+$side-nav-mat-icon-width: 24px;
+$side-nav-mat-icon-padding-right: 15px;
+$side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $side-nav-mat-icon-padding-right;
 .side-nav {
   height: 100%;
   width: 200px;
   &__top {
-    height: 64px;
     display: flex;
     flex-direction: column;
+    height: 56px;
     &-inner {
       display: flex;
       flex: 1;
@@ -13,33 +17,31 @@
   }
   &__items {
     list-style-type: none;
-    padding: 0;
     margin: 0;
+    padding: 10px 0 0;
   }
   &__item {
     align-items: center;
-    display: flex;
-    font-size: 15px;
-    padding: 20px;
-    cursor: pointer;
-    border-top: 1px solid;
     border-bottom: 1px solid;
     border-color: transparent;
+    cursor: pointer;
+    display: flex;
+    font-size: 15px;
+    letter-spacing: .01em;
+    outline: 0;
+    padding: 15px $side-nav-padding-h;
     mat-icon {
-      margin-right: 15px;
+      margin-right: $side-nav-mat-icon-padding-right;
     }
   }
   &__logo {
-    background-image: url('/assets/suse-logo-white.png');
-    background-repeat: no-repeat;
-    background-size: contain;
-    background-position: center;
-    flex: 1;
+    align-items: center;
+    display: flex;
+    padding-left: $side-nav-header-spacing;
     &-text {
-      text-transform: uppercase;
+      padding: 0;
       text-align: center;
-      font-size: 16px;
-      padding: 10px 0;
+      text-transform: uppercase;
     }
   }
 }
