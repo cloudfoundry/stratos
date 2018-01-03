@@ -49,7 +49,12 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
         text: 'Endpoints',
         matIcon: 'settings_input_component',
         link: '/endpoints'
-      }
+      },
+      {
+        text: 'Service Catalogue',
+        matIcon: 'library_books',
+        link: '/service-catalogue'
+      },
     ];
   }
   ngAfterContentInit() {

@@ -1,3 +1,4 @@
+import { ServiceCatalogueModule } from './features/service-catalogue/service-catalogue.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -61,7 +62,8 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
     UAASetupModule,
     LoginModule,
     HomeModule,
-    DashboardModule
+    DashboardModule,
+    ServiceCatalogueModule
     // StoreRouterConnectingModule // Create action for router navigation
   ],
   providers: [
