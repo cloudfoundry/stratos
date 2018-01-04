@@ -30,6 +30,7 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
     letter-spacing: .01em;
     outline: 0;
     padding: 15px $side-nav-padding-h;
+    text-decoration: none;
     mat-icon {
       margin-right: $side-nav-mat-icon-padding-right;
     }
