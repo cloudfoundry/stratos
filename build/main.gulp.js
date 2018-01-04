@@ -33,6 +33,7 @@
   var devDeps = require('./dev-dependencies');
   // Pull in the gulp tasks for e2e tests
   require('./e2e.gulp');
+  require('./deps.gulp');
 
   var paths = config.paths;
   var localComponents, assetFiles, i18nFiles, jsSourceFiles, pluginFiles,

@@ -86,6 +86,7 @@
     "jasmine-reporters": "^2.2.1",
     "jasmine-spec-reporter": "^4.2.1",
     "jsdoc": "^3.5.4",
+    "js-yaml": "^3.10.0",
     "karma": "^1.7.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cli": "^1.0.1",
