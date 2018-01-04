@@ -31,10 +31,10 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
         q: [
           new QParam('type', filter.filter, ' IN '),
         ]
-      }, this.isLocal));
+      }));
     } else {
       // if (pag.params.q.find((q: QParam) => q.key === 'type'))
-      this._cfStore.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['type'], this.isLocal));
+      this._cfStore.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['type']));
     }
   }
 
