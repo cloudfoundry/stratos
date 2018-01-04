@@ -13,7 +13,7 @@ export class PaginationControllerConfig {
     public paginationKey: string,
     public entityKey: string,
     public getFilterFromParams: (pag: PaginationEntityState) => string,
-    public setFilterParam: (store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter) => void
+    public setFilterParam: (store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter, isLocal: boolean) => void
   ) {
   }
 }

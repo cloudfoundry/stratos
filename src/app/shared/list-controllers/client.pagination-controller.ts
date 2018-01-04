@@ -52,7 +52,7 @@ export class ClientPagination implements IPaginationController {
   filter = filterString => {
     this.config.setFilterParam(this.store, this.config.entityKey, this.config.paginationKey, {
       filter: filterString
-    });
+    }, this.isLocal);
     // TODO: RC REMOVE THESE EVERYWHERE
     // this.store.dispatch(new SetListFilterAction(
     //   this.config.listStateKey,

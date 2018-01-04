@@ -25,16 +25,16 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
       return qParam ? qParam.value as string : '';
     }
   }
-  public setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter) {
+  public setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter, isLocal: boolean) {
     if (filter && filter.filter && filter.filter.length) {
       store.dispatch(new AddParams(entityKey, paginationKey, {
         q: [
           new QParam('type', filter.filter, ' IN '),
         ]
-      }));
+      }, isLocal));
     } else {
       // if (pag.params.q.find((q: QParam) => q.key === 'type'))
-      store.dispatch(new RemoveParams(entityKey, paginationKey, [], ['type']));
+      store.dispatch(new RemoveParams(entityKey, paginationKey, [], ['type'], isLocal));
     }
   }
 

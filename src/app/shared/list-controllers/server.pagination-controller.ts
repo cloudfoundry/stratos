@@ -50,6 +50,6 @@ export class ServerPagination implements IPaginationController {
   filter(filterString: string) {
     this.config.setFilterParam(this.store, this.config.entityKey, this.config.paginationKey, {
       filter: filterString
-    });
+    }, this.isLocal);
   }
 }

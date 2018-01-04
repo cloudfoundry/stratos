@@ -65,7 +65,8 @@ export class RemoveParams implements PaginationAction {
     public entityKey: string,
     public paginationKey: string,
     public params: string[],
-    public qs: string[]
+    public qs: string[],
+    public keepPages = false
   ) {
   }
   type = REMOVE_PARAMS;
