@@ -17,7 +17,7 @@ import { SideNavItem } from './../side-nav/side-nav.component';
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit, AfterContentInit {
+export class DashboardBaseComponent implements AfterContentInit {
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -29,39 +29,36 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
-  sideNavTabs: SideNavItem[];
+  sideNavTabs: SideNavItem[] = [
+    {
+      text: 'Dashboard',
+      matIcon: 'assessment',
+      link: '/dashboard'
+    },
+    {
+      text: 'Applications',
+      matIcon: 'apps',
+      link: '/applications'
+    },
+    {
+      text: 'Cloud Foundry',
+      matIcon: 'cloud',
+      link: '/cloud-foundry'
+    },
+    {
+      text: 'Endpoints',
+      matIcon: 'settings_input_component',
+      link: '/endpoints'
+    },
+    {
+      text: 'Service Catalogue',
+      matIcon: 'library_books',
+      link: '/service-catalogue'
+    },
+  ];
 
   sideNaveMode = 'side';
 
-  ngOnInit() {
-    this.sideNavTabs = [
-      {
-        text: 'Dashboard',
-        matIcon: 'assessment',
-        link: '/dashboard'
-      },
-      {
-        text: 'Applications',
-        matIcon: 'apps',
-        link: '/applications'
-      },
-      {
-        text: 'Cloud Foundry',
-        matIcon: 'cloud',
-        link: '/cloud-foundry'
-      },
-      {
-        text: 'Endpoints',
-        matIcon: 'settings_input_component',
-        link: '/endpoints'
-      },
-      {
-        text: 'Service Catalogue',
-        matIcon: 'library_books',
-        link: '/service-catalogue'
-      },
-    ];
-  }
   ngAfterContentInit() {
     this.breakpointObserver.observe([
       Breakpoints.Handset
