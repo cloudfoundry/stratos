@@ -18,7 +18,7 @@ import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 
-import { ClearPaginationOfType, SetParams } from '../actions/pagination.actions';
+import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import {
   ApiActionTypes

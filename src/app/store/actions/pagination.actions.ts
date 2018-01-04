@@ -55,7 +55,8 @@ export class SetParams implements PaginationAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
-    public params: PaginationParam
+    public params: PaginationParam,
+    public keepPages = false
   ) {
   }
   type = SET_PARAMS;

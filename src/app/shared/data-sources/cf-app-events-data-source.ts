@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';
 import { CfListDataSource } from './list-data-source-cf';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
-import { AddParams, RemoveParams, SetParams } from '../../store/actions/pagination.actions';
+import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction, ListPagination } from '../../store/actions/list.actions';
 
 export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {

@@ -100,7 +100,7 @@ export const getPaginationObservables = (function () {
     const { entityKey, paginationKey } = action;
 
     if (action.initialParams) {
-      store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams));
+      store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams, isLocal));
     }
 
     const obs = getObservables<T>(
