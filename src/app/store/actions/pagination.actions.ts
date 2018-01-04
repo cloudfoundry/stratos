@@ -53,7 +53,8 @@ export class AddParams implements PaginationAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
-    public params: PaginationParam
+    public params: PaginationParam,
+    public keepPages = false
   ) {
   }
   type = ADD_PARAMS;

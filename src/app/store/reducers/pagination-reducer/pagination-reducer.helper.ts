@@ -90,7 +90,8 @@ export const getPaginationObservables = (function () {
 
   return function <T = any>(
     { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
-    uid?: string
+    uid?: string,
+    isLocal = false
   ): PaginationObservables<T> {
     const _key = action.entityKey + action.paginationKey + (uid || '');
     if (mem[_key]) {
@@ -107,7 +108,8 @@ export const getPaginationObservables = (function () {
       entityKey,
       paginationKey,
       action,
-      schema
+      schema,
+      isLocal
     );
 
     mem[_key] = obs;
@@ -115,7 +117,13 @@ export const getPaginationObservables = (function () {
   };
 })();
 
-function getObservables<T = any>(store: Store<AppState>, entityKey: string, paginationKey: string, action: Action, schema: Schema)
+function getObservables<T = any>(
+  store: Store<AppState>,
+  entityKey: string,
+  paginationKey: string,
+  action: Action,
+  schema: Schema,
+  isLocal = false)
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
@@ -126,16 +134,16 @@ function getObservables<T = any>(store: Store<AppState>, entityKey: string, pagi
   const entities$: Observable<T[]> =
     paginationSelect$
       .do(pagination => {
-        if (
-          action.type !== RequestTypes.START &&
-          hasDispatchedOnce &&
-          (!pagination || !pagination.fetching)
-        ) {
-          // If we're not dispatching a Request start action then we
-          // assume something will at some point further down the chain so we just wait.
-          return;
-        }
-        if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+        // if (
+        //   action.type !== RequestTypes.START &&
+        //   hasDispatchedOnce &&
+        //   (!pagination || !pagination.fetching)
+        // ) {
+        //   // If we're not dispatching a Request start action then we
+        //   // assume something will at some point further down the chain so we just wait.
+        //   return;
+        // }
+        if (!(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
           store.dispatch(action);
           hasDispatchedOnce = true;
         }
@@ -147,6 +155,60 @@ function getObservables<T = any>(store: Store<AppState>, entityKey: string, pagi
       .map(([paginationEntity, entities]) => {
         const page = paginationEntity.ids[paginationEntity.currentPage];
         return page ? denormalize(page, schema, entities) : null;
+      });
+
+  return {
+    pagination$,
+    entities$
+  };
+}
+
+function getLocalObservables<T = any>(store: Store<AppState>, entityKey: string, paginationKey: string, action: Action, schema: Schema)
+  : PaginationObservables<T> {
+  let hasDispatchedOnce = false;
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
+
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$
+    .filter(pagination => !!pagination);
+
+  const entities$: Observable<T[]> =
+    paginationSelect$
+      .do(pagination => {
+        if (!hasDispatchedOnce && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+          store.dispatch(action);
+          hasDispatchedOnce = true;
+        }
+      })
+      .filter(pagination => {
+        return isPageReady(pagination);
+      })
+      .withLatestFrom(store.select(getAPIRequestDataState))
+      .map(([paginationEntity, entities]) => {
+        const page = paginationEntity.ids[paginationEntity.currentPage];
+        return [
+          paginationEntity,
+          page ? denormalize(page, schema, entities) : null
+        ];
+      })
+      .map(([paginationEntity, entities]) => {
+        // const orderKey = paginationEntity.params['order-direction-field'];
+        const orderDirection = paginationEntity.params['order-direction'];
+        const orderKey = 'name';
+        if (!entities || !orderKey) {
+          return entities;
+        }
+
+        return entities.sort((a, b) => {
+          const valueA = a.entity[orderKey].toUpperCase();
+          const valueB = b.entity[orderKey].toUpperCase();
+          if (valueA > valueB) {
+            return orderDirection === 'desc' ? -1 : 1;
+          }
+          if (valueA < valueB) {
+            return orderDirection === 'desc' ? 1 : -1;
+          }
+          return 0;
+        });
       });
 
   return {

@@ -140,8 +140,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     //   new ServerPagination(this._store, controllerConfig);
 
     this.paginationController = this.listConfigService.isLocal ?
-      new ClientPagination(this._store, controllerConfig) :
-      new ClientPagination(this._store, controllerConfig);
+      new ClientPagination(this._store, controllerConfig, this.dataSource.isLocal) :
+      new ClientPagination(this._store, controllerConfig, this.dataSource.isLocal);
 
     // const paginationStoreToWidget = this.dataSource.clientPagination$.do((pagination: ListPagination) => {
     //   this.paginator.length = pagination.totalResults;

@@ -12,7 +12,8 @@ import { map, filter } from 'rxjs/operators';
 export class ClientPagination implements IPaginationController {
   constructor(
     private store: Store<AppState>,
-    public config: PaginationControllerConfig
+    public config: PaginationControllerConfig,
+    public isLocal = false
   ) {
     this.pagination$ = this.config.pagination$.map(pag => ({
       totalResults: pag.totalResults,
@@ -46,7 +47,7 @@ export class ClientPagination implements IPaginationController {
     this.store.dispatch(new AddParams(this.config.entityKey, this.config.paginationKey, {
       ['order-field']: listSort.field,
       ['order-direction']: listSort.direction
-    }));
+    }, this.isLocal));
   }
   filter = filterString => {
     this.config.setFilterParam(this.store, this.config.entityKey, this.config.paginationKey, {

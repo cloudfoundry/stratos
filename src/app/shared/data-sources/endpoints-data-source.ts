@@ -16,6 +16,8 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
   // Only needed for update purposes
   private rows = new Array<CNSISModel>();
 
+  public isLocal = true;
+
   filteredRows = new Array<CNSISModel>();
   isLoadingPage$: Observable<boolean>;
   data$: any;

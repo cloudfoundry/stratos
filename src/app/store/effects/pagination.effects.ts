@@ -22,9 +22,12 @@ export class PaginationEffects {
     private store: Store<AppState>
   ) { }
 
-  @Effect() clearPaginationOnParamChange$ =
+  @Effect({ dispatch: false }) clearPaginationOnParamChange$ =
     this.actions$.ofType<SetParams | AddParams | RemoveParams>(SET_PARAMS, ADD_PARAMS, REMOVE_PARAMS)
       .map(action => {
-        return new ClearPagination(action.entityKey, action.paginationKey);
+        const addAction = action as AddParams;
+        if (!addAction.keepPages) {
+          this.store.dispatch(new ClearPagination(action.entityKey, action.paginationKey));
+        }
       });
 }

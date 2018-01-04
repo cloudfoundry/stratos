@@ -25,7 +25,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
     {
-      columnId: 'name', headerCell: () => 'Application Name', cellComponent: TableCellAppNameComponent, cellFlex: '2'
+      columnId: 'name', headerCell: () => 'Application Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: true
     },
     {
       columnId: 'status', headerCell: () => 'Status', cell: (row: APIResource) => `${row.entity.state}`, cellFlex: '1'

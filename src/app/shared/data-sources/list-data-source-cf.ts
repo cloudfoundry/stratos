@@ -16,7 +16,9 @@ import { AppState } from '../../store/app-state';
 import { AddParams, SetPage, RemoveParams } from '../../store/actions/pagination.actions';
 import { ListDataSource } from './list-data-source';
 import { IListDataSource, getRowUniqueId } from './list-data-source-types';
-import { map } from 'rxjs/operators/map';
+import { map } from 'rxjs/operators';
+import { withLatestFrom } from 'rxjs/operators';
+import { composeFn } from '../../store/helpers/reducer.helper';
 
 export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> implements IListDataSource<T> {
 
@@ -33,6 +35,7 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
   public filteredRows: Array<T>;
 
   private orderDirectionParam = 'order-direction';
+  public localDataFunctions?: ((entities: T[], paginationState: PaginationEntityState) => T[])[] = [];
 
   public getFilterFromParams(pag: PaginationEntityState) {
     return pag.params.filter;
@@ -55,17 +58,21 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
     protected _cfGetRowUniqueId: getRowUniqueId,
     getEmptyType: () => T,
     public paginationKey: string,
-    private entityLettable: OperatorFunction<A[], T[]> = null
+    private entityLettable: OperatorFunction<A[], T[]> = null,
+    public isLocal = false
   ) {
     super(_cfStore, _cfGetRowUniqueId, getEmptyType, paginationKey);
 
     this.entityKey = sourceScheme.key;
-
     const { pagination$, entities$ } = getPaginationObservables({
       store: this._cfStore,
       action: this.action,
-      schema: [this.sourceScheme],
-    });
+      schema: [this.sourceScheme]
+    },
+      null,
+      isLocal
+    );
+
 
     if (this.entityLettable) {
       this.page$ = entities$.pipe(
@@ -75,6 +82,18 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
       this.page$ = entities$.pipe(
         map(res => res as T[])
       );
+    }
+    if (isLocal) {
+      this.page$ = this.page$.pipe(
+        withLatestFrom(pagination$),
+        map(([entities, paginationEntity]) => {
+          if (this.localDataFunctions && this.localDataFunctions.length) {
+            return this.localDataFunctions.reduce((value, fn) => {
+              return fn(value, paginationEntity);
+            }, entities);
+          }
+          return entities;
+        }));
     }
 
     // Track changes from listPagination to cfPagination

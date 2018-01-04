@@ -10,7 +10,6 @@ import { AddParams, RemoveParams } from '../../store/actions/pagination.actions'
 import { APIResource } from '../../store/types/api.types';
 import { ListActions } from './list-data-source-types';
 
-
 export class CfAppsDataSource extends CfListDataSource<APIResource> {
 
   // cfFilterSub: Subscription;
@@ -51,7 +50,9 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
         return object.entity.metadata ? object.entity.metadata.guid : null;
       },
       () => ({} as APIResource),
-      paginationKey
+      paginationKey,
+      null,
+      true
     );
 
     _store.dispatch(new SetListStateAction(
@@ -69,21 +70,36 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
         filter: ''
       }));
 
-    // const cfFilter$ = this.filter$.withLatestFrom(this.pag$)
-    //   .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
-    //     if (filter && filter.filter && filter.filter.length) {
-    //       const q = pag.params.q;
-    //       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-    //         q: [
-    //           new QParam('name', filter.filter, ' IN '),
-    //         ]
-    //       }));
-    //     } else if (pag.params.q.find((q: QParam) => q.key === 'name')) {
-    //       this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['name']));
-    //     }
-    //   });
-    // this.cfFilterSub = cfFilter$.subscribe();
+    this.localDataFunctions = [
+      (entities, paginationState) => {
+        const orderKey = paginationState.params['order-direction-field'];
+        const orderDirection = paginationState.params['order-direction'];
+        if (!entities || !orderKey) {
+          return entities;
+        }
 
+        return entities.sort((a, b) => {
+          const valueA = this.mapOrderKeyToValue(a, orderKey).toUpperCase();
+          const valueB = this.mapOrderKeyToValue(b, orderKey).toUpperCase();
+          if (valueA > valueB) {
+            return orderDirection === 'desc' ? -1 : 1;
+          }
+          if (valueA < valueB) {
+            return orderDirection === 'desc' ? 1 : -1;
+          }
+          return 0;
+        });
+      }
+    ];
+  }
+
+  mapOrderKeyToValue(app: APIResource, key: string) {
+    switch (key) {
+      case 'creation':
+        return app.metadata.created_at;
+      case 'name':
+        return app.entity.name;
+    }
   }
 
   destroy() {

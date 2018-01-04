@@ -1,5 +1,3 @@
-import { error } from 'util';
-
 import {
   ADD_PARAMS,
   CLEAR_PAGES,
@@ -72,7 +70,7 @@ export function createPaginationReducer(types: [string, string, string]) {
       return state;
     }
 
-    if (action.type === CLEAR_PAGES) {
+    if (action.type === CLEAR_PAGES && !action.keepPages) {
       return paginationClearPages(state, action);
     }
 

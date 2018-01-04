@@ -42,6 +42,7 @@ export interface IListDataSource<T> {
   // sort$: Observable<ListSort>;
   // filter$: Observable<ListFilter>;
   isLocal?: boolean;
+  localDataFunctions?: ((entities: T[], paginationState: PaginationEntityState) => T[])[];
 
   entityKey: string;
   paginationKey: string;
