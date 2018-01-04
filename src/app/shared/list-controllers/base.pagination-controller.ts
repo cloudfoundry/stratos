@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { IListDataSource } from '../data-sources/list-data-source-types';
 import { map, filter } from 'rxjs/operators';
-import { SetPage, AddParams } from '../../store/actions/pagination.actions';
+import { SetPage, AddParams, SetClientPageSize } from '../../store/actions/pagination.actions';
 
 export class PaginationController<T> implements IPaginationController<T> {
   constructor(
@@ -15,11 +15,14 @@ export class PaginationController<T> implements IPaginationController<T> {
     public dataSource: IListDataSource<T>
   ) {
 
-    this.pagination$ = this.dataSource.pagination$.map(pag => ({
-      totalResults: pag.totalResults,
-      pageSize: pag.params['results-per-page'] || 2,
-      pageIndex: pag.currentPage,
-    }));
+    this.pagination$ = this.dataSource.pagination$.map(pag => {
+      const pageSize = (dataSource.isLocal ? pag.clientPageSize : pag.params['results-per-page']) || 2;
+      return {
+        totalResults: pag.totalResults,
+        pageSize,
+        pageIndex: pag.currentPage,
+      };
+    });
 
     this.sort$ = this.dataSource.pagination$.map(pag => ({
       direction: pag.params['order-direction'] as SortDirection,
@@ -41,7 +44,9 @@ export class PaginationController<T> implements IPaginationController<T> {
   sort$: Observable<ListSort>;
   filter$: Observable<ListFilter>;
   page(pageEvent: PageEvent) {
-    this.store.dispatch(new SetPage(this.dataSource.entityKey, this.dataSource.paginationKey, pageEvent.pageIndex, this.dataSource.isLocal));
+    this.store.dispatch(new SetPage(
+      this.dataSource.entityKey, this.dataSource.paginationKey, pageEvent.pageIndex + 1, this.dataSource.isLocal
+    ));
   }
   sort = (listSort: ListSort) => {
     this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {

@@ -23,6 +23,7 @@ export class PaginationEntityState {
   fetching: boolean;
   error: boolean;
   message: string;
+  clientPageSize?: number;
 }
 
 export interface PaginationAction extends Action {

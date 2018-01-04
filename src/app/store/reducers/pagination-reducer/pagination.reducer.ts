@@ -1,3 +1,4 @@
+import { paginationSetClientPageSize } from './pagination-reducer-set-client-page';
 import {
   ADD_PARAMS,
   CLEAR_PAGES,
@@ -5,6 +6,7 @@ import {
   REMOVE_PARAMS,
   SET_PAGE,
   SET_PARAMS,
+  SET_CLIENT_PAGE_SIZE
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -28,6 +30,7 @@ const defaultPaginationEntityState = {
   currentPage: 1,
   totalResults: 0,
   ids: {},
+  clientPageSize: 1,
   params: {
     [resultPerPageParam]: resultPerPageParamDefault
   },
@@ -49,6 +52,8 @@ const getPaginationUpdater = function (types: [string, string, string]) {
         return paginationFailure(state, action);
       case SET_PAGE:
         return paginationSetPage(state, action);
+      case SET_CLIENT_PAGE_SIZE:
+        return paginationSetClientPageSize(state, action);
       case SET_PARAMS:
         return paginationSetParams(state, action);
       case ADD_PARAMS:

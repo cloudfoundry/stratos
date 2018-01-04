@@ -149,66 +149,19 @@ function getObservables<T = any>(
         }
       })
       .filter(pagination => {
-        return isPageReady(pagination);
+        return (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       })
       .withLatestFrom(store.select(getAPIRequestDataState))
       .map(([paginationEntity, entities]) => {
-        const page = paginationEntity.ids[paginationEntity.currentPage];
+        let page;
+        if (isLocal) {
+          const pages = Object.values(paginationEntity.ids);
+          page = [].concat.apply([], pages);
+        } else {
+          page = paginationEntity.ids[paginationEntity.currentPage];
+        }
+        debugger;
         return page ? denormalize(page, schema, entities) : null;
-      });
-
-  return {
-    pagination$,
-    entities$
-  };
-}
-
-function getLocalObservables<T = any>(store: Store<AppState>, entityKey: string, paginationKey: string, action: Action, schema: Schema)
-  : PaginationObservables<T> {
-  let hasDispatchedOnce = false;
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
-
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$
-    .filter(pagination => !!pagination);
-
-  const entities$: Observable<T[]> =
-    paginationSelect$
-      .do(pagination => {
-        if (!hasDispatchedOnce && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
-          store.dispatch(action);
-          hasDispatchedOnce = true;
-        }
-      })
-      .filter(pagination => {
-        return isPageReady(pagination);
-      })
-      .withLatestFrom(store.select(getAPIRequestDataState))
-      .map(([paginationEntity, entities]) => {
-        const page = paginationEntity.ids[paginationEntity.currentPage];
-        return [
-          paginationEntity,
-          page ? denormalize(page, schema, entities) : null
-        ];
-      })
-      .map(([paginationEntity, entities]) => {
-        // const orderKey = paginationEntity.params['order-direction-field'];
-        const orderDirection = paginationEntity.params['order-direction'];
-        const orderKey = 'name';
-        if (!entities || !orderKey) {
-          return entities;
-        }
-
-        return entities.sort((a, b) => {
-          const valueA = a.entity[orderKey].toUpperCase();
-          const valueB = b.entity[orderKey].toUpperCase();
-          if (valueA > valueB) {
-            return orderDirection === 'desc' ? -1 : 1;
-          }
-          if (valueA < valueB) {
-            return orderDirection === 'desc' ? 1 : -1;
-          }
-          return 0;
-        });
       });
 
   return {

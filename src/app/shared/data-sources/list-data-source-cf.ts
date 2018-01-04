@@ -88,12 +88,14 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
         withLatestFrom(pagination$),
         map(([entities, paginationEntity]) => {
           if (this.localDataFunctions && this.localDataFunctions.length) {
-            return this.localDataFunctions.reduce((value, fn) => {
+            entities = this.localDataFunctions.reduce((value, fn) => {
               return fn(value, paginationEntity);
             }, entities);
           }
-          return entities;
-        }));
+          const pages = this.splitClientPages(entities, paginationEntity.clientPageSize);
+          return pages[paginationEntity.currentPage - 1];
+        })
+      );
     }
 
     // Track changes from listPagination to cfPagination
@@ -142,6 +144,19 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
 
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+  }
+
+  splitClientPages(entites: T[], pageSize: number): T[][] {
+    if (!entites || !entites.length) {
+      return [];
+    }
+    const array = [...entites];
+    const pages = [];
+
+    for (let i = 0; i < array.length; i += pageSize) {
+      pages.push(array.slice(i, i + pageSize));
+    }
+    return pages;
   }
 
   connect(): Observable<T[]> {
