@@ -7,7 +7,7 @@ import { ApplicationService, ApplicationData } from '../features/applications/ap
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo } from '../store/types/api.types';
 import { AppMetadataInfo } from '../store/types/app-metadata.types';
-import { ApplicationStateService } from '../features/applications/application/build-tab/application-state/application-state.service';
+import { ApplicationStateService } from '../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsService } from '../features/applications/application/build-tab/application-env-vars.service';
 
 export class ApplicationServiceMock {
