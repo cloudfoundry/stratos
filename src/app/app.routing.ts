@@ -13,7 +13,7 @@ import { SharedModule } from './shared/shared.module';
 import { EndpointsService } from './core/endpoints.service';
 
 const appRoutes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '', redirectTo: 'applications', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
   { path: 'login', loadChildren: 'app/features/login/login.module#LoginModule' },
   {
@@ -23,7 +23,9 @@ const appRoutes: Routes = [
     children: [
       { path: 'dashboard', component: HomePageComponent },
       { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule' },
-      { path: 'endpoints', loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule' }
+      { path: 'endpoints', loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule' },
+      { path: 'service-catalogue', loadChildren: 'app/features/service-catalogue/service-catalogue.module#ServiceCatalogueModule' },
+      { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' }
     ]
   },
   {
