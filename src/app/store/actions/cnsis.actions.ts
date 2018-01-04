@@ -5,6 +5,7 @@ import { Action, createSelector } from '@ngrx/store';
 
 import { AppState } from '../app-state';
 import { PaginatedAction } from '../types/pagination.types';
+import { EndpointsDataSource } from '../../shared/data-sources/endpoints-data-source';
 
 export const GET_CNSIS = '[CNSIS] Get all';
 export const GET_CNSIS_LOGIN = '[CNSIS] Get all at login';
@@ -26,10 +27,17 @@ export const EndpointSchema = new schema.Entity('endpoint', {}, {
 });
 
 export class GetAllCNSIS implements PaginatedAction {
+  public static storeKey = 'endpoint-list';
   constructor(public login = false) { }
   entityKey = EndpointSchema.key;
-  paginationKey = 'endpoint-list';
+  paginationKey = GetAllCNSIS.storeKey;
   type = GET_CNSIS;
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'name',
+    page: 1,
+    'results-per-page': 50,
+  };
 }
 
 export class GetAllCNSISSuccess implements Action {

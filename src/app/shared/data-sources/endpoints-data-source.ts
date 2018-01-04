@@ -11,12 +11,8 @@ import { EndpointSchema, GetAllCNSIS } from '../../store/actions/cnsis.actions';
 
 
 export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
-  private static _storeKey = 'endpoints';
-
   // Only needed for update purposes
   private rows = new Array<CNSISModel>();
-
-  public isLocal = true;
 
   filteredRows = new Array<CNSISModel>();
   isLoadingPage$: Observable<boolean>;
@@ -35,12 +31,14 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
       () => ({
         name: ''
       }),
-      EndpointsDataSource._storeKey
+      GetAllCNSIS.storeKey,
+      null,
+      true// isLocal
     );
 
     // TODO: RC remove pag/sort/filter, etc
     _eStore.dispatch(new SetListStateAction(
-      EndpointsDataSource._storeKey,
+      GetAllCNSIS.storeKey,
       'table',
     ));
 

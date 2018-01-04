@@ -144,8 +144,8 @@ function getObservables<T = any>(
         //   return;
         // }
         if (!(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+          hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
           store.dispatch(action);
-          hasDispatchedOnce = true;
         }
       })
       .filter(pagination => {
