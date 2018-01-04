@@ -1,29 +1,74 @@
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import { Observable } from 'rxjs/Observable';
-import { PageEvent } from '@angular/material';
+import { PageEvent, SortDirection } from '@angular/material';
 
 import { ListPagination, ListSort, ListFilter } from './../../store/actions/list.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
+import { IListDataSource } from '../data-sources/list-data-source-types';
+import { map, filter } from 'rxjs/operators';
+import { SetPage, AddParams } from '../../store/actions/pagination.actions';
 
-export class PaginationControllerConfig {
+export class PaginationController<T> implements IPaginationController<T> {
   constructor(
-    public listStateKey: string,
-    public pagination$: Observable<PaginationEntityState>,
-    public paginationKey: string,
-    public entityKey: string,
-    public getFilterFromParams: (pag: PaginationEntityState) => string,
-    public setFilterParam: (store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter, isLocal: boolean) => void
+    private store: Store<AppState>,
+    public dataSource: IListDataSource<T>
   ) {
+
+    this.pagination$ = this.dataSource.pagination$.map(pag => ({
+      totalResults: pag.totalResults,
+      pageSize: pag.params['results-per-page'] || 2,
+      pageIndex: pag.currentPage,
+    }));
+
+    this.sort$ = this.dataSource.pagination$.map(pag => ({
+      direction: pag.params['order-direction'] as SortDirection,
+      field: pag.params['order-direction-field']
+    })).filter(x => !!x).distinctUntilChanged((x, y) => {
+      return x.direction === y.direction && x.field === y.field;
+    });
+
+    this.filter$ = this.dataSource.pagination$.pipe(
+      map(pag => this.dataSource.getFilterFromParams(pag)),
+      filter(x => !!x),
+      map(filterString => ({
+        filter: filterString
+      }))
+    );
+
+  }
+  pagination$: Observable<ListPagination>;
+  sort$: Observable<ListSort>;
+  filter$: Observable<ListFilter>;
+  page(pageEvent: PageEvent) {
+    this.store.dispatch(new SetPage(this.dataSource.entityKey, this.dataSource.paginationKey, pageEvent.pageIndex, this.dataSource.isLocal));
+  }
+  sort = (listSort: ListSort) => {
+    this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
+      ['order-direction-field']: listSort.field,
+      ['order-direction']: listSort.direction
+    }, this.dataSource.isLocal));
+  }
+  filter = filterString => {
+    this.dataSource.setFilterParam({
+      filter: filterString
+    });
+    // TODO: RC REMOVE THESE EVERYWHERE
+    // this.store.dispatch(new SetListFilterAction(
+    //   this.config.listStateKey,
+    //   {
+    //     filter: filterString
+    //   }
+    // ));
   }
 }
 
-export interface IPaginationController {
+export interface IPaginationController<T> {
   pagination$: Observable<ListPagination>;
   filter: (filterString: string) => void;
   filter$: Observable<ListFilter>;
   sort: (listSort: ListSort) => void;
   sort$: Observable<ListSort>;
   page: (pageEvent: PageEvent) => void;
-  config: PaginationControllerConfig;
+  dataSource: IListDataSource<T>;
 }

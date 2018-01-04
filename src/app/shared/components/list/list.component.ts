@@ -1,5 +1,4 @@
-import { IPaginationController, PaginationControllerConfig } from './../../list-controllers/base.pagination-controller';
-import { ServerPagination } from './../../list-controllers/server.pagination-controller';
+import { IPaginationController, PaginationController } from './../../list-controllers/base.pagination-controller';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -32,7 +31,6 @@ import { CfListDataSource } from '../../data-sources/list-data-source-cf';
 import { LocalListDataSource } from '../../data-sources/list-data-source-local';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from '../table/table.types';
-import { ClientPagination } from '../../list-controllers/client.pagination-controller';
 import { StaticInjector } from '@angular/core/src/di/injector';
 
 export interface IListConfig<T> {
@@ -104,7 +102,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
 
-  paginationController: IPaginationController;
+  paginationController: IPaginationController<T>;
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -126,22 +124,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.columns = this.listConfigService.getColumns();
     this.dataSource = this.listConfigService.getDataSource();
 
-    const controllerConfig = new PaginationControllerConfig(
-      this.dataSource.listStateKey,
-      this.dataSource.pagination$,
-      this.dataSource.paginationKey,
-      this.dataSource.entityKey,
-      this.dataSource.getFilterFromParams,
-      this.dataSource.setFilterParam
-    );
-
-    // this.paginationController = this.listConfigService.isLocal ?
-    //   new ClientPagination(this._store, controllerConfig) :
-    //   new ServerPagination(this._store, controllerConfig);
-
-    this.paginationController = this.listConfigService.isLocal ?
-      new ClientPagination(this._store, controllerConfig, this.dataSource.isLocal) :
-      new ClientPagination(this._store, controllerConfig, this.dataSource.isLocal);
+    this.paginationController = new PaginationController(this._store, this.dataSource);
 
     // const paginationStoreToWidget = this.dataSource.clientPagination$.do((pagination: ListPagination) => {
     //   this.paginator.length = pagination.totalResults;

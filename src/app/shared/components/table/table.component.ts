@@ -25,7 +25,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input('dataSource') dataSource = null as IListDataSource<T>;
-  @Input('paginationController') paginationController = null as IPaginationController;
+  @Input('paginationController') paginationController = null as IPaginationController<T>;
   @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
 

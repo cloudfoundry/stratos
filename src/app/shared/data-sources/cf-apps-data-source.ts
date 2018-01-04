@@ -23,16 +23,16 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
       return qParam ? qParam.value as string : '';
     }
   }
-  public setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter, isLocal: boolean) {
+  public setFilterParam(filter: ListFilter) {
     if (filter && filter.filter && filter.filter.length) {
-      store.dispatch(new AddParams(entityKey, paginationKey, {
+      this._cfStore.dispatch(new AddParams(this.entityKey, this.paginationKey, {
         q: [
           new QParam('name', filter.filter, ' IN '),
         ]
-      }, isLocal));
+      }, this.isLocal));
     } else {
       // if (pag.params.q.find((q: QParam) => q.key === 'name'))
-      store.dispatch(new RemoveParams(entityKey, paginationKey, [], ['name'], isLocal));
+      this._cfStore.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['name'], this.isLocal));
     }
   }
 

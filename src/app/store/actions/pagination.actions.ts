@@ -33,7 +33,8 @@ export class SetPage implements PaginationAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
-    public pageNumber: number
+    public pageNumber: number,
+    public keepPages = false
   ) {
   }
   type = SET_PAGE;

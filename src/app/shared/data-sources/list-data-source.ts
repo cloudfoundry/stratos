@@ -39,7 +39,7 @@ export abstract class ListDataSource<T> extends DataSource<T> implements IListDa
   public editRow: T;
 
   public abstract getFilterFromParams(pag: PaginationEntityState): string;
-  public abstract setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter);
+  public abstract setFilterParam(filter: ListFilter);
 
   constructor(
     private _store: Store<AppState>,

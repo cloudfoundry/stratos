@@ -40,15 +40,14 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
   public getFilterFromParams(pag: PaginationEntityState) {
     return pag.params.filter;
   }
-  public setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter, isLocal: boolean) {
-    console.log(this);
+  public setFilterParam(filter: ListFilter) {
     if (filter && filter.filter && filter.filter.length) {
-      store.dispatch(new AddParams(entityKey, paginationKey, {
+      this._cfStore.dispatch(new AddParams(this.entityKey, this.paginationKey, {
         filter: filter.filter
-      }, isLocal));
+      }, this.isLocal));
     } else {
       // if (pag.params.q.find((q: QParam) => q.key === 'name'))
-      store.dispatch(new RemoveParams(entityKey, paginationKey, ['filter'], [], isLocal));
+      this._cfStore.dispatch(new RemoveParams(this.entityKey, this.paginationKey, ['filter'], [], this.isLocal));
     }
   }
 
