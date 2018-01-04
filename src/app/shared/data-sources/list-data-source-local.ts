@@ -1,4 +1,4 @@
-import { ListFilter, ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
+import { ListFilter, ListPagination, ListSort } from '../../store/actions/list.actions';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';
 import { Sort, MatPaginator, MatSort } from '@angular/material';
@@ -39,12 +39,12 @@ export abstract class LocalListDataSource<T> extends ListDataSource<T> implement
       )
         .map(([collection, pagination]: [Array<T>, ListPagination]) => {
           // .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
-          if (pagination.totalResults !== collection.length) {
-            this._dStore.dispatch(new SetListPaginationAction(this.listStateKey, {
-              ...pagination,
-              totalResults: collection.length
-            }));
-          }
+          // if (pagination.totalResults !== collection.length) {
+          //   this._dStore.dispatch(new SetListPaginationAction(this.listStateKey, {
+          //     ...pagination,
+          //     totalResults: collection.length
+          //   }));
+          // }
 
           // const filtered = this.listFilter(collection, filter);
 
@@ -83,9 +83,9 @@ export abstract class LocalListDataSource<T> extends ListDataSource<T> implement
       for (let i = 0; i < collection.length; i++) {
         if (this._dGetRowUniqueId(collection[i]) === this._dGetRowUniqueId(this._selectItemAfterPagination)) {
           pageIndex = Math.floor(i / pageSize);
-          this._dStore.dispatch(new SetListPaginationAction(this._dlistStateKey, {
-            pageIndex: pageIndex
-          }));
+          // this._dStore.dispatch(new SetListPaginationAction(this._dlistStateKey, {
+          //   pageIndex: pageIndex
+          // }));
           delete this._selectItemAfterPagination;
           break;
         }

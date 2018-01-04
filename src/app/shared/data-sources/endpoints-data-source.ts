@@ -42,18 +42,7 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
     _eStore.dispatch(new SetListStateAction(
       EndpointsDataSource._storeKey,
       'table',
-      {
-        pageIndex: 0,
-        pageSize: 5,
-        totalResults: 0,
-      },
-      {
-        direction: 'asc',
-        field: 'name'
-      },
-      {
-        filter: ''
-      }));
+    ));
 
   }
 

@@ -6,7 +6,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
-import { ListSort, SetListSortAction } from '../../../store/actions/list.actions';
+import { ListSort } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from './table.types';
@@ -55,28 +55,12 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
         });
       }
     });
-    // const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
-    //   if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
-    //     this.sort.sort({
-    //       id: sort.field,
-    //       start: sort.direction as 'asc' | 'desc',
-    //       disableClear: true
-    //     });
-    //   }
-    // });
 
     const sortWidgetToStore = this.sort.sortChange.do((sort: Sort) => {
       this.paginationController.sort({
         field: sort.active,
         direction: sort.direction,
       });
-      // this._store.dispatch(new SetListSortAction(
-      //   this.dataSource.listStateKey,
-      //   {
-      //     field: sort.active,
-      //     direction: sort.direction,
-      //   }
-      // ));
     });
 
     this.uberSub = Observable.combineLatest(

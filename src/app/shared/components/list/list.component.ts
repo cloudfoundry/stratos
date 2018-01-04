@@ -22,8 +22,6 @@ import {
   ListPagination,
   ListSort,
   ListView,
-  SetListFilterAction,
-  SetListPaginationAction,
   SetListViewAction,
 } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
@@ -142,21 +140,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const paginationWidgetToStore = this.paginator.page.do(page => this.paginationController.page(page));
 
-
-
-    // const filterWidgeToStore = this.filter.valueChanges
-    //   .debounceTime(500)
-    //   .distinctUntilChanged()
-    //   .map(value => value as string)
-    //   .do((stFilter) => {
-    //     this._store.dispatch(new SetListFilterAction(
-    //       this.dataSource.listStateKey,
-    //       {
-    //         filter: stFilter
-    //       }
-    //     ));
-    //   });
-
     const filterWidgetToStore = this.filter.valueChanges
       .debounceTime(500)
       .distinctUntilChanged()
@@ -208,13 +191,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       direction,
       field
     });
-    // this._store.dispatch(new SetListSortAction(
-    //   this.dataSource.listStateKey,
-    //   {
-    //     field: field,
-    //     direction: direction,
-    //   }
-    // ));
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {

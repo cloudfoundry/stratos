@@ -78,15 +78,7 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
     _cfStore.dispatch(new SetListStateAction(
       paginationKey,
       'table',
-      {
-        pageIndex: 0,
-        pageSize: 5,
-        totalResults: 0,
-      },
-      null,
-      {
-        filter: ''
-      }));
+    ));
   }
 
   saveAdd() {

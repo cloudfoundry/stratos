@@ -60,18 +60,7 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
     _store.dispatch(new SetListStateAction(
       paginationKey,
       'table',
-      {
-        pageIndex: 0,
-        pageSize: 5,
-        totalResults: 0,
-      },
-      {
-        direction: action.initialParams['order-direction'] as SortDirection,
-        field: action.initialParams['order-direction-field'],
-      },
-      {
-        filter: ''
-      }));
+    ));
 
 
     // TODO: RC We'll need to do this somewhere but not here

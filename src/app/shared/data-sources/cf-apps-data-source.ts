@@ -58,17 +58,7 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
     _store.dispatch(new SetListStateAction(
       paginationKey,
       'cards',
-      {
-        pageIndex: 0,
-        pageSize: 50,
-      },
-      {
-        direction: action.initialParams['order-direction'] as SortDirection,
-        field: action.initialParams['order-direction-field'],
-      },
-      {
-        filter: ''
-      }));
+    ));
 
     this.localDataFunctions = [
       (entities, paginationState) => {
