@@ -20,9 +20,9 @@ export class ListsState { [key: string]: ListState }
 
 export interface ListState {
   view: ListView;
-  pagination: ListPagination;
-  sort: ListSort;
-  filter: ListFilter;
+  // pagination: ListPagination;
+  // sort: ListSort;
+  // filter: ListFilter;
 }
 
 const defaultListsState = {} as ListsState;
@@ -49,12 +49,12 @@ export function listReducer(state = defaultListsState, action): ListsState {
     case ListStateActionTypes.SET_VIEW:
       const listView = (action as SetListViewAction).view;
       return mergeListState(state, action.key, 'view', listView ? listView.toString() : '');
-    case ListStateActionTypes.SET_PAGINATION:
-      return mergeListState(state, action.key, 'pagination', (action as SetListPaginationAction).pagination);
-    case ListStateActionTypes.SET_SORT:
-      return mergeListState(state, action.key, 'sort', (action as SetListSortAction).sort);
-    case ListStateActionTypes.SET_FILTER:
-      return mergeListState(state, action.key, 'filter', (action as SetListFilterAction).filter);
+    // case ListStateActionTypes.SET_PAGINATION:
+    //   return mergeListState(state, action.key, 'pagination', (action as SetListPaginationAction).pagination);
+    // case ListStateActionTypes.SET_SORT:
+    //   return mergeListState(state, action.key, 'sort', (action as SetListSortAction).sort);
+    // case ListStateActionTypes.SET_FILTER:
+    //   return mergeListState(state, action.key, 'filter', (action as SetListFilterAction).filter);
     default:
       return state;
   }
@@ -72,15 +72,12 @@ function mergeListState(state, listKey, key, value) {
 export const getListStateObservable = (store: Store<AppState>, key: string): Observable<ListState> => store.select(selectListState(key));
 export const getListStateObservables = (store: Store<AppState>, key: string): {
   view: Observable<ListView>,
-  pagination: Observable<ListPagination>,
-  sort: Observable<ListSort>,
-  filter: Observable<ListFilter>,
 } => {
   return {
     view: store.select<ListView>(selectListStateProperty(key, 'view')),
-    pagination: store.select<ListPagination>(selectListStateProperty(key, 'pagination')),
-    sort: store.select<ListSort>(selectListStateProperty(key, 'sort')),
-    filter: store.select<ListFilter>(selectListStateProperty(key, 'filter')),
+    // pagination: store.select<ListPagination>(selectListStateProperty(key, 'pagination')),
+    // sort: store.select<ListSort>(selectListStateProperty(key, 'sort')),
+    // filter: store.select<ListFilter>(selectListStateProperty(key, 'filter')),
   };
 };
 

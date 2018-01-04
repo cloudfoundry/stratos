@@ -1,7 +1,7 @@
 import { OperatorFunction } from 'rxjs/interfaces';
 import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
-import { ListPagination, ListSort, SetListPaginationAction } from '../../store/actions/list.actions';
+import { ListPagination, ListSort, SetListPaginationAction, ListFilter } from '../../store/actions/list.actions';
 import { EntityInfo } from '../../store/types/api.types';
 import { fileExists } from 'ts-node/dist';
 import { DataSource } from '@angular/cdk/table';
@@ -13,16 +13,16 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
-import { AddParams, SetPage } from '../../store/actions/pagination.actions';
+import { AddParams, SetPage, RemoveParams } from '../../store/actions/pagination.actions';
 import { ListDataSource } from './list-data-source';
 import { IListDataSource, getRowUniqueId } from './list-data-source-types';
 import { map } from 'rxjs/operators/map';
 
 export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> implements IListDataSource<T> {
 
-  private cfUberSub: Subscription;
+  // private cfUberSub: Subscription;
 
-  public pagination$: Observable<any>;
+  // public pagination$: Observable<any>;
 
   private entities$: Observable<T>;
   private listPaginationWithCfPagination$;
@@ -33,6 +33,20 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
   public filteredRows: Array<T>;
 
   private orderDirectionParam = 'order-direction';
+
+  public getFilterFromParams(pag: PaginationEntityState) {
+    return pag.params.filter;
+  }
+  public setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter) {
+    if (filter && filter.filter && filter.filter.length) {
+      store.dispatch(new AddParams(entityKey, paginationKey, {
+        filter: filter.filter
+      }));
+    } else {
+      // if (pag.params.q.find((q: QParam) => q.key === 'name'))
+      store.dispatch(new RemoveParams(entityKey, paginationKey, ['filter'], []));
+    }
+  }
 
   constructor(
     protected _cfStore: Store<AppState>,
@@ -116,6 +130,6 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
   }
 
   destroy() {
-    this.cfUberSub.unsubscribe();
+    // this.cfUberSub.unsubscribe();
   }
 }

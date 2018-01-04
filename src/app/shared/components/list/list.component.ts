@@ -25,7 +25,6 @@ import {
   ListView,
   SetListFilterAction,
   SetListPaginationAction,
-  SetListSortAction,
   SetListViewAction,
 } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
@@ -127,23 +126,22 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.columns = this.listConfigService.getColumns();
     this.dataSource = this.listConfigService.getDataSource();
 
-    const listPagination$ = this.dataSource.pagination$.map(pag => ({
-      totalResults: pag.totalResults,
-      pageSize: pag.params['results-per-page'] || 5,
-      pageIndex: pag.currentPage,
-    })
-    );
-
     const controllerConfig = new PaginationControllerConfig(
       this.dataSource.listStateKey,
-      listPagination$,
+      this.dataSource.pagination$,
       this.dataSource.paginationKey,
-      this.dataSource.entityKey
+      this.dataSource.entityKey,
+      this.dataSource.getFilterFromParams,
+      this.dataSource.setFilterParam
     );
+
+    // this.paginationController = this.listConfigService.isLocal ?
+    //   new ClientPagination(this._store, controllerConfig) :
+    //   new ServerPagination(this._store, controllerConfig);
 
     this.paginationController = this.listConfigService.isLocal ?
       new ClientPagination(this._store, controllerConfig) :
-      new ServerPagination(this._store, controllerConfig);
+      new ClientPagination(this._store, controllerConfig);
 
     // const paginationStoreToWidget = this.dataSource.clientPagination$.do((pagination: ListPagination) => {
     //   this.paginator.length = pagination.totalResults;
@@ -151,6 +149,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     //   this.paginator.pageSize = pagination.pageSize;
     //   this.paginator.pageSizeOptions = pagination.pageSizeOptions;
     // });
+    // TODO: This should be configurable per list
     this.paginator.pageSizeOptions = [5, 10, 20];
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
@@ -175,7 +174,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     //     ));
     //   });
 
-    const filterWidgeToStore = this.filter.valueChanges
+    const filterWidgetToStore = this.filter.valueChanges
       .debounceTime(500)
       .distinctUntilChanged()
       .map(value => value as string)
@@ -185,13 +184,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       return column.sort;
     });
 
-    // const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
-    //   this.headerSortField.value = sort.field;
-    //   this.headerSortDirection = sort.direction;
-    // });
-    const sortStoreToWidget = this.dataSource.sort$.do(sort => this.paginationController.sort(sort));
+    const sortStoreToWidget = this.paginationController.sort$.do((sort: ListSort) => {
+      this.headerSortField.value = sort.field;
+      this.headerSortDirection = sort.direction;
+    });
+    // const sortStoreToWidget = this.dataSource.sort$.do(sort => this.paginationController.sort(sort));
 
-    const filterStoreToWidget = this.dataSource.filter$.do((filter: ListFilter) => {
+    const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
       this.filter.model = filter.filter;
     });
 
@@ -200,7 +199,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       paginationStoreToWidget,
       paginationWidgetToStore,
       filterStoreToWidget,
-      filterWidgeToStore,
+      filterWidgetToStore,
       sortStoreToWidget,
     ).subscribe();
 
@@ -222,13 +221,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   updateListSort(field: string, direction: SortDirection) {
     this.headerSortField.value = field;
     this.headerSortDirection = direction;
-    this._store.dispatch(new SetListSortAction(
-      this.dataSource.listStateKey,
-      {
-        field: field,
-        direction: direction,
-      }
-    ));
+    this.paginationController.sort({
+      direction,
+      field
+    });
+    // this._store.dispatch(new SetListSortAction(
+    //   this.dataSource.listStateKey,
+    //   {
+    //     field: field,
+    //     direction: direction,
+    //   }
+    // ));
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {

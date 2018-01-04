@@ -13,7 +13,29 @@ import { ListActions } from './list-data-source-types';
 
 export class CfAppsDataSource extends CfListDataSource<APIResource> {
 
-  cfFilterSub: Subscription;
+  // cfFilterSub: Subscription;
+
+  public getFilterFromParams(pag: PaginationEntityState) {
+    const q = pag.params.q;
+    if (q) {
+      const qParam = q.find((q: QParam) => {
+        return q.key === 'name';
+      });
+      return qParam ? qParam.value as string : '';
+    }
+  }
+  public setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter) {
+    if (filter && filter.filter && filter.filter.length) {
+      store.dispatch(new AddParams(entityKey, paginationKey, {
+        q: [
+          new QParam('name', filter.filter, ' IN '),
+        ]
+      }));
+    } else {
+      // if (pag.params.q.find((q: QParam) => q.key === 'name'))
+      store.dispatch(new RemoveParams(entityKey, paginationKey, [], ['name']));
+    }
+  }
 
   constructor(
     _store: Store<AppState>,
@@ -65,7 +87,7 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
   }
 
   destroy() {
-    this.cfFilterSub.unsubscribe();
+    // this.cfFilterSub.unsubscribe();
     super.destroy();
   }
 }

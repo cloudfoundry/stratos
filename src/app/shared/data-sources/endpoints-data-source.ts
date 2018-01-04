@@ -36,6 +36,7 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
       EndpointsDataSource._storeKey
     );
 
+    // TODO: RC remove pag/sort/filter, etc
     _eStore.dispatch(new SetListStateAction(
       EndpointsDataSource._storeKey,
       'table',

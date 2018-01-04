@@ -1,9 +1,9 @@
-import { Action } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
-import { ListFilter, ListSort, ListView } from '../../store/actions/list.actions';
-import { IRequestEntityTypeState } from '../../store/app-state';
+import { ListFilter, ListSort, ListView, ListPagination } from '../../store/actions/list.actions';
+import { IRequestEntityTypeState, AppState } from '../../store/app-state';
 import { ListState } from '../../store/reducers/list.reducer';
 import { PaginationEntityState } from './../../store/types/pagination.types';
 
@@ -39,8 +39,8 @@ export interface IListDataSource<T> {
   view$: Observable<ListView>;
   state$: Observable<ListState>;
   pagination$: Observable<PaginationEntityState>;
-  sort$: Observable<ListSort>;
-  filter$: Observable<ListFilter>;
+  // sort$: Observable<ListSort>;
+  // filter$: Observable<ListFilter>;
   isLocal?: boolean;
 
   entityKey: string;
@@ -64,6 +64,8 @@ export interface IListDataSource<T> {
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
 
+  getFilterFromParams(pag: PaginationEntityState): string;
+  setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter);
 
   connect(): Observable<T[]>;
   destroy();

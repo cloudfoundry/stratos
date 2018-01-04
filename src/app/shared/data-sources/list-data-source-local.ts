@@ -34,10 +34,11 @@ export abstract class LocalListDataSource<T> extends ListDataSource<T> implement
       this.page$ = this.data$
         .combineLatest(
         this.pagination$,
-        this.sort$,
-        this.filter$,
+        // this.sort$,
+        // this.filter$,
       )
-        .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
+        .map(([collection, pagination]: [Array<T>, ListPagination]) => {
+          // .map(([collection, pagination, sort, filter]: [Array<T>, ListPagination, ListSort, ListFilter]) => {
           if (pagination.totalResults !== collection.length) {
             this._dStore.dispatch(new SetListPaginationAction(this.listStateKey, {
               ...pagination,
@@ -45,11 +46,13 @@ export abstract class LocalListDataSource<T> extends ListDataSource<T> implement
             }));
           }
 
-          const filtered = this.listFilter(collection, filter);
+          // const filtered = this.listFilter(collection, filter);
 
-          const sorted = this.listSort(filtered, sort);
+          // const sorted = this.listSort(filtered, sort);
 
-          const page = this.paginate(sorted, pagination.pageSize, pagination.pageIndex);
+          // const page = this.paginate(sorted, pagination.pageSize, pagination.pageIndex);
+          const page = this.paginate(collection, pagination.pageSize, pagination.pageIndex);
+
 
           return page;
         });

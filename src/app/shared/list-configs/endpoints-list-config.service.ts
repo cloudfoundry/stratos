@@ -1,3 +1,4 @@
+import { isLowerCase } from 'tslint/lib/utils';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -78,7 +79,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     },
     icon: 'remove_from_queue',
     label: 'Disconnect',
-    description: `Disconnect but don't delete`,
+    description: ``, // Description depends on console user permission
     visible: row => !!(row.info && row.info.user),
     enabled: row => true,
   };
@@ -153,7 +154,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       cellFlex: '1'
     },
   ];
-
+  isLocal = true;
   dataSource: EndpointsDataSource;
 
   private handleAction(item, effectKey, handleChange) {

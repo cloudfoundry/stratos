@@ -11,11 +11,32 @@ import { schema } from 'normalizr';
 import { CfListDataSource } from './list-data-source-cf';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams, SetParams } from '../../store/actions/pagination.actions';
-import { ListFilter, SetListStateAction } from '../../store/actions/list.actions';
+import { ListFilter, SetListStateAction, ListPagination } from '../../store/actions/list.actions';
 
 export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
 
-  cfFilterSub: Subscription;
+  // cfFilterSub: Subscription;
+  public getFilterFromParams(pag: PaginationEntityState) {
+    const q = pag.params.q;
+    if (q) {
+      const qParam = q.find((q: QParam) => {
+        return q.key === 'type';
+      });
+      return qParam ? qParam.value as string : '';
+    }
+  }
+  public setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter) {
+    if (filter && filter.filter && filter.filter.length) {
+      store.dispatch(new AddParams(entityKey, paginationKey, {
+        q: [
+          new QParam('type', filter.filter, ' IN '),
+        ]
+      }));
+    } else {
+      // if (pag.params.q.find((q: QParam) => q.key === 'type'))
+      store.dispatch(new RemoveParams(entityKey, paginationKey, [], ['type']));
+    }
+  }
 
   constructor(
     _store: Store<AppState>,
@@ -54,25 +75,26 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
     //   }));
 
 
-    const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
-      .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
-        if (filter && filter.filter && filter.filter.length) {
-          const q = pag.params.q;
-          this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-            q: [
-              new QParam('type', filter.filter, ' IN '),
-            ]
-          }));
-        } else if (pag.params.q.find((q: QParam) => q.key === 'type')) {
-          this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
-        }
-      });
-    this.cfFilterSub = cfFilter$.subscribe();
+    // TODO: RC We'll need to do this somewhere but not here
+    // const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
+    //   .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
+    //     if (filter && filter.filter && filter.filter.length) {
+    //       const q = pag.params.q;
+    //       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
+    //         q: [
+    //           new QParam('type', filter.filter, ' IN '),
+    //         ]
+    //       }));
+    //     } else if (pag.params.q.find((q: QParam) => q.key === 'type')) {
+    //       this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
+    //     }
+    //   });
+    // this.cfFilterSub = cfFilter$.subscribe();
 
   }
 
   destroy() {
-    this.cfFilterSub.unsubscribe();
+    // this.cfFilterSub.unsubscribe();
     super.destroy();
   }
 }

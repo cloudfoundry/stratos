@@ -18,8 +18,8 @@ export abstract class ListDataSource<T> extends DataSource<T> implements IListDa
   public view$: Observable<ListView>;
   public state$: Observable<ListState>;
   public pagination$: Observable<PaginationEntityState>;
-  public sort$: Observable<ListSort>;
-  public filter$: Observable<ListFilter>;
+  // public sort$: Observable<ListSort>;
+  // public filter$: Observable<ListFilter>;
   public page$: Observable<T[]>;
 
   public entityKey: string;
@@ -38,6 +38,9 @@ export abstract class ListDataSource<T> extends DataSource<T> implements IListDa
 
   public editRow: T;
 
+  public abstract getFilterFromParams(pag: PaginationEntityState): string;
+  public abstract setFilterParam(store: Store<AppState>, entityKey: string, paginationKey: string, filter: ListFilter);
+
   constructor(
     private _store: Store<AppState>,
     private _getRowUniqueId: getRowUniqueId,
@@ -48,13 +51,14 @@ export abstract class ListDataSource<T> extends DataSource<T> implements IListDa
     this.addItem = this.getEmptyType();
 
     this.state$ = getListStateObservable(this._store, listStateKey);
-    const { view, pagination, sort, filter } = getListStateObservables(this._store, listStateKey);
+    const { view, } = getListStateObservables(this._store, listStateKey);
     this.view$ = view;
     // this.clientPagination$ = pagination.filter(x => !!x);
-    this.sort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
-      return x.direction === y.direction && x.field === y.field;
-    });
-    this.filter$ = filter.filter(x => !!x);
+    // TODO: RC Ensure these only fire when they should in new world
+    // this.sort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
+    //   return x.direction === y.direction && x.field === y.field;
+    // });
+    // this.filter$ = filter.filter(x => !!x);
   }
 
   abstract connect(): Observable<T[]>;
