@@ -34,7 +34,32 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
       GetAllCNSIS.storeKey,
       null,
       true, // isLocal
-      []
+      [
+        {
+          type: 'filter',
+          field: 'name'
+        },
+        {
+          type: 'sort',
+          orderKey: 'name',
+          field: 'name'
+        },
+        {
+          type: 'sort',
+          orderKey: 'connection',
+          field: 'info.user.name'
+        },
+        {
+          type: 'sort',
+          orderKey: 'type',
+          field: 'cnsi_type'
+        },
+        {
+          type: 'sort',
+          orderKey: 'address',
+          field: 'api_endpoint.Host'
+        },
+      ]
     );
 
     // TODO: RC remove pag/sort/filter, etc

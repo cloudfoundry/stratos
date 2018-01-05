@@ -26,7 +26,7 @@ function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
       if (!value) {
         return false;
       }
-      return value.includes(paginationState.clientPagination.filter);
+      return value.toUpperCase().includes(paginationState.clientPagination.filter.toUpperCase());
     });
   };
 }
@@ -45,10 +45,10 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
         const valueA = getValue(a, fieldArray).toUpperCase();
         const valueB = getValue(b, fieldArray).toUpperCase();
         if (valueA > valueB) {
-          return orderDirection === 'desc' ? -1 : 1;
+          return orderDirection === 'desc' ? 1 : -1;
         }
         if (valueA < valueB) {
-          return orderDirection === 'desc' ? 1 : -1;
+          return orderDirection === 'desc' ? -1 : 1;
         }
         return 0;
       });
