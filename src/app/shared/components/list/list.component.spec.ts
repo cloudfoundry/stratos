@@ -1,3 +1,7 @@
+import { ApplicationStateComponent } from '../application-state/application-state.component';
+import { ApplicationStateIconComponent } from '../application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconPipe } from '../application-state/application-state-icon/application-state-icon.pipe';
+import { ApplicationStateService } from '../application-state/application-state.service';
 import { EndpointsListConfigService } from '../../list-configs/endpoints-list-config.service';
 import { TableCellComponent } from '../table/table-cell/table-cell.component';
 import { EventTabActorIconPipe } from '../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
@@ -30,7 +34,8 @@ describe('ListComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       providers: [
-        { provide: ListConfig, useClass: EndpointsListConfigService }
+        { provide: ListConfig, useClass: EndpointsListConfigService },
+        ApplicationStateService
       ],
       declarations: [
         ...TableCellEntryPoints,
@@ -42,13 +47,16 @@ describe('ListComponent', () => {
         EventTabActorIconPipe,
         ValuesPipe,
         TableComponent,
+        ApplicationStateComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe,
       ],
       imports: [
         CoreModule,
         createBasicStoreModule(),
         NoopAnimationsModule
-      ]
-    })
+      ],
+   })
       .compileComponents();
   }));
 

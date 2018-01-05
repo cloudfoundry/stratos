@@ -1,3 +1,9 @@
+import { ApplicationStateComponent } from '../../application-state/application-state.component';
+import {
+    ApplicationStateIconComponent,
+} from '../../application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconPipe } from '../../application-state/application-state-icon/application-state-icon.pipe';
+import { ApplicationStateService } from '../../application-state/application-state.service';
 import { TableCellComponent } from './table-cell.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellEntryPoints } from '../../../../test-framework/list-table-helper';
@@ -17,9 +23,15 @@ describe('TableCellComponent', () => {
         ...TableCellEntryPoints,
         EventTabActorIconPipe,
         ValuesPipe,
+        ApplicationStateComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe,
       ],
       imports: [
         CoreModule,
+      ],
+      providers: [
+        ApplicationStateService,
       ]
 
     })

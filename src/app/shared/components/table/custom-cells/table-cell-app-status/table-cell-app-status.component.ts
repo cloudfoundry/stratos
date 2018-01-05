@@ -37,10 +37,10 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   }
 
   ngOnInit() {
-    this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row.entity.guid))
+    this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row && this.row.entity && this.row.entity.guid))
     .pipe(
       tap( appInstances => {
-        this.applicationState = this.appStateService.get(this.row.entity, appInstances ? appInstances : null);
+        this.applicationState = this.appStateService.get(this.row && this.row.entity, appInstances ? appInstances : null);
       })
     ).subscribe();
   }

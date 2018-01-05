@@ -14,7 +14,7 @@ import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
 import { ApplicationService } from '../../application.service';
 import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
-import { ApplicationStateService } from './application-state/application-state.service';
+import { ApplicationStateService } from '../../../../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { APIResource } from '../../../../store/types/api.types';
 import { cnsisStoreNames } from '../../../../store/types/cnsis.types';
@@ -28,7 +28,7 @@ describe('BuildTabComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         BuildTabComponent,
-        ViewBuildpackComponent
+        ViewBuildpackComponent,
       ],
       imports: [
         CoreModule,

@@ -14,6 +14,13 @@ import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/ev
 import { TableCellComponent } from './table-cell/table-cell.component';
 import { TableComponent } from './table.component';
 import { ITableColumn } from './table.types';
+import { ApplicationStateComponent } from '../../../shared/components/application-state/application-state.component';
+import {
+  ApplicationStateIconComponent
+} from '../../../shared/components/application-state/application-state-icon/application-state-icon.component';
+import {
+  ApplicationStateIconPipe
+} from '../../../shared/components/application-state/application-state-icon/application-state-icon.pipe';
 
 
 describe('TableComponent', () => {
@@ -28,6 +35,9 @@ describe('TableComponent', () => {
         TableCellComponent,
         EventTabActorIconPipe,
         ValuesPipe,
+        ApplicationStateComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe
       ],
       imports: [
         CoreModule,
