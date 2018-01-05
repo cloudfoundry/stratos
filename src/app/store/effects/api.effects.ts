@@ -100,54 +100,17 @@ export class APIEffect {
         state.requestData.endpoint, options.headers
       );
 
-      let requestObservable;
       if (paginatedAction.flattenPagination) {
         options.params.set('page', '1');
-        requestObservable = this.makeRequest(options).pipe(
-          map(response => this.handleMultiEndpoints(response, apiAction)),
-          mergeMap(response => {
-            const { resData } = response;
-            let maxPages = 0;
-            // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
-            // endpoints
-            Object.keys(resData).forEach(endpointGuid => {
-              const endpoint = resData[endpointGuid];
-              if (maxPages < endpoint.total_pages) {
-                maxPages = endpoint.total_pages;
-              }
-            });
-            // Make those requests
-            const requests = [];
-            requests.push(Observable.of(resData)); // Already made the first request, don't repeat it
-            for (let i = 2; i <= maxPages; i++) { // Make any additional page requests
-              const requestOption = { ...options };
-              requestOption.params.set('page', i.toString());
-              requests.push(this.makeRequest(requestOption));
-            }
-            return forkJoin(requests);
-          }),
-          map((responses: Array<any>) => {
-            const newResData = responses[0];
-            // Merge all following responses into the first result/page
-            const endpointGuids = Object.keys(newResData);
-            for (let i = 1; i < responses.length; i++) { // Make any additional page requests
-              const endpointResponse = responses[i];
-              console.log(endpointResponse);
-              endpointGuids.forEach(endpointGuid => {
-                const endpoint = endpointResponse[endpointGuid];
-                if (endpoint && endpoint.resources && endpoint.resources.length) {
-                  newResData[endpointGuid].resources = newResData[endpointGuid].resources.concat(endpoint.resources);
-                }
-              });
-            }
-            return newResData;
-          })
-        );
-      } else {
-        requestObservable = this.makeRequest(options);
       }
 
-      return requestObservable
+      let request = this.makeRequest(options);
+
+      if (paginatedAction.flattenPagination) {
+        request = this.flattenPagination(request, options);
+      }
+
+      return request
         .map(resData => this.handleMultiEndpoints(resData, apiAction))
         .mergeMap(response => {
           const { entities, totalResults } = response;
@@ -268,17 +231,15 @@ export class APIEffect {
   }
 
   private makeRequest(options): Observable<any> {
-    return this.http.request(new Request(options)).map(response => this.convertResponse(response));
-  }
-
-  private convertResponse(response) {
-    let resData;
-    try {
-      resData = response.json();
-    } catch (e) {
-      resData = null;
-    }
-    return resData;
+    return this.http.request(new Request(options)).map(response => {
+      let resData;
+      try {
+        resData = response.json();
+      } catch (e) {
+        resData = null;
+      }
+      return resData;
+    });
   }
 
   private handleMultiEndpoints(resData, apiAction): {
@@ -312,5 +273,46 @@ export class APIEffect {
       entities,
       totalResults
     };
+  }
+
+  private flattenPagination(firstRequest: Observable<{ resData }>, options) {
+    return firstRequest.pipe(
+      mergeMap(resData => {
+        // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
+        // endpoints
+        let maxPages = 0;
+        Object.keys(resData).forEach(endpointGuid => {
+          const endpoint = resData[endpointGuid];
+          if (maxPages < endpoint.total_pages) {
+            maxPages = endpoint.total_pages;
+          }
+        });
+        // Make those requests
+        const requests = [];
+        requests.push(Observable.of(resData)); // Already made the first request, don't repeat it
+        for (let i = 2; i <= maxPages; i++) { // Make any additional page requests
+          const requestOption = { ...options };
+          requestOption.params.set('page', i.toString());
+          requests.push(this.makeRequest(requestOption));
+        }
+        return forkJoin(requests);
+      }),
+      map((responses: Array<any>) => {
+        const newResData = responses[0];
+        // Merge all following responses into the first result/page
+        const endpointGuids = Object.keys(newResData);
+        for (let i = 1; i < responses.length; i++) { // Make any additional page requests
+          const endpointResponse = responses[i];
+          console.log(endpointResponse);
+          endpointGuids.forEach(endpointGuid => {
+            const endpoint = endpointResponse[endpointGuid];
+            if (endpoint && endpoint.resources && endpoint.resources.length) {
+              newResData[endpointGuid].resources = newResData[endpointGuid].resources.concat(endpoint.resources);
+            }
+          });
+        }
+        return newResData;
+      })
+    );
   }
 }
