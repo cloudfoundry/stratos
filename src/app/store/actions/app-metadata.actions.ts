@@ -138,8 +138,8 @@ export const getAppMetadataObservable = (
 ): Observable<any> => {
   let dispatched = false;
   return Observable.combineLatest(
-    store.select(selectMetadata(action.metadataType, appId)),
-    store.select(selectMetadataRequest(action.metadataType, appId))
+    store.select(selectMetadata(action.metadataType, appId)).startWith(null),
+    store.select(selectMetadataRequest(action.metadataType, appId)).startWith(null)
   )
     .mergeMap(([metadata, metadataRequestState]: [any, AppMetadataRequestState]) => {
       if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) { // && !dispatched

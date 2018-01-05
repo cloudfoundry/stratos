@@ -10,7 +10,7 @@ import { ApplicationServiceMock } from '../../../../test-framework/application-s
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../application.service';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
-import { ApplicationStateService } from '../build-tab/application-state/application-state.service';
+import { ApplicationStateService } from '../../../../shared/components/application-state/application-state.service';
 import { VariablesTabComponent } from './variables-tab.component';
 
 describe('VariablesTabComponent', () => {

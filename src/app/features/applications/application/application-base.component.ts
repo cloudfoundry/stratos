@@ -12,7 +12,7 @@ import { DeleteApplication, GetApplication, UpdateApplication, ApplicationSchema
 import { AppState } from '../../../store/app-state';
 import { ApplicationData, ApplicationService } from '../application.service';
 import { RouterNav } from '../../../store/actions/router.actions';
-import { ApplicationStateService } from './build-tab/application-state/application-state.service';
+import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 
 const applicationServiceFactory = (
   store: Store<AppState>,

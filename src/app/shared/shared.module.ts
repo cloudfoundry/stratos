@@ -52,7 +52,15 @@ import {
   TableCellEndpointStatusComponent
 } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
-
+import { TableCellAppStatusComponent } from './components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
+import {
+  ApplicationStateIconComponent,
+} from './components/application-state/application-state-icon/application-state-icon.component';
+import {
+  ApplicationStateIconPipe,
+} from './components/application-state/application-state-icon/application-state-icon.pipe';
+import { ApplicationStateComponent } from './components/application-state/application-state.component';
+import { ApplicationStateService } from './components/application-state/application-state.service';
 
 @NgModule({
   imports: [
@@ -102,6 +110,10 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
     CardEndpointComponent,
     TableCellEndpointStatusComponent,
     DialogErrorComponent,
+    TableCellAppStatusComponent,
+    ApplicationStateIconPipe,
+    ApplicationStateIconComponent,
+    ApplicationStateComponent,
   ],
   exports: [
     FormsModule,
@@ -126,8 +138,12 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
     CardsComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
+    ApplicationStateComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
-  providers: [ListConfig]
+  providers: [
+    ListConfig,
+    ApplicationStateService,
+  ]
 })
 export class SharedModule { }

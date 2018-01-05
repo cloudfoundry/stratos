@@ -1,3 +1,6 @@
+import { ApplicationStateComponent } from '../application-state/application-state.component';
+import { ApplicationStateIconComponent } from '../application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconPipe } from '../application-state/application-state-icon/application-state-icon.pipe';
 import { TableCellComponent } from '../table/table-cell/table-cell.component';
 import { EventTabActorIconPipe } from '../table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../pipes/values.pipe';
@@ -26,10 +29,12 @@ describe('CardsComponent', () => {
         ...TableCellEntryPoints,
         EventTabActorIconPipe,
         ValuesPipe,
+        ApplicationStateComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe
       ],
       imports: [
         CoreModule,
-
       ]
     })
       .compileComponents();
