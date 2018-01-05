@@ -58,17 +58,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     enabled: row => true,
   };
 
-  private listActionAdd: IGlobalListAction<CNSISModel> = {
-    action: () => {
-      this.store.dispatch(new RouterNav({ path: ['endpoints', 'new'] }));
-    },
-    icon: 'add',
-    label: 'Add',
-    description: '',
-    visible: row => true,
-    enabled: row => true,
-  };
-
   private listActionDisconnect: IListAction<CNSISModel> = {
     action: (item) => {
       this.store.dispatch(new DisconnectCnis(item.guid));
@@ -109,7 +98,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   ];
 
   private multiActions = [this.listActionDeleteMulti];
-  private globalActions = [this.listActionAdd];
+  private globalActions = [];
 
   columns: ITableColumn<CNSISModel>[] = [
     {
