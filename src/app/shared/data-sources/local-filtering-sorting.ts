@@ -9,7 +9,6 @@ export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFu
         case 'filter':
           return getFilterFunction(def);
       }
-
     }
     return functionOrDef as DataFunction<any>;
   });

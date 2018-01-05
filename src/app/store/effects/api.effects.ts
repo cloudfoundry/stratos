@@ -1,3 +1,5 @@
+import { request } from 'http';
+import { totalmem } from 'os';
 import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
@@ -31,6 +33,8 @@ import { AppState, IRequestEntityTypeState } from './../app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
+import { map, mergeMap } from 'rxjs/operators';
+import { forkJoin } from 'rxjs/observable/forkJoin';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -96,34 +100,57 @@ export class APIEffect {
         state.requestData.endpoint, options.headers
       );
 
-      return this.http.request(new Request(options))
-        .mergeMap(response => {
-          let resData;
-          try {
-            resData = response.json();
-          } catch (e) {
-            resData = null;
-          }
-          if (resData) {
-            const cnsisErrors = this.getErrors(resData);
-            if (cnsisErrors.length) {
-              // We should consider not completely failing the whole if some cnsis return.
-              throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+      let requestObservable;
+      if (paginatedAction.flattenPagination) {
+        options.params.set('page', '1');
+        requestObservable = this.makeRequest(options).pipe(
+          map(response => this.handleMultiEndpoints(response, apiAction)),
+          mergeMap(response => {
+            const { resData } = response;
+            let maxPages = 0;
+            // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
+            // endpoints
+            Object.keys(resData).forEach(endpointGuid => {
+              const endpoint = resData[endpointGuid];
+              if (maxPages < endpoint.total_pages) {
+                maxPages = endpoint.total_pages;
+              }
+            });
+            // Make those requests
+            const requests = [];
+            requests.push(Observable.of(resData)); // Already made the first request, don't repeat it
+            for (let i = 2; i <= maxPages; i++) { // Make any additional page requests
+              const requestOption = { ...options };
+              requestOption.params.set('page', i.toString());
+              requests.push(this.makeRequest(requestOption));
             }
-          }
-          let entities;
-          let totalResults = 0;
+            return forkJoin(requests);
+          }),
+          map((responses: Array<any>) => {
+            const newResData = responses[0];
+            // Merge all following responses into the first result/page
+            const endpointGuids = Object.keys(newResData);
+            for (let i = 1; i < responses.length; i++) { // Make any additional page requests
+              const endpointResponse = responses[i];
+              console.log(endpointResponse);
+              endpointGuids.forEach(endpointGuid => {
+                const endpoint = endpointResponse[endpointGuid];
+                if (endpoint && endpoint.resources && endpoint.resources.length) {
+                  newResData[endpointGuid].resources = newResData[endpointGuid].resources.concat(endpoint.resources);
+                }
+              });
+            }
+            return newResData;
+          })
+        );
+      } else {
+        requestObservable = this.makeRequest(options);
+      }
 
-          if (resData) {
-            const entityData = this.getEntities(apiAction, resData);
-            entities = entityData.entities;
-            totalResults = entityData.totalResults;
-          }
-
-          entities = entities || {
-            entities: {},
-            result: []
-          };
+      return requestObservable
+        .map(resData => this.handleMultiEndpoints(resData, apiAction))
+        .mergeMap(response => {
+          const { entities, totalResults } = response;
 
           const actions = [];
           actions.push({ type: apiAction.actions[1], apiAction });
@@ -237,6 +264,53 @@ export class APIEffect {
     return {
       ...paginationState.params,
       page: paginationState.currentPage.toString(),
+    };
+  }
+
+  private makeRequest(options): Observable<any> {
+    return this.http.request(new Request(options)).map(response => this.convertResponse(response));
+  }
+
+  private convertResponse(response) {
+    let resData;
+    try {
+      resData = response.json();
+    } catch (e) {
+      resData = null;
+    }
+    return resData;
+  }
+
+  private handleMultiEndpoints(resData, apiAction): {
+    resData,
+    entities,
+    totalResults
+  } {
+    if (resData) {
+      const cnsisErrors = this.getErrors(resData);
+      if (cnsisErrors.length) {
+        // We should consider not completely failing the whole if some cnsis return.
+        throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+      }
+    }
+    let entities;
+    let totalResults = 0;
+
+    if (resData) {
+      const entityData = this.getEntities(apiAction, resData);
+      entities = entityData.entities;
+      totalResults = entityData.totalResults;
+    }
+
+    entities = entities || {
+      entities: {},
+      result: []
+    };
+
+    return {
+      resData,
+      entities,
+      totalResults
     };
   }
 }

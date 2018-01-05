@@ -36,6 +36,7 @@ export interface PaginationAction extends Action {
 }
 
 export interface PaginatedAction extends PaginationAction, IRequestAction {
+  flattenPagination?: boolean;
   initialParams?: PaginationParam;
   options?: {
     params?: {

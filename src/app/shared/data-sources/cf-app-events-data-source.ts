@@ -54,7 +54,10 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
         return object.entity.metadata ? object.entity.metadata.guid : null;
       },
       () => ({} as EntityInfo),
-      paginationKey
+      paginationKey,
+      null,
+      false,
+      []
     );
 
     _store.dispatch(new SetListStateAction(

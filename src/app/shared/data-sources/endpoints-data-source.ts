@@ -33,7 +33,8 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
       }),
       GetAllCNSIS.storeKey,
       null,
-      true// isLocal
+      true, // isLocal
+      []
     );
 
     // TODO: RC remove pag/sort/filter, etc
