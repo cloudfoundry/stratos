@@ -92,8 +92,8 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
               return fn(value, paginationEntity);
             }, entities);
           }
-          const pages = this.splitClientPages(entities, paginationEntity.clientPageSize);
-          return pages[paginationEntity.currentPage - 1];
+          const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
+          return pages[paginationEntity.clientPagination.currentPage - 1];
         })
       );
     }

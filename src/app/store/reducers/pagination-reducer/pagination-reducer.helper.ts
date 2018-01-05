@@ -160,7 +160,6 @@ function getObservables<T = any>(
         } else {
           page = paginationEntity.ids[paginationEntity.currentPage];
         }
-        debugger;
         return page ? denormalize(page, schema, entities) : null;
       });
 

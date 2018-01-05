@@ -14,6 +14,7 @@ export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGES = '[Pagination] Clear pages';
 export const SET_PAGE = '[Pagination] Set Page';
 export const SET_CLIENT_PAGE_SIZE = '[Pagination] Set client page size';
+export const SET_CLIENT_PAGE = '[Pagination] Set client page';
 export const SET_PARAMS = '[Pagination] Set Params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
@@ -49,6 +50,16 @@ export class SetClientPageSize implements PaginationAction {
   ) {
   }
   type = SET_CLIENT_PAGE_SIZE;
+}
+
+export class SetClientPage implements PaginationAction {
+  constructor(
+    public entityKey: string,
+    public paginationKey: string,
+    public pageNumber: number,
+  ) {
+  }
+  type = SET_CLIENT_PAGE;
 }
 
 export class SetParams implements PaginationAction {

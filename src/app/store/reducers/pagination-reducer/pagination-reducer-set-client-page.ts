@@ -1,10 +1,13 @@
-import { SetPage } from '../../actions/pagination.actions';
+import { SetClientPage } from '../../actions/pagination.actions';
 import { PaginationEntityState } from '../../types/pagination.types';
 
-export function paginationSetClientPageSize(state: PaginationEntityState, action: SetPage) {
+export function paginationSetClientPage(state: PaginationEntityState, action: SetClientPage) {
   return {
     ...state,
     error: false,
-    clientPageSize: action.pageNumber
+    clientPagination: {
+      ...state.clientPagination,
+      currentPage: action.pageNumber
+    }
   };
 }
