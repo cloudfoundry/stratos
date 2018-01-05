@@ -106,12 +106,13 @@ export class APIEffect {
 
       let request = this.makeRequest(options);
 
+      // Should we flatten all pages into the first, thus fetching all entities?
       if (paginatedAction.flattenPagination) {
         request = this.flattenPagination(request, options);
       }
 
       return request
-        .map(resData => this.handleMultiEndpoints(resData, apiAction))
+        .map(resData => this.handleMultiEndpoints(resData, apiAction)) // Check for errors and fetch entities
         .mergeMap(response => {
           const { entities, totalResults } = response;
 
@@ -277,19 +278,19 @@ export class APIEffect {
 
   private flattenPagination(firstRequest: Observable<{ resData }>, options) {
     return firstRequest.pipe(
-      mergeMap(resData => {
+      mergeMap(firstResData => {
         // Discover the endpoint with the most pages. This is the amount of request we will need to make to fetch all pages from all
         // endpoints
         let maxPages = 0;
-        Object.keys(resData).forEach(endpointGuid => {
-          const endpoint = resData[endpointGuid];
+        Object.keys(firstResData).forEach(endpointGuid => {
+          const endpoint = firstResData[endpointGuid];
           if (maxPages < endpoint.total_pages) {
             maxPages = endpoint.total_pages;
           }
         });
         // Make those requests
         const requests = [];
-        requests.push(Observable.of(resData)); // Already made the first request, don't repeat it
+        requests.push(Observable.of(firstResData)); // Already made the first request, don't repeat it
         for (let i = 2; i <= maxPages; i++) { // Make any additional page requests
           const requestOption = { ...options };
           requestOption.params.set('page', i.toString());
@@ -298,8 +299,8 @@ export class APIEffect {
         return forkJoin(requests);
       }),
       map((responses: Array<any>) => {
+        // Merge all responses into the first page
         const newResData = responses[0];
-        // Merge all following responses into the first result/page
         const endpointGuids = Object.keys(newResData);
         for (let i = 1; i < responses.length; i++) { // Make any additional page requests
           const endpointResponse = responses[i];
