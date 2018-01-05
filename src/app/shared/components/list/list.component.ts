@@ -174,7 +174,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
       this.filter.model = filter.filter;
     });
-    debugger;
     this.uberSub = Observable.combineLatest(
       this.dataSource.page$,
       paginationStoreToWidget,

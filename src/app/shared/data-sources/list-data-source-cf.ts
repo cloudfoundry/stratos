@@ -118,7 +118,6 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
           }, entities);
         }
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-        // debugger;
         if (paginationEntity.totalResults !== entities.length) {
           this._cfStore.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
@@ -147,9 +146,5 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
 
   connect(): Observable<T[]> {
     return this.page$;
-  }
-
-  destroy() {
-    // this.cfUberSub.unsubscribe();
   }
 }
