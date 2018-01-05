@@ -65,7 +65,10 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
         const env = app[0].environment_json;
         const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
         return rows;
-      })
+      }),
+      true,
+      [
+      ]
     );
 
     this.cfGuid = _appService.cfGuid;
