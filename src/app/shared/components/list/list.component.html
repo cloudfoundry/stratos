@@ -49,6 +49,18 @@
           </div>
         </div>
         <div class="listComponent__header__bottom">
+          <div class="spacer listComponent__header__left">
+            <div class="selectFilters" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+              <mat-form-field *ngFor="let selectFilter of filterConfigs">
+                <!-- multiple for multi select, remove [(value)] with actual filter holder-->
+                <mat-select matInput shouldPlaceholderFloat="false" [(value)]="selectFilter.items[0].value" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="updateFilters(selectFilter.key, $event.value)">
+                  <mat-option *ngFor="let selectItem of selectFilter.items" [value]="selectItem.value">
+                    {{selectItem.label}}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
           <div class="listComponent__header__right">
             <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <button mat-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='asc'">

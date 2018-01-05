@@ -53,4 +53,12 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   getSingleActions = () => null;
   getColumns = () => this.columns;
   getDataSource = () => this.appsDataSource;
+  getFiltersConfigs = () => [{
+    key: 'endpoint',
+    label: 'Endpoint',
+    items: [{
+      label: 'All Endpoints',
+      value: 'all'
+    }]
+  }]
 }

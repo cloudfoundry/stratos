@@ -37,7 +37,19 @@ export interface IListConfig<T> {
   getSingleActions: () => IListAction<T>[];
   getColumns: () => ITableColumn<T>[];
   getDataSource: () => CfListDataSource<T> | LocalListDataSource<T>;
+  getFiltersConfigs: () => IListFilterConfig[];
   isLocal?: boolean;
+}
+
+export interface IListFilterConfig {
+  key: string;
+  label: string;
+  items: IListFilterConfigItem[];
+}
+
+export interface IListFilterConfigItem {
+  label: string;
+  value: string;
 }
 
 export class ListConfig implements IListConfig<any> {
@@ -47,6 +59,7 @@ export class ListConfig implements IListConfig<any> {
   getSingleActions = () => null;
   getColumns = () => null;
   getDataSource = () => null;
+  getFiltersConfigs = () => [];
 }
 
 export interface IBaseListAction<T> {
@@ -99,6 +112,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   singleActions: IListAction<T>[];
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
+  filterConfigs: IListFilterConfig[];
 
   paginationController: IPaginationController<T>;
 
@@ -121,6 +135,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.singleActions = this.listConfigService.getSingleActions();
     this.columns = this.listConfigService.getColumns();
     this.dataSource = this.listConfigService.getDataSource();
+    this.filterConfigs = this.listConfigService.getFiltersConfigs();
 
     this.paginationController = new PaginationController(this._store, this.dataSource);
 
@@ -191,6 +206,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       direction,
       field
     });
+  }
+
+  updateFilters(filterItemKey: string, selectedValue: string) {
+    console.log(`Filter Key: ${filterItemKey} Filter Value: ${selectedValue}`);
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
