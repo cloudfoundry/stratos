@@ -6,8 +6,8 @@ export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFu
       switch (def.type) {
         case 'sort':
           return getSortFunction(def);
-        case 'filter'
-
+        case 'filter':
+          return getFilterFunction(def);
       }
 
     }
@@ -15,35 +15,25 @@ export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFu
   });
 }
 
-function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
-  const fieldArray = def.field.split('.');
-  return (entities, paginationState) => {
-    const orderKey = paginationState.params['order-direction-field'];
-    if (orderKey === def.orderKey) {
-      const orderDirection = paginationState.params['order-direction'];
-      if (!entities || !orderKey) {
-        return entities;
-      }
+function getFieldArray(def: DataFunctionDefinition) {
+  return def.field.split('.');
+}
 
-      return entities.sort((a, b) => {
-        const valueA = getValue(a, fieldArray).toUpperCase();
-        const valueB = getValue(b, fieldArray).toUpperCase();
-        if (valueA > valueB) {
-          return orderDirection === 'desc' ? -1 : 1;
-        }
-        if (valueA < valueB) {
-          return orderDirection === 'desc' ? 1 : -1;
-        }
-        return 0;
-      });
-    } else {
-      return entities;
-    }
+function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
+  const fieldArray = getFieldArray(def);
+  return (entities, paginationState) => {
+    return entities.filter(e => {
+      const value = getValue(e, fieldArray);
+      if (!value) {
+        return false;
+      }
+      return value.includes(paginationState.clientPagination.filter);
+    });
   };
 }
 
 function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
-  const fieldArray = def.field.split('.');
+  const fieldArray = getFieldArray(def);
   return (entities, paginationState) => {
     const orderKey = paginationState.params['order-direction-field'];
     if (orderKey === def.orderKey) {
@@ -69,7 +59,7 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
   };
 }
 
-function getValue(obj, fieldArray: string[], index = 0) {
+function getValue(obj, fieldArray: string[], index = 0): string {
   const field = fieldArray[index];
   if (!field) {
     return obj + '';

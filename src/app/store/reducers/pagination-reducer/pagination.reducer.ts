@@ -1,3 +1,4 @@
+import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
 import {
@@ -5,9 +6,11 @@ import {
   CLEAR_PAGES,
   CLEAR_PAGINATION_OF_TYPE,
   REMOVE_PARAMS,
+  SET_CLIENT_FILTER,
   SET_CLIENT_PAGE,
   SET_CLIENT_PAGE_SIZE,
   SET_PAGE,
+  SET_RESULT_COUNT,
   SET_PARAMS,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
@@ -25,6 +28,7 @@ import { paginationSuccess } from './pagination-reducer-success';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionKey, getActionType, getPaginationKey } from './pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from './pagination-reducer.types';
+import { paginationSetResultCount } from './pagination-reducer-set-result-count';
 
 export const defaultPaginationEntityState = {
   fetching: false,
@@ -39,9 +43,10 @@ export const defaultPaginationEntityState = {
   error: false,
   message: '',
   clientPagination: {
-    pageSize: 1,
+    pageSize: 10,
     currentPage: 1,
-    filter: ''
+    filter: '',
+    totalResults: 0
   }
 };
 
@@ -57,18 +62,22 @@ const getPaginationUpdater = function (types: [string, string, string]) {
         return paginationSuccess(state, action);
       case failureType:
         return paginationFailure(state, action);
+      case SET_RESULT_COUNT:
+        return paginationSetResultCount(state, action);
       case SET_PAGE:
         return paginationSetPage(state, action);
-      case SET_CLIENT_PAGE_SIZE:
-        return paginationSetClientPageSize(state, action);
-      case SET_CLIENT_PAGE:
-        return paginationSetClientPage(state, action);
       case SET_PARAMS:
         return paginationSetParams(state, action);
       case ADD_PARAMS:
         return paginationAddParams(state, action);
       case REMOVE_PARAMS:
         return paginationRemoveParams(state, action);
+      case SET_CLIENT_PAGE_SIZE:
+        return paginationSetClientPageSize(state, action);
+      case SET_CLIENT_PAGE:
+        return paginationSetClientPage(state, action);
+      case SET_CLIENT_FILTER:
+        return paginationSetClientFilter(state, action);
       default:
         return state;
     }
@@ -89,7 +98,7 @@ export function createPaginationReducer(types: [string, string, string]) {
     }
 
     if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-      return paginationClearType(state, action);
+      return paginationClearType(state, action, defaultPaginationEntityState);
     }
 
     return enterPaginationReducer(state, action, updatePagination);

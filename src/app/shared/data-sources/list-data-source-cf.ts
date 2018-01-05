@@ -14,15 +14,16 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
-import { AddParams, SetPage, RemoveParams } from '../../store/actions/pagination.actions';
+import { AddParams, SetPage, RemoveParams, SetResultCount } from '../../store/actions/pagination.actions';
 import { ListDataSource } from './list-data-source';
 import { IListDataSource, getRowUniqueId } from './list-data-source-types';
-import { map } from 'rxjs/operators';
+import { map, debounceTime } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators';
 import { composeFn } from '../../store/helpers/reducer.helper';
+import { distinctUntilChanged } from 'rxjs/operators';
 export interface DataFunctionDefinition {
   type: 'sort' | 'filter';
-  orderKey: string;
+  orderKey?: string;
   field: string;
 }
 
@@ -62,7 +63,7 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
     public paginationKey: string,
     private entityLettable: OperatorFunction<A[], T[]> = null,
     public isLocal = false,
-    public entityFunctions: (DataFunction<T> | DataFunctionDefinition)[]
+    public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[]
   ) {
     super(_cfStore, _cfGetRowUniqueId, getEmptyType, paginationKey);
 
@@ -76,34 +77,59 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
       isLocal
     );
 
-    const dataFunctions = getDataFunctionList(entityFunctions);
+    const dataFunctions = entityFunctions ? getDataFunctionList(entityFunctions) : null;
+    const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
 
-    if (this.entityLettable) {
-      this.page$ = entities$.pipe(
-        this.entityLettable
-      );
-    } else {
-      this.page$ = entities$.pipe(
-        map(res => res as T[])
-      );
-    }
     if (isLocal) {
-      this.page$ = this.page$.pipe(
-        withLatestFrom(pagination$),
-        map(([entities, paginationEntity]) => {
-          if (dataFunctions && dataFunctions.length) {
-            entities = dataFunctions.reduce((value, fn) => {
-              return fn(value, paginationEntity);
-            }, entities);
-          }
-          const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-          return pages[paginationEntity.clientPagination.currentPage - 1];
-        })
-      );
+      this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
+    } else {
+      this.page$ = letted$;
     }
 
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+  }
+
+  attatchEntityLettable(entities$, entityLettable) {
+    if (entityLettable) {
+      return entities$.pipe(
+        this.entityLettable
+      );
+    } else {
+      return entities$.pipe(
+        map(res => res as T[])
+      );
+    }
+  }
+
+  getLocalPagesObservable(page$, pagination$: Observable<PaginationEntityState>, dataFunctions) {
+    return page$.pipe(
+      withLatestFrom(pagination$),
+      distinctUntilChanged((oldVals, newVals) => {
+        const oldPag = this.getPaginationCompareString(oldVals[1]);
+        const newPag = this.getPaginationCompareString(oldVals[1]);
+        return oldPag !== newPag;
+      }),
+      debounceTime(10),
+      map(([entities, paginationEntity]) => {
+        if (dataFunctions && dataFunctions.length) {
+          entities = dataFunctions.reduce((value, fn) => {
+            return fn(value, paginationEntity);
+          }, entities);
+        }
+        const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
+        // debugger;
+        if (paginationEntity.totalResults !== entities.length) {
+          this._cfStore.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+        }
+
+        return pages[paginationEntity.clientPagination.currentPage - 1];
+      })
+    );
+  }
+
+  getPaginationCompareString(paginationEntity: PaginationEntityState) {
+    return Object.values(paginationEntity.clientPagination).join('.');
   }
 
   splitClientPages(entites: T[], pageSize: number): T[][] {

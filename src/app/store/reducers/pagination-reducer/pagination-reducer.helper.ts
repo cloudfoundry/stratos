@@ -125,15 +125,6 @@ function getObservables<T = any>(
   const entities$: Observable<T[]> =
     paginationSelect$
       .do(pagination => {
-        // if (
-        //   action.type !== RequestTypes.START &&
-        //   hasDispatchedOnce &&
-        //   (!pagination || !pagination.fetching)
-        // ) {
-        //   // If we're not dispatching a Request start action then we
-        //   // assume something will at some point further down the chain so we just wait.
-        //   return;
-        // }
         if (!pagination || !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
           hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
           store.dispatch(action);

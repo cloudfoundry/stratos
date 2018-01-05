@@ -7,7 +7,13 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { IListDataSource } from '../data-sources/list-data-source-types';
 import { map, filter } from 'rxjs/operators';
-import { AddParams, SetClientPage, SetClientPageSize, SetPage } from '../../store/actions/pagination.actions';
+import {
+  AddParams,
+  SetClientFilter,
+  SetClientPage,
+  SetClientPageSize,
+  SetPage,
+} from '../../store/actions/pagination.actions';
 
 export class PaginationController<T> implements IPaginationController<T> {
   constructor(
@@ -19,6 +25,7 @@ export class PaginationController<T> implements IPaginationController<T> {
       .map(pag => {
         const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page']) || 2;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 2;
+        // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
         return {
           totalResults: pag.totalResults,
           pageSize,
@@ -34,7 +41,10 @@ export class PaginationController<T> implements IPaginationController<T> {
     });
 
     this.filter$ = this.dataSource.pagination$.pipe(
-      map(pag => this.dataSource.getFilterFromParams(pag)),
+      map(pag => this.dataSource.isLocal ?
+        pag.clientPagination.filter :
+        this.dataSource.getFilterFromParams(pag)
+      ),
       filter(x => !!x),
       map(filterString => ({
         filter: filterString
@@ -63,16 +73,17 @@ export class PaginationController<T> implements IPaginationController<T> {
     }, this.dataSource.isLocal));
   }
   filter = filterString => {
-    this.dataSource.setFilterParam({
-      filter: filterString
-    });
-    // TODO: RC REMOVE THESE EVERYWHERE
-    // this.store.dispatch(new SetListFilterAction(
-    //   this.config.listStateKey,
-    //   {
-    //     filter: filterString
-    //   }
-    // ));
+    if (this.dataSource.isLocal) {
+      this.store.dispatch(new SetClientFilter(
+        this.dataSource.entityKey,
+        this.dataSource.paginationKey,
+        filterString
+      ));
+    } else {
+      this.dataSource.setFilterParam({
+        filter: filterString
+      });
+    }
   }
 }
 

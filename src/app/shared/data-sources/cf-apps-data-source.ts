@@ -55,6 +55,10 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
       true,
       [
         {
+          type: 'filter',
+          field: 'entity.name'
+        },
+        {
           type: 'sort',
           orderKey: 'creation',
           field: 'metadata.created_at'
@@ -74,7 +78,6 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
   }
 
   destroy() {
-    // this.cfFilterSub.unsubscribe();
     super.destroy();
   }
 }
