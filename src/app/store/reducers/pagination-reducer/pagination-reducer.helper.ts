@@ -85,37 +85,28 @@ export function getPaginationKey(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-export const getPaginationObservables = (function () {
-  const mem = {};
+export const getPaginationObservables = <T = any>(
+  { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
+  uid?: string,
+  isLocal = false
+): PaginationObservables<T> => {
+  const { entityKey, paginationKey } = action;
 
-  return function <T = any>(
-    { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
-    uid?: string,
-    isLocal = false
-  ): PaginationObservables<T> {
-    const _key = action.entityKey + action.paginationKey + (uid || '');
-    if (mem[_key]) {
-      return mem[_key];
-    }
-    const { entityKey, paginationKey } = action;
+  if (action.initialParams) {
+    store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams, isLocal));
+  }
 
-    if (action.initialParams) {
-      store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams, isLocal));
-    }
+  const obs = getObservables<T>(
+    store,
+    entityKey,
+    paginationKey,
+    action,
+    schema,
+    isLocal
+  );
 
-    const obs = getObservables<T>(
-      store,
-      entityKey,
-      paginationKey,
-      action,
-      schema,
-      isLocal
-    );
-
-    mem[_key] = obs;
-    return obs;
-  };
-})();
+  return obs;
+};
 
 function getObservables<T = any>(
   store: Store<AppState>,
@@ -143,13 +134,13 @@ function getObservables<T = any>(
         //   // assume something will at some point further down the chain so we just wait.
         //   return;
         // }
-        if (!(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+        if (!pagination || !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
           hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
           store.dispatch(action);
         }
       })
       .filter(pagination => {
-        return (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       })
       .withLatestFrom(store.select(getAPIRequestDataState))
       .map(([paginationEntity, entities]) => {

@@ -22,7 +22,7 @@ export class PaginationController<T> implements IPaginationController<T> {
         return {
           totalResults: pag.totalResults,
           pageSize,
-          pageIndex,
+          pageIndex
         };
       });
 

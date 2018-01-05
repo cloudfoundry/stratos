@@ -26,7 +26,7 @@ import { paginationFailure } from './pagination-reducer.failure';
 import { getActionKey, getActionType, getPaginationKey } from './pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from './pagination-reducer.types';
 
-const defaultPaginationEntityState = {
+export const defaultPaginationEntityState = {
   fetching: false,
   pageCount: 0,
   currentPage: 1,
@@ -40,7 +40,8 @@ const defaultPaginationEntityState = {
   message: '',
   clientPagination: {
     pageSize: 1,
-    currentPage: 1
+    currentPage: 1,
+    filter: ''
   }
 };
 

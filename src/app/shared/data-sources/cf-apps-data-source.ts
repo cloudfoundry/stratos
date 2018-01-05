@@ -52,44 +52,25 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
       () => ({} as APIResource),
       paginationKey,
       null,
-      true
+      true,
+      [
+        {
+          type: 'sort',
+          orderKey: 'creation',
+          field: 'metadata.created_at'
+        },
+        {
+          type: 'sort',
+          orderKey: 'name',
+          field: 'entity.name'
+        }
+      ]
     );
 
     _store.dispatch(new SetListStateAction(
       paginationKey,
       'cards',
     ));
-
-    this.localDataFunctions = [
-      (entities, paginationState) => {
-        const orderKey = paginationState.params['order-direction-field'];
-        const orderDirection = paginationState.params['order-direction'];
-        if (!entities || !orderKey) {
-          return entities;
-        }
-
-        return entities.sort((a, b) => {
-          const valueA = this.mapOrderKeyToValue(a, orderKey).toUpperCase();
-          const valueB = this.mapOrderKeyToValue(b, orderKey).toUpperCase();
-          if (valueA > valueB) {
-            return orderDirection === 'desc' ? -1 : 1;
-          }
-          if (valueA < valueB) {
-            return orderDirection === 'desc' ? 1 : -1;
-          }
-          return 0;
-        });
-      }
-    ];
-  }
-
-  mapOrderKeyToValue(app: APIResource, key: string) {
-    switch (key) {
-      case 'creation':
-        return app.metadata.created_at;
-      case 'name':
-        return app.entity.name;
-    }
   }
 
   destroy() {

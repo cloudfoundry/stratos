@@ -1,3 +1,4 @@
+import { getDataFunctionList } from './local-filtering-sorting';
 import { OperatorFunction } from 'rxjs/interfaces';
 import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
@@ -19,12 +20,14 @@ import { IListDataSource, getRowUniqueId } from './list-data-source-types';
 import { map } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators';
 import { composeFn } from '../../store/helpers/reducer.helper';
+export interface DataFunctionDefinition {
+  type: 'sort' | 'filter';
+  orderKey: string;
+  field: string;
+}
 
+export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
 export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> implements IListDataSource<T> {
-
-  // private cfUberSub: Subscription;
-
-  // public pagination$: Observable<any>;
 
   private entities$: Observable<T>;
   private listPaginationWithCfPagination$;
@@ -35,7 +38,6 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
   public filteredRows: Array<T>;
 
   private orderDirectionParam = 'order-direction';
-  public localDataFunctions?: ((entities: T[], paginationState: PaginationEntityState) => T[])[] = [];
 
   public getFilterFromParams(pag: PaginationEntityState) {
     return pag.params.filter;
@@ -59,7 +61,8 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
     getEmptyType: () => T,
     public paginationKey: string,
     private entityLettable: OperatorFunction<A[], T[]> = null,
-    public isLocal = false
+    public isLocal = false,
+    public entityFunctions: (DataFunction<T> | DataFunctionDefinition)[]
   ) {
     super(_cfStore, _cfGetRowUniqueId, getEmptyType, paginationKey);
 
@@ -73,6 +76,7 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
       isLocal
     );
 
+    const dataFunctions = getDataFunctionList(entityFunctions);
 
     if (this.entityLettable) {
       this.page$ = entities$.pipe(
@@ -87,8 +91,8 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
       this.page$ = this.page$.pipe(
         withLatestFrom(pagination$),
         map(([entities, paginationEntity]) => {
-          if (this.localDataFunctions && this.localDataFunctions.length) {
-            entities = this.localDataFunctions.reduce((value, fn) => {
+          if (dataFunctions && dataFunctions.length) {
+            entities = dataFunctions.reduce((value, fn) => {
               return fn(value, paginationEntity);
             }, entities);
           }
@@ -97,50 +101,6 @@ export abstract class CfListDataSource<T, A = T> extends ListDataSource<T> imple
         })
       );
     }
-
-    // Track changes from listPagination to cfPagination
-    // this.listPaginationWithCfPagination$ = this.pagination$.withLatestFrom(pagination$)
-    //   .do(([listPagination, pag]: [ListPagination, PaginationEntityState]) => {
-    //     if (pag.params[resultPerPageParam] !== listPagination.pageSize) {
-    //       console.log('adding params');
-    //       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-    //         [resultPerPageParam]: listPagination.pageSize
-    //       }));
-    //     }
-    //     if (pag.currentPage - 1 !== listPagination.pageIndex) {
-    //       this._cfStore.dispatch(new SetPage(this.sourceScheme.key, this.action.paginationKey, listPagination.pageIndex + 1));
-    //     }
-    //   });
-
-    // // Track changes from cfPagination to listPagination. This should be the only one
-    // this.cfPaginationWithListPagination$ = pagination$.withLatestFrom(this.pagination$)
-    //   .do(([pag, listPagination]: [PaginationEntityState, ListPagination]) => {
-    //     if (pag.totalResults !== listPagination.totalResults) {
-    //       console.log(pag);
-    //       this._cfStore.dispatch(new SetListPaginationAction(this._cfListStateKey, {
-    //         totalResults: pag.totalResults,
-    //       }));
-    //     }
-    //   });
-
-    // Track changes from listSort to cfPagination
-    // this.sortSub$ = this.sort$
-    //   .withLatestFrom(pagination$)
-    //   .do(([sortObj, pagination]) => {
-    //     const orderParam = pagination.params[this.orderDirectionParam];
-    //     if (!orderParam || orderParam !== sortObj.direction) {
-    //       console.log('adding params sprt');
-    //       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-    //         [this.orderDirectionParam]: sortObj.direction
-    //       }));
-    //     }
-    //   });
-
-    // this.cfUberSub = Observable.combineLatest(
-    //   this.listPaginationWithCfPagination$,
-    //   this.cfPaginationWithListPagination$,
-    //   this.sortSub$
-    // ).subscribe();
 
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
