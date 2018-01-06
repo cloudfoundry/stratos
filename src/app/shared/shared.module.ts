@@ -52,6 +52,7 @@ import {
   TableCellEndpointStatusComponent
 } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
+import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 
 
 @NgModule({
@@ -102,6 +103,7 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
     CardEndpointComponent,
     TableCellEndpointStatusComponent,
     DialogErrorComponent,
+    SshViewerComponent,
   ],
   exports: [
     FormsModule,
@@ -126,6 +128,7 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
     CardsComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
+    SshViewerComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [ListConfig]

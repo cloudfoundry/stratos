@@ -23,6 +23,7 @@ import { ViewBuildpackComponent } from './application/build-tab/view-buildpack/v
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { DatePipe } from '@angular/common';
+import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 
 
 @NgModule({
@@ -44,6 +45,7 @@ import { DatePipe } from '@angular/common';
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
+    SshApplicationComponent,
   ],
   providers: [
     ApplicationService,

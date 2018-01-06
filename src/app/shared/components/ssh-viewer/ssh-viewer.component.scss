@@ -1,0 +1,29 @@
+.ssh-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 2px solid #000;
+
+  .ssh-terminal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
+
+    &.ssh-terminal-disconnected {
+      opacity: 0.4;
+    }
+
+    #terminal {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+
+      .terminal.xterm {
+        flex: 1 !important;
+      }
+    }
+  }
+
+}

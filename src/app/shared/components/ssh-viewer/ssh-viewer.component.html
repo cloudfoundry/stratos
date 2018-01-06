@@ -1,0 +1,7 @@
+<div class="ssh-viewer">
+  <mat-progress-bar *ngIf="attemptingConnection && (isConnecting | async)" mode="indeterminate"></mat-progress-bar>
+  <div class="ssh-terminal" #container [ngClass]="{'ssh-terminal-disconnected': !isConnected}">
+    <div id="terminal" #terminal></div>
+  </div>
+</div>
+  

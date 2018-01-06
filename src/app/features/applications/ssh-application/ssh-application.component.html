@@ -1,0 +1,18 @@
+<app-page-header>
+  <h1>Application SSH</h1>
+  <div class="page-header-right">
+    <span>
+      <button mat-icon-button name="stop" *ngIf="(connectionStatus | async) > 0" (click)="sshViewer.disconnect()" [disabled]="isConnecting">
+        <mat-icon>stop</mat-icon>
+      </button>
+      <button mat-icon-button name="start" *ngIf="(connectionStatus | async) === 0" (click)="sshViewer.reconnect()" [disabled]="isConnecting">
+        <mat-icon>play_arrow</mat-icon>
+      </button>
+      <button mat-icon-button [routerLink]="appInstanceLink">
+        <mat-icon>close</mat-icon>
+      </button>
+    </span>
+  </div>
+</app-page-header>
+
+<app-ssh-viewer #sshViewer (attempting)="updateConnecting($event)" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>
