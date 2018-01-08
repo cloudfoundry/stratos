@@ -81,40 +81,40 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
     super.destroy();
   }
 
-  listFilter(endpoints: CNSISModel[], filter: ListFilter): CNSISModel[] {
-    this.filteredRows.length = 0;
-    this.rows.length = 0;
+  // listFilter(endpoints: CNSISModel[], filter: ListFilter): CNSISModel[] {
+  //   this.filteredRows.length = 0;
+  //   this.rows.length = 0;
 
-    for (const endpoint of endpoints) {
-      const { name } = endpoint;
-      this.rows.push(endpoint);
+  //   for (const endpoint of endpoints) {
+  //     const { name } = endpoint;
+  //     this.rows.push(endpoint);
 
-      if (filter && filter.filter && filter.filter.length > 0) {
-        if (endpoint.name.indexOf(filter.filter) >= 0 ||
-          endpoint.cnsi_type.indexOf(filter.filter) >= 0 ||
-          (
-            endpoint.api_endpoint &&
-            endpoint.api_endpoint.Scheme.indexOf(filter.filter) >= 0 ||
-            endpoint.api_endpoint.Host.indexOf(filter.filter) >= 0
-          )
-        ) {
-          this.filteredRows.push(endpoint);
-        }
-      } else {
-        this.filteredRows.push(endpoint);
-      }
-    }
+  //     if (filter && filter.filter && filter.filter.length > 0) {
+  //       if (endpoint.name.indexOf(filter.filter) >= 0 ||
+  //         endpoint.cnsi_type.indexOf(filter.filter) >= 0 ||
+  //         (
+  //           endpoint.api_endpoint &&
+  //           endpoint.api_endpoint.Scheme.indexOf(filter.filter) >= 0 ||
+  //           endpoint.api_endpoint.Host.indexOf(filter.filter) >= 0
+  //         )
+  //       ) {
+  //         this.filteredRows.push(endpoint);
+  //       }
+  //     } else {
+  //       this.filteredRows.push(endpoint);
+  //     }
+  //   }
 
-    return this.filteredRows;
-  }
+  //   return this.filteredRows;
+  // }
 
-  listSort(endpoints: Array<CNSISModel>, sort: ListSort): CNSISModel[] {
-    return endpoints.slice().sort((a, b) => {
-      const [propertyA, propertyB] = [a[sort.field], b[sort.field]];
-      const valueA = isNaN(+propertyA) ? propertyA : +propertyA;
-      const valueB = isNaN(+propertyB) ? propertyB : +propertyB;
+  // listSort(endpoints: Array<CNSISModel>, sort: ListSort): CNSISModel[] {
+  //   return endpoints.slice().sort((a, b) => {
+  //     const [propertyA, propertyB] = [a[sort.field], b[sort.field]];
+  //     const valueA = isNaN(+propertyA) ? propertyA : +propertyA;
+  //     const valueB = isNaN(+propertyB) ? propertyB : +propertyB;
 
-      return (valueA < valueB ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
-    });
-  }
+  //     return (valueA < valueB ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
+  //   });
+  // }
 }

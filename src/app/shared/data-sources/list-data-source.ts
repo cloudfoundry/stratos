@@ -52,24 +52,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // Edit item
   public editRow: T;
 
-
   // TODO: RC Sort
   public isLoadingPage$: Observable<boolean> = Observable.of(false);
   public filteredRows: Array<T>;
 
   // ------------- Private
-
   private entities$: Observable<T>;
-  // private listPaginationWithCfPagination$;
-  // private cfPaginationWithListPagination$;
-  // private sortSub$;
-  // private orderDirectionParam = 'order-direction';
+  private pageSubscription: Subscription;
 
   constructor(
     protected _store: Store<AppState>,
     protected action: PaginatedAction,
     protected sourceScheme: schema.Entity,
-    protected _cfGetRowUniqueId: getRowUniqueId,
+    public getRowUniqueId: getRowUniqueId,
     private getEmptyType: () => T,
     public paginationKey: string,
     private entityLettable: OperatorFunction<A[], T[]> = null,
@@ -77,9 +72,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[]
   ) {
     super();
-    // _store, _cfGetRowUniqueId, getEmptyType, paginationKey
     this.addItem = this.getEmptyType();
-    // this.state$ = getListStateObservable(this._store, paginationKey);
     const { view, } = getListStateObservables(this._store, paginationKey);
     this.view$ = view;
 
@@ -101,14 +94,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     } else {
       this.page$ = letted$;
     }
+    this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
 
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
   }
 
-  // abstract connect(): Observable<T[]>;
   disconnect() { }
-  destroy() { }
+  destroy() {
+    this.pageSubscription.unsubscribe();
+  }
 
   startAdd() {
     this.addItem = this.getEmptyType();
@@ -122,11 +117,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   selectedRowToggle(row: T) {
-    const exists = this.selectedRows.has(this._cfGetRowUniqueId(row));
+    const exists = this.selectedRows.has(this.getRowUniqueId(row));
     if (exists) {
-      this.selectedRows.delete(this._cfGetRowUniqueId(row));
+      this.selectedRows.delete(this.getRowUniqueId(row));
     } else {
-      this.selectedRows.set(this._cfGetRowUniqueId(row), row);
+      this.selectedRows.set(this.getRowUniqueId(row), row);
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
@@ -135,9 +130,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.selectAllChecked = !this.selectAllChecked;
     for (const row of this.filteredRows) {
       if (this.selectAllChecked) {
-        this.selectedRows.set(this._cfGetRowUniqueId(row), row);
+        this.selectedRows.set(this.getRowUniqueId(row), row);
       } else {
-        this.selectedRows.delete(this._cfGetRowUniqueId(row));
+        this.selectedRows.delete(this.getRowUniqueId(row));
       }
     }
     this.isSelecting$.next(this.selectedRows.size > 0);
@@ -159,7 +154,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   cancelEdit() {
     delete this.editRow;
   }
-
 
   attatchEntityLettable(entities$, entityLettable) {
     if (entityLettable) {
@@ -193,15 +187,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           this._store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
         // Are we on a page with no items (for instance on page 20, filter has been applied reducing item count to 4 items)?
-        let page = paginationEntity.clientPagination.currentPage;
-        if (entities.length <
-          (paginationEntity.clientPagination.currentPage - 1) * paginationEntity.clientPagination.pageSize) {
+        let pageIndex = paginationEntity.clientPagination.currentPage - 1;
+        if (entities.length <= pageIndex * paginationEntity.clientPagination.pageSize) {
           // Filtered results contain too few items to show on current page, move current page to last page of filtered items
-          page = Math.floor(entities.length / paginationEntity.clientPagination.pageSize) + 1;
-          this._store.dispatch(new SetClientPage(this.entityKey, this.paginationKey, page));
+          pageIndex = Math.floor(entities.length / paginationEntity.clientPagination.pageSize) - 1;
+          this._store.dispatch(new SetClientPage(this.entityKey, this.paginationKey, pageIndex + 1));
         }
 
-        return pages[page - 1];
+        return pages[pageIndex];
       })
     );
   }

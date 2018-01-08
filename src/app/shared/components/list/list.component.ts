@@ -180,7 +180,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       sortStoreToWidget,
     ).subscribe();
 
-    // this.dataSource.connect();
   }
 
   ngAfterViewInit() {
