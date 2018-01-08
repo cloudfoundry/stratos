@@ -25,8 +25,7 @@ import {
   SetListViewAction,
 } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
-import { CfListDataSource } from '../../data-sources/list-data-source-cf';
-import { LocalListDataSource } from '../../data-sources/list-data-source-local';
+import { ListDataSource } from '../../data-sources/list-data-source-cf';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from '../table/table.types';
 import { StaticInjector } from '@angular/core/src/di/injector';
@@ -36,7 +35,7 @@ export interface IListConfig<T> {
   getMultiActions: () => IMultiListAction<T>[];
   getSingleActions: () => IListAction<T>[];
   getColumns: () => ITableColumn<T>[];
-  getDataSource: () => CfListDataSource<T> | LocalListDataSource<T>;
+  getDataSource: () => ListDataSource<T>;
   getFiltersConfigs: () => IListFilterConfig[];
   isLocal?: boolean;
 }
@@ -195,7 +194,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateListView(listView: ListView) {
-    this._store.dispatch(new SetListViewAction(this.dataSource.listStateKey, listView));
+    this._store.dispatch(new SetListViewAction(this.dataSource.paginationKey, listView));
   }
 
   updateListSort(field: string, direction: SortDirection) {

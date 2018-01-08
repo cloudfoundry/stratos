@@ -35,12 +35,9 @@ export class ListActions<T> {
   singleActions = new Array<ListActionConfig<T>>();
 }
 export interface IListDataSource<T> {
-  listStateKey: string;
   view$: Observable<ListView>;
   state$: Observable<ListState>;
   pagination$: Observable<PaginationEntityState>;
-  // sort$: Observable<ListSort>;
-  // filter$: Observable<ListFilter>;
   isLocal?: boolean;
   localDataFunctions?: ((entities: T[], paginationState: PaginationEntityState) => T[])[];
 

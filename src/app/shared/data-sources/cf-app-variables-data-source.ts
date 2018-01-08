@@ -1,5 +1,5 @@
 import { EnvVarSchema, GetAppEnvVarsAction, getPaginationKey } from './../../store/actions/app-metadata.actions';
-import { CfListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source-cf';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
@@ -7,7 +7,6 @@ import { MatPaginator, MatSort, Sort, PageEvent, MatSortable } from '@angular/ma
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
-import { LocalListDataSource } from './list-data-source-local';
 import { ApplicationService } from '../../features/applications/application.service';
 import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
@@ -24,7 +23,7 @@ export interface AppEnvVar {
   value: string;
 }
 
-export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, ApplicationEnvVars> {
+export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, ApplicationEnvVars> {
 
   // Only needed for update purposes
   public rows = new Array<AppEnvVar>();
@@ -37,11 +36,11 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
   data$: any;
 
   constructor(
-    protected _cfStore: Store<AppState>,
+    protected _store: Store<AppState>,
     private _appService: ApplicationService,
   ) {
     super(
-      _cfStore,
+      _store,
       new GetAppEnvVarsAction(
         _appService.appGuid,
         _appService.cfGuid,
@@ -78,14 +77,14 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
       _appService.appGuid,
       _appService.cfGuid
     );
-    _cfStore.dispatch(new SetListStateAction(
+    _store.dispatch(new SetListStateAction(
       paginationKey,
       'table',
     ));
   }
 
   saveAdd() {
-    this._cfStore.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.rows, this.addItem));
+    this._store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.rows, this.addItem));
     super.saveAdd();
   }
 
@@ -94,10 +93,11 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
   }
 
   saveEdit() {
-    this._cfStore.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.rows, this.editRow));
+    this._store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.rows, this.editRow));
     super.saveEdit();
   }
 
+  // TODO: RC MOVE
   listFilter(envVars: AppEnvVar[], filter: ListFilter): AppEnvVar[] {
     this.filteredRows.length = 0;
     this.rows.length = 0;
@@ -119,6 +119,7 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
     return this.filteredRows;
   }
 
+  // TODO: RC MOVE
   listSort(envVars: Array<AppEnvVar>, sort: ListSort): AppEnvVar[] {
     return envVars.slice().sort((a, b) => {
       const [propertyA, propertyB] = [a[sort.field], b[sort.field]];

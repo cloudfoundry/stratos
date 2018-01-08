@@ -6,11 +6,12 @@ import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/li
 import { AppState } from '../../store/app-state';
 import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
 import { CNSISModel } from '../../store/types/cnsis.types';
-import { CfListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source-cf';
 import { EndpointSchema, GetAllCNSIS } from '../../store/actions/cnsis.actions';
 
 
-export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
+export class EndpointsDataSource extends ListDataSource<CNSISModel> {
+  // TODO: RC REMOVE?
   // Only needed for update purposes
   private rows = new Array<CNSISModel>();
 
@@ -62,7 +63,6 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
       ]
     );
 
-    // TODO: RC remove pag/sort/filter, etc
     _eStore.dispatch(new SetListStateAction(
       GetAllCNSIS.storeKey,
       'table',

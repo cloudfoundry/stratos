@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs/Rx';
-import { CfListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source-cf';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';
@@ -10,9 +10,7 @@ import { AddParams, RemoveParams } from '../../store/actions/pagination.actions'
 import { APIResource } from '../../store/types/api.types';
 import { ListActions } from './list-data-source-types';
 
-export class CfAppsDataSource extends CfListDataSource<APIResource> {
-
-  // cfFilterSub: Subscription;
+export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public getFilterFromParams(pag: PaginationEntityState) {
     const q = pag.params.q;
@@ -25,14 +23,14 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
   }
   public setFilterParam(filter: ListFilter) {
     if (filter && filter.filter && filter.filter.length) {
-      this._cfStore.dispatch(new AddParams(this.entityKey, this.paginationKey, {
+      this._store.dispatch(new AddParams(this.entityKey, this.paginationKey, {
         q: [
           new QParam('name', filter.filter, ' IN '),
         ]
       }, this.isLocal));
     } else {
       // if (pag.params.q.find((q: QParam) => q.key === 'name'))
-      this._cfStore.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['name'], this.isLocal));
+      this._store.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['name'], this.isLocal));
     }
   }
 
@@ -75,9 +73,5 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
       paginationKey,
       'cards',
     ));
-  }
-
-  destroy() {
-    super.destroy();
   }
 }

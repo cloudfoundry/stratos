@@ -8,14 +8,13 @@ import { MatPaginator, PageEvent, MatSort, Sort, SortDirection } from '@angular/
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';
-import { CfListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source-cf';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction, ListPagination } from '../../store/actions/list.actions';
 
-export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
+export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 
-  // cfFilterSub: Subscription;
   public getFilterFromParams(pag: PaginationEntityState) {
     const q = pag.params.q;
     if (q) {
@@ -27,14 +26,14 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
   }
   public setFilterParam(filter: ListFilter) {
     if (filter && filter.filter && filter.filter.length) {
-      this._cfStore.dispatch(new AddParams(this.entityKey, this.paginationKey, {
+      this._store.dispatch(new AddParams(this.entityKey, this.paginationKey, {
         q: [
           new QParam('type', filter.filter, ' IN '),
         ]
       }));
     } else {
       // if (pag.params.q.find((q: QParam) => q.key === 'type'))
-      this._cfStore.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['type']));
+      this._store.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['type']));
     }
   }
 
@@ -84,8 +83,4 @@ export class CfAppEventsDataSource extends CfListDataSource<EntityInfo> {
 
   }
 
-  destroy() {
-    // this.cfFilterSub.unsubscribe();
-    super.destroy();
-  }
 }
