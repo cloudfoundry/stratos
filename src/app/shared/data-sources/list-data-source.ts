@@ -33,7 +33,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // -------------- Public
   // Core observables
   public view$: Observable<ListView>;
-  public state$: Observable<ListState>;
+  // public state$: Observable<ListState>;
   public pagination$: Observable<PaginationEntityState>;
   public page$: Observable<T[]>;
 
@@ -79,7 +79,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     super();
     // _store, _cfGetRowUniqueId, getEmptyType, paginationKey
     this.addItem = this.getEmptyType();
-    this.state$ = getListStateObservable(this._store, paginationKey);
+    // this.state$ = getListStateObservable(this._store, paginationKey);
     const { view, } = getListStateObservables(this._store, paginationKey);
     this.view$ = view;
 

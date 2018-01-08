@@ -89,7 +89,8 @@ export class SetParams implements PaginationAction {
     public entityKey: string,
     public paginationKey: string,
     public params: PaginationParam,
-    public keepPages = false
+    public keepPages = false,
+    public overwrite = false,
   ) {
   }
   type = SET_PARAMS;

@@ -304,7 +304,6 @@ export class APIEffect {
         const endpointGuids = Object.keys(newResData);
         for (let i = 1; i < responses.length; i++) { // Make any additional page requests
           const endpointResponse = responses[i];
-          console.log(endpointResponse);
           endpointGuids.forEach(endpointGuid => {
             const endpoint = endpointResponse[endpointGuid];
             if (endpoint && endpoint.resources && endpoint.resources.length) {

@@ -101,6 +101,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
+  filterString = '';
 
   sortColumns: ITableColumn<T>[];
   @ViewChild('headerSortField') headerSortField: MatSelect;
@@ -139,12 +140,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.paginationController = new ListPaginationController(this._store, this.dataSource);
 
-    // const paginationStoreToWidget = this.dataSource.clientPagination$.do((pagination: ListPagination) => {
-    //   this.paginator.length = pagination.totalResults;
-    //   this.paginator.pageIndex = pagination.pageIndex;
-    //   this.paginator.pageSize = pagination.pageSize;
-    //   this.paginator.pageSizeOptions = pagination.pageSizeOptions;
-    // });
     // TODO: This should be configurable per list
     this.paginator.pageSizeOptions = [5, 10, 20];
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
@@ -159,7 +154,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       .debounceTime(500)
       .distinctUntilChanged()
       .map(value => value as string)
-      .do(this.paginationController.filter);
+      .do(filterString => {
+        return this.paginationController.filter(filterString);
+      });
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
@@ -169,11 +166,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.headerSortField.value = sort.field;
       this.headerSortDirection = sort.direction;
     });
-    // const sortStoreToWidget = this.dataSource.sort$.do(sort => this.paginationController.sort(sort));
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
-      this.filter.model = filter.filter;
+      this.filterString = filter.filter;
     });
+
     this.uberSub = Observable.combineLatest(
       this.dataSource.page$,
       paginationStoreToWidget,

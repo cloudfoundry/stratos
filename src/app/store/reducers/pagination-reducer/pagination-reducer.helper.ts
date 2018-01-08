@@ -87,7 +87,7 @@ export function getPaginationKey(action: PaginatedAction) {
 
 export const getPaginationObservables = <T = any>(
   { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
-  uid?: string,
+  uid?: string, // TODO: Delete me?
   isLocal = false
 ): PaginationObservables<T> => {
   const { entityKey, paginationKey } = action;
