@@ -27,7 +27,7 @@ import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/b
 import {
   ApplicationStateData,
   ApplicationStateService,
-} from './application/build-tab/application-state/application-state.service';
+} from '../../shared/components/application-state/application-state.service';
 import { EntityInfo } from '../../store/types/api.types';
 import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType, AppEnvVarsState } from '../../store/types/app-metadata.types';
 import { combineLatest } from 'rxjs/operators/combineLatest';

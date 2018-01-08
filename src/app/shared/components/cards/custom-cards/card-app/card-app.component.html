@@ -6,7 +6,9 @@
     <div class="card-app__meta">
       <b>Instances: </b> {{ row.entity.instances }}</div>
     <div class="card-app__meta">
-      <b>State: </b> {{ row.entity.state }}</div>
+      <b>State: </b>
+      <app-application-state [state]="applicationState"></app-application-state>
+  </div>
     <div class="card-app__meta">
       <b>Created at: </b>{{ row.metadata.created_at | date:'medium' }}</div>
   </mat-card-content>

@@ -1,6 +1,12 @@
 import { CoreModule } from '../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ApplicationStateComponent } from '../../../../shared/components/application-state/application-state.component';
+import {
+  ApplicationStateIconComponent
+} from '../../../../shared/components/application-state/application-state-icon/application-state-icon.component';
+import {
+  ApplicationStateIconPipe
+} from '../../../../shared/components/application-state/application-state-icon/application-state-icon.pipe';
 import { CardComponent } from './card.component';
 import { EntityInfo } from '../../../../store/types/api.types';
 import { TableCellComponent } from '../../table/table-cell/table-cell.component';
@@ -23,6 +29,9 @@ describe('CardComponent', () => {
         ...TableCellEntryPoints,
         EventTabActorIconPipe,
         ValuesPipe,
+        ApplicationStateComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe
       ],
       imports: [
         CoreModule,

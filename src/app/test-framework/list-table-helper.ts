@@ -1,3 +1,6 @@
+import {
+    TableCellAppStatusComponent,
+} from '../shared/components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
 import { CardEventComponent } from '../shared/components/cards/custom-cards/card-app-event/card-app-event.component';
 import {
   CardAppVariableComponent,
@@ -42,6 +45,7 @@ export const TableCellEntryPoints = [
   TableCellActionsComponent,
   TableCellAppNameComponent,
   TableCellEndpointStatusComponent,
+  TableCellAppStatusComponent,
 ];
 
 export const CardEntryPoints = [

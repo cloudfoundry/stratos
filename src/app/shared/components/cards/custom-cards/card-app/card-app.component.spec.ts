@@ -1,5 +1,13 @@
+import { ApplicationStateComponent } from '../../../application-state/application-state.component';
+import {
+    ApplicationStateIconComponent,
+} from '../../../application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconPipe } from '../../../application-state/application-state-icon/application-state-icon.pipe';
 import { CoreModule } from '../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { StoreModule } from '@ngrx/store';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { ApplicationStateService } from '../../../../../shared/components/application-state/application-state.service';
 
 import { CardAppComponent } from './card-app.component';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -12,11 +20,18 @@ describe('CardAppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        CardAppComponent
+        CardAppComponent,
+        ApplicationStateComponent,
+        ApplicationStateIconComponent,
+        ApplicationStateIconPipe,
       ],
       imports: [
         CoreModule,
-        RouterTestingModule
+        RouterTestingModule,
+        createBasicStoreModule()
+      ],
+      providers: [
+        ApplicationStateService,
       ]
     })
       .compileComponents();

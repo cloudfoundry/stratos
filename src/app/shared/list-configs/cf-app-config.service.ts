@@ -11,6 +11,8 @@ import { EntityInfo } from '../../store/types/api.types';
 import { IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
 import { AppState } from '../../store/app-state';
 import { UtilsService } from '../../core/utils.service';
+import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
+import { TableCellAppStatusComponent } from '../components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
 
 @Injectable()
 export class CfAppConfigService implements IListConfig<APIResource> {
@@ -18,7 +20,9 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   constructor(
     private datePipe: DatePipe,
     private store: Store<AppState>,
-    private utilsService: UtilsService
+    private utilsService: UtilsService,
+    private appStateService: ApplicationStateService,
+
   ) {
     this.appsDataSource = new CfAppsDataSource(this.store);
   }
@@ -28,7 +32,9 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       columnId: 'name', headerCell: () => 'Application Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: true
     },
     {
-      columnId: 'status', headerCell: () => 'Status', cell: (row: APIResource) => `${row.entity.state}`, cellFlex: '1'
+      columnId: 'status', headerCell: () => 'Status',
+       cellFlex: '1',
+       cellComponent: TableCellAppStatusComponent,
     },
     {
       columnId: 'instances', headerCell: () => 'Instances', cell: (row: APIResource) => `${row.entity.instances}`, cellFlex: '1'

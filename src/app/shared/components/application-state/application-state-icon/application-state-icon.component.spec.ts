@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MDAppModule } from '../../../../../../core/md.module';
+import { MDAppModule } from '../../../../core/md.module';
 import { ApplicationStateIconComponent } from './application-state-icon.component';
 import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 

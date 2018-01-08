@@ -181,8 +181,8 @@ export const getAppMetadataObservable = (
   action: IGetAppMetadataAction
 ): Observable<any> => {
   return Observable.combineLatest(
-    store.select(selectEntity(action.entityKey, appId)),
-    store.select(selectRequestInfo(action.entityKey, appId))
+    store.select(selectMetadata(action.metadataType, appId)).startWith(null),
+    store.select(selectMetadataRequest(action.metadataType, appId)).startWith(null)
   )
     .do(([metadata, metadataRequestState]) => {
       if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) { // && !dispatched
