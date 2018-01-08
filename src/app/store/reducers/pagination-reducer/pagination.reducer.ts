@@ -38,7 +38,6 @@ export const defaultPaginationEntityState = {
   totalResults: 0,
   ids: {},
   params: {
-    [resultPerPageParam]: resultPerPageParamDefault
   },
   error: false,
   message: '',
