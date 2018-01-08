@@ -12,28 +12,6 @@ import { ListActions } from './list-data-source-types';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
-  public getFilterFromParams(pag: PaginationEntityState) {
-    const q = pag.params.q;
-    if (q) {
-      const qParam = q.find((q: QParam) => {
-        return q.key === 'name';
-      });
-      return qParam ? qParam.value as string : '';
-    }
-  }
-  public setFilterParam(filter: ListFilter) {
-    if (filter && filter.filter && filter.filter.length) {
-      this._store.dispatch(new AddParams(this.entityKey, this.paginationKey, {
-        q: [
-          new QParam('name', filter.filter, ' IN '),
-        ]
-      }, this.isLocal));
-    } else {
-      // if (pag.params.q.find((q: QParam) => q.key === 'name'))
-      this._store.dispatch(new RemoveParams(this.entityKey, this.paginationKey, [], ['name'], this.isLocal));
-    }
-  }
-
   constructor(
     _store: Store<AppState>,
   ) {

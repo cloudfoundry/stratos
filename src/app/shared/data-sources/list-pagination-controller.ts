@@ -16,6 +16,16 @@ import {
 } from '../../store/actions/pagination.actions';
 import { defaultClientPaginationPageSize } from '../../store/reducers/pagination-reducer/pagination.reducer';
 
+export interface IListPaginationController<T> {
+  pagination$: Observable<ListPagination>;
+  filter: (filterString: string) => void;
+  filter$: Observable<ListFilter>;
+  sort: (listSort: ListSort) => void;
+  sort$: Observable<ListSort>;
+  page: (pageEvent: PageEvent) => void;
+  dataSource: IListDataSource<T>;
+}
+
 export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
     private store: Store<AppState>,
@@ -23,6 +33,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
   ) {
 
     this.pagination$ = this.dataSource.pagination$
+      .filter(pag => !!pag)
       .map(pag => {
         const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
           || defaultClientPaginationPageSize;
@@ -87,14 +98,4 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       });
     }
   }
-}
-
-export interface IListPaginationController<T> {
-  pagination$: Observable<ListPagination>;
-  filter: (filterString: string) => void;
-  filter$: Observable<ListFilter>;
-  sort: (listSort: ListSort) => void;
-  sort$: Observable<ListSort>;
-  page: (pageEvent: PageEvent) => void;
-  dataSource: IListDataSource<T>;
 }

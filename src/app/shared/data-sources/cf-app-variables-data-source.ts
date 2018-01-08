@@ -26,7 +26,7 @@ export interface AppEnvVar {
 export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, ApplicationEnvVars> {
 
   // Only needed for update purposes
-  public rows = new Array<AppEnvVar>(); // TODO: RC CHECK
+  // public rows = new Array<AppEnvVar>(); // TODO: RC CHECK
 
   public cfGuid: string;
   public appGuid: string;

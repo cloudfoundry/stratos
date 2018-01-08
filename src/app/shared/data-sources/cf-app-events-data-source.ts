@@ -16,9 +16,9 @@ import { ListFilter, SetListStateAction, ListPagination } from '../../store/acti
 export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 
   public getFilterFromParams(pag: PaginationEntityState) {
-    const q = pag.params.q;
-    if (q) {
-      const qParam = q.find((q: QParam) => {
+    const qParams = pag.params.q;
+    if (qParams) {
+      const qParam = qParams.find((q: QParam) => {
         return q.key === 'type';
       });
       return qParam ? qParam.value as string : '';
@@ -63,23 +63,6 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
       paginationKey,
       'table',
     ));
-
-
-    // TODO: RC We'll need to do this somewhere but not here
-    // const cfFilter$ = this.filter$.withLatestFrom(this.pagination$)
-    //   .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
-    //     if (filter && filter.filter && filter.filter.length) {
-    //       const q = pag.params.q;
-    //       this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-    //         q: [
-    //           new QParam('type', filter.filter, ' IN '),
-    //         ]
-    //       }));
-    //     } else if (pag.params.q.find((q: QParam) => q.key === 'type')) {
-    //       this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['type']));
-    //     }
-    //   });
-    // this.cfFilterSub = cfFilter$.subscribe();
 
   }
 
