@@ -47,7 +47,7 @@ export class EndpointsDataSource extends CfListDataSource<CNSISModel> {
         {
           type: 'sort',
           orderKey: 'connection',
-          field: 'info.user.name'
+          field: 'info.user'
         },
         {
           type: 'sort',

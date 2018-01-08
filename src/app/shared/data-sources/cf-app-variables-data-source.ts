@@ -58,8 +58,8 @@ export class CfAppEvnVarsDataSource extends CfListDataSource<AppEnvVar, Applicat
       },
       getPaginationKey(
         AppMetadataProperties.ENV_VARS,
+        _appService.cfGuid,
         _appService.appGuid,
-        _appService.cfGuid
       ),
       map(app => {
         const env = app[0].environment_json;

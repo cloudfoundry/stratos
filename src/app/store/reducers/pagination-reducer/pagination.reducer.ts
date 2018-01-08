@@ -36,7 +36,6 @@ export const defaultPaginationEntityState = {
   currentPage: 1,
   totalResults: 0,
   ids: {},
-  clientPageSize: 1,
   params: {
     [resultPerPageParam]: resultPerPageParamDefault
   },
