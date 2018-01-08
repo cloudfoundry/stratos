@@ -1,9 +1,10 @@
 import { Action } from '@ngrx/store';
 import { SortDirection } from '@angular/material';
+import { defaultClientPaginationPageSize } from '../reducers/pagination-reducer/pagination.reducer';
 
 export class ListPagination {
   public totalResults?= 0;
-  public pageSize?= 5;
+  public pageSize?= defaultClientPaginationPageSize;
   public pageIndex?= 0;
 }
 

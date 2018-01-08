@@ -30,6 +30,7 @@ import { getActionKey, getActionType, getPaginationKey } from './pagination-redu
 import { resultPerPageParam, resultPerPageParamDefault } from './pagination-reducer.types';
 import { paginationSetResultCount } from './pagination-reducer-set-result-count';
 
+export const defaultClientPaginationPageSize = 9;
 export const defaultPaginationEntityState = {
   fetching: false,
   pageCount: 0,
@@ -42,7 +43,7 @@ export const defaultPaginationEntityState = {
   error: false,
   message: '',
   clientPagination: {
-    pageSize: 10,
+    pageSize: defaultClientPaginationPageSize,
     currentPage: 1,
     filter: '',
     totalResults: 0

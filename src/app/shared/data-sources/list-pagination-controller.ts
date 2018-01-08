@@ -14,6 +14,7 @@ import {
   SetClientPageSize,
   SetPage,
 } from '../../store/actions/pagination.actions';
+import { defaultClientPaginationPageSize } from '../../store/reducers/pagination-reducer/pagination.reducer';
 
 export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
@@ -23,8 +24,9 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
     this.pagination$ = this.dataSource.pagination$
       .map(pag => {
-        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page']) || 2;
-        const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 2;
+        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
+          || defaultClientPaginationPageSize;
+        const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
         // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
         return {
           totalResults: pag.totalResults,
