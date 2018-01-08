@@ -5,6 +5,10 @@ export function paginationSetResultCount(state: PaginationEntityState, action: S
   return {
     ...state,
     error: false,
-    totalResults: action.count
+    totalResults: action.count,
+    clientPagination: {
+      ...state.clientPagination,
+      totalResults: action.count
+    }
   };
 }

@@ -127,6 +127,7 @@ function getObservables<T = any>(
       .do(pagination => {
         if (!pagination || !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
           hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
+          // TODO: NJ - From RC.. for server pagination this fires multiple times even when there's no change of pagination
           store.dispatch(action);
         }
       })

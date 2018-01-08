@@ -55,10 +55,12 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // TODO: RC Sort
   public isLoadingPage$: Observable<boolean> = Observable.of(false);
   public filteredRows: Array<T>;
+  public entityLettabledRows: Array<T>;
 
   // ------------- Private
   private entities$: Observable<T>;
   private pageSubscription: Subscription;
+  private entityLettabledSubscription: Subscription;
 
   constructor(
     protected _store: Store<AppState>,
@@ -88,6 +90,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     const dataFunctions = entityFunctions ? getDataFunctionList(entityFunctions) : null;
     const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
+    this.entityLettabledSubscription = letted$.do(items => this.entityLettabledRows = items).subscribe();
 
     if (isLocal) {
       this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
@@ -103,6 +106,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   disconnect() { }
   destroy() {
     this.pageSubscription.unsubscribe();
+    this.entityLettabledSubscription.unsubscribe();
   }
 
   startAdd() {
@@ -183,7 +187,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           }, entities);
         }
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-        if (paginationEntity.totalResults !== entities.length) {
+        if (paginationEntity.totalResults !== entities.length || paginationEntity.clientPagination.totalResults !== entities.length) {
           this._store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
         // Are we on a page with no items (for instance on page 20, filter has been applied reducing item count to 4 items)?

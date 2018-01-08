@@ -21,12 +21,13 @@ function getFieldArray(def: DataFunctionDefinition) {
 function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
   const fieldArray = getFieldArray(def);
   return (entities, paginationState) => {
+    const upperCaseFilter = paginationState.clientPagination.filter.toUpperCase();
     return entities.filter(e => {
       const value = getValue(e, fieldArray);
       if (!value) {
         return false;
       }
-      return value.toUpperCase().includes(paginationState.clientPagination.filter.toUpperCase());
+      return value.toUpperCase().includes(upperCaseFilter);
     });
   };
 }

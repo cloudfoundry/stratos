@@ -68,7 +68,7 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
       new AppVariablesDelete(
         this.envVarsDataSource.cfGuid,
         this.envVarsDataSource.appGuid,
-        this.envVarsDataSource.rows,
+        this.envVarsDataSource.entityLettabledRows,
         Array.from(this.envVarsDataSource.selectedRows.values()
         ))
     );

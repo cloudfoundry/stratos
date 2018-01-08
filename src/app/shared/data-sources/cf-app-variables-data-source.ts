@@ -26,14 +26,14 @@ export interface AppEnvVar {
 export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, ApplicationEnvVars> {
 
   // Only needed for update purposes
-  public rows = new Array<AppEnvVar>();
+  public rows = new Array<AppEnvVar>(); // TODO: RC CHECK
 
   public cfGuid: string;
   public appGuid: string;
 
-  filteredRows = new Array<AppEnvVar>();
-  isLoadingPage$: Observable<boolean>;
-  data$: any;
+  // filteredRows = new Array<AppEnvVar>();
+  // isLoadingPage$: Observable<boolean>;
+  // data$: any;
 
   constructor(
     protected _store: Store<AppState>,
@@ -67,6 +67,20 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
       }),
       true,
       [
+        {
+          type: 'sort',
+          orderKey: 'name',
+          field: 'name'
+        },
+        {
+          type: 'sort',
+          orderKey: 'value',
+          field: 'value'
+        },
+        {
+          type: 'filter',
+          field: 'name'
+        },
       ]
     );
 
@@ -74,8 +88,8 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
     this.appGuid = _appService.appGuid;
     const paginationKey = getPaginationKey(
       AppMetadataProperties.ENV_VARS,
+      _appService.cfGuid,
       _appService.appGuid,
-      _appService.cfGuid
     );
     _store.dispatch(new SetListStateAction(
       paginationKey,
@@ -84,7 +98,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
   }
 
   saveAdd() {
-    this._store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.rows, this.addItem));
+    this._store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.entityLettabledRows, this.addItem));
     super.saveAdd();
   }
 
@@ -93,40 +107,8 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
   }
 
   saveEdit() {
-    this._store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.rows, this.editRow));
+    this._store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.entityLettabledRows, this.editRow));
     super.saveEdit();
   }
 
-  // TODO: RC MOVE
-  listFilter(envVars: AppEnvVar[], filter: ListFilter): AppEnvVar[] {
-    this.filteredRows.length = 0;
-    this.rows.length = 0;
-
-    for (const envVar of envVars) {
-      const { name, value } = envVar;
-      this.rows.push(envVar);
-
-
-      if (filter && filter.filter && filter.filter.length > 0) {
-        if (name.indexOf(filter.filter) >= 0 || value.indexOf(filter.filter) >= 0) {
-          this.filteredRows.push({ name, value });
-        }
-      } else {
-        this.filteredRows.push({ name, value });
-      }
-    }
-
-    return this.filteredRows;
-  }
-
-  // TODO: RC MOVE
-  listSort(envVars: Array<AppEnvVar>, sort: ListSort): AppEnvVar[] {
-    return envVars.slice().sort((a, b) => {
-      const [propertyA, propertyB] = [a[sort.field], b[sort.field]];
-      const valueA = isNaN(+propertyA) ? propertyA : +propertyA;
-      const valueB = isNaN(+propertyB) ? propertyB : +propertyB;
-
-      return (valueA < valueB ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
-    });
-  }
 }

@@ -78,6 +78,10 @@ export class GetAppEnvVarsAction extends AppMetadataAction implements PaginatedA
   paginationKey: string;
   type = AppMetadataTypes.APP_METADATA;
   entityKey: string;
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'name',
+  };
 }
 
 export class GetAppSummaryAction extends AppMetadataAction implements IGetAppMetadataAction {
