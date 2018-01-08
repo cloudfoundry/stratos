@@ -14,7 +14,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
-import { AddParams, SetPage, RemoveParams, SetResultCount } from '../../store/actions/pagination.actions';
+import { AddParams, RemoveParams, SetClientPage, SetPage, SetResultCount } from '../../store/actions/pagination.actions';
 import { IListDataSource, getRowUniqueId } from './list-data-source-types';
 import { map, debounceTime } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators';
@@ -192,8 +192,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         if (paginationEntity.totalResults !== entities.length) {
           this._store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
+        // Are we on a page with no items (for instance on page 20, filter has been applied reducing item count to 4 items)?
+        let page = paginationEntity.clientPagination.currentPage;
+        if (entities.length <
+          (paginationEntity.clientPagination.currentPage - 1) * paginationEntity.clientPagination.pageSize) {
+          // Filtered results contain too few items to show on current page, move current page to last page of filtered items
+          page = Math.floor(entities.length / paginationEntity.clientPagination.pageSize) + 1;
+          this._store.dispatch(new SetClientPage(this.entityKey, this.paginationKey, page));
+        }
 
-        return pages[paginationEntity.clientPagination.currentPage - 1];
+        return pages[page - 1];
       })
     );
   }
