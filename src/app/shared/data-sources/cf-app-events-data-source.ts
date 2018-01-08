@@ -8,7 +8,7 @@ import { MatPaginator, PageEvent, MatSort, Sort, SortDirection } from '@angular/
 import { Observable } from 'rxjs/Observable';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';
-import { ListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction, ListPagination } from '../../store/actions/list.actions';

@@ -1,92 +1,235 @@
-// import { PaginationState, PaginationEntityState } from './../../store/types/pagination.types';
-// import { IListDataSource } from './list-data-source-types';
-// import { Type } from '@angular/core';
-// import { DataSource } from '@angular/cdk/table';
-// import { Observable, Subscribable } from 'rxjs/Observable';
-// import { Sort, MatPaginator, MatSort } from '@angular/material';
-// import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-// import { Store, Action } from '@ngrx/store';
-// import { Subscription } from 'rxjs/Subscription';
-// import { schema } from 'normalizr';
-// import { AppState } from '../../store/app-state';
-// import { getListStateObservable, ListState, getListStateObservables } from '../../store/reducers/list.reducer';
-// import { ListFilter, ListPagination, ListSort, ListView } from '../../store/actions/list.actions';
-// export type getRowUniqueId = (T) => string;
+import { getDataFunctionList } from './local-filtering-sorting';
+import { OperatorFunction } from 'rxjs/interfaces';
+import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
+import { ListPagination, ListSort, ListFilter, ListView } from '../../store/actions/list.actions';
+import { EntityInfo } from '../../store/types/api.types';
+import { fileExists } from 'ts-node/dist';
+import { DataSource } from '@angular/cdk/table';
+import { Observable, Subscribable } from 'rxjs/Observable';
+import { Sort, MatPaginator, MatSort } from '@angular/material';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs/Subscription';
+import { schema } from 'normalizr';
+import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
+import { AppState } from '../../store/app-state';
+import { AddParams, SetPage, RemoveParams, SetResultCount } from '../../store/actions/pagination.actions';
+import { IListDataSource, getRowUniqueId } from './list-data-source-types';
+import { map, debounceTime } from 'rxjs/operators';
+import { withLatestFrom } from 'rxjs/operators';
+import { composeFn } from '../../store/helpers/reducer.helper';
+import { distinctUntilChanged } from 'rxjs/operators';
+import { getListStateObservable, getListStateObservables, ListState } from '../../store/reducers/list.reducer';
+export interface DataFunctionDefinition {
+  type: 'sort' | 'filter';
+  orderKey?: string;
+  field: string;
+}
 
-// export abstract class ListDataSource<T> extends DataSource<T> implements IListDataSource<T> {
+export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
+export abstract class ListDataSource<T, A = T> extends DataSource<T> implements IListDataSource<T> {
+
+  // -------------- Public
+  // Core observables
+  public view$: Observable<ListView>;
+  public state$: Observable<ListState>;
+  public pagination$: Observable<PaginationEntityState>;
+  public page$: Observable<T[]>;
+
+  // Store related
+  public entityKey: string; // TODO: RC Needed?
+
+  // Add item
+  public addItem: T;
+  public isAdding$ = new BehaviorSubject<boolean>(false);
+
+  // Select item/s
+  public selectedRows = new Map<string, T>();
+  public isSelecting$ = new BehaviorSubject(false);
+  public selectAllChecked = false;
+
+  // Edit item
+  public editRow: T;
 
 
-//   constructor(
-//     private _store: Store<AppState>,
-//     private _getRowUniqueId: getRowUniqueId,
-//     private getEmptyType: () => T,
-//     public listStateKey: string,
-//   ) {
-//     super();
+  // TODO: RC Sort
+  public isLoadingPage$: Observable<boolean> = Observable.of(false);
+  public filteredRows: Array<T>;
 
-//     // this.state$ = getListStateObservable(this._store, listStateKey);
-//     // const { view, } = getListStateObservables(this._store, listStateKey);
-//     // this.view$ = view;
-//     // this.clientPagination$ = pagination.filter(x => !!x);
-//     // TODO: RC Ensure these only fire when they should in new world
-//     // this.sort$ = sort.filter(x => !!x).distinctUntilChanged((x, y) => {
-//     //   return x.direction === y.direction && x.field === y.field;
-//     // });
-//     // this.filter$ = filter.filter(x => !!x);
-//   }
+  // ------------- Private
 
-//   abstract connect(): Observable<T[]>;
-//   disconnect() { }
-//   destroy() { }
+  private entities$: Observable<T>;
+  // private listPaginationWithCfPagination$;
+  // private cfPaginationWithListPagination$;
+  // private sortSub$;
+  // private orderDirectionParam = 'order-direction';
 
-//   startAdd() {
-//     this.addItem = this.getEmptyType();
-//     this.isAdding$.next(true);
-//   }
-//   saveAdd() {
-//     this.isAdding$.next(false);
-//   }
-//   cancelAdd() {
-//     this.isAdding$.next(false);
-//   }
+  constructor(
+    protected _store: Store<AppState>,
+    protected action: PaginatedAction,
+    protected sourceScheme: schema.Entity,
+    protected _cfGetRowUniqueId: getRowUniqueId,
+    private getEmptyType: () => T,
+    public paginationKey: string,
+    private entityLettable: OperatorFunction<A[], T[]> = null,
+    public isLocal = false,
+    public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[]
+  ) {
+    super();
+    // _store, _cfGetRowUniqueId, getEmptyType, paginationKey
+    this.addItem = this.getEmptyType();
+    this.state$ = getListStateObservable(this._store, paginationKey);
+    const { view, } = getListStateObservables(this._store, paginationKey);
+    this.view$ = view;
 
-//   selectedRowToggle(row: T) {
-//     const exists = this.selectedRows.has(this._getRowUniqueId(row));
-//     if (exists) {
-//       this.selectedRows.delete(this._getRowUniqueId(row));
-//     } else {
-//       this.selectedRows.set(this._getRowUniqueId(row), row);
-//     }
-//     this.isSelecting$.next(this.selectedRows.size > 0);
-//   }
+    this.entityKey = sourceScheme.key;
+    const { pagination$, entities$ } = getPaginationObservables({
+      store: this._store,
+      action: this.action,
+      schema: [this.sourceScheme]
+    },
+      null,
+      isLocal
+    );
 
-//   selectAllFilteredRows() {
-//     this.selectAllChecked = !this.selectAllChecked;
-//     for (const row of this.filteredRows) {
-//       if (this.selectAllChecked) {
-//         this.selectedRows.set(this._getRowUniqueId(row), row);
-//       } else {
-//         this.selectedRows.delete(this._getRowUniqueId(row));
-//       }
-//     }
-//     this.isSelecting$.next(this.selectedRows.size > 0);
-//   }
+    const dataFunctions = entityFunctions ? getDataFunctionList(entityFunctions) : null;
+    const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
 
-//   selectClear() {
-//     this.selectedRows.clear();
-//     this.isSelecting$.next(false);
-//   }
+    if (isLocal) {
+      this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
+    } else {
+      this.page$ = letted$;
+    }
 
-//   startEdit(rowClone: T) {
-//     this.editRow = rowClone;
-//   }
+    this.pagination$ = pagination$;
+    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+  }
 
-//   saveEdit() {
-//     delete this.editRow;
-//   }
+  // abstract connect(): Observable<T[]>;
+  disconnect() { }
+  destroy() { }
 
-//   cancelEdit() {
-//     delete this.editRow;
-//   }
+  startAdd() {
+    this.addItem = this.getEmptyType();
+    this.isAdding$.next(true);
+  }
+  saveAdd() {
+    this.isAdding$.next(false);
+  }
+  cancelAdd() {
+    this.isAdding$.next(false);
+  }
 
-// }
+  selectedRowToggle(row: T) {
+    const exists = this.selectedRows.has(this._cfGetRowUniqueId(row));
+    if (exists) {
+      this.selectedRows.delete(this._cfGetRowUniqueId(row));
+    } else {
+      this.selectedRows.set(this._cfGetRowUniqueId(row), row);
+    }
+    this.isSelecting$.next(this.selectedRows.size > 0);
+  }
+
+  selectAllFilteredRows() {
+    this.selectAllChecked = !this.selectAllChecked;
+    for (const row of this.filteredRows) {
+      if (this.selectAllChecked) {
+        this.selectedRows.set(this._cfGetRowUniqueId(row), row);
+      } else {
+        this.selectedRows.delete(this._cfGetRowUniqueId(row));
+      }
+    }
+    this.isSelecting$.next(this.selectedRows.size > 0);
+  }
+
+  selectClear() {
+    this.selectedRows.clear();
+    this.isSelecting$.next(false);
+  }
+
+  startEdit(rowClone: T) {
+    this.editRow = rowClone;
+  }
+
+  saveEdit() {
+    delete this.editRow;
+  }
+
+  cancelEdit() {
+    delete this.editRow;
+  }
+
+
+  attatchEntityLettable(entities$, entityLettable) {
+    if (entityLettable) {
+      return entities$.pipe(
+        this.entityLettable
+      );
+    } else {
+      return entities$.pipe(
+        map(res => res as T[])
+      );
+    }
+  }
+
+  getLocalPagesObservable(page$, pagination$: Observable<PaginationEntityState>, dataFunctions) {
+    return page$.pipe(
+      withLatestFrom(pagination$),
+      distinctUntilChanged((oldVals, newVals) => {
+        const oldPag = this.getPaginationCompareString(oldVals[1]);
+        const newPag = this.getPaginationCompareString(oldVals[1]);
+        return oldPag !== newPag;
+      }),
+      debounceTime(10),
+      map(([entities, paginationEntity]) => {
+        if (dataFunctions && dataFunctions.length) {
+          entities = dataFunctions.reduce((value, fn) => {
+            return fn(value, paginationEntity);
+          }, entities);
+        }
+        const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
+        if (paginationEntity.totalResults !== entities.length) {
+          this._store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+        }
+
+        return pages[paginationEntity.clientPagination.currentPage - 1];
+      })
+    );
+  }
+
+  getPaginationCompareString(paginationEntity: PaginationEntityState) {
+    return Object.values(paginationEntity.clientPagination).join('.');
+  }
+
+  splitClientPages(entites: T[], pageSize: number): T[][] {
+    if (!entites || !entites.length) {
+      return [];
+    }
+    const array = [...entites];
+    const pages = [];
+
+    for (let i = 0; i < array.length; i += pageSize) {
+      pages.push(array.slice(i, i + pageSize));
+    }
+    return pages;
+  }
+
+  connect(): Observable<T[]> {
+    return this.page$;
+  }
+
+  public getFilterFromParams(pag: PaginationEntityState) {
+    return pag.params.filter;
+  }
+  public setFilterParam(filter: ListFilter) {
+    if (filter && filter.filter && filter.filter.length) {
+      this._store.dispatch(new AddParams(this.entityKey, this.paginationKey, {
+        filter: filter.filter
+      }, this.isLocal));
+    } else {
+      // if (pag.params.q.find((q: QParam) => q.key === 'name'))
+      this._store.dispatch(new RemoveParams(this.entityKey, this.paginationKey, ['filter'], [], this.isLocal));
+    }
+  }
+}

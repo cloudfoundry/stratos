@@ -1,4 +1,4 @@
-import { IPaginationController, PaginationController } from './../../list-controllers/base.pagination-controller';
+
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -25,10 +25,11 @@ import {
   SetListViewAction,
 } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
-import { ListDataSource } from '../../data-sources/list-data-source-cf';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from '../table/table.types';
 import { StaticInjector } from '@angular/core/src/di/injector';
+import { ListDataSource } from '../../data-sources/list-data-source';
+import { ListPaginationController, IListPaginationController } from '../../data-sources/list-pagination-controller';
 
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
@@ -113,7 +114,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   dataSource: IListDataSource<T>;
   filterConfigs: IListFilterConfig[];
 
-  paginationController: IPaginationController<T>;
+  paginationController: IListPaginationController<T>;
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -136,7 +137,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource = this.listConfigService.getDataSource();
     this.filterConfigs = this.listConfigService.getFiltersConfigs();
 
-    this.paginationController = new PaginationController(this._store, this.dataSource);
+    this.paginationController = new ListPaginationController(this._store, this.dataSource);
 
     // const paginationStoreToWidget = this.dataSource.clientPagination$.do((pagination: ListPagination) => {
     //   this.paginator.length = pagination.totalResults;

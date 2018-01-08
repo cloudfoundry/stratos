@@ -1,5 +1,5 @@
 import { EnvVarSchema, GetAppEnvVarsAction, getPaginationKey } from './../../store/actions/app-metadata.actions';
-import { ListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
 import { AppState } from '../../store/app-state';

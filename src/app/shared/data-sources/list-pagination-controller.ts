@@ -15,7 +15,7 @@ import {
   SetPage,
 } from '../../store/actions/pagination.actions';
 
-export class PaginationController<T> implements IPaginationController<T> {
+export class ListPaginationController<T> implements IListPaginationController<T> {
   constructor(
     private store: Store<AppState>,
     public dataSource: IListDataSource<T>
@@ -87,7 +87,7 @@ export class PaginationController<T> implements IPaginationController<T> {
   }
 }
 
-export interface IPaginationController<T> {
+export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
   filter: (filterString: string) => void;
   filter$: Observable<ListFilter>;

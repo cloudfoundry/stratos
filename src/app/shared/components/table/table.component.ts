@@ -1,4 +1,4 @@
-import { IPaginationController } from '../../list-controllers/base.pagination-controller';
+import { IListPaginationController } from '../../data-sources/list-pagination-controller';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { MatSort, Sort } from '@angular/material';
@@ -25,7 +25,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input('dataSource') dataSource = null as IListDataSource<T>;
-  @Input('paginationController') paginationController = null as IPaginationController<T>;
+  @Input('paginationController') paginationController = null as IListPaginationController<T>;
   @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
 

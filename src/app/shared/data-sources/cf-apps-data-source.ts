@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs/Rx';
-import { ListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';

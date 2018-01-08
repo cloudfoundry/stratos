@@ -6,7 +6,7 @@ import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/li
 import { AppState } from '../../store/app-state';
 import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
 import { CNSISModel } from '../../store/types/cnsis.types';
-import { ListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source';
 import { EndpointSchema, GetAllCNSIS } from '../../store/actions/cnsis.actions';
 
 
