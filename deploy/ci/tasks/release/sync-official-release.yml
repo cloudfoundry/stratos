@@ -31,6 +31,7 @@ run:
       # Sync the release images and make a PR for the Helm Chart Release
       
       # Fetch the sync script - this will fail if we can not get the script
+      apk update
       apk add wget
       curl --fail -H "Authorization: token ${GITHUB_TOKEN}" -H 'Accept: application/vnd.github.v3.raw' -O -L ${RELEASE_SCRIPT}
       chmod +x release.sh
