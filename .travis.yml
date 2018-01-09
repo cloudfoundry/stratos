@@ -19,6 +19,16 @@ cache:
   - "/home/travis/.npm/"
 jobs:
   include:
+  - stage: development build check
+    os:
+    - linux
+    - osx
+    before_script:
+    - npm install -g bower
+    - bower install
+    script:
+    - npm build
+    - npm build-backend
   - stage: front-end
     before_script:
     - npm install -g bower
