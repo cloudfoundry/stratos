@@ -58,7 +58,7 @@ run:
       # Download chart
       CHART_TARBALL=$(mc find minio --name "console-helm-chart-cap-sle-${GIT_TAG}.tgz")
       mc cp ${CHART_TARBALL} .
-      
+
       # Sync the images
       cd -
       ./release.sh show-images stratos
@@ -90,6 +90,7 @@ run:
       git checkout -b ${BRANCH}
 
       # Sync
+      apk add rsync
       rsync -v -r --delete ${STRATOS_UI}/deploy/kubernetes/console ${HELM_REPO}/${RELEASE_HELM_STABLE_FOLDER}
 
       # Show the changes that have been made
