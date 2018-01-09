@@ -22,7 +22,6 @@ export class CfAppConfigService implements IListConfig<APIResource> {
     private store: Store<AppState>,
     private utilsService: UtilsService,
     private appStateService: ApplicationStateService,
-
   ) {
     this.appsDataSource = new CfAppsDataSource(this.store);
   }

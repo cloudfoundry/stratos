@@ -123,7 +123,10 @@ function getObservables<T = any>(
   const entities$: Observable<T[]> =
     paginationSelect$
       .do(pagination => {
-        if (!pagination || !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+        if (
+          (!pagination && !hasDispatchedOnce) ||
+          !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
+        ) {
           hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
           // TODO: NJ - From RC.. for server pagination this fires multiple times even when there's no change of pagination
           store.dispatch(action);
@@ -167,4 +170,3 @@ export function hasValidOrGettingPage(pagination: PaginationEntityState) {
 export function hasError(pagination: PaginationEntityState) {
   return pagination && pagination.error;
 }
-

@@ -52,6 +52,4 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
     this.fetchAppState$.unsubscribe();
   }
 
-
-
 }

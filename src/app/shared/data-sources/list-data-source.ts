@@ -62,6 +62,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private entities$: Observable<T>;
   private pageSubscription: Subscription;
   private entityLettabledSubscription: Subscription;
+  private paginationToStringFn: (PaginationEntityState) => string;
 
   constructor(
     protected _store: Store<AppState>,
@@ -72,7 +73,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     public paginationKey: string,
     private entityLettable: OperatorFunction<A[], T[]> = null,
     public isLocal = false,
-    public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[]
+    public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[] // Config
   ) {
     super();
     this.addItem = this.getEmptyType();
@@ -177,7 +178,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       distinctUntilChanged((oldVals, newVals) => {
         // TODO: NJ .. from RC .. Currently never changes (oldVals vs oldVals). Need to also take into account anything thats changed via
         // dataFunctions (for instance filter, sort, etc)
-        return this.getPaginationCompareString(oldVals[1]) === this.getPaginationCompareString(oldVals[1]);
+        const oldVal = this.getPaginationCompareString(oldVals[1]);
+        const newVal = this.getPaginationCompareString(newVals[1]);
+        return oldVal === newVal;
       }),
       debounceTime(10),
       map(([entities, paginationEntity]) => {
@@ -204,7 +207,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {
-    return Object.values(paginationEntity.clientPagination).join('.');
+    return Object.values(paginationEntity.clientPagination).join('.')
+      + paginationEntity.params['order-direction-field']
+      + paginationEntity.params['order-direction'];
   }
 
   splitClientPages(entites: T[], pageSize: number): T[][] {
