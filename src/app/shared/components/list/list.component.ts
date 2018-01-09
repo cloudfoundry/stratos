@@ -142,8 +142,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.paginationController = new ListPaginationController(this._store, this.dataSource);
 
-    // TODO: This should be configurable per list
-    this.paginator.pageSizeOptions = [5, 10, 20];
+    this.paginator.pageSizeOptions = this.listConfigService.pageSizeOptions;
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
       this.paginator.pageIndex = pagination.pageIndex - 1;

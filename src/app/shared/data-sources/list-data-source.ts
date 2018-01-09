@@ -37,7 +37,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public page$: Observable<T[]>;
 
   // Store related
-  public entityKey: string; // TODO: RC Needed?
+  public entityKey: string;
 
   // Add item
   public addItem: T;
@@ -85,7 +85,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       action: this.action,
       schema: [this.sourceScheme]
     },
-      null,
       isLocal
     );
 
