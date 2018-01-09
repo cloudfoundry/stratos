@@ -32,7 +32,8 @@ run:
       
       # Fetch the sync script - this will fail if we can not get the script
       apk update
-      apk add wget
+      apk del dropbear-scp
+      apk add wget rsync openssh-client
       curl --fail -H "Authorization: token ${GITHUB_TOKEN}" -H 'Accept: application/vnd.github.v3.raw' -O -L ${RELEASE_SCRIPT}
       chmod +x release.sh
 
@@ -89,15 +90,13 @@ run:
       git checkout -b ${BRANCH}
 
       # Sync
-      apk add rsync
       rsync -v -r --delete ${STRATOS_UI}/deploy/kubernetes/console ${HELM_REPO}/${RELEASE_HELM_STABLE_FOLDER}
 
       # Show the changes that have been made
       git status
-
+      # Disable authenticity check
+      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       # Add the changes
-      apk del dropbear-scp
-      apk add openssh-client
       git add ${RELEASE_HELM_STABLE_FOLDER}/console
       git status
       git commit -m "Stratos UI Console Helm Chart for release ${GIT_TAG}"
