@@ -33,7 +33,8 @@ run:
       # Fetch the sync script - this will fail if we can not get the script
       apk update
       apk del dropbear-scp
-      apk add wget rsync openssh-client
+      apk add wget rsync openssh-client grep
+      export PATH=/usr/bin:$PATH
       curl --fail -H "Authorization: token ${GITHUB_TOKEN}" -H 'Accept: application/vnd.github.v3.raw' -O -L ${RELEASE_SCRIPT}
       chmod +x release.sh
 
