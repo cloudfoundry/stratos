@@ -6,17 +6,15 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.capbristol.com:5000/concourse-dcind
-   tag: "latest"
-   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
+   repository:  dockerswarm/dind
+   tag: "17.12.0-ce"
 
 run:
   path: sh
   args:
     - -exc
     - |
-      source /docker-lib.sh
-      start_docker
+      # start_docker
       cat /etc/docker/daemon.json
       # Login to Staging repository
       docker login -u ${STAGING_REPOSITORY_USERNAME} -p ${STAGING_REPOSITORY_PASSWORD} ${STAGING_REPOSITORY};
@@ -31,10 +29,10 @@ run:
       # Sync the release images and make a PR for the Helm Chart Release
       
       # Fetch the sync script - this will fail if we can not get the script
-      apk update
-      apk del dropbear-scp
-      apk add wget rsync openssh-client grep
-      export PATH=/usr/bin:$PATH
+      # apk update
+      # apk del dropbear-scp
+      # apk add wget rsync openssh-client grep
+      # export PATH=/usr/bin:$PATH
       curl --fail -H "Authorization: token ${GITHUB_TOKEN}" -H 'Accept: application/vnd.github.v3.raw' -O -L ${RELEASE_SCRIPT}
       chmod +x release.sh
 
