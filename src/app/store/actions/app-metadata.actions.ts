@@ -180,12 +180,13 @@ export const getAppMetadataObservable = (
   appId: string,
   action: IGetAppMetadataAction
 ): Observable<any> => {
+  // If you put startWith(null) in here please fix multi-request spam on apps page.
   return Observable.combineLatest(
-    store.select(selectEntity(action.entityKey, appId)).startWith(null),
-    store.select(selectRequestInfo(action.entityKey, appId)).startWith(null)
+    store.select(selectEntity(action.entityKey, appId)),
+    store.select(selectRequestInfo(action.entityKey, appId))
   )
     .do(([metadata, metadataRequestState]) => {
-      if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) { // && !dispatched
+      if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) {
         store.dispatch(action);
       }
     })

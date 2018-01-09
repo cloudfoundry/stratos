@@ -106,7 +106,7 @@ export class ApplicationService {
       store: this.store,
       action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
       schema: EnvVarsSchema
-    });
+    }, true);
   }
 
   private constructAmalgamatedObservables() {
