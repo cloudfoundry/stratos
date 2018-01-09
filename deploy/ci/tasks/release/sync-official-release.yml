@@ -6,8 +6,9 @@ inputs:
 image_resource:
   type: docker-image
   source:
-   repository:  dockerswarm/dind
-   tag: "17.12.0-ce"
+   repository:  ci-registry.capbristol.com:5000/stratos-ubuntu-dind
+   tag: "latest"
+   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 run:
   path: sh
@@ -15,7 +16,11 @@ run:
     - -exc
     - |
       # start_docker
-      cat /etc/docker/daemon.json
+      export PORT=9999
+      wrapdocker &
+      sleep 10
+      docker info
+      # cat /etc/docker/daemon.json
       # Login to Staging repository
       docker login -u ${STAGING_REPOSITORY_USERNAME} -p ${STAGING_REPOSITORY_PASSWORD} ${STAGING_REPOSITORY};
       # Login to Release repository
@@ -92,9 +97,9 @@ run:
       rsync -v -r --delete ${STRATOS_UI}/deploy/kubernetes/console ${HELM_REPO}/${RELEASE_HELM_STABLE_FOLDER}
 
       # Show the changes that have been made
+      echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
+      chmod 600 /root/.ssh/id_rsa
       git status
-      # Disable authenticity check
-      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       # Add the changes
       git add ${RELEASE_HELM_STABLE_FOLDER}/console
       git status
