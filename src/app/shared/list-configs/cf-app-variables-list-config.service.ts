@@ -62,6 +62,7 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
     },
   ];
 
+  pageSizeOptions = [5, 10, 20];
 
   private dispatchDeleteAction() {
     this.store.dispatch(

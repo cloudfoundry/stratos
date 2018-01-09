@@ -32,37 +32,11 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     public dataSource: IListDataSource<T>
   ) {
 
-    this.pagination$ = this.dataSource.pagination$
-      .filter(pag => !!pag)
-      .map(pag => {
-        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
-          || defaultClientPaginationPageSize;
-        const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
-        // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
-        return {
-          totalResults: pag.totalResults,
-          pageSize,
-          pageIndex
-        };
-      });
+    this.pagination$ = this.createPaginationObservable(dataSource);
 
-    this.sort$ = this.dataSource.pagination$.map(pag => ({
-      direction: pag.params['order-direction'] as SortDirection,
-      field: pag.params['order-direction-field']
-    })).filter(x => !!x).distinctUntilChanged((x, y) => {
-      return x.direction === y.direction && x.field === y.field;
-    });
+    this.sort$ = this.createSortObservable(dataSource);
 
-    this.filter$ = this.dataSource.pagination$.pipe(
-      map(pag => this.dataSource.isLocal ?
-        pag.clientPagination.filter :
-        this.dataSource.getFilterFromParams(pag)
-      ),
-      filter(x => !!x),
-      map(filterString => ({
-        filter: filterString
-      }))
-    );
+    this.filter$ = this.createFilterObservable(dataSource);
 
   }
   pagination$: Observable<ListPagination>;
@@ -97,5 +71,42 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         filter: filterString
       });
     }
+  }
+  private createPaginationObservable(dataSource: IListDataSource<T>): Observable<ListPagination> {
+    return dataSource.pagination$
+      .filter(pag => !!pag)
+      .map(pag => {
+        const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
+          || defaultClientPaginationPageSize;
+        const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
+        // const totalResults = (dataSource.isLocal ? pag.clientPagination.totalResults : pag.totalResults) || 0;
+        return {
+          totalResults: pag.totalResults,
+          pageSize,
+          pageIndex
+        };
+      });
+  }
+
+  private createSortObservable(dataSource: IListDataSource<T>): Observable<ListSort> {
+    return dataSource.pagination$.map(pag => ({
+      direction: pag.params['order-direction'] as SortDirection,
+      field: pag.params['order-direction-field']
+    })).filter(x => !!x).distinctUntilChanged((x, y) => {
+      return x.direction === y.direction && x.field === y.field;
+    });
+  }
+
+  private createFilterObservable(dataSource: IListDataSource<T>): Observable<ListFilter> {
+    return dataSource.pagination$.pipe(
+      map(pag => dataSource.isLocal ?
+        pag.clientPagination.filter :
+        dataSource.getFilterFromParams(pag)
+      ),
+      filter(x => !!x),
+      map(filterString => ({
+        filter: filterString
+      }))
+    );
   }
 }

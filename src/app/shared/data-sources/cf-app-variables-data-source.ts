@@ -25,15 +25,8 @@ export interface AppEnvVar {
 
 export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, ApplicationEnvVars> {
 
-  // Only needed for update purposes
-  // public rows = new Array<AppEnvVar>(); // TODO: RC CHECK
-
   public cfGuid: string;
   public appGuid: string;
-
-  // filteredRows = new Array<AppEnvVar>();
-  // isLoadingPage$: Observable<boolean>;
-  // data$: any;
 
   constructor(
     protected _store: Store<AppState>,

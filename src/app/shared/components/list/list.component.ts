@@ -39,6 +39,7 @@ export interface IListConfig<T> {
   getDataSource: () => ListDataSource<T>;
   getFiltersConfigs: () => IListFilterConfig[];
   isLocal?: boolean;
+  pageSizeOptions: Number[];
 }
 
 export interface IListFilterConfig {
@@ -54,6 +55,7 @@ export interface IListFilterConfigItem {
 
 export class ListConfig implements IListConfig<any> {
   isLocal = false;
+  pageSizeOptions = [5, 10, 20];
   getGlobalActions = () => null;
   getMultiActions = () => null;
   getSingleActions = () => null;

@@ -19,16 +19,10 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-
 import { ClearPaginationOfType } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
-import {
-  ApiActionTypes
-} from './../actions/request.actions';
-import {
-  APIResource,
-  NormalizedResponse,
-} from './../types/api.types';
+import { ApiActionTypes } from './../actions/request.actions';
+import { APIResource, NormalizedResponse } from './../types/api.types';
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
@@ -58,7 +52,6 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-
 
       const paramsObject = {};
       const apiAction = action as ICFAction;
@@ -115,7 +108,6 @@ export class APIEffect {
         .map(resData => this.handleMultiEndpoints(resData, apiAction)) // Check for errors and fetch entities
         .mergeMap(response => {
           const { entities, totalResults } = response;
-
           const actions = [];
           actions.push({ type: apiAction.actions[1], apiAction });
           actions.push(new WrapperRequestActionSuccess(

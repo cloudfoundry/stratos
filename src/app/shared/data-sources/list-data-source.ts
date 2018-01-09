@@ -33,7 +33,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // -------------- Public
   // Core observables
   public view$: Observable<ListView>;
-  // public state$: Observable<ListState>;
   public pagination$: Observable<PaginationEntityState>;
   public page$: Observable<T[]>;
 
@@ -52,10 +51,12 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // Edit item
   public editRow: T;
 
-  // TODO: RC Sort
-  public isLoadingPage$: Observable<boolean> = Observable.of(false);
+  // Cached collections
   public filteredRows: Array<T>;
   public entityLettabledRows: Array<T>;
+
+  // Misc
+  public isLoadingPage$: Observable<boolean> = Observable.of(false);
 
   // ------------- Private
   private entities$: Observable<T>;
@@ -175,9 +176,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return page$.pipe(
       withLatestFrom(pagination$),
       distinctUntilChanged((oldVals, newVals) => {
-        const oldPag = this.getPaginationCompareString(oldVals[1]);
-        const newPag = this.getPaginationCompareString(oldVals[1]);
-        return oldPag !== newPag;
+        // TODO: NJ .. from RC .. Currently never changes (oldVals vs oldVals). Need to also take into account anything thats changed via
+        // dataFunctions (for instance filter, sort, etc)
+        return this.getPaginationCompareString(oldVals[1]) === this.getPaginationCompareString(oldVals[1]);
       }),
       debounceTime(10),
       map(([entities, paginationEntity]) => {

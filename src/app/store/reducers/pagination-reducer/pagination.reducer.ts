@@ -120,5 +120,3 @@ function enterPaginationReducer(state: PaginationState, action, updatePagination
     return state;
   }
 }
-
-

@@ -33,8 +33,8 @@ export class CfAppConfigService implements IListConfig<APIResource> {
     },
     {
       columnId: 'status', headerCell: () => 'Status',
-       cellFlex: '1',
-       cellComponent: TableCellAppStatusComponent,
+      cellFlex: '1',
+      cellComponent: TableCellAppStatusComponent,
     },
     {
       columnId: 'instances', headerCell: () => 'Instances', cell: (row: APIResource) => `${row.entity.instances}`, cellFlex: '1'
@@ -53,6 +53,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       cellFlex: '2'
     },
   ];
+  pageSizeOptions = [5, 10, 20];
 
   getGlobalActions = () => null;
   getMultiActions = () => null;
