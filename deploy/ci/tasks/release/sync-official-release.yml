@@ -62,7 +62,7 @@ run:
       cd -
       CHART_TARBALL=$(mc find minio --name "console-helm-chart-cap-sle-${GIT_TAG}.tgz")
       mc cp ${CHART_TARBALL} .
-      ./release.sh show-images stratos
+      bash -x ./release.sh show-images stratos
       echo 'y' | ./release.sh publish-release stratos
 
       # Copy the Helm chart contents into the correct folder - use rsync so that we remove any files that have gone
