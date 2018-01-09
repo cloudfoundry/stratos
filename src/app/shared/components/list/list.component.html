@@ -96,7 +96,7 @@
     <app-cards *ngIf="(dataSource.view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
     <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [paginationController]="paginationController" [columns]="columns" [text]="text" [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
     </app-table>
-    <mat-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize" [pageSizeOptions]="[]">
+    <mat-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize" [pageSizeOptions]="paginator.pageSizeOptions">
     </mat-paginator>
     <mat-card [hidden]="(dataSource.isLoadingPage$ | async) || (dataSource.pagination$ | async)?.totalResults > 0">
       <mat-card-content>

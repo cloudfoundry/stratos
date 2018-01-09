@@ -52,7 +52,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       cellFlex: '2'
     },
   ];
-  pageSizeOptions = [5, 10, 20];
+  pageSizeOptions = [9, 45, 90];
 
   getGlobalActions = () => null;
   getMultiActions = () => null;

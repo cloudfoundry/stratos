@@ -47,10 +47,16 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       this.store.dispatch(new SetClientPage(
         this.dataSource.entityKey, this.dataSource.paginationKey, pageEvent.pageIndex + 1
       ));
+      this.store.dispatch(new SetClientPageSize(
+        this.dataSource.entityKey, this.dataSource.paginationKey, pageEvent.pageSize
+      ));
     } else {
       this.store.dispatch(new SetPage(
         this.dataSource.entityKey, this.dataSource.paginationKey, pageEvent.pageIndex + 1
       ));
+      this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
+        ['results-per-page']: pageEvent.pageSize,
+      }, this.dataSource.isLocal));
     }
   }
   sort = (listSort: ListSort) => {

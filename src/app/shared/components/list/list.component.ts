@@ -55,7 +55,7 @@ export interface IListFilterConfigItem {
 
 export class ListConfig implements IListConfig<any> {
   isLocal = false;
-  pageSizeOptions = [5, 10, 20];
+  pageSizeOptions = [9, 45, 90];
   getGlobalActions = () => null;
   getMultiActions = () => null;
   getSingleActions = () => null;
@@ -150,6 +150,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const paginationWidgetToStore = this.paginator.page.do(page => this.paginationController.page(page));
+
 
     const filterWidgetToStore = this.filter.valueChanges
       .debounceTime(500)

@@ -146,7 +146,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   ];
   isLocal = true;
   dataSource: EndpointsDataSource;
-  pageSizeOptions = [5, 10, 20];
+  pageSizeOptions = [9, 45, 90];
 
   private handleAction(item, effectKey, handleChange) {
     const disSub = this.store.select(selectUpdateInfo(
