@@ -29,5 +29,6 @@
   },
   "config": {
     "main": "cloud-foundry"
-  }
+  },
+  "stratosLocales": ["en_US", "en_GB"]
 }
