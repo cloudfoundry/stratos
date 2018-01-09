@@ -12,7 +12,7 @@
 
   var components;
   var depsFolder = path.resolve('./.deps');
-  
+
   gulp.task('dump-deps-backend-prep', function (cb) {
     process.env.STRATOS_TEMP = path.resolve(__dirname, '../tmp');
     fsx.mkdirpSync(process.env.STRATOS_TEMP);
