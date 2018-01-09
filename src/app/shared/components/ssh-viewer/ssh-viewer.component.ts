@@ -10,14 +10,16 @@ import { Subject } from 'rxjs/Subject';
 import * as Terminal from 'xterm/dist/xterm.js';
 import 'xterm/dist/addons/fit/fit.js';
 import { map } from 'rxjs/operators';
-
+import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-ssh-viewer',
   templateUrl: './ssh-viewer.component.html',
-  encapsulation: ViewEncapsulation.None,
   styleUrls: ['./ssh-viewer.component.scss']
 })
 export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  {
+
+  @Input('errorMessage')
+  errorMessage: string;
 
   @Input('sshStream')
   sshStream: Observable<any>;
@@ -28,70 +30,43 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
   @Input('connectionStatus')
   public connectionStatus: Observable<number>;
 
-  @Output('attempting')
-  public attempting = new EventEmitter();
-
-  public isConnecting: Observable<boolean>;
-
   public isConnected = false;
-  public attemptingConnection = false;
+  public isConnecting = false;
+  private isDestroying = false;
 
   @ViewChild('terminal') container: ElementRef;
   private xterm: Terminal;
 
   private msgSubscription: Subscription;
+  private connectSubscription: Subscription;
 
   private onTermSendData = this.termSendData.bind(this);
   private onTermResize = this.termResize.bind(this);
 
-  constructor() { }
+  constructor(private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
-    this.attempting.emit(false);
-
-    this.isConnecting = this.connectionStatus.pipe(map((count: number) => {
-
-      if (this.attemptingConnection) {
-        this.attempting.emit(count === 0);
-      } else {
-        this.attempting.emit(false);
-      }
-
+    this.connectSubscription = this.connectionStatus.subscribe((count: number) => {
       this.isConnected = (count !== 0);
       if (this.isConnected) {
         this.xterm.focus();
+        this.isConnecting = false;
       }
-      return count === 0;
-    }));
+      if (!this.isDestroying) {
+        this.changeDetector.detectChanges();
+      }
+    });
 
     this.xterm = new Terminal({
       cols: 80,
       rows: 40
     });
-    // console.log(Terminal);
-    // Terminal.loadAddon('fit', TerminalFitAddon);
 
     this.xterm.open(this.container.nativeElement, false);
-
-    // TODO: Fit the terminal when the web socket is connected
-
     this.xterm.on('data', this.onTermSendData);
     this.xterm.on('resize', this.onTermResize);
 
     this.reconnect();
-
-  }
-
-  // @HostListener('window:resize', ['$event'])
-  onResize(event) {
-    console.log('RESIZE !!!!!!!!!!!!!!!!!!!!!!!!!!');
-    console.log(event.target);
-
-    console.log(this.container);
-    console.log(this.container.nativeElement.clientWidth);
-    console.log(this.container.nativeElement.clientHeight);
-
-
   }
 
   ngAfterViewChecked() {
@@ -99,24 +74,26 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
   }
 
   ngOnDestroy() {
+    this.isDestroying = true;
     this.xterm.off('data', this.onTermSendData);
     this.xterm.off('resize', this.onTermResize);
     this.disconnect();
+    this.connectSubscription.unsubscribe();
   }
 
   disconnect() {
-    this.attemptingConnection = false;
-    this.attempting.emit(false);
-    console.log('Disconnect');
-    this.msgSubscription.unsubscribe();
+    this.isConnecting = false;
     this.isConnected = false;
+    this.errorMessage = undefined;
+    if (!this.msgSubscription.closed) {
+      this.msgSubscription.unsubscribe();
+    }
   }
 
   reconnect() {
-    this.attemptingConnection = true;
-    this.attempting.emit(true);
+    this.isConnecting = true;
+    this.errorMessage = undefined;
     this.xterm.reset();
-    console.log('Reconnect');
     this.msgSubscription = this.sshStream
     .subscribe(
       (data: string) => {
@@ -125,11 +102,13 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
         }
       },
       (err) => {
-        console.log('ERROR');
         this.disconnect();
       },
       () => {
         this.disconnect();
+        if (!this.isDestroying) {
+          this.changeDetector.detectChanges();
+        }
       }
     );
   }

@@ -1,11 +1,11 @@
 <app-page-header>
-  <h1>Application SSH</h1>
+  <h1>Application SSH ({{ (entityService.entityObs$ | async)?.entity?.entity.name }} #{{ instanceId }})</h1>
   <div class="page-header-right">
     <span>
-      <button mat-icon-button name="stop" *ngIf="(connectionStatus | async) > 0" (click)="sshViewer.disconnect()" [disabled]="isConnecting">
+      <button mat-icon-button name="stop" *ngIf="sshViewer.isConnected" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
         <mat-icon>stop</mat-icon>
       </button>
-      <button mat-icon-button name="start" *ngIf="(connectionStatus | async) === 0" (click)="sshViewer.reconnect()" [disabled]="isConnecting">
+      <button mat-icon-button name="start" *ngIf="!sshViewer.isConnected" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
         <mat-icon>play_arrow</mat-icon>
       </button>
       <button mat-icon-button [routerLink]="appInstanceLink">
@@ -15,4 +15,4 @@
   </div>
 </app-page-header>
 
-<app-ssh-viewer #sshViewer (attempting)="updateConnecting($event)" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>
+<app-ssh-viewer #sshViewer [errorMessage]="errorMessage" [sshStream]="messages" [sshInput]="sshInput" [connectionStatus]="connectionStatus"></app-ssh-viewer>

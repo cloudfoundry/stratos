@@ -1,30 +1,56 @@
-import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
-
-import { ApplicationStateService } from '../application/build-tab/application-state/application-state.service';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+
 import { Observable } from 'rxjs/Observable';
+import { Store } from '@ngrx/store';
 import { Subscription, Subject } from 'rxjs/Rx';
 import websocketConnect from 'rxjs-websockets';
+
+import { ApplicationService } from '../application.service';
+import { ApplicationStateService } from '../application/build-tab/application-state/application-state.service';
 import { QueueingSubject } from 'queueing-subject';
 import { LoggerService } from '../../../core/logger.service';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';
-
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 import { AppState } from '../../../store/app-state';
+import { EntityService } from '../../../core/entity-service';
+import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
+
+const entityServiceFactory = (
+  store: Store<AppState>,
+  activatedRoute: ActivatedRoute
+) => {
+  const { id, cfId } = activatedRoute.snapshot.params;
+  return new EntityService(
+    store,
+    ApplicationSchema.key,
+    ApplicationSchema,
+    id,
+    new GetApplication(id, cfId)
+  );
+};
 
 @Component({
   selector: 'app-ssh-application',
   templateUrl: './ssh-application.component.html',
-  styleUrls: ['./ssh-application.component.scss']
+  styleUrls: ['./ssh-application.component.scss'],
+  providers: [
+    {
+      provide: EntityService,
+      useFactory: entityServiceFactory,
+      deps: [Store, ActivatedRoute]
+    }
+  ]
 })
-export class SshApplicationComponent implements OnInit, OnDestroy {
+export class SshApplicationComponent implements OnInit {
 
   public messages: Observable<string>;
 
   public connectionStatus: Observable<number>;
 
   public sshInput: QueueingSubject<string>;
+
+  public errorMessage: string;
 
   public sshRoute: string;
 
@@ -34,15 +60,21 @@ export class SshApplicationComponent implements OnInit, OnDestroy {
 
   private connection: Subscription;
 
-  public isConnecting: boolean;
+  public instanceId: string;
 
   @ViewChild('sshViewer') sshViewer: SshViewerComponent;
 
-  constructor(private activatedRoute: ActivatedRoute, private logService: LoggerService, private store: Store<AppState>) { }
+  constructor(
+    private activatedRoute: ActivatedRoute,
+    private logService: LoggerService,
+    private store: Store<AppState>,
+    private entityService: EntityService
+  ) {}
 
   ngOnInit() {
-    console.log(this.activatedRoute.snapshot.params);
     const routeParams = this.activatedRoute.snapshot.params;
+
+    this.instanceId = routeParams.instanceId;
 
     this.appInstanceLink = (
       `/applications/${routeParams.cfId}/${routeParams.id}/ssh`
@@ -51,16 +83,11 @@ export class SshApplicationComponent implements OnInit, OnDestroy {
     if (!routeParams.cfId || !routeParams.id) {
       this.messages = Observable.never();
     } else {
-      console.log('******************* SSH ***************');
-      console.log(routeParams);
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-      console.log(protocol);
-      console.log(window.location.protocol);
       const streamUrl = (
         `${protocol}://${host}/pp/v1/${routeParams.cfId}/apps/${routeParams.id}/ssh/${routeParams.instanceId}`
       );
-      console.log(streamUrl);
       this.sshInput = new QueueingSubject<string>();
       const connection = websocketConnect(
         streamUrl,
@@ -69,33 +96,13 @@ export class SshApplicationComponent implements OnInit, OnDestroy {
 
       this.messages = connection.messages
       .catch(e => {
-        this.logService.error('Error while connecting to socket: ' + JSON.stringify(e));
+        if (e.type === 'error') {
+          this.errorMessage = 'Error connecting to web socket';
+        }
         return [];
       });
 
-      this.connectionStatus = connection.connectionStatus.share();
-
-      this.isConnecting = true;
-
-      this.connection = this.connectionStatus.subscribe((count: number) => {
-        if (!this.isConnecting && count === 0) {
-          // Disconnected
-          console.log('DISCONNECTED');
-          this.store.dispatch(new ShowSnackBar(`SSH Disconnected`));
-        }
-
-      });
+      this.connectionStatus = connection.connectionStatus;
     }
-  }
-
-  updateConnecting(e) {
-    console.log('HELLO - ATTEMPTING CONNECTION');
-    console.log(e);
-    this.isConnecting = e;
-  }
-
-
-  ngOnDestroy() {
-    this.connection.unsubscribe();
   }
 }
