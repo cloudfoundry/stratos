@@ -1,11 +1,11 @@
 import { tap } from 'rxjs/operators';
-import { selectMetadata } from '../../../../../store/actions/app-metadata.actions';
+import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from '../../../../../core/entity-service';
 import {
-    ApplicationEnvVarsService,
+  ApplicationEnvVarsService,
 } from '../../../../../features/applications/application/build-tab/application-env-vars.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ApplicationSchema, GetApplication } from '../../../../../store/actions/application.actions';
@@ -15,8 +15,9 @@ import { TableCellCustom } from '../../table-cell/table-cell-custom';
 import {
   ApplicationStateService,
   ApplicationStateData,
- } from './../../../application-state/application-state.service';
+} from './../../../application-state/application-state.service';
 import { Subscription } from 'rxjs/Subscription';
+import { selectEntity } from '../../../../../store/selectors/api.selectors';
 
 @Component({
   selector: 'app-table-cell-app-status',
@@ -37,12 +38,14 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   }
 
   ngOnInit() {
-    this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row && this.row.entity && this.row.entity.guid))
-    .pipe(
-      tap( appInstances => {
+    this.fetchAppState$ = this.store.select(
+      selectEntity(AppMetadataProperties.INSTANCES, this.row && this.row.entity && this.row.entity.guid))
+      // this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row && this.row.entity && this.row.entity.guid))
+      .pipe(
+      tap(appInstances => {
         this.applicationState = this.appStateService.get(this.row && this.row.entity, appInstances ? appInstances : null);
       })
-    ).subscribe();
+      ).subscribe();
   }
 
   ngOnDestroy() {

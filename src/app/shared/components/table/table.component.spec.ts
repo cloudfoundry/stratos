@@ -21,6 +21,7 @@ import {
 import {
   ApplicationStateIconPipe
 } from '../../../shared/components/application-state/application-state-icon/application-state-icon.pipe';
+import { ListSort } from '../../../store/actions/list.actions';
 
 
 describe('TableComponent', () => {

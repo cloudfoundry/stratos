@@ -12,9 +12,9 @@ import { EndpointsService } from '../../../core/endpoints.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { ApplicationSchema } from '../../../store/actions/application.actions';
-import { GetAppMetadataAction, getAppMetadataObservable } from '../../../store/actions/app-metadata.actions';
+import { getAppMetadataObservable } from '../../../store/actions/app-metadata.actions';
 import { AppMetadataType } from '../../../store/types/app-metadata.types';
-import { AppMetadataProperties } from '../../../store/actions/app-metadata.actions';
+import { AppMetadataProperties, GetAppInstancesAction } from '../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-application-wall',
@@ -62,12 +62,12 @@ export class ApplicationWallComponent {
           const appGuid = app.entity.guid;
           const cfGuid = app.entity.cfGuid;
           if (appState === 'STARTED') {
-             this.store.dispatch(new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.INSTANCES as AppMetadataType));
+            this.store.dispatch(new GetAppInstancesAction(appGuid, cfGuid));
           }
         });
       }),
     ).subscribe();
-   }
+  }
 
   cardComponent = CardAppComponent;
 }
