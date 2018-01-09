@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.0.0 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.9...1.0.0)
+
+**Improvements:**
+- Added French localization (*Open Source build only*) [\#1419](https://github.com/SUSE/stratos-ui/pull/1419)
+
+**Fixes:**
+- Removed dependency `jsdocs` because of security vulnerability [\#1428](https://github.com/SUSE/stratos-ui/pull/1428)
+- Fix vertical alignment for setup screens (*Open Source build only*) [\#1417](https://github.com/SUSE/stratos-ui/pull/1417)
+
 ## 0.9.9 Release Candidate 1 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.8...0.9.9)
