@@ -257,8 +257,9 @@
 
   gulp.task('i18n', function () {
     var productVersion = {product: {version: utils.getMajorMinor(packageJson.version)}};
+    var bower = components.getBowerConfig();
     return gulp.src(i18nFiles.bower)
-      .pipe(i18n(gutil.env.devMode, productVersion))
+      .pipe(i18n(gutil.env.devMode, productVersion, bower.stratosLocales))
       //.pipe(gutil.env.devMode ? gutil.noop() : uglify())
       .pipe(gulp.dest(paths.i18nDist));
   });
