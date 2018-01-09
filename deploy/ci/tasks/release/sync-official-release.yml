@@ -46,9 +46,6 @@ run:
       export PUBLIC_REGISTRY=${RELEASE_REPOSITORY}
       export PUBLIC_REGISTRY_ORGANIZATION=${RELEASE_REPOSITORY_ORG}
 
-      # Sync the images
-      ./release.sh show-images stratos
-      echo 'y' | ./release.sh publish-release stratos
 
       # Now create a PR for the helm chart
       STRATOS_UI=${ROOT_DIR}/stratos-ui
@@ -58,13 +55,22 @@ run:
       GIT_TAG="$(git describe $(git rev-list --tags --max-count=1))"
       echo "Release: ${GIT_TAG}"
 
+      # Download chart
+      CHART_TARBALL=$(mc find minio --name "console-helm-chart-cap-sle-${GIT_TAG}.tgz")
+      mc cp ${CHART_TARBALL} .
+      
+      # Sync the images
+      cd -
+      ./release.sh show-images stratos
+      echo 'y' | ./release.sh publish-release stratos
+
       # Copy the Helm chart contents into the correct folder - use rsync so that we remove any files that have gone
       cd ${STRATOS_UI}/deploy/kubernetes/
 
       # Copy in the values and Chart
-      VALUES_YAML=$(mc find minio --name 'values.yaml-${GIT_TAG}*') 
+      VALUES_YAML=$(mc find minio --name "values.yaml-${GIT_TAG}*") 
       mc cat ${VALUES_YAML} > console/values.yaml
-      CHART_YAML=$(mc find minio --name 'Chart.yaml-${GIT_TAG}*') 
+      CHART_YAML=$(mc find minio --name "Chart.yaml-${GIT_TAG}*") 
       mc cat ${CHART_YAML} > console/Chart.yaml
 
       # Patch values file
