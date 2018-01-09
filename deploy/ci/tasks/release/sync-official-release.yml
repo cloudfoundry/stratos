@@ -96,6 +96,8 @@ run:
       git status
 
       # Add the changes
+      apk del dropbear-scp
+      apk add openssh-client
       git add ${RELEASE_HELM_STABLE_FOLDER}/console
       git status
       git commit -m "Stratos UI Console Helm Chart for release ${GIT_TAG}"
