@@ -10,7 +10,7 @@ import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { combineLatest } from 'rxjs/operator/combineLatest';
 import { CombineLatestOperator } from 'rxjs/operators/combineLatest';
-import { distinctUntilChanged, tap, filter, withLatestFrom, map } from 'rxjs/operators';
+import { distinctUntilChanged, tap, filter, withLatestFrom, map, share } from 'rxjs/operators';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -118,17 +118,28 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    distinctUntilChanged((oldVals, newVals) => {
-      const oldVal = getPaginationCompareString(oldVals);
-      const newVal = getPaginationCompareString(newVals);
-      return oldVal === newVal;
-    }));
+  const a = Observable.of(Date.now());
+  let b = store.select(selectPaginationState(entityKey, paginationKey)).publish().refCount();
+  b = b.do(c => {
+    console.log('do');
+  });
+
+  b.subscribe();
+  b.subscribe();
+  b.subscribe();
+
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).publish().refCount();
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
+  // On every subscription tap is executed regardles of distinct
   const entities$: Observable<T[]> =
     paginationSelect$
       .pipe(
+      distinctUntilChanged((oldVals, newVals) => {
+        const oldVal = getPaginationCompareString(oldVals);
+        const newVal = getPaginationCompareString(newVals);
+        return oldVal === newVal;
+      }),
       tap(pagination => {
         if (
           (!pagination && !hasDispatchedOnce) ||
@@ -136,7 +147,7 @@ function getObservables<T = any>(
         ) {
           hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
           // TODO: NJ - From RC.. for server pagination this fires multiple times even when there's no change of pagination
-          console.log(pagination);
+          // console.log(pagination);
           store.dispatch(action);
         }
       }),
@@ -203,7 +214,7 @@ function getPaginationCompareString(paginationEntity: PaginationEntityState) {
   if (paginationEntity.params) {
     params = JSON.stringify(paginationEntity.params);
   }
-  console.log(paginationEntity.currentPage + params);
+  // console.log(paginationEntity.currentPage + params);
   return paginationEntity.currentPage + params;
   // return Object.values(paginationEntity).join('.')
   //   + paginationEntity.params['order-direction-field']
