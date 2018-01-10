@@ -26,16 +26,18 @@
   html {
     background-color: $app-background-color;
   }
+  
+  $side-nav-text: #fff;
 
   // Palette for side navigation
   $side-nav: (
     background: #333,
     background-top: #333,
-    text: darken(#fff, 10%),
+    text: darken($side-nav-text, 10%),
     active: #484848,
-    active-text: #fff,
+    active-text: $side-nav-text,
     hover: #555,
-    hover-text: #fff
+    hover-text: $side-nav-text
   );
 
   // App Theme defines a set of colors used by stratos components
