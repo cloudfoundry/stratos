@@ -1,0 +1,37 @@
+{
+  "product": {
+    "name": "SUSE Cloud Foundry",
+    "console": "SUSE Console Cloud Foundry",
+    "cf": "Cloud Foundry"
+  },
+  "company": {
+    "name": "SUSE",
+    "terms": "Légal",
+    "terms.href": "https://www.suse.com/company/legal/",
+    "PRIVACY_HREF": "", 
+    "PRODUCT_FAMILY_HREF": "",
+    "www-link": "http://www.suse.com"
+  },
+  "about": {
+    "footer": {
+      "company.logo": "images/OpenSUSE_Logo.png",
+      "company.terms-href": "",
+      "company.privacy-href": ""
+    }
+  },
+  "navbar": {
+    "title": "Stratos UI",
+    "logo": "svg:SUSE_Geeko.svg"
+  },
+  "login": {
+    "title":"Se connecter",
+    "console": "Console Cloud Foundry"
+  },
+  "landing": {
+    "footer": {
+      "company.logo": "images/OpenSUSE_Logo.png",
+      "company.terms-href": "",
+      "company.privacy-href": ""
+    }
+  }
+}
