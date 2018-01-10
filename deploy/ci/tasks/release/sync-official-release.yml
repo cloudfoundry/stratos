@@ -72,9 +72,9 @@ run:
       cd ${STRATOS_UI}/deploy/kubernetes/
 
       # Copy in the values and Chart
-      VALUES_YAML=$(mc find minio --name "values.yaml-${GIT_TAG}*") 
+      VALUES_YAML=$(mc find minio --name "values.yaml-cap-${GIT_TAG}*") 
       mc cat ${VALUES_YAML} > console/values.yaml
-      CHART_YAML=$(mc find minio --name "Chart.yaml-${GIT_TAG}*") 
+      CHART_YAML=$(mc find minio --name "Chart.yaml-cap-${GIT_TAG}*") 
       mc cat ${CHART_YAML} > console/Chart.yaml
 
       # Patch values file
@@ -111,3 +111,4 @@ run:
 
       # TODO: Automatically create a PR
       echo "Please manually create a PR from the branch ${BRANCH}"
+      exit 0
