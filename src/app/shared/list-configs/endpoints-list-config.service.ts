@@ -1,4 +1,4 @@
-import { ClearPagination } from '../../store/actions/pagination.actions';
+import { ResetPagination } from '../../store/actions/pagination.actions';
 import { isLowerCase } from 'tslint/lib/utils';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
@@ -38,7 +38,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       this.store.dispatch(new UnregisterCnis(item.guid));
       this.handleAction(item, CNSISEffect.unregisteringKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
-        this.store.dispatch(new ClearPagination(this.dataSource.entityKey, this.dataSource.paginationKey));
+        this.store.dispatch(new ResetPagination(this.dataSource.entityKey, this.dataSource.paginationKey));
       });
     },
     icon: 'delete',

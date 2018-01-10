@@ -3,7 +3,7 @@ import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
 import {
   ADD_PARAMS,
-  CLEAR_PAGES,
+  RESET_PAGINATION,
   CLEAR_PAGINATION_OF_TYPE,
   REMOVE_PARAMS,
   SET_CLIENT_FILTER,
@@ -18,7 +18,7 @@ import { mergeState } from '../../helpers/reducer.helper';
 import { defaultCfEntitiesState } from '../../types/entity.types';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
-import { paginationClearPages } from './pagination-reducer-clear-pages';
+import { paginationResetPagination } from './pagination-reducer-clear-pages';
 import { paginationClearType } from './pagination-reducer-clear-pagination-type';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationSetPage } from './pagination-reducer-set-page';
@@ -92,8 +92,8 @@ export function createPaginationReducer(types: [string, string, string]) {
       return state;
     }
 
-    if (action.type === CLEAR_PAGES && !action.keepPages) {
-      return paginationClearPages(state, action);
+    if (action.type === RESET_PAGINATION && !action.keepPages) {
+      return paginationResetPagination(state, action);
     }
 
     if (action.type === CLEAR_PAGINATION_OF_TYPE) {
