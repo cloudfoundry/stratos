@@ -12,13 +12,13 @@ import {
   SET_PAGE,
   SET_RESULT_COUNT,
   SET_PARAMS,
+  CLEAR_PAGES,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
 import { defaultCfEntitiesState } from '../../types/entity.types';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
-import { paginationResetPagination } from './pagination-reducer-clear-pages';
 import { paginationClearType } from './pagination-reducer-clear-pagination-type';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationSetPage } from './pagination-reducer-set-page';
@@ -29,6 +29,8 @@ import { paginationFailure } from './pagination-reducer.failure';
 import { getActionKey, getActionType, getPaginationKey } from './pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from './pagination-reducer.types';
 import { paginationSetResultCount } from './pagination-reducer-set-result-count';
+import { paginationResetPagination } from './pagination-reducer-reset-pagination';
+import { paginationClearPages } from './pagination-reducer-clear-pages';
 
 export const defaultClientPaginationPageSize = 9;
 export const defaultPaginationEntityState = {
@@ -90,6 +92,10 @@ export function createPaginationReducer(types: [string, string, string]) {
     state = state || defaultPaginationState;
     if (action.type === ApiActionTypes.API_REQUEST_START) {
       return state;
+    }
+
+    if (action.type === CLEAR_PAGES) {
+      return paginationClearPages(state, action);
     }
 
     if (action.type === RESET_PAGINATION && !action.keepPages) {

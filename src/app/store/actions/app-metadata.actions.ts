@@ -30,7 +30,7 @@ export const AppMetadataProperties = {
 export const EnvVarSchema = new schema.Entity(AppMetadataProperties.ENV_VARS);
 export const EnvVarsSchema = new schema.Array(EnvVarSchema);
 
-export interface IGetAppMetadataAction extends IRequestAction {
+export interface IGetAppMetadataAction extends PaginatedAction, IRequestAction {
   options: RequestOptions;
   guid: string;
   cnis: string;
@@ -40,7 +40,7 @@ export abstract class AppMetadataAction implements Action {
   type = AppMetadataTypes.APP_METADATA;
 }
 
-export class GetAppInstancesAction extends AppMetadataAction implements PaginatedAction, IGetAppMetadataAction {
+export class GetAppInstancesAction extends AppMetadataAction implements IGetAppMetadataAction {
   options: RequestOptions;
 
   constructor(

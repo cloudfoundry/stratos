@@ -12,6 +12,7 @@ import {
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const RESET_PAGINATION = '[Pagination] Reset pagination';
+export const CLEAR_PAGES = '[Pagination] Clear pages only';
 export const SET_PAGE = '[Pagination] Set page';
 export const SET_RESULT_COUNT = '[Pagination] Set result count';
 export const SET_CLIENT_PAGE_SIZE = '[Pagination] Set client page size';
@@ -31,6 +32,12 @@ export class ResetPagination implements PaginationAction {
   constructor(public entityKey: string, public paginationKey: string) {
   }
   type = RESET_PAGINATION;
+}
+
+export class ClearPages implements PaginationAction {
+  constructor(public entityKey: string, public paginationKey: string) {
+  }
+  type = CLEAR_PAGES;
 }
 
 export class SetPage implements PaginationAction {

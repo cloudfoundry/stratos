@@ -53,8 +53,11 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
         _appService.cfGuid,
         _appService.appGuid,
       ),
-      map(app => {
-        const env = app[0].environment_json;
+      map(variables => {
+        if (!variables || variables.length === 0) {
+          return [];
+        }
+        const env = variables[0].environment_json;
         const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
         return rows;
       }),

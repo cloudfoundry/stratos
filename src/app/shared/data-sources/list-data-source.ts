@@ -196,6 +196,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         if (entities.length <= pageIndex * paginationEntity.clientPagination.pageSize) {
           // Filtered results contain too few items to show on current page, move current page to last page of filtered items
           pageIndex = Math.floor(entities.length / paginationEntity.clientPagination.pageSize) - 1;
+          if (pageIndex < 0) {
+            pageIndex = 0; // If there's zero results ensure we don't set an invalid page number
+          }
           this._store.dispatch(new SetClientPage(this.entityKey, this.paginationKey, pageIndex + 1));
         }
 
@@ -207,7 +210,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {
     return Object.values(paginationEntity.clientPagination).join('.')
       + paginationEntity.params['order-direction-field']
-      + paginationEntity.params['order-direction'];
+      + paginationEntity.params['order-direction']
+      + paginationEntity.fetching; // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }
 
   splitClientPages(entites: T[], pageSize: number): T[][] {
