@@ -10,6 +10,7 @@ import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { combineLatest } from 'rxjs/operator/combineLatest';
 import { CombineLatestOperator } from 'rxjs/operators/combineLatest';
+import { distinctUntilChanged, tap, filter, withLatestFrom, map } from 'rxjs/operators';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -117,26 +118,33 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+    distinctUntilChanged((oldVals, newVals) => {
+      const oldVal = getPaginationCompareString(oldVals);
+      const newVal = getPaginationCompareString(newVals);
+      return oldVal === newVal;
+    }));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
   const entities$: Observable<T[]> =
     paginationSelect$
-      .do(pagination => {
+      .pipe(
+      tap(pagination => {
         if (
           (!pagination && !hasDispatchedOnce) ||
           !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
         ) {
           hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
           // TODO: NJ - From RC.. for server pagination this fires multiple times even when there's no change of pagination
+          console.log(pagination);
           store.dispatch(action);
         }
-      })
-      .filter(pagination => {
+      }),
+      filter(pagination => {
         return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
-      })
-      .withLatestFrom(store.select(getAPIRequestDataState))
-      .map(([paginationEntity, entities]) => {
+      }),
+      withLatestFrom(store.select(getAPIRequestDataState)),
+      map(([paginationEntity, entities]) => {
         let page;
         if (isLocal) {
           const pages = Object.values(paginationEntity.ids);
@@ -145,12 +153,62 @@ function getObservables<T = any>(
           page = paginationEntity.ids[paginationEntity.currentPage];
         }
         return page ? denormalize(page, schema, entities) : null;
-      });
+      })
+      );
+
+
+
+  // .distinctUntilChanged((oldVals, newVals) => {
+  //   const oldVal = getPaginationCompareString(oldVals);
+  //   const newVal = getPaginationCompareString(newVals);
+  //   return oldVal === newVal;
+  // })
+  // .do(pagination => {
+  //   if (
+  //     (!pagination && !hasDispatchedOnce) ||
+  //     !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
+  //   ) {
+  //     hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
+  //     // TODO: NJ - From RC.. for server pagination this fires multiple times even when there's no change of pagination
+  //     console.log(pagination);
+  //     store.dispatch(action);
+  //   }
+  // })
+  // .filter(pagination => {
+  //   return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+  // })
+  // .withLatestFrom(store.select(getAPIRequestDataState))
+  // .map(([paginationEntity, entities]) => {
+  //   let page;
+  //   if (isLocal) {
+  //     const pages = Object.values(paginationEntity.ids);
+  //     page = [].concat.apply([], pages);
+  //   } else {
+  //     page = paginationEntity.ids[paginationEntity.currentPage];
+  //   }
+  //   return page ? denormalize(page, schema, entities) : null;
+  // });
 
   return {
     pagination$,
     entities$
   };
+}
+
+function getPaginationCompareString(paginationEntity: PaginationEntityState) {
+  if (!paginationEntity) {
+    return '';
+  }
+  let params = '';
+  if (paginationEntity.params) {
+    params = JSON.stringify(paginationEntity.params);
+  }
+  console.log(paginationEntity.currentPage + params);
+  return paginationEntity.currentPage + params;
+  // return Object.values(paginationEntity).join('.')
+  //   + paginationEntity.params['order-direction-field']
+  //   + paginationEntity.params['order-direction']
+  //   + paginationEntity.fetching; // Some outlier cases actually fetch independently from this list (looking at you app variables)
 }
 
 export function isPageReady(pagination: PaginationEntityState) {
