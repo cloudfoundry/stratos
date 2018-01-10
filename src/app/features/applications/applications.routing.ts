@@ -28,6 +28,7 @@ const appplicationsRoutes: Routes = [
       {
         path: ':cfId/:id',
         component: ApplicationBaseComponent,
+        data: { fullView: true},
         children: [
           { path: '', redirectTo: 'build', pathMatch: 'full' },
           { path: 'build', component: BuildTabComponent },

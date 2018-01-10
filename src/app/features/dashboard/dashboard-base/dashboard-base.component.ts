@@ -17,7 +17,7 @@ import { SideNavItem } from './../side-nav/side-nav.component';
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements AfterContentInit {
+export class DashboardBaseComponent implements OnInit, AfterContentInit {
 
   constructor(
     public pageHeaderService: PageHeaderService,
@@ -26,6 +26,8 @@ export class DashboardBaseComponent implements AfterContentInit {
     private breakpointObserver: BreakpointObserver
   ) {
   }
+
+  private fullView: boolean;
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
@@ -58,6 +60,11 @@ export class DashboardBaseComponent implements AfterContentInit {
   ];
 
   sideNaveMode = 'side';
+
+  ngOnInit() {
+    console.log('HELLOOOOOO');
+    this.fullView = true;
+  }
 
   ngAfterContentInit() {
     this.breakpointObserver.observe([

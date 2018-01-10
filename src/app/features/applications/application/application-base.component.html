@@ -30,8 +30,20 @@
     </span>
   </div>
 </app-page-header>
+<div>
+  <div>SUB HEADER</div>
+  <nav backgroundColor="primary" mat-tab-nav-bar class="summary__nav">
+      <a mat-tab-link class="mat-tab-fit" *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
+        [active]="rla.isActive">
+        {{tabLink.label}}
+      </a>
+    </nav>
+</div>
 
 <app-loading-page [isLoading]="isFetching$" [text]="'Getting your application'">
+  <router-outlet></router-outlet>
+</app-loading-page>
+<!--    
   <div class="summary">
     <app-details-card class="summary__form" title="Summary" [busy]="summaryDataChanging$ | async">
       <form class="summary__form" #summaryForm="ngForm">
@@ -130,11 +142,5 @@
       </form>
     </app-details-card>
   </div>
-  <nav mat-tab-nav-bar class="summary__nav">
-    <a mat-tab-link *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
-      [active]="rla.isActive">
-      {{tabLink.label}}
-    </a>
-  </nav>
-  <router-outlet></router-outlet>
 </app-loading-page>
+-->
