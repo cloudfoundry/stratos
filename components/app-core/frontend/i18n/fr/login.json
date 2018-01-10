@@ -1,6 +1,6 @@
 {
   "login": {
-    "login": "Login",
+    "login": "Se connecter",
     "console": "@:product.console",
     "logo": "",
     "title": "[[@:product.name]] [[@:product.version]]",
