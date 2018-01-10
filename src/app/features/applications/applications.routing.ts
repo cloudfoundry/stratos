@@ -11,11 +11,16 @@ import { BuildTabComponent } from './application/build-tab/build-tab.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
 import { CreateApplicationModule } from './create-application/create-application.module';
+import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 
 const appplicationsRoutes: Routes = [
   {
     path: 'new',
     component: CreateApplicationComponent
+  },
+  {
+    path: 'ssh/:cfId/:id/:instanceId',
+    component: SshApplicationComponent
   },
   {
     path: '',

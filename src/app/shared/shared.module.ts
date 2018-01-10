@@ -52,6 +52,7 @@ import {
   TableCellEndpointStatusComponent
 } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
+import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { TableCellAppStatusComponent } from './components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
 import {
   ApplicationStateIconComponent,
@@ -61,6 +62,7 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+
 
 @NgModule({
   imports: [
@@ -110,6 +112,7 @@ import { ApplicationStateService } from './components/application-state/applicat
     CardEndpointComponent,
     TableCellEndpointStatusComponent,
     DialogErrorComponent,
+    SshViewerComponent,
     TableCellAppStatusComponent,
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
@@ -139,6 +142,7 @@ import { ApplicationStateService } from './components/application-state/applicat
     NoContentMessageComponent,
     EndpointsMissingComponent,
     ApplicationStateComponent,
+    SshViewerComponent
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [

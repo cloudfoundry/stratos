@@ -5,6 +5,7 @@ const PROXY_CONFIG = {
       "protocol": "https:",
       "port": 443
     },
+    "ws": true,
     "secure": false,
     "changeOrigin": true
   }

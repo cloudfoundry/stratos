@@ -10,11 +10,20 @@ import { LogStreamTabComponent } from './application/log-stream-tab/log-stream-t
 import { ServicesTabComponent } from './application/services-tab/services-tab.component';
 import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
 import { ApplicationEnvVarsService } from './application/build-tab/application-env-vars.service';
+import {
+  ApplicationStateIconComponent,
+} from './application/build-tab/application-state/application-state-icon/application-state-icon.component';
+import {
+  ApplicationStateIconPipe,
+} from './application/build-tab/application-state/application-state-icon/application-state-icon.pipe';
+import { ApplicationStateComponent } from './application/build-tab/application-state/application-state.component';
+import { ApplicationStateService } from './application/build-tab/application-state/application-state.service';
 import { BuildTabComponent } from './application/build-tab/build-tab.component';
 import { ViewBuildpackComponent } from './application/build-tab/view-buildpack/view-buildpack.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { DatePipe } from '@angular/common';
+import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 
 
 @NgModule({
@@ -33,9 +42,14 @@ import { DatePipe } from '@angular/common';
     BuildTabComponent,
     VariablesTabComponent,
     ViewBuildpackComponent,
+    ApplicationStateIconPipe,
+    ApplicationStateIconComponent,
+    ApplicationStateComponent,
+    SshApplicationComponent,
   ],
   providers: [
     ApplicationService,
+    ApplicationStateService,
     ApplicationEnvVarsService,
     DatePipe
   ]
