@@ -176,8 +176,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return page$.pipe(
       withLatestFrom(pagination$),
       distinctUntilChanged((oldVals, newVals) => {
-        // TODO: NJ .. from RC .. Currently never changes (oldVals vs oldVals). Need to also take into account anything thats changed via
-        // dataFunctions (for instance filter, sort, etc)
         const oldVal = this.getPaginationCompareString(oldVals[1]);
         const newVal = this.getPaginationCompareString(newVals[1]);
         return oldVal === newVal;
