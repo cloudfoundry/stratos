@@ -4,6 +4,8 @@ node_js:
 branches:
   only:
   - master
+addons:
+  chrome: stable
 install:
 - npm install
 cache:
