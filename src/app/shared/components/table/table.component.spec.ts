@@ -1,10 +1,10 @@
+import { IListPaginationController } from '../../data-sources/list-pagination-controller';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatPaginatorIntl } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable } from 'rxjs/Rx';
 
 import { CoreModule } from '../../../core/core.module';
-import { ListSort } from '../../../store/actions/list.actions';
 import { TableCellEntryPoints } from '../../../test-framework/list-table-helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { AppEnvVar } from '../../data-sources/cf-app-variables-data-source';
@@ -21,6 +21,7 @@ import {
 import {
   ApplicationStateIconPipe
 } from '../../../shared/components/application-state/application-state-icon/application-state-icon.pipe';
+import { ListSort } from '../../../store/actions/list.actions';
 
 
 describe('TableComponent', () => {
@@ -53,12 +54,13 @@ describe('TableComponent', () => {
     component = fixture.componentInstance;
 
     const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
+    component.columns = new Array<ITableColumn<any>>();
+    component.paginationController = {
+      sort$: Observable.of({} as ListSort)
+    } as IListPaginationController<any>;
     component.dataSource = {
       connect() { return Observable.of([]); },
-      sort$: Observable.of({} as ListSort),
-    } as IListDataSource<AppEnvVar>;
-    component.columns = new Array<ITableColumn<any>>();
-
+    } as IListDataSource<any>;
     fixture.detectChanges();
   });
 

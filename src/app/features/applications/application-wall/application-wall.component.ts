@@ -1,20 +1,23 @@
+import { PaginationEntityState } from '../../../store/types/pagination.types';
 import { denormalize } from 'normalizr';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subscription } from 'rxjs/Rx';
 import { getAPIRequestDataState } from '../../../store/selectors/api.selectors';
-import { map, tap, withLatestFrom, filter, toArray } from 'rxjs/operators';
+import { map, tap, withLatestFrom, filter, toArray, distinctUntilChanged } from 'rxjs/operators';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
-import { ListConfig } from '../../../shared/components/list/list.component';
+import { ListConfig, IListConfig } from '../../../shared/components/list/list.component';
 import { CfAppConfigService } from '../../../shared/list-configs/cf-app-config.service';
 import { CardAppComponent } from '../../../shared/components/cards/custom-cards/card-app/card-app.component';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { ApplicationSchema } from '../../../store/actions/application.actions';
-import { GetAppMetadataAction, getAppMetadataObservable } from '../../../store/actions/app-metadata.actions';
 import { AppMetadataType } from '../../../store/types/app-metadata.types';
-import { AppMetadataProperties } from '../../../store/actions/app-metadata.actions';
+import { AppMetadataProperties, GetAppInstancesAction } from '../../../store/actions/app-metadata.actions';
+import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-source';
+import { ListDataSource } from '../../../shared/data-sources/list-data-source';
+import { APIResource } from '../../../store/types/api.types';
 
 @Component({
   selector: 'app-application-wall',
@@ -37,37 +40,39 @@ import { AppMetadataProperties } from '../../../store/actions/app-metadata.actio
     useClass: CfAppConfigService
   }]
 })
-export class ApplicationWallComponent {
+export class ApplicationWallComponent implements OnDestroy {
+
+  private statsSub: Subscription;
 
   constructor(
     public endpointsService: EndpointsService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private appListConfig: ListConfig,
   ) {
+    const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
 
-    const paginationSelect$ = store.select(selectPaginationState('application', 'applicationWall'));
-
-    const entities$ = paginationSelect$.pipe(
-      withLatestFrom(store.select(getAPIRequestDataState)),
-      map(([paginationEntity, entities]) => {
-        if (!paginationEntity) {
+    this.statsSub = dataSource.page$.pipe(
+      withLatestFrom(dataSource.pagination$),
+      tap(([page, pagination]) => {
+        if (!page) {
           return;
         }
-        const page = paginationEntity.ids[paginationEntity.currentPage];
-        return page ? denormalize(page, [ApplicationSchema], entities) : null;
-      }),
-      filter(p => !!p),
-      tap(p => {
-        p.forEach(app => {
+        page.forEach(app => {
           const appState = app.entity.state;
           const appGuid = app.entity.guid;
           const cfGuid = app.entity.cfGuid;
+          const dispatching = false;
           if (appState === 'STARTED') {
-             this.store.dispatch(new GetAppMetadataAction(appGuid, cfGuid, AppMetadataProperties.INSTANCES as AppMetadataType));
+            this.store.dispatch(new GetAppInstancesAction(appGuid, cfGuid));
           }
         });
-      }),
+      })
     ).subscribe();
-   }
+  }
 
   cardComponent = CardAppComponent;
+
+  ngOnDestroy(): void {
+    this.statsSub.unsubscribe();
+  }
 }

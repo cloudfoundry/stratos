@@ -6,7 +6,7 @@ import { PaginationAction, PaginationEntityState } from '../../types/pagination.
 export function paginationSuccess(state: PaginationEntityState, action) {
   const params = {};
   const { apiAction } = action;
-  if (apiAction.options.params) {
+  if (apiAction.options && apiAction.options.params) {
     apiAction.options.params.paramsMap.forEach((value, key) => {
       const paramValue = value.length === 1 ? value[0] : value;
       params[key] = paramValue;

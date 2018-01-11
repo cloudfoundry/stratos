@@ -22,19 +22,18 @@ export class CfAppConfigService implements IListConfig<APIResource> {
     private store: Store<AppState>,
     private utilsService: UtilsService,
     private appStateService: ApplicationStateService,
-
   ) {
     this.appsDataSource = new CfAppsDataSource(this.store);
   }
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
     {
-      columnId: 'name', headerCell: () => 'Application Name', cellComponent: TableCellAppNameComponent, cellFlex: '2'
+      columnId: 'name', headerCell: () => 'Application Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: true
     },
     {
       columnId: 'status', headerCell: () => 'Status',
-       cellFlex: '1',
-       cellComponent: TableCellAppStatusComponent,
+      cellFlex: '1',
+      cellComponent: TableCellAppStatusComponent,
     },
     {
       columnId: 'instances', headerCell: () => 'Instances', cell: (row: APIResource) => `${row.entity.instances}`, cellFlex: '1'
@@ -53,10 +52,19 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       cellFlex: '2'
     },
   ];
+  pageSizeOptions = [9, 45, 90];
 
   getGlobalActions = () => null;
   getMultiActions = () => null;
   getSingleActions = () => null;
   getColumns = () => this.columns;
   getDataSource = () => this.appsDataSource;
+  getFiltersConfigs = () => [{
+    key: 'endpoint',
+    label: 'Endpoint',
+    items: [{
+      label: 'All Endpoints',
+      value: 'all'
+    }]
+  }]
 }

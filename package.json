@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "build": "ng build",
-    "test-debug": "ng test",
+    "test-debug": "ng test --sourcemaps=false",
     "test": "ng test --code-coverage --sourcemaps=false -sr",
     "posttest": "codecov -f coverage/*.json",
     "lint": "ng lint --type-check --format stylish",
