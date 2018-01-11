@@ -112,6 +112,10 @@
           </span>
         </mat-list-item>
       </mat-list>
+      <button mat-button
+      color="primary"
+      (click)="addRoute()"
+      >Add Route</button>
     </app-details-card>
     <mat-card-footer>
       <mat-progress-bar *ngIf="(cardTwoFetching$ | async)" [mode]="'indeterminate'">

@@ -25,6 +25,7 @@ import {
 } from '../../shared/components/application-state/application-state.service';
 import { EntityInfo } from '../../store/types/api.types';
 import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType } from '../../store/types/app-metadata.types';
+import { NewRoute, CreateRoute } from '../../store/actions/route.actions';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -88,7 +89,7 @@ export class ApplicationService {
         new GetAppMetadataAction(this.appGuid, this.cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType)
       ));
 
-    // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
+      // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
     this.appStats$ =
       this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
         this.store,
@@ -170,6 +171,8 @@ export class ApplicationService {
 
     this.isFetchingStats$ =
       this.appStatsGated$.map(appStats => appStats ? appStats.metadataRequestState.updating.busy : false).startWith(false);
+
+
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
@@ -193,6 +196,14 @@ export class ApplicationService {
       this.appGuid,
       this.cfGuid,
       { ...updatedApplication }
+    ));
+  }
+
+  createRoute(route: NewRoute) {
+    this.store.dispatch(new CreateRoute(
+      this.appGuid,
+      this.cfGuid,
+      route
     ));
   }
 

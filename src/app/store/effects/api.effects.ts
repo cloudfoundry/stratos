@@ -194,10 +194,20 @@ export class APIEffect {
           return null;
         }
         return cfData.resources.map(resource => {
+          if (resource.entity) {
+            // Inject `cfGuid` in nested entities
+            Object.keys(resource.entity).forEach(resourceKey => {
+              const nestedResourceEntity = resource.entity[resourceKey];
+              if (nestedResourceEntity &&
+                nestedResourceEntity.hasOwnProperty('entity') &&
+                nestedResourceEntity.hasOwnProperty('metadata')) {
+                resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid);
+              }
+            });
+          }
           return this.completeResourceEntity(resource, cfGuid);
         });
       } else {
-
         return this.completeResourceEntity(cfData, cfGuid);
       }
     });

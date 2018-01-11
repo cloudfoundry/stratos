@@ -38,6 +38,7 @@ import { AppReducersModule } from './reducers.module';
       RouterEffect,
       SystemEffects,
       SnackBarEffects,
+      // AppRoutesEffects
     ]),
   ]
 })

@@ -21,7 +21,7 @@ export interface NewRoute {
 }
 
 export class CreateRoute extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cnis: string, route: NewRoute) {
+  constructor(public guid: string, public cfGuid: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'routes';
@@ -43,7 +43,7 @@ export class CreateRoute extends CFStartAction implements ICFAction {
 
 
 export class CheckRouteExists extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cnis: string, route: NewRoute) {
+  constructor(public guid: string, public cfGuid: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'routes';
