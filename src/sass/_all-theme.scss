@@ -26,7 +26,28 @@
   html {
     background-color: $app-background-color;
   }
-  $app-theme: ( app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65));
+  
+  $side-nav-text: #fff;
+
+  // Palette for side navigation
+  $side-nav: (
+    background: #333,
+    background-top: #333,
+    text: darken($side-nav-text, 10%),
+    active: #484848,
+    active-text: $side-nav-text,
+    hover: #555,
+    hover-text: $side-nav-text
+  );
+
+  // App Theme defines a set of colors used by stratos components
+  $app-theme: (
+    app-background-color: $app-background-color,
+    app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
+    side-nav: $side-nav
+  );
+
+  // Pass the Material theme and the App Theme to components that need to be themed
   @include dialog-error-theme($theme, $app-theme);
   @include login-page-theme($theme, $app-theme);
   @include side-nav-theme($theme, $app-theme);
@@ -35,6 +56,8 @@
   @include steppers-theme($theme, $app-theme);
   @include variables-tab-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
+
+  // These should move into a component file for status
   $status-success: mat-color($primary);
   $status-warning: mat-color($warn);
   $status-danger: mat-color($accent);
