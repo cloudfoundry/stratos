@@ -9,7 +9,6 @@ import {
 } from '../../../../../features/applications/application/build-tab/application-env-vars.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ApplicationSchema, GetApplication } from '../../../../../store/actions/application.actions';
-import { selector } from 'rxjs/operator/publish';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { TableCellCustom } from '../../table-cell/table-cell-custom';
 import {

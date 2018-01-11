@@ -232,16 +232,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {
-    return pag.params.filter;
+    // If data source is not local then this method must be overridden
+    return '';
   }
-  public setFilterParam(filter: ListFilter) {
-    if (filter && filter.filter && filter.filter.length) {
-      this._store.dispatch(new AddParams(this.entityKey, this.paginationKey, {
-        filter: filter.filter
-      }, this.isLocal));
-    } else {
-      // if (pag.params.q.find((q: QParam) => q.key === 'name'))
-      this._store.dispatch(new RemoveParams(this.entityKey, this.paginationKey, ['filter'], [], this.isLocal));
-    }
+  public setFilterParam(filter: ListFilter, pag: PaginationEntityState) {
+    // If data source is not local then this method must be overridden
   }
 }

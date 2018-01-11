@@ -30,6 +30,7 @@ import { ITableColumn, ITableText } from '../table/table.types';
 import { StaticInjector } from '@angular/core/src/di/injector';
 import { ListDataSource } from '../../data-sources/list-data-source';
 import { ListPaginationController, IListPaginationController } from '../../data-sources/list-pagination-controller';
+import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
@@ -149,15 +150,25 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.paginator.pageSize = pagination.pageSize;
     });
 
-    const paginationWidgetToStore = this.paginator.page.do(page => this.paginationController.page(page));
+    const paginationWidgetToStorePage = this.paginator.page
+      .map(page => page.pageIndex)
+      .distinctUntilChanged()
+      .do(pageIndex => this.paginationController.page(pageIndex));
 
+
+    const paginationWidgetToStorePageSize = this.paginator.page
+      // Ignore the initial case where it skips distinctUntilChanged (we should have gotten the widget values from the store to start with)
+      .skip(1)
+      .map(page => page.pageSize)
+      .distinctUntilChanged()
+      .do(pageSize => this.paginationController.pageSize(pageSize));
 
     const filterWidgetToStore = this.filter.valueChanges
       .debounceTime(500)
       .distinctUntilChanged()
       .map(value => value as string)
       .do(filterString => {
-        return this.paginationController.filter(filterString);
+        return this.paginationController.filterByString(filterString);
       });
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
@@ -176,7 +187,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.uberSub = Observable.combineLatest(
       this.dataSource.page$,
       paginationStoreToWidget,
-      paginationWidgetToStore,
+      paginationWidgetToStorePage,
+      paginationWidgetToStorePageSize,
       filterStoreToWidget,
       filterWidgetToStore,
       sortStoreToWidget,

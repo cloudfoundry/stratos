@@ -54,6 +54,9 @@ export class ApplicationWallComponent implements OnDestroy {
     this.statsSub = dataSource.page$.pipe(
       withLatestFrom(dataSource.pagination$),
       tap(([page, pagination]) => {
+        if (!page) {
+          return;
+        }
         page.forEach(app => {
           const appState = app.entity.state;
           const appGuid = app.entity.guid;

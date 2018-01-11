@@ -169,7 +169,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
     // Auto refresh
     this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
-      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      // this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
     }).subscribe());
 
     const initialFetch$ = Observable.combineLatest(
