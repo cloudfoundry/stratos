@@ -1,5 +1,5 @@
 import { PaginationState } from '../../types/pagination.types';
-export function paginationClearPages(state: PaginationState, action) {
+export function paginationResetPagination(state: PaginationState, action) {
   if (!state[action.entityKey] || !state[action.entityKey][action.paginationKey]) {
     return state;
   }
@@ -9,6 +9,12 @@ export function paginationClearPages(state: PaginationState, action) {
     [action.paginationKey]: {
       ...newState[action.entityKey][action.paginationKey],
       ids: {},
+      fetching: false,
+      pageCount: 0,
+      currentPage: 1,
+      totalResults: 0,
+      error: false,
+      message: ''
     }
   };
   return {

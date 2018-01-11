@@ -62,13 +62,14 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
     },
   ];
 
+  pageSizeOptions = [9, 45, 90];
 
   private dispatchDeleteAction() {
     this.store.dispatch(
       new AppVariablesDelete(
         this.envVarsDataSource.cfGuid,
         this.envVarsDataSource.appGuid,
-        this.envVarsDataSource.rows,
+        this.envVarsDataSource.entityLettabledRows,
         Array.from(this.envVarsDataSource.selectedRows.values()
         ))
     );
@@ -79,6 +80,7 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
   getSingleActions = () => [this.listActionDelete];
   getColumns = () => this.columns;
   getDataSource = () => this.envVarsDataSource;
+  getFiltersConfigs = () => [];
 
   constructor(
     private store: Store<AppState>,

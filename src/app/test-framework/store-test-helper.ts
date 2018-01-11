@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment.prod';
 import { AppState } from '../store/app-state';
 import { ListState } from '../store/reducers/list.reducer';
 import { ModuleWithProviders } from '@angular/core';
@@ -250,9 +251,18 @@ const testInitialStoreState: AppState = {
             ]
           },
           error: false,
-          message: ''
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: '',
+          }
         },
       },
+      stack: {},
+      space: {},
+      organization: {},
+      route: {},
       event: {
         'app-events:01ccda9d-8f40-4dd0-bc39-08eea68e364f4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
           fetching: false,
@@ -404,9 +414,36 @@ const testInitialStoreState: AppState = {
             ]
           },
           error: false,
-          message: ''
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: '',
+          }
         }
-      }
+      },
+      endpoint: {
+        "endpoint-list": {
+          fetching: false,
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 0,
+          params: {
+            key: 'a'
+          },
+          ids: { },
+          error: false,
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: '',
+          }
+        }
+      },
+      environmentVars: {},
+      instances: {},
+      summary: {}
     },
     dashboard: {
       sidenavOpen: true,

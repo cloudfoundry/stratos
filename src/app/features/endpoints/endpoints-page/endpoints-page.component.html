@@ -1,8 +1,12 @@
 <app-page-header>
   <h1>Endpoints</h1>
+  <div class="page-header-right">
+    <button mat-icon-button [routerLink]="'/endpoints/new/'">
+        <mat-icon>add</mat-icon>
+      </button>
+  </div>
 </app-page-header>
 
 <app-endpoints-missing [showSnackForNoneConnected]="true"></app-endpoints-missing>
-<app-list [text]="{ title: 'Endpoints', filter: 'Filter Endpoints'}" [enableFilter]="true" [cardComponent]="cardComponent"
-  [tableFixedRowHeight]="true" [hidden]="!(endpointsService.haveRegistered$ | async)">
+<app-list [text]="{ filter: 'Filter Endpoints'}" [enableFilter]="true" [cardComponent]="cardComponent" [tableFixedRowHeight]="true" [hidden]="!(endpointsService.haveRegistered$ | async)">
 </app-list>

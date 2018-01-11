@@ -1,19 +1,13 @@
-import {
-  ListFilter,
-  ListPagination,
-  ListSort,
-  SetListFilterAction,
-  SetListPaginationAction,
-  SetListSortAction,
-} from '../../../store/actions/list.actions';
-import { Component, ContentChild, EventEmitter, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
-import { DataSource } from '@angular/cdk/table';
-import { MatPaginator, MatSort, Sort, MatTable, PageEvent } from '@angular/material';
-import { NgModel, NgForm } from '@angular/forms';
-import { Observable } from 'rxjs/Observable';
+import { IListPaginationController } from '../../data-sources/list-pagination-controller';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { MatSort, Sort } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
+
+import { ListSort } from '../../../store/actions/list.actions';
+import { AppState } from '../../../store/app-state';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from './table.types';
 
@@ -31,6 +25,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
   @Input('dataSource') dataSource = null as IListDataSource<T>;
+  @Input('paginationController') paginationController = null as IListPaginationController<T>;
   @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
 
@@ -51,7 +46,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   ngOnInit() {
     this.columnNames = this.columns.map(x => x.columnId);
 
-    const sortStoreToWidget = this.dataSource.sort$.do((sort: ListSort) => {
+    const sortStoreToWidget = this.paginationController.sort$.do((sort: ListSort) => {
       if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
         this.sort.sort({
           id: sort.field,
@@ -62,13 +57,10 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
     });
 
     const sortWidgetToStore = this.sort.sortChange.do((sort: Sort) => {
-      this._store.dispatch(new SetListSortAction(
-        this.dataSource.listStateKey,
-        {
-          field: sort.active,
-          direction: sort.direction,
-        }
-      ));
+      this.paginationController.sort({
+        field: sort.active,
+        direction: sort.direction,
+      });
     });
 
     this.uberSub = Observable.combineLatest(
