@@ -66,5 +66,19 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       label: 'All Endpoints',
       value: 'all'
     }]
+  }, {
+    key: 'org',
+    label: 'Organisation',
+    items: [{
+      label: 'All Organisations',
+      value: 'all'
+    }]
+  }, {
+    key: 'space',
+    label: 'Space',
+    items: [{
+      label: 'All Spaces',
+      value: 'all'
+    }]
   }]
 }

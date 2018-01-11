@@ -3,7 +3,7 @@
     <mat-card>
       <mat-card-header>
         <div class="listComponent__header__top">
-          <div class="spacer listComponent__header__left">
+          <div class="listComponent__header__left spacer">
             <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">{{ text?.title }}</div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           </div>
@@ -48,7 +48,7 @@
           </div>
         </div>
         <div class="listComponent__header__bottom">
-          <div class="spacer listComponent__header__left">
+          <div class="listComponent__header__left spacer">
             <div class="selectFilters" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <mat-form-field *ngFor="let selectFilter of filterConfigs">
                 <!-- multiple for multi select, remove [(value)] with actual filter holder-->

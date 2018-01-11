@@ -61,6 +61,7 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { CfOrgSpaceServiceService } from './data-services/cf-org-space-service.service';
 
 @NgModule({
   imports: [
@@ -144,6 +145,7 @@ import { ApplicationStateService } from './components/application-state/applicat
   providers: [
     ListConfig,
     ApplicationStateService,
+    CfOrgSpaceServiceService,
   ]
 })
 export class SharedModule { }

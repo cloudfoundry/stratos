@@ -14,6 +14,7 @@
     }
   }
   $title-left-padding: 25px;
+  $title-content-padding: 10px;
   &__header {
     mat-card-header {
       padding: 15px;
@@ -30,11 +31,15 @@
     &__left,
     &__right {
       > div {
-        padding-right: 10px;
+        padding-right: $title-content-padding;
       }
     }
     &__left {
-      padding-left: $title-left-padding;
+      .selectFilters {
+        mat-form-field {
+          padding-right: $title-content-padding;
+        }
+      }
     }
     &__right {
       .add-container {

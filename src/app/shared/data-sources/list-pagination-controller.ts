@@ -40,6 +40,8 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
     this.filter$ = this.createFilterObservable(dataSource);
 
+    // this.filters$ = this.createFiltersObservable(dataSource);
+
   }
   pagination$: Observable<ListPagination>;
   sort$: Observable<ListSort>;
