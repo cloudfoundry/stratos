@@ -37,7 +37,7 @@ export class CfAppEventsConfigService implements IListConfig<EntityInfo> {
       columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
     },
   ];
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = [5, 25, 50];
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {
     this.eventSource = new CfAppEventsDataSource(

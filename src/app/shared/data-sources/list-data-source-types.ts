@@ -64,7 +64,7 @@ export interface IListDataSource<T> {
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
 
   getFilterFromParams(pag: PaginationEntityState): string;
-  setFilterParam(filter: ListFilter);
+  setFilterParam(filter: ListFilter, pag: PaginationEntityState);
 
   connect(): Observable<T[]>;
   destroy();

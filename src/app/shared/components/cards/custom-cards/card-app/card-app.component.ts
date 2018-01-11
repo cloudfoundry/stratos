@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
-import { selector } from 'rxjs/operator/publish';
 import { tap } from 'rxjs/operators';
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { APIResource } from '../../../../../store/types/api.types';
