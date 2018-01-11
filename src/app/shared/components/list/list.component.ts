@@ -151,41 +151,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const paginationWidgetToStorePage = this.paginator.page
-      .distinctUntilChanged((oldVal, newVal) => {
-        return oldVal.pageIndex === newVal.pageIndex;
-      })
       .map(page => page.pageIndex)
+      .distinctUntilChanged()
       .do(pageIndex => this.paginationController.page(pageIndex));
 
 
-    // const paginationWidgetToStorePageSize = this.paginator.page.pipe(
-    //   distinctUntilChanged((oldVal, newVal) => {
-    //     return oldVal.pageSize === newVal.pageSize;
-    //   }),
-    //   map(page => page.pageSize),
-    //   tapOnNext(pageSize => this.paginationController.pageSize(pageSize))
-    // );
     const paginationWidgetToStorePageSize = this.paginator.page
-      .map((a) => {
-        console.log('-a:', a);
-        return a;
-      })
-      .distinctUntilChanged((oldVal, newVal) => {
-        console.log('a');
-        return oldVal.pageSize === newVal.pageSize;
-      })
+      // Ignore the initial case where it skips distinctUntilChanged (we should have gotten the widget values from the store to start with)
       .skip(1)
       .map(page => page.pageSize)
-      .do(pageSize => {
-        console.log('b');
-        this.paginationController.pageSize(pageSize);
-      });
-
-    // .distinctUntilChanged((oldVal, newVal) => {
-    //   return oldVal.pageSize === newVal.pageSize;
-    // })
-    // .map(page => page.pageSize)
-    // .do(pageSize => this.paginationController.pageSize(pageSize))
+      .distinctUntilChanged()
+      .do(pageSize => this.paginationController.pageSize(pageSize));
 
     const filterWidgetToStore = this.filter.valueChanges
       .debounceTime(500)

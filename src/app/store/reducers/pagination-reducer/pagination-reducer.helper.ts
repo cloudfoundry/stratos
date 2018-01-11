@@ -126,7 +126,6 @@ function getObservables<T = any>(
     distinctUntilChanged((oldVals, newVals) => {
       const oldVal = getPaginationCompareString(oldVals);
       const newVal = getPaginationCompareString(newVals);
-      console.log(newVal);
       return oldVal === newVal;
     }),
     tap(pagination => {
@@ -135,7 +134,6 @@ function getObservables<T = any>(
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        console.log(pagination);
         store.dispatch(action);
       }
     })
