@@ -4,12 +4,11 @@
   </mat-card-header>
   <mat-card-content>
     <div class="card-app__meta">
-      <b>Instances: </b> {{ row.entity.instances }}</div>
-    <div class="card-app__meta">
-      <b>State: </b>
       <app-application-state [state]="applicationState"></app-application-state>
-  </div>
+    </div>
     <div class="card-app__meta">
-      <b>Created at: </b>{{ row.metadata.created_at | date:'medium' }}</div>
+      Instances: {{ row.entity.instances }}</div>
+    <div class="card-app__meta">
+      Created at: {{ row.metadata.created_at | date:'medium' }}</div>
   </mat-card-content>
 </mat-card>

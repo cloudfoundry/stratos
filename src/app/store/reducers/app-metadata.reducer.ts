@@ -2,11 +2,7 @@ import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { mergeState } from './../helpers/reducer.helper';
 import { AppMetadata } from '../types/app-metadata.types';
 
-export const defaultMetadataState = {
-
-};
-
-export function appMetadataReducer(state: AppMetadata = defaultMetadataState, action) {
+export function appMetadataReducer(state: AppMetadata = {}, action) {
   switch (action.type) {
     case AppMetadataTypes.APP_METADATA_SUCCESS:
       return setAppMetadataState(state, action.metadata, action.appMetadataAction);

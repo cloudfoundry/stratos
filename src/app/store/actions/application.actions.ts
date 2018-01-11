@@ -76,6 +76,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     'results-per-page': 50,
     'inline-relations-depth': 2
   };
+  flattenPagination = true;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction {
