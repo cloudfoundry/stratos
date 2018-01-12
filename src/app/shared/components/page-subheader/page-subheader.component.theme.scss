@@ -1,0 +1,6 @@
+@mixin app-page-subheader-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  .page-subheader {
+    background-color: mat-color($primary);
+  }
+}

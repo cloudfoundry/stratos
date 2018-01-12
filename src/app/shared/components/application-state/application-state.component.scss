@@ -1,9 +1,11 @@
 .app-state {
   display: flex;
   flex-direction: row;
-  height: 25px;
   align-items: center;
   app-application-state-icon {
     padding-right: 5px;
+  }
+  &__with-icon {
+    height: 25px;
   }
 }

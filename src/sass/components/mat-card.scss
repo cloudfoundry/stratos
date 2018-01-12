@@ -1,0 +1,20 @@
+// ==================================================
+// Corrections to the Angular Material Design Library
+// Material Card
+// These should be submitted as issues upstream
+// ==================================================
+
+.md-overrides {
+  .mat-card {
+    padding: 16px;
+
+    > .mat-card-header {
+      padding-top: 8px;
+
+      .mat-card-header-text {
+        margin: 0;
+      }
+    }
+
+  }
+}

@@ -101,7 +101,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   };
 
   tabLinks = [
-    { link: 'build', label: 'Build Info' },
+    { link: 'build', label: 'Summary' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },

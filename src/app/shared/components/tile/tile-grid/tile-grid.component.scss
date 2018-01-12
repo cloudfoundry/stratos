@@ -1,0 +1,8 @@
+app-tile-grid {
+  display: flex;
+  flex-direction: column;
+  
+  > app-tile-group {
+    margin-bottom: 24px;
+  }
+}

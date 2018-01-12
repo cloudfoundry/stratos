@@ -8,6 +8,10 @@
 @import '../app/features/applications/application/application-base.component.theme';
 @import '../app/shared/components/cards/cards.components.theme';
 @import '../app/shared/components/dialog-error/dialog-error.component.theme';
+@import '../app/shared/components/page-subheader/page-subheader.component.theme';
+@import './components/mat-tabs.theme';
+@import './mat-themes';
+
 @mixin app-theme($theme) {
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
@@ -56,12 +60,15 @@
   @include steppers-theme($theme, $app-theme);
   @include variables-tab-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
+  @include app-page-subheader-theme($theme, $app-theme);
+  @include app-mat-tabs-theme($theme, $app-theme);
 
   // These should move into a component file for status
-  $status-success: mat-color($primary);
-  $status-warning: mat-color($warn);
-  $status-danger: mat-color($accent);
-  $status-tentative: mat-color($primary, 100);
+  
+  $status-success: map-get($mat-green, 500);
+  $status-warning: map-get($mat-orange, 500);
+  $status-danger: mat-color($warn);
+  $status-tentative: map-get($mat-grey, 500);
   .text-success {
     color: $status-success;
   }
@@ -73,5 +80,22 @@
   }
   .text-tentative {
     color: $status-tentative;
+  }
+
+  .card-status {
+    border-top: 4px solid transparent;
+    border-top-color: transparent;
+    transition: border-top-color 0.5s ease-in-out;
+
+    &__ok {
+      border-top-color: $status-success;
+    }
+    &__warning {
+      border-top-color: $status-warning;
+    }
+    &__error {
+      border-top-color: $status-danger;
+    }
+
   }
 }

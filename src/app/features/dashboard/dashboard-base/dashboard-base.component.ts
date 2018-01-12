@@ -1,6 +1,8 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
+import { Router, ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd } from '@angular/router';
+
 import { Store } from '@ngrx/store';
 import { debounceTime } from 'rxjs/operators';
 
@@ -10,6 +12,8 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { isFulfilled } from 'q';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -17,17 +21,21 @@ import { SideNavItem } from './../side-nav/side-nav.component';
   styleUrls: ['./dashboard-base.component.scss']
 })
 
-export class DashboardBaseComponent implements OnInit, AfterContentInit {
+export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentInit {
 
   constructor(
     public pageHeaderService: PageHeaderService,
     private store: Store<AppState>,
     private eventWatcherService: EventWatcherService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
   ) {
   }
 
   private fullView: boolean;
+
+  private routeChangeSubscription: Subscription;
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
@@ -62,8 +70,26 @@ export class DashboardBaseComponent implements OnInit, AfterContentInit {
   sideNaveMode = 'side';
 
   ngOnInit() {
-    console.log('HELLOOOOOO');
-    this.fullView = true;
+    this.fullView = this.isFullView(this.activatedRoute.snapshot);
+    this.routeChangeSubscription = this.router.events
+    .filter((event) => event instanceof NavigationEnd)
+    .subscribe((event) => {
+      this.fullView = this.isFullView(this.activatedRoute.snapshot);
+    });
+  }
+
+  ngOnDestroy() {
+    this.routeChangeSubscription.unsubscribe();
+  }
+
+  isFullView(route: ActivatedRouteSnapshot): boolean {
+    while (route.firstChild) {
+      route = route.firstChild;
+      if (route.data.uiFullView) {
+        return true;
+      }
+    }
+    return false;
   }
 
   ngAfterContentInit() {
