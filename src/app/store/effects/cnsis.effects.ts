@@ -26,7 +26,8 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { flatMap, mergeMap, catchError, tap } from 'rxjs/operators';
+import { PaginatedAction } from '../types/pagination.types';
+import { WrapperAppMetadataStart } from '../actions/app-metadata.actions';
 
 
 @Injectable()

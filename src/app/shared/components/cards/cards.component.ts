@@ -10,6 +10,6 @@ import { IListDataSource } from '../../data-sources/list-data-source-types';
 })
 export class CardsComponent<T> {
 
-  @Input('dataSource') dataSource = null as IListDataSource<T>;
+  @Input('dataSource') dataSource: IListDataSource<T>;
   @Input('component') component: Type<{}>;
 }

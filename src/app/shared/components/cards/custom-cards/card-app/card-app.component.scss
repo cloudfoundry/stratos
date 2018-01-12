@@ -1,21 +1,14 @@
 .card-app {
-  &__card-started .mat-card-title {
-    border-bottom: 3px solid green;
-  }
-  &__card-stopped .mat-card-title {
-    border-bottom: 3px solid red;
-  }
   &__meta {
     display: flex;
     justify-content: space-between;
+    padding: 2px 0;
   }
 }
 
 .mat-card {
   cursor: pointer;
   &-title {
-    border-bottom: 3px solid yellow;
-    padding-bottom: 10px;
     margin-left: -16px; //Remove margin of original .mat-card-title
   }
   &-header-text {

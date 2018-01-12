@@ -1,1 +1,1 @@
-<mat-checkbox [disabled]="(dataSource.isAdding$ | async)" [checked]="dataSource.selectedRows?.has(row.name)" (change)="dataSource.selectedRowToggle(row)"></mat-checkbox>
+<mat-checkbox [disabled]="(dataSource.isAdding$ | async)" [checked]="dataSource.selectedRows?.has(dataSource.getRowUniqueId(row))" (change)="dataSource.selectedRowToggle(row)"></mat-checkbox>

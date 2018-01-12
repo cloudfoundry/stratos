@@ -1,7 +1,8 @@
+import { IGetAppMetadataAction } from './../actions/app-metadata.actions';
 import { RequestMethod } from '@angular/http';
 import { error } from 'util';
 
-import { AppMetadataTypes, GetAppMetadataAction } from '../actions/app-metadata.actions';
+import { AppMetadataTypes } from '../actions/app-metadata.actions';
 import { mergeState } from '../helpers/reducer.helper';
 import { MetadataUpdateState, AppMetadataRequestState, AppMetadataRequestStates } from '../types/app-metadata.types';
 
@@ -43,7 +44,7 @@ function getRequestTypeFromMethod(method): MetadataRequestTypes {
 }
 
 export function appMetadataRequestReducer(state = {}, action) {
-  const appMetadataAction: GetAppMetadataAction = action.appMetadataAction;
+  const appMetadataAction: IGetAppMetadataAction = action.appMetadataAction;
   switch (action.type) {
     case AppMetadataTypes.APP_METADATA_START:
       if (!appMetadataAction) {
@@ -79,19 +80,19 @@ export function appMetadataRequestReducer(state = {}, action) {
   }
 }
 
-function getAppMetadataRequestState(state, { metadataType, guid }): AppMetadataRequestState {
+function getAppMetadataRequestState(state, { entityKey, guid }): AppMetadataRequestState {
   let requestState = state[guid] || {};
-  requestState = requestState[metadataType] || {};
+  requestState = requestState[entityKey] || {};
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
     return { ...requestState };
   }
   return { ...defaultAppMetadataRequest };
 }
 
-function setAppMetadataRequestState(state, requestState, { metadataType, guid }): AppMetadataRequestStates {
+function setAppMetadataRequestState(state, requestState, { entityKey, guid }): AppMetadataRequestStates {
   const newState = {
     [guid]: {
-      [metadataType]: requestState
+      [entityKey]: requestState
     }
   };
   return mergeState(state, newState);
