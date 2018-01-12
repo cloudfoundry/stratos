@@ -31,6 +31,7 @@ import { StaticInjector } from '@angular/core/src/di/injector';
 import { ListDataSource } from '../../data-sources/list-data-source';
 import { ListPaginationController, IListPaginationController } from '../../data-sources/list-pagination-controller';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
@@ -46,11 +47,14 @@ export interface IListConfig<T> {
 export interface IListFilterConfig {
   key: string;
   label: string;
-  items: IListFilterConfigItem[];
+  list$: Observable<IListFilterConfigItem[]>;
+  loading$: Observable<boolean>;
+  select: BehaviorSubject<any>;
 }
 
 export interface IListFilterConfigItem {
   label: string;
+  item: any;
   value: string;
 }
 
@@ -105,6 +109,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
   filterString = '';
+  filteredItems = {};
 
   sortColumns: ITableColumn<T>[];
   @ViewChild('headerSortField') headerSortField: MatSelect;
@@ -171,6 +176,14 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         return this.paginationController.filterByString(filterString);
       });
 
+    const filterWidgetsObservables = new Array<Subscription>();
+    Object.values(this.filterConfigs).forEach((filterConfig: IListFilterConfig) => {
+      const sub = filterConfig.select.asObservable().do((filterItem: string) => {
+        this.paginationController.filterByConfig(filterConfig, filterItem);
+      });
+      filterWidgetsObservables.push(sub.subscribe());
+    });
+
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
@@ -181,7 +194,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
-      this.filterString = filter.filter;
+      this.filterString = filter.string;
+      this.filteredItems = filter.items;
     });
 
     this.uberSub = Observable.combineLatest(
@@ -192,6 +206,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       filterStoreToWidget,
       filterWidgetToStore,
       sortStoreToWidget,
+      filterWidgetsObservables
     ).subscribe();
 
   }

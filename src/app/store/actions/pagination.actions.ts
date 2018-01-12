@@ -2,11 +2,13 @@ import { AppState } from '../app-state';
 import { Action, compose } from '@ngrx/store';
 import {
   PaginationAction,
-  PaginationEntityState,
+  // PaginationEntityState,
   PaginationEntityTypeState,
   PaginationParam,
   PaginationState,
+  PaginationClientFilter,
 } from '../types/pagination.types';
+import { ListFilter } from './list.actions';
 
 
 
@@ -85,7 +87,7 @@ export class SetClientFilter implements PaginationAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
-    public filter: string,
+    public filter: PaginationClientFilter,
   ) {
   }
   type = SET_CLIENT_FILTER;

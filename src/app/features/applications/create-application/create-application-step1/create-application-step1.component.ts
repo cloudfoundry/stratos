@@ -8,7 +8,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
-import { CfOrgSpaceServiceService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-create-application-step1',
@@ -17,7 +17,7 @@ import { CfOrgSpaceServiceService } from '../../../../shared/data-services/cf-or
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  constructor(private store: Store<AppState>, public cfOrgSpaceService: CfOrgSpaceServiceService) { }
+  constructor(private store: Store<AppState>, public cfOrgSpaceService: CfOrgSpaceDataService) { }
 
   cfValid$: Observable<boolean>;
 

@@ -1,15 +1,15 @@
 import { TestBed, inject } from '@angular/core/testing';
-import { CfOrgSpaceServiceService } from './cf-org-space-service.service';
+import { CfOrgSpaceDataService } from './cf-org-space-service.service';
 
 
 describe('EndpointOrgSpaceServiceService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfOrgSpaceServiceService]
+      providers: [CfOrgSpaceDataService]
     });
   });
 
-  it('should be created', inject([CfOrgSpaceServiceService], (service: CfOrgSpaceServiceService) => {
+  it('should be created', inject([CfOrgSpaceDataService], (service: CfOrgSpaceDataService) => {
     expect(service).toBeTruthy();
   }));
 });

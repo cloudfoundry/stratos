@@ -16,7 +16,7 @@ export interface CfOrgSpaceItem {
 }
 
 @Injectable()
-export class CfOrgSpaceServiceService {
+export class CfOrgSpaceDataService {
 
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
@@ -29,7 +29,7 @@ export class CfOrgSpaceServiceService {
   // which might mean inline data missing from entity when we need it)
   private allOrgs$ = getPaginationObservables({
     store: this.store,
-    action: new GetAllOrganizations(CfOrgSpaceServiceService.CfOrgSpaceServicePaginationKey),
+    action: new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey),
     schema: [OrganizationSchema]
   });
 
@@ -60,7 +60,7 @@ export class CfOrgSpaceServiceService {
             return entities
               .map(org => org.entity)
               .filter(org => {
-                return org.cfGuid === selectedCF.guid;
+                return org.cfGuid === selectedCF;
               });
           }
         }
@@ -75,13 +75,17 @@ export class CfOrgSpaceServiceService {
 
     const spaceList$ = Observable.combineLatest(
       this.org.select.asObservable(),
-      getEndpointsAndOrgs$
+      getEndpointsAndOrgs$,
+      this.allOrgs$.entities$
     )
       .do(() => this.space.select.next(null))
-      .map(([selectedOrg, data]) => {
+      .map(([selectedOrgGuid, data, orgs]) => {
         const [orgList, cfList] = data;
-        if (selectedOrg) {
-          return selectedOrg.spaces.map(space => {
+        const selectedOrg = orgs.find(org => {
+          return org.entity.guid === selectedOrgGuid;
+        });
+        if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
+          return selectedOrg.entity.spaces.map(space => {
             const entity = { ...space.entity };
             entity.guid = space.metadata.guid;
             return entity;

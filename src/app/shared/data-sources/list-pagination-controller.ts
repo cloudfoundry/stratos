@@ -1,4 +1,4 @@
-import { PaginationEntityState } from '../../store/types/pagination.types';
+import { PaginationEntityState, PaginationClientFilter } from '../../store/types/pagination.types';
 import { Observable } from 'rxjs/Observable';
 import { SortDirection } from '@angular/material';
 
@@ -15,10 +15,12 @@ import {
   SetPage,
 } from '../../store/actions/pagination.actions';
 import { defaultClientPaginationPageSize } from '../../store/reducers/pagination-reducer/pagination.reducer';
+import { IListFilterConfigItem, IListFilterConfig } from '../components/list/list.component';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
   filterByString: (filterString: string) => void;
+  filterByConfig: (filterConfig: IListFilterConfig, filterValue: string) => void;
   filter$: Observable<ListFilter>;
   sort: (listSort: ListSort) => void;
   sort$: Observable<ListSort>;
@@ -39,8 +41,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     this.sort$ = this.createSortObservable(dataSource);
 
     this.filter$ = this.createFilterObservable(dataSource);
-
-    // this.filters$ = this.createFiltersObservable(dataSource);
 
   }
   pagination$: Observable<ListPagination>;
@@ -83,18 +83,37 @@ export class ListPaginationController<T> implements IListPaginationController<T>
   }
   filterByString = filterString => {
     if (this.dataSource.isLocal) {
-      if (this.pag.clientPagination.filter !== filterString) {
+      if (this.pag.clientPagination.filter.string !== filterString) {
+        const newFilter = this.cloneFilter(this.pag.clientPagination.filter);
+        newFilter.string = filterString;
         this.store.dispatch(new SetClientFilter(
           this.dataSource.entityKey,
           this.dataSource.paginationKey,
-          filterString
+          newFilter
         ));
       }
     } else if (this.dataSource.getFilterFromParams(this.pag) !== filterString) {
-      this.dataSource.setFilterParam({
-        filter: filterString
-      }, this.pag);
+      this.dataSource.setFilterParam(filterString, this.pag);
     }
+  }
+  filterByConfig = (filterConfig: IListFilterConfig, filterValue: string) => {
+    if (this.dataSource.isLocal && this.pag && this.pag.clientPagination.filter.items[filterConfig.key] !== filterValue) {
+      // this.pag.clientPagination.filter.items[filterConfig.key] = filterConfigItem.value;
+      const newFilter = this.cloneFilter(this.pag.clientPagination.filter);
+      newFilter.items[filterConfig.key] = filterValue;
+      this.store.dispatch(new SetClientFilter(
+        this.dataSource.entityKey,
+        this.dataSource.paginationKey,
+        newFilter
+      ));
+    }
+  }
+
+  private cloneFilter(filter: PaginationClientFilter) {
+    return {
+      ...filter,
+      items: { ...filter.items }
+    };
   }
   private createPaginationObservable(dataSource: IListDataSource<T>): Observable<ListPagination> {
     return dataSource.pagination$
@@ -124,13 +143,14 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
   private createFilterObservable(dataSource: IListDataSource<T>): Observable<ListFilter> {
     return dataSource.pagination$.pipe(
-      map(pag => dataSource.isLocal ?
-        pag.clientPagination.filter :
-        dataSource.getFilterFromParams(pag)
-      ),
-      filter(x => !!x),
-      map(filterString => ({
-        filter: filterString
+      // map(pag => dataSource.isLocal ?
+      //   pag.clientPagination.filter :
+      //   dataSource.getFilterFromParams(pag)
+      // ),
+      // filter(x => !!x),
+      map(pag => ({
+        string: dataSource.isLocal ? pag.clientPagination.filter.string : dataSource.getFilterFromParams(pag),
+        items: pag.clientPagination.filter.items
       }))
     );
   }
