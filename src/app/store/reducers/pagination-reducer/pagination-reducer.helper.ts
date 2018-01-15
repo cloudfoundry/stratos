@@ -117,7 +117,6 @@ function getObservables<T = any>(
   isLocal = false)
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
-
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 

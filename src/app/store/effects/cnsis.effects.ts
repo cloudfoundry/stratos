@@ -37,26 +37,16 @@ export class CNSISEffect {
   static disconnectingKey = 'disconnecting';
   static unregisteringKey = 'unregistering';
 
-  apiAction: IRequestAction;
-  actionType;
-  action;
   constructor(
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
-  ) {
-
-   }
+  ) { }
 
   @Effect() getAllCNSIS$ = this.actions$.ofType<GetAllCNSIS>(GET_CNSIS)
-  .pipe(
-    flatMap(action => {
-      this.actionType = 'fetch';
-      this.apiAction = {
-        entityKey: cnsisStoreNames.type,
-      } as IRequestAction;
-      this.action = action;
-      this.store.dispatch(new StartRequestAction(this.apiAction, this.actionType));
+    .flatMap(action => {
+      const actionType = 'fetch';
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),
         this.http.get('/pp/v1/cnsis/registered'),
@@ -68,33 +58,34 @@ export class CNSISEffect {
             c.registered = !!registeredCnsis.find(r => r.guid === c.guid);
             return c;
           });
-        });
-    }),
-    mergeMap(data => {
-      const mappedData = {
-        entities: {
-          [cnsisStoreNames.type]: {}
-        },
-        result: []
-      } as NormalizedResponse;
+        }
+      )
+        .mergeMap(data => {
+          const mappedData = {
+            entities: {
+              [cnsisStoreNames.type]: {}
+            },
+            result: []
+          } as NormalizedResponse;
 
-      data.forEach(cnsi => {
-        mappedData.entities[cnsisStoreNames.type][cnsi.guid] = cnsi;
-        mappedData.result.push(cnsi.guid);
-      });
-      // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
-      // (cnsi success)
-      return [
-        new WrapperRequestActionSuccess(mappedData, this.apiAction, this.actionType),
-        new GetAllCNSISSuccess(data, this.action.login),
-      ];
-    }),
-    tap(p => console.log('###############################' + JSON.stringify(p))),
-    catchError((err, caught) => [
-      new WrapperRequestActionFailed(err.message, this.apiAction, this.actionType),
-      new GetAllCNSISFailed(err.message, this.action.login),
-    ])
-  );
+          data.forEach(cnsi => {
+            mappedData.entities[cnsisStoreNames.type][cnsi.guid] = cnsi;
+            mappedData.result.push(cnsi.guid);
+          });
+          // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
+          // (cnsi success)
+          return [
+            new WrapperRequestActionSuccess(mappedData, action, actionType),
+            new GetAllCNSISSuccess(data, action.login),
+          ];
+        })
+        .catch((err, caught) => [
+          new WrapperRequestActionFailed(err.message, action, actionType),
+          new GetAllCNSISFailed(err.message, action.login),
+        ]);
+
+    });
+
 
   @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
     .flatMap(action => {

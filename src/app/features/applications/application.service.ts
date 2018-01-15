@@ -31,7 +31,6 @@ import {
 import { EntityInfo } from '../../store/types/api.types';
 import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType, AppEnvVarsState } from '../../store/types/app-metadata.types';
 import { combineLatest } from 'rxjs/operators/combineLatest';
-import { NewRoute, CreateRoute } from '../../store/actions/route.actions';
 export interface ApplicationData {
   fetching: boolean;
   app: EntityInfo;
@@ -200,13 +199,4 @@ export class ApplicationService {
       { ...updatedApplication }
     ));
   }
-
-  createRoute(route: NewRoute) {
-    this.store.dispatch(new CreateRoute(
-      this.appGuid,
-      this.cfGuid,
-      route
-    ));
-  }
-
-}
+ }

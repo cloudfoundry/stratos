@@ -87,8 +87,6 @@ export class GetApplication extends CFStartAction implements ICFAction {
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.options.params.set('inline-relations-depth', '2');
-    this.options.params.set('include-relations', 'space,organization,stack');
-
   }
   actions = [
     GET,

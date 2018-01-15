@@ -1,3 +1,10 @@
+import { CardAppRoutesComponent } from '../shared/components/cards/custom-cards/card-app-routes/card-app-routes.component';
+import {
+    TableCellTCPRouteComponent,
+} from '../shared/components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
+import {
+    TableCellRouteComponent,
+} from '../shared/components/table/custom-cells/table-cell-route/table-cell-route.component';
 import {
     TableCellAppStatusComponent,
 } from '../shared/components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
@@ -46,6 +53,9 @@ export const TableCellEntryPoints = [
   TableCellAppNameComponent,
   TableCellEndpointStatusComponent,
   TableCellAppStatusComponent,
+  TableCellRouteComponent,
+  TableCellTCPRouteComponent,
+
 ];
 
 export const CardEntryPoints = [
@@ -53,4 +63,5 @@ export const CardEntryPoints = [
   CardAppVariableComponent,
   CardAppComponent,
   CardEndpointComponent,
+  CardAppRoutesComponent
 ];

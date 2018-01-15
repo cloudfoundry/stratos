@@ -69,7 +69,8 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
   connect(): Observable<CNSISModel[]> {
     this.isLoadingPage$ = this.isLoadingPage$ || this._eStore.select(cnsisStatusSelector).map((cnsis => cnsis.loading));
     this.data$ = this.data$ || this._eStore.select(cnsisEntitiesSelector)
-      .map(cnsis => Object.values(cnsis));
+    .map(cnsis => Object.values(cnsis))
+    .subscribe(p => console.log(p));
     return super.connect();
   }
 

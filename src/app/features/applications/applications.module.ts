@@ -15,6 +15,8 @@ import { ViewBuildpackComponent } from './application/build-tab/view-buildpack/v
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { DatePipe } from '@angular/common';
+import { RoutesComponent } from './routes/routes.component';
+import { AddRoutesComponent } from './application/build-tab/add-routes/add-routes.component';
 
 
 @NgModule({
@@ -33,6 +35,8 @@ import { DatePipe } from '@angular/common';
     BuildTabComponent,
     VariablesTabComponent,
     ViewBuildpackComponent,
+    RoutesComponent,
+    AddRoutesComponent,
   ],
   providers: [
     ApplicationService,

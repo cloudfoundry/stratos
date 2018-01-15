@@ -37,8 +37,7 @@ import { AppReducersModule } from './reducers.module';
       AppVariablesEffect,
       RouterEffect,
       SystemEffects,
-      SnackBarEffects,
-      // AppRoutesEffects
+      SnackBarEffects
     ]),
   ]
 })

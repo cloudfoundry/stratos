@@ -52,7 +52,6 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-
       const paramsObject = {};
       const apiAction = action as ICFAction;
       const paginatedAction = action as PaginatedAction;
@@ -61,7 +60,6 @@ export class APIEffect {
 
       this.store.dispatch(new StartRequestAction(action, requestType));
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
-
       // Apply the params from the store
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();

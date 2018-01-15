@@ -1,3 +1,4 @@
+import { AddRoutesComponent } from './application/build-tab/add-routes/add-routes.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -31,11 +32,12 @@ const appplicationsRoutes: Routes = [
         children: [
           { path: '', redirectTo: 'build', pathMatch: 'full' },
           { path: 'build', component: BuildTabComponent },
+          { path: 'build/add-route', component: AddRoutesComponent },
           { path: 'log-stream', component: LogStreamTabComponent },
           { path: 'services', component: ServicesTabComponent },
           { path: 'variables', component: VariablesTabComponent },
           { path: 'events', component: EventsTabComponent },
-          { path: 'ssh', component: SshTabComponent }
+          { path: 'ssh', component: SshTabComponent },
         ]
       }
     ]

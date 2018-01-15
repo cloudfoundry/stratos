@@ -1,3 +1,5 @@
+import { TableCellTCPRouteComponent } from '../custom-cells/table-cell-tcproute/table-cell-tcproute.component';
+import { TableCellRouteComponent } from '../custom-cells/table-cell-route/table-cell-route.component';
 import { Component, ComponentFactoryResolver, Input, OnInit, Type, ViewContainerRef, ViewChild } from '@angular/core';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
@@ -33,6 +35,8 @@ import { TableCellAppStatusComponent } from '../custom-cells/table-cell-app-stat
     TableCellAppNameComponent,
     TableCellEndpointStatusComponent,
     TableCellAppStatusComponent,
+    TableCellRouteComponent,
+    TableCellTCPRouteComponent,
   ],
 })
 export class TableCellComponent<T> implements OnInit {

@@ -117,6 +117,7 @@ function enterPaginationReducer(state: PaginationState, action, updatePagination
 
   if (actionType && key && paginationKey) {
     const newState = { ...state };
+    //
     const updatedPaginationState = updatePagination(newState[key][paginationKey], action, actionType);
     newState[key] = mergeState(newState[key], {
       [paginationKey]: updatedPaginationState

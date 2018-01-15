@@ -30,14 +30,4 @@ export class BuildTabComponent implements OnInit {
         return app.fetching || appSummary.metadataRequestState.fetching.busy;
       }).distinct();
   }
-
-  addRoute() {
-
-    const route = {
-      domain_guid: '815a79fa-58dc-433f-b4a6-b3e06c4dda77',
-      space_guid: 'd612962c-ce25-4c4f-87f6-2821e466eb4e',
-      host: 'angular2-test'}
-    // this.appService.createRoute()
-  }
-
 }

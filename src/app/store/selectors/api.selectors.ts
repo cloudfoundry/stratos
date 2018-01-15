@@ -17,6 +17,10 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
 
+export const getDomainsById = <T>(guid: string) => (entities): T => {
+  return entities[guid].entity.domains;
+};
+
 export const getEntityDeleteSections = (request: RequestInfoState) => {
   return request.deleting;
 };
@@ -65,6 +69,14 @@ export function selectEntities<T = APIResource>(entityType: string) {
 export function selectEntity<T = APIResource>(entityType: string, guid: string) {
   return compose(
     getEntityById<T>(guid),
+    getRequestEntityType<T>(entityType),
+    getAPIRequestDataState,
+  );
+}
+
+export function selectDomains<T = APIResource>(entityType: string, guid: string) {
+  return compose(
+    getDomainsById<T>(guid),
     getRequestEntityType<T>(entityType),
     getAPIRequestDataState,
   );

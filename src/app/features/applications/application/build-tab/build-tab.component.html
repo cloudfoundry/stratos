@@ -37,7 +37,7 @@
         </mat-list-item>
       </mat-list>
       <mat-list>
-        <h3 mat-subheader>Cloud Foundary</h3>
+        <h3 mat-subheader>Cloud Foundry</h3>
         <mat-list-item>
           <mat-icon mat-list-icon>title</mat-icon>
           <div mat-line>Name</div>
@@ -112,13 +112,16 @@
           </span>
         </mat-list-item>
       </mat-list>
-      <button mat-button
-      color="primary"
-      (click)="addRoute()"
-      >Add Route</button>
     </app-details-card>
     <mat-card-footer>
       <mat-progress-bar *ngIf="(cardTwoFetching$ | async)" [mode]="'indeterminate'">
       </mat-progress-bar>
     </mat-card-footer>
+
+  </div>
+  <div class="routes__card">
+    <app-details-card class="routes__card" title="Routes" [busy]="cardTwoFetching$ | async">
+     <app-routes></app-routes>
+    </app-details-card>
+    </div>
   </div>
