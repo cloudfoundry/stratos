@@ -34,6 +34,15 @@ function checkState({ newState, expectedNewState, entityKey, paginationKey }) {
 }
 
 describe('PaginationReducer', () => {
+  const defaultClientPagination = {
+    pageSize: 5,
+    currentPage: 1,
+    filter: {
+      string: '',
+      items: {}
+    }
+  };
+
   it('should return empty state', () => {
     const paginationReducer = getReducer();
     expect(paginationReducer(null, { type: 'FAKE_NEWS' })).toEqual(defaultPaginationState);
@@ -65,12 +74,7 @@ describe('PaginationReducer', () => {
             error: true,
             message: 'aasdasdasd',
             clientPagination: {
-              pageSize: 5,
-              currentPage: 1,
-              filter: {
-                string: '',
-                items: {}
-              }
+              ...defaultClientPagination
             }
           }
         }
@@ -86,12 +90,7 @@ describe('PaginationReducer', () => {
           error: false,
           message: '',
           clientPagination: {
-            pageSize: 5,
-            currentPage: 1,
-            filter: {
-              string: '',
-              items: {}
-            }
+            ...defaultClientPagination
           }
         }
       }
@@ -140,12 +139,7 @@ describe('PaginationReducer', () => {
           error: true,
           message: 'asdasdasdasd',
           clientPagination: {
-            pageSize: 5,
-            currentPage: 1,
-            filter: {
-              string: '',
-              items: {}
-            }
+            ...defaultClientPagination
           }
         }
       }
@@ -163,12 +157,7 @@ describe('PaginationReducer', () => {
           error: false,
           message: '',
           clientPagination: {
-            pageSize: 5,
-            currentPage: 1,
-            filter: {
-              string: '',
-              items: {}
-            }
+            ...defaultClientPagination
           }
         }
       }
@@ -210,7 +199,10 @@ describe('PaginationReducer', () => {
           totalResults: 0,
           ids: {},
           error: false,
-          message: 'asdasdasdasd'
+          message: 'asdasdasdasd',
+          clientPagination: {
+            ...defaultClientPagination
+          }
         }
       }
     }, failedApiAction);
@@ -223,7 +215,10 @@ describe('PaginationReducer', () => {
           totalResults: 0,
           ids: {},
           error: true,
-          message: message
+          message: message,
+          clientPagination: {
+            ...defaultClientPagination
+          }
         }
       }
     };

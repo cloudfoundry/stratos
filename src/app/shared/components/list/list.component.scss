@@ -34,12 +34,8 @@
         padding-right: $title-content-padding;
       }
     }
-    &__left {
-      .multiFilters {
-        mat-form-field {
-          padding-right: $title-content-padding;
-        }
-      }
+    &__left .multi-filters mat-form-field {
+      padding-right: $title-content-padding;
     }
     &__right {
       .add-container {

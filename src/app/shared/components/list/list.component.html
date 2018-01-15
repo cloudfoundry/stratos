@@ -49,7 +49,7 @@
         </div>
         <div class="listComponent__header__bottom">
           <div class="listComponent__header__left spacer">
-            <div class="multiFilters" [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isLoadingPage$ | async)">
+            <div class="multi-filters" [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isLoadingPage$ | async)">
               <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs">
                 <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
                   <mat-option>All</mat-option>

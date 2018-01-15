@@ -39,35 +39,58 @@ export class CfOrgSpaceDataService {
     schema: [OrganizationSchema]
   });
 
-  constructor(private store: Store<AppState>) {
-    this.cf = {
-      list$: this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis)),
-      loading$: Observable.of(false),
-      select: new BehaviorSubject(null),
-    };
+  private getEndpointsAndOrgs$: Observable<any>;
 
-    const getEndpointsAndOrgs$ = Observable.combineLatest(
+  constructor(private store: Store<AppState>) {
+    this.createCf();
+    this.init();
+    this.createOrg();
+    this.createSpace();
+
+    const orgResetSub = this.cf.select.asObservable().distinctUntilChanged().do(() => {
+      this.org.select.next(null);
+      this.space.select.next(null);
+    }).subscribe();
+    this.cf.select.asObservable().finally(() => {
+      orgResetSub.unsubscribe();
+    });
+
+    const spaceResetSub = this.org.select.asObservable().distinctUntilChanged().do(() => {
+      this.space.select.next(null);
+    }).subscribe();
+    this.org.select.asObservable().finally(() => {
+      spaceResetSub.unsubscribe();
+    });
+
+  }
+
+  private init() {
+    this.getEndpointsAndOrgs$ = Observable.combineLatest(
       this.allOrgs$.pagination$.filter(paginationEntity => {
         return !paginationEntity.fetching;
       }).first(),
       this.cf.list$
     );
+  }
 
+  private createCf() {
+    this.cf = {
+      list$: this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis)),
+      loading$: Observable.of(false),
+      select: new BehaviorSubject(null),
+    };
+  }
+
+  private createOrg() {
     const orgList$ = Observable.combineLatest(
       this.cf.select.asObservable(),
-      getEndpointsAndOrgs$,
+      this.getEndpointsAndOrgs$,
       this.allOrgs$.entities$
     )
       .map(([selectedCF, endpointsAndOrgs, entities]: [CNSISModel, any, any]) => {
         const [pag, cfList] = endpointsAndOrgs;
-        if (selectedCF) {
-          if (entities) {
-            return entities
-              .map(org => org.entity)
-              .filter(org => {
-                return org.cfGuid === selectedCF;
-              });
-          }
+        if (selectedCF && entities) {
+          return entities.map(org => org.entity).filter(org => org.cfGuid === selectedCF);
         }
         return [];
       });
@@ -77,10 +100,12 @@ export class CfOrgSpaceDataService {
       loading$: this.allOrgs$.pagination$.map(pag => pag.fetching),
       select: new BehaviorSubject(null),
     };
+  }
 
+  private createSpace() {
     const spaceList$ = Observable.combineLatest(
       this.org.select.asObservable(),
-      getEndpointsAndOrgs$,
+      this.getEndpointsAndOrgs$,
       this.allOrgs$.entities$
     )
       .map(([selectedOrgGuid, data, orgs]) => {
@@ -103,22 +128,6 @@ export class CfOrgSpaceDataService {
       loading$: this.org.loading$,
       select: new BehaviorSubject(null),
     };
-
-    const orgResetSub = this.cf.select.asObservable().distinctUntilChanged().do(() => {
-      this.org.select.next(null);
-      this.space.select.next(null);
-    }).subscribe();
-    this.cf.select.asObservable().finally(() => {
-      orgResetSub.unsubscribe();
-    });
-
-    const spaceResetSub = this.org.select.asObservable().distinctUntilChanged().do(() => {
-      this.space.select.next(null);
-    }).subscribe();
-    this.org.select.asObservable().finally(() => {
-      spaceResetSub.unsubscribe();
-    });
-
   }
 
   public appWallPaginationState() {
