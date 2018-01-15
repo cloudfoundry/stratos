@@ -9,7 +9,7 @@ import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
 import { APIResource } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
 import { EntityInfo } from '../../store/types/api.types';
-import { IListAction, IListConfig, IListFilterConfig, IMultiListAction } from '../components/list/list.component';
+import { IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction } from '../components/list/list.component';
 import { AppState } from '../../store/app-state';
 import { UtilsService } from '../../core/utils.service';
 import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
@@ -19,7 +19,7 @@ import { CfOrgSpaceDataService } from '../data-services/cf-org-space-service.ser
 @Injectable()
 export class CfAppConfigService implements IListConfig<APIResource> {
 
-  filterConfigs: IListFilterConfig[];
+  multiFilterConfigs: IListMultiFilterConfig[];
 
   constructor(
     private datePipe: DatePipe,
@@ -30,7 +30,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   ) {
     this.appsDataSource = new CfAppsDataSource(this.store);
 
-    this.filterConfigs = [
+    this.multiFilterConfigs = [
       {
         key: 'cf',
         label: 'Cloud Foundry',
@@ -103,6 +103,6 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   getSingleActions = () => null;
   getColumns = () => this.columns;
   getDataSource = () => this.appsDataSource;
-  getFiltersConfigs = () => this.filterConfigs;
+  getMultiFiltersConfigs = () => this.multiFilterConfigs;
 
 }

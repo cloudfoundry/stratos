@@ -15,12 +15,12 @@ import {
   SetPage,
 } from '../../store/actions/pagination.actions';
 import { defaultClientPaginationPageSize } from '../../store/reducers/pagination-reducer/pagination.reducer';
-import { IListFilterConfigItem, IListFilterConfig } from '../components/list/list.component';
+import { IListMultiFilterConfigItem, IListMultiFilterConfig } from '../components/list/list.component';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
   filterByString: (filterString: string) => void;
-  filterByConfig: (filterConfig: IListFilterConfig, filterValue: string) => void;
+  multiFilter: (filterConfig: IListMultiFilterConfig, filterValue: string) => void;
   filter$: Observable<ListFilter>;
   sort: (listSort: ListSort) => void;
   sort$: Observable<ListSort>;
@@ -84,7 +84,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
   filterByString = filterString => {
     if (this.dataSource.isLocal) {
       if (this.pag.clientPagination.filter.string !== filterString) {
-        const newFilter = this.cloneFilter(this.pag.clientPagination.filter);
+        const newFilter = this.cloneMultiFilter(this.pag.clientPagination.filter);
         newFilter.string = filterString;
         this.store.dispatch(new SetClientFilter(
           this.dataSource.entityKey,
@@ -96,10 +96,10 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       this.dataSource.setFilterParam(filterString, this.pag);
     }
   }
-  filterByConfig = (filterConfig: IListFilterConfig, filterValue: string) => {
+  multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
     if (this.dataSource.isLocal && this.pag && this.pag.clientPagination.filter.items[filterConfig.key] !== filterValue) {
       // this.pag.clientPagination.filter.items[filterConfig.key] = filterConfigItem.value;
-      const newFilter = this.cloneFilter(this.pag.clientPagination.filter);
+      const newFilter = this.cloneMultiFilter(this.pag.clientPagination.filter);
       newFilter.items[filterConfig.key] = filterValue;
       this.store.dispatch(new SetClientFilter(
         this.dataSource.entityKey,
@@ -109,7 +109,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     }
   }
 
-  private cloneFilter(filter: PaginationClientFilter) {
+  private cloneMultiFilter(filter: PaginationClientFilter) {
     return {
       ...filter,
       items: { ...filter.items }
@@ -143,11 +143,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
 
   private createFilterObservable(dataSource: IListDataSource<T>): Observable<ListFilter> {
     return dataSource.pagination$.pipe(
-      // map(pag => dataSource.isLocal ?
-      //   pag.clientPagination.filter :
-      //   dataSource.getFilterFromParams(pag)
-      // ),
-      // filter(x => !!x),
       map(pag => ({
         string: dataSource.isLocal ? pag.clientPagination.filter.string : dataSource.getFilterFromParams(pag),
         items: pag.clientPagination.filter.items

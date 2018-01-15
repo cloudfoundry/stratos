@@ -23,15 +23,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   cfValid$: Observable<boolean>;
 
-  @ViewChild('orgSelect')
-  orgSelect: NgModel;
-
-  @ViewChild('cfSelect')
-  cfSelect: NgModel;
-
-  @ViewChild('spaceSelect')
-  spaceSelect: NgModel;
-
   @ViewChild('cfForm')
   cfForm: NgForm;
 

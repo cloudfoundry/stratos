@@ -49,11 +49,11 @@
         </div>
         <div class="listComponent__header__bottom">
           <div class="listComponent__header__left spacer">
-            <div class="selectFilters" [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isLoadingPage$ | async)">
-              <mat-form-field *ngFor="let selectFilter of filterConfigs">
-                <mat-select matInput shouldLabelFloat="false" [(value)]="filteredItems[selectFilter.key]" placeholder="{{selectFilter.label}}" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="selectFilter.select.next($event.value)">
+            <div class="multiFilters" [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isLoadingPage$ | async)">
+              <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs">
+                <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
                   <mat-option>All</mat-option>
-                  <mat-option *ngFor="let selectItem of selectFilter.list$ | async" [value]="selectItem.value">
+                  <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
                     {{selectItem.label}}
                   </mat-option>
                 </mat-select>

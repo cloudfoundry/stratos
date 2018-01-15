@@ -52,6 +52,6 @@ export class CfAppEventsConfigService implements IListConfig<EntityInfo> {
   getSingleActions = () => null;
   getColumns = () => this.columns;
   getDataSource = () => this.eventSource;
-  getFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => [];
 
 }

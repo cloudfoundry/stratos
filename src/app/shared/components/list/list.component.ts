@@ -39,20 +39,20 @@ export interface IListConfig<T> {
   getSingleActions: () => IListAction<T>[];
   getColumns: () => ITableColumn<T>[];
   getDataSource: () => ListDataSource<T>;
-  getFiltersConfigs: () => IListFilterConfig[];
+  getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   isLocal?: boolean;
   pageSizeOptions: Number[];
 }
 
-export interface IListFilterConfig {
+export interface IListMultiFilterConfig {
   key: string;
   label: string;
-  list$: Observable<IListFilterConfigItem[]>;
+  list$: Observable<IListMultiFilterConfigItem[]>;
   loading$: Observable<boolean>;
   select: BehaviorSubject<any>;
 }
 
-export interface IListFilterConfigItem {
+export interface IListMultiFilterConfigItem {
   label: string;
   item: any;
   value: string;
@@ -66,7 +66,7 @@ export class ListConfig implements IListConfig<any> {
   getSingleActions = () => null;
   getColumns = () => null;
   getDataSource = () => null;
-  getFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => [];
 }
 
 export interface IBaseListAction<T> {
@@ -109,7 +109,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
   filterString = '';
-  filteredItems = {};
+  multiFilters = {};
 
   sortColumns: ITableColumn<T>[];
   @ViewChild('headerSortField') headerSortField: MatSelect;
@@ -121,7 +121,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   singleActions: IListAction<T>[];
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
-  filterConfigs: IListFilterConfig[];
+  multiFilterConfigs: IListMultiFilterConfig[];
 
   paginationController: IListPaginationController<T>;
 
@@ -144,7 +144,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.singleActions = this.listConfigService.getSingleActions();
     this.columns = this.listConfigService.getColumns();
     this.dataSource = this.listConfigService.getDataSource();
-    this.filterConfigs = this.listConfigService.getFiltersConfigs();
+    this.multiFilterConfigs = this.listConfigService.getMultiFiltersConfigs();
 
     this.paginationController = new ListPaginationController(this._store, this.dataSource);
 
@@ -176,12 +176,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         return this.paginationController.filterByString(filterString);
       });
 
-    const filterWidgetsObservables = new Array<Subscription>();
-    Object.values(this.filterConfigs).forEach((filterConfig: IListFilterConfig) => {
+    const multiFilterWidgetObservables = new Array<Subscription>();
+    Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
       const sub = filterConfig.select.asObservable().do((filterItem: string) => {
-        this.paginationController.filterByConfig(filterConfig, filterItem);
+        this.paginationController.multiFilter(filterConfig, filterItem);
       });
-      filterWidgetsObservables.push(sub.subscribe());
+      multiFilterWidgetObservables.push(sub.subscribe());
     });
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
@@ -195,7 +195,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
       this.filterString = filter.string;
-      this.filteredItems = filter.items;
+      this.multiFilters = filter.items;
     });
 
     this.uberSub = Observable.combineLatest(
@@ -206,7 +206,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       filterStoreToWidget,
       filterWidgetToStore,
       sortStoreToWidget,
-      filterWidgetsObservables
+      multiFilterWidgetObservables
     ).subscribe();
 
   }
