@@ -10,7 +10,9 @@ install:
 - npm install
 cache:
   directories:
-  - "/home/travis/.npm/"
+  - "$HOME/.npm"
+  - "$HOME/.cache"
+  - node_modules
 stages:
 - Lint
 - Unit Tests
