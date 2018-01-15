@@ -36,7 +36,15 @@ describe('EventsTabComponent', () => {
         ids: {
         },
         error: false,
-        message: ''
+        message: '',
+        clientPagination: {
+          pageSize: 5,
+          currentPage: 1,
+          filter: {
+            string: '',
+            items: {}
+          }
+        }
       }
     }
   };

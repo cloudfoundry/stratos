@@ -98,7 +98,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
   }
   multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
     if (this.dataSource.isLocal && this.pag && this.pag.clientPagination.filter.items[filterConfig.key] !== filterValue) {
-      // this.pag.clientPagination.filter.items[filterConfig.key] = filterConfigItem.value;
       const newFilter = this.cloneMultiFilter(this.pag.clientPagination.filter);
       newFilter.items[filterConfig.key] = filterValue;
       this.store.dispatch(new SetClientFilter(

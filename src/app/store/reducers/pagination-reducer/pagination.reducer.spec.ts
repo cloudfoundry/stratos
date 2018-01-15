@@ -63,7 +63,15 @@ describe('PaginationReducer', () => {
             currentPage: 1,
             ids: {},
             error: true,
-            message: 'aasdasdasd'
+            message: 'aasdasdasd',
+            clientPagination: {
+              pageSize: 5,
+              currentPage: 1,
+              filter: {
+                string: '',
+                items: {}
+              }
+            }
           }
         }
       }, startApiAction);
@@ -76,7 +84,15 @@ describe('PaginationReducer', () => {
           currentPage: 1,
           ids: {},
           error: false,
-          message: ''
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            }
+          }
         }
       }
     };
@@ -122,7 +138,15 @@ describe('PaginationReducer', () => {
           currentPage: 1,
           ids: {},
           error: true,
-          message: 'asdasdasdasd'
+          message: 'asdasdasdasd',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            }
+          }
         }
       }
     }, successApiAction);
@@ -137,7 +161,15 @@ describe('PaginationReducer', () => {
             1: [1, 2]
           },
           error: false,
-          message: ''
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            }
+          }
         }
       }
     };

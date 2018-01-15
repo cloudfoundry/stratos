@@ -39,7 +39,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   ngOnInit() {
     const appWallPaginationState = this.cfOrgSpaceService.appWallPaginationState();
-    appWallPaginationState.first().do(pag => {
+    appWallPaginationState.filter(pag => !!pag).first().do(pag => {
       this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
       this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
       this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
