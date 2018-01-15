@@ -1,7 +1,7 @@
 import { EntityInfo } from '../../../../store/types/api.types';
 import { selectDeletionInfo } from '../../../../store/selectors/api.selectors';
 import { getPaginationObservables } from './../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
@@ -10,10 +10,12 @@ import { SetCFDetails } from '../../../../store/actions/create-applications-page
 import { AppState } from '../../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 
+
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
+  providers: [CfOrgSpaceDataService]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
@@ -35,10 +37,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   validate: Observable<boolean>;
 
-  selectedCF: any = null;
-  selectedOrg: any = null;
-  selectedSpace: any = null;
-
   onNext = () => {
     this.store.dispatch(new SetCFDetails({
       cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
@@ -49,10 +47,12 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
-    const cf = this.cfOrgSpaceService.cf.select.getValue();
-    if (cf) {
-      this.selectedCF = cf;
-    }
+    const appWallPaginationState = this.cfOrgSpaceService.appWallPaginationState();
+    appWallPaginationState.first().do(pag => {
+      this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+      this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+      this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+    }).subscribe();
   }
 
   ngAfterContentInit() {

@@ -92,6 +92,8 @@ export const getPaginationObservables = <T = any>(
 ): PaginationObservables<T> => {
   const { entityKey, paginationKey } = action;
 
+  // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
+  // section)
   if (action.initialParams) {
     store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams, isLocal));
   }
@@ -112,7 +114,7 @@ function getObservables<T = any>(
   store: Store<AppState>,
   entityKey: string,
   paginationKey: string,
-  action: Action,
+  action: PaginatedAction,
   schema: Schema,
   isLocal = false)
   : PaginationObservables<T> {

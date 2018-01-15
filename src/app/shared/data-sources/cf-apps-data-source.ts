@@ -12,11 +12,12 @@ import { PaginationEntityState } from '../../store/types/pagination.types';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
+  public static paginationKey = 'applicationWall';
+
   constructor(
     _store: Store<AppState>,
   ) {
-    const paginationKey = 'applicationWall';
-    const action = new GetAllApplications(paginationKey);
+    const action = new GetAllApplications(CfAppsDataSource.paginationKey);
 
     super(
       _store,
@@ -26,7 +27,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         return object.entity.metadata ? object.entity.metadata.guid : null;
       },
       () => ({} as APIResource),
-      paginationKey,
+      CfAppsDataSource.paginationKey,
       null,
       true,
       [
@@ -45,22 +46,22 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
           field: 'entity.name'
         },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
-          const upperCaseFilter = paginationState.clientPagination.filter.string.toUpperCase();
+          // Filter by cf/org/space
           const cfGuid = paginationState.clientPagination.filter.items['cf'];
           const orgGuid = paginationState.clientPagination.filter.items['org'];
           const spaceGuid = paginationState.clientPagination.filter.items['space'];
           return entities.filter(e => {
-            if ((cfGuid && cfGuid !== e.entity.cfGuid) || (spaceGuid && spaceGuid !== e.entity.space)) {
-              return false;
-            }
-            return true;
+            const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+            const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+            const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+            return validCF && validOrg && validSpace;
           });
         }
       ]
     );
 
     _store.dispatch(new SetListStateAction(
-      paginationKey,
+      CfAppsDataSource.paginationKey,
       'cards',
     ));
   }

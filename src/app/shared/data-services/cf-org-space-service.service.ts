@@ -1,3 +1,4 @@
+import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
 import { EntityInfo } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
@@ -8,6 +9,9 @@ import { getPaginationObservables } from '../../store/reducers/pagination-reduce
 import { GetAllOrganizations, OrganizationSchema } from '../../store/actions/organization.actions';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CNSISModel } from '../../store/types/cnsis.types';
+import { selectPaginationState } from '../../store/selectors/pagination.selectors';
+import { PaginationEntityState } from '../../store/types/pagination.types';
+import { ApplicationSchema } from '../../store/actions/application.actions';
 
 export interface CfOrgSpaceItem {
   list$: Observable<CNSISModel[] | any[]>;
@@ -24,12 +28,14 @@ export class CfOrgSpaceDataService {
   public org: CfOrgSpaceItem;
   public space: CfOrgSpaceItem;
 
+  public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey);
+
   // TODO: We should optimise this to only fetch the orgs for the current endpoint
   // (if we inline depth the get orgs request it could be hefty... or we could use a different action to only fetch required data..
   // which might mean inline data missing from entity when we need it)
   private allOrgs$ = getPaginationObservables({
     store: this.store,
-    action: new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey),
+    action: this.paginationAction,
     schema: [OrganizationSchema]
   });
 
@@ -52,7 +58,6 @@ export class CfOrgSpaceDataService {
       getEndpointsAndOrgs$,
       this.allOrgs$.entities$
     )
-      .do(() => this.org.select.next(null))
       .map(([selectedCF, endpointsAndOrgs, entities]: [CNSISModel, any, any]) => {
         const [pag, cfList] = endpointsAndOrgs;
         if (selectedCF) {
@@ -78,7 +83,6 @@ export class CfOrgSpaceDataService {
       getEndpointsAndOrgs$,
       this.allOrgs$.entities$
     )
-      .do(() => this.space.select.next(null))
       .map(([selectedOrgGuid, data, orgs]) => {
         const [orgList, cfList] = data;
         const selectedOrg = orgs.find(org => {
@@ -99,5 +103,25 @@ export class CfOrgSpaceDataService {
       loading$: this.org.loading$,
       select: new BehaviorSubject(null),
     };
+
+    const orgResetSub = this.cf.select.asObservable().distinctUntilChanged().do(() => {
+      this.org.select.next(null);
+      this.space.select.next(null);
+    }).subscribe();
+    this.cf.select.asObservable().finally(() => {
+      orgResetSub.unsubscribe();
+    });
+
+    const spaceResetSub = this.org.select.asObservable().distinctUntilChanged().do(() => {
+      this.space.select.next(null);
+    }).subscribe();
+    this.org.select.asObservable().finally(() => {
+      spaceResetSub.unsubscribe();
+    });
+
+  }
+
+  public appWallPaginationState() {
+    return this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey));
   }
 }
