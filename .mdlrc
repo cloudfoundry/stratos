@@ -1,1 +1,1 @@
-rules ~MD013 #Disable markdownlint line_length rule (cannot set to anything other than 80)
+rules "~MD013" #Disable markdownlint line_length rule (cannot set to anything other than 80)
