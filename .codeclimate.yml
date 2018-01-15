@@ -6,6 +6,8 @@ plugins:
     enabled: true
   markdownlint:
     enabled: true
+  scss-lint:
+    enabled: true
 exclude_patterns:
 - "config/"
 - "db/"
