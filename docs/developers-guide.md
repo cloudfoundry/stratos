@@ -68,10 +68,14 @@ The build artifacts will be stored in the `dist/` directory. Use the `-prod` fla
 
 Run `npm run lint` to execute tslint lint checking.
 
-#### Code Climate
+### Code Climate
 
 We use [Code Climate](https://codeclimate.com/github/SUSE/stratos) to check for general code quality issues. This executes against Pull
-Requests on creation/push. To run locally see instructions [here](https://github.com/codeclimate/codeclimate) to install Code Climate CLI
+Requests on creation/push.
+
+
+#### Running Code Climate locally
+To run locally see instructions [here](https://github.com/codeclimate/codeclimate) to install Code Climate CLI
 and engine via docker. Once set ensure you're in the root of the project and execute the following (it may take a while)
 
 ```
