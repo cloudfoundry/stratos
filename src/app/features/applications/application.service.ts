@@ -200,5 +200,4 @@ export class ApplicationService {
       { ...updatedApplication }
     ));
   }
-
 }
