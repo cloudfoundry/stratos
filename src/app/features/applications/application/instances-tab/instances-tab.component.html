@@ -1,0 +1,59 @@
+<app-tile-grid>
+  <app-tile-group>
+    <app-tile>
+      <mat-card>
+        <app-card-status [statusProvider]="applicationService.applicationState$"></app-card-status>
+        <mat-card-header>
+          <mat-card-title>Status</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="summary__large">
+            <app-application-state [state]="applicationService.applicationState$ | async"></app-application-state>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </app-tile>
+    <app-tile>
+      <mat-card>
+          <app-card-status [status]="(appMonitor.appMonitor$ | async)?.status.instance"></app-card-status>
+          <mat-card-header>
+          <mat-card-title>Instances</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="summary__large">
+                {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
+            </div>
+        </mat-card-content>
+      </mat-card>
+    </app-tile>
+    <app-tile>
+        <mat-card>
+          <app-card-status [status]="(appMonitor.appMonitor$ | async)?.status.usage"></app-card-status>
+          <mat-card-content>
+            <table class="usage__detail">
+              <tr>
+                <td>Usage</td>
+                <td>Mem</td>
+                <td>Disk</td>
+                <td>CPU</td>
+              </tr>
+              <tr>
+                <td>Max</td>
+                <td> {{ (appMonitor.appMonitor$ | async)?.max.mem | percentage }}</td>
+                <td> {{ (appMonitor.appMonitor$ | async)?.max.disk | percentage }}</td>
+                <td> {{ (appMonitor.appMonitor$ | async)?.max.cpu | percentage }}</td>
+              </tr>
+              <tr>
+                  <td>Avg</td>
+                  <td> {{ (appMonitor.appMonitor$ | async)?.avg.mem | percentage }}</td>
+                  <td> {{ (appMonitor.appMonitor$ | async)?.avg.disk | percentage }}</td>
+                  <td> {{ (appMonitor.appMonitor$ | async)?.avg.cpu | percentage }}</td>
+                </tr>
+              </table>
+          </mat-card-content>
+        </mat-card>
+      </app-tile>
+  </app-tile-group>
+</app-tile-grid>
+<app-list [text]="{ title: 'Instances'}" [enableFilter]="false" [cardComponent]="cardComponent">
+</app-list>

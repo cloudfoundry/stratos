@@ -1,4 +1,5 @@
-import { GetAppSummaryAction } from './../../../store/actions/app-metadata.actions';
+import { ApplicationMonitorService } from '../application-monitor.service';
+import { GetAppSummaryAction, GetAppInstancesAction } from './../../../store/actions/app-metadata.actions';
 import { ApplicationEnvVarsService } from './build-tab/application-env-vars.service';
 import { AppMetadataType } from '../../../store/types/app-metadata.types';
 import { AppMetadataProperties } from '../../../store/actions/app-metadata.actions';
@@ -54,6 +55,7 @@ const entityServiceFactory = (
   styleUrls: ['./application-base.component.scss'],
   providers: [
     ApplicationService,
+    ApplicationMonitorService,
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
@@ -102,6 +104,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   tabLinks = [
     { link: 'build', label: 'Summary' },
+    { link: 'instances', label: 'Instances' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
@@ -170,6 +173,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     // Auto refresh
     this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
       this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      this.store.dispatch(new GetAppInstancesAction(appGuid, cfGuid));
     }).subscribe());
 
     const initialFetch$ = Observable.combineLatest(

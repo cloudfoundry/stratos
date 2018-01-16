@@ -15,6 +15,8 @@ import { ViewBuildpackComponent } from './application/build-tab/view-buildpack/v
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
 import { DatePipe } from '@angular/common';
+import { InstancesTabComponent } from './application/instances-tab/instances-tab.component';
+import { ApplicationMonitorService } from './application-monitor.service';
 
 
 @NgModule({
@@ -33,10 +35,12 @@ import { DatePipe } from '@angular/common';
     BuildTabComponent,
     VariablesTabComponent,
     ViewBuildpackComponent,
+    InstancesTabComponent,
   ],
   providers: [
     ApplicationService,
     ApplicationEnvVarsService,
+    ApplicationMonitorService,
     DatePipe
   ]
 })

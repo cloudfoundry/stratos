@@ -1,3 +1,5 @@
+import { UptimePipe } from './pipes/uptime.pipe';
+import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { EventTabActorIconPipe } from './components/table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { CommonModule } from '@angular/common';
@@ -67,6 +69,9 @@ import { TileGroupComponent } from './components/tile/tile-group/tile-group.comp
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { CardStatusComponent } from './components/card-status/card-status.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
+import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
+import { PercentagePipe } from './pipes/percentage.pipe';
+import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 
 @NgModule({
   imports: [
@@ -84,6 +89,9 @@ import { MetadataItemComponent } from './components/metadata-item/metadata-item.
     StatefulIconComponent,
     EditableDisplayValueComponent,
     MbToHumanSizePipe,
+    PercentagePipe,
+    UptimePipe,
+    UsageBytesPipe,
     ValuesPipe,
     LoadingPageComponent,
     DetailsCardComponent,
@@ -126,6 +134,8 @@ import { MetadataItemComponent } from './components/metadata-item/metadata-item.
     TileGridComponent,
     CardStatusComponent,
     MetadataItemComponent,
+    UsageGaugeComponent,
+    TableCellUsageComponent,
   ],
   exports: [
     FormsModule,
@@ -140,6 +150,9 @@ import { MetadataItemComponent } from './components/metadata-item/metadata-item.
     StatefulIconComponent,
     MbToHumanSizePipe,
     ValuesPipe,
+    PercentagePipe,
+    UsageBytesPipe,
+    UptimePipe,
     SteppersModule,
     FocusDirective,
     UniqueDirective,
@@ -157,6 +170,8 @@ import { MetadataItemComponent } from './components/metadata-item/metadata-item.
     TileGridComponent,
     CardStatusComponent,
     MetadataItemComponent,
+    UsageGaugeComponent,
+    TableCellUsageComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [

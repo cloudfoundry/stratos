@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { ApplicationWallComponent } from './application-wall/application-wall.component';
 import { ApplicationBaseComponent } from './application/application-base.component';
+import { InstancesTabComponent } from './application/instances-tab/instances-tab.component';
 import { EventsTabComponent } from './application/events-tab/events-tab.component';
 import { LogStreamTabComponent } from './application/log-stream-tab/log-stream-tab.component';
 import { ServicesTabComponent } from './application/services-tab/services-tab.component';
@@ -34,6 +35,7 @@ const appplicationsRoutes: Routes = [
         children: [
           { path: '', redirectTo: 'build', pathMatch: 'full' },
           { path: 'build', component: BuildTabComponent },
+          { path: 'instances', component: InstancesTabComponent },
           { path: 'log-stream', component: LogStreamTabComponent },
           { path: 'services', component: ServicesTabComponent },
           { path: 'variables', component: VariablesTabComponent },
