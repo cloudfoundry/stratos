@@ -31,7 +31,7 @@
   </div>
 </app-page-header>
 
-<app-loading-page [isLoading]="isFetching$" [text]="'Getting your application'">
+<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving your application'">
   <div class="summary">
     <app-details-card class="summary__form" title="Summary" [busy]="summaryDataChanging$ | async">
       <form class="summary__form" #summaryForm="ngForm">
@@ -63,14 +63,12 @@
                 <app-editable-display-value [edit]="isEditSummary">
                   <div class="display-input__display">
                     <app-display-value>
-                      {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances
-                      }}
+                      {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances }}
                     </app-display-value>
                   </div>
                   <div class="display-input__input">
                     <mat-form-field>
-                      <input matInput name="instances" type="number" placeholder="Required No. Instances" [(ngModel)]="appEdits.instances" required
-                        pattern="[0-9]+" />
+                      <input matInput name="instances" type="number" placeholder="Required No. Instances" [(ngModel)]="appEdits.instances" required pattern="[0-9]+" />
                     </mat-form-field>
                   </div>
                 </app-editable-display-value>
@@ -93,8 +91,7 @@
                 <app-editable-display-value [edit]="isEditSummary" [value]="(applicationService.application$| async)?.app.entity.memory | mbToHumanSize">
                   <div class="display-input__input">
                     <mat-form-field>
-                      <input matInput name="appMemory" type="number" placeholder="Memory" [(ngModel)]="appEdits.memory" required pattern="[0-9]+"
-                      />
+                      <input matInput name="appMemory" type="number" placeholder="Memory" [(ngModel)]="appEdits.memory" required pattern="[0-9]+" />
                     </mat-form-field>
                   </div>
                 </app-editable-display-value>
@@ -131,8 +128,7 @@
     </app-details-card>
   </div>
   <nav mat-tab-nav-bar class="summary__nav">
-    <a mat-tab-link *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
-      [active]="rla.isActive">
+    <a mat-tab-link *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive" [active]="rla.isActive">
       {{tabLink.label}}
     </a>
   </nav>
