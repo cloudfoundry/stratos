@@ -1,7 +1,7 @@
 import { ApplicationData } from './../../../features/applications/application.service';
 import { APIResource } from './../../types/api.types';
 import { IRequestEntityTypeState } from './../../app-state';
-import { DISCONNECT_CNSIS, UNREGISTER_CNSIS, DisconnectCnis } from './../../actions/cnsis.actions';
+import { DISCONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS, DisconnectCnis } from './../../actions/cnsis.actions';
 import { IRequestArray } from '../api-request-reducer/types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { ISuccessRequestAction } from '../../types/request.types';
@@ -13,7 +13,7 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
   const defaultState = generateDefaultState(entityList);
   return function entitiesReducer(state = defaultState, action: Action) {
     switch (action.type) {
-      case DISCONNECT_CNSIS:
+      case DISCONNECT_CNSIS_SUCCESS:
       case UNREGISTER_CNSIS:
         const cnisAction = action as DisconnectCnis;
         return deletionApplicationFromEndpoint(state, cnisAction.guid);

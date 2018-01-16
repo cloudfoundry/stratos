@@ -1,13 +1,13 @@
 import { PaginationState } from '../../types/pagination.types';
-export function paginationClearType(state: PaginationState, action, defaultPaginationEntityState) {
-  if (state[action.entityKey]) {
+export function paginationClearType(state: PaginationState, entityKey, defaultPaginationEntityState) {
+  if (state[entityKey]) {
     const clearState = { ...state };
-    const entityState = clearState[action.entityKey];
+    const entityState = clearState[entityKey];
     const newObject = {};
     Object.keys(entityState).forEach(key => {
       newObject[key] = defaultPaginationEntityState;
     });
-    clearState[action.entityKey] = newObject;
+    clearState[entityKey] = newObject;
     return clearState;
   }
   return state;

@@ -1,3 +1,4 @@
+import { DISCONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS } from './../../actions/cnsis.actions';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
@@ -102,8 +103,18 @@ export function createPaginationReducer(types: [string, string, string]) {
       return paginationResetPagination(state, action);
     }
 
-    if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-      return paginationClearType(state, action, defaultPaginationEntityState);
+    if (
+      action.type === CLEAR_PAGINATION_OF_TYPE ||
+      /*
+      I could argue that we don't need look at DISCONNECT_CNSIS & UNREGISTER_CNSIS actions
+       we're likely causing an unneeded request but am going to for now just to avoid any bugs from
+       having an incomplete pagination pages - NJ
+      */
+      action.type === DISCONNECT_CNSIS_SUCCESS ||
+      action.type === UNREGISTER_CNSIS
+    ) {
+      const clearEntityType = action.entityKey || 'application';
+      return paginationClearType(state, clearEntityType, defaultPaginationEntityState);
     }
 
     return enterPaginationReducer(state, action, updatePagination);
