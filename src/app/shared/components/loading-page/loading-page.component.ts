@@ -25,7 +25,7 @@ export class LoadingPageComponent implements OnInit {
   isLoading: Observable<boolean> = Observable.of(false);
 
   @Input('text')
-  text = 'Getting your data';
+  text = 'Retrieving your data';
 
   done: boolean;
 
