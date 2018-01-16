@@ -3,7 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 
 import { ApplicationData, ApplicationService } from '../../application.service';
-import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
+import { EntityInfo } from '../../../../store/types/api.types';
+import { AppSummary } from '../../../../store/types/app-metadata.types';
 
 @Component({
   selector: 'app-build-tab',
@@ -25,8 +26,8 @@ export class BuildTabComponent implements OnInit {
       .combineLatest(
       this.appService.appSummary$
       )
-      .map(([app, appSummary]: [ApplicationData, AppMetadataInfo]) => {
-        return app.fetching || appSummary.metadataRequestState.fetching.busy;
+      .map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
+        return app.fetching || appSummary.entityRequestInfo.fetching;
       }).distinct();
   }
 

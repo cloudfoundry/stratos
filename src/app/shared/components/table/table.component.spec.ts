@@ -5,7 +5,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable } from 'rxjs/Rx';
 
 import { CoreModule } from '../../../core/core.module';
-import { TableCellEntryPoints } from '../../../test-framework/list-table-helper';
+import { ListAppEnvVarEntryPoints } from '../../../test-framework/list-table-helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { AppEnvVar } from '../../data-sources/cf-app-variables-data-source';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
@@ -31,8 +31,8 @@ describe('TableComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
-        ...TableCellEntryPoints,
-        TableComponent,
+        ...TableCellEntryPoints, ListAppEnvVar
+        TableComponent, ListAppEnvVar
         TableCellComponent,
         EventTabActorIconPipe,
         ValuesPipe,
@@ -60,7 +60,7 @@ describe('TableComponent', () => {
     } as IListPaginationController<any>;
     component.dataSource = {
       connect() { return Observable.of([]); },
-    } as IListDataSource<any>;
+    } as IListDataSource<ListAppEnvVar
     fixture.detectChanges();
   });
 

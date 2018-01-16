@@ -8,9 +8,9 @@ import { Action } from '@ngrx/store';
 import { ApiActionTypes } from '../actions/request.actions';
 import { PaginatedAction } from './pagination.types';
 
-export interface EntityInfo {
+export interface EntityInfo<T = any> {
   entityRequestInfo: RequestInfoState;
-  entity: any;
+  entity: T;
 }
 
 export interface APIResource<T = any> {

@@ -1,3 +1,5 @@
+import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
+import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
 import { tap } from 'rxjs/operators';
@@ -11,7 +13,11 @@ import {
   ApplicationStateData,
 } from './../../../application-state/application-state.service';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
-import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
+import { AppStatsSchema, AppStatSchema } from '../../../../../store/types/app-metadata.types';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
+import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+// import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-card-app',
@@ -22,7 +28,7 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
 
   @Input('row') row;
   applicationState: ApplicationStateData;
-  fetchAppState$: Subscription;
+  // fetchAppState$: Subscription;
 
   constructor(
     private store: Store<AppState>,
@@ -30,18 +36,23 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
     super();
   }
   ngOnInit() {
-    this.fetchAppState$ = this.store.select(selectEntity(AppMetadataProperties.INSTANCES, this.row.entity.guid))
+    this.applicationState = this.appStateService.get(this.row.entity, null);
+    const pages$ = getPaginationPages(this.store, new GetAppStatsAction(this.row.entity.guid, this.row.entity.cfGuid), AppStatsSchema)
+      // this.fetchAppState$ = a
       // this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row.entity.guid))
       .pipe(
-      tap(appInstances => {
-        this.applicationState = this.appStateService.get(this.row.entity, appInstances ? appInstances : null);
+      tap(appInstancesPages => {
+        const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
+          return apiResource.entity;
+        });
+        this.applicationState = this.appStateService.get(this.row.entity, appInstances);
       })
       ).subscribe();
 
   }
 
   ngOnDestroy() {
-    this.fetchAppState$.unsubscribe();
+    // this.fetchAppState$.unsubscribe();
   }
 
 }

@@ -81,10 +81,26 @@ export function getActionKey(action) {
   return apiAction.entityKey || null;
 }
 
-export function getPaginationKey(action: PaginatedAction) {
+export function getPaginationKeyFromAction(action: PaginatedAction) {
   const apiAction = getAction(action);
   return apiAction.paginationKey;
 }
+
+export const getPaginationPages = (store: Store<AppState>, action: PaginatedAction, schema: Schema): {
+  [key: string]: any
+} => {
+  const { entityKey, paginationKey } = action;
+
+  return Observable.combineLatest(
+    store.select(selectPaginationState(entityKey, paginationKey)).filter(pag => !!pag).first(),
+    store.select(getAPIRequestDataState).first()
+  ).map(([paginationState, entities]) => {
+    console.log('!!!!');
+    return Object.keys(paginationState.ids).map(page => {
+      return denormalize(paginationState.ids[page], schema, entities);
+    });
+  });
+};
 
 export const getPaginationObservables = <T = any>(
   { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },

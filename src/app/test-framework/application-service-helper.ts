@@ -1,3 +1,4 @@
+import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { EntityService } from '../core/entity-service';
@@ -6,9 +7,9 @@ import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { ApplicationService, ApplicationData } from '../features/applications/application.service';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo } from '../store/types/api.types';
-import { AppMetadataInfo } from '../store/types/app-metadata.types';
 import { ApplicationStateService } from '../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsService } from '../features/applications/application/build-tab/application-env-vars.service';
+import { AppSummary } from '../store/types/app-metadata.types';
 
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
@@ -35,7 +36,7 @@ export class ApplicationServiceMock {
     },
     fetching: false
   } as ApplicationData));
-  appSummary$: Observable<AppMetadataInfo> = Observable.of(({ metadataRequestState: { fetching: {} } } as AppMetadataInfo));
+  appSummary$: Observable<EntityInfo<AppSummary>> = Observable.of(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
   isFetchingApp$: Observable<boolean> = Observable.of(false);
   isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
@@ -53,7 +54,7 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
     provide: ApplicationService,
     useFactory: (
       store: Store<AppState>,
-      entityService: EntityService,
+      entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
       applicationEnvVarsService: ApplicationEnvVarsService
     ) => {
@@ -61,7 +62,7 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
         cfGuid,
         appGuid,
         store,
-        entityService,
+        entityServiceFactory,
         applicationStateService,
         applicationEnvVarsService
       );

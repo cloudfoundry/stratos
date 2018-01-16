@@ -16,8 +16,6 @@ import {
 import { AppState } from './../app-state';
 import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
 import { ApiActionTypes } from '../actions/request.actions';
-import { AppMetadataProperties } from '../actions/app-metadata.actions';
-import { AppMetadataType } from '../types/app-metadata.types';
 
 
 @Injectable()

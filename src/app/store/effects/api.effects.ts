@@ -128,7 +128,7 @@ export class APIEffect {
         })
         .catch(err => {
           return [
-            { type: apiAction.actions[1], apiAction },
+            { type: apiAction.actions[2], apiAction },
             new WrapperRequestActionFailed(
               err.message,
               apiAction,
@@ -138,7 +138,7 @@ export class APIEffect {
         });
     });
 
-  private completeResourceEntity(resource: APIResource | any, cfGuid: string): APIResource {
+  private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
     if (!resource) {
       return resource;
     }
@@ -147,7 +147,7 @@ export class APIEffect {
       metadata: resource.metadata
     } : {
         entity: { ...resource, cfGuid },
-        metadata: { guid: resource.guid }
+        metadata: { guid: guid }
       };
   }
 
@@ -176,11 +176,18 @@ export class APIEffect {
           return null;
         }
         return cfData.resources.map(resource => {
-          return this.completeResourceEntity(resource, cfGuid);
+          return this.completeResourceEntity(resource, cfGuid, resource.guid);
+        });
+      } else if (cfData[0]) {
+        delete cfData.guid;
+        return Object.keys(cfData).map(key => {
+          const guid = apiAction.guid + '-' + key;
+          const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
+          result.entity.guid = guid;
+          return result;
         });
       } else {
-
-        return this.completeResourceEntity(cfData, cfGuid);
+        return this.completeResourceEntity(cfData, cfGuid, cfData.guid);
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
@@ -217,10 +224,10 @@ export class APIEffect {
   }
 
   getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
-    return {
+    return paginationState ? {
       ...paginationState.params,
       page: paginationState.currentPage.toString(),
-    };
+    } : {};
   }
 
   private makeRequest(options): Observable<any> {
