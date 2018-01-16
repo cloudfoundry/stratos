@@ -1,9 +1,10 @@
-import { selectRequestInfo, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { EntityInfo, APIResource } from '../../../../store/types/api.types';
+import { selectRequestInfo, selectUpdateInfo, selectEntity } from '../../../../store/selectors/api.selectors';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subscription } from 'rxjs/Rx';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import {
@@ -17,13 +18,14 @@ import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { RouterNav } from '../../../../store/actions/router.actions';
+import { OrganisationSchema } from '../../../../store/actions/organisation.action';
 
 @Component({
   selector: 'app-create-application-step3',
   templateUrl: './create-application-step3.component.html',
   styleUrls: ['./create-application-step3.component.scss']
 })
-export class CreateApplicationStep3Component implements OnInit {
+export class CreateApplicationStep3Component implements OnInit, OnDestroy {
 
   constructor(private store: Store<AppState>, private router: Router) { }
 
@@ -32,20 +34,24 @@ export class CreateApplicationStep3Component implements OnInit {
 
   hostName: string;
 
+  domains: APIResource<any>[];
+
   message = null;
+
+  subscription: Subscription;
 
   newAppData: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {
     const { cloudFoundryDetails, name } = this.newAppData;
 
     const { cloudFoundry, org, space } = cloudFoundryDetails;
-    const newAppGuid = name + space.guid;
+    const newAppGuid = name + space;
 
     this.store.dispatch(new CreateNewApplication(
       newAppGuid,
-      cloudFoundry.guid, {
+      cloudFoundry, {
         name,
-        space_guid: space.guid
+        space_guid: space
       }
     ));
 
@@ -57,9 +63,9 @@ export class CreateApplicationStep3Component implements OnInit {
     if (shouldCreateRoute) {
       this.store.dispatch(new CreateRoute(
         newRouteGuid,
-        cloudFoundry.guid,
+        cloudFoundry,
         {
-          space_guid: space.guid,
+          space_guid: space,
           domain_guid: routeDomainMetaData.guid,
           host: hostName
         }
@@ -88,7 +94,7 @@ export class CreateApplicationStep3Component implements OnInit {
           routeAssignAction = new AssociateRouteWithAppApplication(
             app.response.result[0],
             route.response.result[0],
-            cloudFoundry.guid
+            cloudFoundry
           );
           this.store.dispatch(routeAssignAction);
         }
@@ -117,20 +123,32 @@ export class CreateApplicationStep3Component implements OnInit {
         if (!update.error) {
           this.store.dispatch(new GetApplication(
             app.response.result[0],
-            cloudFoundry.guid
+            cloudFoundry
           ));
-          this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry.guid, app.response.result[0], 'build'] }));
+          this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'build'] }));
         }
         return { success: !update };
       });
   }
 
   ngOnInit() {
-    this.store.select(selectNewAppState)
-      .subscribe(state => {
+    const state$ = this.store.select(selectNewAppState);
+
+    this.subscription = state$
+      .do(state => {
         this.hostName = state.name.split(' ').join('-').toLowerCase();
         this.newAppData = state;
-      });
+      })
+      .filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.org)
+      .do(state => {
+        this.store.select(selectEntity(OrganisationSchema.key, state.cloudFoundryDetails.org)).first()
+          .subscribe(org => this.domains = org.entity.domains);
+      })
+      .subscribe();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
 }
