@@ -96,6 +96,12 @@ git checkout feature-branch-A
 codeclimate analyze $(git diff --name-only master)
 ```
 
+You can also run the above command via npm
+
+```
+npm run climate
+```
+
 ### Unit tests
 
 Run `npm test` to execute the unit tests via [Karma](https://karma-runner.github.io). Coverage information can be found in ./coverage
