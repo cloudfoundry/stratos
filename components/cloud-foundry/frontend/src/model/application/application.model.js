@@ -798,8 +798,8 @@
      */
     function restartApp(cnsiGuid, guid) {
 
-      stopApp(cnsiGuid, guid).then(function () {
-        startApp(cnsiGuid, guid);
+      return stopApp(cnsiGuid, guid).then(function () {
+        return startApp(cnsiGuid, guid);
       });
     }
 

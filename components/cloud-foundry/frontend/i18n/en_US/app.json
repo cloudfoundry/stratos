@@ -41,6 +41,26 @@
         "start": "Start",
         "cli": "CLI Info"
       },
+      "restart-app": {
+        "title": "Restart Application",
+        "description": "Are you sure you want to restart application {{app}}?",
+        "error-message": "There was a problem restarting this application. Please try again. If this error persists, please contact the Administrator.",
+        "button": {
+          "yes": "Restart",
+          "no": "@:buttons.cancel"
+        },
+        "success": "Application {{app}} successfully restarted"
+      },
+      "stop-app": {
+        "title": "Stop Application",
+        "description": "Are you sure you want to stop application {{app}}?",
+        "error-message": "There was a problem stopping this application. Please try again. If this error persists, please contact the Administrator.",
+        "button": {
+          "yes": "Stop",
+          "no": "@:buttons.cancel"
+        },
+        "success": "Application {{app}} successfully stopped"
+      },
       "edit-app": {
         "edit-app": "Edit App",
         "ssh-access": "Enable SSH Access",
