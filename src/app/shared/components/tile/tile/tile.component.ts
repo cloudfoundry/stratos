@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBinding, ElementRef, Renderer } from '@angular/core';
 
 @Component({
   selector: 'app-tile',
@@ -6,11 +6,23 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
   styleUrls: ['./tile.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class TileComponent implements OnInit {
+export class TileComponent implements OnInit, AfterContentInit {
+
+  @Input('size') size: number;
+
+  @HostBinding('class.app-tile__sized') private isSized = false;
+
+  @HostBinding('style.width.%') private width: number;
 
   constructor() { }
 
   ngOnInit() {
   }
 
+  ngAfterContentInit() {
+    if (this.size) {
+      this.isSized = true;
+      this.width = this.size;
+    }
+  }
 }

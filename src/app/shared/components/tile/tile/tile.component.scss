@@ -4,4 +4,9 @@ app-tile {
   .mat-card {
     height: 100%;
   }
+
+  &.app-tile__sized {
+    flex: none !important;
+  }
 }
+

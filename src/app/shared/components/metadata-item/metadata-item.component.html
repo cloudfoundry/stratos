@@ -1,10 +1,18 @@
 <div class="metadata-item">
-  <mat-icon *ngIf="icon" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</mat-icon>
+  <mat-icon *ngIf="icon && !tooltip" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</mat-icon>
+  <mat-icon *ngIf="icon && tooltip" matTooltip="{{ tooltip }}" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</mat-icon>
   <div class="metadata-item__content">
     <div class="metadata-item__label">{{ label }}</div>
     <div class="metadata-item__value">
       <ng-content></ng-content>
+      <div *ngIf="!edit">
+        <ng-content select="[view]"></ng-content>
+      </div>
+      <div *ngIf="edit">
+        <ng-content select="[edit]"></ng-content>
+      </div>
     </div>
   </div>
 </div>
+
 

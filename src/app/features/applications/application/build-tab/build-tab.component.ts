@@ -1,3 +1,4 @@
+import { AppState } from '../../../../store/app-state';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
@@ -6,6 +7,7 @@ import { ApplicationData, ApplicationService } from '../../application.service';
 import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
 
 import { UpdateApplication } from '../../../../store/actions/application.actions';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-build-tab',
@@ -13,11 +15,13 @@ import { UpdateApplication } from '../../../../store/actions/application.actions
   styleUrls: ['./build-tab.component.scss']
 })
 export class BuildTabComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private applicationService: ApplicationService) { }
+  constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
 
   appService = this.applicationService;
 
   cardTwoFetching$: Observable<boolean>;
+
+  isEditSummary = false;
 
   public async: any;
 
@@ -33,6 +37,7 @@ export class BuildTabComponent implements OnInit {
   ngOnInit() {
 
     this.setAppDefaults();
+    this.appEdits = { ... this.appDefaultEdits };
 
     // const { cfGuid, appGuid } = this.applicationService;
 
@@ -46,9 +51,24 @@ export class BuildTabComponent implements OnInit {
   }
 
 
-  setAppDefaults() {
-    this.appEdits = { ... this.appDefaultEdits };
+  startEdit() {
+    this.isEditSummary = true;
+    this.setAppDefaults();
   }
-  
 
+  endEdit() {
+    this.isEditSummary = false;
+  }
+
+  saveEdits() {
+    this.endEdit();
+    // this.applicationService.updateApplication(this.appEdits);
+    console.log('APP UPDATE EDIT');
+    console.log(this.appEdits);
+  }
+
+  setAppDefaults() {
+    // this.appEdits = { ... this.appDefaultEdits };
+
+  }
 }

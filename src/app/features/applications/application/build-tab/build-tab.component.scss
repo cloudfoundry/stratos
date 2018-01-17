@@ -13,4 +13,21 @@
       font-size: 16px;
       font-weight: 500;
     }
+    &__tile_actions {
+      padding: 6px;
+      text-align: right;
+    }
+  }
+  
+  .app-metadata {
+    display: flex;
+    flex-direction: row;
+    
+    &__two-cols {
+      flex: 1;
+
+      app-metadata-item:first-child {
+        margin-top: 0;
+      }
+    }
   }

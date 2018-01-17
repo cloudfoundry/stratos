@@ -13,6 +13,11 @@ export class MetadataItemComponent implements OnInit {
 
   @Input('label') private label: string;
 
+  @Input('tooltip') private tooltip: string;
+
+  // Are we editing?
+  @Input('edit') private edit: boolean;
+
   ngOnInit() {
   }
 

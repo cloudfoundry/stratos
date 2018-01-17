@@ -1,31 +1,11 @@
-<div>
-
+<div class="summary" *ngIf="applicationService.application$| async as appSvc">
   <app-tile-grid>
     <app-tile-group>
       <app-tile>
-        <mat-card>
-          <app-card-status [statusProvider]="applicationService.applicationState$"></app-card-status>
-          <mat-card-header>
-            <mat-card-title>Status</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="summary__large">
-              <app-application-state [state]="applicationService.applicationState$ | async"></app-application-state>
-            </div>
-          </mat-card-content>
-        </mat-card>
+        <app-card-app-status></app-card-app-status>
       </app-tile>
       <app-tile>
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Instances</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-              <div class="summary__large">
-                  {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
-              </div>
-          </mat-card-content>
-        </mat-card>
+        <app-card-app-instances></app-card-app-instances>
       </app-tile>
       <app-tile>
         <mat-card>
@@ -39,57 +19,77 @@
               </mat-card-content>
           -->
         </mat-card>
-        </app-tile>
+      </app-tile>
     </app-tile-group>
     <app-tile-group>
       <app-tile>
           <mat-card>
-              <mat-card-header>
-                  <mat-card-title>Detail</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <app-metadata-item icon="touch_app" label="App State">{{ (applicationService.application$ | async)?.app.entity.state }}</app-metadata-item>
-                  <app-metadata-item icon="card_travel" label="Package State">{{ (applicationService.application$| async)?.app.entity.package_state }}</app-metadata-item>
-
-                  <app-metadata-item icon="memory" label="Memory Quota">{{(applicationService.application$| async)?.app.entity.memory | mbToHumanSize}}</app-metadata-item>
-                  <app-metadata-item icon="storage" label="Disk Quota">{{(applicationService.application$| async)?.app.entity.disk_quota | mbToHumanSize}}</app-metadata-item>
-
-                  <app-metadata-item icon="developer_board" label="Services">{{ (applicationService.appSummary$| async)?.metadata?.services?.length || '-' }}</app-metadata-item>
-              </mat-card-content>
+            <mat-card-header>
+              <mat-card-title>App Info</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="app-metadata">
+                <div class="app-metadata__two-cols">
+                  <app-metadata-item icon="memory" label="Memory Quota">{{ appSvc.app.entity.memory | mbToHumanSize }}</app-metadata-item>
+                  <app-metadata-item icon="storage" label="Disk Quota">{{ appSvc.app.entity.disk_quota | mbToHumanSize}}</app-metadata-item>
+                  <app-metadata-item icon="date_range" label="Created">{{ appSvc.app.metadata.created_at | date:'medium' }}</app-metadata-item>
+                  <app-metadata-item icon="access_time" label="Modified">{{ appSvc.app.entity.package_updated_at | date:'medium' || '-' }}</app-metadata-item>
+                  <app-metadata-item icon="bug_report" label="Production">{{ appSvc.app.entity.production ? 'Yes' : 'No'}}</app-metadata-item>
+                </div>
+                <div class="app-metadata__two-cols">
+                  <app-metadata-item icon="touch_app" label="App State">{{ appSvc.app.entity.state }}</app-metadata-item>
+                  <app-metadata-item icon="card_travel" label="Package State">{{ appSvc.app.entity.package_state }}</app-metadata-item>
+                  <app-metadata-item icon="developer_board" label="Services">{{ appSvc.metadata?.services?.length || '0' }}</app-metadata-item>
+                  <app-metadata-item icon="http" label="Routes">{{ appSvc.metadata?.routes?.length || '0' }}</app-metadata-item>
+                  <app-metadata-item icon="developer_mode" label="SSH Enabled">{{ appSvc.app.entity.enable_ssh ? 'Yes' : 'No' }}</app-metadata-item>
+                </div>
+              </div>
+            </mat-card-content>
           </mat-card>
       </app-tile>
-      <app-tile>          
+      <app-tile size="33.33333333">          
         <mat-card>
           <mat-card-header>
-            <mat-card-title>Cloud Foundary</mat-card-title>
+            <mat-card-title>Cloud Foundry</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-              <app-metadata-item icon="title" label="Name">{{(appService.application$| async)?.cf?.name}}</app-metadata-item>
-              <app-metadata-item icon="http" label="URL">{{(appService.application$| async)?.cf?.api_endpoint.Scheme + '://' + (appService.application$| async)?.cf?.api_endpoint.Host}}</app-metadata-item>
-              <app-metadata-item icon="location_city" label="Organization">{{(appService.application$| async)?.organisation.entity.name}}</app-metadata-item>
-              <app-metadata-item icon="language" label="Space">{{(appService.application$| async)?.space.entity.name}}</app-metadata-item>
+              <app-metadata-item icon="title" label="Name" tooltip="{{ appSvc.cf?.api_endpoint.Scheme + '://' + appSvc.cf?.api_endpoint.Host}}">{{ appSvc.cf?.name}}</app-metadata-item>
+              <app-metadata-item icon="location_city" label="Organization">{{ appSvc.organisation.entity.name }}</app-metadata-item>
+              <app-metadata-item icon="language" label="Space">{{ appSvc.space.entity.name }}</app-metadata-item>
             </mat-card-content>
           </mat-card>
       </app-tile>
     </app-tile-group>
 
-
     <!-- Misc -->
     <app-tile-group>
-        <app-tile>
-            <mat-card>
-                <mat-card-header>
-                    <mat-card-title>Detail</mat-card-title>
-                  </mat-card-header>
-                  <mat-card-content>
-                      <app-metadata-item icon="developer_mode" label="SSH Enabled">{{(applicationService.application$| async)?.app.entity.enable_ssh ? 'Yes' : 'No'}}</app-metadata-item>
-                      <app-metadata-item icon="date_range" label="Created">{{ (appService.application$ | async)?.app.metadata.created_at | date:'medium' }}</app-metadata-item>
-                      <app-metadata-item icon="access_time" label="Modified">{{ (appService.application$ | async)?.app.entity.package_updated_at | date:'medium' || '-' }}</app-metadata-item>
-                      <!--
-                      <app-metadata-item icon="date_range" label=""></app-metadata-item>
-                      <app-metadata-item icon="date_range" label=""></app-metadata-item>
-                      -->
-                    </mat-card-content>
+      <app-tile>          
+          <mat-card *ngIf="(appService.applicationStratProject$ | async)?.deploySource as deploySource && deploySource">
+            <mat-card-header>
+              <mat-card-title>Deployment Info</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
+                <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
+                    <div matTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
+                    [matTooltipHideDelay]="1500">
+                    {{(appService.applicationStratProject$| async)?.deploySource.url}}
+                  </div>
+                </app-metadata-item>
+                <app-metadata-item *ngSwitchCase="'github'" icon="code" label="GitHub">
+                    <a href="{{ deploySource.url}}/commit/{{ deploySource.commit}}"
+                      rel="noopener noreferrer" target="_blank">
+                      {{ deploySource.deploySource.commit | slice:0:8 }}
+                    </a>
+                  </app-metadata-item>
+                  <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
+                    Deployed from local folder
+                  </app-metadata-item>
+                  <app-metadata-item *ngSwitchCase="'filefolder'" icon="insert_driev_file" label="File">
+                    Deployed from local file
+                  </app-metadata-item>
+                </span>
+              </mat-card-content>
             </mat-card>
         </app-tile>
         <app-tile>          
@@ -101,44 +101,10 @@
                 <app-metadata-item icon="build" label="Buildpack">
                     <app-view-buildpack [buildPack]="(appService.application$ | async)?.app.entity.buildpack || (appService.application$ | async)?.app.entity.detected_buildpack"></app-view-buildpack>
                 </app-metadata-item>
-                <app-metadata-item icon="bug_report" label="Production">{{(appService.application$| async)?.app.entity.production ? 'Yes' : 'No'}}</app-metadata-item>
                 <app-metadata-item icon="code" label="Stack">{{(appService.application$| async)?.stack?.entity.name}}</app-metadata-item>
               </mat-card-content>
             </mat-card>
         </app-tile>
       </app-tile-group>
-  
-    <app-tile-group *ngIf="(appService.applicationStratProject$| async)?.deploySource">
-        <app-tile>          
-            <mat-card>
-              <mat-card-header>
-                <mat-card-title>Deployment Info</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
-                  <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                      <div matTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
-                      [matTooltipHideDelay]="1500">
-                      {{(appService.applicationStratProject$| async)?.deploySource.url}}
-                    </div>
-                  </app-metadata-item>
-                  <app-metadata-item *ngSwitchCase="'github'" icon="code" label="GitHub">
-                      <a href="{{(appService.applicationStratProject$| async)?.deploySource.url}}/commit/{{(appService.applicationStratProject$| async)?.deploySource.commit}}"
-                        rel="noopener noreferrer" target="_blank">
-                        {{(appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8}}
-                      </a>
-                    </app-metadata-item>
-                    <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
-                      Deployed from local folder
-                    </app-metadata-item>
-                    <app-metadata-item *ngSwitchCase="'filefolder'" icon="insert_driev_file" label="File">
-                      Deployed from local file
-                    </app-metadata-item>
-                  </span>
-                </mat-card-content>
-              </mat-card>
-          </app-tile>
-        </app-tile-group>
-    
   </app-tile-grid>
   

@@ -21,16 +21,9 @@ export class TileGroupComponent implements OnInit, AfterContentInit {
 
   @ContentChildren(TileComponent) tiles: QueryList<TileComponent>;
 
-  private tileSub: Subscription;
-
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngAfterContentInit() {
-    console.log('==================================================================');
-    console.log('Tile Group');
-    console.log(this.tiles);
-
     this.isThreeColumn = (this.tiles.length === 3);
     this.isTwoColumn = (this.tiles.length === 2);
     this.isOneColumn = (this.tiles.length === 1);
