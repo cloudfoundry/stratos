@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MetadataItemComponent } from './metadata-item.component';
+import { CoreModule } from '../../../core/core.module';
 
 describe('MetadataItemComponent', () => {
   let component: MetadataItemComponent;
@@ -8,7 +9,12 @@ describe('MetadataItemComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MetadataItemComponent ]
+      declarations: [
+        MetadataItemComponent
+      ],
+      imports: [
+        CoreModule
+      ],
     })
     .compileComponents();
   }));
