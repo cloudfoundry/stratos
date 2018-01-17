@@ -37,13 +37,15 @@
                 <mat-icon>add</mat-icon>
               </button>
             </div>
-            <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
-              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'">
-                <mat-icon>grid_on</mat-icon>
-              </button>
-              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'">
-                <mat-icon>list</mat-icon>
-              </button>
+              <div *ngIf="cardComponent">
+              <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+                <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'">
+                  <mat-icon>grid_on</mat-icon>
+                </button>
+                <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'">
+                  <mat-icon>list</mat-icon>
+                </button>
+              </div>
             </div>
           </div>
         </div>
