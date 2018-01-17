@@ -1,4 +1,3 @@
-import { CardAppRoutesComponent } from '../custom-cards/card-app-routes/card-app-routes.component';
 import { Component, OnInit, Type, Input, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
 import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
@@ -16,7 +15,6 @@ import { IListDataSource } from '../../../data-sources/list-data-source-types';
     CardAppVariableComponent,
     CardAppComponent,
     CardEndpointComponent,
-    CardAppRoutesComponent,
   ]
 })
 export class CardComponent<T> implements OnInit {

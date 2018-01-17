@@ -1,3 +1,4 @@
+import { RouterNav } from '../../store/actions/router.actions';
 import { DeleteRoute } from '../../store/actions/route.actions';
 import {
     TableCellTCPRouteComponent,
@@ -28,6 +29,7 @@ import {
 
 @Injectable()
 export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
+  isLocal?: boolean;
   routesDataSource: CfAppRoutesDataSource;
 
 
@@ -52,6 +54,19 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     visible: (row: EntityInfo) => true,
     enabled: (row: EntityInfo) => true,
   };
+
+  private listActionAdd: IGlobalListAction<EntityInfo> = {
+    action: () => {
+      this.store.dispatch(new RouterNav({ path: ['applications', this.appService.cfGuid, this.appService.appGuid, 'add-route'] }));
+    },
+    icon: 'add',
+    label: 'Add',
+    description: '',
+    visible: (row: EntityInfo) => true,
+    enabled: (row: EntityInfo) => true,
+  };
+
+
   columns: Array<ITableColumn<EntityInfo>> = [
     {
       columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
@@ -76,7 +91,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     );
   }
 
-  getGlobalActions = () => null;
+  getGlobalActions = () => [this.listActionAdd];
   getMultiActions = () => [this.multiListActionDelete];
   getSingleActions = () => [this.listActionDelete];
   getColumns = () => this.columns;

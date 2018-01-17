@@ -1,11 +1,11 @@
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { AssociateRouteWithAppApplication } from '../../../../../store/actions/application.actions';
-import { CreateRoute, NewRoute, RouteSchema } from '../../../../../store/actions/route.actions';
-import { AppState } from '../../../../../store/app-state';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { AssociateRouteWithAppApplication } from '../../../../store/actions/application.actions';
+import { CreateRoute, NewRoute, RouteSchema } from '../../../../store/actions/route.actions';
+import { AppState } from '../../../../store/app-state';
 import { Domain } from './domain.types';
-import { selectDomains, selectEntity, selectRequestInfo } from '../../../../../store/selectors/api.selectors';
+import { selectDomains, selectEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { Route } from './route.types';
-import { ApplicationService } from '../../../application.service';
+import { ApplicationService } from '../../application.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
@@ -14,7 +14,7 @@ import { Observable } from 'rxjs/Observable';
 import { tap, pluck, map, filter, delay, mergeMap } from 'rxjs/operators';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Subscription } from 'rxjs/Subscription';
-import { APIResource } from '../../../../../store/types/api.types';
+import { APIResource } from '../../../../store/types/api.types';
 
 @Component({
   selector: 'app-add-routes',
@@ -99,24 +99,22 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           this.cfGuid
         );
         this.store.dispatch(routeAssignAction);
-        this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid] })) :
         return { route, updatingKey: routeAssignAction ? routeAssignAction.updatingKey : null };
-
-      })
-    ).subscribe();
+      }),
+      tap(p => {
+        this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid] }));
+      }
+    )).subscribe();
   }
 
-  cancel() {
-  }
 
   ngOnDestroy(): void {
-    this.domains$.unsubscribe();
+    if (this.domains$) {
+      this.domains$.unsubscribe();
+    }
     this.space$.unsubscribe();
     if (this.associateRoute$) {
       this.associateRoute$.unsubscribe();
     }
-  }
-  get log() {
-   return  JSON.stringify(this.model ? this.model : {});
   }
 }

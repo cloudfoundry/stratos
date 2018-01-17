@@ -1,4 +1,3 @@
-import { CardAppRoutesComponent } from '../shared/components/cards/custom-cards/card-app-routes/card-app-routes.component';
 import {
     TableCellTCPRouteComponent,
 } from '../shared/components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
@@ -63,5 +62,4 @@ export const CardEntryPoints = [
   CardAppVariableComponent,
   CardAppComponent,
   CardEndpointComponent,
-  CardAppRoutesComponent
 ];

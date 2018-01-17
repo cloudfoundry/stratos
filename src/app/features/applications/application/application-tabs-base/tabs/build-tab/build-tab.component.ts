@@ -1,4 +1,4 @@
-import { NewRoute } from '../../../../store/actions/route.actions';
+import { NewRoute } from '../../../../../../store/actions/route.actions';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';

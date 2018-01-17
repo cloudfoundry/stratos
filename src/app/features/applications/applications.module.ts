@@ -1,3 +1,4 @@
+import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
@@ -17,7 +18,6 @@ import { ApplicationsRoutingModule } from './applications.routing';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DatePipe } from '@angular/common';
 import { RoutesComponent } from './routes/routes.component';
-import { AddRoutesComponent } from './application/build-tab/add-routes/add-routes.component';
 
 
 @NgModule({

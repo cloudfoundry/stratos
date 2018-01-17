@@ -61,7 +61,6 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
-import { CardAppRoutesComponent } from './components/cards/custom-cards/card-app-routes/card-app-routes.component';
 import { TableCellRouteComponent } from './components/table/custom-cells/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 
@@ -117,7 +116,6 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
-    CardAppRoutesComponent,
     TableCellRouteComponent,
     TableCellTCPRouteComponent,
   ],

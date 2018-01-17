@@ -2,9 +2,6 @@ import { GetSharedDomains } from '../../../store/actions/domain.actions';
 import { CfAppRoutesListConfigService } from '../../../shared/list-configs/cf-app-routes-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component';
 import { ApplicationService } from '../application.service';
-import {
-    CardAppRoutesComponent,
-} from '../../../shared/components/cards/custom-cards/card-app-routes/card-app-routes.component';
 import { CfAppRoutesDataSource } from '../../../shared/data-sources/cf-app-routes-data-source';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
@@ -30,7 +27,7 @@ export class RoutesComponent implements OnInit {
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;
   }
 
-  cardComponent = CardAppRoutesComponent;
+  cardComponent = null;
   routesDataSource: CfAppRoutesDataSource;
 
   ngOnInit() {

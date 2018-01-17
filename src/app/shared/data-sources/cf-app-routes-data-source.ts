@@ -17,7 +17,6 @@ import { ListActionConfig, ListActions } from './list-data-source-types';
 import { AppMetadataProperties, EnvVarsSchema } from '../../store/actions/app-metadata.actions';
 import { AppMetadataType } from '../../store/types/app-metadata.types';
 import { map } from 'rxjs/operators';
-import { ApplicationEnvVars } from '../../features/applications/application/build-tab/application-env-vars.service';
 import { schema } from 'normalizr';
 
 export const RouteSchema = new schema.Entity('route');
