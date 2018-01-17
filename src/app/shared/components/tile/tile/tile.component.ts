@@ -10,7 +10,7 @@ export class TileComponent implements OnInit, AfterContentInit {
 
   @Input('size') size: number;
 
-  @HostBinding('class.app-tile__sized') private isSized = false;
+  @HostBinding('class.app-tile-sized') private isSized = false;
 
   @HostBinding('style.width.%') private width: number;
 
