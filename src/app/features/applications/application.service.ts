@@ -164,8 +164,8 @@ export class ApplicationService {
 
     this.applicationState$ = this.waitForAppEntity$
       .combineLatest(this.appStats$)
-      .map(([appInfo, appStats]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStats.map(apiResource => apiResource.entity));
+      .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
+        return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
       });
 
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {

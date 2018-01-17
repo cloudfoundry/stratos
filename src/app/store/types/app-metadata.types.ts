@@ -2,16 +2,13 @@ import { schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 
 
-// TODO: REMOVE
-// export const AppMetadataEntityKeysTODORE = {
-//   INSTANCES: 'instances',
-//   ENV_VARS: 'environmentVars',
-//   SUMMARY: 'summary'
-// };
-
 export const AppSummarySchema = new schema.Entity('summary', {}, { idAttribute: getAPIResourceGuid });
 
-export interface AppSummary { }
+export interface AppSummary {
+  guid: string;
+  running_instances: number;
+  service: any[];
+}
 
 export const AppStatSchema = new schema.Entity('stats', {}, { idAttribute: getAPIResourceGuid });
 export const AppStatsSchema = new schema.Array(AppStatSchema);

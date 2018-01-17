@@ -2,8 +2,7 @@ import { CoreModule } from '../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CardAppVariableComponent } from './card-app-variable.component';
-import { AppEnvVar } from '../../../../data-sources/cf-app-variables-data-source';
-ListAppEnvVar;
+import { ListAppEnvVar } from '../../../../data-sources/cf-app-variables-data-source';
 describe('CardAppVariableComponent', () => {
   let component: CardAppVariableComponent;
   let fixture: ComponentFixture<CardAppVariableComponent>;
@@ -25,8 +24,7 @@ describe('CardAppVariableComponent', () => {
     component = fixture.componentInstance;
     component.row = {
 
-    } as AppEnvVar;
-    fixtuListAppEnvVarChanges();
+    } as ListAppEnvVar;
   });
 
   it('should be created', () => {
