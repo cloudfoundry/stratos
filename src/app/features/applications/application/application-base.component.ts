@@ -55,7 +55,7 @@ const entityServiceFactory = (
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
-      deps: [Store, ActivatedRoute, EntityService, ApplicationStateService, ApplicationEnvVarsService]
+      deps: [Store, ActivatedRoute, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService]
     },
     {
       provide: EntityService,

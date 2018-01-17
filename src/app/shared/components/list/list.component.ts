@@ -37,7 +37,7 @@ export interface IListConfig<T> {
   getMultiActions: () => IMultiListAction<T>[];
   getSingleActions: () => IListAction<T>[];
   getColumns: () => ITableColumn<T>[];
-  getDataSource: () => ListDataSource<T>;
+  getDataSource: () => IListDataSource<T>;
   getFiltersConfigs: () => IListFilterConfig[];
   isLocal?: boolean;
   pageSizeOptions: Number[];

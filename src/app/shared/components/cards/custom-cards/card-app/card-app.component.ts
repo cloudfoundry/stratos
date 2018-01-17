@@ -28,7 +28,7 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
 
   @Input('row') row;
   applicationState: ApplicationStateData;
-  // fetchAppState$: Subscription;
+  fetchAppState$: Subscription;
 
   constructor(
     private store: Store<AppState>,
@@ -37,22 +37,21 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
   }
   ngOnInit() {
     this.applicationState = this.appStateService.get(this.row.entity, null);
-    const pages$ = getPaginationPages(this.store, new GetAppStatsAction(this.row.entity.guid, this.row.entity.cfGuid), AppStatsSchema)
-      // this.fetchAppState$ = a
-      // this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row.entity.guid))
-      .pipe(
-      tap(appInstancesPages => {
-        const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
-          return apiResource.entity;
-        });
-        this.applicationState = this.appStateService.get(this.row.entity, appInstances);
-      })
-      ).subscribe();
+    this.fetchAppState$ =
+      getPaginationPages(this.store, new GetAppStatsAction(this.row.entity.guid, this.row.entity.cfGuid), AppStatsSchema)
+        .pipe(
+        tap(appInstancesPages => {
+          const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
+            return apiResource.entity;
+          });
+          this.applicationState = this.appStateService.get(this.row.entity, appInstances);
+        })
+        ).subscribe();
 
   }
 
   ngOnDestroy() {
-    // this.fetchAppState$.unsubscribe();
+    this.fetchAppState$.unsubscribe();
   }
 
 }

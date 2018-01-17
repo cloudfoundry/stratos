@@ -1,3 +1,4 @@
+import { APIResource } from '../../store/types/api.types';
 import { GetAppEnvVarsAction } from './../../store/actions/app-metadata.actions';
 import { ListDataSource } from './list-data-source';
 import { DataSource } from '@angular/cdk/table';
@@ -22,7 +23,7 @@ export interface ListAppEnvVar {
 }
 
 // TODO: RC
-export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, AppEnvVarsState> {
+export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIResource<AppEnvVarsState>> {
 
   public cfGuid: string;
   public appGuid: string;
@@ -56,7 +57,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, AppEnv
         if (!variables || variables.length === 0) {
           return [];
         }
-        const env = variables[0].environment_json;
+        const env = variables[0].entity.environment_json;
         const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
         return rows;
       }),

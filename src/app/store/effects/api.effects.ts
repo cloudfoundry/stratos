@@ -1,3 +1,4 @@
+import { cnsisEntitiesSelector } from '../selectors/cnsis.selectors';
 import { request } from 'http';
 import { totalmem } from 'os';
 import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
@@ -153,14 +154,15 @@ export class APIEffect {
 
   getErrors(resData) {
     return Object.keys(resData)
-      .map(guid => {
-        const cnsis = resData[guid];
-        cnsis.guid = guid;
-        return cnsis;
+      .map(cfGuid => {
+        // Return list of guid+error objects for those endpoints with errors
+        const cnsis = resData[cfGuid];
+        return cnsis.error ? {
+          error: cnsis.error,
+          guid: cfGuid
+        } : null;
       })
-      .filter(cnsis => {
-        return cnsis.error;
-      });
+      .filter(cnsisError => !!cnsisError);
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -178,7 +180,7 @@ export class APIEffect {
         return cfData.resources.map(resource => {
           return this.completeResourceEntity(resource, cfGuid, resource.guid);
         });
-      } else if (cfData[0]) {
+      } else if (cfData[0]) {// FIXME:
         delete cfData.guid;
         return Object.keys(cfData).map(key => {
           const guid = apiAction.guid + '-' + key;
@@ -187,7 +189,7 @@ export class APIEffect {
           return result;
         });
       } else {
-        return this.completeResourceEntity(cfData, cfGuid, cfData.guid);
+        return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);

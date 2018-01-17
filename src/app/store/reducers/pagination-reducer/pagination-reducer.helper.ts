@@ -90,12 +90,22 @@ export const getPaginationPages = (store: Store<AppState>, action: PaginatedActi
   [key: string]: any
 } => {
   const { entityKey, paginationKey } = action;
+  // FIXME: Need to fire whenever the entities themselves change. At the moment can only update when ALL entities change
+  //   store.select(selectPaginationState(entityKey, paginationKey)).filter(pag => !!pag)
+  //   .distinctUntilChanged((pag, new) => {
+  //     return true;
+  //   }),
+  // // store.select(getAPIRequestDataState) selector for list of keys
+  // store.select(stats section)
+  //   .distinctUntilChanged(state => {
 
+  //     return true//;part of store i care about?
+  //   })
+  // FIXME: Need to fire whenever the entities themselves change. At the moment can only update when ALL entities change
   return Observable.combineLatest(
     store.select(selectPaginationState(entityKey, paginationKey)).filter(pag => !!pag).first(),
     store.select(getAPIRequestDataState).first()
   ).map(([paginationState, entities]) => {
-    console.log('!!!!');
     return Object.keys(paginationState.ids).map(page => {
       return denormalize(paginationState.ids[page], schema, entities);
     });

@@ -1,69 +1,19 @@
 import { schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 
-// export type AppMetadataType = 'instances' | 'environmentVars' | 'summary';
-
-// export interface AppMetadataInfo {
-//   metadata: any;
-//   metadataRequestState: AppMetadataRequestState;
-// }
-
-// export interface AppMetadataRequestStates {
-//   [key: string]: {
-//     instances: AppMetadataRequestState;
-//     environmentVars: AppMetadataRequestState;
-//   };
-// }
-
-// export interface MetadataUpdateState {
-//   busy: boolean;
-//   error: boolean;
-//   message: string;
-// }
-
-// export interface AppMetadataRequestState {
-//   fetching: MetadataUpdateState;
-//   updating: MetadataUpdateState;
-//   creating: MetadataUpdateState;
-//   error: boolean;
-//   message: string;
-// }
-
-
-// export interface MetadataState {
-//   values: AppMetadata;
-//   requests: {};
-// }
-
-// export interface AppMetadata {
-//   [key: string]: {
-//     instances: AppInstancesState;
-//     environmentVars: AppEnvVarsState;
-//     summary: any;
-//   };
-// }
 
 // TODO: REMOVE
-export const AppMetadataEntityKeysTODORE = {
-  INSTANCES: 'instances',
-  ENV_VARS: 'environmentVars',
-  SUMMARY: 'summary'
-};
+// export const AppMetadataEntityKeysTODORE = {
+//   INSTANCES: 'instances',
+//   ENV_VARS: 'environmentVars',
+//   SUMMARY: 'summary'
+// };
 
-export const AppSummarySchema = new schema.Entity('summary');
+export const AppSummarySchema = new schema.Entity('summary', {}, { idAttribute: getAPIResourceGuid });
 
-export interface AppSummary {
+export interface AppSummary { }
 
-}
-
-export const AppStatSchema = new schema.Entity('stats', {
-
-}, {
-    idAttribute: (a) => {
-      console.log(a);
-      return getAPIResourceGuid(a);
-    }
-  });
+export const AppStatSchema = new schema.Entity('stats', {}, { idAttribute: getAPIResourceGuid });
 export const AppStatsSchema = new schema.Array(AppStatSchema);
 
 export interface AppStats {
@@ -94,7 +44,7 @@ export interface AppInstanceUsage {
   time: string;
 }
 
-export const AppEnvVarSchema = new schema.Entity('environmentVars');
+export const AppEnvVarSchema = new schema.Entity('environmentVars', {}, { idAttribute: getAPIResourceGuid });
 export const AppEnvVarsSchema = new schema.Array(AppEnvVarSchema);
 
 export interface AppEnvVarsState {

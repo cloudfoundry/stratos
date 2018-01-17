@@ -28,7 +28,7 @@ import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
-import { EntityInfo } from '../../store/types/api.types';
+import { EntityInfo, APIResource } from '../../store/types/api.types';
 import { combineLatest } from 'rxjs/operators/combineLatest';
 import {
   AppStats,
@@ -57,8 +57,6 @@ export class ApplicationService {
 
   private appEntityService: EntityService;
   private appSummaryEntityService: EntityService;
-  private appInstancesEntityService: EntityService;
-  private appEnvVarsEntityService: EntityService;
 
   constructor(
     public cfGuid: string,
@@ -80,25 +78,13 @@ export class ApplicationService {
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid));
 
-    // this.appInstancesEntityService = this.entityServiceFactory.create(
-    //   AppInstancesSchema.key,
-    //   AppInstancesSchema,
-    //   appGuid,
-    //   new GetAppInstancesAction(appGuid, cfGuid));
-
-    // this.appEnvVarsEntityService = this.entityServiceFactory.create(
-    //   AppEnvVarSchema.key,
-    //   AppEnvVarSchema,
-    //   appGuid,
-    //   new GetAppEnvVarsAction(appGuid, cfGuid));
-
     this.constructCoreObservables();
     this.constructAmalgamatedObservables();
     this.constructStatusObservables();
   }
 
   // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
-  private appStats: PaginationObservables<AppStat>;
+  private appStats: PaginationObservables<APIResource<AppStat>>;
 
   // NJ: This needs to be cleaned up. So much going on!
   isFetchingApp$: Observable<boolean>;
@@ -131,7 +117,7 @@ export class ApplicationService {
     this.appSummary$ = this.waitForAppEntity$.mergeMap(() => this.appSummaryEntityService.entityObs$);
 
     // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
-    this.appStats = getPaginationObservables<AppStat>({
+    this.appStats = getPaginationObservables<APIResource<AppStat>>({
       store: this.store,
       action: new GetAppStatsAction(this.appGuid, this.cfGuid),
       schema: AppStatsSchema
@@ -151,7 +137,9 @@ export class ApplicationService {
       .filter(ai => ai && ai.entity && ai.entity.entity)
       .mergeMap(ai => {
         if (ai.entity.entity.state === 'STARTED') {
-          return this.appStats.entities$;
+          return this.appStats.entities$.map(apiResources => {
+            return apiResources.map(apiResource => apiResource.entity);
+          });
         } else {
           return Observable.of(null);
         }
@@ -176,7 +164,7 @@ export class ApplicationService {
       });
 
     this.applicationState$ = this.waitForAppEntity$
-      .combineLatest(this.appStats.entities$)
+      .combineLatest(this.appStatsGated$)
       .map(([appInfo, appStats]: [EntityInfo, AppStat[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStats);
       });

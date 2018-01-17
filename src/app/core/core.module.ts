@@ -14,6 +14,7 @@ import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component
 import { LoggerService } from './logger.service';
 import { EndpointsService } from './endpoints.service';
 import { UserService } from './user.service';
+import { EntityServiceFactory } from './entity-service-factory.service';
 
 @NgModule({
   imports: [
@@ -35,6 +36,7 @@ import { UserService } from './user.service';
     LoggerService,
     EndpointsService,
     UserService,
+    EntityServiceFactory,
   ],
   declarations: [LogOutDialogComponent],
   entryComponents: [
