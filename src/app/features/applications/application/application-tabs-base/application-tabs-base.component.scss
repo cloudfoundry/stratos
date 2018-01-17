@@ -1,28 +1,34 @@
 .summary {
   display: flex;
+
   &__nav {
-    margin-top: 20px;
     margin-bottom: 20px;
+    margin-top: 20px;
   }
+
   &__form {
-    flex: 1;
     display: flex;
+    flex: 1;
     flex-direction: column;
     flex-wrap: wrap;
+
     div {
-      flex: 1;
       display: flex;
+      flex: 1;
       flex-direction: row;
     }
   }
+
   &__card {
     flex: 1;
   }
+
   mat-chip-list {
+
     mat-chip {
-      margin-right: 7px;
       margin-bottom: 5px;
       margin-left: 0;
+      margin-right: 7px;
     }
   }
 }

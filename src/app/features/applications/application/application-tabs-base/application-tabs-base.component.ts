@@ -81,10 +81,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       state: stoppedString
     });
 
-    this.entityService.poll(1000, 'stopping')
-      .takeWhile(({ resource, updatingSection }) => {
-        return resource.entity.state !== stoppedString;
-      }).subscribe();
+    this.pollEntityService('stopping', stoppedString).subscribe();
+  }
+
+  pollEntityService(state, stateString) {
+    return this.entityService.poll(1000, state)
+    .takeWhile(({ resource, updatingSection }) => {
+      return resource.entity.state !== stateString;
+    });
   }
 
   startApplication() {
@@ -94,10 +98,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       state: startedString
     });
 
-    this.entityService.poll(1000, 'starting')
-      .takeWhile(({ resource, updatingSection }) => {
-        return resource.entity.state !== startedString;
-      })
+    this.pollEntityService('starting', startedString)
       .delay(1)
       .subscribe();
   }
