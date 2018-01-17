@@ -5,19 +5,19 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
-import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../../shared/shared.module';
-import { appReducers } from '../../../../store/reducers.module';
-import { AppStoreModule } from '../../../../store/store.module';
-import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { CoreModule } from '../../../../../../core/core.module';
+import { SharedModule } from '../../../../../../shared/shared.module';
+import { appReducers } from '../../../../../../store/reducers.module';
+import { AppStoreModule } from '../../../../../../store/store.module';
+import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
-import { ApplicationService } from '../../application.service';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
-import { ApplicationStateService } from '../../../../shared/components/application-state/application-state.service';
+import { ApplicationService } from '../../../../application.service';
+import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
+import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsService } from './application-env-vars.service';
-import { APIResource } from '../../../../store/types/api.types';
-import { cnsisStoreNames } from '../../../../store/types/cnsis.types';
+import { APIResource } from '../../../../../../store/types/api.types';
+import { cnsisStoreNames } from '../../../../../../store/types/cnsis.types';
 
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
