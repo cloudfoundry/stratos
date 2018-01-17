@@ -1,6 +1,6 @@
 @import '../../../../sass/colors';
 
-$appHeaderHeight: 56px;
+$app-header-height: 56px;
 
 .dashboard {
   height: 100vh;
@@ -10,13 +10,13 @@ $appHeaderHeight: 56px;
     height: 100%;
   }
   &__content {
-    margin-top: $appHeaderHeight;
+    margin-top: $app-header-height;
     max-height: 100%;
     overflow: auto;
     padding: 20px 2% 2%;
     width: 100%;
   }
   &___subHeader {
-    margin-top: $appHeaderHeight * 2;
+    margin-top: $app-header-height * 2;
   }
 }
