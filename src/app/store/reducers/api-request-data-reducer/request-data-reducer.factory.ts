@@ -13,10 +13,6 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
   const defaultState = generateDefaultState(entityList);
   return function entitiesReducer(state = defaultState, action: Action) {
     switch (action.type) {
-      case DISCONNECT_CNSIS_SUCCESS:
-      case UNREGISTER_CNSIS:
-        const cnisAction = action as DisconnectCnis;
-        return deletionApplicationFromEndpoint(state, cnisAction.guid);
       case successAction:
         const success = action as ISuccessRequestAction;
         if (success.requestType === 'delete') {
@@ -46,19 +42,4 @@ function deleteEntity(state, entityKey, guid) {
     }
   }
   return newState;
-}
-// There may be a better place to put this.
-function deletionApplicationFromEndpoint(state: IRequestEntityTypeState<APIResource>, endpointGuid) {
-  const entityKey = 'application';
-  const oldApplications = Object.values(state[entityKey]);
-  const application = {};
-  oldApplications.forEach(app => {
-    if (app.cfGuid !== endpointGuid) {
-      application[app.guid] = app;
-    }
-  });
-  return {
-    ...state,
-    application
-  };
 }

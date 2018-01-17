@@ -8,6 +8,7 @@ import { Action, ActionReducerMap, combineReducers } from '@ngrx/store';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { AppMetadataProperties } from '../actions/app-metadata.actions';
+import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -68,6 +69,9 @@ export function requestDataReducer(state, action) {
   const extraReducers = {
     [cnsisStoreNames.type]: [
       systemEndpointsReducer
+    ],
+    'application': [
+      endpointDisconnectApplicationReducer
     ]
   };
 

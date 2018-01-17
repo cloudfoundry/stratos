@@ -21,6 +21,8 @@ export const DISCONNECT_CNSIS_SUCCESS = '[CNSIS] Disconnect succeed';
 export const DISCONNECT_CNSIS_FAILED = '[CNSIS] Disconnect failed';
 
 export const UNREGISTER_CNSIS = '[CNSIS] Unregister';
+export const UNREGISTER_CNSIS_SUCCESS = '[CNSIS] Unregister succeed';
+export const UNREGISTER_CNSIS_FAILED = '[CNSIS] Unregister failed';
 
 export const EndpointSchema = new schema.Entity('endpoint', {}, {
   idAttribute: 'guid'

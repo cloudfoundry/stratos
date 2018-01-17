@@ -12,14 +12,11 @@ export interface SingleEntityAction {
   guid?: string;
 }
 
-export interface RequestAction extends Action, SingleEntityAction {
-  cnis?: string;
-  updatingKey?: string;
-}
-
-export interface IRequestAction extends RequestAction {
+export interface IRequestAction extends Action {
   entity?: Schema;
   entityKey: string;
+  cnis?: string;
+  updatingKey?: string;
   // For single entity requests
   guid?: string;
 }

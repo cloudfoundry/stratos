@@ -1,5 +1,5 @@
 import { NormalizedResponse } from '../../types/api.types';
-import { RequestAction, SingleEntityAction } from '../../types/request.types';
+import { IRequestAction, SingleEntityAction } from '../../types/request.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
 import { defaultActionState, defaultDeletingActionState, defaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
@@ -15,7 +15,7 @@ export function getEntityRequestState(state: IRequestTypeState, action: SingleEn
   return { ...defaultRequestState };
 }
 
-export function setEntityRequestState(state: IRequestTypeState, requestState, { entityKey, guid }: RequestAction) {
+export function setEntityRequestState(state: IRequestTypeState, requestState, { entityKey, guid }: IRequestAction) {
   const newState = {
     [entityKey]: {
       [guid]: {
@@ -39,7 +39,7 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
       entState.fetching = false;
       entState.error = false;
       entState.deleting = { ...defaultDeletingActionState };
-      newState = setEntityRequestState(newState, entState, { entityKey, guid } as RequestAction);
+      newState = setEntityRequestState(newState, entState, { entityKey, guid } as IRequestAction);
     });
   });
   return newState;
