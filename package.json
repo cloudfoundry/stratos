@@ -11,7 +11,8 @@
     "posttest": "codecov -f coverage/*.json",
     "lint": "ng lint --type-check --format stylish",
     "e2e": "ng e2e --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
-    "gate-check": "npm run lint && npm run test-debug -- --browsers ChromeHeadless --single-run"
+    "gate-check": "npm run lint && npm run test-debug -- --browsers ChromeHeadless --single-run",
+    "climate": "codeclimate analyze $(git diff --name-only master)"
   },
   "private": true,
   "dependencies": {
