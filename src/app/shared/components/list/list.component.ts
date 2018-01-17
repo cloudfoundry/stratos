@@ -100,7 +100,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @Input('tableFixedRowHeight') tableFixedRowHeight = false;
   @Input('cardComponent') cardComponent: Type<{}>;
   @Input('addForm') addForm: NgForm;
-
+  @Input('cardOnly') cardOnly = false;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
@@ -193,6 +193,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       filterWidgetToStore,
       sortStoreToWidget,
     ).subscribe();
+
+    if (this.cardOnly) {
+      this.updateListView('cards');
+    }
 
   }
 
