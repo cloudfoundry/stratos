@@ -17,7 +17,7 @@ app-tile-group {
   &.tile-group-3-cols > app-tile {
     flex: 0 0 100%;
   }
-  
+
   &.tile-group-4-cols > app-tile {
     flex: 0 0 100%;
   }
@@ -34,7 +34,7 @@ app-tile-group {
 // Tablet (medium) screens
 @media (min-width: 30em) {
   app-tile-group {
-    &.tile-group__4-cols > app-tile {
+    &.tile-group-4-cols > app-tile {
       flex: 0 0 calc(50% - #{$tile-grid-gutter});
     }
   }
@@ -43,14 +43,14 @@ app-tile-group {
 // Large screens
 @media (min-width: 48em) {
   app-tile-group {
-    &.tile-group__2-cols > app-tile {
+    &.tile-group-2-cols > app-tile {
       flex: 1;
     }
 
     &.tile-group-3-cols > app-tile {
       flex: 1;
     }
-    
+
     &.tile-group-4-cols > app-tile {
       flex: 1;
     }
