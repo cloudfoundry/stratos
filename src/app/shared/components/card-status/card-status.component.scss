@@ -1,6 +1,6 @@
 $status-okay: #008000;
 $status-warn: #ffa500;
-$state-error: #ff0000;
+$state-error: #f00;
 
 .app-card-status {
   background-color: transparent;
@@ -14,9 +14,11 @@ $state-error: #ff0000;
   &__ok {
     background-color: $status-okay;
   }
+
   &__warning {
     background-color: $status-warn;
   }
+  
   &__error {
     background-color: $state-error;
   }
