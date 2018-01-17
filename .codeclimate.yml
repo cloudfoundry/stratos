@@ -6,9 +6,6 @@ checks:
   method-lines:
     config:
       threshold: 40
-  similar-code:
-    config:
-      threshold: 6
 plugins:
   fixme:
     enabled: true
