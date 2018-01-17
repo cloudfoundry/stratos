@@ -14,7 +14,7 @@
         <mat-icon>delete</mat-icon>
       </button>
       <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async"
-        (click)="startEdit()">
+        routerLink="/applications/edit/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
         <mat-icon>edit</mat-icon>
       </button>
       <span>

@@ -21,23 +21,9 @@ export class BuildTabComponent implements OnInit {
 
   cardTwoFetching$: Observable<boolean>;
 
-  isEditSummary = false;
-
   public async: any;
 
-  appEdits: UpdateApplication;
-  appDefaultEdits: UpdateApplication = {
-    enable_ssh: false,
-    instances: 0,
-    memory: 0,
-    name: '',
-    environment_json: {}
-  };
-
   ngOnInit() {
-
-    this.setAppDefaults();
-    this.appEdits = { ... this.appDefaultEdits };
 
     // const { cfGuid, appGuid } = this.applicationService;
 
@@ -48,27 +34,5 @@ export class BuildTabComponent implements OnInit {
       .map(([app, appSummary]: [ApplicationData, AppMetadataInfo]) => {
         return app.fetching || appSummary.metadataRequestState.fetching.busy;
       }).distinct();
-  }
-
-
-  startEdit() {
-    this.isEditSummary = true;
-    this.setAppDefaults();
-  }
-
-  endEdit() {
-    this.isEditSummary = false;
-  }
-
-  saveEdits() {
-    this.endEdit();
-    // this.applicationService.updateApplication(this.appEdits);
-    console.log('APP UPDATE EDIT');
-    console.log(this.appEdits);
-  }
-
-  setAppDefaults() {
-    // this.appEdits = { ... this.appDefaultEdits };
-
   }
 }

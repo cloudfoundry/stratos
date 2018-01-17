@@ -47,7 +47,6 @@ const entityServiceFactory = (
   );
 };
 
-
 @Component({
   selector: 'app-application-base',
   templateUrl: './application-base.component.html',

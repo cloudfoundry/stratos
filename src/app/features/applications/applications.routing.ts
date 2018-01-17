@@ -11,11 +11,16 @@ import { BuildTabComponent } from './application/build-tab/build-tab.component';
 import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
 import { CreateApplicationModule } from './create-application/create-application.module';
+import { EditApplicationComponent } from './edit-application/edit-application.component';
 
 const appplicationsRoutes: Routes = [
   {
     path: 'new',
     component: CreateApplicationComponent
+  },
+  {
+    path: 'edit/:cfId/:id',
+    component: EditApplicationComponent
   },
   {
     path: '',

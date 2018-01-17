@@ -11,11 +11,9 @@
         <mat-card>
           <!--
             <mat-card-header>
-                <mat-card-title>Quotas</mat-card-title>
+                <mat-card-title>Quota</mat-card-title>
               </mat-card-header>
               <mat-card-content>
-                <app-metadata-item label="Memory">{{(applicationService.application$| async)?.app.entity.memory | mbToHumanSize}}</app-metadata-item>
-                <app-metadata-item label="Disk">{{(applicationService.application$| async)?.app.entity.disk_quota | mbToHumanSize}}</app-metadata-item>
               </mat-card-content>
           -->
         </mat-card>
@@ -25,7 +23,7 @@
       <app-tile>
           <mat-card>
             <mat-card-header>
-              <mat-card-title>App Info</mat-card-title>
+              <mat-card-title>Application Info</mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <div class="app-metadata">
@@ -63,8 +61,8 @@
 
     <!-- Misc -->
     <app-tile-group>
-      <app-tile>          
-          <mat-card *ngIf="(appService.applicationStratProject$ | async)?.deploySource as deploySource && deploySource">
+      <app-tile  *ngIf="(appService.applicationStratProject$ | async)?.deploySource as deploySource; else notDeployedFromStratos">
+          <mat-card>
             <mat-card-header>
               <mat-card-title>Deployment Info</mat-card-title>
             </mat-card-header>
@@ -77,9 +75,9 @@
                   </div>
                 </app-metadata-item>
                 <app-metadata-item *ngSwitchCase="'github'" icon="code" label="GitHub">
-                    <a href="{{ deploySource.url}}/commit/{{ deploySource.commit}}"
+                    <a href="{{ deploySource.url }}/commit/{{ deploySource.commit }}"
                       rel="noopener noreferrer" target="_blank">
-                      {{ deploySource.deploySource.commit | slice:0:8 }}
+                      {{ deploySource.commit | slice:0:8 }}
                     </a>
                   </app-metadata-item>
                   <app-metadata-item *ngSwitchCase="'filefolder'" icon="folder" label="Folder">
@@ -92,6 +90,15 @@
               </mat-card-content>
             </mat-card>
         </app-tile>
+        <ng-template #notDeployedFromStratos>
+          <app-tile>
+            <mat-card>
+              <mat-card-header>
+                <mat-card-title>No Deployment Info</mat-card-title>
+              </mat-card-header>
+            </mat-card>
+          </app-tile>
+        </ng-template>
         <app-tile>          
           <mat-card>
             <mat-card-header>
