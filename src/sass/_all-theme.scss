@@ -85,7 +85,7 @@
   .card-status {
     border-top: 4px solid transparent;
     border-top-color: transparent;
-    transition: border-top-color 0.5s ease-in-out;
+    transition: border-top-color .5s ease-in-out;
 
     &__ok {
       border-top-color: $status-success;
