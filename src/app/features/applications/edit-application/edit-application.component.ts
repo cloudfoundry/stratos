@@ -1,6 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Location } from '@angular/common';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-edit-application',
@@ -9,13 +7,9 @@ import { Router } from '@angular/router';
 })
 export class EditApplicationComponent implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor() { }
 
   ngOnInit() {
-
-    console.log('APPLICATION EDIT');
-
-    console.log(this.router);
   }
 
 }
