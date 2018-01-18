@@ -89,7 +89,7 @@ const MODES = {
   CARD_ONLY: 'cardOnly',
   TABLE_ONLY: 'tableOnly',
   DEFAULT: 'default'
-}
+};
 
 @Component({
   selector: 'app-list',
@@ -201,7 +201,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     if (this.listMode === MODES.CARD_ONLY) {
       this.updateListView('cards');
-    } else if (this.listMode === MODES.TABLE_ONLY){
+    } else if (this.listMode === MODES.TABLE_ONLY) {
       this.updateListView('table');
     }
 
