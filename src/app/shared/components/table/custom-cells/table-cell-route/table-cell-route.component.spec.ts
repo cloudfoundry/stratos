@@ -3,8 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellRouteComponent } from './table-cell-route.component';
 
 describe('TableCellRouteComponent', () => {
-  let component: TableCellRouteComponent;
-  let fixture: ComponentFixture<TableCellRouteComponent>;
+  let component: TableCellRouteComponent<any>;
+  let fixture: ComponentFixture<TableCellRouteComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

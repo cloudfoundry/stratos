@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableCellTcprouteComponent } from './table-cell-tcproute.component';
+import { TableCellTCPRouteComponent } from './table-cell-tcproute.component';
 
-describe('TableCellTcprouteComponent', () => {
-  let component: TableCellTcprouteComponent;
-  let fixture: ComponentFixture<TableCellTcprouteComponent>;
+describe('TableCellTCPRouteComponent', () => {
+  let component: TableCellTCPRouteComponent<any>;
+  let fixture: ComponentFixture<TableCellTCPRouteComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellTcprouteComponent ]
+      declarations: [ TableCellTCPRouteComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableCellTcprouteComponent);
+    fixture = TestBed.createComponent(TableCellTCPRouteComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
