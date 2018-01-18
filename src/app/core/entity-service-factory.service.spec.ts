@@ -1,11 +1,15 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { createBasicStoreModule } from '../test-framework/store-test-helper';
 
 describe('EntityServiceFactoryService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EntityServiceFactory]
+      providers: [EntityServiceFactory],
+      imports: [
+        createBasicStoreModule(),
+      ]
     });
   });
 

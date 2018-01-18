@@ -70,7 +70,7 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
     },
     deps: [
       Store,
-      EntityService,
+      EntityServiceFactory,
       ApplicationStateService,
       ApplicationEnvVarsService
     ]
