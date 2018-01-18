@@ -14,7 +14,7 @@
         <mat-icon>delete</mat-icon>
       </button>
       <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async"
-        (click)="startEdit()">
+        routerLink="/applications/edit/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
         <mat-icon>edit</mat-icon>
       </button>
       <span>
@@ -23,7 +23,7 @@
           <mat-icon>stop</mat-icon>
         </button>
         <button mat-icon-button name="start" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STOPPED'" [disabled]="summaryDataChanging$ | async"
-          (click)="startApplication()">
+          (clicmediak)="startApplication()">
           <mat-icon>play_arrow</mat-icon>
         </button>
       </span>
@@ -41,6 +41,3 @@
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving application'">
   <router-outlet></router-outlet>
 </app-loading-page>
-<!--    
-</app-loading-page>
--->

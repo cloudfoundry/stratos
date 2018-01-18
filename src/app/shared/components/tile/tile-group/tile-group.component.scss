@@ -2,53 +2,56 @@ $tile-grid-gutter: 1em;
 
 app-tile-group {
   display: flex;
-  flex-flow: row; 
+  flex-flow: row;
   flex-wrap: wrap;
 
-
-  &.tile-group__1-cols > app-tile {
+  &.tile-group-1-cols > app-tile {
     flex: 0 0 100%;
-    //flex: 1;
   }
 
   // Mobile layout
-  &.tile-group__2-cols > app-tile {
-    flex: 0 0 100%;
-  }
-  &.tile-group__3-cols > app-tile {
-    flex: 0 0 100%;
-  }
-  &.tile-group__4-cols > app-tile {
+  &.tile-group-2-cols > app-tile {
     flex: 0 0 100%;
   }
 
-  &.tile_group__gutters {
+  &.tile-group-3-cols > app-tile {
+    flex: 0 0 100%;
+  }
+
+  &.tile-group-4-cols > app-tile {
+    flex: 0 0 100%;
+  }
+
+  &.tile-group-gutters {
     margin-left: -$tile-grid-gutter;
+
     app-tile {
       padding-left: $tile-grid-gutter;
     }
   }
 }
 
-/* Tablet (medium) screens */
+// Tablet (medium) screens
 @media (min-width: 30em) {
   app-tile-group {
-    &.tile-group__4-cols > app-tile {
-      flex: 0 0 calc(50% - #{$tile-grid-gutter});     
+    &.tile-group-4-cols > app-tile {
+      flex: 0 0 calc(50% - #{$tile-grid-gutter});
     }
   }
 }
 
-/* Large screens */
+// Large screens
 @media (min-width: 48em) {
   app-tile-group {
-    &.tile-group__2-cols > app-tile {
+    &.tile-group-2-cols > app-tile {
       flex: 1;
     }
-    &.tile-group__3-cols > app-tile {
+
+    &.tile-group-3-cols > app-tile {
       flex: 1;
     }
-    &.tile-group__4-cols > app-tile {
+
+    &.tile-group-4-cols > app-tile {
       flex: 1;
     }
   }

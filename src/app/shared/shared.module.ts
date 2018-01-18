@@ -69,6 +69,8 @@ import { TileGroupComponent } from './components/tile/tile-group/tile-group.comp
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { CardStatusComponent } from './components/card-status/card-status.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
+import { CardAppStatusComponent } from './components/cards/custom-cards/card-app-status/card-app-status.component';
+import { CardAppInstancesComponent } from './components/cards/custom-cards/card-app-instances/card-app-instances.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
@@ -134,6 +136,8 @@ import { TableCellUsageComponent } from './components/table/custom-cells/table-c
     TileGridComponent,
     CardStatusComponent,
     MetadataItemComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
     UsageGaugeComponent,
     TableCellUsageComponent,
   ],
@@ -170,6 +174,8 @@ import { TableCellUsageComponent } from './components/table/custom-cells/table-c
     TileGridComponent,
     CardStatusComponent,
     MetadataItemComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
     UsageGaugeComponent,
     TableCellUsageComponent,
   ],

@@ -5,10 +5,9 @@
   $is-dark: map-get($theme, is-dark);
   $primary: map-get($theme, primary);
   $tabs-ink-color: mat-color($primary);
-  @if $is-dark==true {
+  @if $is-dark == true {
     $tabs-ink-color: lighten($tabs-ink-color, 20%);
-  }
-  @else {
+  } @else {
     $tabs-ink-color: darken($tabs-ink-color, 20%);
   }
 
