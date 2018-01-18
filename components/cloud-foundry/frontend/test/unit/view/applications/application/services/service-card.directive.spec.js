@@ -4,6 +4,8 @@
   describe('service-card directive', function () {
     var $compile, $httpBackend, $scope, mockBindingsApi, cfServiceInstanceService;
     var APP_GUID = '6e23689c-2844-4ebf-ab69-e52ab3439f6b';
+    var SERVICE_BINDING_GUID = '571b283b-97f9-41e3-abc7-81792ee34e40';
+    var SERVICE_NAME = 'instance_123';
     var cnsiGuid = 'cnsiGuid';
     var spaceGuid = 'spaceGuid';
 
@@ -91,26 +93,28 @@
           serviceCardCtrl = element.controller('serviceCard');
         });
 
-        it('detach', function () {
-          it('should call unbindServiceFromApp', function () {
-            spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
-            serviceCardCtrl.detach({
-              entity: {
-                service_bindings: [{
-                  entity: {
-                    app_guid: APP_GUID
-                  }
-                }]
-              }
-            });
-            expect(cfServiceInstanceService.unbindServiceFromApp)
-              .toHaveBeenCalled();
-            var args = cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
-            expect(args[0]).toBe('guid');
-            expect(args[1]).toBe('6e23689c-2844-4ebf-ab69-e52ab3439f6b');
-            expect(args[2]).toBe('571b283b-97f9-41e3-abc7-81792ee34e40');
-            expect(args[3]).toBe('instance_123');
+        it('should call unbindServiceFromApp', function () {
+          spyOn(cfServiceInstanceService, 'unbindServiceFromApp');
+          serviceCardCtrl.detach({
+            entity: {
+              name: SERVICE_NAME,
+              service_bindings: [{
+                metadata: {
+                  guid: SERVICE_BINDING_GUID
+                },
+                entity: {
+                  app_guid: APP_GUID
+                }
+              }]
+            }
           });
+          expect(cfServiceInstanceService.unbindServiceFromApp)
+            .toHaveBeenCalled();
+          var args = cfServiceInstanceService.unbindServiceFromApp.calls.argsFor(0);
+          expect(args[0]).toBe('guid');
+          expect(args[1]).toBe('6e23689c-2844-4ebf-ab69-e52ab3439f6b');
+          expect(args[2]).toBe('571b283b-97f9-41e3-abc7-81792ee34e40');
+          expect(args[3]).toBe('instance_123');
         });
       });
     });
