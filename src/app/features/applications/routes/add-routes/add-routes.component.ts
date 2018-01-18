@@ -38,7 +38,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   cfGuid: string;
   spaceGuid: string;
 
-
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
@@ -74,30 +73,29 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   }
 
-  _getValue(key) {
+  _getValueForKey(key) {
     return this.addRoute.value[key] ? this.addRoute.value[key] : '';
   }
+
+  _getValue(key) {
+    return this.addRoute.value[key] !== '' ? this.addRoute.value[key] : null;
+  }
+
   onSubmit() {
     this.submitted = true;
-    const newRouteGuid =  this._getValue('host') +  this._getValue('port') +
-    this._getValue('path') + this.addRoute.value.domain.metadata.guid;
+    const newRouteGuid =  this._getValueForKey('host') +  this._getValueForKey('port') +
+    this._getValueForKey('path') + this.addRoute.value.domain.metadata.guid;
 
     this.store.dispatch(new CreateRoute(
       newRouteGuid,
       this.cfGuid,
       new Route(
-        this.addRoute.value.domain.metadata.guid,
-        this.spaceGuid,
-        this.addRoute.value.host !== '' ? this.addRoute.value.host : null,
-        this.addRoute.value.path !== '' ? this.addRoute.value.path : null,
-        this.addRoute.value.port !== '' ? this.addRoute.value.port : null
+        this.addRoute.value.domain.metadata.guid, this.spaceGuid, this._getValue('host'), this._getValue('path'), this._getValue('port')
       )
     ));
     this.associateRoute$ = this.store.select(selectRequestInfo(RouteSchema.key, newRouteGuid))
     .pipe(
-      filter((route) => {
-        return !route.creating;
-      }),
+      filter(route => !route.creating),
       map(route => {
         if (route.error) {
           throw new Error('Failed to create route due to: !' + route.error);

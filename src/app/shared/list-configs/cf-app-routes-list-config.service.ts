@@ -33,7 +33,6 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
   isLocal?: boolean;
   routesDataSource: CfAppRoutesDataSource;
 
-
   private multiListActionDelete: IMultiListAction<EntityInfo> = {
     action: (items: EntityInfo[]) => {
       items.forEach(item => this.dispatchDeleteAction(item));
