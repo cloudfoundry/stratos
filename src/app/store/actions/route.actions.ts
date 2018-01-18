@@ -19,6 +19,9 @@ export const RouteEvents = {
   DELETE: '[Application Routes] Delete',
   DELETE_SUCCESS: '[Application Routes] Delete success',
   DELETE_FAILED: '[Application Routes] Delete failed',
+  UNMAP_ROUTE: '[Application Routes] Unmap route',
+  UNMAP_ROUTE_SUCCESS: '[Application Routes] Unmap route success',
+  UNMAP_ROUTE_FAILED: '[Application Routes] Unmap route failed',
 };
 
 export const RouteSchema = new schema.Entity('route', {}, {
@@ -52,7 +55,6 @@ export class CreateRoute extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
-
 export class DeleteRoute extends CFStartAction implements ICFAction {
   constructor(
     public routeGuid: string,
@@ -72,6 +74,30 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
     RouteEvents.DELETE,
     RouteEvents.DELETE_SUCCESS,
     RouteEvents.DELETE_FAILED,
+  ];
+  entity = [RouteSchema];
+  entityKey = RouteSchema.key;
+  options: RequestOptions;
+
+}
+
+
+export class UnmapRoute extends CFStartAction implements ICFAction {
+  constructor(
+    public routeGuid: string,
+    public appGuid: string,
+    public cfGuid: string
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `routes/${routeGuid}/apps/${appGuid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+  }
+  actions = [
+    RouteEvents.UNMAP_ROUTE,
+    RouteEvents.UNMAP_ROUTE_SUCCESS,
+    RouteEvents.UNMAP_ROUTE_FAILED,
   ];
   entity = [RouteSchema];
   entityKey = RouteSchema.key;

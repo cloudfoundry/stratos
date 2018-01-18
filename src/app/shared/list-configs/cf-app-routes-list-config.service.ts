@@ -1,5 +1,5 @@
 import { RouterNav } from '../../store/actions/router.actions';
-import { DeleteRoute } from '../../store/actions/route.actions';
+import { DeleteRoute, UnmapRoute } from '../../store/actions/route.actions';
 import {
     TableCellTCPRouteComponent,
 } from '../components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
@@ -26,6 +26,7 @@ import {
   IListConfig,
   IMultiListAction,
 } from '../components/list/list.component';
+import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
 
 @Injectable()
 export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
@@ -35,22 +36,44 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
 
   private multiListActionDelete: IMultiListAction<EntityInfo> = {
     action: (items: EntityInfo[]) => {
-      this.dispatchDeleteAction();
+      items.forEach(item => this.dispatchDeleteAction(item));
     },
     icon: 'delete',
     label: 'Delete',
-    description: '',
+    description: 'Unmap and delete route',
+    visible: (row: EntityInfo) => true,
+    enabled: (row: EntityInfo) => true,
+  };
+
+  private multiListActionUnmap: IMultiListAction<EntityInfo> = {
+    action: (items: EntityInfo[]) => {
+      items.forEach(item => this.dispatchUnmapAction(item));
+    },
+    icon: 'block',
+    label: 'Unmap',
+    description: 'Unmap route',
     visible: (row: EntityInfo) => true,
     enabled: (row: EntityInfo) => true,
   };
 
   private listActionDelete: IListAction<EntityInfo> = {
     action: (item: EntityInfo) => {
-      this.dispatchDeleteAction();
+      this.dispatchDeleteAction(item);
     },
     icon: 'delete',
     label: 'Delete',
-    description: '',
+    description: 'Unmap and delete route',
+    visible: (row: EntityInfo) => true,
+    enabled: (row: EntityInfo) => true,
+  };
+
+  private listActionUnmap: IListAction<EntityInfo> = {
+    action: (item: EntityInfo) => {
+      this.dispatchUnmapAction(item);
+    },
+    icon: 'block',
+    label: 'Unmap',
+    description: 'Unmap route',
     visible: (row: EntityInfo) => true,
     enabled: (row: EntityInfo) => true,
   };
@@ -61,7 +84,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     },
     icon: 'add',
     label: 'Add',
-    description: '',
+    description: 'Add new route',
     visible: (row: EntityInfo) => true,
     enabled: (row: EntityInfo) => true,
   };
@@ -81,19 +104,26 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
       cellComponent: TableCellTCPRouteComponent,
       sort: true, cellFlex: '3'
     },
+    {
+      columnId: 'edit',
+      headerCell: () => 'Actions',
+      cellComponent: TableCellActionsComponent,
+      class: 'table-column-edit',
+      cellFlex: '1'
+    },
   ];
 
   pageSizeOptions = [9, 45, 90];
 
-  private dispatchDeleteAction() {
-    this.routesDataSource.selectedRows.forEach(route =>
-      this.store.dispatch( new DeleteRoute( route.entity.guid, this.routesDataSource.cfGuid))
-    );
-  }
-
+  dispatchDeleteAction = route => this.store.dispatch(
+     new DeleteRoute( route.entity.guid, this.routesDataSource.cfGuid)
+    )
+  dispatchUnmapAction = route => this.store.dispatch(
+     new UnmapRoute( route.entity.guid, this.routesDataSource.appGuid, this.routesDataSource.cfGuid)
+    )
   getGlobalActions = () => [this.listActionAdd];
-  getMultiActions = () => [this.multiListActionDelete];
-  getSingleActions = () => [this.listActionDelete];
+  getMultiActions = () => [this.multiListActionUnmap, this.multiListActionDelete];
+  getSingleActions = () => [this.listActionDelete, this.listActionUnmap];
   getColumns = () => this.columns;
   getDataSource = () => this.routesDataSource;
   getFiltersConfigs = () => [];
