@@ -12,6 +12,7 @@ export function paginationSuccess(state: PaginationEntityState, action) {
       params[key] = paramValue;
     });
   }
+  const totalResults = action.totalResults || action.response.result.length;
   return {
     ...state,
     fetching: false,
@@ -22,6 +23,10 @@ export function paginationSuccess(state: PaginationEntityState, action) {
       [state.currentPage]: action.response.result
     },
     pageCount: state.pageCount + 1,
-    totalResults: action.totalResults || action.response.result.length
+    totalResults,
+    clientPagination: {
+      ...state.clientPagination,
+      totalResults
+    }
   };
 }

@@ -1,4 +1,4 @@
 <div>
-  <mat-icon *ngIf="row.info && row.info.user">cloud_done</mat-icon>
-  <mat-icon *ngIf="!row.info || !row.info.user">cloud_off</mat-icon>
+  <mat-icon *ngIf="row.connected">cloud_done</mat-icon>
+  <mat-icon *ngIf="!row.connected">cloud_off</mat-icon>
 </div>

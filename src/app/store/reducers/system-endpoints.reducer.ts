@@ -9,7 +9,8 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<CNSISModel
     Object.keys(action.payload.endpoints.cf).forEach(guid => {
       newState[guid] = {
         ...newState[guid],
-        info: action.payload.endpoints.cf[guid]
+        info: action.payload.endpoints.cf[guid],
+        connected: !!action.payload.endpoints.cf[guid].user
       };
     });
     return newState;

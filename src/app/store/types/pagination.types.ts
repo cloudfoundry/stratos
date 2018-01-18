@@ -26,7 +26,8 @@ export class PaginationEntityState {
   clientPagination?: {
     pageSize: number,
     currentPage: number,
-    filter: string
+    filter: string,
+    totalResults: number
   };
 }
 

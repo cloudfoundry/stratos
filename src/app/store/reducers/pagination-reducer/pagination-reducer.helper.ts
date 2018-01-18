@@ -5,12 +5,11 @@ import { Observable } from 'rxjs/Rx';
 
 import { AddParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { getAPIRequestDataState } from '../../selectors/api.selectors';
+import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
-import { combineLatest } from 'rxjs/operator/combineLatest';
-import { CombineLatestOperator } from 'rxjs/operators/combineLatest';
 import { distinctUntilChanged, tap, filter, withLatestFrom, map, share } from 'rxjs/operators';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -118,11 +117,13 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+    distinctUntilChanged()
+  );
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
-  const fetchPagination$ = paginationSelect$.share().pipe(
+  const fetchPagination$ = paginationSelect$.pipe(
     distinctUntilChanged((oldVals, newVals) => {
       const oldVal = getPaginationCompareString(oldVals);
       const newVal = getPaginationCompareString(newVals);
@@ -136,27 +137,34 @@ function getObservables<T = any>(
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         store.dispatch(action);
       }
-    })
+    }),
+    share()
   );
   fetchPagination$.subscribe();
 
   const entities$: Observable<T[]> =
-    paginationSelect$.pipe(
-      filter(pagination => {
-        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+    combineLatest(
+      store.select(selectEntities(entityKey)),
+      paginationSelect$
+    )
+      .pipe(
+      filter(([ent, pagination]) => {
+        const shouldfilter = !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+        return shouldfilter;
       }),
+      map(([ent, pagination]) => pagination),
       withLatestFrom(store.select(getAPIRequestDataState)),
-      map(([paginationEntity, entities]) => {
+      map(([pagination, entities]) => {
         let page;
         if (isLocal) {
-          const pages = Object.values(paginationEntity.ids);
+          const pages = Object.values(pagination.ids);
           page = [].concat.apply([], pages);
         } else {
-          page = paginationEntity.ids[paginationEntity.currentPage];
+          page = pagination.ids[pagination.currentPage];
         }
         return page ? denormalize(page, schema, entities).filter(ent => !!ent) : null;
       })
-    );
+      );
 
   return {
     pagination$,

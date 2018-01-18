@@ -202,6 +202,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this.uberSub.unsubscribe();
+    this.dataSource.destroy();
   }
 
   updateListView(listView: ListView) {
