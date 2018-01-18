@@ -3,7 +3,11 @@ import { AssociateRouteWithAppApplication } from '../../../../store/actions/appl
 import { CreateRoute, NewRoute, RouteSchema } from '../../../../store/actions/route.actions';
 import { AppState } from '../../../../store/app-state';
 import { Domain } from './domain.types';
-import { selectDomains, selectEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import {
+    selectEntity,
+    selectNestedEntity,
+    selectRequestInfo,
+} from '../../../../store/selectors/api.selectors';
 import { Route } from './route.types';
 import { ApplicationService } from '../../application.service';
 import { Component, OnInit } from '@angular/core';
@@ -56,7 +60,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       tap(p => {
         if (p) {
           this.spaceGuid = p.entity.space_guid;
-          this.domains$ = this.store.select(selectDomains('space', this.spaceGuid))
+          this.domains$ = this.store.select(selectNestedEntity('space', this.spaceGuid, ['entity', 'domains']))
           .pipe(
             tap(d => {
               if (d) {
@@ -70,9 +74,14 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   }
 
+  _getValue(key) {
+    return this.addRoute.value[key] ? this.addRoute.value[key] : '';
+  }
   onSubmit() {
     this.submitted = true;
-    const newRouteGuid =  this.addRoute.value.host + this.addRoute.value.domain.metadata.guid;
+    const newRouteGuid =  this._getValue('host') +  this._getValue('port') +
+    this._getValue('path') + this.addRoute.value.domain.metadata.guid;
+
     this.store.dispatch(new CreateRoute(
       newRouteGuid,
       this.cfGuid,
@@ -102,6 +111,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         return { route, updatingKey: routeAssignAction ? routeAssignAction.updatingKey : null };
       }),
       tap(p => {
+        this.submitted = false;
         this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid] }));
       }
     )).subscribe();

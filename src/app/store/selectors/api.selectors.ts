@@ -17,8 +17,10 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
 
-export const getDomainsById = <T>(guid: string) => (entities): T => {
-  return entities[guid].entity.domains;
+export const getNestedEntityWithKeys = <T>(entityKeys: string[]) => (entities): T => {
+let entity = entities;
+entityKeys.forEach(k => entity = entity[k]);
+return entity;
 };
 
 export const getEntityDeleteSections = (request: RequestInfoState) => {
@@ -74,9 +76,9 @@ export function selectEntity<T = APIResource>(entityType: string, guid: string) 
   );
 }
 
-export function selectDomains<T = APIResource>(entityType: string, guid: string) {
+export function selectNestedEntity<T = APIResource>(entityType: string, guid: string, entityKeys: string[]) {
   return compose(
-    getDomainsById<T>(guid),
+    getNestedEntityWithKeys<T>([guid, ...entityKeys]),
     getRequestEntityType<T>(entityType),
     getAPIRequestDataState,
   );

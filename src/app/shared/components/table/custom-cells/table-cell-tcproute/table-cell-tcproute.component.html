@@ -1,3 +1,8 @@
 <div>
-  <mat-slide-toggle [ngModel]="isRouteTCP" [disabled]="true"></mat-slide-toggle>
+  <div *ngIf="isRouteTCP">
+    <mat-icon>check</mat-icon>
+  </div>
+  <div *ngIf="!isRouteTCP">
+    <mat-icon>close</mat-icon>
+  </div>
 </div>

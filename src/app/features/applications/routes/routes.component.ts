@@ -1,4 +1,3 @@
-import { GetSharedDomains } from '../../../store/actions/domain.actions';
 import { CfAppRoutesListConfigService } from '../../../shared/list-configs/cf-app-routes-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component';
 import { ApplicationService } from '../application.service';

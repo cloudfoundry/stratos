@@ -151,14 +151,15 @@ export class APIEffect {
 
   getErrors(resData) {
     return Object.keys(resData)
-      .map(guid => {
-        const cnsis = resData[guid];
-        cnsis.guid = guid;
-        return cnsis;
-      })
-      .filter(cnsis => {
-        return cnsis.error;
-      });
+    .filter(guid => resData[guid] !== null)
+    .map(guid => {
+      const cnsis = resData[guid];
+      cnsis.guid = guid;
+      return cnsis;
+    })
+    .filter(cnsis => {
+      return cnsis.error;
+    });
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -166,7 +167,9 @@ export class APIEffect {
     totalResults: number
   } {
     let totalResults = 0;
-    const allEntities = Object.keys(data).map(cfGuid => {
+    const allEntities = Object.keys(data)
+    .filter( guid => data[guid] !== null)
+    .map(cfGuid => {
       const cfData = data[cfGuid];
       totalResults += cfData['total_results'];
       if (cfData.resources) {
