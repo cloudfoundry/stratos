@@ -1,7 +1,6 @@
 import { ApplicationData } from './../../../features/applications/application.service';
 import { APIResource } from './../../types/api.types';
 import { IRequestEntityTypeState } from './../../app-state';
-import { DISCONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS, DisconnectCnis } from './../../actions/cnsis.actions';
 import { IRequestArray } from '../api-request-reducer/types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { ISuccessRequestAction } from '../../types/request.types';

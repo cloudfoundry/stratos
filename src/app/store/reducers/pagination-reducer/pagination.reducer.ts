@@ -1,4 +1,4 @@
-import { DISCONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS } from './../../actions/cnsis.actions';
+import { DISCONNECT_CNSIS_SUCCESS, CONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS } from './../../actions/cnsis.actions';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
@@ -21,7 +21,7 @@ import { mergeState } from '../../helpers/reducer.helper';
 import { defaultCfEntitiesState } from '../../types/entity.types';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
-import { paginationClearType } from './pagination-reducer-clear-pagination-type';
+import { clearEndpointEntities, paginationClearType } from './pagination-reducer-clear-pagination-type';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationSetPage } from './pagination-reducer-set-page';
 import { paginationSetParams } from './pagination-reducer-set-params';
@@ -35,7 +35,12 @@ import { paginationResetPagination } from './pagination-reducer-reset-pagination
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 
 export const defaultClientPaginationPageSize = 9;
-export const defaultPaginationEntityState = {
+function getDefaultPaginationEntityState() {
+  return {
+    ...defaultPaginationEntityState
+  };
+}
+const defaultPaginationEntityState = {
   fetching: false,
   pageCount: 0,
   currentPage: 1,
@@ -57,7 +62,7 @@ export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
+  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
         return paginationStart(state);
@@ -105,18 +110,17 @@ export function createPaginationReducer(types: [string, string, string]) {
       return paginationResetPagination(state, action);
     }
 
+    if (action.type === CLEAR_PAGINATION_OF_TYPE) {
+      const clearEntityType = action.entityKey || 'application';
+      return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
+    }
+
     if (
-      action.type === CLEAR_PAGINATION_OF_TYPE ||
-      /*
-      I could argue that we don't need look at DISCONNECT_CNSIS & UNREGISTER_CNSIS actions
-       we're likely causing an unneeded request but am going to for now just to avoid any bugs from
-       having an incomplete pagination pages - NJ
-      */
       action.type === DISCONNECT_CNSIS_SUCCESS ||
+      action.type === CONNECT_CNSIS_SUCCESS ||
       action.type === UNREGISTER_CNSIS
     ) {
-      const clearEntityType = action.entityKey || 'application';
-      return paginationClearType(state, clearEntityType, defaultPaginationEntityState);
+      return clearEndpointEntities(state, getDefaultPaginationEntityState());
     }
 
     return enterPaginationReducer(state, action, updatePagination);

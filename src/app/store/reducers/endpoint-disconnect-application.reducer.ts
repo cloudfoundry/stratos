@@ -1,28 +1,26 @@
 import { APIResource } from '../types/api.types';
 import { IRequestEntityTypeState } from '../app-state';
 import { DISCONNECT_CNSIS_SUCCESS, DisconnectCnis, UNREGISTER_CNSIS } from '../actions/cnsis.actions';
-export function endpointDisconnectApplicationReducer(state: APIResource, action: DisconnectCnis) {
-  switch (action.type) {
-    case DISCONNECT_CNSIS_SUCCESS:
-    case UNREGISTER_CNSIS:
-      return deletionApplicationFromEndpoint(state, action);
-  }
-  return state;
+export function endpointDisconnectApplicationReducer(entityKey) {
+  return function (state: APIResource, action: DisconnectCnis) {
+    switch (action.type) {
+      case DISCONNECT_CNSIS_SUCCESS:
+      case UNREGISTER_CNSIS:
+        return deletionApplicationFromEndpoint(state, action.guid, entityKey);
+    }
+    return state;
+  };
 }
 
-function deletionApplicationFromEndpoint(state: APIResource, endpointGuid) {
-  const entityKey = 'application';
-  const oldApplications = Object.values(state);
-  const application = {};
-  oldApplications.forEach(app => {
+function deletionApplicationFromEndpoint(state: APIResource, endpointGuid, entityKey: string) {
+  const oldEntities = Object.values(state);
+  const entities = {};
+  oldEntities.forEach(app => {
     if (app.cfGuid !== endpointGuid && app.guid) {
-      application[app.guid] = app;
+      entities[app.guid] = app;
     }
   });
-  return {
-    ...state,
-    application
-  };
+  return entities;
 }
 
 

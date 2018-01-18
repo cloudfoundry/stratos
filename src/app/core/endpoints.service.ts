@@ -24,7 +24,7 @@ export class EndpointsService implements CanActivate {
     this.haveRegistered$ = this.endpoints$.map(cnsis => !!Object.keys(cnsis).length);
     this.haveConnected$ = this.endpoints$.map(cnsis => {
       for (const cnsi in cnsis) {
-        if (cnsis[cnsi].registered) {
+        if (cnsis[cnsi].connected === true || typeof cnsis[cnsi].connected === 'undefined') {
           return true;
         }
       }

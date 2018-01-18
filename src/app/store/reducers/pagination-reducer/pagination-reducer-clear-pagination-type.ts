@@ -12,3 +12,11 @@ export function paginationClearType(state: PaginationState, entityKey, defaultPa
   }
   return state;
 }
+
+export function clearEndpointEntities(state: PaginationState, defaultPaginationEntityState) {
+  let newState = {};
+  newState = paginationClearType(state, 'application', defaultPaginationEntityState);
+  newState = paginationClearType(newState, 'space', defaultPaginationEntityState);
+  newState = paginationClearType(newState, 'organization', defaultPaginationEntityState);
+  return newState;
+}

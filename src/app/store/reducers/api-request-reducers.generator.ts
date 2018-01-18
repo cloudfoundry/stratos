@@ -71,7 +71,13 @@ export function requestDataReducer(state, action) {
       systemEndpointsReducer
     ],
     'application': [
-      endpointDisconnectApplicationReducer
+      endpointDisconnectApplicationReducer('application')
+    ],
+    'space': [
+      endpointDisconnectApplicationReducer('space')
+    ],
+    'organization': [
+      endpointDisconnectApplicationReducer('organization')
     ]
   };
 

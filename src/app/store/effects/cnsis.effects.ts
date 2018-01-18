@@ -3,6 +3,8 @@ import { APIResource, NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
+  CONNECT_CNSIS_FAILED,
+  CONNECT_CNSIS_SUCCESS,
   ConnectCnis,
   DISCONNECT_CNSIS,
   DISCONNECT_CNSIS_FAILED,
@@ -103,7 +105,9 @@ export class CNSISEffect {
       return this.doCnisAction(
         apiAction,
         '/pp/v1/auth/login/cnsi',
-        params
+        params,
+        null,
+        [CONNECT_CNSIS_SUCCESS, CONNECT_CNSIS_FAILED]
       );
     });
 
