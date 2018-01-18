@@ -117,11 +117,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     const { cfGuid, appGuid } = this.applicationService;
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
-    // Auto refresh
-    this.sub.push(this.entityService.poll(10000, this.autoRefreshString).do(() => {
-      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-    }).subscribe());
-
     const initialFetch$ = Observable.combineLatest(
       this.applicationService.isFetchingApp$,
       this.applicationService.isFetchingEnvVars$,
