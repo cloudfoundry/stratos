@@ -74,6 +74,7 @@ import { CardAppInstancesComponent } from './components/cards/custom-cards/card-
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
+import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 
 @NgModule({
   imports: [
@@ -140,6 +141,7 @@ import { TableCellUsageComponent } from './components/table/custom-cells/table-c
     CardAppInstancesComponent,
     UsageGaugeComponent,
     TableCellUsageComponent,
+    TableCellStatusDirective,
   ],
   exports: [
     FormsModule,
@@ -178,6 +180,7 @@ import { TableCellUsageComponent } from './components/table/custom-cells/table-c
     CardAppInstancesComponent,
     UsageGaugeComponent,
     TableCellUsageComponent,
+    TableCellStatusDirective,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [

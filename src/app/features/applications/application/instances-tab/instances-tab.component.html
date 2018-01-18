@@ -27,27 +27,27 @@
       </mat-card>
     </app-tile>
     <app-tile>
-        <mat-card>
-          <app-card-status [status]="(appMonitor.appMonitor$ | async)?.status.usage"></app-card-status>
+        <mat-card *ngIf="appMonitor.appMonitor$ | async as monitor">
+          <app-card-status [status]="monitor.status?.usage"></app-card-status>
           <mat-card-content>
             <table class="usage__detail">
               <tr>
                 <td>Usage</td>
-                <td>Mem</td>
-                <td>Disk</td>
-                <td>CPU</td>
+                <td [appTableCellStatus]="monitor.status.mem">Mem</td>
+                <td [appTableCellStatus]="monitor.status.disk">Disk</td>
+                <td [appTableCellStatus]="monitor.status.cpu">CPU</td>
               </tr>
               <tr>
                 <td>Max</td>
-                <td> {{ (appMonitor.appMonitor$ | async)?.max.mem | percentage }}</td>
-                <td> {{ (appMonitor.appMonitor$ | async)?.max.disk | percentage }}</td>
-                <td> {{ (appMonitor.appMonitor$ | async)?.max.cpu | percentage }}</td>
+                <td>{{ monitor.max.mem | percentage }}</td>
+                <td>{{ monitor.max.disk | percentage }}</td>
+                <td>{{ monitor.max.cpu | percentage }}</td>
               </tr>
               <tr>
                   <td>Avg</td>
-                  <td> {{ (appMonitor.appMonitor$ | async)?.avg.mem | percentage }}</td>
-                  <td> {{ (appMonitor.appMonitor$ | async)?.avg.disk | percentage }}</td>
-                  <td> {{ (appMonitor.appMonitor$ | async)?.avg.cpu | percentage }}</td>
+                  <td>{{ monitor.avg.mem | percentage }}</td>
+                  <td>{{ monitor.avg.disk | percentage }}</td>
+                  <td>{{ monitor.avg.cpu | percentage }}</td>
                 </tr>
               </table>
           </mat-card-content>

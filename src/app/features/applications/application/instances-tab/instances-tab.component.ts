@@ -8,8 +8,6 @@ import { ApplicationData, ApplicationService } from '../../application.service';
 import { CfAppEventsConfigService } from '../../../../shared/list-configs/cf-app-events-config.service';
 import { ListConfig } from '../../../../shared/components/list/list.component';
 
-// import { CardComponent } from '../../../../shared/components/cards/card/card.component';
-
 @Component({
   selector: 'app-instances-tab',
   templateUrl: './instances-tab.component.html',
