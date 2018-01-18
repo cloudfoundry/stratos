@@ -3,17 +3,21 @@
   mat-cell {
     flex-grow: 1;
   }
+
   .cdk-column-actor_name {
-    flex-basis: 100px;
-    display: flex;
-    flex-direction: row;
     align-items: center;
+    display: flex;
+    flex-basis: 100px;
+    flex-direction: row;
   }
+
   .cdk-column-type {
     flex-basis: 100px;
   }
+
   .cdk-column-detail {
     flex-grow: 3;
+
     td {
       padding-right: 5px;
     }

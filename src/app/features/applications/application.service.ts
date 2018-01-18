@@ -12,8 +12,8 @@ import {
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-
-import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsService,
+   EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
   ApplicationStateData,
   ApplicationStateService,

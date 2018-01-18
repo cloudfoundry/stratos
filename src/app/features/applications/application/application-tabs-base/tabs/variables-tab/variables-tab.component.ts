@@ -1,14 +1,14 @@
-import { CfAppEvnVarsDataSource } from '../../../../shared/data-sources/cf-app-variables-data-source';
-import { CfAppVariablesListConfigService } from '../../../../shared/list-configs/cf-app-variables-list-config.service';
-import { ListConfig } from '../../../../shared/components/list/list.component';
+import { CfAppEvnVarsDataSource } from '../../../../../../shared/data-sources/cf-app-variables-data-source';
+import { CfAppVariablesListConfigService } from '../../../../../../shared/list-configs/cf-app-variables-list-config.service';
+import { ListConfig } from '../../../../../../shared/components/list/list.component';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { ApplicationService } from '../../application.service';
+import { AppState } from '../../../../../../store/app-state';
+import { ApplicationService } from '../../../../application.service';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import {
   CardAppVariableComponent,
-} from '../../../../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
+} from '../../../../../../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
 
 @Component({
   selector: 'app-variables-tab',

@@ -1,5 +1,6 @@
-import { APIResource } from '../../store/types/api.types';
-import { GetAppEnvVarsAction } from './../../store/actions/app-metadata.actions';
+import {
+    ApplicationEnvVars,
+} from '../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ListDataSource } from './list-data-source';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
@@ -14,7 +15,6 @@ import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/li
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
 import { ListActionConfig, ListActions } from './list-data-source-types';
 import { map } from 'rxjs/operators';
-import { getPaginationKey } from '../../store/actions/pagination.actions';
 import { AppEnvVarSchema, AppEnvVarsState } from '../../store/types/app-metadata.types';
 
 export interface ListAppEnvVar {

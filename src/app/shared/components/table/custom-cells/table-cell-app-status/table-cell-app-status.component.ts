@@ -3,9 +3,6 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from '../../../../../core/entity-service';
-import {
-  ApplicationEnvVarsService,
-} from '../../../../../features/applications/application/build-tab/application-env-vars.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ApplicationSchema, GetApplication } from '../../../../../store/actions/application.actions';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';

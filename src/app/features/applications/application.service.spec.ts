@@ -1,4 +1,4 @@
-import { ApplicationEnvVarsService } from './application/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsService } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
 import { ApplicationModule } from '@angular/core';
 import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
