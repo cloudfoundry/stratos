@@ -1,25 +1,8 @@
-$status-okay: #008000;
-$status-warn: #ffa500;
-$state-error: #f00;
-
 .app-card-status {
-  background-color: transparent;
   height: 4px;
   left: 0;
   position: absolute;
   right: 0;
   top: 0;
   transition: background-color .5s ease-in-out;
-
-  &__ok {
-    background-color: $status-okay;
-  }
-
-  &__warning {
-    background-color: $status-warn;
-  }
-
-  &__error {
-    background-color: $state-error;
-  }
 }
