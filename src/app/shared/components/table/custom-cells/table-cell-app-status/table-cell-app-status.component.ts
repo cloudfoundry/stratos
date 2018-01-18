@@ -14,6 +14,8 @@ import {
 import { Subscription } from 'rxjs/Subscription';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { AppStatsSchema, AppStatSchema } from '../../../../../store/types/app-metadata.types';
+import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-table-cell-app-status',
@@ -34,14 +36,17 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   }
 
   ngOnInit() {
-    this.fetchAppState$ = this.store.select(
-      selectEntity(AppStatSchema.key, this.row && this.row.entity && this.row.entity.guid))
-      // this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row && this.row.entity && this.row.entity.guid))
-      .pipe(
-      tap(appInstances => {
-        this.applicationState = this.appStateService.get(this.row && this.row.entity, appInstances ? appInstances : null);
-      })
-      ).subscribe();
+    this.applicationState = this.appStateService.get(this.row.entity, null);
+    this.fetchAppState$ =
+      getPaginationPages(this.store, new GetAppStatsAction(this.row.entity.guid, this.row.entity.cfGuid), AppStatsSchema)
+        .pipe(
+        tap(appInstancesPages => {
+          const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
+            return apiResource.entity;
+          });
+          this.applicationState = this.appStateService.get(this.row.entity, appInstances);
+        })
+        ).subscribe();
   }
 
   ngOnDestroy() {
