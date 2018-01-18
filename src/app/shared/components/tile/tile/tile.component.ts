@@ -10,7 +10,7 @@ export class TileComponent implements OnInit, AfterContentInit {
 
   @Input('size') size: number;
 
-  @HostBinding('class.app-tile-sized') private isSized = false;
+  @HostBinding('style.flex') private isSized: string;
 
   @HostBinding('style.width.%') private width: number;
 
@@ -21,7 +21,7 @@ export class TileComponent implements OnInit, AfterContentInit {
 
   ngAfterContentInit() {
     if (this.size) {
-      this.isSized = true;
+      this.isSized = 'none';
       this.width = this.size;
     }
   }
