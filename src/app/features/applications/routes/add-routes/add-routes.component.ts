@@ -2,13 +2,11 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { AssociateRouteWithAppApplication } from '../../../../store/actions/application.actions';
 import { CreateRoute, NewRoute, RouteSchema } from '../../../../store/actions/route.actions';
 import { AppState } from '../../../../store/app-state';
-import { Domain } from './domain.types';
 import {
     selectEntity,
     selectNestedEntity,
     selectRequestInfo,
 } from '../../../../store/selectors/api.selectors';
-import { Route } from './route.types';
 import { ApplicationService } from '../../application.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -19,7 +17,8 @@ import { tap, pluck, map, filter, delay, mergeMap } from 'rxjs/operators';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Subscription } from 'rxjs/Subscription';
 import { APIResource } from '../../../../store/types/api.types';
-
+import { Route } from '../../../../store/types/route.types';
+import { Domain } from '../../../../store/types/domain.types';
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',

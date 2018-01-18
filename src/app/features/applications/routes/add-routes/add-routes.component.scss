@@ -1,13 +1,13 @@
-.add-route__form{
+.add-route--form{
 
   display: flex;
   flex-direction: column;
   margin-right: 24px;
   width: 100%;
-}
 
-.add-route-buttons{
+  .add-route--form-buttons{
+    display:flex;
+    flex-direction: row-reverse;
+  }
 
-  display:flex;
-  flex-direction: row-reverse;
 }

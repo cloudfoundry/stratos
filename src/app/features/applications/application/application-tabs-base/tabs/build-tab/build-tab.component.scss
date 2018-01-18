@@ -12,13 +12,13 @@
 
     width: 100%;
   }
-}
 
-.routes__card {
+  &--routes-card {
 
-  app-routes {
+    app-routes {
 
-    width:100%;
-    padding-right: 24px;
+      padding-right: 24px;
+      width:100%;
+    }
   }
 }

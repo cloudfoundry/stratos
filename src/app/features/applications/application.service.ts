@@ -31,6 +31,7 @@ import {
 import { EntityInfo } from '../../store/types/api.types';
 import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType, AppEnvVarsState } from '../../store/types/app-metadata.types';
 import { combineLatest } from 'rxjs/operators/combineLatest';
+
 export interface ApplicationData {
   fetching: boolean;
   app: EntityInfo;
@@ -199,4 +200,5 @@ export class ApplicationService {
       { ...updatedApplication }
     ));
   }
+
  }

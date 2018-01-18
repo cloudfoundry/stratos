@@ -13,7 +13,6 @@ export interface IRequestDataState extends IRequestTypeState {
   event: IRequestEntityTypeState<APIResource>;
   endpoint: IRequestEntityTypeState<CNSISModel>;
   system: IRequestEntityTypeState<SystemInfo>;
-  domain: IRequestEntityTypeState<SystemInfo>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -25,7 +24,6 @@ export interface IRequestState extends IRequestTypeState {
   event: IRequestEntityTypeState<RequestInfoState>;
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   system: IRequestEntityTypeState<RequestInfoState>;
-  domain: IRequestEntityTypeState<RequestInfoState>;
 }
 
 export const defaultCfEntitiesState = {
@@ -36,7 +34,6 @@ export const defaultCfEntitiesState = {
   route: {},
   event: {},
   endpoint: {},
-  domain: {},
   [AppMetadataProperties.ENV_VARS]: {},
   [AppMetadataProperties.INSTANCES]: {},
   [AppMetadataProperties.SUMMARY]: {},

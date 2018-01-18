@@ -1,8 +1,8 @@
 <div>
   <mat-progress-bar *ngIf="submitted" [mode]="'indeterminate'">
       </mat-progress-bar>
-  <app-details-card class="add-route__form" title="Add Route">
-  <form class="add-route__form" [formGroup]="addRoute" >
+  <app-details-card title="Add Route">
+  <form class="add-route--form" [formGroup]="addRoute" >
       Host
       <mat-form-field>
         <input matInput formControlName="host" placeholder="Host" required>
@@ -22,7 +22,7 @@
       <mat-form-field>
         <input matInput formControlName="port" placeholder="Port">
       </mat-form-field>
-      <div class="add-route-buttons">
+      <div class="add-route--form-buttons">
         <button mat-button name="submit" color="primary" (click)="onSubmit()">
           Submit
         </button>
