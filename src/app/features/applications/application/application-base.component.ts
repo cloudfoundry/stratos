@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { GetAppSummaryAction } from '../../../store/actions/app-metadata.actions';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 
 
 const applicationServiceFactory = (
@@ -77,10 +78,9 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
 
     const { cfGuid, appGuid } = this.applicationService;
-    // TODO: RC
     // Auto refresh
     this.entityServiceAppRefresh$ = this.entityService.poll(10000, this.autoRefreshString).do(() => {
-    //   this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      //   this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));//TODO: RC
     }).subscribe();
 
     this.appSub$ = this.applicationService.app$.subscribe(app => {

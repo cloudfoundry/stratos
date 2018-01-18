@@ -101,7 +101,6 @@ export const getPaginationPages = (store: Store<AppState>, action: PaginatedActi
 
   //     return true//;part of store i care about?
   //   })
-  // FIXME: Need to fire whenever the entities themselves change. At the moment can only update when ALL entities change
   return Observable.combineLatest(
     store.select(selectPaginationState(entityKey, paginationKey)).filter(pag => !!pag).first(),
     store.select(getAPIRequestDataState).first()

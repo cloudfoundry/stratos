@@ -14,7 +14,6 @@ import {
 } from './../../../application-state/application-state.service';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { AppStatsSchema, AppStatSchema } from '../../../../../store/types/app-metadata.types';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
 import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 // import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';

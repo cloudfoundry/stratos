@@ -3,8 +3,8 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 
 import { ApplicationData, ApplicationService } from '../../../../application.service';
-import { EntityInfo } from '../../../../store/types/api.types';
-import { AppSummary } from '../../../../store/types/app-metadata.types';
+import { EntityInfo } from '../../../../../../store/types/api.types';
+import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 
 @Component({
   selector: 'app-build-tab',

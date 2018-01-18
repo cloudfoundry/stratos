@@ -63,7 +63,7 @@
                 <app-editable-display-value [edit]="isEditSummary">
                   <div class="display-input__display">
                     <app-display-value>
-                      {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances }}
+                      {{(applicationService.appSummary$| async)?.entity?.entity.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances }}
                     </app-display-value>
                   </div>
                   <div class="display-input__input">
@@ -77,7 +77,7 @@
             <mat-list-item role="listitem">
               <mat-icon mat-list-icon>developer_board</mat-icon>
               <div mat-line>Services</div>
-              <div mat-line>{{(applicationService.appSummary$| async)?.metadata?.services?.length || '-'}}</div>
+              <div mat-line>{{(applicationService.appSummary$| async)?.entity?.entity.services?.length || '-'}}</div>
             </mat-list-item>
           </mat-list>
         </div>

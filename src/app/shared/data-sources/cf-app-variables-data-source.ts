@@ -1,6 +1,3 @@
-import {
-    ApplicationEnvVars,
-} from '../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ListDataSource } from './list-data-source';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
@@ -16,13 +13,15 @@ import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../sto
 import { ListActionConfig, ListActions } from './list-data-source-types';
 import { map } from 'rxjs/operators';
 import { AppEnvVarSchema, AppEnvVarsState } from '../../store/types/app-metadata.types';
+import { APIResource } from '../../store/types/api.types';
+import { GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
+import { getPaginationKey } from '../../store/actions/pagination.actions';
 
 export interface ListAppEnvVar {
   name: string;
   value: string;
 }
 
-// TODO: RC
 export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIResource<AppEnvVarsState>> {
 
   public cfGuid: string;

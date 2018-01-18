@@ -10,6 +10,7 @@ import {
   IRequestAction,
   ICFAction,
   StartCFAction,
+  RequestEntityLocation,
 } from '../types/request.types';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
@@ -172,24 +173,29 @@ export class APIEffect {
     let totalResults = 0;
     const allEntities = Object.keys(data).map(cfGuid => {
       const cfData = data[cfGuid];
-      totalResults += cfData['total_results'];
-      if (cfData.resources) {
-        if (!cfData.resources.length) {
-          return null;
-        }
-        return cfData.resources.map(resource => {
-          return this.completeResourceEntity(resource, cfGuid, resource.guid);
-        });
-      } else if (cfData[0]) {// FIXME:
-        delete cfData.guid;
-        return Object.keys(cfData).map(key => {
-          const guid = apiAction.guid + '-' + key;
-          const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
-          result.entity.guid = guid;
-          return result;
-        });
-      } else {
-        return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
+      switch (apiAction.entityLocation) {
+        case RequestEntityLocation.ARRAY: // The response is an array which contains the entities
+          return Object.keys(cfData).map(key => {
+            const guid = apiAction.guid + '-' + key;
+            const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
+            result.entity.guid = guid;
+            return result;
+          });
+        case RequestEntityLocation.OBJECT: // The response is the entity
+          return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
+        case RequestEntityLocation.RESOURCE: // The response is an object and the entities list is within a 'resource' param
+        default:
+          if (!cfData.resources) {
+            // Treat the response as RequestEntityLocation.OBJECT
+            return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
+          }
+          totalResults += cfData['total_results'];
+          if (!cfData.resources.length) {
+            return null;
+          }
+          return cfData.resources.map(resource => {
+            return this.completeResourceEntity(resource, cfGuid, resource.guid);
+          });
       }
     });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
