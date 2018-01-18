@@ -63,7 +63,7 @@
             <mat-card-content>
               <span [ngSwitch]="deploySource.type">
                 <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                    <div matTooltip="{{ deploySource.branch + ' ' + deploySource.commit | slice:0:8)}}"
+                    <div matTooltip="{{ deploySource.branch + ' ' + deploySource.commit | slice:0:8}}"
                     [matTooltipHideDelay]="1500">
                     {{(appService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
@@ -100,7 +100,7 @@
             </mat-card-header>
             <mat-card-content>
                 <app-metadata-item icon="build" label="Buildpack">
-                    <app-view-buildpack [buildPack]="appService.app.entity.buildpack || appService.app.entity.detected_buildpack"></app-view-buildpack>
+                    <app-view-buildpack [buildPack]="appSvc.app.entity.buildpack || appSvc.app.entity.detected_buildpack"></app-view-buildpack>
                 </app-metadata-item>
                 <app-metadata-item icon="code" label="Stack">{{ appSvc.app.stack?.entity.name }}</app-metadata-item>
               </mat-card-content>
