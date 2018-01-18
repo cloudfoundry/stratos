@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellRouteComponent } from './table-cell-route.component';
+import { EntityInfo } from '../../../../../store/types/api.types';
 
 describe('TableCellRouteComponent', () => {
   let component: TableCellRouteComponent<any>;
@@ -16,6 +17,9 @@ describe('TableCellRouteComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRouteComponent);
     component = fixture.componentInstance;
+    component.row = {
+      entity: {}
+    } as EntityInfo;
     fixture.detectChanges();
   });
 
