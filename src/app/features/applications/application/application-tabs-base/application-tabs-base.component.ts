@@ -157,17 +157,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           environment_json: application.app.entity.environment_json
         };
       }));
-
-    const appSub = this.applicationService.app$.subscribe(app => {
-      if (
-        app.entityRequestInfo.deleting.deleted ||
-        app.entityRequestInfo.error
-      ) {
-        this.store.dispatch(new RouterNav({ path: ['applications'] }));
-      }
-    });
-
-    this.sub.push(appSub);
   }
 
 
