@@ -137,7 +137,8 @@ describe('PaginationReducer', () => {
             1: [1, 2]
           },
           error: false,
-          message: ''
+          message: '',
+          clientPagination: { totalResults: 2 }
         }
       }
     };

@@ -256,6 +256,7 @@ const testInitialStoreState: AppState = {
             pageSize: 5,
             currentPage: 1,
             filter: '',
+            totalResults: 50
           }
         },
       },
@@ -419,6 +420,7 @@ const testInitialStoreState: AppState = {
             pageSize: 5,
             currentPage: 1,
             filter: '',
+            totalResults: 50
           }
         }
       },
@@ -438,6 +440,7 @@ const testInitialStoreState: AppState = {
             pageSize: 5,
             currentPage: 1,
             filter: '',
+            totalResults: 50
           }
         }
       },
