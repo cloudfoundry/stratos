@@ -9,13 +9,7 @@
       </app-tile>
       <app-tile>
         <mat-card>
-          <!--
-            <mat-card-header>
-                <mat-card-title>Quota</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-              </mat-card-content>
-          -->
+          <!-- One more card to go here -->
         </mat-card>
       </app-tile>
     </app-tile-group>
@@ -67,9 +61,9 @@
               <mat-card-title>Deployment Info</mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <span [ngSwitch]="(appService.applicationStratProject$| async)?.deploySource.type">
+              <span [ngSwitch]="deploySource.type">
                 <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
-                    <div matTooltip="{{(appService.applicationStratProject$| async)?.deploySource.branch + ' ' + ((appService.applicationStratProject$| async)?.deploySource.commit | slice:0:8)}}"
+                    <div matTooltip="{{ deploySource.branch + ' ' + deploySource.commit | slice:0:8)}}"
                     [matTooltipHideDelay]="1500">
                     {{(appService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
@@ -106,9 +100,9 @@
             </mat-card-header>
             <mat-card-content>
                 <app-metadata-item icon="build" label="Buildpack">
-                    <app-view-buildpack [buildPack]="(appService.application$ | async)?.app.entity.buildpack || (appService.application$ | async)?.app.entity.detected_buildpack"></app-view-buildpack>
+                    <app-view-buildpack [buildPack]="appService.app.entity.buildpack || appService.app.entity.detected_buildpack"></app-view-buildpack>
                 </app-metadata-item>
-                <app-metadata-item icon="code" label="Stack">{{(appService.application$| async)?.stack?.entity.name}}</app-metadata-item>
+                <app-metadata-item icon="code" label="Stack">{{ appSvc.app.stack?.entity.name }}</app-metadata-item>
               </mat-card-content>
             </mat-card>
         </app-tile>
