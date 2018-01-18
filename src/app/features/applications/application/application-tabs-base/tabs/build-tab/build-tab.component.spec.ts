@@ -20,7 +20,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { cnsisStoreNames } from '../../../../../../store/types/cnsis.types';
 import { RoutesComponent } from '../../../../routes/routes.component';
 
-fdescribe('BuildTabComponent', () => {
+describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
   let fixture: ComponentFixture<BuildTabComponent>;
   const initialState = getInitialTestStoreState();
