@@ -16,7 +16,7 @@ import { PaginationEntityState, PaginatedAction, QParam } from '../../store/type
 import { AppState } from '../../store/app-state';
 import { AddParams, RemoveParams, SetClientPage, SetPage, SetResultCount } from '../../store/actions/pagination.actions';
 import { IListDataSource, getRowUniqueId } from './list-data-source-types';
-import { map, debounceTime, share } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators';
 import { composeFn } from '../../store/helpers/reducer.helper';
 import { distinctUntilChanged } from 'rxjs/operators';
@@ -98,7 +98,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     } else {
       this.page$ = letted$;
     }
-    this.page$ = this.page$.pipe(share());
+    this.page$ = this.page$.pipe(shareReplay());
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
 
     this.pagination$ = pagination$;
@@ -109,6 +109,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.pageSubscription.unsubscribe();
     this.entityLettabledSubscription.unsubscribe();
   }
+
   destroy() {
     this.disconnect();
   }
@@ -178,11 +179,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   getLocalPagesObservable(page$, pagination$: Observable<PaginationEntityState>, dataFunctions) {
     return page$.pipe(
       withLatestFrom(pagination$),
-      distinctUntilChanged((oldVals, newVals) => {
-        const oldVal = this.getPaginationCompareString(oldVals[1]);
-        const newVal = this.getPaginationCompareString(newVals[1]);
-        return oldVal === newVal;
-      }),
       map(([entities, paginationEntity]) => {
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
@@ -191,21 +187,12 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         }
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
         if (
-          !this.isLocal && paginationEntity.totalResults !== entities.length ||
-          this.isLocal && paginationEntity.clientPagination.totalResults !== entities.length
+          paginationEntity.totalResults !== entities.length ||
+          paginationEntity.clientPagination.totalResults !== entities.length
         ) {
           this._store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
-        // Are we on a page with no items (for instance on page 20, filter has been applied reducing item count to 4 items)?
-        let pageIndex = paginationEntity.clientPagination.currentPage - 1;
-        if (entities.length <= pageIndex * paginationEntity.clientPagination.pageSize) {
-          // Filtered results contain too few items to show on current page, move current page to last page of filtered items
-          pageIndex = Math.floor(entities.length / paginationEntity.clientPagination.pageSize) - 1;
-          if (pageIndex < 0) {
-            pageIndex = 0; // If there's zero results ensure we don't set an invalid page number
-          }
-          this._store.dispatch(new SetClientPage(this.entityKey, this.paginationKey, pageIndex + 1));
-        }
+        const pageIndex = paginationEntity.clientPagination.currentPage - 1;
         return pages[pageIndex];
       })
     );

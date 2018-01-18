@@ -3,12 +3,12 @@ import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 
-import { AddParams, SetParams } from '../../actions/pagination.actions';
+import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
 import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
-import { distinctUntilChanged, tap, filter, withLatestFrom, map, share } from 'rxjs/operators';
+import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
 export interface PaginationObservables<T> {
@@ -92,7 +92,7 @@ export const getPaginationObservables = <T = any>(
   const { entityKey, paginationKey } = action;
 
   if (action.initialParams) {
-    store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams, isLocal));
+    store.dispatch(new SetInitialParams(entityKey, paginationKey, action.initialParams, isLocal));
   }
 
   const obs = getObservables<T>(
@@ -129,6 +129,7 @@ function getObservables<T = any>(
       const newVal = getPaginationCompareString(newVals);
       return oldVal === newVal;
     }),
+    debounceTime(1),
     tap(pagination => {
       if (
         (!pagination && !hasDispatchedOnce) ||
@@ -149,8 +150,7 @@ function getObservables<T = any>(
     )
       .pipe(
       filter(([ent, pagination]) => {
-        const shouldfilter = !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
-        return shouldfilter;
+        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       }),
       map(([ent, pagination]) => pagination),
       withLatestFrom(store.select(getAPIRequestDataState)),
@@ -181,7 +181,7 @@ function getPaginationCompareString(paginationEntity: PaginationEntityState) {
     params = JSON.stringify(paginationEntity.params);
   }
   // paginationEntity.totalResults included to ensure we cover the 'ResetPagination' case, for instance after AddParam
-  return paginationEntity.totalResults + paginationEntity.currentPage + params;
+  return paginationEntity.totalResults + paginationEntity.currentPage + params + paginationEntity.pageCount;
 }
 
 export function isPageReady(pagination: PaginationEntityState) {

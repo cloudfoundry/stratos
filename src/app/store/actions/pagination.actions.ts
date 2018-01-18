@@ -19,6 +19,7 @@ export const SET_CLIENT_PAGE_SIZE = '[Pagination] Set client page size';
 export const SET_CLIENT_PAGE = '[Pagination] Set client page';
 export const SET_CLIENT_FILTER = '[Pagination] Set client filter';
 export const SET_PARAMS = '[Pagination] Set Params';
+export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 
@@ -101,6 +102,18 @@ export class SetParams implements PaginationAction {
   ) {
   }
   type = SET_PARAMS;
+}
+
+export class SetInitialParams implements SetParams {
+  constructor(
+    public entityKey: string,
+    public paginationKey: string,
+    public params: PaginationParam,
+    public keepPages = false,
+    public overwrite = false,
+  ) {
+  }
+  type = SET_INITIAL_PARAMS;
 }
 
 export class AddParams implements PaginationAction {

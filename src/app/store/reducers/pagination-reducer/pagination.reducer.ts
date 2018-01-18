@@ -14,6 +14,7 @@ import {
   SET_RESULT_COUNT,
   SET_PARAMS,
   CLEAR_PAGES,
+  SET_INITIAL_PARAMS,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -68,6 +69,7 @@ const getPaginationUpdater = function (types: [string, string, string]) {
         return paginationSetResultCount(state, action);
       case SET_PAGE:
         return paginationSetPage(state, action);
+      case SET_INITIAL_PARAMS:
       case SET_PARAMS:
         return paginationSetParams(state, action);
       case ADD_PARAMS:
