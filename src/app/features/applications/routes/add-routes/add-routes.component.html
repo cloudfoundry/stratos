@@ -1,18 +1,17 @@
 <div>
   <mat-progress-bar *ngIf="submitted" [mode]="'indeterminate'">
-      </mat-progress-bar>
+  </mat-progress-bar>
   <app-details-card title="Add Route">
-  <form class="add-route--form" [formGroup]="addRoute" >
-      Host
-      <mat-form-field>
-        <input matInput formControlName="host" placeholder="Host" required>
-      </mat-form-field>
+    <form class="add-route--form" [formGroup]="addRoute" >
       Domain
       <mat-form-field>
-
         <mat-select  formControlName="domain" required>
           <mat-option *ngFor="let domain of domains" [value]="domain" >{{domain.entity.name}}</mat-option>
         </mat-select>
+      </mat-form-field>
+      Host
+      <mat-form-field>
+        <input matInput formControlName="host" placeholder="Host">
       </mat-form-field>
       Path
       <mat-form-field>
