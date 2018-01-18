@@ -1,48 +1,50 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { appReducers } from '../../../../store/reducers.module';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
-import { ApplicationService } from '../../application.service';
-import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
+import { ApplicationBaseComponent } from './../application-base.component';
+import { ApplicationEnvVarsService } from './../application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService } from '../../../../shared/components/application-state/application-state.service';
-import { VariablesTabComponent } from './variables-tab.component';
 
-describe('VariablesTabComponent', () => {
-  let component: VariablesTabComponent;
-  let fixture: ComponentFixture<VariablesTabComponent>;
+describe('ApplicationTabsBaseComponent', () => {
+  let component: ApplicationBaseComponent;
+  let fixture: ComponentFixture<ApplicationBaseComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [VariablesTabComponent],
+      declarations: [
+        ApplicationBaseComponent,
+      ],
       imports: [
         StoreModule,
         CoreModule,
         SharedModule,
-        MDAppModule,
         BrowserAnimationsModule,
-        StoreModule.forRoot(appReducers, {
-          initialState: getInitialTestStoreState()
-        })
+        RouterTestingModule,
+        MDAppModule,
+        StoreModule.forRoot(
+          appReducers
+          , {
+            initialState: getInitialTestStoreState()
+          })
       ],
       providers: [
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        ApplicationEnvVarsService,
+        ApplicationEnvVarsService
       ]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(VariablesTabComponent);
+    fixture = TestBed.createComponent(ApplicationBaseComponent);
     component = fixture.componentInstance;
-
     fixture.detectChanges();
   });
 
