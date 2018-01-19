@@ -3,32 +3,27 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 export class AppMonitorState {
-  avg: {
-    mem: number,
-    disk: number,
-    cpu: number,
+
+  avg = {
+    mem:  0,
+    disk: 0,
+    cpu: 0,
   };
-  max: {
-    mem: number,
-    disk: number,
-    cpu: number,
+  max = {
+    mem: 0,
+    disk: 0,
+    cpu: 0,
   };
-  running: number;
-  status: {
-    instance: string,
-    usage: string,
-    disk: string,
-    mem: string,
-    cpu: string,
+  running = 0;
+  status = {
+    instance: 'error',
+    usage: 'tentative',
+    disk: 'tentative',
+    mem: 'tentative',
+    cpu: 'tentative',
   };
 
-  constructor() {
-    this.status.instance = 'error';
-    this.status.usage = 'tentative';
-    this.status.disk = 'tentative';
-    this.status.mem = 'tentative';
-    this.status.cpu = 'tentative';
-  }
+  constructor() {}
 
   updateStatuses() {
     // Mem/Disk/CPU Usage Status
