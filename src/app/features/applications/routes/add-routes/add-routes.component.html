@@ -40,12 +40,12 @@
         </div>
         <div class="add-route--form-buttons">
           <button mat-button name="submit" color="primary" (click)="onSubmit('http')"  [disabled]="!addHTTPRoute.valid">
-            Submit
+              Submit
           </button>
-          <button mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
+          <button type="button" mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
             Cancel
           </button>
-      </div>
+        </div>
     </form>
 
       <form  [formGroup]="addTCPRoute" *ngIf="createTCPRoute">
@@ -64,13 +64,13 @@
           </div>
         </div>
         <div class="add-route--form-buttons">
-          <button mat-button name="submit" color="primary" (click)="onSubmit('tcp')"  [disabled]="!addTCPRoute.valid">
-            Submit
+          <button  mat-button name="submit" color="primary" (click)="onSubmit('tcp')"  [disabled]="!addTCPRoute.valid">
+              Submit
           </button>
-          <button mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
+          <button type="button" mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
             Cancel
           </button>
-      </div>
+        </div>
     </form>
     </div>
   </mat-card>
