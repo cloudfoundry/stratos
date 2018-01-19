@@ -8,34 +8,43 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<CNSISModel
   switch (action.type) {
     case VERIFY_SESSION:
     case GET_SYSTEM_INFO:
-      const fetchingState = { ...state };
-      let modified = false;
-      getAllEnpointIds(fetchingState).forEach(guid => {
-        // Only set checking flag if we don't have a status
-        if (!fetchingState[guid].connectionStatus) {
-          modified = true;
-          fetchingState[guid] = {
-            ...fetchingState[guid],
-            connectionStatus: 'checking'
-          };
-        }
-      });
-      return modified ? fetchingState : state;
+      return fetchingEndpointInfo(state);
     case SESSION_VERIFIED:
     case GET_SYSTEM_INFO_SUCCESS:
-      const newState = { ...state };
-      const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
-      getAllEnpointIds(newState, payload.endpoints.cf).forEach(guid => {
-        const endpointInfo = payload.endpoints.cf[guid];
-        newState[guid] = {
-          ...newState[guid],
-          info: payload.endpoints.cf[guid],
-          connectionStatus: endpointInfo ? endpointInfo.user ? 'connected' : 'disconnected' : 'unknown'
-        };
-      });
-      return newState;
+      return succeedEndpointInfo(state, action);
+    default:
+      return state;
   }
-  return state;
+}
+
+function fetchingEndpointInfo(state) {
+  const fetchingState = { ...state };
+  let modified = false;
+  getAllEnpointIds(fetchingState).forEach(guid => {
+    // Only set checking flag if we don't have a status
+    if (!fetchingState[guid].connectionStatus) {
+      modified = true;
+      fetchingState[guid] = {
+        ...fetchingState[guid],
+        connectionStatus: 'checking'
+      };
+    }
+  });
+  return modified ? fetchingState : state;
+}
+
+function succeedEndpointInfo(state, action) {
+  const newState = { ...state };
+  const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
+  getAllEnpointIds(newState, payload.endpoints.cf).forEach(guid => {
+    const endpointInfo = payload.endpoints.cf[guid];
+    newState[guid] = {
+      ...newState[guid],
+      info: payload.endpoints.cf[guid],
+      connectionStatus: endpointInfo ? endpointInfo.user ? 'connected' : 'disconnected' : 'unknown'
+    };
+  });
+  return newState;
 }
 
 function getAllEnpointIds(endpoints, payloadEndpoints = {}) {
