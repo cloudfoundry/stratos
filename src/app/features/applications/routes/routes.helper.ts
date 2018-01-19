@@ -9,8 +9,10 @@ export const getRoute = (route: EntityInfo, browsable: boolean = false, secure: 
       return;
     }
     let protocol = '';
-    if (browsable) {
-      protocol = secure ? 'https://' : 'http://';
+    if (browsable && secure) {
+      protocol = 'https://';
+    } else if (browsable && !secure) {
+      protocol = 'http://';
     }
     if (route.entity.port) {
       // Note: Hostname and path are not supported for TCP routes
