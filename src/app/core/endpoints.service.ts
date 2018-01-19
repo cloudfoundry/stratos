@@ -19,17 +19,11 @@ export class EndpointsService implements CanActivate {
 
   constructor(
     private store: Store<AppState>,
-    private userService: UserService, ) {
+    private userService: UserService
+  ) {
     this.endpoints$ = store.select(cnsisEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.map(cnsis => !!Object.keys(cnsis).length);
-    this.haveConnected$ = this.endpoints$.map(cnsis => {
-      for (const cnsi in cnsis) {
-        if (cnsis[cnsi].connected === true || typeof cnsis[cnsi].connected === 'undefined') {
-          return true;
-        }
-      }
-      return false;
-    });
+    this.haveConnected$ = this.endpoints$.map(cnsis => Object.values(cnsis).find(cnsi => cnsi.connectionStatus === 'connected'));
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
