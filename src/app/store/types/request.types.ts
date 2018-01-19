@@ -18,7 +18,11 @@ export interface RequestAction extends Action, SingleEntityAction {
   updatingKey?: string;
 }
 
-// The entities in the response can live in a few different places. This will tell us where to look in the response to gather the entities
+/**
+ * The entities in the response can live in a few different places. This will tell us where to look in the response to gather the entities
+ * @export
+ * @enum {number}
+ */
 export enum RequestEntityLocation {
   RESOURCE, // The response is an object and the entities list is within a 'resource' param. Falls back to 'OBJECT' if missing.
   ARRAY, // The response is an array which contains the entities

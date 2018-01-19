@@ -80,7 +80,7 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
     const { cfGuid, appGuid } = this.applicationService;
     // Auto refresh
     this.entityServiceAppRefresh$ = this.entityService.poll(10000, this.autoRefreshString).do(() => {
-      //   this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));//TODO: RC
+      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
     }).subscribe();
 
     this.appSub$ = this.applicationService.app$.subscribe(app => {
