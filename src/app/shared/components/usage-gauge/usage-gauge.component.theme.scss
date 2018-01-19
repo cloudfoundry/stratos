@@ -12,6 +12,7 @@
     &__progress-bar {
       background-color: $usage-gauge-bar-color;
     }
+
     &__progress-bar-background {
       background-image: app-usage-gauge-gradient($usage-gauge-bar-color);
     }
@@ -37,9 +38,9 @@
     $gradient-stop-1,
     $gradient-stop-1 25%,
     $gradient-stop-2 25%,
-    $gradient-stop-2 50%, 
-    $gradient-stop-3 50%, 
-    $gradient-stop-3 75%, 
+    $gradient-stop-2 50%,
+    $gradient-stop-3 50%,
+    $gradient-stop-3 75%,
     $gradient-stop-4 75%,
     $gradient-stop-4 100%
   );
