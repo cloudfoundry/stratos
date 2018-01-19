@@ -12,8 +12,8 @@ export class TableCellUsageComponent<T> extends TableCellCustom<T> implements On
   private label: string;
 
   ngOnInit() {
-    this.value = this.config.value;
-    this.label = this.config.label;
+    this.value = this.config ? this.config.value : row => 0;
+    this.label = this.config ? this.config.label : row => '-';
   }
 
 }

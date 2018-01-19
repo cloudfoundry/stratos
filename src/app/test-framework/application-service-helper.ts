@@ -38,6 +38,7 @@ export class ApplicationServiceMock {
     fetching: false
   } as ApplicationData));
   appSummary$: Observable<AppMetadataInfo> = Observable.of(({ metadataRequestState: { fetching: {} } } as AppMetadataInfo));
+  appStatsGated$: Observable<AppMetadataInfo> = Observable.of(({ metadataRequestState: { fetching: {} } } as AppMetadataInfo));
   isFetchingApp$: Observable<boolean> = Observable.of(false);
   isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
