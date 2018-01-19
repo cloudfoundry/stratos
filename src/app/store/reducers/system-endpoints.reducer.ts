@@ -6,6 +6,7 @@ import { VERIFY_SESSION, SESSION_VERIFIED } from '../actions/auth.actions';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<CNSISModel>, action) {
   switch (action.type) {
+    case VERIFY_SESSION:
     case GET_SYSTEM_INFO:
       const fetchingState = { ...state };
       let modified = false;
