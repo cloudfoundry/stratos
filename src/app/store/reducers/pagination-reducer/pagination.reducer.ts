@@ -35,11 +35,7 @@ import { paginationResetPagination } from './pagination-reducer-reset-pagination
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 
 export const defaultClientPaginationPageSize = 9;
-function getDefaultPaginationEntityState() {
-  return {
-    ...defaultPaginationEntityState
-  };
-}
+
 const defaultPaginationEntityState = {
   fetching: false,
   pageCount: 0,
@@ -57,6 +53,12 @@ const defaultPaginationEntityState = {
     totalResults: 0
   }
 };
+
+function getDefaultPaginationEntityState() {
+  return {
+    ...defaultPaginationEntityState
+  };
+}
 
 export const defaultPaginationState = { ...defaultCfEntitiesState };
 
@@ -123,14 +125,14 @@ function paginate(action, state, updatePagination) {
     return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
   }
 
-  if (isEnpointAction(action)) {
+  if (isEnDpointAction(action)) {
     return clearEndpointEntities(state, getDefaultPaginationEntityState());
   }
 
   return enterPaginationReducer(state, action, updatePagination);
 }
 
-function isEnpointAction(action) {
+function isEnDpointAction(action) {
   // ... that we care about.
   return action.type === DISCONNECT_CNSIS_SUCCESS ||
     action.type === CONNECT_CNSIS_SUCCESS ||
