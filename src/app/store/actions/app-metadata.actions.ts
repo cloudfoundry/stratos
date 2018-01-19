@@ -1,15 +1,9 @@
+import { getPaginationKey } from './pagination.actions';
 import { schema } from 'normalizr';
 import { PaginatedAction, PaginationParam } from '../types/pagination.types';
 import { ICFAction, CFStartAction, RequestEntityLocation } from '../types/request.types';
 import { RequestOptions } from '@angular/http';
 import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
-import { getPaginationKey } from './pagination.actions';
-// Schema for an App Instance and an array of these
-export const InstanceSchema = new schema.Entity(AppMetadataProperties.INSTANCES);
-export const InstancesSchema = new schema.Array(InstanceSchema);
-
-// Schema for an App Env Var and an array of these
-
 
 export class GetAppStatsAction extends CFStartAction implements PaginatedAction, ICFAction {
   options: RequestOptions;

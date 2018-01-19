@@ -1,6 +1,6 @@
-import { EntityInfo } from '../../store/types/api.types';
+import { EntityInfo, APIResource } from '../../store/types/api.types';
 import { EventSchema, GetAllAppEvents } from '../../store/actions/app-event.actions';
-import { GetAppInstancesAction, InstanceSchema } from './../../store/actions/app-metadata.actions';
+import { GetAppStatsAction } from './../../store/actions/app-metadata.actions';
 import { AppState } from '../../store/app-state';
 import { Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
@@ -15,8 +15,14 @@ import { ListDataSource } from './list-data-source';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction, ListPagination } from '../../store/actions/list.actions';
+import { AppStatSchema, AppStat } from '../../store/types/app-metadata.types';
 
-export class CfAppInstancesDataSource extends ListDataSource<any> {
+export interface ListAppInstance {
+  index: number;
+  value: AppStat;
+}
+
+export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
 
   constructor(
     _store: Store<AppState>,
@@ -24,21 +30,29 @@ export class CfAppInstancesDataSource extends ListDataSource<any> {
     _appGuid: string,
   ) {
     const paginationKey = `app-instances:${_cfGuid}${_appGuid}`;
-    const action =         new GetAppInstancesAction(_appGuid, _cfGuid);
+    const action = new GetAppStatsAction(_appGuid, _cfGuid);
 
     super(
       _store,
       action,
-      InstanceSchema,
-      (object: any) => {
-        // This needs to return the unique identifier for each row - used for the checkbox selection
-        // and multiple actions
-        return '1';
+      AppStatSchema,
+      (row: ListAppInstance) => {
+        return row.index.toString();
       },
       () => ({} as any),
       paginationKey,
       map(instances => {
-        return Object.keys(instances[0]).map(index => ({ index, value: instances[0][index] }));
+        if (!instances || instances.length === 0) {
+          return [];
+        }
+        const res = [];
+        Object.keys(instances).forEach(key => {
+          res.push({
+            index: key,
+            value: instances[key].entity
+          });
+        });
+        return res;
       }),
       true,
       []

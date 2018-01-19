@@ -53,7 +53,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
       class: 'table-column-select', cellFlex: '1'
     },
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row: ListAppEnvVar) => `${row.name}`, sort: true, cellFlex: '3'
+      columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: true, cellFlex: '3'
     },
     {
       columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '4'

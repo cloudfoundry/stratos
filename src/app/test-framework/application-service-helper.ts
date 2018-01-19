@@ -9,9 +9,9 @@ import { cnsisStoreNames } from '../store/types/cnsis.types';
 import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { ApplicationService, ApplicationData } from '../features/applications/application.service';
 import { Observable } from 'rxjs/Observable';
-import { EntityInfo } from '../store/types/api.types';
+import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ApplicationStateService } from '../shared/components/application-state/application-state.service';
-import { AppSummary } from '../store/types/app-metadata.types';
+import { AppSummary, AppStat } from '../store/types/app-metadata.types';
 
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
@@ -39,7 +39,7 @@ export class ApplicationServiceMock {
     fetching: false
   } as ApplicationData));
   appSummary$: Observable<EntityInfo<AppSummary>> = Observable.of(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
-  appStatsGated$: Observable<AppMetadataInfo> = Observable.of(({ metadataRequestState: { fetching: {} } } as AppMetadataInfo));
+  appStats$: Observable<APIResource<AppStat>[]> = Observable.of(new Array<APIResource<AppStat>>());
   isFetchingApp$: Observable<boolean> = Observable.of(false);
   isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
