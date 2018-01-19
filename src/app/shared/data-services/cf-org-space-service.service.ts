@@ -129,8 +129,4 @@ export class CfOrgSpaceDataService {
       select: new BehaviorSubject(null),
     };
   }
-
-  public appWallPaginationState() {
-    return this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey));
-  }
 }

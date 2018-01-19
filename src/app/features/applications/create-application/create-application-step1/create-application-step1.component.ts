@@ -9,6 +9,10 @@ import { Observable } from 'rxjs/Rx';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { Subscription } from 'rxjs/Subscription';
+import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
+import { CfAppsDataSource } from '../../../../shared/data-sources/cf-apps-data-source';
+import { ApplicationSchema } from '../../../../store/actions/application.actions';
 
 
 @Component({
@@ -38,7 +42,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
-    const appWallPaginationState = this.cfOrgSpaceService.appWallPaginationState();
+    // We will auto select endpoint/org/space that have been selected on the app wall.
+    const appWallPaginationState = this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey));
     appWallPaginationState.filter(pag => !!pag).first().do(pag => {
       this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
       this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);

@@ -72,7 +72,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   getDataSource = () => this.appsDataSource;
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
 
-  private createConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem, ) {
+  private createConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
     return {
       key: key,
       label: label,
