@@ -16,6 +16,7 @@ import { VariablesTabComponent } from './application/application-tabs-base/tabs/
 import { ApplicationsRoutingModule } from './applications.routing';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DatePipe } from '@angular/common';
+import { EditApplicationComponent } from './edit-application/edit-application.component';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { DatePipe } from '@angular/common';
     VariablesTabComponent,
     ViewBuildpackComponent,
     ApplicationTabsBaseComponent,
+    EditApplicationComponent,
   ],
   providers: [
     ApplicationService,

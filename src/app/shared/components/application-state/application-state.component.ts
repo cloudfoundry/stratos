@@ -10,6 +10,9 @@ export class ApplicationStateComponent implements OnInit {
   @Input('state')
   public state: any;
 
+  @Input('hideIcon')
+  public hideIcon: boolean;
+
   constructor() { }
 
   ngOnInit() {
