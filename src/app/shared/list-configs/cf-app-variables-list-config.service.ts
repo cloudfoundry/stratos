@@ -80,7 +80,7 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
   getSingleActions = () => [this.listActionDelete];
   getColumns = () => this.columns;
   getDataSource = () => this.envVarsDataSource;
-  getFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => [];
 
   constructor(
     private store: Store<AppState>,

@@ -49,6 +49,7 @@ export interface ApplicationData {
 
 @Injectable()
 export class ApplicationService {
+  applicationInstanceState$: Observable<any>;
 
   constructor(
     public cfGuid: string,
@@ -157,7 +158,13 @@ export class ApplicationService {
         return this.appStateService.get(appInfo.entity.entity, appStats ? appStats.metadata : null);
       });
 
-    this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
+    this.applicationInstanceState$ = this.waitForAppEntity$
+      .combineLatest(this.appStatsGated$)
+      .map(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
+        return this.appStateService.getInstanceState(appInfo.entity.entity, appStats ? appStats.metadata : null);
+    });
+
+      this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
     });
   }

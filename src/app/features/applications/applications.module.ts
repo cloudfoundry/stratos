@@ -1,6 +1,4 @@
-import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { NgModule } from '@angular/core';
-
 import { CoreModule } from '../../core/core.module';
 import { SharedModule } from '../../shared/shared.module';
 import { ApplicationWallComponent } from './application-wall/application-wall.component';
@@ -17,8 +15,9 @@ import { VariablesTabComponent } from './application/application-tabs-base/tabs/
 import { ApplicationsRoutingModule } from './applications.routing';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DatePipe } from '@angular/common';
+import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { RoutesComponent } from './routes/routes.component';
-
+import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 
 @NgModule({
   imports: [
@@ -38,7 +37,8 @@ import { RoutesComponent } from './routes/routes.component';
     ViewBuildpackComponent,
     ApplicationTabsBaseComponent,
     RoutesComponent,
-    AddRoutesComponent,
+    EditApplicationComponent,
+    AddRoutesComponent
   ],
   providers: [
     ApplicationService,

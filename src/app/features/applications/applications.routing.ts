@@ -12,6 +12,7 @@ import { BuildTabComponent } from './application/application-tabs-base/tabs/buil
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
 import { CreateApplicationModule } from './create-application/create-application.module';
+import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 const appplicationsRoutes: Routes = [
   {
@@ -31,11 +32,18 @@ const appplicationsRoutes: Routes = [
         component: ApplicationBaseComponent,
         children: [
           {
+            path: 'edit',
+            component: EditApplicationComponent
+          },
+          {
             path: '',
             component: ApplicationTabsBaseComponent,
+            data: {
+              uiFullView: true
+            },
             children: [
-              { path: '', redirectTo: 'build', pathMatch: 'full' },
-              { path: 'build', component: BuildTabComponent },
+              { path: '', redirectTo: 'summary', pathMatch: 'full' },
+              { path: 'summary', component: BuildTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },

@@ -12,6 +12,7 @@ import { ApplicationStateService } from '../../../../../shared/components/applic
 import { CardAppComponent } from './card-app.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { APIResourceMetadata } from '../../../../../store/types/api.types';
+import { CardStatusComponent } from '../../../card-status/card-status.component';
 
 describe('CardAppComponent', () => {
   let component: CardAppComponent;
@@ -21,6 +22,7 @@ describe('CardAppComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CardAppComponent,
+        CardStatusComponent,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,

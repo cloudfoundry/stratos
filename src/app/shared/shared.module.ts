@@ -61,6 +61,15 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
+import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
+import { TileComponent } from './components/tile/tile/tile.component';
+import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
+import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
+import { CardStatusComponent } from './components/card-status/card-status.component';
+import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
+import { CardAppStatusComponent } from './components/cards/custom-cards/card-app-status/card-app-status.component';
+import { CardAppInstancesComponent } from './components/cards/custom-cards/card-app-instances/card-app-instances.component';
 import { TableCellRouteComponent } from './components/table/custom-cells/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 
@@ -116,6 +125,14 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
+    PageSubheaderComponent,
+    TileComponent,
+    TileGroupComponent,
+    TileGridComponent,
+    CardStatusComponent,
+    MetadataItemComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
     TableCellRouteComponent,
     TableCellTCPRouteComponent,
   ],
@@ -143,11 +160,20 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
     NoContentMessageComponent,
     EndpointsMissingComponent,
     ApplicationStateComponent,
+    PageSubheaderComponent,
+    TileComponent,
+    TileGroupComponent,
+    TileGridComponent,
+    CardStatusComponent,
+    MetadataItemComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [
     ListConfig,
     ApplicationStateService,
+    CfOrgSpaceDataService,
   ]
 })
 export class SharedModule { }
