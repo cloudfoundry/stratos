@@ -76,7 +76,7 @@ export function selectEntity<T = APIResource>(entityType: string, guid: string) 
   );
 }
 
-export function selectNestedEntity<T = APIResource>(entityType: string, guid: string, entityKeys: string[]) {
+export function selectNestedEntity<T = APIResource[]>(entityType: string, guid: string, entityKeys: string[]) {
   return compose(
     getNestedEntityWithKeys<T>([guid, ...entityKeys]),
     getRequestEntityType<T>(entityType),

@@ -12,7 +12,7 @@
         Domain
         <mat-form-field>
           <mat-select  formControlName="domain" required>
-            <mat-option *ngFor="let domain of domains" [value]="domain" >{{domain.entity.name}}</mat-option>
+            <mat-option *ngFor="let domain of getDomainValues()" [value]="domain" >{{domain.entity.name}}</mat-option>
           </mat-select>
         </mat-form-field>
         </div>

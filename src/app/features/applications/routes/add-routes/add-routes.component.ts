@@ -19,6 +19,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { APIResource } from '../../../../store/types/api.types';
 import { Route } from '../../../../store/types/route.types';
 import { Domain } from '../../../../store/types/domain.types';
+
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
@@ -60,10 +61,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           this.spaceGuid = p.entity.space_guid;
           this.domains$ = this.store.select(selectNestedEntity('space', this.spaceGuid, ['entity', 'domains']))
           .pipe(
-            distinct(),
             tap(d => {
               if (d) {
-                this.domains = this.domains.concat(d);
+                d.forEach(domain => {
+                  this.domains[domain.metadata.guid] = domain;
+                });
               }
             })
           ).subscribe();
@@ -73,6 +75,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   }
 
+  getDomainValues() {
+    return Object.values(this.domains);
+  }
   _getValueForKey(key) {
     return this.addRoute.value[key] ? this.addRoute.value[key] : '';
   }
