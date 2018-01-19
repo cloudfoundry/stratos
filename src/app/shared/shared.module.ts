@@ -1,3 +1,5 @@
+import { UptimePipe } from './pipes/uptime.pipe';
+import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { EventTabActorIconPipe } from './components/table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { CommonModule } from '@angular/common';
@@ -70,6 +72,10 @@ import { CardStatusComponent } from './components/card-status/card-status.compon
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { CardAppStatusComponent } from './components/cards/custom-cards/card-app-status/card-app-status.component';
 import { CardAppInstancesComponent } from './components/cards/custom-cards/card-app-instances/card-app-instances.component';
+import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
+import { PercentagePipe } from './pipes/percentage.pipe';
+import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
+import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 
 @NgModule({
   imports: [
@@ -87,6 +93,9 @@ import { CardAppInstancesComponent } from './components/cards/custom-cards/card-
     StatefulIconComponent,
     EditableDisplayValueComponent,
     MbToHumanSizePipe,
+    PercentagePipe,
+    UptimePipe,
+    UsageBytesPipe,
     ValuesPipe,
     LoadingPageComponent,
     DetailsCardComponent,
@@ -131,6 +140,9 @@ import { CardAppInstancesComponent } from './components/cards/custom-cards/card-
     MetadataItemComponent,
     CardAppStatusComponent,
     CardAppInstancesComponent,
+    UsageGaugeComponent,
+    TableCellUsageComponent,
+    TableCellStatusDirective,
   ],
   exports: [
     FormsModule,
@@ -145,6 +157,9 @@ import { CardAppInstancesComponent } from './components/cards/custom-cards/card-
     StatefulIconComponent,
     MbToHumanSizePipe,
     ValuesPipe,
+    PercentagePipe,
+    UsageBytesPipe,
+    UptimePipe,
     SteppersModule,
     FocusDirective,
     UniqueDirective,
@@ -164,6 +179,9 @@ import { CardAppInstancesComponent } from './components/cards/custom-cards/card-
     MetadataItemComponent,
     CardAppStatusComponent,
     CardAppInstancesComponent,
+    UsageGaugeComponent,
+    TableCellUsageComponent,
+    TableCellStatusDirective,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [

@@ -13,6 +13,8 @@ import { EntityInfo } from '../../../../../store/types/api.types';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../../store/reducers.module';
 import { TableCellEntryPoints } from '../../../../../test-framework/list-table-helper';
+import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
+import { PercentagePipe } from '../../../../pipes/percentage.pipe';
 
 
 describe('CardEventComponent', () => {
@@ -29,7 +31,9 @@ describe('CardEventComponent', () => {
         ValuesPipe,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        UsageGaugeComponent,
+        PercentagePipe,
       ],
       imports: [ CoreModule ]
     })

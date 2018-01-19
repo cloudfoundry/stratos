@@ -22,6 +22,9 @@ import {
 } from '../../../shared/components/application-state/application-state-icon/application-state-icon.pipe';
 import { ListSort } from '../../../store/actions/list.actions';
 import { ListAppEnvVar } from '../../data-sources/cf-app-variables-data-source';
+import { PercentagePipe } from '../../pipes/percentage.pipe';
+import { UtilsService } from '../../../core/utils.service';
+import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 
 
 describe('TableComponent', () => {
@@ -38,15 +41,20 @@ describe('TableComponent', () => {
         ValuesPipe,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        UsageGaugeComponent,
+        PercentagePipe,
       ],
       imports: [
         CoreModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
+      ],
+      providers: [
+        UtilsService,
       ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

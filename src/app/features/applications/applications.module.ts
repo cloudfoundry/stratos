@@ -17,6 +17,8 @@ import { ApplicationsRoutingModule } from './applications.routing';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DatePipe } from '@angular/common';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
+import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
+import { ApplicationMonitorService } from './application-monitor.service';
 
 
 @NgModule({
@@ -37,10 +39,12 @@ import { EditApplicationComponent } from './edit-application/edit-application.co
     ViewBuildpackComponent,
     ApplicationTabsBaseComponent,
     EditApplicationComponent,
+    InstancesTabComponent,
   ],
   providers: [
     ApplicationService,
     ApplicationEnvVarsService,
+    ApplicationMonitorService,
     DatePipe
   ]
 })
