@@ -37,16 +37,14 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
 
   ngOnInit() {
     this.applicationState = this.appStateService.get(this.row.entity, null);
-    this.fetchAppState$ =
-      getPaginationPages(this.store, new GetAppStatsAction(this.row.entity.guid, this.row.entity.cfGuid), AppStatsSchema)
-        .pipe(
-        tap(appInstancesPages => {
-          const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
-            return apiResource.entity;
-          });
-          this.applicationState = this.appStateService.get(this.row.entity, appInstances);
-        })
-        ).subscribe();
+    this.fetchAppState$ = ApplicationService.getApplicationState(
+      this.store,
+      this.appStateService,
+      this.row.entity,
+      this.row.entity.guid,
+      this.row.entity.cfGuid)
+      .do(appSate => this.applicationState = appSate)
+      .subscribe();
   }
 
   ngOnDestroy() {

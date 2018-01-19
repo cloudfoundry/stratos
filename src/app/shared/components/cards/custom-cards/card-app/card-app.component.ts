@@ -16,6 +16,7 @@ import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { AppStatsSchema, AppStatSchema } from '../../../../../store/types/app-metadata.types';
 import { selectPaginationState } from '../../../../../store/selectors/pagination.selectors';
 import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 // import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
 
 @Component({
@@ -36,16 +37,16 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
   }
   ngOnInit() {
     this.applicationState = this.appStateService.get(this.row.entity, null);
-    this.fetchAppState$ =
-      getPaginationPages(this.store, new GetAppStatsAction(this.row.entity.guid, this.row.entity.cfGuid), AppStatsSchema)
-        .pipe(
-        tap(appInstancesPages => {
-          const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
-            return apiResource.entity;
-          });
-          this.applicationState = this.appStateService.get(this.row.entity, appInstances);
-        })
-        ).subscribe();
+    this.fetchAppState$ = ApplicationService.getApplicationState(
+      this.store,
+      this.appStateService,
+      this.row.entity,
+      this.row.entity.guid,
+      this.row.entity.cfGuid)
+      .do(appSate => {
+        this.applicationState = appSate;
+      })
+      .subscribe();
 
   }
 

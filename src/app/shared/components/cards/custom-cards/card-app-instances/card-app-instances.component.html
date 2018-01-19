@@ -4,8 +4,8 @@
     <mat-card-title>Instances</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-      <div class="card-app-instances__large">
-          {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
-      </div>
+    <div class="card-app-instances__large">
+      {{(applicationService.appSummary$| async)?.entity?.entity.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
+    </div>
   </mat-card-content>
 </mat-card>

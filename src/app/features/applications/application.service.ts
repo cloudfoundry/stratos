@@ -1,4 +1,8 @@
-import { getPaginationObservables, PaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+  getPaginationPages,
+} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityService } from '../../core/entity-service';
 import { cnsisEntitiesSelector } from '../../store/selectors/cnsis.selectors';
 import { Injectable } from '@angular/core';
@@ -23,13 +27,12 @@ import {
 import { EntityInfo, APIResource } from '../../store/types/api.types';
 import { combineLatest } from 'rxjs/operators/combineLatest';
 import {
-  AppStats,
-  AppSummarySchema,
-  AppStatsSchema,
   AppEnvVarSchema,
-  AppStat,
   AppEnvVarsState,
-  AppSummary
+  AppStat,
+  AppStatsSchema,
+  AppSummarySchema,
+  AppSummary,
 } from '../../store/types/app-metadata.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
@@ -38,6 +41,7 @@ import {
   defaultPaginationEntityState,
   defaultPaginationState,
 } from '../../store/reducers/pagination-reducer/pagination.reducer';
+import { tap, map } from 'rxjs/operators';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -100,6 +104,35 @@ export class ApplicationService {
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
   applicationState$: Observable<ApplicationStateData>;
+
+  /**
+   * Fetch the current state of the app (given it's instances) as an object ready
+   *
+   * @static
+   * @param {Store<AppState>} store
+   * @param {ApplicationStateService} appStateService
+   * @param {any} app
+   * @param {string} appGuid
+   * @param {string} cfGuid
+   * @returns {Observable<ApplicationStateData>}
+   * @memberof ApplicationService
+   */
+  static getApplicationState(
+    store: Store<AppState>,
+    appStateService: ApplicationStateService,
+    app,
+    appGuid: string,
+    cfGuid: string): Observable<ApplicationStateData> {
+    return getPaginationPages(store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
+      .pipe(
+      map(appInstancesPages => {
+        const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
+          return apiResource.entity;
+        });
+        return appStateService.get(app, appInstances);
+      })
+      );
+  }
 
   private constructCoreObservables() {
     // First set up all the base observables
@@ -172,12 +205,12 @@ export class ApplicationService {
       });
 
     this.applicationInstanceState$ = this.waitForAppEntity$
-      .combineLatest(this.appStatsGated$)
-      .map(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
-        return this.appStateService.getInstanceState(appInfo.entity.entity, appStats ? appStats.metadata : null);
-    });
+      .combineLatest(this.appStats$)
+      .mergeMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
+        return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
+      });
 
-      this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
+    this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
     });
   }
