@@ -94,37 +94,47 @@ const getPaginationUpdater = function (types: [string, string, string]) {
 };
 
 export function createPaginationReducer(types: [string, string, string]) {
-  const updatePagination = getPaginationUpdater(types);
+  return paginationReducer(getPaginationUpdater(types), types);
+}
+
+function paginationReducer(updatePagination, types) {
   const [requestType, successType, failureType] = types;
   return function (state, action) {
     state = state || defaultPaginationState;
-    if (action.type === ApiActionTypes.API_REQUEST_START) {
-      return state;
-    }
-
-    if (action.type === CLEAR_PAGES) {
-      return paginationClearPages(state, action);
-    }
-
-    if (action.type === RESET_PAGINATION && !action.keepPages) {
-      return paginationResetPagination(state, action);
-    }
-
-    if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-      const clearEntityType = action.entityKey || 'application';
-      return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
-    }
-
-    if (
-      action.type === DISCONNECT_CNSIS_SUCCESS ||
-      action.type === CONNECT_CNSIS_SUCCESS ||
-      action.type === UNREGISTER_CNSIS
-    ) {
-      return clearEndpointEntities(state, getDefaultPaginationEntityState());
-    }
-
-    return enterPaginationReducer(state, action, updatePagination);
+    return paginate(action, state, updatePagination);
   };
+}
+
+function paginate(action, state, updatePagination) {
+  if (action.type === ApiActionTypes.API_REQUEST_START) {
+    return state;
+  }
+
+  if (action.type === CLEAR_PAGES) {
+    return paginationClearPages(state, action);
+  }
+
+  if (action.type === RESET_PAGINATION && !action.keepPages) {
+    return paginationResetPagination(state, action);
+  }
+
+  if (action.type === CLEAR_PAGINATION_OF_TYPE) {
+    const clearEntityType = action.entityKey || 'application';
+    return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
+  }
+
+  if (isEnpointAction(action)) {
+    return clearEndpointEntities(state, getDefaultPaginationEntityState());
+  }
+
+  return enterPaginationReducer(state, action, updatePagination);
+}
+
+function isEnpointAction(action) {
+  // ... that we care about.
+  return action.type === DISCONNECT_CNSIS_SUCCESS ||
+    action.type === CONNECT_CNSIS_SUCCESS ||
+    action.type === UNREGISTER_CNSIS;
 }
 
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
