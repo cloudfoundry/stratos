@@ -1,9 +1,9 @@
-import { ApplicationSchema } from '../../../../store/actions/application.actions';
-import { getEntityById, selectEntity } from '../../../../store/selectors/api.selectors';
+import { ApplicationSchema } from '../../../../../../store/actions/application.actions';
+import { getEntityById, selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { State, Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
-import { ApplicationService } from '../../application.service';
+import { AppState } from '../../../../../../store/app-state';
+import { LogViewerComponent } from '../../../../../../shared/components/log-viewer/log-viewer.component';
+import { ApplicationService } from '../../../../application.service';
 import { NgModel } from '@angular/forms';
 import { Observable } from 'rxjs/Rx';
 import { Component, OnInit, ViewChild } from '@angular/core';
@@ -11,7 +11,7 @@ import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
 import { MatInput } from '@angular/material';
 import * as moment from 'moment';
-import { LoggerService } from '../../../../core/logger.service';
+import { LoggerService } from '../../../../../../core/logger.service';
 
 interface LogItem {
   message: string;
