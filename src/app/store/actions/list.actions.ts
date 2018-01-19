@@ -14,7 +14,10 @@ export class ListSort {
 }
 
 export class ListFilter {
-  filter: string;
+  string: string;
+  items: {
+    [key: string]: any;
+  };
 }
 
 export const ListStateActionTypes = {

@@ -1,7 +1,7 @@
 <b>Create a route</b>
 <form novalidate #form="ngForm">
   <mat-select placeholder="Domain" ngModel name="domain">
-    <mat-option *ngFor="let domain of newAppData?.cloudFoundryDetails?.org.domains" [value]="domain">
+    <mat-option *ngFor="let domain of (domains | async)" [value]="domain">
       <span>{{ domain.entity.name }}</span>
     </mat-option>
   </mat-select>

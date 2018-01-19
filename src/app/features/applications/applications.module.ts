@@ -17,8 +17,9 @@ import { VariablesTabComponent } from './application/application-tabs-base/tabs/
 import { ApplicationsRoutingModule } from './applications.routing';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DatePipe } from '@angular/common';
-import { RoutesComponent } from './routes/routes.component';
+import { EditApplicationComponent } from './edit-application/edit-application.component';
 
+import { RoutesComponent } from './routes/routes.component';
 
 @NgModule({
   imports: [
@@ -38,7 +39,7 @@ import { RoutesComponent } from './routes/routes.component';
     ViewBuildpackComponent,
     ApplicationTabsBaseComponent,
     RoutesComponent,
-    AddRoutesComponent,
+    EditApplicationComponent,
   ],
   providers: [
     ApplicationService,

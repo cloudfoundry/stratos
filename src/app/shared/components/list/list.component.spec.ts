@@ -26,6 +26,7 @@ import { CardAppComponent } from '../cards/custom-cards/card-app/card-app.compon
 import { TableCellAppNameComponent } from '../table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../test-framework/list-table-helper';
 import { ListActions } from '../../data-sources/list-data-source-types';
+import { CardStatusComponent } from '../card-status/card-status.component';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -43,6 +44,7 @@ describe('ListComponent', () => {
         ListComponent,
         CardsComponent,
         CardComponent,
+        CardStatusComponent,
         TableCellComponent,
         EventTabActorIconPipe,
         ValuesPipe,

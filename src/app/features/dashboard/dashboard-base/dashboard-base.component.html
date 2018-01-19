@@ -4,7 +4,7 @@
     </app-side-nav>
   </mat-sidenav>
   <div class="dashboard__inner">
-    <div class="dashboard__content">
+    <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView}">
       <router-outlet></router-outlet>
     </div>
   </div>
