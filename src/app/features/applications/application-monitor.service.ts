@@ -71,7 +71,7 @@ export class ApplicationMonitorService {
       res.status.cpu = this.getStatus(res.max.cpu);
 
       // Overall Usage Status
-      res.status.usage = this.getWorstStatus(res.status);
+      res.status.usage = this.getWorstStatus(res.status.mem, res.status.disk, res.status.cpu);
 
       // Instance Status
       res.status.instance = res.running === statsCount ? 'ok' : 'warning';
@@ -89,12 +89,11 @@ export class ApplicationMonitorService {
     return 'ok';
   }
 
-  private getWorstStatus(res) {
-    const allStatus = Array.from(res, ([key, value]) => value);
-    if (allStatus.find(status => status === 'error')) {
+  private getWorstStatus(...statuses: string[]): string {
+    if (statuses.find(status => status === 'error')) {
       return 'error';
     }
-    if (allStatus.find(status => status === 'warning')) {
+    if (statuses.find(status => status === 'warning')) {
       return 'warning';
     }
     return 'ok';

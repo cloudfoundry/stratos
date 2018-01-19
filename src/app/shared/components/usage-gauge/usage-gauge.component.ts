@@ -15,7 +15,11 @@ export class UsageGaugeComponent implements OnInit {
 
   @Input('barOnly') private barOnly: boolean;
 
-  @Input('mode') private mode: string;
+  // Change bar color to warning if this threshold is reached
+  @Input('warningAt') private warningAt: number;
+
+  // Change bar color to error if this threshold is reached
+  @Input('errorAt') private errorAt: number;
 
   constructor() { }
 

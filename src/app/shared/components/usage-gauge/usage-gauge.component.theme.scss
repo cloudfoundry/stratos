@@ -1,0 +1,27 @@
+// --------------------------------------------------
+// Usage Gauge
+// --------------------------------------------------
+@mixin app-usage-gauge-theme($theme, $app-theme) {
+
+  $usage-gauge-bar-color:           #777 !default;
+  $usage-gauge-bar-max-color:       #888 !default;
+  $usage-gauge-alert-color:         $usage-gauge-bar-max-color !default;
+  $usage-gauge-bar-background:      linear-gradient(to right,#eee,#eee 25%,#e6e6e6 25%,#e6e6e6 50%,#d9d9d9 50%,#d9d9d9 75%,#ccc 75%,#ccc 100%);
+
+  .usage-gauge {
+    &__progress-bar {
+      background-color: $usage-gauge-bar-color;
+    }
+    &__progress-bar-background {
+      background-image: $usage-gauge-bar-background;
+    }
+
+    &__warning {
+      background-color: orange;
+    }
+
+    &__error {
+      background-color: red;
+    }
+  }
+}

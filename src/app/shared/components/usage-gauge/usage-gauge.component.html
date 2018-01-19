@@ -1,14 +1,17 @@
-<div class="usage-gauge" [ngClass]="{'usage-gauge__over-max': value > 1}">
+<div class="usage-gauge">
   <div ng-if="!barOnly" class="usage-gauge__label">
     <div class="usage-gauge__info">{{ valueText || (value | percentage) }}</div>
     {{ title }}
   </div>
-  <div class="usage-gauge__bar" [ngClass]="{'usage-gauge__quota' : mode == 'quota', 'usage-gauge-instance' : mode == 'instance'}">
+  <div class="usage-gauge__bar">
     <div class="usage-gauge__progress-bar-background"></div>
     <div #usageBar
     [style.width.%]="value * 100"
-    [ngClass]="{'usage-gauge-at-max': value >= 1}"
-    class="usage-gauge__progress-bar usage-gauge__utilized-bar">
+    [ngClass]="{
+      'usage-gauge__error': errorAt && value >= errorAt,
+      'usage-gauge__warning': warningAt && value >= warningAt
+    }"
+    class="usage-gauge__progress-bar">
   </div>
   </div>
 </div>

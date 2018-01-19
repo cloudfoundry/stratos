@@ -1,16 +1,10 @@
-//
+// --------------------------------------------------
 // Usage Gauge
 // --------------------------------------------------
 
 $usage-gauge-margin-vertical:     6px !default;
-
-$usage-gauge-bar-color:           #777 !default;
-$usage-gauge-bar-max-color:       #888 !default;
-
-$usage-gauge-alert-color:         $usage-gauge-bar-max-color !default;
 $usage-gauge-alert-size:          8px !default;
 $usage-gauge-alert-box-width:     $usage-gauge-alert-size + 4px !default;
-
 $usage-gauge-bar-height: 4px;
 
 :host {
@@ -30,9 +24,11 @@ $usage-gauge-bar-height: 4px;
     margin-top: $usage-gauge-margin-vertical;
     text-transform: uppercase;
   }
+
   &__info {
     float: right;
   }
+
   &__bar {
     display: inline-block;
     height: $usage-gauge-bar-height;
@@ -41,27 +37,26 @@ $usage-gauge-bar-height: 4px;
     vertical-align: middle;
     width: 100%;
     position: relative;
+
+    &:after {
+      margin-bottom: 0;
+      margin-top: 0;
+    }
   }
+
   &__progress-bar {
     position: absolute;
     height: $usage-gauge-bar-height;
     box-shadow: none;
     float: left;
-    background-color: $usage-gauge-bar-color;
     width: 0%;
-    transition: width 0.6s ease;
+    transition: width 0.6s ease, background-color 0.6s ease;
   }
+
   &__progress-bar-background {
     float: left;
     position: absolute;
     height: $usage-gauge-bar-height;
     width: 100%;
-    background-image: linear-gradient(to right,#eee,#eee 25%,#e6e6e6 25%,#e6e6e6 50%,#d9d9d9 50%,#d9d9d9 75%,#ccc 75%,#ccc 100%);
-  }
-  &__quota {
-    &:after {
-      margin-bottom: 0;
-      margin-top: 0;
-    }
   }
 }
