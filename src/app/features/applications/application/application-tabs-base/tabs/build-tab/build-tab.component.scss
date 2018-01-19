@@ -5,13 +5,16 @@
     flex-wrap: wrap;
     margin: auto;
   }
+
   &__card {
     width: 100%;
   }
+
   &__large {
     font-size: 16px;
     font-weight: 500;
   }
+
   &__tile_actions {
     padding: 6px;
     text-align: right;

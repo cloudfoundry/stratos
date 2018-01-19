@@ -1,3 +1,6 @@
+import {
+    ApplicationEnvVars,
+} from '../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EnvVarSchema, GetAppEnvVarsAction, getPaginationKey } from './../../store/actions/app-metadata.actions';
 import { ListDataSource } from './list-data-source';
 import { DataSource } from '@angular/cdk/table';
@@ -16,7 +19,6 @@ import { ListActionConfig, ListActions } from './list-data-source-types';
 import { AppMetadataProperties, EnvVarsSchema } from '../../store/actions/app-metadata.actions';
 import { AppMetadataType } from '../../store/types/app-metadata.types';
 import { map } from 'rxjs/operators';
-import { ApplicationEnvVars } from '../../features/applications/application/build-tab/application-env-vars.service';
 
 export interface AppEnvVar {
   name: string;

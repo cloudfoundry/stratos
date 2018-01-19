@@ -1,12 +1,11 @@
-import { AppState } from '../../../../store/app-state';
+import { AppState } from '../../../../../../store/app-state';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Rx';
 
-import { ApplicationData, ApplicationService } from '../../application.service';
-import { AppMetadataInfo } from '../../../../store/types/app-metadata.types';
+import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { AppMetadataInfo } from '../../../../../../store/types/app-metadata.types';
 
-import { UpdateApplication } from '../../../../store/actions/application.actions';
 import { Store } from '@ngrx/store';
 
 @Component({
