@@ -25,7 +25,7 @@ import { OrganisationSchema } from '../../../../store/actions/organisation.actio
   templateUrl: './create-application-step3.component.html',
   styleUrls: ['./create-application-step3.component.scss']
 })
-export class CreateApplicationStep3Component implements OnInit, OnDestroy {
+export class CreateApplicationStep3Component implements OnInit {
 
   constructor(private store: Store<AppState>, private router: Router) { }
 
@@ -34,11 +34,9 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
 
   hostName: string;
 
-  domains: APIResource<any>[];
+  domains: Observable<any>;
 
   message = null;
-
-  subscription: Subscription;
 
   newAppData: CreateNewApplicationState;
   onNext: StepOnNextFunction = () => {
@@ -134,21 +132,17 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   ngOnInit() {
     const state$ = this.store.select(selectNewAppState);
 
-    this.subscription = state$
+    this.domains = state$
       .do(state => {
         this.hostName = state.name.split(' ').join('-').toLowerCase();
         this.newAppData = state;
       })
       .filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.org)
-      .do(state => {
-        this.store.select(selectEntity(OrganisationSchema.key, state.cloudFoundryDetails.org)).first()
-          .subscribe(org => this.domains = org.entity.domains);
-      })
-      .subscribe();
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+      .mergeMap(state => {
+        return this.store.select(selectEntity(OrganisationSchema.key, state.cloudFoundryDetails.org))
+          .first()
+          .map(org => org.entity.domains);
+      });
   }
 
 }
