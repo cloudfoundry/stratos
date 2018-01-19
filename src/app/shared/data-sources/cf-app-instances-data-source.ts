@@ -31,7 +31,7 @@ export class CfAppInstancesDataSource extends ListDataSource<any> {
       action,
       InstanceSchema,
       (object: any) => {
-        // TODO: This needs to return the unique identifier for each row - used for the checkbox selection
+        // This needs to return the unique identifier for each row - used for the checkbox selection
         // and multiple actions
         return '1';
       },

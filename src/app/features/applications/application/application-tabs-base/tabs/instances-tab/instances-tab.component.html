@@ -7,7 +7,7 @@
           <mat-card-title>Status</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="summary__large">
+          <div class="instances__large">
             <app-application-state [state]="applicationService.applicationState$ | async"></app-application-state>
           </div>
         </mat-card-content>
@@ -20,7 +20,7 @@
           <mat-card-title>Instances</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-            <div class="summary__large">
+            <div class="instances__large">
                 {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
             </div>
         </mat-card-content>
@@ -30,7 +30,7 @@
         <mat-card *ngIf="appMonitor.appMonitor$ | async as monitor">
           <app-card-status [status]="monitor.status?.usage"></app-card-status>
           <mat-card-content>
-            <table class="usage__detail">
+            <table class="instances__detail">
               <tr>
                 <td>Usage</td>
                 <td [appTableCellStatus]="monitor.status.mem">Mem</td>

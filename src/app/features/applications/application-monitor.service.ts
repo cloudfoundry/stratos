@@ -2,6 +2,64 @@ import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
+export class AppMonitorState {
+  avg: {
+    mem: number,
+    disk: number,
+    cpu: number,
+  };
+  max: {
+    mem: number,
+    disk: number,
+    cpu: number,
+  };
+  running: number;
+  status: {
+    instance: string,
+    usage: string,
+    disk: string,
+    mem: string,
+    cpu: string,
+  };
+
+  constructor() {
+    this.status.instance = 'error';
+    this.status.usage = 'tentative';
+    this.status.disk = 'tentative';
+    this.status.mem = 'tentative';
+    this.status.cpu = 'tentative';
+  }
+
+  updateStatuses() {
+    // Mem/Disk/CPU Usage Status
+    this.status.disk = this.getStatus(this.max.disk);
+    this.status.mem = this.getStatus(this.max.mem);
+    this.status.cpu = this.getStatus(this.max.cpu);
+
+    // Overall Usage Status
+    this.status.usage = this.getWorstStatus(this.status.mem, this.status.disk, this.status.cpu);
+  }
+
+  private getStatus(value: number) {
+    if (value >= 0.9) {
+      return 'error';
+    } else if (value >= 0.8) {
+      return 'warning';
+    }
+    return 'ok';
+  }
+
+  private getWorstStatus(...statuses: string[]): string {
+    if (statuses.find(status => status === 'error')) {
+      return 'error';
+    }
+    if (statuses.find(status => status === 'warning')) {
+      return 'warning';
+    }
+    return 'ok';
+  }
+}
+
 @Injectable()
 export class ApplicationMonitorService {
 
@@ -14,27 +72,7 @@ export class ApplicationMonitorService {
     this.appMonitor$ = this.applicationService.appStatsGated$.map(item => {
       // console.log('APP MONITOR');
       // console.log(item);
-      const res = {
-        avg: {
-          mem: 0,
-          disk: 0,
-          cpu: 0
-        },
-        max: {
-          mem: 0,
-          disk: 0,
-          cpu: 0
-        },
-        running: 0,
-        status: {
-          instance: 'error',
-          usage: 'tentative',
-          disk: 'tentative',
-          mem: 'tentative',
-          cpu: 'tentative'
-        }
-      };
-
+      const res = new AppMonitorState();
       if (!item.metadata) {
         return res;
       }
@@ -65,38 +103,13 @@ export class ApplicationMonitorService {
       res.avg.mem = res.avg.mem / validStatsCount;
       res.avg.cpu = res.avg.cpu / validStatsCount;
 
-      // Mem/Disk/CPU Usage Status
-      res.status.disk = this.getStatus(res.max.disk);
-      res.status.mem = this.getStatus(res.max.mem);
-      res.status.cpu = this.getStatus(res.max.cpu);
-
-      // Overall Usage Status
-      res.status.usage = this.getWorstStatus(res.status.mem, res.status.disk, res.status.cpu);
+      res.updateStatuses();
 
       // Instance Status
       res.status.instance = res.running === statsCount ? 'ok' : 'warning';
 
       return res;
     }).share();
-  }
-
-  private getStatus(value: number) {
-    if (value >= 0.9) {
-      return 'error';
-    } else if (value >= 0.8) {
-      return 'warning';
-    }
-    return 'ok';
-  }
-
-  private getWorstStatus(...statuses: string[]): string {
-    if (statuses.find(status => status === 'error')) {
-      return 'error';
-    }
-    if (statuses.find(status => status === 'warning')) {
-      return 'warning';
-    }
-    return 'ok';
   }
 
 }

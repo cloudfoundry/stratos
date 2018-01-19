@@ -3,25 +3,44 @@
 // --------------------------------------------------
 @mixin app-usage-gauge-theme($theme, $app-theme) {
 
-  $usage-gauge-bar-color:           #777 !default;
-  $usage-gauge-bar-max-color:       #888 !default;
-  $usage-gauge-alert-color:         $usage-gauge-bar-max-color !default;
-  $usage-gauge-bar-background:      linear-gradient(to right,#eee,#eee 25%,#e6e6e6 25%,#e6e6e6 50%,#d9d9d9 50%,#d9d9d9 75%,#ccc 75%,#ccc 100%);
+  $status-colors:           map-get($app-theme, status);
+  $usage-gauge-bar-color:   map-get($status-colors, tentative);
+  $usage-bar-warning-color: map-get($status-colors, warning);
+  $usage-bar-error-color:   map-get($status-colors, danger);
 
   .usage-gauge {
     &__progress-bar {
       background-color: $usage-gauge-bar-color;
     }
     &__progress-bar-background {
-      background-image: $usage-gauge-bar-background;
+      background-image: app-usage-gauge-gradient($usage-gauge-bar-color);
     }
 
     &__warning {
-      background-color: orange;
+      background-color: $usage-bar-warning-color;
     }
 
     &__error {
-      background-color: red;
+      background-color: $usage-bar-error-color;
     }
   }
+}
+
+@function app-usage-gauge-gradient($bar-color) {
+  $color: lighten($bar-color, 22%);
+  $gradient-stop-1: lighten($color, 8%);
+  $gradient-stop-2: lighten($color, 5%);
+  $gradient-stop-3: $color;
+  $gradient-stop-4: darken($color, 5%);
+
+  @return linear-gradient(to right,
+    $gradient-stop-1,
+    $gradient-stop-1 25%,
+    $gradient-stop-2 25%,
+    $gradient-stop-2 50%, 
+    $gradient-stop-3 50%, 
+    $gradient-stop-3 75%, 
+    $gradient-stop-4 75%,
+    $gradient-stop-4 100%
+  );
 }

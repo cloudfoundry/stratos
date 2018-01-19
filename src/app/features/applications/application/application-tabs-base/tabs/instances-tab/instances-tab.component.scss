@@ -1,11 +1,11 @@
-.summary {
+.instances {
   &__large {
     font-size: 16px;
     font-weight: 500;
   }
-}
 
-.usage__detail {
-  width: 100%;
-  font-size: 14px;
+  &__detail {
+    font-size: 14px;
+    width: 100%;
+  }
 }
