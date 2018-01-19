@@ -1,48 +1,77 @@
 <div class="add-route">
+  <app-page-header>
+    Create Route
+  </app-page-header>
+
   <mat-progress-bar *ngIf="submitted" [mode]="'indeterminate'">
-  </mat-progress-bar>
-  <app-details-card title="Add Route">
+    </mat-progress-bar>
+
+  <mat-card>
+      <mat-card-header>
+        Create Route
+      </mat-card-header>
     <div class="add-route--form">
+      <div class="add-route--form-message">
+        Please specify details for the new route.
+      </div>
       <div class="add-route--form-toggle">
-          Create TCP Route
-          <mat-slide-toggle name="createTcp" [(ngModel)]="createTCPRoute" ></mat-slide-toggle>
+        Create TCP Route
+        <mat-checkbox name="createTcp" [(ngModel)]="createTCPRoute" ></mat-checkbox>
+      </div>
+      <form  [formGroup]="addHTTPRoute"  *ngIf="!createTCPRoute">
+      <div class="form-fields">
+          <div>
+            <mat-form-field>
+              <mat-select  formControlName="domain" placeholder="domain" [(ngModel)]="selectedDomain" required>
+                <mat-option *ngFor="let domain of getDomainValues()" [value]="domain" >{{domain.entity.name}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field>
+              <input matInput formControlName="host"  placeholder="Host" required>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field>
+              <input matInput formControlName="path" placeholder="Path">
+            </mat-form-field>
+          </div>
         </div>
-    <form  [formGroup]="addRoute" >
-      <div>
-        Domain
-        <mat-form-field>
-          <mat-select  formControlName="domain" required>
-            <mat-option *ngFor="let domain of getDomainValues()" [value]="domain" >{{domain.entity.name}}</mat-option>
-          </mat-select>
-        </mat-form-field>
+        <div class="add-route--form-buttons">
+          <button mat-button name="submit" color="primary" (click)="onSubmit('http')"  [disabled]="!addHTTPRoute.valid">
+            Submit
+          </button>
+          <button mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
+            Cancel
+          </button>
+      </div>
+    </form>
+
+      <form  [formGroup]="addTCPRoute" *ngIf="createTCPRoute">
+      <div class="form-fields">
+          <div>
+            <mat-form-field>
+              <mat-select  formControlName="domain" placeholder="domain" [(ngModel)]="selectedDomain" required>
+                <mat-option *ngFor="let domain of getDomainValues()" [value]="domain" >{{domain.entity.name}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div>
+            <mat-form-field>
+              <input matInput formControlName="port" placeholder="Port" required>
+            </mat-form-field>
+          </div>
         </div>
-      <div *ngIf="!createTCPRoute">
-        Host
-        <mat-form-field>
-          <input matInput formControlName="host"  placeholder="Host">
-        </mat-form-field>
-      </div>
-      <div *ngIf="!createTCPRoute">
-        Path
-        <mat-form-field>
-          <input matInput formControlName="path" placeholder="Path">
-        </mat-form-field>
-      </div>
-      <div *ngIf="createTCPRoute">
-        Port
-        <mat-form-field>
-          <input matInput formControlName="port" placeholder="Port">
-        </mat-form-field>
-      </div>
-      <div class="add-route--form-buttons">
-        <button mat-button name="submit" color="primary" (click)="onSubmit()">
-          Submit
-        </button>
-        <button mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
-          Cancel
-        </button>
+        <div class="add-route--form-buttons">
+          <button mat-button name="submit" color="primary" (click)="onSubmit('tcp')"  [disabled]="!addTCPRoute.valid">
+            Submit
+          </button>
+          <button mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
+            Cancel
+          </button>
       </div>
     </form>
     </div>
-  </app-details-card>
+  </mat-card>
 </div>
