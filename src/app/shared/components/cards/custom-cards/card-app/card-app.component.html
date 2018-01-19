@@ -1,14 +1,23 @@
 <mat-card [routerLink]="['/applications', row.entity.cfGuid , row.entity.guid]" [ngClass]="'card-app__card-' + row.entity.state.toLowerCase()">
+  <app-card-status [status]="applicationState?.indicator"></app-card-status>
   <mat-card-header>
-    <div class="mat-card-title">{{ row.entity.name }}</div>
+    <div class="card-app__title">{{ row.entity.name }}</div>
+    <app-application-state-icon [state]="applicationState"></app-application-state-icon>
   </mat-card-header>
   <mat-card-content>
     <div class="card-app__meta">
-      <app-application-state [state]="applicationState"></app-application-state>
+      <div class="card-app__label">State:</div>
+      <div class="card-app__value">
+        <app-application-state [hideIcon]="true" [state]="applicationState"></app-application-state>
+      </div>
     </div>
     <div class="card-app__meta">
-      Instances: {{ row.entity.instances }}</div>
+      <div class="card-app__label">Instances:</div>
+      <div class="card-app__value">{{ row.entity.instances }}</div>
+    </div>
     <div class="card-app__meta">
-      Created at: {{ row.metadata.created_at | date:'medium' }}</div>
+      <div class="card-app__label">Created:</div>
+      <div class="card-app__value">{{ row.metadata.created_at | date:'medium' }}</div>
+    </div>
   </mat-card-content>
 </mat-card>

@@ -1,3 +1,6 @@
+import {
+    ApplicationEnvVarsService,
+} from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { EntityService } from '../core/entity-service';
@@ -8,7 +11,6 @@ import { Observable } from 'rxjs/Observable';
 import { EntityInfo } from '../store/types/api.types';
 import { AppMetadataInfo } from '../store/types/app-metadata.types';
 import { ApplicationStateService } from '../shared/components/application-state/application-state.service';
-import { ApplicationEnvVarsService } from '../features/applications/application/build-tab/application-env-vars.service';
 
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';

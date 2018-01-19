@@ -5,16 +5,18 @@ import { SharedModule } from '../../shared/shared.module';
 import { ApplicationWallComponent } from './application-wall/application-wall.component';
 import { ApplicationService } from './application.service';
 import { ApplicationBaseComponent } from './application/application-base.component';
-import { EventsTabComponent } from './application/events-tab/events-tab.component';
-import { LogStreamTabComponent } from './application/log-stream-tab/log-stream-tab.component';
-import { ServicesTabComponent } from './application/services-tab/services-tab.component';
-import { SshTabComponent } from './application/ssh-tab/ssh-tab.component';
-import { ApplicationEnvVarsService } from './application/build-tab/application-env-vars.service';
-import { BuildTabComponent } from './application/build-tab/build-tab.component';
-import { ViewBuildpackComponent } from './application/build-tab/view-buildpack/view-buildpack.component';
-import { VariablesTabComponent } from './application/variables-tab/variables-tab.component';
+import { EventsTabComponent } from './application/application-tabs-base/tabs/events-tab/events-tab.component';
+import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
+import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
+import { SshTabComponent } from './application/application-tabs-base/tabs/ssh-tab/ssh-tab.component';
+import { ApplicationEnvVarsService } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
+import { ViewBuildpackComponent } from './application/application-tabs-base/tabs/build-tab/view-buildpack/view-buildpack.component';
+import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
+import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DatePipe } from '@angular/common';
+import { EditApplicationComponent } from './edit-application/edit-application.component';
 
 
 @NgModule({
@@ -33,6 +35,8 @@ import { DatePipe } from '@angular/common';
     BuildTabComponent,
     VariablesTabComponent,
     ViewBuildpackComponent,
+    ApplicationTabsBaseComponent,
+    EditApplicationComponent,
   ],
   providers: [
     ApplicationService,

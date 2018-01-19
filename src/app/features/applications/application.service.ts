@@ -22,8 +22,8 @@ import {
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-
-import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/build-tab/application-env-vars.service';
+import { ApplicationEnvVarsService,
+   EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -43,6 +43,7 @@ export interface ApplicationData {
 
 @Injectable()
 export class ApplicationService {
+  applicationInstanceState$: Observable<any>;
 
   constructor(
     public cfGuid: string,
@@ -146,7 +147,13 @@ export class ApplicationService {
         return this.appStateService.get(appInfo.entity.entity, appStats ? appStats.metadata : null);
       });
 
-    this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
+    this.applicationInstanceState$ = this.waitForAppEntity$
+      .combineLatest(this.appStatsGated$)
+      .map(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
+        return this.appStateService.getInstanceState(appInfo.entity.entity, appStats ? appStats.metadata : null);
+    });
+
+      this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
     });
   }
