@@ -1,26 +1,39 @@
-<div>
+<div class="add-route">
   <mat-progress-bar *ngIf="submitted" [mode]="'indeterminate'">
   </mat-progress-bar>
   <app-details-card title="Add Route">
-    <form class="add-route--form" [formGroup]="addRoute" >
-      Domain
-      <mat-form-field>
-        <mat-select  formControlName="domain" required>
-          <mat-option *ngFor="let domain of domains" [value]="domain" >{{domain.entity.name}}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      Host
-      <mat-form-field>
-        <input matInput formControlName="host" placeholder="Host">
-      </mat-form-field>
-      Path
-      <mat-form-field>
-        <input matInput formControlName="path" placeholder="Path">
-      </mat-form-field>
-      Port
-      <mat-form-field>
-        <input matInput formControlName="port" placeholder="Port">
-      </mat-form-field>
+    <div class="add-route--form">
+      <div class="add-route--form-toggle">
+          Create TCP Route
+          <mat-slide-toggle name="createTcp" [(ngModel)]="createTCPRoute" ></mat-slide-toggle>
+        </div>
+    <form  [formGroup]="addRoute" >
+      <div>
+        Domain
+        <mat-form-field>
+          <mat-select  formControlName="domain" required>
+            <mat-option *ngFor="let domain of domains" [value]="domain" >{{domain.entity.name}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        </div>
+      <div *ngIf="!createTCPRoute">
+        Host
+        <mat-form-field>
+          <input matInput formControlName="host"  placeholder="Host">
+        </mat-form-field>
+      </div>
+      <div *ngIf="!createTCPRoute">
+        Path
+        <mat-form-field>
+          <input matInput formControlName="path" placeholder="Path">
+        </mat-form-field>
+      </div>
+      <div *ngIf="createTCPRoute">
+        Port
+        <mat-form-field>
+          <input matInput formControlName="port" placeholder="Port">
+        </mat-form-field>
+      </div>
       <div class="add-route--form-buttons">
         <button mat-button name="submit" color="primary" (click)="onSubmit()">
           Submit
@@ -30,5 +43,6 @@
         </button>
       </div>
     </form>
+    </div>
   </app-details-card>
 </div>

@@ -1,3 +1,8 @@
+.add-route {
+
+  display: flex;
+  flex-direction: column;
+
 .add-route--form {
 
   display: flex;
@@ -5,9 +10,22 @@
   margin-right: 24px;
   width: 100%;
 
+  .add-route--form-toggle {
+
+    margin-bottom: 24px;
+  }
+
+  mat-form-field {
+
+    margin-left: 24px;
+  }
+
   .add-route--form-buttons {
+
     display: flex;
     flex-direction: row-reverse;
   }
+
+}
 
 }

@@ -13,7 +13,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { tap, pluck, map, filter, delay, mergeMap } from 'rxjs/operators';
+import { tap, map, filter, delay, mergeMap, distinct } from 'rxjs/operators';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Subscription } from 'rxjs/Subscription';
 import { APIResource } from '../../../../store/types/api.types';
@@ -36,6 +36,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   appGuid: string;
   cfGuid: string;
   spaceGuid: string;
+  createTCPRoute = false;
 
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) {
     this.appGuid = applicationService.appGuid;
@@ -46,11 +47,10 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.addRoute = new FormGroup({
-      host: new FormControl('', [<any>Validators.required]),
+      host: new FormControl(''),
       domain: new FormControl('', [<any>Validators.required]),
       path: new FormControl(''),
-      port: new FormControl(''),
-      isTcp: new FormControl(''),
+      port: new FormControl('')
     });
 
     this.space$ = this.store.select(selectEntity('application', this.appGuid))
@@ -60,6 +60,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           this.spaceGuid = p.entity.space_guid;
           this.domains$ = this.store.select(selectNestedEntity('space', this.spaceGuid, ['entity', 'domains']))
           .pipe(
+            distinct(),
             tap(d => {
               if (d) {
                 this.domains = this.domains.concat(d);
@@ -114,7 +115,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     )).subscribe();
   }
 
-
+  toggleCreateTCPRoute() {
+    this.createTCPRoute = !this.createTCPRoute;
+  }
   ngOnDestroy(): void {
     if (this.domains$) {
       this.domains$.unsubscribe();
