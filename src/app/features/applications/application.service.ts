@@ -31,7 +31,12 @@ import {
 import { EntityInfo } from '../../store/types/api.types';
 import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType, AppEnvVarsState } from '../../store/types/app-metadata.types';
 import { combineLatest } from 'rxjs/operators/combineLatest';
+import { isTCPRoute } from './routes/routes.helper';
 
+export interface RoutesData {
+  nonTCP: EntityInfo[];
+  TCP: EntityInfo[];
+}
 export interface ApplicationData {
   fetching: boolean;
   app: EntityInfo;
@@ -39,6 +44,7 @@ export interface ApplicationData {
   organisation: EntityInfo;
   stack: EntityInfo;
   cf: any;
+  routes: RoutesData;
 }
 
 @Injectable()
@@ -130,6 +136,7 @@ export class ApplicationService {
         return entity && entity.entity && entity.entity.cfGuid && entity.entity.space && entity.entity.space.entity.organization;
       })
       .map(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]): ApplicationData => {
+
         return {
           fetching: entityRequestInfo.fetching,
           app: entity,
@@ -137,6 +144,10 @@ export class ApplicationService {
           organisation: entity.entity.space.entity.organization,
           stack: entity.entity.stack,
           cf: cnsis[entity.entity.cfGuid],
+          routes: {
+            nonTCP:  entity.entity.routes ? entity.entity.routes.filter(p => !isTCPRoute(p)) : [],
+            TCP: entity.entity.routes ? entity.entity.routes.filter(p => isTCPRoute(p)) : []
+          }
         };
       });
 
