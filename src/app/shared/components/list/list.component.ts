@@ -164,7 +164,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       .do(pageSize => this.paginationController.pageSize(pageSize));
 
     const filterWidgetToStore = this.filter.valueChanges
-      .debounceTime(500)
+      .debounceTime(this.dataSource.isLocal ? 150 : 250)
       .distinctUntilChanged()
       .map(value => value as string)
       .do(filterString => {
