@@ -23,7 +23,7 @@
           <mat-icon>stop</mat-icon>
         </button>
         <button mat-icon-button name="start" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STOPPED'" [disabled]="summaryDataChanging$ | async"
-          (clicmediak)="startApplication()">
+          (click)="startApplication()">
           <mat-icon>play_arrow</mat-icon>
         </button>
       </span>

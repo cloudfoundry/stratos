@@ -25,7 +25,7 @@
                   <app-metadata-item icon="memory" label="Memory Quota">{{ appSvc.app.entity.memory | mbToHumanSize }}</app-metadata-item>
                   <app-metadata-item icon="storage" label="Disk Quota">{{ appSvc.app.entity.disk_quota | mbToHumanSize}}</app-metadata-item>
                   <app-metadata-item icon="date_range" label="Created">{{ appSvc.app.metadata.created_at | date:'medium' }}</app-metadata-item>
-                  <app-metadata-item icon="access_time" label="Modified">{{ appSvc.app.entity.package_updated_at | date:'medium' || '-' }}</app-metadata-item>
+                  <app-metadata-item icon="access_time" label="Modified">{{ appSvc.app.entity.package_updated_at ? (appSvc.app.entity.package_updated_at | date:'medium') : '-' }}</app-metadata-item>
                   <app-metadata-item icon="bug_report" label="Production">{{ appSvc.app.entity.production ? 'Yes' : 'No'}}</app-metadata-item>
                 </div>
                 <div class="app-metadata__two-cols">
@@ -39,7 +39,7 @@
             </mat-card-content>
           </mat-card>
       </app-tile>
-      <app-tile size="33.33333333">          
+      <app-tile size="1of3">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Cloud Foundry</mat-card-title>
@@ -55,6 +55,19 @@
 
     <!-- Misc -->
     <app-tile-group>
+      <app-tile>          
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Build Info</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+              <app-metadata-item icon="build" label="Buildpack">
+                  <app-view-buildpack [buildPack]="appSvc.app.entity.buildpack || appSvc.app.entity.detected_buildpack"></app-view-buildpack>
+              </app-metadata-item>
+              <app-metadata-item icon="code" label="Stack">{{ appSvc.app.entity.stack?.entity.name || '-' }}</app-metadata-item>
+            </mat-card-content>
+          </mat-card>
+      </app-tile>
       <app-tile  *ngIf="(appService.applicationStratProject$ | async)?.deploySource as deploySource; else notDeployedFromStratos">
           <mat-card>
             <mat-card-header>
@@ -93,19 +106,6 @@
             </mat-card>
           </app-tile>
         </ng-template>
-        <app-tile>          
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Build Info</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-                <app-metadata-item icon="build" label="Buildpack">
-                    <app-view-buildpack [buildPack]="appSvc.app.entity.buildpack || appSvc.app.entity.detected_buildpack"></app-view-buildpack>
-                </app-metadata-item>
-                <app-metadata-item icon="code" label="Stack">{{ appSvc.app.stack?.entity.name }}</app-metadata-item>
-              </mat-card-content>
-            </mat-card>
-        </app-tile>
       </app-tile-group>
   </app-tile-grid>
   

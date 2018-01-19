@@ -8,11 +8,9 @@ import { Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBind
 })
 export class TileComponent implements OnInit, AfterContentInit {
 
-  @Input('size') size: number;
+  @Input('size') size: string;
 
-  @HostBinding('style.flex') private isSized: string;
-
-  @HostBinding('style.width.%') private width: number;
+  @HostBinding('class.app-tile-1-3') private isOneThirdFixed = false;
 
   constructor() { }
 
@@ -21,8 +19,10 @@ export class TileComponent implements OnInit, AfterContentInit {
 
   ngAfterContentInit() {
     if (this.size) {
-      this.isSized = 'none';
-      this.width = this.size;
+
+      if (this.size === '1of3') {
+        this.isOneThirdFixed = true;
+      }
     }
   }
 }
