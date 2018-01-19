@@ -40,7 +40,7 @@ function chainReducers(baseReducer, extraReducers) {
     return newState;
   };
 }
-
+// These should be const
 const entities = [
   'application',
   'stack',

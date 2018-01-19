@@ -4,7 +4,7 @@ import { IRequestEntityTypeState } from './../../app-state';
 import { IRequestArray } from '../api-request-reducer/types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { ISuccessRequestAction } from '../../types/request.types';
-import { mergeState } from '../../helpers/reducer.helper';
+import { deepMergeState } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
@@ -17,7 +17,7 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
         if (success.requestType === 'delete') {
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
-          return mergeState(state, success.response.entities);
+          return deepMergeState(state, success.response.entities);
         }
         return state;
       default:
