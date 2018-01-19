@@ -25,7 +25,6 @@ export interface AppState {
   request: IRequestState;
   requestData: IRequestDataState;
   dashboard: DashboardState;
-  // appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;
   lists: ListsState;
 }

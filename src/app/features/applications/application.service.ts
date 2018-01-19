@@ -12,8 +12,10 @@ import {
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-import { ApplicationEnvVarsService,
-   EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import {
+  ApplicationEnvVarsService,
+  EnvVarStratosProject
+} from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
@@ -205,14 +207,6 @@ export class ApplicationService {
       return !!value;
     }
   }
-
-  // isMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
-  //   if (requestInfo) {
-  //     return !requestInfo.fetching;
-  //   } else {
-  //     return !!value;
-  //   }
-  // }
 
   updateApplication(updatedApplication: UpdateApplication) {
     this.store.dispatch(new UpdateExistingApplication(
