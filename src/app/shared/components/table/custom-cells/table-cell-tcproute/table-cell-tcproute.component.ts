@@ -1,5 +1,6 @@
 import { TableCellCustom } from '../../table-cell/table-cell-custom';
 import { Component, OnInit, Input } from '@angular/core';
+import { isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 
 @Component({
   selector: 'app-table-cell-tcp-route',
@@ -14,10 +15,8 @@ export class TableCellTCPRouteComponent<T> extends TableCellCustom<T> implements
     super();
   }
 
-  isTCP = (routeEntity) => routeEntity.port !== null;
-
   ngOnInit() {
-    this.isRouteTCP = this.isTCP(this.row.entity);
+    this.isRouteTCP = isTCPRoute(this.row);
   }
 
 }
