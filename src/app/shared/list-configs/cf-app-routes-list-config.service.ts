@@ -126,6 +126,8 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
   getColumns = () => this.columns;
   getDataSource = () => this.routesDataSource;
   getFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => [];
+
 
   constructor(
     private store: Store<AppState>,
