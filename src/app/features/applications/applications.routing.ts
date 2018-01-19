@@ -42,8 +42,8 @@ const appplicationsRoutes: Routes = [
               uiFullView: true
             },
             children: [
-              { path: '', redirectTo: 'build', pathMatch: 'full' },
-              { path: 'build', component: BuildTabComponent },
+              { path: '', redirectTo: 'summary', pathMatch: 'full' },
+              { path: 'summary', component: BuildTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },

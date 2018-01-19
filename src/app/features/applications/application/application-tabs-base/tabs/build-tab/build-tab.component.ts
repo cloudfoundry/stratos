@@ -23,9 +23,6 @@ export class BuildTabComponent implements OnInit {
   public async: any;
 
   ngOnInit() {
-
-    // const { cfGuid, appGuid } = this.applicationService;
-
     this.cardTwoFetching$ = this.appService.application$
       .combineLatest(
       this.appService.appSummary$

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 // import { UpdateApplication } from '../../../store/actions/application.actions';
 
@@ -7,11 +7,8 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './edit-application.component.html',
   styleUrls: ['./edit-application.component.scss']
 })
-export class EditApplicationComponent implements OnInit {
+export class EditApplicationComponent {
 
   constructor() { }
-
-  ngOnInit() {
-  }
 
 }
