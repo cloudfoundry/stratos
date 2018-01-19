@@ -15,6 +15,7 @@ import { ValuesPipe } from '../../../pipes/values.pipe';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../store/reducers.module';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../../test-framework/list-table-helper';
+import { CardStatusComponent } from '../../card-status/card-status.component';
 
 describe('CardComponent', () => {
   let component: CardComponent<EntityInfo>;
@@ -24,6 +25,7 @@ describe('CardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         CardComponent,
+        CardStatusComponent,
         ...CardEntryPoints,
         TableCellComponent,
         ...TableCellEntryPoints,

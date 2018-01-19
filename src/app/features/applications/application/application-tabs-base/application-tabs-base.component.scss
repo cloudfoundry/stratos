@@ -2,8 +2,12 @@
   display: flex;
 
   &__nav {
-    margin-bottom: 20px;
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 56px;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0 16px;
   }
 
   &__form {

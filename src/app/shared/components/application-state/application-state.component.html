@@ -1,6 +1,6 @@
-<div class="app-state">
-  <app-application-state-icon [state]="state"></app-application-state-icon>
-  <span>{{state?.label }}</span>
+<div class="app-state" [ngClass]="{'app-state__with-icon': !hideIcon}">
+  <app-application-state-icon *ngIf="!hideIcon" [state]="state"></app-application-state-icon>
+  <span>{{ state?.label }}</span>
   <span *ngIf="state?.subLabel">&nbsp;-&nbsp;</span>
   <span *ngIf="state?.subLabel">{{ state?.subLabel }}</span>
 </div>

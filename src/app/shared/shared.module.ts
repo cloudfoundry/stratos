@@ -61,6 +61,14 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
+import { TileComponent } from './components/tile/tile/tile.component';
+import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
+import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
+import { CardStatusComponent } from './components/card-status/card-status.component';
+import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
+import { CardAppStatusComponent } from './components/cards/custom-cards/card-app-status/card-app-status.component';
+import { CardAppInstancesComponent } from './components/cards/custom-cards/card-app-instances/card-app-instances.component';
 
 @NgModule({
   imports: [
@@ -114,6 +122,14 @@ import { ApplicationStateService } from './components/application-state/applicat
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
+    PageSubheaderComponent,
+    TileComponent,
+    TileGroupComponent,
+    TileGridComponent,
+    CardStatusComponent,
+    MetadataItemComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
   ],
   exports: [
     FormsModule,
@@ -139,6 +155,14 @@ import { ApplicationStateService } from './components/application-state/applicat
     NoContentMessageComponent,
     EndpointsMissingComponent,
     ApplicationStateComponent,
+    PageSubheaderComponent,
+    TileComponent,
+    TileGroupComponent,
+    TileGridComponent,
+    CardStatusComponent,
+    MetadataItemComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [
