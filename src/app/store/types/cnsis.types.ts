@@ -32,7 +32,7 @@ export interface CNSISModel {
   // This is generated client side when we login
   registered?: boolean;
   info?: SystemInfoEndpoint;
-  connectionStatus: endpointConnectionStatus;
+  connectionStatus?: endpointConnectionStatus;
 }
 
 export interface CNSISState {
