@@ -3,7 +3,25 @@ mat-dialog-actions {
 }
 
 .logout-dialog {
-  &--content {
+  &__content {
     padding: 20px;
   }
+  &__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+  }
+  &__outer {
+    position: relative;
+    margin: -24px;
+    padding: 24px 50px;
+  }
+  &__actions {
+    justify-content: center;
+  }
+}
+
+mat-dialog-container {
+  position: relative;
 }

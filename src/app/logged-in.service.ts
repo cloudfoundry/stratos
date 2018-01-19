@@ -9,6 +9,10 @@ import { MatDialog } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { Observable } from 'rxjs/Observable';
 import { SessionData } from './store/types/auth.types';
+import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
+import { interval } from 'rxjs/observable/interval';
+import { timeInterval } from 'rxjs/operator/timeInterval';
+import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class LoggedInService {
@@ -17,10 +21,10 @@ export class LoggedInService {
   private _userInteractionChecker: Subscription;
 
   private _lastUserInteraction = Date.now();
-  private _sessionChecker;
+  private _sessionChecker: Subscription;
 
   // Check the session every 30 seconds (Note: this is vey cheap to do unless the session is about to expire)
-  private _checkSessionInterval = 30 * 1000;
+  private _checkSessionInterval = 1 * 1000;
 
   // Warn inactive users 2 minutes before logging them out
   private _warnBeforeLogout = 2 * 60 * 1000;
@@ -35,6 +39,7 @@ export class LoggedInService {
   private _userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
   private _activityPromptShown = false;
+
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -51,16 +56,8 @@ export class LoggedInService {
       .subscribe((auth: AuthState) => {
         this._sessionData = auth.sessionData;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
-          if (!this._sessionChecker) {
-            ngZone.runOutsideAngular(() => {
-              // Run outside of zone to allow protractor to finish
-              this._sessionChecker = setInterval(() => {
-                ngZone.run(() => {
-                  // Run inside zone for change detection
-                  this._checkSession();
-                });
-              }, this._checkSessionInterval);
-            });
+          if (!this._sessionChecker || this._sessionChecker.closed) {
+            this.openSessionCheckerPoll();
           }
           if (!this._userInteractionChecker) {
             this._userInteractionChecker = Observable.merge(...eventStreams).subscribe(() => {
@@ -68,10 +65,7 @@ export class LoggedInService {
             });
           }
         } else {
-          if (this._sessionChecker) {
-            clearInterval(this._sessionChecker);
-            delete this._sessionChecker;
-          }
+          this.closeSessionCheckerPoll();
           if (this._userInteractionChecker) {
             this._userInteractionChecker.unsubscribe();
           }
@@ -79,6 +73,22 @@ export class LoggedInService {
       });
 
   }
+
+  private openSessionCheckerPoll() {
+    this._sessionChecker = interval(this._checkSessionInterval)
+      .pipe(
+      tap(() => {
+        this._checkSession();
+      })
+      ).subscribe();
+  }
+
+  private closeSessionCheckerPoll() {
+    if (this._sessionChecker && !this._sessionChecker.closed) {
+      this._sessionChecker.unsubscribe();
+    }
+  }
+
 
   private _promptInactiveUser(expiryDate) {
     this._activityPromptShown = true;
@@ -88,9 +98,10 @@ export class LoggedInService {
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe((verrify = false) => {
-      if (verrify) {
+    dialogRef.afterClosed().subscribe((verify = false) => {
+      if (verify) {
         this.store.dispatch(new VerifySession(false, false));
+        this.openSessionCheckerPoll();
       }
       this._activityPromptShown = false;
     });
@@ -100,12 +111,14 @@ export class LoggedInService {
     if (this._activityPromptShown) {
       return;
     }
+
     const now = Date.now();
     const sessionExpiresOn = this._sessionData.sessionExpiresOn;
+    console.log(this._sessionData.sessionExpiresOn);
     const safeExpire = sessionExpiresOn - this._autoLogoutDelta;
     const delta = safeExpire - now;
     const aboutToExpire = delta < this._warnBeforeLogout;
-
+    console.log(aboutToExpire);
     if (aboutToExpire) {
       const idleDelta = now - this._lastUserInteraction;
       const userIsActive = idleDelta < this._userIdlePeriod;
@@ -113,6 +126,7 @@ export class LoggedInService {
         this.store.dispatch(new VerifySession(false, false));
       } else {
         this._promptInactiveUser(safeExpire);
+        this.closeSessionCheckerPoll();
       }
     }
   }
