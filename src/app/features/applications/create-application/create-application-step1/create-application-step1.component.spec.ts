@@ -7,10 +7,13 @@ import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { appReducers } from '../../../../store/reducers.module';
 import { CreateApplicationStep1Component } from './create-application-step1.component';
+import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
 
 describe('CreateApplicationStep1Component', () => {
   let component: CreateApplicationStep1Component;
   let fixture: ComponentFixture<CreateApplicationStep1Component>;
+
+  const initialState = { ...getInitialTestStoreState() };
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -21,7 +24,10 @@ describe('CreateApplicationStep1Component', () => {
         SharedModule,
         BrowserAnimationsModule,
         StoreModule.forRoot(
-          appReducers
+          appReducers,
+          {
+            initialState
+          }
         )
       ]
     })

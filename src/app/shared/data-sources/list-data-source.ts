@@ -1,3 +1,4 @@
+import { paginationAddParams } from '../../store/reducers/pagination-reducer/pagination-reducer-add-params';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { OperatorFunction } from 'rxjs/interfaces';
 import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -210,6 +211,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     return Object.values(paginationEntity.clientPagination).join('.')
       + paginationEntity.params['order-direction-field']
       + paginationEntity.params['order-direction']
+      + paginationEntity.clientPagination.filter.string
+      + Object.values(paginationEntity.clientPagination.filter.items)
       + paginationEntity.fetching; // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }
 
@@ -234,7 +237,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     // If data source is not local then this method must be overridden
     return '';
   }
-  public setFilterParam(filter: ListFilter, pag: PaginationEntityState) {
+  public setFilterParam(filter: string, pag: PaginationEntityState) {
     // If data source is not local then this method must be overridden
   }
 }

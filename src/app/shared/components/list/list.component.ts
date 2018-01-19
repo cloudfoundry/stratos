@@ -31,6 +31,7 @@ import { StaticInjector } from '@angular/core/src/di/injector';
 import { ListDataSource } from '../../data-sources/list-data-source';
 import { ListPaginationController, IListPaginationController } from '../../data-sources/list-pagination-controller';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
@@ -38,19 +39,22 @@ export interface IListConfig<T> {
   getSingleActions: () => IListAction<T>[];
   getColumns: () => ITableColumn<T>[];
   getDataSource: () => IListDataSource<T>;
-  getFiltersConfigs: () => IListFilterConfig[];
+  getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   isLocal?: boolean;
   pageSizeOptions: Number[];
 }
 
-export interface IListFilterConfig {
+export interface IListMultiFilterConfig {
   key: string;
   label: string;
-  items: IListFilterConfigItem[];
+  list$: Observable<IListMultiFilterConfigItem[]>;
+  loading$: Observable<boolean>;
+  select: BehaviorSubject<any>;
 }
 
-export interface IListFilterConfigItem {
+export interface IListMultiFilterConfigItem {
   label: string;
+  item: any;
   value: string;
 }
 
@@ -62,7 +66,7 @@ export class ListConfig implements IListConfig<any> {
   getSingleActions = () => null;
   getColumns = () => null;
   getDataSource = () => null;
-  getFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => [];
 }
 
 export interface IBaseListAction<T> {
@@ -110,6 +114,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
   filterString = '';
+  multiFilters = {};
 
   sortColumns: ITableColumn<T>[];
   @ViewChild('headerSortField') headerSortField: MatSelect;
@@ -121,7 +126,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   singleActions: IListAction<T>[];
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
-  filterConfigs: IListFilterConfig[];
+  multiFilterConfigs: IListMultiFilterConfig[];
 
   paginationController: IListPaginationController<T>;
 
@@ -144,7 +149,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.singleActions = this.listConfigService.getSingleActions();
     this.columns = this.listConfigService.getColumns();
     this.dataSource = this.listConfigService.getDataSource();
-    this.filterConfigs = this.listConfigService.getFiltersConfigs();
+    this.multiFilterConfigs = this.listConfigService.getMultiFiltersConfigs();
 
     this.paginationController = new ListPaginationController(this._store, this.dataSource);
 
@@ -176,6 +181,14 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         return this.paginationController.filterByString(filterString);
       });
 
+    const multiFilterWidgetObservables = new Array<Subscription>();
+    Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
+      const sub = filterConfig.select.asObservable().do((filterItem: string) => {
+        this.paginationController.multiFilter(filterConfig, filterItem);
+      });
+      multiFilterWidgetObservables.push(sub.subscribe());
+    });
+
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
@@ -186,7 +199,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
-      this.filterString = filter.filter;
+      this.filterString = filter.string;
+      this.multiFilters = filter.items;
     });
 
     this.uberSub = Observable.combineLatest(
@@ -197,6 +211,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       filterStoreToWidget,
       filterWidgetToStore,
       sortStoreToWidget,
+      multiFilterWidgetObservables
     ).subscribe();
 
     if (this.listMode === MODES.CARD_ONLY) {
