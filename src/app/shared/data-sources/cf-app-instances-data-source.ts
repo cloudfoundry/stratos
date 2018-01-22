@@ -16,6 +16,7 @@ import { PaginationEntityState, QParam } from '../../store/types/pagination.type
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction, ListPagination } from '../../store/actions/list.actions';
 import { AppStatSchema, AppStat } from '../../store/types/app-metadata.types';
+import { inspect } from 'util';
 
 export interface ListAppInstance {
   index: number;
@@ -49,18 +50,67 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
         Object.keys(instances).forEach(key => {
           res.push({
             index: key,
+            usage: this.calcUsage(instances[key].entity),
             value: instances[key].entity
           });
         });
         return res;
       }),
       true,
-      []
+      [
+        {
+          type: 'sort',
+          orderKey: 'index',
+          field: 'index',
+        },
+        {
+          type: 'sort',
+          orderKey: 'state',
+          field: 'value.state'
+        },
+        {
+          type: 'sort',
+          orderKey: 'memory',
+          field: 'usage.mem'
+        },
+        {
+          type: 'sort',
+          orderKey: 'disk',
+          field: 'usage.disk'
+        },
+        {
+          type: 'sort',
+          orderKey: 'cpu',
+          field: 'usage.cpu'
+        },
+        {
+          type: 'sort',
+          orderKey: 'uptime',
+          field: 'value.stats.uptime'
+        }
+      ]
+
     );
 
     _store.dispatch(new SetListStateAction(
       paginationKey,
       'table',
     ));
+  }
+
+  // Need to calculate usage as a fraction for sorting
+  calcUsage(instanceStats) {
+    const usage = {
+      mem: 0,
+      disk: 0,
+      cpu: 0,
+    };
+
+    if (instanceStats.stats && instanceStats.stats.usage ) {
+      usage.mem = instanceStats.stats.usage.mem / instanceStats.stats.mem_quota;
+      usage.disk = instanceStats.stats.usage.disk / instanceStats.stats.disk_quota;
+      usage.cpu = instanceStats.stats.usage.cpu;
+    }
+    return usage;
   }
 }
