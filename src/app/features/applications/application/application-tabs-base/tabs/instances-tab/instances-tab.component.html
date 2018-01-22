@@ -14,17 +14,7 @@
       </mat-card>
     </app-tile>
     <app-tile>
-      <mat-card>
-        <app-card-status [status]="(appMonitor.appMonitor$ | async)?.status.instance"></app-card-status>
-        <mat-card-header>
-          <mat-card-title>Instances</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="instances__large">
-            {{(applicationService.appSummary$| async)?.entity?.entity.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <app-card-app-instances></app-card-app-instances>
     </app-tile>
     <app-tile>
       <mat-card *ngIf="appMonitor.appMonitor$ | async as monitor">
