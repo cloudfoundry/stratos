@@ -42,6 +42,7 @@ import {
   defaultPaginationState,
 } from '../../store/reducers/pagination-reducer/pagination.reducer';
 import { tap, map } from 'rxjs/operators';
+import { isTCPRoute, getRoute } from './routes/routes.helper';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -50,6 +51,7 @@ export interface ApplicationData {
   organisation: EntityInfo;
   stack: EntityInfo;
   cf: any;
+  appUrl: string;
 }
 
 @Injectable()
@@ -195,6 +197,7 @@ export class ApplicationService {
           organisation: entity.entity.space.entity.organization,
           stack: entity.entity.stack,
           cf: cnsis[entity.entity.cfGuid],
+          appUrl: this.getAppUrl(entity)
         };
       });
 
@@ -238,6 +241,15 @@ export class ApplicationService {
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching && ev.ids[ev.currentPage]).startWith(false);
 
     this.isFetchingStats$ = this.appStatsFetching$.map(appStats => appStats ? appStats.fetching : false).startWith(false);
+  }
+
+  getAppUrl(app: EntityInfo): string {
+    const nonTCPRoutes = app.entity.routes
+    .filter(p => !isTCPRoute(p));
+    if (nonTCPRoutes.length >= 0) {
+      return getRoute(nonTCPRoutes[0], true);
+    }
+   return null;
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {

@@ -10,6 +10,11 @@
       </button>
     </span>
     <span *ngIf="!isEditSummary">
+      <a  mat-icon-button *ngIf="(applicationService.application$ | async)?.appUrl != ''
+      && (applicationService.application$ | async)?.app.entity.state === 'STARTED' "
+       href="{{(applicationService.application$ | async)?.appUrl}}" target="_blank">
+          <mat-icon>launch</mat-icon>
+      </a>
       <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
         <mat-icon>delete</mat-icon>
       </button>
