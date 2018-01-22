@@ -1,4 +1,5 @@
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
+import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -14,7 +15,6 @@ import { CreateApplicationComponent } from './create-application/create-applicat
 import { CreateApplicationModule } from './create-application/create-application.module';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
-
 const appplicationsRoutes: Routes = [
   {
     path: 'new',
@@ -52,9 +52,13 @@ const appplicationsRoutes: Routes = [
               { path: 'events', component: EventsTabComponent },
               { path: 'ssh', component: SshTabComponent }
             ]
+          },
+          {
+            path: 'add-route',
+            component: AddRoutesComponent,
           }
         ]
-      },
+      }
     ]
   }
 ];
