@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>Event Detail</h2>
 <mat-dialog-content>
-  <div *ngFor="let value of data.row.entity.metadata | values;">
+  <div *ngFor="let value of data.row.entity | values;">
     {{value.key}}
     <pre>{{value.value | json}}</pre>
   </div>

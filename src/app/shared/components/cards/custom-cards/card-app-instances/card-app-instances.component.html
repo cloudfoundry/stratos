@@ -6,7 +6,7 @@
   <mat-card-content class="card-app-instances__compact">
       <div *ngIf="!isEditing" class="card-app-instances__large">
           {{(runningInstances$ | async) || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
-      </div>
+    </div>
       <form [hidden]="!isEditing" class="exampcard-app-instances_form">
           <mat-form-field>
             <input #instanceField matInput type="number" name="instances" [(ngModel)]="editValue" value="{{ editCount }}">

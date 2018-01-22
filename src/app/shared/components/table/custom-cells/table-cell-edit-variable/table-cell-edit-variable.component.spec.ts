@@ -1,4 +1,4 @@
-import { AppEnvVar } from '../../../../data-sources/cf-app-variables-data-source';
+import { ListAppEnvVar } from '../../../../data-sources/cf-app-variables-data-source';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEditVariableComponent } from './table-cell-edit-variable.component';
@@ -6,8 +6,8 @@ import { CoreModule } from '../../../../../core/core.module';
 import { IListDataSource } from '../../../../data-sources/list-data-source-types';
 
 describe('TableCellEditVariableComponent', () => {
-  let component: TableCellEditVariableComponent<AppEnvVar>;
-  let fixture: ComponentFixture<TableCellEditVariableComponent<AppEnvVar>>;
+  let component: TableCellEditVariableComponent<ListAppEnvVar>;
+  let fixture: ComponentFixture<TableCellEditVariableComponent<ListAppEnvVar>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -26,7 +26,7 @@ describe('TableCellEditVariableComponent', () => {
       name: 'name',
       value: 'value'
     };
-    component.dataSource = {} as IListDataSource<AppEnvVar>;
+    component.dataSource = {} as IListDataSource<ListAppEnvVar>;
     fixture.detectChanges();
   });
 

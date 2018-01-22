@@ -1,4 +1,3 @@
-import { getPaginationKey } from './app-metadata.actions';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction, ICFAction } from '../types/request.types';
 
@@ -7,6 +6,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
+import { getPaginationKey } from './pagination.actions';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';

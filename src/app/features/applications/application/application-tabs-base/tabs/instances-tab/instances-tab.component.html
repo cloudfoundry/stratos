@@ -7,32 +7,32 @@
       <app-card-app-instances [busy]="summaryDataChanging$" showActions="true"></app-card-app-instances>
     </app-tile>
     <app-tile>
-        <mat-card *ngIf="appMonitor.appMonitor$ | async as monitor">
-          <app-card-status [status]="monitor.status?.usage"></app-card-status>
-          <mat-card-content>
-            <table class="instances__detail">
-              <tr>
-                <td>Usage</td>
-                <td [appTableCellStatus]="monitor.status.mem">Mem</td>
-                <td [appTableCellStatus]="monitor.status.disk">Disk</td>
-                <td [appTableCellStatus]="monitor.status.cpu">CPU</td>
-              </tr>
-              <tr>
-                <td>Max</td>
-                <td>{{ monitor.max.mem | percentage }}</td>
-                <td>{{ monitor.max.disk | percentage }}</td>
-                <td>{{ monitor.max.cpu | percentage }}</td>
-              </tr>
-              <tr>
-                  <td>Avg</td>
-                  <td>{{ monitor.avg.mem | percentage }}</td>
-                  <td>{{ monitor.avg.disk | percentage }}</td>
-                  <td>{{ monitor.avg.cpu | percentage }}</td>
-                </tr>
-              </table>
-          </mat-card-content>
-        </mat-card>
-      </app-tile>
+      <mat-card *ngIf="appMonitor.appMonitor$ | async as monitor">
+        <app-card-status [status]="monitor.status?.usage"></app-card-status>
+        <mat-card-content>
+          <table class="instances__detail">
+            <tr>
+              <td>Usage</td>
+              <td [appTableCellStatus]="monitor.status.mem">Mem</td>
+              <td [appTableCellStatus]="monitor.status.disk">Disk</td>
+              <td [appTableCellStatus]="monitor.status.cpu">CPU</td>
+            </tr>
+            <tr>
+              <td>Max</td>
+              <td>{{ monitor.max.mem | percentage }}</td>
+              <td>{{ monitor.max.disk | percentage }}</td>
+              <td>{{ monitor.max.cpu | percentage }}</td>
+            </tr>
+            <tr>
+              <td>Avg</td>
+              <td>{{ monitor.avg.mem | percentage }}</td>
+              <td>{{ monitor.avg.disk | percentage }}</td>
+              <td>{{ monitor.avg.cpu | percentage }}</td>
+            </tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </app-tile>
   </app-tile-group>
 </app-tile-grid>
 <app-list [text]="{ title: 'Instances'}" [enableFilter]="false" [cardComponent]="cardComponent">

@@ -3,9 +3,9 @@ import { TableCellUsageComponent } from '../components/table/custom-cells/table-
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { ApplicationService } from '../../features/applications/application.service';
-import { CfAppInstancesDataSource } from '../data-sources/cf-app-instances-data-source';
+import { CfAppInstancesDataSource, ListAppInstance } from '../data-sources/cf-app-instances-data-source';
 import { IListAction, IListConfig } from '../components/list/list.component';
-import { EntityInfo } from '../../store/types/api.types';
+import { APIResource, EntityInfo } from '../../store/types/api.types';
 import { ITableColumn } from '../components/table/table.types';
 import {
   TableCellEventTimestampComponent,
@@ -22,12 +22,13 @@ import {
 import { Injectable } from '@angular/core';
 import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
 import { DeleteApplicationInstance } from '../../store/actions/application.actions';
+import { AppStat } from '../../store/types/app-metadata.types';
 
 @Injectable()
-export class CfAppInstancesConfigService implements IListConfig<any> {
+export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
 
   instancesSource: CfAppInstancesDataSource;
-  columns: Array<ITableColumn<any>> = [
+  columns: Array<ITableColumn<ListAppInstance>> = [
     {
       columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: true, cellFlex: '1'
     },
@@ -120,7 +121,6 @@ export class CfAppInstancesConfigService implements IListConfig<any> {
   getSingleActions = () => this.singleActions;
   getColumns = () => this.columns;
   getDataSource = () => this.instancesSource;
-  getFiltersConfigs = () => [];
   getMultiFiltersConfigs = () => [];
 
 }
