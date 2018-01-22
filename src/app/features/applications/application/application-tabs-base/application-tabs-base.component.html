@@ -10,7 +10,8 @@
       </button>
     </span>
     <span *ngIf="!isEditSummary">
-      <button mat-icon-button name="open" *ngIf="(applicationService.application$ | async)?.routes?.nonTCP.length != 0" [disabled]="summaryDataChanging$ | async"
+      <button mat-icon-button name="open" *ngIf="(applicationService.application$ | async)?.routes?.nonTCP.length != 0
+      && (applicationService.application$ | async)?.app.entity.state === 'STARTED'" [disabled]="summaryDataChanging$ | async"
         (click)="openApplication()">
         <mat-icon>launch</mat-icon>
       </button>
