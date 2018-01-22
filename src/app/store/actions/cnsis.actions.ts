@@ -5,7 +5,6 @@ import { Action, createSelector } from '@ngrx/store';
 
 import { AppState } from '../app-state';
 import { PaginatedAction } from '../types/pagination.types';
-import { EndpointsDataSource } from '../../shared/data-sources/endpoints-data-source';
 
 export const GET_CNSIS = '[CNSIS] Get all';
 export const GET_CNSIS_LOGIN = '[CNSIS] Get all at login';

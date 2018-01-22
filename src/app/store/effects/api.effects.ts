@@ -54,7 +54,6 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-
       const paramsObject = {};
       const apiAction = action as ICFAction;
       const paginatedAction = action as PaginatedAction;
@@ -63,7 +62,6 @@ export class APIEffect {
 
       this.store.dispatch(new StartRequestAction(action, requestType));
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
-
       // Apply the params from the store
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();
@@ -155,6 +153,7 @@ export class APIEffect {
 
   getErrors(resData) {
     return Object.keys(resData)
+    .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
         const cnsis = resData[cfGuid];
@@ -162,7 +161,7 @@ export class APIEffect {
           error: cnsis.error,
           guid: cfGuid
         } : null;
-      })
+    })
       .filter(cnsisError => !!cnsisError);
   }
 
@@ -171,7 +170,9 @@ export class APIEffect {
     totalResults: number
   } {
     let totalResults = 0;
-    const allEntities = Object.keys(data).map(cfGuid => {
+    const allEntities = Object.keys(data)
+    .filter( guid => data[guid] !== null)
+    .map(cfGuid => {
       const cfData = data[cfGuid];
       switch (apiAction.entityLocation) {
         case RequestEntityLocation.ARRAY: // The response is an array which contains the entities
