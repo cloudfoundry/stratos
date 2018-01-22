@@ -142,18 +142,31 @@ export class APIEffect {
     if (!resource) {
       return resource;
     }
-    return resource.metadata ? {
+
+    const result = resource.metadata ? {
       entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
       metadata: resource.metadata
     } : {
         entity: { ...resource, cfGuid },
         metadata: { guid: guid }
       };
+
+    // Inject `cfGuid` in nested entities
+    Object.keys(result.entity).forEach(resourceKey => {
+      const nestedResourceEntity = result.entity[resourceKey];
+      if (nestedResourceEntity &&
+        nestedResourceEntity.hasOwnProperty('entity') &&
+        nestedResourceEntity.hasOwnProperty('metadata')) {
+        resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid, nestedResourceEntity.metadata.guid);
+      }
+    });
+
+    return result;
   }
 
   getErrors(resData) {
     return Object.keys(resData)
-    .filter(guid => resData[guid] !== null)
+      .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
         const cnsis = resData[cfGuid];
@@ -161,7 +174,7 @@ export class APIEffect {
           error: cnsis.error,
           guid: cfGuid
         } : null;
-    })
+      })
       .filter(cnsisError => !!cnsisError);
   }
 
@@ -171,34 +184,34 @@ export class APIEffect {
   } {
     let totalResults = 0;
     const allEntities = Object.keys(data)
-    .filter( guid => data[guid] !== null)
-    .map(cfGuid => {
-      const cfData = data[cfGuid];
-      switch (apiAction.entityLocation) {
-        case RequestEntityLocation.ARRAY: // The response is an array which contains the entities
-          return Object.keys(cfData).map(key => {
-            const guid = apiAction.guid + '-' + key;
-            const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
-            result.entity.guid = guid;
-            return result;
-          });
-        case RequestEntityLocation.OBJECT: // The response is the entity
-          return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
-        case RequestEntityLocation.RESOURCE: // The response is an object and the entities list is within a 'resource' param
-        default:
-          if (!cfData.resources) {
-            // Treat the response as RequestEntityLocation.OBJECT
+      .filter(guid => data[guid] !== null)
+      .map(cfGuid => {
+        const cfData = data[cfGuid];
+        switch (apiAction.entityLocation) {
+          case RequestEntityLocation.ARRAY: // The response is an array which contains the entities
+            return Object.keys(cfData).map(key => {
+              const guid = apiAction.guid + '-' + key;
+              const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
+              result.entity.guid = guid;
+              return result;
+            });
+          case RequestEntityLocation.OBJECT: // The response is the entity
             return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
-          }
-          totalResults += cfData['total_results'];
-          if (!cfData.resources.length) {
-            return null;
-          }
-          return cfData.resources.map(resource => {
-            return this.completeResourceEntity(resource, cfGuid, resource.guid);
-          });
-      }
-    });
+          case RequestEntityLocation.RESOURCE: // The response is an object and the entities list is within a 'resource' param
+          default:
+            if (!cfData.resources) {
+              // Treat the response as RequestEntityLocation.OBJECT
+              return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
+            }
+            totalResults += cfData['total_results'];
+            if (!cfData.resources.length) {
+              return null;
+            }
+            return cfData.resources.map(resource => {
+              return this.completeResourceEntity(resource, cfGuid, resource.guid);
+            });
+        }
+      });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
     return {
       entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,
