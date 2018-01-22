@@ -24,11 +24,11 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
       return qParam ? qParam.value as string : '';
     }
   }
-  public setFilterParam(filter: ListFilter, pag: PaginationEntityState) {
-    if (filter && filter.filter && filter.filter.length) {
+  public setFilterParam(filterString: string, pag: PaginationEntityState) {
+    if (filterString && filterString.length) {
       this._store.dispatch(new AddParams(this.entityKey, this.paginationKey, {
         q: [
-          new QParam('type', filter.filter, ' IN '),
+          new QParam('type', filterString, ' IN '),
         ]
       }));
     } else if (pag.params.q.find((q: QParam) => q.key === 'type')) {

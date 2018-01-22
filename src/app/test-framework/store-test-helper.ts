@@ -255,7 +255,10 @@ const testInitialStoreState: AppState = {
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
-            filter: '',
+            filter: {
+              string: '',
+              items: {}
+            }
           }
         },
       },
@@ -418,7 +421,10 @@ const testInitialStoreState: AppState = {
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
-            filter: '',
+            filter: {
+              string: '',
+              items: {}
+            }
           }
         }
       },
@@ -437,7 +443,10 @@ const testInitialStoreState: AppState = {
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
-            filter: '',
+            filter: {
+              string: '',
+              items: {}
+            }
           }
         }
       },

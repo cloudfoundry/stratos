@@ -35,16 +35,16 @@ export class CreateAppPageEffects {
     .withLatestFrom(this.store.select(selectNewAppCFDetails))
     .switchMap(([action, cfDetails]: [any, NewAppCFDetails]) => {
       const { cloudFoundry, org, space } = cfDetails;
-      const headers = new Headers({ 'x-cap-cnsi-list': cloudFoundry.guid });
+      const headers = new Headers({ 'x-cap-cnsi-list': cloudFoundry });
       return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/${this.cfAPIVersion}/apps`, {
         params: {
-          'q': `name:${action.name};space_guid:${space.guid}`
+          'q': `name:${action.name};space_guid:${space}`
         },
         headers
       })
         .map(res => {
           const apps = res.json();
-          const ourCfApps = apps[cloudFoundry.guid];
+          const ourCfApps = apps[cloudFoundry];
           if (ourCfApps.total_results) {
             throw Observable.throw('Taken');
           }

@@ -60,7 +60,7 @@ export class CfAppInstancesConfigService implements IListConfig<any> {
     },
     {
       columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
-      (row.value.stats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), cellFlex: '5'
+      (row.value.stats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
     },
     {
       columnId: 'edit',
@@ -115,5 +115,6 @@ export class CfAppInstancesConfigService implements IListConfig<any> {
   getColumns = () => this.columns;
   getDataSource = () => this.instancesSource;
   getFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => [];
 
 }

@@ -46,7 +46,10 @@ export const defaultPaginationEntityState = {
   clientPagination: {
     pageSize: defaultClientPaginationPageSize,
     currentPage: 1,
-    filter: '',
+    filter: {
+      string: '',
+      items: {}
+    },
     totalResults: 0
   }
 };

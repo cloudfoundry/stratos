@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 export class AppMonitorState {
 
   avg = {
-    mem:  0,
+    mem: 0,
     disk: 0,
     cpu: 0,
   };
@@ -23,7 +23,7 @@ export class AppMonitorState {
     cpu: 'tentative',
   };
 
-  constructor() {}
+  constructor() { }
 
   updateStatuses() {
     // Mem/Disk/CPU Usage Status

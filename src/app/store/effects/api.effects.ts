@@ -52,7 +52,6 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-
       const paramsObject = {};
       const apiAction = action as ICFAction;
       const paginatedAction = action as PaginatedAction;
@@ -61,7 +60,6 @@ export class APIEffect {
 
       this.store.dispatch(new StartRequestAction(action, requestType));
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
-
       // Apply the params from the store
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();
@@ -153,14 +151,15 @@ export class APIEffect {
 
   getErrors(resData) {
     return Object.keys(resData)
-      .map(guid => {
-        const cnsis = resData[guid];
-        cnsis.guid = guid;
-        return cnsis;
-      })
-      .filter(cnsis => {
-        return cnsis.error;
-      });
+    .filter(guid => resData[guid] !== null)
+    .map(guid => {
+      const cnsis = resData[guid];
+      cnsis.guid = guid;
+      return cnsis;
+    })
+    .filter(cnsis => {
+      return cnsis.error;
+    });
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -168,7 +167,9 @@ export class APIEffect {
     totalResults: number
   } {
     let totalResults = 0;
-    const allEntities = Object.keys(data).map(cfGuid => {
+    const allEntities = Object.keys(data)
+    .filter( guid => data[guid] !== null)
+    .map(cfGuid => {
       const cfData = data[cfGuid];
       totalResults += cfData['total_results'];
       if (cfData.resources) {
@@ -176,10 +177,20 @@ export class APIEffect {
           return null;
         }
         return cfData.resources.map(resource => {
+          if (resource.entity) {
+            // Inject `cfGuid` in nested entities
+            Object.keys(resource.entity).forEach(resourceKey => {
+              const nestedResourceEntity = resource.entity[resourceKey];
+              if (nestedResourceEntity &&
+                nestedResourceEntity.hasOwnProperty('entity') &&
+                nestedResourceEntity.hasOwnProperty('metadata')) {
+                resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid);
+              }
+            });
+          }
           return this.completeResourceEntity(resource, cfGuid);
         });
       } else {
-
         return this.completeResourceEntity(cfData, cfGuid);
       }
     });

@@ -63,6 +63,7 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
@@ -73,6 +74,8 @@ import { CardAppStatusComponent } from './components/cards/custom-cards/card-app
 import { CardAppInstancesComponent } from './components/cards/custom-cards/card-app-instances/card-app-instances.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { PercentagePipe } from './pipes/percentage.pipe';
+import { TableCellRouteComponent } from './components/table/custom-cells/table-cell-route/table-cell-route.component';
+import { TableCellTCPRouteComponent } from './components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 
@@ -141,6 +144,8 @@ import { TableCellStatusDirective } from './components/table/table-cell-status.d
     CardAppInstancesComponent,
     UsageGaugeComponent,
     TableCellUsageComponent,
+    TableCellRouteComponent,
+    TableCellTCPRouteComponent,
     TableCellStatusDirective,
   ],
   exports: [
@@ -186,6 +191,7 @@ import { TableCellStatusDirective } from './components/table/table-cell-status.d
   providers: [
     ListConfig,
     ApplicationStateService,
+    CfOrgSpaceDataService,
   ]
 })
 export class SharedModule { }
