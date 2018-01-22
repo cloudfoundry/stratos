@@ -34,6 +34,8 @@ export class ApplicationStateIconPipe implements PipeTransform {
         return this.result(args, value, 'text-success', 'lens');
       case 'tentative':
         return this.result(args, value, 'text-tentative', 'lens');
+      case 'incomplete':
+        return this.result(args, value, 'text-tentative', 'broken_image');
       case 'warning':
         return this.result(args, value, 'text-warning', 'warning');
       case 'error':
