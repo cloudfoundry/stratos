@@ -2,6 +2,12 @@ import { ApplicationService } from '../../../../../features/applications/applica
 import { Component, OnInit, OnDestroy, Input, ElementRef, ViewChild, Renderer,
   ViewChildren, QueryList, ContentChildren} from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
+import { AppState } from '../../../../../store/app-state';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
+import { selectEntity } from '../../../../../store/selectors/api.selectors';
+import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-card-app-instances',
@@ -17,7 +23,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @ViewChild('instanceField') instanceField: ElementRef;
 
-  constructor(private applicationService: ApplicationService, private renderer: Renderer ) { }
+  constructor(private store: Store<AppState>, private applicationService: ApplicationService, private renderer: Renderer ) { }
 
   private currentCount: 0;
   private editCount: 0;
@@ -28,17 +34,19 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   private editValue: any;
 
-
+  // Observable on the running instances count for the application
+  private runningInstances$: Observable<number>;
 
   ngOnInit() {
-    console.log('=== BUSY =====');
-    console.log(this.busy);
     this.sub = this.applicationService.application$.subscribe(app => {
       if (app.app.entity) {
         this.currentCount = app.app.entity.instances;
       }
     });
 
+    const { cfGuid, appGuid } = this.applicationService;
+    this.runningInstances$ = this.store.select(selectEntity<any>(AppMetadataProperties.INSTANCES, appGuid))
+    .pipe(map(stats => Object.values(stats || {}).filter(stat => stat.state === 'RUNNING').length));
   }
 
   ngOnDestroy(): void {

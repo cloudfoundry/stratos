@@ -5,7 +5,7 @@
   </mat-card-header>
   <mat-card-content class="card-app-instances__compact">
       <div *ngIf="!isEditing" class="card-app-instances__large">
-          {{(applicationService.appSummary$| async)?.metadata?.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
+          {{(runningInstances$ | async) || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
       </div>
       <form [hidden]="!isEditing" class="exampcard-app-instances_form">
           <mat-form-field>

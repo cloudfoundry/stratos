@@ -11,6 +11,7 @@ import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { NewApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
+import { AppMetadataTypes } from './app-metadata.actions';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -39,6 +40,10 @@ export const ASSIGN_ROUTE_FAILED = '[Application] Assign route failed';
 export const DELETE = '[Application] Delete';
 export const DELETE_SUCCESS = '[Application] Delete success';
 export const DELETE_FAILED = '[Application] Delete failed';
+
+export const DELETE_INSTANCE = '[Application Instance] Delete';
+export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
+export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
 
 const ApplicationEntiySchema = {
   entity: {
@@ -196,5 +201,28 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
   ];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
+  options: RequestOptions;
+}
+
+export class DeleteApplicationInstance extends CFStartAction implements ICFAction {
+  static updateKey = 'Deleting-Existing-Application-Instance';
+
+  constructor(public guid: string, private index: number, public cnis: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}/instances/${index}`;
+    this.options.method = 'delete';
+    this.options.headers = new Headers();
+    const cnsiPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(cnsiPassthroughHeader, 'true');
+  }
+  actions = [
+    DELETE_INSTANCE,
+    DELETE_INSTANCE_SUCCESS,
+    DELETE_INSTANCE_FAILED
+  ];
+  entity = [ApplicationSchema];
+  entityKey = ApplicationSchema.key;
+  // updatingKey = 'delete-instance-' + this.index;
   options: RequestOptions;
 }

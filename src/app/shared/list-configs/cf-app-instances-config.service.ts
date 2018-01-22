@@ -21,6 +21,7 @@ import {
 } from '../components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { Injectable } from '@angular/core';
 import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
+import { DeleteApplicationInstance } from '../../store/actions/application.actions';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<any> {
@@ -74,10 +75,22 @@ export class CfAppInstancesConfigService implements IListConfig<any> {
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      window.alert('TERMINATE!');
+      console.log(item);
+      this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid));
     },
-    icon: 'remove_from_queue',
+    icon: 'delete',
     label: 'Terminate',
+    description: ``, // Description depends on console user permission
+    visible: row => true,
+    enabled: row => !!(row.value && row.value.state === 'RUNNING'),
+  };
+
+  private listActionSSh: IListAction<any> = {
+    action: (item) => {
+      window.alert('SSH!');
+    },
+    icon: 'computer',
+    label: 'SSH',
     description: ``, // Description depends on console user permission
     visible: row => true,
     enabled: row => !!(row.value && row.value.state === 'RUNNING'),
@@ -85,6 +98,7 @@ export class CfAppInstancesConfigService implements IListConfig<any> {
 
   private singleActions = [
     this.listActionTerminate,
+    this.listActionSSh
   ];
 
   constructor(private store: Store<AppState>, private appService: ApplicationService, private utilsService: UtilsService) {

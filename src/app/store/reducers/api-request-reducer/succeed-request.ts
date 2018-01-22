@@ -26,7 +26,7 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
           message: '',
         }
       );
-    } else if (action.requestType === 'delete') {
+    } else if (action.requestType === 'delete' && !action.apiAction.updatingKey) {
       requestSuccessState.deleting = mergeInnerObject(
         'deleting',
         requestSuccessState.deleting,
