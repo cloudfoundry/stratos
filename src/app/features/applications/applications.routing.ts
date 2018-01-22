@@ -1,3 +1,4 @@
+import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
@@ -44,6 +45,7 @@ const appplicationsRoutes: Routes = [
             children: [
               { path: '', redirectTo: 'summary', pathMatch: 'full' },
               { path: 'summary', component: BuildTabComponent },
+              { path: 'instances', component: InstancesTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },

@@ -27,6 +27,11 @@ export const AppMetadataProperties = {
   SUMMARY: 'summary'
 };
 
+// Schema for an App Instance and an array of these
+export const InstanceSchema = new schema.Entity(AppMetadataProperties.INSTANCES);
+export const InstancesSchema = new schema.Array(InstanceSchema);
+
+// Schema for an App Env Var and an array of these
 export const EnvVarSchema = new schema.Entity(AppMetadataProperties.ENV_VARS);
 export const EnvVarsSchema = new schema.Array(EnvVarSchema);
 
@@ -58,6 +63,10 @@ export class GetAppInstancesAction extends AppMetadataAction implements IGetAppM
   paginationKey: string;
   type = AppMetadataTypes.APP_METADATA;
   entityKey: string;
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'index',
+  };
 }
 
 export class GetAppEnvVarsAction extends AppMetadataAction implements PaginatedAction, IGetAppMetadataAction {

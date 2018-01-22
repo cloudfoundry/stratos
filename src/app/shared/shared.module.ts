@@ -1,3 +1,5 @@
+import { UptimePipe } from './pipes/uptime.pipe';
+import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { EventTabActorIconPipe } from './components/table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { CommonModule } from '@angular/common';
@@ -70,8 +72,12 @@ import { CardStatusComponent } from './components/card-status/card-status.compon
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { CardAppStatusComponent } from './components/cards/custom-cards/card-app-status/card-app-status.component';
 import { CardAppInstancesComponent } from './components/cards/custom-cards/card-app-instances/card-app-instances.component';
+import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
+import { PercentagePipe } from './pipes/percentage.pipe';
 import { TableCellRouteComponent } from './components/table/custom-cells/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
+import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
+import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 
 @NgModule({
   imports: [
@@ -89,6 +95,9 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
     StatefulIconComponent,
     EditableDisplayValueComponent,
     MbToHumanSizePipe,
+    PercentagePipe,
+    UptimePipe,
+    UsageBytesPipe,
     ValuesPipe,
     LoadingPageComponent,
     DetailsCardComponent,
@@ -133,8 +142,11 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
     MetadataItemComponent,
     CardAppStatusComponent,
     CardAppInstancesComponent,
+    UsageGaugeComponent,
+    TableCellUsageComponent,
     TableCellRouteComponent,
     TableCellTCPRouteComponent,
+    TableCellStatusDirective,
   ],
   exports: [
     FormsModule,
@@ -149,6 +161,9 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
     StatefulIconComponent,
     MbToHumanSizePipe,
     ValuesPipe,
+    PercentagePipe,
+    UsageBytesPipe,
+    UptimePipe,
     SteppersModule,
     FocusDirective,
     UniqueDirective,
@@ -168,6 +183,9 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
     MetadataItemComponent,
     CardAppStatusComponent,
     CardAppInstancesComponent,
+    UsageGaugeComponent,
+    TableCellUsageComponent,
+    TableCellStatusDirective,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [
