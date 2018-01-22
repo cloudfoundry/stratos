@@ -68,7 +68,7 @@ export class ApplicationMonitorService {
       // console.log('APP MONITOR');
       // console.log(item);
       const res = new AppMonitorState();
-      if (!item.metadata) {
+      if (!item || !item.metadata) {
         return res;
       }
 

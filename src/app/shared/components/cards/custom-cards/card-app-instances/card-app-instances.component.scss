@@ -2,4 +2,18 @@
   &__large {
     font-size: 16px;
   }
+
+  &__compact {
+    margin-bottom: 0;
+    position: absolute;
+  }
+
+  &__actions {
+    padding-top: 0;
+    text-align: right;
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+  }
+  
 }
