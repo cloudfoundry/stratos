@@ -1,7 +1,13 @@
 options:
   formatter: stylish
 files:
-  include: '/src/**/*.s+(a|c)ss'
+  include: 'src/**/*.s+(a|c)ss'
+  ignore: 
+    - '/dist/*'
+    - '/tmp/*'
+    - '/out-tsc/*'
+    - '/out/*'
+    - '/node_modules/*'
 rules:
   # Extends
   extends-before-mixins: 1
@@ -13,7 +19,7 @@ rules:
 
   # Line Spacing
   one-declaration-per-line: 1
-  empty-line-between-blocks: 1
+  empty-line-between-blocks: 0
   single-line-per-selector: 1
 
   # Disallows
@@ -51,7 +57,10 @@ rules:
   force-pseudo-nesting: 1
 
   # Name Formats
-  class-name-format: 1
+  class-name-format:
+    - 1
+    - allow-leading-underscore: false
+    - convention: hyphenatedbem
   function-name-format: 1
   id-name-format: 0
   mixin-name-format: 1
