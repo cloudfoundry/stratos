@@ -37,30 +37,36 @@ export class CfAppInstancesConfigService implements IListConfig<any> {
     {
       columnId: 'memory', headerCell: () => 'Memory',
       cellConfig: {
-        value: (row) => row.value.stats ? row.value.stats.usage.mem / row.value.stats.mem_quota : 0,
-        label: (row) => this.utilsService.usageBytes([row.value.stats.usage ? row.value.stats.usage.mem : 0, row.value.stats.mem_quota])
+        value: (row) => row.usage.mem,
+        label: (row) => this.utilsService.usageBytes([
+          row.usage.hasStats ? row.value.stats.usage.mem : 0,
+          row.usage.hasStats ? row.value.stats.mem_quota : 0
+        ])
       },
       cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
     },
     {
       columnId: 'disk', headerCell: () => 'Disk',
       cellConfig: {
-        value: (row) => row.value.stats ? row.value.stats.usage.disk / row.value.stats.disk_quota : 0,
-        label: (row) => this.utilsService.usageBytes([row.value.stats.usage ? row.value.stats.usage.disk : 0, row.value.stats.disk_quota])
+        value: (row) => row.usage.disk,
+        label: (row) => this.utilsService.usageBytes([
+          row.usage.hasStats ? row.value.stats.usage.disk : 0,
+          row.usage.hasStats ? row.value.stats.disk_quota : 0
+        ])
       },
       cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
     },
     {
       columnId: 'cpu', headerCell: () => 'CPU',
       cellConfig: {
-        value: (row) => row.value.stats ? row.value.stats.usage.cpu : 0,
-        label: (row) => this.utilsService.percent(row.value.stats ? row.value.stats.usage.cpu : 0)
+        value: (row) => row.usage.cpu,
+        label: (row) => this.utilsService.percent(row.usage.hasStats ? row.value.stats.usage.cpu : 0)
       },
       cellComponent: TableCellUsageComponent, sort: true, cellFlex: '2'
     },
     {
       columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
-      (row.value.stats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
+      (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
     },
     {
       columnId: 'edit',

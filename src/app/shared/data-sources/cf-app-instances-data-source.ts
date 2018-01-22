@@ -92,12 +92,14 @@ export class CfAppInstancesDataSource extends ListDataSource<any> {
       mem: 0,
       disk: 0,
       cpu: 0,
+      hasStats: false
     };
 
     if (instanceStats.stats && instanceStats.stats.usage ) {
       usage.mem = instanceStats.stats.usage.mem / instanceStats.stats.mem_quota;
       usage.disk = instanceStats.stats.usage.disk / instanceStats.stats.disk_quota;
       usage.cpu = instanceStats.stats.usage.cpu;
+      usage.hasStats = true;
     }
     return usage;
   }

@@ -221,6 +221,6 @@ export class DeleteApplicationInstance extends CFStartAction implements ICFActio
   ];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
-  // updatingKey = 'delete-instance-' + this.index;
+  updatingKey = 'delete-instance-' + this.index;
   options: RequestOptions;
 }
