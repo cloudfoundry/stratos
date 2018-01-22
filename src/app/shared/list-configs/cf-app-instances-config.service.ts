@@ -102,6 +102,5 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   getColumns = () => this.columns;
   getDataSource = () => this.instancesSource;
   getMultiFiltersConfigs = () => [];
-  getMultiFiltersConfigs = () => [];
 
 }

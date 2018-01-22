@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs/Subscription';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { AppStatsSchema, AppStatSchema } from '../../../../../store/types/app-metadata.types';
 import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-table-cell-app-status',
