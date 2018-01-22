@@ -58,7 +58,8 @@ export class CfAppInstancesConfigService implements IListConfig<any> {
       cellComponent: TableCellUsageComponent, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) => this.utilsService.formatUptime(row.value.stats.uptime), cellFlex: '5'
+      columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) => this.utilsService.formatUptime(row.value.stats.uptime),
+      sort: true, cellFlex: '5'
     },
     {
       columnId: 'edit',
