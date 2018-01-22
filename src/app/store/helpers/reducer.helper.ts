@@ -19,8 +19,6 @@ export const deepMergeState = (state, newState) => {
   const baseState = { ...state };
   Object.keys(newState).forEach(entityKey => {
     if (shouldMerge(newState, baseState, entityKey)) {
-      baseState[entityKey] = newState[entityKey];
-    } else {
       const baseStateEnt = { ...baseState[entityKey] };
       const newStateEnt = newState[entityKey];
       Object.keys(newStateEnt).forEach(id => {
@@ -33,13 +31,15 @@ export const deepMergeState = (state, newState) => {
         ...baseState[entityKey],
         ...baseStateEnt
       };
+    } else {
+      baseState[entityKey] = newState[entityKey];
     }
   });
   return baseState;
 };
 
 function shouldMerge(newState, baseState, entityKey) {
-  return typeof (newState[entityKey]) === 'string' || !baseState[entityKey] || !Object.keys(baseState[entityKey]);
+  return typeof newState[entityKey] !== 'string' && baseState[entityKey] && Object.keys(baseState[entityKey]);
 }
 
 export const pick = <O, K extends keyof O>(o: O, keys: [K]): Pick<O, K> => {

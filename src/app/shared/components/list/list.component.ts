@@ -157,7 +157,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const paginationWidgetToStorePage = this.paginator.page
       .map(page => page.pageIndex)
-      .do(index => console.log(index))
       .do(pageIndex => this.paginationController.page(pageIndex));
 
 
