@@ -70,6 +70,8 @@ import { CardStatusComponent } from './components/card-status/card-status.compon
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
 import { CardAppStatusComponent } from './components/cards/custom-cards/card-app-status/card-app-status.component';
 import { CardAppInstancesComponent } from './components/cards/custom-cards/card-app-instances/card-app-instances.component';
+import { TableCellRouteComponent } from './components/table/custom-cells/table-cell-route/table-cell-route.component';
+import { TableCellTCPRouteComponent } from './components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 
 @NgModule({
   imports: [
@@ -131,6 +133,8 @@ import { CardAppInstancesComponent } from './components/cards/custom-cards/card-
     MetadataItemComponent,
     CardAppStatusComponent,
     CardAppInstancesComponent,
+    TableCellRouteComponent,
+    TableCellTCPRouteComponent,
   ],
   exports: [
     FormsModule,
