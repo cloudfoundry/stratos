@@ -116,6 +116,7 @@ export class APIEffect {
           ));
 
           if (
+            !apiAction.updatingKey &&
             apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete
           ) {
@@ -151,15 +152,15 @@ export class APIEffect {
 
   getErrors(resData) {
     return Object.keys(resData)
-    .filter(guid => resData[guid] !== null)
-    .map(guid => {
-      const cnsis = resData[guid];
-      cnsis.guid = guid;
-      return cnsis;
-    })
-    .filter(cnsis => {
-      return cnsis.error;
-    });
+      .filter(guid => resData[guid] !== null)
+      .map(guid => {
+        const cnsis = resData[guid];
+        cnsis.guid = guid;
+        return cnsis;
+      })
+      .filter(cnsis => {
+        return cnsis.error;
+      });
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -168,32 +169,32 @@ export class APIEffect {
   } {
     let totalResults = 0;
     const allEntities = Object.keys(data)
-    .filter( guid => data[guid] !== null)
-    .map(cfGuid => {
-      const cfData = data[cfGuid];
-      totalResults += cfData['total_results'];
-      if (cfData.resources) {
-        if (!cfData.resources.length) {
-          return null;
-        }
-        return cfData.resources.map(resource => {
-          if (resource.entity) {
-            // Inject `cfGuid` in nested entities
-            Object.keys(resource.entity).forEach(resourceKey => {
-              const nestedResourceEntity = resource.entity[resourceKey];
-              if (nestedResourceEntity &&
-                nestedResourceEntity.hasOwnProperty('entity') &&
-                nestedResourceEntity.hasOwnProperty('metadata')) {
-                resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid);
-              }
-            });
+      .filter(guid => data[guid] !== null)
+      .map(cfGuid => {
+        const cfData = data[cfGuid];
+        totalResults += cfData['total_results'];
+        if (cfData.resources) {
+          if (!cfData.resources.length) {
+            return null;
           }
-          return this.completeResourceEntity(resource, cfGuid);
-        });
-      } else {
-        return this.completeResourceEntity(cfData, cfGuid);
-      }
-    });
+          return cfData.resources.map(resource => {
+            if (resource.entity) {
+              // Inject `cfGuid` in nested entities
+              Object.keys(resource.entity).forEach(resourceKey => {
+                const nestedResourceEntity = resource.entity[resourceKey];
+                if (nestedResourceEntity &&
+                  nestedResourceEntity.hasOwnProperty('entity') &&
+                  nestedResourceEntity.hasOwnProperty('metadata')) {
+                  resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid);
+                }
+              });
+            }
+            return this.completeResourceEntity(resource, cfGuid);
+          });
+        } else {
+          return this.completeResourceEntity(cfData, cfGuid);
+        }
+      });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
     return {
       entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,

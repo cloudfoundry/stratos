@@ -11,10 +11,12 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
     switch (action.type) {
       case successAction:
         const success = action as ISuccessRequestAction;
-        if (success.requestType === 'delete') {
-          return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
-        } else if (success.response) {
-          return mergeState(state, success.response.entities);
+        if (!success.apiAction.updatingKey) {
+          if (success.requestType === 'delete') {
+            return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
+          } else if (success.response) {
+            return mergeState(state, success.response.entities);
+          }
         }
         return state;
       default:
