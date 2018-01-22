@@ -16,5 +16,15 @@
     &__error {
       background-color: map-get($status-colors, danger);
     }
+
+    &__tentative {
+      background-color: map-get($status-colors, tentative);
+    }
+
+    &__incomplete {
+      background-color: map-get($status-colors, tentative);
+    }
+    
+
   }
 }
