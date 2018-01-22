@@ -59,8 +59,7 @@ rules:
   # Name Formats
   class-name-format:
     - 1
-    - allow-leading-underscore: false
-    - convention: hyphenatedbem
+    - convention: strictbem
   function-name-format: 1
   id-name-format: 0
   mixin-name-format: 1
