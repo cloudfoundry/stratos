@@ -3,7 +3,6 @@ import { denormalize } from 'normalizr';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { getAPIRequestDataState } from '../../../store/selectors/api.selectors';
 import { map, tap, withLatestFrom, filter, toArray, distinctUntilChanged } from 'rxjs/operators';
-import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 import { ListConfig, IListConfig } from '../../../shared/components/list/list.component';
 import { CfAppConfigService } from '../../../shared/list-configs/cf-app-config.service';
 import { CardAppComponent } from '../../../shared/components/cards/custom-cards/card-app/card-app.component';
@@ -13,11 +12,10 @@ import { EndpointsService } from '../../../core/endpoints.service';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { ApplicationSchema } from '../../../store/actions/application.actions';
-import { AppMetadataType } from '../../../store/types/app-metadata.types';
-import { AppMetadataProperties, GetAppInstancesAction } from '../../../store/actions/app-metadata.actions';
 import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-source';
 import { ListDataSource } from '../../../shared/data-sources/list-data-source';
 import { APIResource } from '../../../store/types/api.types';
+import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-application-wall',
@@ -63,7 +61,7 @@ export class ApplicationWallComponent implements OnDestroy {
           const cfGuid = app.entity.cfGuid;
           const dispatching = false;
           if (appState === 'STARTED') {
-            this.store.dispatch(new GetAppInstancesAction(appGuid, cfGuid));
+            this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
           }
         });
       })

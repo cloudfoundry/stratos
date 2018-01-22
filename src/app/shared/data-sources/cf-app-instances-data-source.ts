@@ -1,6 +1,6 @@
-import { EntityInfo } from '../../store/types/api.types';
+import { EntityInfo, APIResource } from '../../store/types/api.types';
 import { EventSchema, GetAllAppEvents } from '../../store/actions/app-event.actions';
-import { GetAppInstancesAction, InstanceSchema } from './../../store/actions/app-metadata.actions';
+import { GetAppStatsAction } from './../../store/actions/app-metadata.actions';
 import { AppState } from '../../store/app-state';
 import { Subscription } from 'rxjs/Rx';
 import { DataSource } from '@angular/cdk/table';
@@ -13,36 +13,48 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { schema } from 'normalizr';
 import { ListDataSource } from './list-data-source';
 import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
-import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
+import { AddParams, RemoveParams, getPaginationKey } from '../../store/actions/pagination.actions';
 import { ListFilter, SetListStateAction, ListPagination } from '../../store/actions/list.actions';
+import { AppStatSchema, AppStat } from '../../store/types/app-metadata.types';
 import { inspect } from 'util';
 
-export class CfAppInstancesDataSource extends ListDataSource<any> {
+export interface ListAppInstance {
+  index: number;
+  value: AppStat;
+}
+
+export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
 
   constructor(
     _store: Store<AppState>,
     _cfGuid: string,
     _appGuid: string,
   ) {
-    const paginationKey = `app-instances:${_cfGuid}${_appGuid}`;
-    const action =         new GetAppInstancesAction(_appGuid, _cfGuid);
+    const paginationKey = getPaginationKey(AppStatSchema.key, _cfGuid, _appGuid);
+    const action = new GetAppStatsAction(_appGuid, _cfGuid);
 
     super(
       _store,
       action,
-      InstanceSchema,
-      (object: any) => {
-        // Unique identifier for each row - used for multi-select actions
-        return object.index;
+      AppStatSchema,
+      (row: ListAppInstance) => {
+        return row.index.toString();
       },
       () => ({} as any),
       paginationKey,
       map(instances => {
-        return Object.keys(instances[0]).map(index => ({
-          index,
-          usage: this.calcUsage(instances[0][index]),
-          value: instances[0][index]
-        }));
+        if (!instances || instances.length === 0) {
+          return [];
+        }
+        const res = [];
+        Object.keys(instances).forEach(key => {
+          res.push({
+            index: key,
+            usage: this.calcUsage(instances[key].entity),
+            value: instances[key].entity
+          });
+        });
+        return res;
       }),
       true,
       [
@@ -94,7 +106,7 @@ export class CfAppInstancesDataSource extends ListDataSource<any> {
       cpu: 0,
     };
 
-    if (instanceStats.stats && instanceStats.stats.usage ) {
+    if (instanceStats.stats && instanceStats.stats.usage) {
       usage.mem = instanceStats.stats.usage.mem / instanceStats.stats.mem_quota;
       usage.disk = instanceStats.stats.usage.disk / instanceStats.stats.disk_quota;
       usage.cpu = instanceStats.stats.usage.cpu;

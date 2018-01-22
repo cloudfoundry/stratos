@@ -1,7 +1,7 @@
 import { RouterNav } from '../../store/actions/router.actions';
 import { DeleteRoute, UnmapRoute } from '../../store/actions/route.actions';
 import {
-    TableCellTCPRouteComponent,
+  TableCellTCPRouteComponent,
 } from '../components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 import { TableCellRouteComponent } from '../components/table/custom-cells/table-cell-route/table-cell-route.component';
 import { CfAppRoutesDataSource } from '../data-sources/cf-app-routes-data-source';
@@ -16,7 +16,7 @@ import { ApplicationService } from '../../features/applications/application.serv
 import { AppVariablesDelete } from '../../store/actions/app-variables.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { AppEnvVar, CfAppEvnVarsDataSource } from '../data-sources/cf-app-variables-data-source';
+import { CfAppEvnVarsDataSource } from '../data-sources/cf-app-variables-data-source';
 import { Injectable } from '@angular/core';
 import { EntityInfo } from '../../store/types/api.types';
 import {
@@ -96,7 +96,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     },
     {
       columnId: 'route', headerCell: () => 'Route',
-       cellComponent: TableCellRouteComponent, sort: true, cellFlex: '3'
+      cellComponent: TableCellRouteComponent, sort: true, cellFlex: '3'
     },
     {
       columnId: 'tcproute', headerCell: () => 'TCP Route',
@@ -115,11 +115,11 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
   pageSizeOptions = [9, 45, 90];
 
   dispatchDeleteAction = route => this.store.dispatch(
-     new DeleteRoute( route.entity.guid, this.routesDataSource.cfGuid)
-    )
+    new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
+  )
   dispatchUnmapAction = route => this.store.dispatch(
-     new UnmapRoute( route.entity.guid, this.routesDataSource.appGuid, this.routesDataSource.cfGuid)
-    )
+    new UnmapRoute(route.entity.guid, this.routesDataSource.appGuid, this.routesDataSource.cfGuid)
+  )
   getGlobalActions = () => [this.listActionAdd];
   getMultiActions = () => [this.multiListActionUnmap, this.multiListActionDelete];
   getSingleActions = () => [this.listActionDelete, this.listActionUnmap];

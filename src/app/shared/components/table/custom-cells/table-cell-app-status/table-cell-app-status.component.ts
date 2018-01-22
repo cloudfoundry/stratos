@@ -1,5 +1,4 @@
 import { tap } from 'rxjs/operators';
-import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
 import { ActivatedRoute } from '@angular/router';
@@ -14,6 +13,8 @@ import {
 } from './../../../application-state/application-state.service';
 import { Subscription } from 'rxjs/Subscription';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
+import { AppStatsSchema, AppStatSchema } from '../../../../../store/types/app-metadata.types';
+import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Component({
   selector: 'app-table-cell-app-status',
@@ -34,14 +35,15 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   }
 
   ngOnInit() {
-    this.fetchAppState$ = this.store.select(
-      selectEntity(AppMetadataProperties.INSTANCES, this.row && this.row.entity && this.row.entity.guid))
-      // this.fetchAppState$ = this.store.select(selectMetadata('instances', this.row && this.row.entity && this.row.entity.guid))
-      .pipe(
-      tap(appInstances => {
-        this.applicationState = this.appStateService.get(this.row && this.row.entity, appInstances ? appInstances : null);
-      })
-      ).subscribe();
+    this.applicationState = this.appStateService.get(this.row.entity, null);
+    this.fetchAppState$ = ApplicationService.getApplicationState(
+      this.store,
+      this.appStateService,
+      this.row.entity,
+      this.row.entity.guid,
+      this.row.entity.cfGuid)
+      .do(appSate => this.applicationState = appSate)
+      .subscribe();
   }
 
   ngOnDestroy() {
