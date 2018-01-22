@@ -114,11 +114,9 @@ export class LoggedInService {
 
     const now = Date.now();
     const sessionExpiresOn = this._sessionData.sessionExpiresOn;
-    console.log(this._sessionData.sessionExpiresOn);
     const safeExpire = sessionExpiresOn - this._autoLogoutDelta;
     const delta = safeExpire - now;
     const aboutToExpire = delta < this._warnBeforeLogout;
-    console.log(aboutToExpire);
     if (aboutToExpire) {
       const idleDelta = now - this._lastUserInteraction;
       const userIsActive = idleDelta < this._userIdlePeriod;
