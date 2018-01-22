@@ -5,7 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { MDAppModule } from '../../../core/md.module';
 import { SideNavComponent } from './side-nav.component';
-import { getInitialTestStoreState } from '../../../test-framework/store-test-helper';
+import { getInitialTestStoreState, createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { StoreModule } from '@ngrx/store';
 
 describe('SideNavComponent', () => {
@@ -18,9 +18,7 @@ describe('SideNavComponent', () => {
       imports: [
         RouterTestingModule,
         MDAppModule,
-        StoreModule.forRoot(appReducers, {
-          initialState: getInitialTestStoreState()
-        })
+        createBasicStoreModule()
       ]
     })
       .compileComponents();

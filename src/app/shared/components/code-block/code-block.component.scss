@@ -2,9 +2,10 @@
   position: relative;
   min-height: 20px;
   padding: 20px;
-  overflow-x: auto;
   pre {
     margin: 0;
+    white-space: pre-line;
+    word-wrap: break-word;
   }
   &___copied-div,
   &___copy-icon {

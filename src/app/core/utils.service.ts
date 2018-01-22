@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 @Injectable()
 export class UtilsService {
 
+  private units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+
   /*
      * Expression used to validate URLs in the Endpoint registration form.
      * Expression explanation available from https://gist.github.com/dperini/729294
@@ -75,6 +77,109 @@ export class UtilsService {
     }
     return this.precisionIfUseful(mb) + ' MB';
 
+  }
+
+  getDefaultPrecision(precision: number): number {
+    if (precision === undefined || precision === null) {
+      precision = 0;
+    }
+    return precision;
+  }
+
+  getNumber(value: number): number {
+    return Math.floor(Math.log(value) / Math.log(1024));
+  }
+
+  getReducedValue(value, number, precision): number {
+    return (value / Math.pow(1024, Math.floor(number)));
+  }
+
+  usageBytes(usage, usedPrecision?, totalPrecision?): string {
+    const used = usage[0];
+    const total = usage[1];
+
+    if (isNaN(parseFloat(used)) || !isFinite(used) ||
+      isNaN(parseFloat(total)) || !isFinite(total) ||
+      total === 0) {
+      return '-';
+    }
+
+    // Precision
+    usedPrecision = this.getDefaultPrecision(usedPrecision);
+    totalPrecision = this.getDefaultPrecision(totalPrecision);
+
+    // Units
+    const number = this.getNumber(total);
+    let usedNumber = null;
+
+    // Values to display
+    const totalDisplay = this.getReducedValue(total, number, totalPrecision).toFixed(totalPrecision);
+    const usedValue = this.getReducedValue(used, number, usedPrecision);
+    let usedDisplay = usedValue.toFixed(totalPrecision);
+
+    // Is the used value too small to be accurate (for instance 20M consumed of 1GB would show as 0 of 1GB)?
+    if (used !== 0 && usedPrecision === 0 && usedValue < 1) {
+      // Use the units relative to the used value instead of total (20MB of 1GB instead of 0 of 1GB)
+      usedNumber = this.getNumber(used);
+      usedDisplay = this.getReducedValue(used, usedNumber, usedPrecision).toFixed(totalPrecision);
+    }
+
+    return usedDisplay + (usedNumber ? ' ' + this.units[usedNumber] : '') + ' / ' + totalDisplay + ' ' + this.units[number];
+  }
+
+  /**
+   * @function formatUptime
+   * @description format an uptime in seconds into a days, hours, minutes, seconds string
+   * @param {number} uptime in seconds
+   * @returns {string} formatted uptime string
+   */
+  formatUptime(uptime): string {
+    if (uptime === undefined || uptime === null) {
+      return '-';
+    }
+
+    if (uptime === 0) {
+      return this.getFormattedTime(false, '0', 's');
+    }
+    const days = Math.floor(uptime / 86400);
+    uptime = uptime % 86400;
+    const hours = Math.floor(uptime / 3600);
+    uptime = uptime % 3600;
+    const minutes = Math.floor(uptime / 60);
+    const  seconds = uptime % 60;
+
+    return (
+      this.formatPart(days, 'd', 'd') +
+      this.formatPart(hours, 'h', 'h') +
+      this.formatPart(minutes, 'm', 'm') +
+      this.formatPart(seconds, 's', 's')
+      .trim()
+    );
+  }
+
+  private getFormattedTime(isPlural, value, unit): string {
+    // i18n
+    // const formatString = isPlural ? 'dateTime.plural.format' : 'dateTime.singular.format';
+    // return $translate.instant(formatString, { value: value, unit: unit });
+    return value + unit;
+  }
+
+  private formatPart(count, single, plural): string {
+    if (count === 0) {
+      return '';
+    } else if (count === 1) {
+      return this.getFormattedTime(false, count, single) + ' ';
+    } else {
+      return this.getFormattedTime(true, count, plural) + ' ';
+    }
+  }
+
+  percent(value: number, decimals: number = 2): string {
+    if (!value && value !== 0) {
+      return '';
+    }
+    const val = (value * 100).toFixed(decimals);
+    return val + '%';
   }
 
 }

@@ -1,3 +1,4 @@
+import { CNSISModel } from '../../store/types/cnsis.types';
 import { ITableColumn } from '../components/table/table.types';
 import { DatePipe } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -7,23 +8,32 @@ import {
 import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
 import { APIResource } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
-import { EntityInfo } from '../../store/types/api.types';
-import { IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
+import { IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction } from '../components/list/list.component';
 import { AppState } from '../../store/app-state';
 import { UtilsService } from '../../core/utils.service';
 import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
 import { TableCellAppStatusComponent } from '../components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
+import { CfOrgSpaceDataService, CfOrgSpaceItem } from '../data-services/cf-org-space-service.service';
 
 @Injectable()
 export class CfAppConfigService implements IListConfig<APIResource> {
+
+  multiFilterConfigs: IListMultiFilterConfig[];
 
   constructor(
     private datePipe: DatePipe,
     private store: Store<AppState>,
     private utilsService: UtilsService,
     private appStateService: ApplicationStateService,
+    private cfOrgSpaceService: CfOrgSpaceDataService
   ) {
     this.appsDataSource = new CfAppsDataSource(this.store);
+
+    this.multiFilterConfigs = [
+      this.createConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
+      this.createConfig('org', 'Organisation', this.cfOrgSpaceService.org),
+      this.createConfig('space', 'Space', this.cfOrgSpaceService.space),
+    ];
   }
   appsDataSource: CfAppsDataSource;
   columns: Array<ITableColumn<APIResource>> = [
@@ -59,12 +69,21 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   getSingleActions = () => null;
   getColumns = () => this.columns;
   getDataSource = () => this.appsDataSource;
-  getFiltersConfigs = () => [{
-    key: 'endpoint',
-    label: 'Endpoint',
-    items: [{
-      label: 'All Endpoints',
-      value: 'all'
-    }]
-  }]
+  getMultiFiltersConfigs = () => this.multiFilterConfigs;
+
+  private createConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
+    return {
+      key: key,
+      label: label,
+      ...cfOrgSpaceItem,
+      list$: cfOrgSpaceItem.list$.map((entities: any[]) => {
+        return entities.map(entity => ({
+          label: entity.name,
+          item: entity,
+          value: entity.guid
+        }));
+      }),
+    };
+  }
+
 }

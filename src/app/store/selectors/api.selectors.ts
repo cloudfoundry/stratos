@@ -17,6 +17,12 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
   return entities[guid];
 };
 
+export const getNestedEntityWithKeys = <T>(entityKeys: string[]) => (entities): T => {
+let entity = entities;
+entityKeys.forEach(k => entity = entity[k]);
+return entity;
+};
+
 export const getEntityDeleteSections = (request: RequestInfoState) => {
   return request.deleting;
 };
@@ -65,6 +71,14 @@ export function selectEntities<T = APIResource>(entityType: string) {
 export function selectEntity<T = APIResource>(entityType: string, guid: string) {
   return compose(
     getEntityById<T>(guid),
+    getRequestEntityType<T>(entityType),
+    getAPIRequestDataState,
+  );
+}
+
+export function selectNestedEntity<T = APIResource[]>(entityType: string, guid: string, entityKeys: string[]) {
+  return compose(
+    getNestedEntityWithKeys<T>([guid, ...entityKeys]),
     getRequestEntityType<T>(entityType),
     getAPIRequestDataState,
   );

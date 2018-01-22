@@ -7,7 +7,6 @@ import { EffectsModule } from '@ngrx/effects';
 
 import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
-import { AppMetadataEffect } from './effects/app-metadata.effects';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CNSISEffect } from './effects/cnsis.effects';
@@ -32,7 +31,6 @@ import { AppReducersModule } from './reducers.module';
       UAASetupEffect,
       CNSISEffect,
       CreateAppPageEffects,
-      AppMetadataEffect,
       UpdateAppEffects,
       PaginationEffects,
       ActionHistoryEffect,

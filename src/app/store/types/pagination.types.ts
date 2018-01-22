@@ -14,6 +14,13 @@ export interface PaginationParam {
   [entityKey: string]: any;
 }
 
+export interface PaginationClientFilter {
+  string: string;
+  items: {
+    [key: string]: any;
+  };
+}
+
 export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0;
@@ -26,7 +33,7 @@ export class PaginationEntityState {
   clientPagination?: {
     pageSize: number,
     currentPage: number,
-    filter: string,
+    filter: PaginationClientFilter,
     totalResults: number
   };
 }

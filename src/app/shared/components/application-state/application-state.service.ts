@@ -132,7 +132,7 @@ export class ApplicationStateService {
 
   /**
  * @description Translates string list of action names into a map for easier checking if an action is supported
- * @param {any} obj - object to traverse to replace 'actions' kets with maps
+ * @param {any} obj - object to traverse to replace 'actions' keys with maps
  */
   private mapActions(obj: any) {
     for (const k in obj) {
@@ -280,8 +280,8 @@ export class ApplicationStateService {
     if (value) {
       return value;
     } else if (appInstances) {
-      // Calculate form app instance metadata if available
-      return (Object.keys(appInstances).find(k => appInstances[k].state === instanceState) || []).length;
+      // Calculate from app instance metadata if available
+      return (Object.keys(appInstances).filter(k => appInstances[k].state === instanceState)).length;
     } else {
       // No value given and no instance data available, so return -1 to represent unknown
       return -1;
@@ -300,6 +300,35 @@ export class ApplicationStateService {
     } else {
       return '?';
     }
+  }
+
+  /**
+  * @description Get the instance state - single state to summarize the state of the application's instances
+  * @param {object} summary - the application summary metadata (either from summary or entity)
+  * @param {object} appInstances - the application instances metadata (from the app stats API call)
+  */
+  getInstanceState(summary: any, appInstances: any): ApplicationStateData {
+    const appState: string = summary ? summary.state : 'UNKNOWN';
+    if (appState !== 'STARTED') {
+      return this.getStateForIndicator('tentative');
+    } else {
+      const running = this.getCount(undefined, appInstances, 'RUNNING');
+      if (running === summary.instances) {
+        return this.getStateForIndicator('ok');
+      } else if (running > 0) {
+        return this.getStateForIndicator('warning');
+      }
+
+      return this.getStateForIndicator('error');
+    }
+  }
+
+  private getStateForIndicator(indicator: string): ApplicationStateData {
+    return {
+      indicator: indicator,
+      label: '-',
+      actions: {}
+    };
   }
 
 }

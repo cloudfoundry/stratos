@@ -2,13 +2,13 @@ import { AppState } from '../app-state';
 import { Action, compose } from '@ngrx/store';
 import {
   PaginationAction,
-  PaginationEntityState,
+  // PaginationEntityState,
   PaginationEntityTypeState,
   PaginationParam,
   PaginationState,
+  PaginationClientFilter,
 } from '../types/pagination.types';
-
-
+import { ListFilter } from './list.actions';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const RESET_PAGINATION = '[Pagination] Reset pagination';
@@ -22,6 +22,10 @@ export const SET_PARAMS = '[Pagination] Set Params';
 export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
+
+export function getPaginationKey(entityKey, cnis, guid) {
+  return `${entityKey}:${cnis}:${guid}`;
+}
 
 export class ClearPaginationOfType implements Action {
   constructor(public entityKey: string) {
@@ -86,7 +90,7 @@ export class SetClientFilter implements PaginationAction {
   constructor(
     public entityKey: string,
     public paginationKey: string,
-    public filter: string,
+    public filter: PaginationClientFilter,
   ) {
   }
   type = SET_CLIENT_FILTER;

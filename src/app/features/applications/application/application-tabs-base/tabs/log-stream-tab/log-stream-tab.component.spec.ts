@@ -10,7 +10,7 @@ import { appReducers } from '../../../../../../store/reducers.module';
 import { AppStoreModule } from '../../../../../../store/store.module';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../../../test-framework/entity-service.helper';
-import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+import { getInitialTestStoreState, createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
@@ -32,9 +32,7 @@ describe('LogStreamTabComponent', () => {
         BrowserAnimationsModule,
         RouterTestingModule,
         MDAppModule,
-        StoreModule.forRoot(appReducers, {
-          initialState: getInitialTestStoreState()
-        })
+        createBasicStoreModule()
       ],
       declarations: [
         LogViewerComponent,

@@ -5,11 +5,11 @@ import { Observable } from 'rxjs/Rx';
 
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
-import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay } from 'rxjs/operators';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
+import { selectPaginationState } from '../../selectors/pagination.selectors';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -80,10 +80,38 @@ export function getActionKey(action) {
   return apiAction.entityKey || null;
 }
 
-export function getPaginationKey(action: PaginatedAction) {
+export function getPaginationKeyFromAction(action: PaginatedAction) {
   const apiAction = getAction(action);
   return apiAction.paginationKey;
 }
+
+export const getPaginationPages = <T = any>(store: Store<AppState>, action: PaginatedAction, schema: Schema): {
+  [key: string]: any
+} => {
+  const { entityKey, paginationKey } = action;
+
+  // One observable to emit when pagination changes
+  const paginationChanged$ = store.select(selectPaginationState(entityKey, paginationKey))
+    .filter(pag => !!pag)
+    .distinctUntilChanged((oldVals, newVals) => {
+      const oldVal = getPaginationCompareString(oldVals);
+      const newVal = getPaginationCompareString(newVals);
+      return oldVal === newVal;
+    });
+
+  // One observable to emit when the store items changed (not as granular as it should be, ideally should only emit when entities from pag
+  // changes)
+  const entitySectionChanged$ = store.select(selectEntities<T>(entityKey));
+
+  // Combine the two and emit with a list of pages containing the normalised entities
+  return Observable.combineLatest(paginationChanged$, entitySectionChanged$)
+    .withLatestFrom(store.select(getAPIRequestDataState))
+    .map(([[paginationState, entitiesOfType], entities]) => {
+      return Object.keys(paginationState.ids).map(page => {
+        return denormalize(paginationState.ids[page], schema, entities);
+      });
+    });
+};
 
 export const getPaginationObservables = <T = any>(
   { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
@@ -91,6 +119,8 @@ export const getPaginationObservables = <T = any>(
 ): PaginationObservables<T> => {
   const { entityKey, paginationKey } = action;
 
+  // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
+  // section)
   if (action.initialParams) {
     store.dispatch(new SetInitialParams(entityKey, paginationKey, action.initialParams, isLocal));
   }
@@ -111,7 +141,7 @@ function getObservables<T = any>(
   store: Store<AppState>,
   entityKey: string,
   paginationKey: string,
-  action: Action,
+  action: PaginatedAction,
   schema: Schema,
   isLocal = false)
   : PaginationObservables<T> {
@@ -162,6 +192,7 @@ function getObservables<T = any>(
         } else {
           page = pagination.ids[pagination.currentPage];
         }
+
         return page ? denormalize(page, schema, entities).filter(ent => !!ent) : null;
       })
       );

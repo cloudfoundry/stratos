@@ -1,0 +1,132 @@
+import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
+import { EntityInfo } from '../../store/types/api.types';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../store/app-state';
+import { cnsisRegisteredEntitiesSelector } from '../../store/selectors/cnsis.selectors';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { GetAllOrganizations, OrganizationSchema } from '../../store/actions/organization.actions';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CNSISModel } from '../../store/types/cnsis.types';
+import { selectPaginationState } from '../../store/selectors/pagination.selectors';
+import { PaginationEntityState } from '../../store/types/pagination.types';
+import { ApplicationSchema } from '../../store/actions/application.actions';
+
+export interface CfOrgSpaceItem {
+  list$: Observable<CNSISModel[] | any[]>;
+  loading$: Observable<boolean>;
+  select: BehaviorSubject<CNSISModel | any>;
+}
+
+@Injectable()
+export class CfOrgSpaceDataService {
+
+  private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
+
+  public cf: CfOrgSpaceItem;
+  public org: CfOrgSpaceItem;
+  public space: CfOrgSpaceItem;
+
+  public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey);
+
+  // TODO: We should optimise this to only fetch the orgs for the current endpoint
+  // (if we inline depth the get orgs request it could be hefty... or we could use a different action to only fetch required data..
+  // which might mean inline data missing from entity when we need it)
+  private allOrgs$ = getPaginationObservables({
+    store: this.store,
+    action: this.paginationAction,
+    schema: [OrganizationSchema]
+  });
+
+  private getEndpointsAndOrgs$: Observable<any>;
+
+  constructor(private store: Store<AppState>) {
+    this.createCf();
+    this.init();
+    this.createOrg();
+    this.createSpace();
+
+    const orgResetSub = this.cf.select.asObservable().distinctUntilChanged().do(() => {
+      this.org.select.next(null);
+      this.space.select.next(null);
+    }).subscribe();
+    this.cf.select.asObservable().finally(() => {
+      orgResetSub.unsubscribe();
+    });
+
+    const spaceResetSub = this.org.select.asObservable().distinctUntilChanged().do(() => {
+      this.space.select.next(null);
+    }).subscribe();
+    this.org.select.asObservable().finally(() => {
+      spaceResetSub.unsubscribe();
+    });
+
+  }
+
+  private init() {
+    this.getEndpointsAndOrgs$ = Observable.combineLatest(
+      this.allOrgs$.pagination$.filter(paginationEntity => {
+        return !paginationEntity.fetching;
+      }).first(),
+      this.cf.list$
+    );
+  }
+
+  private createCf() {
+    this.cf = {
+      list$: this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis)),
+      loading$: Observable.of(false),
+      select: new BehaviorSubject(null),
+    };
+  }
+
+  private createOrg() {
+    const orgList$ = Observable.combineLatest(
+      this.cf.select.asObservable(),
+      this.getEndpointsAndOrgs$,
+      this.allOrgs$.entities$
+    )
+      .map(([selectedCF, endpointsAndOrgs, entities]: [CNSISModel, any, any]) => {
+        const [pag, cfList] = endpointsAndOrgs;
+        if (selectedCF && entities) {
+          return entities.map(org => org.entity).filter(org => org.cfGuid === selectedCF);
+        }
+        return [];
+      });
+
+    this.org = {
+      list$: orgList$,
+      loading$: this.allOrgs$.pagination$.map(pag => pag.fetching),
+      select: new BehaviorSubject(null),
+    };
+  }
+
+  private createSpace() {
+    const spaceList$ = Observable.combineLatest(
+      this.org.select.asObservable(),
+      this.getEndpointsAndOrgs$,
+      this.allOrgs$.entities$
+    )
+      .map(([selectedOrgGuid, data, orgs]) => {
+        const [orgList, cfList] = data;
+        const selectedOrg = orgs.find(org => {
+          return org.entity.guid === selectedOrgGuid;
+        });
+        if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
+          return selectedOrg.entity.spaces.map(space => {
+            const entity = { ...space.entity };
+            entity.guid = space.metadata.guid;
+            return entity;
+          });
+        }
+        return [];
+      });
+
+    this.space = {
+      list$: spaceList$,
+      loading$: this.org.loading$,
+      select: new BehaviorSubject(null),
+    };
+  }
+}

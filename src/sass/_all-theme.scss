@@ -8,7 +8,25 @@
 @import '../app/features/applications/application/application-base.component.theme';
 @import '../app/shared/components/cards/cards.components.theme';
 @import '../app/shared/components/dialog-error/dialog-error.component.theme';
-@mixin app-theme($theme) {
+@import '../app/shared/components/page-subheader/page-subheader.component.theme';
+@import '../app/shared/components/card-status/card-status.component.theme';
+@import '../app/shared/components/usage-gauge/usage-gauge.component.theme';
+@import './components/mat-tabs.theme';
+@import './components/text-status.theme';
+@import './mat-themes';
+
+// Defaults
+$side-nav-light-text: #fff;
+$side-nav-light-bg: #333;
+$side-nav-light-hover: #555;
+$side-nav-light-active: #484848;
+
+// Creates the app theme and applies it to the application
+
+// $theme = Angular Material Theme
+// $nav-theme - Colors for the Side Nav (optional)
+// $status-theme - Colors for status (optional)
+@mixin app-theme($theme, $nav-theme: null, $status-theme: null) {
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
   $is-dark: map-get($theme, is-dark);
@@ -26,25 +44,13 @@
   html {
     background-color: $app-background-color;
   }
-  
-  $side-nav-text: #fff;
-
-  // Palette for side navigation
-  $side-nav: (
-    background: #333,
-    background-top: #333,
-    text: darken($side-nav-text, 10%),
-    active: #484848,
-    active-text: $side-nav-text,
-    hover: #555,
-    hover-text: $side-nav-text
-  );
 
   // App Theme defines a set of colors used by stratos components
   $app-theme: (
     app-background-color: $app-background-color,
     app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
-    side-nav: $side-nav
+    side-nav: app-generate-nav-theme($theme, $nav-theme),
+    status: app-generate-status-theme($theme, $status-theme)
   );
 
   // Pass the Material theme and the App Theme to components that need to be themed
@@ -56,22 +62,43 @@
   @include steppers-theme($theme, $app-theme);
   @include variables-tab-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
+  @include app-page-subheader-theme($theme, $app-theme);
+  @include app-mat-tabs-theme($theme, $app-theme);
+  @include app-text-status-theme($theme, $app-theme);
+  @include app-card-status-theme($theme, $app-theme);
+  @include app-usage-gauge-theme($theme, $app-theme);
+}
 
-  // These should move into a component file for status
-  $status-success: mat-color($primary);
-  $status-warning: mat-color($warn);
-  $status-danger: mat-color($accent);
-  $status-tentative: mat-color($primary, 100);
-  .text-success {
-    color: $status-success;
+@function app-generate-nav-theme($theme, $nav-theme: null) {
+  @if ($nav-theme) {
+    @return $nav-theme;
+  } @else {
+    // Use default palette for side navigation
+    @return (
+      background: $side-nav-light-bg,
+      background-top: $side-nav-light-bg,
+      text: darken($side-nav-light-text, 10%),
+      active: $side-nav-light-active,
+      active-text: $side-nav-light-text,
+      hover: $side-nav-light-hover,
+      hover-text: $side-nav-light-text
+    );
   }
-  .text-warning {
-    color: $status-warning;
-  }
-  .text-danger {
-    color: $status-danger;
-  }
-  .text-tentative {
-    color: $status-tentative;
+}
+  
+@function app-generate-status-theme($theme, $status-theme: null) {
+  @if ($status-theme) {
+    @return $status-theme;
+  } @else {
+    $warn: map-get($theme, warn);
+    $primary: map-get($theme, primary);    
+    // Use default palette for status
+    @return (
+      success: map-get($mat-green, 500),
+      warning: map-get($mat-orange, 500),
+      danger: mat-color($warn),
+      tentative: map-get($mat-grey, 500),
+      busy: mat-color($primary)
+    );
   }
 }

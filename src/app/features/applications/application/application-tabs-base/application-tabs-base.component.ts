@@ -7,7 +7,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 import { UpdateApplication, DeleteApplication } from '../../../../store/actions/application.actions';
-import { GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 
 @Component({
@@ -50,7 +49,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   };
 
   tabLinks = [
-    { link: 'build', label: 'Build Info' },
+    { link: 'summary', label: 'Summary' },
+    { link: 'instances', label: 'Instances' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
@@ -86,9 +86,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   pollEntityService(state, stateString) {
     return this.entityService.poll(1000, state)
-    .takeWhile(({ resource, updatingSection }) => {
-      return resource.entity.state !== stateString;
-    });
+      .takeWhile(({ resource, updatingSection }) => {
+        return resource.entity.state !== stateString;
+      });
   }
 
   startApplication() {

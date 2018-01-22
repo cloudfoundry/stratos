@@ -9,7 +9,7 @@ import { ApplicationService } from '../../features/applications/application.serv
 import { AppVariablesDelete } from '../../store/actions/app-variables.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
-import { AppEnvVar, CfAppEvnVarsDataSource } from '../data-sources/cf-app-variables-data-source';
+import { ListAppEnvVar, CfAppEvnVarsDataSource } from '../data-sources/cf-app-variables-data-source';
 import { Injectable } from '@angular/core';
 import { EntityInfo } from '../../store/types/api.types';
 import {
@@ -19,40 +19,41 @@ import {
   IListConfig,
   IMultiListAction,
 } from '../components/list/list.component';
+import { AppEnvVarsState } from '../../store/types/app-metadata.types';
 
 @Injectable()
-export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
+export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
   envVarsDataSource: CfAppEvnVarsDataSource;
 
-  private multiListActionDelete: IMultiListAction<AppEnvVar> = {
-    action: (items: AppEnvVar[]) => {
+  private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
+    action: (items: ListAppEnvVar[]) => {
       this.dispatchDeleteAction();
     },
     icon: 'delete',
     label: 'Delete',
     description: '',
-    visible: (row: AppEnvVar) => true,
-    enabled: (row: AppEnvVar) => true,
+    visible: (row: ListAppEnvVar) => true,
+    enabled: (row: ListAppEnvVar) => true,
   };
 
-  private listActionDelete: IListAction<AppEnvVar> = {
-    action: (item: AppEnvVar) => {
+  private listActionDelete: IListAction<ListAppEnvVar> = {
+    action: (item: ListAppEnvVar) => {
       this.dispatchDeleteAction();
     },
     icon: 'delete',
     label: 'Delete',
     description: '',
-    visible: (row: AppEnvVar) => true,
-    enabled: (row: AppEnvVar) => true,
+    visible: (row: ListAppEnvVar) => true,
+    enabled: (row: ListAppEnvVar) => true,
   };
 
-  columns: Array<ITableColumn<AppEnvVar>> = [
+  columns: Array<ITableColumn<ListAppEnvVar>> = [
     {
       columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
       class: 'table-column-select', cellFlex: '1'
     },
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row: AppEnvVar) => `${row.name}`, sort: true, cellFlex: '3'
+      columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: true, cellFlex: '3'
     },
     {
       columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '4'
@@ -80,7 +81,7 @@ export class CfAppVariablesListConfigService implements IListConfig<AppEnvVar> {
   getSingleActions = () => [this.listActionDelete];
   getColumns = () => this.columns;
   getDataSource = () => this.envVarsDataSource;
-  getFiltersConfigs = () => [];
+  getMultiFiltersConfigs = () => [];
 
   constructor(
     private store: Store<AppState>,

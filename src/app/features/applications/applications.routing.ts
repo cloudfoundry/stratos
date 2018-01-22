@@ -1,3 +1,5 @@
+import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
+import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -11,8 +13,8 @@ import { BuildTabComponent } from './application/application-tabs-base/tabs/buil
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
 import { CreateApplicationModule } from './create-application/create-application.module';
+import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
-
 const appplicationsRoutes: Routes = [
   {
     path: 'new',
@@ -31,20 +33,32 @@ const appplicationsRoutes: Routes = [
         component: ApplicationBaseComponent,
         children: [
           {
+            path: 'edit',
+            component: EditApplicationComponent
+          },
+          {
             path: '',
             component: ApplicationTabsBaseComponent,
+            data: {
+              uiFullView: true
+            },
             children: [
-              { path: '', redirectTo: 'build', pathMatch: 'full' },
-              { path: 'build', component: BuildTabComponent },
+              { path: '', redirectTo: 'summary', pathMatch: 'full' },
+              { path: 'summary', component: BuildTabComponent },
+              { path: 'instances', component: InstancesTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },
               { path: 'events', component: EventsTabComponent },
               { path: 'ssh', component: SshTabComponent }
             ]
+          },
+          {
+            path: 'add-route',
+            component: AddRoutesComponent,
           }
         ]
-      },
+      }
     ]
   }
 ];
