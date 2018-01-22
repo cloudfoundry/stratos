@@ -451,7 +451,7 @@ const testInitialStoreState: AppState = {
         }
       },
       environmentVars: {},
-      instances: {},
+      stats: {},
       summary: {}
     },
     dashboard: {
