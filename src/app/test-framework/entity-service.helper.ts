@@ -3,6 +3,7 @@ import { Action, Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { EntityService } from '../core/entity-service';
 import { schema } from 'normalizr';
+import { RequestSectionKeys } from '../store/reducers/api-request-reducer/types';
 
 export function generateTestEntityServiceProvider(
   guid: string,
@@ -17,7 +18,8 @@ export function generateTestEntityServiceProvider(
       schema.key,
       schema,
       guid,
-      action
+      action,
+      RequestSectionKeys.CF
     );
   };
 

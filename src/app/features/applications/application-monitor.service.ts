@@ -64,19 +64,19 @@ export class ApplicationMonitorService {
     private applicationService: ApplicationService,
   ) {
     // Do we need share()? Or should this be on the app stats observable?
-    this.appMonitor$ = this.applicationService.appStatsGated$.map(item => {
+    this.appMonitor$ = this.applicationService.appStats$.map(stats => {
       // console.log('APP MONITOR');
       // console.log(item);
       const res = new AppMonitorState();
-      if (!item || !item.metadata) {
+      if (!stats) {
         return res;
       }
 
-      const statsCount = Object.keys(item.metadata).length;
+      const statsCount = stats.length;
       let validStatsCount = 0;
 
-      Object.keys(item.metadata).forEach(key => {
-        const stat = item.metadata[key];
+      stats.forEach(statEntity => {
+        const stat = statEntity.entity;
         // Inly include stats for Running Application Instances
         if (stat.stats && stat.state === 'RUNNING') {
           const usage = stat.stats.usage;

@@ -1,5 +1,5 @@
 import { GetRoutes } from '../../store/actions/route.actions';
-import { EnvVarSchema, GetAppEnvVarsAction, getPaginationKey } from './../../store/actions/app-metadata.actions';
+import { GetAppEnvVarsAction } from './../../store/actions/app-metadata.actions';
 import { ListDataSource } from './list-data-source';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
@@ -14,10 +14,9 @@ import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
 import { ListActionConfig, ListActions } from './list-data-source-types';
-import { AppMetadataProperties, EnvVarsSchema } from '../../store/actions/app-metadata.actions';
-import { AppMetadataType } from '../../store/types/app-metadata.types';
 import { map } from 'rxjs/operators';
 import { schema } from 'normalizr';
+import { getPaginationKey } from '../../store/actions/pagination.actions';
 
 export const RouteSchema = new schema.Entity('route');
 
@@ -46,7 +45,7 @@ export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
         _appService.cfGuid,
         _appService.appGuid,
       ),
-  null,
+      null,
       false,
       [
         {

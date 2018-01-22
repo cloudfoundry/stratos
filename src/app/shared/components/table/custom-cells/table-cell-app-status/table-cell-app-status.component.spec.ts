@@ -1,5 +1,5 @@
 import { appReducers } from '../../../../../store/reducers.module';
-import { getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
+import { getInitialTestStoreState, createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellAppStatusComponent } from './table-cell-app-status.component';
@@ -30,20 +30,19 @@ describe('TableCellAppStatusComponent', () => {
       imports: [
         StoreModule,
         CoreModule,
-        StoreModule.forRoot(appReducers, {
-          initialState: getInitialTestStoreState()
-        })
+        createBasicStoreModule()
       ],
       providers: [
         ApplicationStateService
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppStatusComponent);
     component = fixture.componentInstance;
+    component.row = { entity: {} };
     fixture.detectChanges();
   });
 

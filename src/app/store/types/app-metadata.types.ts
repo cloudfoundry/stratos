@@ -1,50 +1,23 @@
-export type AppMetadataType = 'instances' | 'environmentVars' | 'summary';
+import { schema } from 'normalizr';
+import { getAPIResourceGuid } from '../selectors/api.selectors';
 
-export interface AppMetadataInfo {
-  metadata: any;
-  metadataRequestState: AppMetadataRequestState;
+
+export const AppSummarySchema = new schema.Entity('summary', {}, { idAttribute: getAPIResourceGuid });
+
+export interface AppSummary {
+  guid: string;
+  running_instances: number;
+  service: any[];
 }
 
-export interface AppMetadataRequestStates {
-  [key: string]: {
-    instances: AppMetadataRequestState;
-    environmentVars: AppMetadataRequestState;
-  };
+export const AppStatSchema = new schema.Entity('stats', {}, { idAttribute: getAPIResourceGuid });
+export const AppStatsSchema = new schema.Array(AppStatSchema);
+
+export interface AppStats {
+  [key: string]: AppStat;
 }
 
-export interface MetadataUpdateState {
-  busy: boolean;
-  error: boolean;
-  message: string;
-}
-
-export interface AppMetadataRequestState {
-  fetching: MetadataUpdateState;
-  updating: MetadataUpdateState;
-  creating: MetadataUpdateState;
-  error: boolean;
-  message: string;
-}
-
-
-export interface MetadataState {
-  values: AppMetadata;
-  requests: {};
-}
-
-export interface AppMetadata {
-  [key: string]: {
-    instances: AppInstancesState;
-    environmentVars: AppEnvVarsState;
-    summary: any;
-  };
-}
-
-export interface AppInstancesState {
-  [key: string]: AppInstanceState;
-}
-
-export interface AppInstanceState {
+export interface AppStat {
   state: string;
   stats: AppInstanceStats;
 }
@@ -68,6 +41,9 @@ export interface AppInstanceUsage {
   time: string;
 }
 
+export const AppEnvVarSchema = new schema.Entity('environmentVars', {}, { idAttribute: getAPIResourceGuid });
+export const AppEnvVarsSchema = new schema.Array(AppEnvVarSchema);
+
 export interface AppEnvVarsState {
   application_env_json?: any;
   environment_json?: {
@@ -76,4 +52,6 @@ export interface AppEnvVarsState {
   running_env_json?: any;
   staging_env_json?: any;
   system_env_json?: any;
+  name?: any;
 }
+

@@ -4,7 +4,6 @@ import { OperatorFunction } from 'rxjs/interfaces';
 import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
 import { ListPagination, ListSort, ListFilter, ListView } from '../../store/actions/list.actions';
-import { EntityInfo } from '../../store/types/api.types';
 import { fileExists } from 'ts-node/dist';
 import { DataSource } from '@angular/cdk/table';
 import { Observable, Subscribable } from 'rxjs/Observable';

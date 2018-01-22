@@ -26,7 +26,7 @@ import { paginationSetParams } from './pagination-reducer-set-params';
 import { paginationStart } from './pagination-reducer-start';
 import { paginationSuccess } from './pagination-reducer-success';
 import { paginationFailure } from './pagination-reducer.failure';
-import { getActionKey, getActionType, getPaginationKey } from './pagination-reducer.helper';
+import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from './pagination-reducer.types';
 import { paginationSetResultCount } from './pagination-reducer-set-result-count';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
@@ -116,7 +116,7 @@ export function createPaginationReducer(types: [string, string, string]) {
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
   const actionType = getActionType(action);
   const key = getActionKey(action);
-  const paginationKey = getPaginationKey(action);
+  const paginationKey = getPaginationKeyFromAction(action);
 
   if (actionType && key && paginationKey) {
     const newState = { ...state };
