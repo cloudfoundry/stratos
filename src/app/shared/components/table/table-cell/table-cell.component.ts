@@ -15,6 +15,7 @@ import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/t
 import { TableCellEndpointStatusComponent } from '../custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { IListDataSource } from '../../../data-sources/list-data-source-types';
 import { TableCellAppStatusComponent } from '../custom-cells/table-cell-app-status/table-cell-app-status.component';
+import { TableCellUsageComponent } from '../custom-cells/table-cell-usage/table-cell-usage.component';
 
 @Component({
   selector: 'app-table-cell',
@@ -35,6 +36,7 @@ import { TableCellAppStatusComponent } from '../custom-cells/table-cell-app-stat
     TableCellAppNameComponent,
     TableCellEndpointStatusComponent,
     TableCellAppStatusComponent,
+    TableCellUsageComponent,
     TableCellRouteComponent,
     TableCellTCPRouteComponent,
   ],
@@ -48,6 +50,7 @@ export class TableCellComponent<T> implements OnInit {
   @Input('component') component: Type<{}>;
   @Input('func') func: () => string;
   @Input('row') row: T;
+  @Input('config') config: any;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
@@ -59,6 +62,7 @@ export class TableCellComponent<T> implements OnInit {
       const cellComponent = <TableCellCustom<T>>componentRef.instance;
       cellComponent.row = this.row;
       cellComponent.dataSource = this.dataSource;
+      cellComponent.config = this.config;
     }
   }
 

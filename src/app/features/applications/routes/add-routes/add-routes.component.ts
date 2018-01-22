@@ -59,13 +59,12 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.addHTTPRoute = new FormGroup({
       host: new FormControl('', [<any>Validators.required]),
       domain: new FormControl('', [<any>Validators.required]),
-      path: new FormControl(''),
-      port: new FormControl('')
+      path: new FormControl('')
     });
 
     this.addTCPRoute = new FormGroup({
       domain: new FormControl('', [<any>Validators.required]),
-      port: new FormControl('', [<any>Validators.required])
+      port: new FormControl('', [Validators.required, Validators.pattern('[0-9]*')])
     });
 
     this.space$ = this.store.select(selectEntity('application', this.appGuid))

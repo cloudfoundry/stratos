@@ -38,6 +38,7 @@ import { CardEndpointComponent } from '../shared/components/cards/custom-cards/c
 import {
   TableCellEndpointStatusComponent
 } from '../shared/components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { TableCellUsageComponent } from '../shared/components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 
 export const TableCellEntryPoints = [
   TableCellSelectComponent,
@@ -52,6 +53,7 @@ export const TableCellEntryPoints = [
   TableCellAppNameComponent,
   TableCellEndpointStatusComponent,
   TableCellAppStatusComponent,
+  TableCellUsageComponent,
   TableCellRouteComponent,
   TableCellTCPRouteComponent,
 

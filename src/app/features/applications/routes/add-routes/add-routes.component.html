@@ -7,9 +7,6 @@
     </mat-progress-bar>
 
   <mat-card>
-      <mat-card-header>
-        Create Route
-      </mat-card-header>
     <div class="add-route--form">
       <div class="add-route--form-message">
         Please specify details for the new route.
@@ -60,6 +57,7 @@
           <div>
             <mat-form-field>
               <input matInput formControlName="port" placeholder="Port" required>
+              <mat-error *ngIf="addTCPRoute.controls['port'].errors?.pattern">Invalid Port</mat-error>
             </mat-form-field>
           </div>
         </div>

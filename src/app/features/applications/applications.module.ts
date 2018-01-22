@@ -16,6 +16,8 @@ import { ApplicationsRoutingModule } from './applications.routing';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DatePipe } from '@angular/common';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
+import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
+import { ApplicationMonitorService } from './application-monitor.service';
 import { RoutesComponent } from './routes/routes.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 
@@ -38,11 +40,13 @@ import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
     ApplicationTabsBaseComponent,
     RoutesComponent,
     EditApplicationComponent,
+    InstancesTabComponent,
     AddRoutesComponent
   ],
   providers: [
     ApplicationService,
     ApplicationEnvVarsService,
+    ApplicationMonitorService,
     DatePipe
   ]
 })
