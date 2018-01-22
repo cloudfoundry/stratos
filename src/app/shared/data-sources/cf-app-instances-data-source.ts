@@ -18,9 +18,17 @@ import { ListFilter, SetListStateAction, ListPagination } from '../../store/acti
 import { AppStatSchema, AppStat } from '../../store/types/app-metadata.types';
 import { inspect } from 'util';
 
+export interface ListAppInstanceUsage {
+  mem: number;
+  disk: number;
+  cpu: number;
+  hasStats: boolean;
+}
+
 export interface ListAppInstance {
   index: number;
   value: AppStat;
+  usage: ListAppInstanceUsage;
 }
 
 export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, APIResource<AppStat>> {
@@ -99,7 +107,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
   }
 
   // Need to calculate usage as a fraction for sorting
-  calcUsage(instanceStats) {
+  calcUsage(instanceStats): ListAppInstanceUsage {
     const usage = {
       mem: 0,
       disk: 0,

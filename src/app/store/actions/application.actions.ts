@@ -11,7 +11,6 @@ import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { NewApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
-import { AppMetadataTypes } from './app-metadata.actions';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -45,14 +44,14 @@ export const DELETE_INSTANCE = '[Application Instance] Delete';
 export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
 export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
 
-const ApplicationEntiySchema = {
+const ApplicationEntitySchema = {
   entity: {
     stack: StackSchema,
     space: SpaceSchema
   }
 };
 
-export const ApplicationSchema = new schema.Entity('application', ApplicationEntiySchema, {
+export const ApplicationSchema = new schema.Entity('application', ApplicationEntitySchema, {
   idAttribute: getAPIResourceGuid
 });
 
@@ -174,7 +173,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   options: RequestOptions;
   updatingKey = UpdateExistingApplication.updateKey;
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
-    const keepFromOld = pick(oldEntities[ApplicationSchema.key][this.guid].entity, Object.keys(ApplicationEntiySchema.entity) as [string]);
+    const keepFromOld = pick(oldEntities[ApplicationSchema.key][this.guid].entity, Object.keys(ApplicationEntitySchema.entity) as [string]);
     newEntities[ApplicationSchema.key][this.guid].entity = { ...newEntities[ApplicationSchema.key][this.guid].entity, ...keepFromOld };
     return newEntities;
   }

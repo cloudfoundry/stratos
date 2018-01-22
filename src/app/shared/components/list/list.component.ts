@@ -243,10 +243,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  updateFilters(filterItemKey: string, selectedValue: string) {
-    console.log(`Filter Key: ${filterItemKey} Filter Value: ${selectedValue}`);
-  }
-
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
     listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
     this.dataSource.selectClear();

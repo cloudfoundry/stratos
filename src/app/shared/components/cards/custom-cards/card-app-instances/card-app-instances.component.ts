@@ -1,13 +1,19 @@
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { Component, OnInit, OnDestroy, Input, ElementRef, ViewChild, Renderer,
-  ViewChildren, QueryList, ContentChildren} from '@angular/core';
+import {
+  Component, OnInit, OnDestroy, Input, ElementRef, ViewChild, Renderer,
+  ViewChildren, QueryList, ContentChildren
+} from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import { AppState } from '../../../../../store/app-state';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
-import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
+import { AppStatSchema, AppStats, AppStatsSchema } from '../../../../../store/types/app-metadata.types';
+import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
+import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Component({
   selector: 'app-card-app-instances',
@@ -23,7 +29,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @ViewChild('instanceField') instanceField: ElementRef;
 
-  constructor(private store: Store<AppState>, private applicationService: ApplicationService, private renderer: Renderer ) { }
+  constructor(private store: Store<AppState>, private applicationService: ApplicationService, private renderer: Renderer) { }
 
   private currentCount: 0;
   private editCount: 0;
@@ -45,8 +51,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     });
 
     const { cfGuid, appGuid } = this.applicationService;
-    this.runningInstances$ = this.store.select(selectEntity<any>(AppMetadataProperties.INSTANCES, appGuid))
-    .pipe(map(stats => Object.values(stats || {}).filter(stat => stat.state === 'RUNNING').length));
+    this.runningInstances$ = getPaginationPages(this.store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
+      .pipe(
+      map(appInstancesPages => {
+        const allInstances = [].concat.apply([], Object.values(appInstancesPages || []));
+        return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
+      })
+      );
   }
 
   ngOnDestroy(): void {
@@ -54,16 +65,12 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   }
 
   scaleUp(current: number) {
-    console.log('Scale Up');
-    console.log(this.currentCount);
     this.applicationService.updateApplication({
       instances: this.currentCount + 1
     });
   }
 
   scaleDown(current: number) {
-    console.log('Scale Down');
-    console.log(this.currentCount);
     this.applicationService.updateApplication({
       instances: this.currentCount - 1
     });
