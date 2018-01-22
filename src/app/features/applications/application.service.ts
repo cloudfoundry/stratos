@@ -31,12 +31,8 @@ import {
 import { EntityInfo } from '../../store/types/api.types';
 import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType, AppEnvVarsState } from '../../store/types/app-metadata.types';
 import { combineLatest } from 'rxjs/operators/combineLatest';
-import { isTCPRoute } from './routes/routes.helper';
+import { isTCPRoute, getRoute } from './routes/routes.helper';
 
-export interface RoutesData {
-  nonTCP: EntityInfo[];
-  TCP: EntityInfo[];
-}
 export interface ApplicationData {
   fetching: boolean;
   app: EntityInfo;
@@ -44,7 +40,7 @@ export interface ApplicationData {
   organisation: EntityInfo;
   stack: EntityInfo;
   cf: any;
-  routes: RoutesData;
+  appUrl: string;
 }
 
 @Injectable()
@@ -145,10 +141,7 @@ export class ApplicationService {
           organisation: entity.entity.space.entity.organization,
           stack: entity.entity.stack,
           cf: cnsis[entity.entity.cfGuid],
-          routes: {
-            nonTCP:  entity.entity.routes ? entity.entity.routes.filter(p => !isTCPRoute(p)) : [],
-            TCP: entity.entity.routes ? entity.entity.routes.filter(p => isTCPRoute(p)) : []
-          }
+          appUrl: this.getAppUrl(entity)
         };
       });
 
@@ -209,6 +202,15 @@ export class ApplicationService {
     } else {
       return !!value;
     }
+  }
+
+  getAppUrl(app: EntityInfo): string {
+    const nonTCPRoutes = app.entity.routes
+    .filter(p => !isTCPRoute(p));
+    if (nonTCPRoutes.length >= 0) {
+      return getRoute(nonTCPRoutes[0], true);
+    }
+   return null;
   }
 
   updateApplication(updatedApplication: UpdateApplication) {

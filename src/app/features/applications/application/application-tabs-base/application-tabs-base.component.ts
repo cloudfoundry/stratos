@@ -1,6 +1,6 @@
 import { AppState } from '../../../../store/app-state';
 import { EntityService } from '../../../../core/entity-service';
-import { ApplicationService, ApplicationData, RoutesData } from '../../application.service';
+import { ApplicationService, ApplicationData } from '../../application.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -9,9 +9,6 @@ import { Subscription } from 'rxjs/Rx';
 import { UpdateApplication, DeleteApplication } from '../../../../store/actions/application.actions';
 import { GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { EntityInfo } from '../../../../store/types/api.types';
-import { isTCPRoute, getRoute } from '../../routes/routes.helper';
-import { WindowRef } from '../../../../core/window-ref/window-ref.service';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -25,8 +22,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private router: Router,
     private applicationService: ApplicationService,
     private entityService: EntityService,
-    private store: Store<AppState>,
-    private windowRef: WindowRef
+    private store: Store<AppState>
   ) { }
 
   public async: any;
@@ -62,8 +58,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     { link: 'events', label: 'Events' },
     { link: 'ssh', label: 'SSH' }
   ];
-
-  appRoutes: RoutesData;
 
   autoRefreshString = 'auto-refresh';
 
@@ -118,11 +112,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
   }
 
-  openApplication() {
-    const path = getRoute(this.appRoutes.nonTCP[0], true);
-    this.windowRef.nativeWindow.open(path, '_blank');
-  }
-
   ngOnInit() {
     this.setAppDefaults();
 
@@ -163,7 +152,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           enable_ssh: application.app.entity.enable_ssh,
           environment_json: application.app.entity.environment_json
         };
-        this.appRoutes = application.routes;
       }));
   }
 
