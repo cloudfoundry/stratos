@@ -61,6 +61,7 @@ import {
 } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
@@ -168,6 +169,7 @@ import { CardAppInstancesComponent } from './components/cards/custom-cards/card-
   providers: [
     ListConfig,
     ApplicationStateService,
+    CfOrgSpaceDataService,
   ]
 })
 export class SharedModule { }

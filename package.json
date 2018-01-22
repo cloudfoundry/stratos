@@ -66,6 +66,7 @@
     "karma-spec-reporter": "0.0.31",
     "ngrx-store-freeze": "^0.2.0",
     "protractor": "~5.1.2",
+    "sass-lint": "^1.12.1",
     "ts-node": "~3.2.0",
     "tslint": "~5.3.2",
     "typescript": "2.4.2"

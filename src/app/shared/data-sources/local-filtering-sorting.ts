@@ -21,7 +21,7 @@ function getFieldArray(def: DataFunctionDefinition) {
 function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
   const fieldArray = getFieldArray(def);
   return (entities, paginationState) => {
-    const upperCaseFilter = paginationState.clientPagination.filter.toUpperCase();
+    const upperCaseFilter = paginationState.clientPagination.filter.string.toUpperCase();
     return entities.filter(e => {
       const value = getValue(e, fieldArray);
       if (!value) {

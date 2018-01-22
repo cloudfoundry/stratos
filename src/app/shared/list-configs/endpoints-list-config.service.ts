@@ -176,6 +176,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   public getSingleActions = () => this.singleActions;
   public getColumns = () => this.columns;
   public getDataSource = () => this.dataSource;
-  public getFiltersConfigs = () => [];
+  public getMultiFiltersConfigs = () => [];
 
 }
