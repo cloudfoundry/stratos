@@ -65,27 +65,29 @@ export class SshApplicationComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private logService: LoggerService,
     private store: Store<AppState>,
-    private entityService: EntityService
+    private entityService: EntityService,
+    private applicationService: ApplicationService,
   ) {}
 
   ngOnInit() {
-    const routeParams = this.activatedRoute.snapshot.params;
 
-    this.instanceId = routeParams.instanceId;
+    const { cfGuid, appGuid } = this.applicationService;
+    const routeParams = this.activatedRoute.snapshot.params;
+    this.instanceId = routeParams.index;
 
     this.appInstanceLink = (
-      `/applications/${routeParams.cfId}/${routeParams.id}/ssh`
+      `/applications/${cfGuid}/${appGuid}/instances`
     );
 
-    if (!routeParams.cfId || !routeParams.id) {
+    if (!cfGuid || !appGuid || !this.instanceId) {
       this.messages = Observable.never();
+      this.connectionStatus = Observable.never();
     } else {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       const streamUrl = (
-        `${protocol}://${host}/pp/v1/${routeParams.cfId}/apps/${routeParams.id}/ssh/${routeParams.instanceId}`
+        `${protocol}://${host}/pp/v1/${cfGuid}/apps/${appGuid}/ssh/${this.instanceId}`
       );
       this.sshInput = new QueueingSubject<string>();
       const connection = websocketConnect(

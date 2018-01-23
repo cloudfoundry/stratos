@@ -178,7 +178,7 @@ import { TableCellStatusDirective } from './components/table/table-cell-status.d
     NoContentMessageComponent,
     EndpointsMissingComponent,
     ApplicationStateComponent,
-    SshViewerComponent
+    SshViewerComponent,
     PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
