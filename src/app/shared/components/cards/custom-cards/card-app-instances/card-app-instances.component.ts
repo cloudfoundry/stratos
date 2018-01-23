@@ -57,7 +57,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     this.runningInstances$ = getPaginationPages(this.store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
       .pipe(
       map(appInstancesPages => {
-        const allInstances = [].concat.apply([], Object.values(appInstancesPages || []));
+        const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
         return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
       })
       );

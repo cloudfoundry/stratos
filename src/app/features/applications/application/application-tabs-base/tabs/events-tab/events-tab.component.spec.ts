@@ -44,7 +44,8 @@ describe('EventsTabComponent', () => {
           filter: {
             string: '',
             items: {}
-          }
+          },
+          totalResults: 0
         }
       }
     }

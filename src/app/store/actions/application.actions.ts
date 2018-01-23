@@ -11,6 +11,9 @@ import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { NewApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
+import { AppMetadataTypes } from './app-metadata.actions';
+import { AppStatSchema } from '../types/app-metadata.types';
+import { getPaginationKey } from './pagination.actions';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -158,7 +161,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
     public guid: string,
     public cnis: string,
     private application: UpdateApplication,
-    public updateEntities?: string[]) {
+    public updateEntities?: AppMetadataTypes[]) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
@@ -204,24 +207,24 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
 }
 
 export class DeleteApplicationInstance extends CFStartAction implements ICFAction {
-  static updateKey = 'Deleting-Existing-Application-Instance';
-
-  constructor(public guid: string, private index: number, public cnis: string) {
+  guid: string;
+  constructor(public appGuid: string, private index: number, public cnis: string) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/instances/${index}`;
+    this.options.url = `apps/${appGuid}/instances/${index}`;
     this.options.method = 'delete';
     this.options.headers = new Headers();
     const cnsiPassthroughHeader = 'x-cap-passthrough';
     this.options.headers.set(cnsiPassthroughHeader, 'true');
+    this.guid = `${appGuid}-${index}`;
   }
   actions = [
     DELETE_INSTANCE,
     DELETE_INSTANCE_SUCCESS,
     DELETE_INSTANCE_FAILED
   ];
-  entity = [ApplicationSchema];
-  entityKey = ApplicationSchema.key;
-  updatingKey = 'delete-instance-' + this.index;
+  entity = [AppStatSchema];
+  entityKey = AppStatSchema.key;
+  removeEntityOnDelete = true;
   options: RequestOptions;
 }

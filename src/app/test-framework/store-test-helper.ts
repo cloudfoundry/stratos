@@ -259,7 +259,8 @@ const testInitialStoreState: AppState = {
             filter: {
               string: '',
               items: {}
-            }
+            },
+            totalResults: 0,
           }
         },
       },
@@ -426,7 +427,8 @@ const testInitialStoreState: AppState = {
             filter: {
               string: '',
               items: {}
-            }
+            },
+            totalResults: 0,
           }
         }
       },
@@ -449,7 +451,8 @@ const testInitialStoreState: AppState = {
             filter: {
               string: '',
               items: {}
-            }
+            },
+            totalResults: 0,
           }
         }
       },

@@ -15,6 +15,7 @@ import {
   SET_PARAMS,
   CLEAR_PAGES,
   SET_INITIAL_PARAMS,
+  CLEAR_PAGINATION_OF_ENTITY,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
@@ -33,6 +34,7 @@ import { resultPerPageParam, resultPerPageParamDefault } from './pagination-redu
 import { paginationSetResultCount } from './pagination-reducer-set-result-count';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
+import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
 
 export const defaultClientPaginationPageSize = 9;
 
@@ -126,6 +128,10 @@ function paginate(action, state, updatePagination) {
   if (action.type === CLEAR_PAGINATION_OF_TYPE) {
     const clearEntityType = action.entityKey || 'application';
     return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
+  }
+  
+  if (action.type === CLEAR_PAGINATION_OF_ENTITY) {
+    return paginationClearOfEntity(state, action);
   }
 
   if (isEnDpointAction(action)) {
