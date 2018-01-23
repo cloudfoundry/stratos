@@ -1,22 +1,5 @@
 import { Injectable } from '@angular/core';
 
-export interface ApplicationEnvVars {
-  staging_env_json?: any;
-  running_env_json?: any;
-  environment_json?: {
-    STRATOS_PROJECT?: any;
-  };
-  system_env_json?: any;
-  credentials?: any;
-  syslog_drain_url?: any;
-  volume_mounts?: any;
-  label?: string;
-  provider?: string;
-  plan?: string;
-  name?: string;
-  tags?: string[];
-}
-
 export interface EnvVarStratosProject {
   deploySource: EnvVarStratosProjectSource;
 }

@@ -1,3 +1,4 @@
+import { DISCONNECT_CNSIS_SUCCESS, CONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS } from './../../actions/cnsis.actions';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
@@ -13,27 +14,29 @@ import {
   SET_RESULT_COUNT,
   SET_PARAMS,
   CLEAR_PAGES,
+  SET_INITIAL_PARAMS,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
 import { defaultCfEntitiesState } from '../../types/entity.types';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
-import { paginationClearType } from './pagination-reducer-clear-pagination-type';
+import { clearEndpointEntities, paginationClearType } from './pagination-reducer-clear-pagination-type';
 import { paginationRemoveParams } from './pagination-reducer-remove-params';
 import { paginationSetPage } from './pagination-reducer-set-page';
 import { paginationSetParams } from './pagination-reducer-set-params';
 import { paginationStart } from './pagination-reducer-start';
 import { paginationSuccess } from './pagination-reducer-success';
 import { paginationFailure } from './pagination-reducer.failure';
-import { getActionKey, getActionType, getPaginationKey } from './pagination-reducer.helper';
+import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from './pagination-reducer.types';
 import { paginationSetResultCount } from './pagination-reducer-set-result-count';
 import { paginationResetPagination } from './pagination-reducer-reset-pagination';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 
 export const defaultClientPaginationPageSize = 9;
-export const defaultPaginationEntityState = {
+
+const defaultPaginationEntityState = {
   fetching: false,
   pageCount: 0,
   currentPage: 1,
@@ -54,11 +57,17 @@ export const defaultPaginationEntityState = {
   }
 };
 
+function getDefaultPaginationEntityState() {
+  return {
+    ...defaultPaginationEntityState
+  };
+}
+
 export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = defaultPaginationEntityState, action, actionType): PaginationEntityState {
+  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
         return paginationStart(state);
@@ -70,6 +79,7 @@ const getPaginationUpdater = function (types: [string, string, string]) {
         return paginationSetResultCount(state, action);
       case SET_PAGE:
         return paginationSetPage(state, action);
+      case SET_INITIAL_PARAMS:
       case SET_PARAMS:
         return paginationSetParams(state, action);
       case ADD_PARAMS:
@@ -89,34 +99,53 @@ const getPaginationUpdater = function (types: [string, string, string]) {
 };
 
 export function createPaginationReducer(types: [string, string, string]) {
-  const updatePagination = getPaginationUpdater(types);
+  return paginationReducer(getPaginationUpdater(types), types);
+}
+
+function paginationReducer(updatePagination, types) {
   const [requestType, successType, failureType] = types;
   return function (state, action) {
     state = state || defaultPaginationState;
-    if (action.type === ApiActionTypes.API_REQUEST_START) {
-      return state;
-    }
-
-    if (action.type === CLEAR_PAGES) {
-      return paginationClearPages(state, action);
-    }
-
-    if (action.type === RESET_PAGINATION && !action.keepPages) {
-      return paginationResetPagination(state, action);
-    }
-
-    if (action.type === CLEAR_PAGINATION_OF_TYPE) {
-      return paginationClearType(state, action, defaultPaginationEntityState);
-    }
-
-    return enterPaginationReducer(state, action, updatePagination);
+    return paginate(action, state, updatePagination);
   };
+}
+
+function paginate(action, state, updatePagination) {
+  if (action.type === ApiActionTypes.API_REQUEST_START) {
+    return state;
+  }
+
+  if (action.type === CLEAR_PAGES) {
+    return paginationClearPages(state, action);
+  }
+
+  if (action.type === RESET_PAGINATION && !action.keepPages) {
+    return paginationResetPagination(state, action);
+  }
+
+  if (action.type === CLEAR_PAGINATION_OF_TYPE) {
+    const clearEntityType = action.entityKey || 'application';
+    return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
+  }
+
+  if (isEnDpointAction(action)) {
+    return clearEndpointEntities(state, getDefaultPaginationEntityState());
+  }
+
+  return enterPaginationReducer(state, action, updatePagination);
+}
+
+function isEnDpointAction(action) {
+  // ... that we care about.
+  return action.type === DISCONNECT_CNSIS_SUCCESS ||
+    action.type === CONNECT_CNSIS_SUCCESS ||
+    action.type === UNREGISTER_CNSIS;
 }
 
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {
   const actionType = getActionType(action);
   const key = getActionKey(action);
-  const paginationKey = getPaginationKey(action);
+  const paginationKey = getPaginationKeyFromAction(action);
 
   if (actionType && key && paginationKey) {
     const newState = { ...state };

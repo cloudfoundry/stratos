@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { DisconnectCnis, GetAllCNSIS, UnregisterCnis } from '../../store/actions/cnsis.actions';
+import { DisconnectCnis, UnregisterCnis } from '../../store/actions/cnsis.actions';
 import { RouterNav } from '../../store/actions/router.actions';
 import { ShowSnackBar } from '../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../store/actions/system.actions';
@@ -70,7 +70,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     icon: 'remove_from_queue',
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    visible: row => !!(row.info && row.info.user),
+    visible: row => row.connectionStatus === 'connected',
     enabled: row => true,
   };
 
@@ -87,7 +87,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     icon: 'add_to_queue',
     label: 'Connect',
     description: '',
-    visible: row => !!(row.info && !row.info.user),
+    visible: row => row.connectionStatus === 'disconnected',
     enabled: row => true,
   };
 

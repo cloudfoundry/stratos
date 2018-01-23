@@ -37,6 +37,7 @@ describe('PaginationReducer', () => {
   const defaultClientPagination = {
     pageSize: 5,
     currentPage: 1,
+    totalResult: 0,
     filter: {
       string: '',
       items: {}
@@ -157,7 +158,8 @@ describe('PaginationReducer', () => {
           error: false,
           message: '',
           clientPagination: {
-            ...defaultClientPagination
+            ...defaultClientPagination,
+            totalResults: 2
           }
         }
       }

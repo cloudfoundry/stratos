@@ -9,6 +9,7 @@ export function paginationClearPages(state: PaginationState, action) {
     [action.paginationKey]: {
       ...newState[action.entityKey][action.paginationKey],
       ids: {},
+      currentPage: 1
     }
   };
   return {

@@ -1,3 +1,4 @@
+import { cnsisEntitiesSelector } from '../selectors/cnsis.selectors';
 import { request } from 'http';
 import { totalmem } from 'os';
 import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
@@ -9,6 +10,7 @@ import {
   IRequestAction,
   ICFAction,
   StartCFAction,
+  RequestEntityLocation,
 } from '../types/request.types';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
@@ -52,7 +54,6 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-
       const paramsObject = {};
       const apiAction = action as ICFAction;
       const paginatedAction = action as PaginatedAction;
@@ -61,7 +62,6 @@ export class APIEffect {
 
       this.store.dispatch(new StartRequestAction(action, requestType));
       this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
-
       // Apply the params from the store
       if (paginatedAction.paginationKey) {
         options.params = new URLSearchParams();
@@ -128,7 +128,7 @@ export class APIEffect {
         })
         .catch(err => {
           return [
-            { type: apiAction.actions[1], apiAction },
+            { type: apiAction.actions[2], apiAction },
             new WrapperRequestActionFailed(
               err.message,
               apiAction,
@@ -138,29 +138,44 @@ export class APIEffect {
         });
     });
 
-  private completeResourceEntity(resource: APIResource | any, cfGuid: string): APIResource {
+  private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
     if (!resource) {
       return resource;
     }
-    return resource.metadata ? {
+
+    const result = resource.metadata ? {
       entity: { ...resource.entity, guid: resource.metadata.guid, cfGuid },
       metadata: resource.metadata
     } : {
         entity: { ...resource, cfGuid },
-        metadata: { guid: resource.guid }
+        metadata: { guid: guid }
       };
+
+    // Inject `cfGuid` in nested entities
+    Object.keys(result.entity).forEach(resourceKey => {
+      const nestedResourceEntity = result.entity[resourceKey];
+      if (nestedResourceEntity &&
+        nestedResourceEntity.hasOwnProperty('entity') &&
+        nestedResourceEntity.hasOwnProperty('metadata')) {
+        resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid, nestedResourceEntity.metadata.guid);
+      }
+    });
+
+    return result;
   }
 
   getErrors(resData) {
     return Object.keys(resData)
-      .map(guid => {
-        const cnsis = resData[guid];
-        cnsis.guid = guid;
-        return cnsis;
+      .filter(guid => resData[guid] !== null)
+      .map(cfGuid => {
+        // Return list of guid+error objects for those endpoints with errors
+        const cnsis = resData[cfGuid];
+        return cnsis.error ? {
+          error: cnsis.error,
+          guid: cfGuid
+        } : null;
       })
-      .filter(cnsis => {
-        return cnsis.error;
-      });
+      .filter(cnsisError => !!cnsisError);
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -168,21 +183,35 @@ export class APIEffect {
     totalResults: number
   } {
     let totalResults = 0;
-    const allEntities = Object.keys(data).map(cfGuid => {
-      const cfData = data[cfGuid];
-      totalResults += cfData['total_results'];
-      if (cfData.resources) {
-        if (!cfData.resources.length) {
-          return null;
+    const allEntities = Object.keys(data)
+      .filter(guid => data[guid] !== null)
+      .map(cfGuid => {
+        const cfData = data[cfGuid];
+        switch (apiAction.entityLocation) {
+          case RequestEntityLocation.ARRAY: // The response is an array which contains the entities
+            return Object.keys(cfData).map(key => {
+              const guid = apiAction.guid + '-' + key;
+              const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
+              result.entity.guid = guid;
+              return result;
+            });
+          case RequestEntityLocation.OBJECT: // The response is the entity
+            return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
+          case RequestEntityLocation.RESOURCE: // The response is an object and the entities list is within a 'resource' param
+          default:
+            if (!cfData.resources) {
+              // Treat the response as RequestEntityLocation.OBJECT
+              return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
+            }
+            totalResults += cfData['total_results'];
+            if (!cfData.resources.length) {
+              return null;
+            }
+            return cfData.resources.map(resource => {
+              return this.completeResourceEntity(resource, cfGuid, resource.guid);
+            });
         }
-        return cfData.resources.map(resource => {
-          return this.completeResourceEntity(resource, cfGuid);
-        });
-      } else {
-
-        return this.completeResourceEntity(cfData, cfGuid);
-      }
-    });
+      });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
     return {
       entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,
@@ -217,10 +246,10 @@ export class APIEffect {
   }
 
   getPaginationParams(paginationState: PaginationEntityState): PaginationParam {
-    return {
+    return paginationState ? {
       ...paginationState.params,
       page: paginationState.currentPage.toString(),
-    };
+    } : {};
   }
 
   private makeRequest(options): Observable<any> {

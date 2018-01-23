@@ -63,11 +63,11 @@ export class EntityService {
     this.isDeletingEntity$ = this.entityObs$.map(a => a.entityRequestInfo.deleting.busy).startWith(false);
 
     this.waitForEntity$ = this.entityObs$
-      .filter((appInfo) => {
-        const available = !!appInfo.entity &&
-          !appInfo.entityRequestInfo.deleting.busy &&
-          !appInfo.entityRequestInfo.deleting.deleted &&
-          !appInfo.entityRequestInfo.error;
+      .filter((entityInfo) => {
+        const available = !!entityInfo.entity &&
+          !entityInfo.entityRequestInfo.deleting.busy &&
+          !entityInfo.entityRequestInfo.deleting.deleted &&
+          !entityInfo.entityRequestInfo.error;
         return (
           available
         );
