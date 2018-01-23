@@ -5,16 +5,14 @@
   position: relative;
 
   .ssh-terminal {
-    background-color: #000;
-    border: 2px solid #000;
     display: flex;
     flex: 1;
     flex-direction: column;
     opacity: 1;
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity .5s ease-in-out;
 
     &.ssh-terminal-disconnected {
-      opacity: 0.4;
+      opacity: .4;
     }
 
     #terminal {
@@ -24,30 +22,25 @@
     }
   }
 
-}
+  &__overlay {
+    align-items: flex-end;
+    display: flex;  
+    height: 100%;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+  }
 
-.ssh-viewer__overlay {
-  align-items: flex-end;
-  display: flex;  
-  height: 100%;
-  justify-content: center;
-  position: absolute;
-  width: 100%;
-  z-index: 1;
-}
+  &__error {
+    padding: 8px;
+    text-align: center;
+    width: 100%;
+  }
 
-.ssh-viewer__error {
-  background-color: red;
-  color: #fff;
-  padding: 8px;
-  text-align: center;
-  width: 100%;
-}
-
-.ssh-viewer__disconnected {
-  background-color: #333;
-  color: #fff;
-  padding: 8px;
-  text-align: center;
-  width: 100%;
+  &__disconnected {
+    padding: 8px;
+    text-align: center;
+    width: 100%;
+  }
 }
