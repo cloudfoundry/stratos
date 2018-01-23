@@ -21,6 +21,7 @@ import {
 } from '../components/table/custom-cells/table-cell-event-detail/table-cell-event-detail.component';
 import { Injectable } from '@angular/core';
 import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
+import { DeleteApplicationInstance } from '../../store/actions/application.actions';
 import { AppStat } from '../../store/types/app-metadata.types';
 
 @Injectable()
@@ -37,30 +38,36 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     {
       columnId: 'memory', headerCell: () => 'Memory',
       cellConfig: {
-        value: (row) => row.value.stats.usage.mem / row.value.stats.mem_quota,
-        label: (row) => this.utilsService.usageBytes([row.value.stats.usage.mem, row.value.stats.mem_quota])
+        value: (row) => row.usage.mem,
+        label: (row) => this.utilsService.usageBytes([
+          row.usage.hasStats ? row.value.stats.usage.mem : 0,
+          row.usage.hasStats ? row.value.stats.mem_quota : 0
+        ])
       },
       cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
     },
     {
       columnId: 'disk', headerCell: () => 'Disk',
       cellConfig: {
-        value: (row) => row.value.stats.usage.disk / row.value.stats.disk_quota,
-        label: (row) => this.utilsService.usageBytes([row.value.stats.usage.disk, row.value.stats.disk_quota])
+        value: (row) => row.usage.disk,
+        label: (row) => this.utilsService.usageBytes([
+          row.usage.hasStats ? row.value.stats.usage.disk : 0,
+          row.usage.hasStats ? row.value.stats.disk_quota : 0
+        ])
       },
       cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
     },
     {
       columnId: 'cpu', headerCell: () => 'CPU',
       cellConfig: {
-        value: (row) => row.value.stats.usage.cpu,
-        label: (row) => this.utilsService.percent(row.value.stats.usage.cpu)
+        value: (row) => row.usage.cpu,
+        label: (row) => this.utilsService.percent(row.usage.hasStats ? row.value.stats.usage.cpu : 0)
       },
       cellComponent: TableCellUsageComponent, sort: true, cellFlex: '2'
     },
     {
-      columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) => this.utilsService.formatUptime(row.value.stats.uptime),
-      sort: true, cellFlex: '5'
+      columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
+        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
     },
     {
       columnId: 'edit',
@@ -75,10 +82,21 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      window.alert('TERMINATE!');
+      this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid));
     },
-    icon: 'remove_from_queue',
+    icon: 'delete',
     label: 'Terminate',
+    description: ``, // Description depends on console user permission
+    visible: row => true,
+    enabled: row => !!(row.value && row.value.state === 'RUNNING'),
+  };
+
+  private listActionSSh: IListAction<any> = {
+    action: (item) => {
+      window.alert('SSH!');
+    },
+    icon: 'computer',
+    label: 'SSH',
     description: ``, // Description depends on console user permission
     visible: row => true,
     enabled: row => !!(row.value && row.value.state === 'RUNNING'),
@@ -86,6 +104,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private singleActions = [
     this.listActionTerminate,
+    this.listActionSSh
   ];
 
   constructor(private store: Store<AppState>, private appService: ApplicationService, private utilsService: UtilsService) {

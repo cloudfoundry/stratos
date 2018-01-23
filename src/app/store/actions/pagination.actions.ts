@@ -11,6 +11,7 @@ import {
 import { ListFilter } from './list.actions';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
+export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
 export const RESET_PAGINATION = '[Pagination] Reset pagination';
 export const CLEAR_PAGES = '[Pagination] Clear pages only';
 export const SET_PAGE = '[Pagination] Set page';
@@ -31,6 +32,12 @@ export class ClearPaginationOfType implements Action {
   constructor(public entityKey: string) {
   }
   type = CLEAR_PAGINATION_OF_TYPE;
+}
+
+export class ClearPaginationOfEntity implements Action {
+  constructor(public entityKey: string, public entityGuid) {
+  }
+  type = CLEAR_PAGINATION_OF_ENTITY;
 }
 
 export class ResetPagination implements PaginationAction {

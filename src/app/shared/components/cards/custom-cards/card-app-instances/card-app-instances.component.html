@@ -3,9 +3,33 @@
   <mat-card-header>
     <mat-card-title>Instances</mat-card-title>
   </mat-card-header>
-  <mat-card-content>
-    <div class="card-app-instances__large">
-      {{(applicationService.appSummary$| async)?.entity?.entity.running_instances || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
+  <mat-card-content class="card-app-instances__compact">
+      <div *ngIf="!isEditing" class="card-app-instances__large">
+          {{(runningInstances$ | async) || 0}} / {{ (applicationService.application$ | async)?.app.entity?.instances}}
     </div>
+      <form [hidden]="!isEditing" class="exampcard-app-instances_form">
+          <mat-form-field>
+            <input #instanceField matInput type="number" name="instances" [(ngModel)]="editValue" value="{{ editCount }}">
+          </mat-form-field>
+      </form>
   </mat-card-content>
-</mat-card>
+  <mat-card-actions *ngIf="showActions && isRunning && !isEditing" class="card-app-instances__actions">
+      <button (click)="edit()" mat-icon-button [disabled]="applicationService.isUpdatingApp$ | async">
+          <mat-icon>edit</mat-icon>
+      </button>
+      <button (click)="scaleDown()" mat-icon-button [disabled]="applicationService.isUpdatingApp$ | async">
+          <mat-icon>remove_circle_outline</mat-icon>
+      </button>
+      <button (click)="scaleUp()" mat-icon-button [disabled]="applicationService.isUpdatingApp$ | async">
+          <mat-icon>add_circle_outline</mat-icon>
+      </button>
+    </mat-card-actions>  
+    <mat-card-actions *ngIf="showActions && isEditing" class="card-app-instances__actions">
+        <button (click)="finishEdit(false)" mat-icon-button [disabled]="applicationService.isUpdatingApp$ | async">
+            <mat-icon>clear</mat-icon>
+        </button>
+        <button (click)="finishEdit(true)" mat-icon-button [disabled]="applicationService.isUpdatingApp$ | async">
+            <mat-icon>done</mat-icon>
+        </button>
+      </mat-card-actions>  
+  </mat-card>

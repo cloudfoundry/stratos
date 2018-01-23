@@ -5,6 +5,13 @@ import { ICFAction, CFStartAction, RequestEntityLocation } from '../types/reques
 import { RequestOptions } from '@angular/http';
 import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
 
+// export type AppMetadataEntities = AppStatsSchema | AppEnvVarSchema | AppSummarySchema;
+export enum AppMetadataTypes {
+  STATS,
+  ENV_VARS,
+  SUMMARY
+}
+
 export class GetAppStatsAction extends CFStartAction implements PaginatedAction, ICFAction {
   options: RequestOptions;
   paginationKey: string;

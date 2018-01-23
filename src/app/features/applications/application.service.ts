@@ -1,3 +1,4 @@
+import { OrganizationSchema } from '../../store/actions/organization.actions';
 import {
   getPaginationObservables,
   PaginationObservables,
@@ -36,19 +37,19 @@ import {
   AppEnvVarsSchema,
 } from '../../store/types/app-metadata.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
+import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction, AppMetadataTypes } from '../../store/actions/app-metadata.actions';
 import { PaginationEntityState, PaginationState } from '../../store/types/pagination.types';
 import {
   defaultPaginationState,
 } from '../../store/reducers/pagination-reducer/pagination.reducer';
 import { tap, map } from 'rxjs/operators';
 import { isTCPRoute, getRoute } from './routes/routes.helper';
+import { selectEntity } from '../../store/selectors/api.selectors';
+import { SpaceSchema } from '../../store/actions/space.action';
 
 export interface ApplicationData {
   fetching: boolean;
   app: EntityInfo;
-  space: EntityInfo;
-  organisation: EntityInfo;
   stack: EntityInfo;
   cf: any;
   appUrl: string;
@@ -102,6 +103,8 @@ export class ApplicationService {
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<AppEnvVarsState>;
+  appOrg$: Observable<APIResource<any>>;
+  appSpace$: Observable<APIResource<any>>;
 
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
@@ -128,9 +131,11 @@ export class ApplicationService {
     return getPaginationPages(store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
       .pipe(
       map(appInstancesPages => {
-        const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
-          return apiResource.entity;
-        });
+        const appInstances = [].concat.apply([], Object.values(appInstancesPages))
+          .filter(apiResource => !!apiResource)
+          .map(apiResource => {
+            return apiResource.entity;
+          });
         return appStateService.get(app, appInstances);
       })
       );
@@ -139,6 +144,22 @@ export class ApplicationService {
   private constructCoreObservables() {
     // First set up all the base observables
     this.app$ = this.appEntityService.entityObs$;
+
+    // App org and space
+    this.app$
+      .filter(entityInfo => {
+        return entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid;
+      })
+      .map(entityInfo => {
+        return entityInfo.entity.entity;
+      })
+      .do(app => {
+        this.appSpace$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid));
+        // See https://github.com/SUSE/stratos/issues/158 (Failing to populate entity store with a space's org)
+        this.appOrg$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid)).map(space => space.entity.organization);
+      })
+      .take(1)
+      .subscribe();
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$;
 
@@ -183,14 +204,12 @@ export class ApplicationService {
       this.store.select(cnsisEntitiesSelector),
     )
       .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
-        return entity && entity.entity && entity.entity.cfGuid && entity.entity.space && entity.entity.space.entity.organization;
+        return entity && entity.entity && entity.entity.cfGuid;
       })
       .map(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]): ApplicationData => {
         return {
           fetching: entityRequestInfo.fetching,
           app: entity,
-          space: entity.entity.space,
-          organisation: entity.entity.space.entity.organization,
           stack: entity.entity.stack,
           cf: cnsis[entity.entity.cfGuid],
           appUrl: this.getAppUrl(entity)
@@ -256,11 +275,12 @@ export class ApplicationService {
     }
   }
 
-  updateApplication(updatedApplication: UpdateApplication) {
+  updateApplication(updatedApplication: UpdateApplication, updateEntities?: AppMetadataTypes[]) {
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
-      { ...updatedApplication }
+      { ...updatedApplication },
+      updateEntities
     ));
   }
 }
