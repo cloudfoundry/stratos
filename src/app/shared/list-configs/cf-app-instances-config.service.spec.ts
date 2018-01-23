@@ -10,6 +10,7 @@ import { ApplicationSchema, GetApplication } from '../../store/actions/applicati
 import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
 import { ApplicationsModule } from '../../features/applications/applications.module';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('CfAppInstancesConfigService', () => {
 
@@ -33,7 +34,8 @@ describe('CfAppInstancesConfigService', () => {
         CoreModule,
         SharedModule,
         ApplicationsModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        RouterTestingModule,
       ]
     });
   });
