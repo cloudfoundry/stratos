@@ -151,12 +151,14 @@ export interface UpdateApplication {
 }
 
 
-// declare function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K>;
-
 export class UpdateExistingApplication extends CFStartAction implements ICFAction {
   static updateKey = 'Updating-Existing-Application';
 
-  constructor(public guid: string, public cnis: string, application: UpdateApplication) {
+  constructor(
+    public guid: string,
+    public cnis: string,
+    private application: UpdateApplication,
+    public updateEntities?: string[]) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;

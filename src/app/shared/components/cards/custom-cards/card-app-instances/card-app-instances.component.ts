@@ -12,7 +12,7 @@ import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { AppStatSchema, AppStats, AppStatsSchema } from '../../../../../store/types/app-metadata.types';
-import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
+import { GetAppStatsAction, AppMetadataTypes } from '../../../../../store/actions/app-metadata.actions';
 import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Component({
@@ -70,13 +70,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   scaleUp(current: number) {
     this.applicationService.updateApplication({
       instances: this.currentCount + 1
-    });
+    }, [AppMetadataTypes.STATS]);
   }
 
   scaleDown(current: number) {
     this.applicationService.updateApplication({
       instances: this.currentCount - 1
-    });
+    }, [AppMetadataTypes.STATS]);
   }
 
   edit() {
@@ -92,7 +92,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
     if (ok) {
       this.applicationService.updateApplication({
         instances: parseInt(this.editValue, 10)
-      });
+      }, [AppMetadataTypes.STATS]);
     }
   }
 

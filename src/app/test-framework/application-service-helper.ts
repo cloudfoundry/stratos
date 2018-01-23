@@ -27,15 +27,6 @@ export class ApplicationServiceMock {
       entity: {
       },
     },
-    organisation: {
-      entity: {
-      },
-    },
-    space: {
-      entity: {
-
-      }
-    },
     fetching: false
   } as ApplicationData));
   appSummary$: Observable<EntityInfo<AppSummary>> = Observable.of(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));

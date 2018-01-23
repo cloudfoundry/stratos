@@ -43,14 +43,6 @@ export class APIEffect {
     private store: Store<AppState>
   ) { }
 
-  // @Effect() apiRequestStart$ = this.actions$.ofType<ICFAction>(ApiActionTypes.API_REQUEST)
-  //   .map(apiAction => {
-  // return new StartCFAction(
-  //   apiAction,
-  //   getRequestTypeFromMethod(apiAction.options.method)
-  // );
-  //   });
-
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {

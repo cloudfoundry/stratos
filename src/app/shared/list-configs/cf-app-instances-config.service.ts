@@ -67,7 +67,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     {
       columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
-      (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
+        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
     },
     {
       columnId: 'edit',
@@ -82,7 +82,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      console.log(item);
       this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid));
     },
     icon: 'delete',
