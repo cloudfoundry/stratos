@@ -3,15 +3,14 @@ export const mergeState = (state, newState) => {
 
   Object.keys(newState).forEach(entityKey => {
     if (shouldMerge(newState, baseState, entityKey)) {
-      baseState[entityKey] = newState[entityKey];
-    } else {
       baseState[entityKey] = {
         ...baseState[entityKey],
         ...newState[entityKey]
       };
+    } else {
+      baseState[entityKey] = newState[entityKey];
     }
   });
-
   return baseState;
 };
 
