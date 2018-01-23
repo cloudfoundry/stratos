@@ -467,6 +467,9 @@ const testInitialStoreState: AppState = {
         name: ''
       }
     },
+    deployApplication: {
+      cloudFoundryDetails: null,
+    },
     appMetadata: {
       values: {
         '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {

@@ -1,0 +1,26 @@
+.deploy-step2--form{
+  .project-info-group{
+    display: flex;
+    flex-flow: row;
+    padding-top: 24px;
+
+    .avatar-img {
+      height: 51px;
+      width: 51px;
+    }
+
+    .description{
+      flex-flow: row;
+      position: absolute;
+      .centered {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 40%;
+        // a{
+          // text-align: center;
+        // }
+      }
+    }
+  }
+}

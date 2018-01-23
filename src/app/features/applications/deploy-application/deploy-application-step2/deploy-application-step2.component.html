@@ -1,0 +1,72 @@
+<b>Please specify the source</b>
+<form novalidate #sourceSelectionForm="ngForm">
+  <div class="deploy-step2--form">
+    <mat-form-field>
+      <mat-select placeholder="Source Type"  (change)="setSourceType($event.value)" required>
+        <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
+          {{ sourceType.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div *ngIf="(sourceType$ | async)?.id === 'git'">
+      <div>
+        <mat-radio-group (change)="setSourceSubType($event.value)" required>
+          <mat-radio-button value="github">Public Github</mat-radio-button>
+          <mat-radio-button value="giturl">Public Git URL</mat-radio-button>
+        </mat-radio-group>
+     </div>
+     <div *ngIf="(sourceSubType$ | async) === 'github'">
+        <mat-form-field >
+          <input matInput [(ngModel)]="repository" placeholder="Project" name="projectName" appGithubProjectExists required>
+          <mat-error *ngIf="sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')">
+              Project doesn't exist
+            </mat-error>
+        </mat-form-field>
+        <mat-select placeholder="Branch"  [(ngModel)]="repositoryBranch"  name="repositoryBranch" (change)="fetchCommit($event.value)" required>
+            <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
+              {{ branch.name }}
+            </mat-option>
+          </mat-select>
+        <div *ngIf="projectInfo$| async as projectInfo" class="project-info-group">
+            <div >
+              <img class="avatar-img" src="{{projectInfo.owner.avatar_url}}">
+            </div>
+            <div src="description">
+              <div>
+                  <a href="{{projectInfo.html_url}}">{{projectInfo.full_name}}</a>
+              </div>
+              <div class="centered">
+                  <a >{{projectInfo.description}}</a>
+              </div>
+            </div>
+        </div>
+        <div *ngIf="commitInfo$| async as commitInfo" class="commit-info-group">
+            <div >
+              <img class="avatar-img"  height=51px width=51px src="{{commitInfo.author.avatar_url}}">
+            </div>
+            <div src="description">
+              <div>
+                  <a href="{{commitInfo.commit.url}}">{{commitInfo.commit.sha}}{{commitInfo.commit.message}}</a>
+              </div>
+              <div class="author-info">
+                <div>
+                    <a>{{commitInfo.commit.author.login}}</a>
+                </div>
+                <div >
+                    <a>{{commitInfo.commit.author.date}}</a>
+                </div>
+              </div>
+            </div>
+        </div>
+     </div>
+     <div *ngIf="(sourceSubType$ | async) === 'giturl'">
+        <mat-form-field >
+          <input matInput [(ngModel)]="repository" placeholder="Project" name="projectName" required>
+        </mat-form-field>
+        <mat-form-field >
+          <input matInput [(ngModel)]="repositoryBranch.name" placeholder="Branch or Tag" name="projectBranch" required>
+        </mat-form-field>
+     </div>
+    </div>
+  </div>
+</form>

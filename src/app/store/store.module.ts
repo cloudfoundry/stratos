@@ -10,6 +10,7 @@ import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CNSISEffect } from './effects/cnsis.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
+import { DeployAppEffects } from './effects/deploy-app.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RouterEffect } from './effects/router.effects';
 import { SnackBarEffects } from './effects/snackBar.effects';
@@ -38,6 +39,7 @@ import { AppReducersModule } from './reducers.module';
       RouterEffect,
       SystemEffects,
       SnackBarEffects,
+      DeployAppEffects
     ]),
   ]
 })

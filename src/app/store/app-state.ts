@@ -10,6 +10,7 @@ import { CreateNewApplicationState } from './types/create-application.types';
 import { IRequestDataState, IRequestState } from './types/entity.types';
 import { PaginationState } from './types/pagination.types';
 import { UAASetupState } from './types/uaa-setup.types';
+import { DeployApplicationState } from './types/deploy-application.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
@@ -28,5 +29,6 @@ export interface AppState {
   dashboard: DashboardState;
   appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;
+  deployApplication: DeployApplicationState;
   lists: ListsState;
 }
