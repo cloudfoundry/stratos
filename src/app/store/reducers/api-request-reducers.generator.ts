@@ -7,6 +7,7 @@ import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { Action, ActionReducerMap, combineReducers } from '@ngrx/store';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
+import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -50,7 +51,10 @@ const entities = [
   'system',
   'routerReducer',
   'createApplication',
-  'uaaSetup'
+  'uaaSetup',
+  AppEnvVarSchema.key,
+  AppStatSchema.key,
+  AppSummarySchema.key,
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 

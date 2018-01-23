@@ -1,3 +1,5 @@
+import { ResetPagination } from '../../store/actions/pagination.actions';
+import { isLowerCase } from 'tslint/lib/utils';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -5,7 +7,7 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { DisconnectCnis, GetAllCNSIS, UnregisterCnis } from '../../store/actions/cnsis.actions';
+import { DisconnectCnis, UnregisterCnis } from '../../store/actions/cnsis.actions';
 import { RouterNav } from '../../store/actions/router.actions';
 import { ShowSnackBar } from '../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../store/actions/system.actions';
@@ -36,7 +38,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       this.store.dispatch(new UnregisterCnis(item.guid));
       this.handleAction(item, CNSISEffect.unregisteringKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
-        this.store.dispatch(new GetAllCNSIS());
+        this.store.dispatch(new ResetPagination(this.dataSource.entityKey, this.dataSource.paginationKey));
       });
     },
     icon: 'delete',
@@ -57,17 +59,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     enabled: row => true,
   };
 
-  private listActionAdd: IGlobalListAction<CNSISModel> = {
-    action: () => {
-      this.store.dispatch(new RouterNav({ path: ['endpoints', 'new'] }));
-    },
-    icon: 'add',
-    label: 'Add',
-    description: '',
-    visible: row => true,
-    enabled: row => true,
-  };
-
   private listActionDisconnect: IListAction<CNSISModel> = {
     action: (item) => {
       this.store.dispatch(new DisconnectCnis(item.guid));
@@ -78,7 +69,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     },
     icon: 'remove_from_queue',
     label: 'Disconnect',
-    description: `Disconnect but don't delete`,
+    description: ``, // Description depends on console user permission
     visible: row => !!(row.info && row.info.user),
     enabled: row => true,
   };
@@ -108,7 +99,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   ];
 
   private multiActions = [this.listActionDeleteMulti];
-  private globalActions = [this.listActionAdd];
+  private globalActions = [];
 
   columns: ITableColumn<CNSISModel>[] = [
     {
@@ -153,8 +144,9 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       cellFlex: '1'
     },
   ];
-
+  isLocal = true;
   dataSource: EndpointsDataSource;
+  pageSizeOptions = [9, 45, 90];
 
   private handleAction(item, effectKey, handleChange) {
     const disSub = this.store.select(selectUpdateInfo(
@@ -184,5 +176,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   public getSingleActions = () => this.singleActions;
   public getColumns = () => this.columns;
   public getDataSource = () => this.dataSource;
+  public getMultiFiltersConfigs = () => [];
 
 }

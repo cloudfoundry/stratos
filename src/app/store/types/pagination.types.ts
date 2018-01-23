@@ -1,4 +1,4 @@
-import { IRequestAction } from './request.types';
+import { IRequestAction, RequestAction } from './request.types';
 import { Action } from '@ngrx/store';
 
 export class QParam {
@@ -14,6 +14,13 @@ export interface PaginationParam {
   [entityKey: string]: any;
 }
 
+export interface PaginationClientFilter {
+  string: string;
+  items: {
+    [key: string]: any;
+  };
+}
+
 export class PaginationEntityState {
   currentPage = 0;
   totalResults = 0;
@@ -23,6 +30,11 @@ export class PaginationEntityState {
   fetching: boolean;
   error: boolean;
   message: string;
+  clientPagination?: {
+    pageSize: number,
+    currentPage: number,
+    filter: PaginationClientFilter
+  };
 }
 
 export interface PaginationAction extends Action {
@@ -31,8 +43,9 @@ export interface PaginationAction extends Action {
 }
 
 export interface PaginatedAction extends PaginationAction, IRequestAction {
+  flattenPagination?: boolean;
   initialParams?: PaginationParam;
-  options: {
+  options?: {
     params?: {
       paramsMap: any;
     }

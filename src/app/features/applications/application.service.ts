@@ -1,15 +1,14 @@
+import {
+  getPaginationObservables,
+  PaginationObservables,
+  getPaginationPages,
+} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityService } from '../../core/entity-service';
 import { cnsisEntitiesSelector } from '../../store/selectors/cnsis.selectors';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import {
-  AppMetadataProperties,
-  GetAppMetadataAction,
-  getAppMetadataObservable,
-  selectMetadataRequest,
-} from '../../store/actions/app-metadata.actions';
 import { ApplicationSchema } from '../../store/actions/application.actions';
 import {
   GetApplication,
@@ -17,14 +16,33 @@ import {
   UpdateExistingApplication,
 } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-
-import { ApplicationEnvVarsService, EnvVarStratosProject } from './application/build-tab/application-env-vars.service';
+import {
+  ApplicationEnvVarsService,
+  EnvVarStratosProject
+} from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
-import { EntityInfo } from '../../store/types/api.types';
-import { AppMetadataRequestState, AppMetadataInfo, AppMetadataType } from '../../store/types/app-metadata.types';
+import { EntityInfo, APIResource } from '../../store/types/api.types';
+import { combineLatest } from 'rxjs/operators/combineLatest';
+import {
+  AppEnvVarSchema,
+  AppEnvVarsState,
+  AppStat,
+  AppStatsSchema,
+  AppSummarySchema,
+  AppSummary,
+} from '../../store/types/app-metadata.types';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
+import { PaginationEntityState, PaginationState } from '../../store/types/pagination.types';
+import {
+  defaultPaginationEntityState,
+  defaultPaginationState,
+} from '../../store/reducers/pagination-reducer/pagination.reducer';
+import { tap, map } from 'rxjs/operators';
+import { isTCPRoute, getRoute } from './routes/routes.helper';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -33,25 +51,40 @@ export interface ApplicationData {
   organisation: EntityInfo;
   stack: EntityInfo;
   cf: any;
+  appUrl: string;
 }
 
 @Injectable()
 export class ApplicationService {
+  applicationInstanceState$: Observable<any>;
+
+  private appEntityService: EntityService;
+  private appSummaryEntityService: EntityService;
 
   constructor(
     public cfGuid: string,
     public appGuid: string,
     private store: Store<AppState>,
-    private entityService: EntityService,
+    private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
     private appEnvVarsService: ApplicationEnvVarsService) {
+
+    this.appEntityService = this.entityServiceFactory.create(
+      ApplicationSchema.key,
+      ApplicationSchema,
+      appGuid,
+      new GetApplication(appGuid, cfGuid));
+
+    this.appSummaryEntityService = this.entityServiceFactory.create(
+      AppSummarySchema.key,
+      AppSummarySchema,
+      appGuid,
+      new GetAppSummaryAction(appGuid, cfGuid));
+
     this.constructCoreObservables();
     this.constructAmalgamatedObservables();
     this.constructStatusObservables();
   }
-
-  // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
-  private appStats$: Observable<null | AppMetadataInfo>;
 
   // NJ: This needs to be cleaned up. So much going on!
   isFetchingApp$: Observable<boolean>;
@@ -65,55 +98,87 @@ export class ApplicationService {
 
   app$: Observable<EntityInfo>;
   waitForAppEntity$: Observable<EntityInfo>;
-  appSummary$: Observable<AppMetadataInfo>;
-  appStatsGated$: Observable<null | AppMetadataInfo>;
-  appEnvVars$: Observable<AppMetadataInfo>;
+  appSummary$: Observable<EntityInfo<AppSummary>>;
+  appStats$: Observable<APIResource<AppStat>[]>;
+  private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
+  appEnvVars: PaginationObservables<AppEnvVarsState>;
 
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
   applicationState$: Observable<ApplicationStateData>;
 
+  /**
+   * Fetch the current state of the app (given it's instances) as an object ready
+   *
+   * @static
+   * @param {Store<AppState>} store
+   * @param {ApplicationStateService} appStateService
+   * @param {any} app
+   * @param {string} appGuid
+   * @param {string} cfGuid
+   * @returns {Observable<ApplicationStateData>}
+   * @memberof ApplicationService
+   */
+  static getApplicationState(
+    store: Store<AppState>,
+    appStateService: ApplicationStateService,
+    app,
+    appGuid: string,
+    cfGuid: string): Observable<ApplicationStateData> {
+    return getPaginationPages(store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
+      .pipe(
+      map(appInstancesPages => {
+        const appInstances = [].concat.apply([], Object.values(appInstancesPages)).map(apiResource => {
+          return apiResource.entity;
+        });
+        return appStateService.get(app, appInstances);
+      })
+      );
+  }
+
   private constructCoreObservables() {
     // First set up all the base observables
-    this.app$ = this.entityService.entityObs$;
+    this.app$ = this.appEntityService.entityObs$;
 
-    this.isDeletingApp$ = this.entityService.isDeletingEntity$;
+    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$;
 
-    this.waitForAppEntity$ = this.entityService.waitForEntity$;
+    this.waitForAppEntity$ = this.appEntityService.waitForEntity$;
 
-    this.appSummary$ =
-      this.waitForAppEntity$.mergeMap(() => getAppMetadataObservable(
-        this.store,
-        this.appGuid,
-        new GetAppMetadataAction(this.appGuid, this.cfGuid, AppMetadataProperties.SUMMARY as AppMetadataType)
-      ));
+    this.appSummary$ = this.waitForAppEntity$.mergeMap(() => this.appSummaryEntityService.entityObs$);
 
-    // Subscribing to this will make the stats call. It's better to subscribe to appStatsGated$
-    this.appStats$ =
-      this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
-        this.store,
-        this.appGuid,
-        new GetAppMetadataAction(this.appGuid, this.cfGuid, AppMetadataProperties.INSTANCES as AppMetadataType)
-      ));
-
-    this.appEnvVars$ =
-      this.waitForAppEntity$.take(1).mergeMap(() => getAppMetadataObservable(
-        this.store,
-        this.appGuid,
-        new GetAppMetadataAction(this.appGuid, this.cfGuid, AppMetadataProperties.ENV_VARS as AppMetadataType)
-      ));
+    this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
+      store: this.store,
+      action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
+      schema: AppEnvVarSchema
+    }, true);
   }
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
 
-    this.appStatsGated$ = this.waitForAppEntity$
+    const appStats = getPaginationObservables<APIResource<AppStat>>({
+      store: this.store,
+      action: new GetAppStatsAction(this.appGuid, this.cfGuid),
+      schema: AppStatsSchema
+    }, true);
+
+    this.appStats$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity)
       .mergeMap(ai => {
         if (ai.entity.entity.state === 'STARTED') {
-          return this.appStats$;
+          return appStats.entities$;
         } else {
-          return Observable.of(null);
+          return Observable.of(new Array<APIResource<AppStat>>());
+        }
+      });
+
+    this.appStatsFetching$ = this.waitForAppEntity$
+      .filter(ai => ai && ai.entity && ai.entity.entity)
+      .mergeMap(ai => {
+        if (ai.entity.entity.state === 'STARTED') {
+          return appStats.pagination$;
+        } else {
+          return Observable.of(defaultPaginationEntityState);
         }
       });
 
@@ -132,17 +197,24 @@ export class ApplicationService {
           organisation: entity.entity.space.entity.organization,
           stack: entity.entity.stack,
           cf: cnsis[entity.entity.cfGuid],
+          appUrl: this.getAppUrl(entity)
         };
       });
 
     this.applicationState$ = this.waitForAppEntity$
-      .combineLatest(this.appStatsGated$)
-      .map(([appInfo, appStats]: [EntityInfo, AppMetadataInfo]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStats ? appStats.metadata : null);
+      .combineLatest(this.appStats$)
+      .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
+        return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
       });
 
-    this.applicationStratProject$ = this.appEnvVars$.map(applicationEnvVars => {
-      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars.metadata);
+    this.applicationInstanceState$ = this.waitForAppEntity$
+      .combineLatest(this.appStats$)
+      .mergeMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
+        return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
+      });
+
+    this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
+      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
     });
   }
 
@@ -152,7 +224,7 @@ export class ApplicationService {
     */
     this.isFetchingApp$ = Observable.combineLatest(
       this.app$.map(ei => ei.entityRequestInfo.fetching),
-      this.appSummary$.map(as => as.metadataRequestState.fetching.busy)
+      this.appSummary$.map(as => as.entityRequestInfo.fetching)
     )
       .map((fetching) => fetching[0] || fetching[1]);
 
@@ -164,23 +236,23 @@ export class ApplicationService {
         return updatingSection.busy || false;
       });
 
-    this.isFetchingEnvVars$ = this.appEnvVars$.map(ev => ev.metadataRequestState.fetching.busy).startWith(false);
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching).startWith(false);
 
-    this.isUpdatingEnvVars$ = this.appEnvVars$.map(ev => ev.metadataRequestState.updating.busy).startWith(false);
+    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching && ev.ids[ev.currentPage]).startWith(false);
 
-    this.isFetchingStats$ =
-      this.appStatsGated$.map(appStats => appStats ? appStats.metadataRequestState.updating.busy : false).startWith(false);
+    this.isFetchingStats$ = this.appStatsFetching$.map(appStats => appStats ? appStats.fetching : false).startWith(false);
+  }
+
+  getAppUrl(app: EntityInfo): string {
+    const nonTCPRoutes = app.entity.routes
+    .filter(p => !isTCPRoute(p));
+    if (nonTCPRoutes.length >= 0) {
+      return getRoute(nonTCPRoutes[0], true);
+    }
+   return null;
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
-    if (requestInfo) {
-      return !requestInfo.fetching;
-    } else {
-      return !!value;
-    }
-  }
-
-  isMetadataComplete(value, requestInfo: AppMetadataRequestState): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
     } else {

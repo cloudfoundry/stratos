@@ -25,7 +25,10 @@ import { TableCellActionsComponent } from '../table/table-cell-actions/table-cel
 import { CardAppComponent } from '../cards/custom-cards/card-app/card-app.component';
 import { TableCellAppNameComponent } from '../table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../test-framework/list-table-helper';
-import { ListActions, IListDataSource } from '../../data-sources/list-data-source-types';
+import { ListActions } from '../../data-sources/list-data-source-types';
+import { CardStatusComponent } from '../card-status/card-status.component';
+import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
+import { PercentagePipe } from '../../pipes/percentage.pipe';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -43,6 +46,7 @@ describe('ListComponent', () => {
         ListComponent,
         CardsComponent,
         CardComponent,
+        CardStatusComponent,
         TableCellComponent,
         EventTabActorIconPipe,
         ValuesPipe,
@@ -50,6 +54,8 @@ describe('ListComponent', () => {
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
+        UsageGaugeComponent,
+        PercentagePipe,
       ],
       imports: [
         CoreModule,

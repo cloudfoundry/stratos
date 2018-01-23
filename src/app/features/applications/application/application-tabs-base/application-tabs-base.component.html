@@ -1,0 +1,48 @@
+<app-page-header>
+  <h1>{{ (applicationService.application$ | async)?.app.entity.name }} </h1>
+  <div class="page-header-right">
+    <span *ngIf="isEditSummary">
+      <button mat-icon-button mat-button (click)="saveEdits()" [disabled]="!summaryForm.valid">
+        <mat-icon>done</mat-icon>
+      </button>
+      <button mat-icon-button name="cancel" mat-button (click)="endEdit()">
+        <mat-icon>clear</mat-icon>
+      </button>
+    </span>
+    <span *ngIf="!isEditSummary">
+      <a  mat-icon-button *ngIf="(applicationService.application$ | async)?.appUrl != ''
+      && (applicationService.application$ | async)?.app.entity.state === 'STARTED' "
+       href="{{(applicationService.application$ | async)?.appUrl}}" target="_blank">
+          <mat-icon>launch</mat-icon>
+      </a>
+      <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
+        <mat-icon>delete</mat-icon>
+      </button>
+      <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async"
+        routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <span>
+        <button mat-icon-button name="stop" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STARTED'" [disabled]="summaryDataChanging$ | async"
+          (click)="stopApplication()">
+          <mat-icon>stop</mat-icon>
+        </button>
+        <button mat-icon-button name="start" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STOPPED'" [disabled]="summaryDataChanging$ | async"
+          (click)="startApplication()">
+          <mat-icon>play_arrow</mat-icon>
+        </button>
+      </span>
+    </span>
+  </div>
+</app-page-header>
+<app-page-subheader class="summary__subheader">
+  <nav backgroundColor="primary" mat-tab-nav-bar class="summary__nav">
+      <a mat-tab-link class="mat-tab-fit" *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
+        [active]="rla.isActive">
+        {{tabLink.label}}
+      </a>
+    </nav>
+</app-page-subheader>
+<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving application'">
+  <router-outlet></router-outlet>
+</app-loading-page>

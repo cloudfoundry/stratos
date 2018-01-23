@@ -7,7 +7,6 @@ import { Subscription, Subject } from 'rxjs/Rx';
 import websocketConnect from 'rxjs-websockets';
 
 import { ApplicationService } from '../application.service';
-import { ApplicationStateService } from '../application/build-tab/application-state/application-state.service';
 import { QueueingSubject } from 'queueing-subject';
 import { LoggerService } from '../../../core/logger.service';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';

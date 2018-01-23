@@ -3,6 +3,7 @@ import { cnsisStoreNames, CNSISModel } from './cnsis.types';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { IRequestTypeState, IRequestEntityTypeState } from '../app-state';
 import { APIResource } from './api.types';
+import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from './app-metadata.types';
 export interface IRequestDataState extends IRequestTypeState {
   application: IRequestEntityTypeState<APIResource>;
   stack: IRequestEntityTypeState<APIResource>;
@@ -31,5 +32,9 @@ export const defaultCfEntitiesState = {
   space: {},
   organization: {},
   route: {},
-  event: {}
+  event: {},
+  endpoint: {},
+  [AppEnvVarSchema.key]: {},
+  [AppStatSchema.key]: {},
+  [AppSummarySchema.key]: {},
 };

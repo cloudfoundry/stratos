@@ -1,14 +1,19 @@
+sudo: required
 language: node_js
 node_js:
 - '8.4'
 branches:
   only:
   - master
+addons:
+  chrome: stable
 install:
 - npm install
 cache:
   directories:
-  - "/home/travis/.npm/"
+  - "$HOME/.npm"
+  - "$HOME/.cache"
+  - node_modules
 stages:
 - Lint
 - Unit Tests

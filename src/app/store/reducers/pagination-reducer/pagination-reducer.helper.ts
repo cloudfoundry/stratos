@@ -1,12 +1,19 @@
+import { RequestTypes } from './../../actions/request.actions';
 import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 
 import { AddParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { getAPIRequestDataState } from '../../selectors/api.selectors';
+import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
+import { distinctUntilChanged, tap, filter, map, share, combineLatest, withLatestFrom } from 'rxjs/operators';
+
+export interface PaginationObservables<T> {
+  pagination$: Observable<PaginationEntityState>;
+  entities$: Observable<T[]>;
+}
 
 export function qParamsToString(params: QParam[]) {
   return params.map(joinQParam);
@@ -72,68 +79,129 @@ export function getActionKey(action) {
   return apiAction.entityKey || null;
 }
 
-export function getPaginationKey(action) {
+export function getPaginationKeyFromAction(action: PaginatedAction) {
   const apiAction = getAction(action);
   return apiAction.paginationKey;
 }
 
-export const getPaginationObservables = (function () {
-  const mem = {};
-  return function (
-    { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
-    uid?: string
-  ): {
-      entities$: Observable<any[]>,
-      pagination$: Observable<PaginationEntityState>
-    } {
-    const _key = action.entityKey + action.paginationKey + (uid || '');
-    if (mem[_key]) {
-      return mem[_key];
-    }
-    const { entityKey, paginationKey } = action;
+export const getPaginationPages = <T = any>(store: Store<AppState>, action: PaginatedAction, schema: Schema): {
+  [key: string]: any
+} => {
+  const { entityKey, paginationKey } = action;
 
-    if (action.initialParams) {
-      store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams));
-    }
+  // One observable to emit when pagination changes
+  const paginationChanged$ = store.select(selectPaginationState(entityKey, paginationKey))
+    .filter(pag => !!pag)
+    .distinctUntilChanged((oldVals, newVals) => {
+      const oldVal = getPaginationCompareString(oldVals);
+      const newVal = getPaginationCompareString(newVals);
+      return oldVal === newVal;
+    });
 
-    const obs = getObservables(
-      store,
-      entityKey,
-      paginationKey,
-      action,
-      schema
-    );
+  // One observable to emit when the store items changed (not as granular as it should be, ideally should only emit when entities from pag
+  // changes)
+  const entitySectionChanged$ = store.select(selectEntities<T>(entityKey));
 
-    mem[_key] = obs;
-    return obs;
-  };
-})();
+  // Combine the two and emit with a list of pages containing the normalised entities
+  return Observable.combineLatest(paginationChanged$, entitySectionChanged$)
+    .withLatestFrom(store.select(getAPIRequestDataState))
+    .map(([[paginationState, entitiesOfType], entities]) => {
+      return Object.keys(paginationState.ids).map(page => {
+        return denormalize(paginationState.ids[page], schema, entities);
+      });
+    });
+};
 
-function getObservables(store: Store<AppState>, entityKey: string, paginationKey: string, action: Action, schema: Schema) {
+export const getPaginationObservables = <T = any>(
+  { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
+  isLocal = false
+): PaginationObservables<T> => {
+  const { entityKey, paginationKey } = action;
+
+  // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
+  // section)
+  if (action.initialParams) {
+    store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams, isLocal));
+  }
+
+  const obs = getObservables<T>(
+    store,
+    entityKey,
+    paginationKey,
+    action,
+    schema,
+    isLocal
+  );
+
+  return obs;
+};
+
+function getObservables<T = any>(
+  store: Store<AppState>,
+  entityKey: string,
+  paginationKey: string,
+  action: PaginatedAction,
+  schema: Schema,
+  isLocal = false)
+  : PaginationObservables<T> {
+  let hasDispatchedOnce = false;
+
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$
-    .filter(pagination => !!pagination);
-
-  const entities$: Observable<any[]> = paginationSelect$
-    .do(pagination => {
-      if (!hasError(pagination) && !hasValidOrGettingPage(pagination)) {
+  // Keep this separate, we don't want tap executing every time someone subscribes
+  const fetchPagination$ = paginationSelect$.share().pipe(
+    distinctUntilChanged((oldVals, newVals) => {
+      const oldVal = getPaginationCompareString(oldVals);
+      const newVal = getPaginationCompareString(newVals);
+      return oldVal === newVal;
+    }),
+    tap(pagination => {
+      if (
+        (!pagination && !hasDispatchedOnce) ||
+        !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
+      ) {
+        hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         store.dispatch(action);
       }
     })
-    .filter(pagination => {
-      return isPageReady(pagination);
-    })
-    .withLatestFrom(store.select(getAPIRequestDataState))
-    .map(([paginationEntity, entities]) => {
-      const page = paginationEntity.ids[paginationEntity.currentPage];
-      return page ? denormalize(page, schema, entities) : null;
-    });
+  );
+  fetchPagination$.subscribe();
 
-    return  {
-      pagination$,
-      entities$
-    };
+  const entities$: Observable<T[]> =
+    paginationSelect$.pipe(
+      filter(pagination => {
+        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+      }),
+      withLatestFrom(store.select(getAPIRequestDataState)),
+      map(([paginationEntity, entities]) => {
+        let page;
+        if (isLocal) {
+          const pages = Object.values(paginationEntity.ids);
+          page = [].concat.apply([], pages);
+        } else {
+          page = paginationEntity.ids[paginationEntity.currentPage];
+        }
+        return page ? denormalize(page, schema, entities) : null;
+      })
+    );
+
+  return {
+    pagination$,
+    entities$
+  };
+}
+
+function getPaginationCompareString(paginationEntity: PaginationEntityState) {
+  if (!paginationEntity) {
+    return '';
+  }
+  let params = '';
+  if (paginationEntity.params) {
+    params = JSON.stringify(paginationEntity.params);
+  }
+  // paginationEntity.totalResults included to ensure we cover the 'ResetPagination' case, for instance after AddParam
+  return paginationEntity.totalResults + paginationEntity.currentPage + params;
 }
 
 export function isPageReady(pagination: PaginationEntityState) {
@@ -153,4 +221,3 @@ export function hasValidOrGettingPage(pagination: PaginationEntityState) {
 export function hasError(pagination: PaginationEntityState) {
   return pagination && pagination.error;
 }
-

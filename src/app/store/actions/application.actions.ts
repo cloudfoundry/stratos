@@ -70,12 +70,13 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
   initialParams = {
-    'order-direction': 'desc',
+    'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
     page: 1,
     'results-per-page': 50,
     'inline-relations-depth': 2
   };
+  flattenPagination = true;
 }
 
 export class GetApplication extends CFStartAction implements ICFAction {
@@ -86,8 +87,6 @@ export class GetApplication extends CFStartAction implements ICFAction {
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.options.params.set('inline-relations-depth', '2');
-    this.options.params.set('include-relations', 'space,organization,stack');
-
   }
   actions = [
     GET,

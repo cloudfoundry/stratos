@@ -1,25 +1,23 @@
 import { Subscription } from 'rxjs/Rx';
-import { CfListDataSource } from './list-data-source-cf';
+import { ListDataSource } from './list-data-source';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';
 import { SetListStateAction, ListFilter } from '../../store/actions/list.actions';
 import { SortDirection } from '@angular/material';
-import { PaginationEntityState, QParam } from '../../store/types/pagination.types';
 import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { APIResource } from '../../store/types/api.types';
 import { ListActions } from './list-data-source-types';
+import { PaginationEntityState } from '../../store/types/pagination.types';
 
+export class CfAppsDataSource extends ListDataSource<APIResource> {
 
-export class CfAppsDataSource extends CfListDataSource<APIResource> {
-
-  cfFilterSub: Subscription;
+  public static paginationKey = 'applicationWall';
 
   constructor(
     _store: Store<AppState>,
   ) {
-    const paginationKey = 'applicationWall';
-    const action = new GetAllApplications(paginationKey);
+    const action = new GetAllApplications(CfAppsDataSource.paginationKey);
 
     super(
       _store,
@@ -29,45 +27,42 @@ export class CfAppsDataSource extends CfListDataSource<APIResource> {
         return object.entity.metadata ? object.entity.metadata.guid : null;
       },
       () => ({} as APIResource),
-      paginationKey
+      CfAppsDataSource.paginationKey,
+      null,
+      true,
+      [
+        {
+          type: 'filter',
+          field: 'entity.name'
+        },
+        {
+          type: 'sort',
+          orderKey: 'creation',
+          field: 'metadata.created_at'
+        },
+        {
+          type: 'sort',
+          orderKey: 'name',
+          field: 'entity.name'
+        },
+        (entities: APIResource[], paginationState: PaginationEntityState) => {
+          // Filter by cf/org/space
+          const cfGuid = paginationState.clientPagination.filter.items['cf'];
+          const orgGuid = paginationState.clientPagination.filter.items['org'];
+          const spaceGuid = paginationState.clientPagination.filter.items['space'];
+          return entities.filter(e => {
+            const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+            const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+            const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+            return validCF && validOrg && validSpace;
+          });
+        }
+      ]
     );
 
     _store.dispatch(new SetListStateAction(
-      paginationKey,
+      CfAppsDataSource.paginationKey,
       'cards',
-      {
-        pageIndex: 0,
-        pageSize: 50,
-        pageSizeOptions: [5, 10, 15, 30, 50, 100],
-      },
-      {
-        direction: action.initialParams['order-direction'] as SortDirection,
-        field: action.initialParams['order-direction-field'],
-      },
-      {
-        filter: ''
-      }));
-
-
-    const cfFilter$ = this.filter$.withLatestFrom(this.cfPagination$)
-      .do(([filter, pag]: [ListFilter, PaginationEntityState]) => {
-        if (filter && filter.filter && filter.filter.length) {
-          const q = pag.params.q;
-          this._cfStore.dispatch(new AddParams(this.sourceScheme.key, this.action.paginationKey, {
-            q: [
-              new QParam('name', filter.filter, ' IN '),
-            ]
-          }));
-        } else if (pag.params.q.find((q: QParam) => q.key === 'name')) {
-          this._cfStore.dispatch(new RemoveParams(this.sourceScheme.key, this.action.paginationKey, [], ['name']));
-        }
-      });
-    this.cfFilterSub = cfFilter$.subscribe();
-
-  }
-
-  destroy() {
-    this.cfFilterSub.unsubscribe();
-    super.destroy();
+    ));
   }
 }

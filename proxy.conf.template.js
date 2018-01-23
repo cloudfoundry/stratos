@@ -7,7 +7,8 @@ const PROXY_CONFIG = {
     },
     "ws": true,
     "secure": false,
-    "changeOrigin": true
+    "changeOrigin": true,
+    "ws": true
   }
 }
 

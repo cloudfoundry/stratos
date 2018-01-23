@@ -1,13 +1,12 @@
+import { IListPaginationController } from '../../data-sources/list-pagination-controller';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatPaginatorIntl } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable } from 'rxjs/Rx';
 
 import { CoreModule } from '../../../core/core.module';
-import { ListSort } from '../../../store/actions/list.actions';
 import { TableCellEntryPoints } from '../../../test-framework/list-table-helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
-import { AppEnvVar } from '../../data-sources/cf-app-variables-data-source';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ValuesPipe } from '../../pipes/values.pipe';
 import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
@@ -21,11 +20,16 @@ import {
 import {
   ApplicationStateIconPipe
 } from '../../../shared/components/application-state/application-state-icon/application-state-icon.pipe';
+import { ListSort } from '../../../store/actions/list.actions';
+import { ListAppEnvVar } from '../../data-sources/cf-app-variables-data-source';
+import { PercentagePipe } from '../../pipes/percentage.pipe';
+import { UtilsService } from '../../../core/utils.service';
+import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 
 
 describe('TableComponent', () => {
-  let component: TableComponent<AppEnvVar>;
-  let fixture: ComponentFixture<TableComponent<AppEnvVar>>;
+  let component: TableComponent<ListAppEnvVar>;
+  let fixture: ComponentFixture<TableComponent<ListAppEnvVar>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -37,15 +41,20 @@ describe('TableComponent', () => {
         ValuesPipe,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        UsageGaugeComponent,
+        PercentagePipe,
       ],
       imports: [
         CoreModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
+      ],
+      providers: [
+        UtilsService,
       ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {
@@ -53,12 +62,13 @@ describe('TableComponent', () => {
     component = fixture.componentInstance;
 
     const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
+    component.columns = new Array<ITableColumn<any>>();
+    component.paginationController = {
+      sort$: Observable.of({} as ListSort)
+    } as IListPaginationController<any>;
     component.dataSource = {
       connect() { return Observable.of([]); },
-      sort$: Observable.of({} as ListSort),
-    } as IListDataSource<AppEnvVar>;
-    component.columns = new Array<ITableColumn<any>>();
-
+    } as IListDataSource<ListAppEnvVar>;
     fixture.detectChanges();
   });
 

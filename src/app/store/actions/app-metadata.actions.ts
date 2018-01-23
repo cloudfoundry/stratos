@@ -1,158 +1,85 @@
+import { getPaginationKey } from './pagination.actions';
+import { schema } from 'normalizr';
+import { PaginatedAction, PaginationParam } from '../types/pagination.types';
+import { ICFAction, CFStartAction, RequestEntityLocation } from '../types/request.types';
 import { RequestOptions } from '@angular/http';
-import { Action, compose, Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
+import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
 
-import { AppState } from '../app-state';
-import { AppMetadataType, AppMetadataRequestState } from '../types/app-metadata.types';
-
-export const AppMetadataTypes = {
-  APP_METADATA: '[App Metadata] App Metadata',
-  APP_METADATA_START: '[App Metadata] App Metadata start',
-  APP_METADATA_SUCCESS: '[App Metadata] App Metadata success',
-  APP_METADATA_FAILED: '[App Metadata] App Metadata failed'
-};
-
-export const AppMetadataProperties = {
-  INSTANCES: 'instances',
-  ENV_VARS: 'environmentVars',
-  SUMMARY: 'summary'
-};
-
-export class GetAppMetadataAction implements Action {
+export class GetAppStatsAction extends CFStartAction implements PaginatedAction, ICFAction {
   options: RequestOptions;
+  paginationKey: string;
+  constructor(
+    public guid: string,
+    public cnis: string
+  ) {
+    super();
+    this.options = new RequestOptions({
+      url: `apps/${guid}/stats`,
+      method: 'get'
+    });
+    this.paginationKey = getPaginationKey(this.entityKey, cnis, guid);
+  }
+  entity = [AppStatSchema];
+  entityKey = AppStatSchema.key;
+  actions = [
+    '[App Metadata] Stats start',
+    '[App Metadata] Stats success',
+    '[App Metadata] Stats failed',
+  ];
+  flattenPagination: false;
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'index',
+  };
+  entityLocation = RequestEntityLocation.ARRAY;
+}
 
+export class GetAppEnvVarsAction extends CFStartAction implements PaginatedAction, ICFAction {
+  options: RequestOptions;
+  paginationKey: string;
   constructor(
     public guid: string,
     public cnis: string,
-    public metadataType: AppMetadataType
   ) {
-    this.options = this.getRequestOptions(guid, cnis, metadataType);
-  }
-
-  type = AppMetadataTypes.APP_METADATA;
-
-  private getRequestOptions(guid: string, cnis: string, type: AppMetadataType) {
-    let requestObject: RequestOptions;
-    switch (type) {
-      case AppMetadataProperties.INSTANCES:
-        requestObject = new RequestOptions({
-          url: `apps/${guid}/stats`,
-          method: 'get'
-        });
-        break;
-      case AppMetadataProperties.ENV_VARS:
-        requestObject = new RequestOptions({
-          url: `apps/${guid}/env`,
-          method: 'get'
-        });
-        break;
-      case AppMetadataProperties.SUMMARY:
-        requestObject = new RequestOptions({
-          url: `apps/${guid}/summary`,
-          method: 'get'
-        });
-        break;
-      default:
-        throw new Error(`Unexpected AppMetadataProperties type of ${type}`);
-    }
-    return requestObject;
-  }
-}
-
-export class WrapperAppMetadataStart implements Action {
-  constructor(
-    public appMetadataAction: GetAppMetadataAction
-  ) { }
-  type = AppMetadataTypes.APP_METADATA_START;
-}
-
-export class WrapperAppMetadataSuccess implements Action {
-  constructor(
-    public metadata: any,
-    public appMetadataAction: GetAppMetadataAction,
-  ) { }
-  type = AppMetadataTypes.APP_METADATA_SUCCESS;
-}
-
-export class WrapperAppMetadataFailed implements Action {
-  message: string;
-  appMetedataError: AppMetedataError;
-
-  constructor(
-    public response: any,
-    public appMetadataAction: GetAppMetadataAction
-  ) {
-    this.appMetedataError = response._body ? JSON.parse(response._body) : response;
-    this.message = this.appMetedataError.description || this.appMetedataError.message;
-  }
-  type = AppMetadataTypes.APP_METADATA_FAILED;
-}
-
-interface AppMetedataError {
-  description?: string;
-  message?: string;
-  error_code?: string;
-  code?: number;
-}
-
-function getAppMetadata(state) {
-  return state.appMetadata.values || {};
-}
-
-function getAppRequestMetadata(state) {
-  return state.appMetadata.requests || {};
-}
-
-function getMetadataType<T>(metadataType) {
-  return (appMetadata): T => {
-    return appMetadata[metadataType];
-  };
-}
-
-function getMetadataById(appId: string) {
-  return (entities) => {
-    return entities[appId] || {};
-  };
-}
-
-export const selectMetadata = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<any>(metadataType),
-    getMetadataById(appId),
-    getAppMetadata
-  );
-};
-
-export const selectMetadataRequest = (metadataType: AppMetadataType, appId): any => {
-  return compose(
-    getMetadataType<AppMetadataRequestState>(metadataType),
-    getMetadataById(appId),
-    getAppRequestMetadata
-  );
-};
-
-export const getAppMetadataObservable = (
-  store: Store<AppState>,
-  appId: string,
-  action: GetAppMetadataAction
-): Observable<any> => {
-  let dispatched = false;
-  return Observable.combineLatest(
-    store.select(selectMetadata(action.metadataType, appId)).startWith(null),
-    store.select(selectMetadataRequest(action.metadataType, appId)).startWith(null)
-  )
-    .mergeMap(([metadata, metadataRequestState]: [any, AppMetadataRequestState]) => {
-      if (!metadata && (!metadataRequestState || !metadataRequestState.fetching)) { // && !dispatched
-        store.dispatch(action);
-        dispatched = true;
-      }
-      return Observable.of({
-        metadata,
-        metadataRequestState
-      });
-    })
-    .filter(({ metadata, metadataRequestState }) => {
-      return metadata || metadataRequestState;
+    super();
+    this.options = new RequestOptions({
+      url: `apps/${guid}/env`,
+      method: 'get'
     });
-};
+    this.paginationKey = getPaginationKey(this.entityKey, cnis, guid);
+  }
+  entity = [AppEnvVarSchema];
+  entityKey = AppEnvVarSchema.key;
+  actions = [
+    '[App Metadata] EnvVars start',
+    '[App Metadata] EnvVars success',
+    '[App Metadata] EnvVars failed',
+  ];
+  flattenPagination: false;
+  initialParams = {
+    'order-direction': 'desc',
+    'order-direction-field': 'name',
+  };
+}
 
+export class GetAppSummaryAction extends CFStartAction implements ICFAction {
+  options: RequestOptions;
+  constructor(
+    public guid: string,
+    public cnis: string,
+  ) {
+    super();
+    this.options = new RequestOptions({
+      url: `apps/${guid}/summary`,
+      method: 'get'
+    });
+  }
+  entity = [AppSummarySchema];
+  entityKey = AppSummarySchema.key;
+  paginationKey: string;
+  actions = [
+    '[App Metadata] Summary start',
+    '[App Metadata] Summary success',
+    '[App Metadata] Summary failed',
+  ];
+}

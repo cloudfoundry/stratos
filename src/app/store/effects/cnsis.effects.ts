@@ -26,6 +26,7 @@ import {
   WrapperRequestActionSuccess,
 } from '../types/request.types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { PaginatedAction } from '../types/pagination.types';
 
 
 @Injectable()
@@ -44,10 +45,7 @@ export class CNSISEffect {
   @Effect() getAllCNSIS$ = this.actions$.ofType<GetAllCNSIS>(GET_CNSIS)
     .flatMap(action => {
       const actionType = 'fetch';
-      const apiAction = {
-        entityKey: cnsisStoreNames.type,
-      } as IRequestAction;
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(action, actionType));
       return Observable.zip(
         this.http.get('/pp/v1/cnsis'),
         this.http.get('/pp/v1/cnsis/registered'),
@@ -76,12 +74,12 @@ export class CNSISEffect {
           // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
           // (cnsi success)
           return [
-            new WrapperRequestActionSuccess(mappedData, apiAction, actionType),
+            new WrapperRequestActionSuccess(mappedData, action, actionType),
             new GetAllCNSISSuccess(data, action.login),
           ];
         })
         .catch((err, caught) => [
-          new WrapperRequestActionFailed(err.message, apiAction, actionType),
+          new WrapperRequestActionFailed(err.message, action, actionType),
           new GetAllCNSISFailed(err.message, action.login),
         ]);
 

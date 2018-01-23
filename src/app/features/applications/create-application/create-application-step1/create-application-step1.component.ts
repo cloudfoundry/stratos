@@ -1,115 +1,54 @@
+import { EntityInfo } from '../../../../store/types/api.types';
+import { selectDeletionInfo } from '../../../../store/selectors/api.selectors';
 import { getPaginationObservables } from './../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { cnsisRegisteredEntitiesSelector } from '../../../../store/selectors/cnsis.selectors';
-import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
-import { GetAllOrganizations, OrganizationSchema } from '../../../../store/actions/organization.actions';
 import { AppState } from '../../../../store/app-state';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { Subscription } from 'rxjs/Subscription';
+import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
+import { CfAppsDataSource } from '../../../../shared/data-sources/cf-apps-data-source';
+import { ApplicationSchema } from '../../../../store/actions/application.actions';
+
 
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
+  providers: [CfOrgSpaceDataService]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  constructor(private store: Store<AppState>) {
-  }
+  constructor(private store: Store<AppState>, public cfOrgSpaceService: CfOrgSpaceDataService) { }
 
-  paginationKey = 'createApplication';
-
-  data$: Observable<any>;
   cfValid$: Observable<boolean>;
-
-  @ViewChild('orgSelect')
-  orgSelect: NgModel;
-
-  @ViewChild('cfSelect')
-  cfSelect: NgModel;
-
-  @ViewChild('spaceSelect')
-  spaceSelect: NgModel;
 
   @ViewChild('cfForm')
   cfForm: NgForm;
 
   validate: Observable<boolean>;
 
-  currentOrg: any;
-
-  cfList$ = this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis));
-
-  org = getPaginationObservables({
-    store: this.store,
-    action: new GetAllOrganizations(this.paginationKey),
-    schema: [OrganizationSchema]
-  });
-
-  private getData$ = Observable.combineLatest(
-    this.org.pagination$.filter(paginationEntity => {
-      return !paginationEntity.fetching;
-    }).first(),
-    this.cfList$
-  );
-
-  orgList$: Observable<any>;
-
-  spaceList$: Observable<any>;
-
-  selectedCF: any = null;
-
-  selectedOrg: any = null;
-
-  selectedSpace: any = null;
-
   onNext = () => {
     this.store.dispatch(new SetCFDetails({
-      cloudFoundry: this.cfSelect.value,
-      org: this.orgSelect.value,
-      space: this.spaceSelect.value
+      cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
+      org: this.cfOrgSpaceService.org.select.getValue(),
+      space: this.cfOrgSpaceService.space.select.getValue()
     }));
     return Observable.of({ success: true });
   }
 
   ngOnInit() {
-    this.orgList$ = Observable.combineLatest(
-      this.cfSelect.valueChanges.startWith(''),
-      this.getData$,
-      this.org.entities$
-    )
-      .do(() => this.selectedOrg = null)
-      .map(([selectedCF, data, entities]) => {
-        this.orgSelect.viewModel = '';
-        const [pag, cfList] = data;
-        if (selectedCF) {
-          if (entities) {
-            return entities
-              .map(org => org.entity)
-              .filter(org => org.cfGuid === selectedCF.guid);
-          }
-        }
-        return [];
-      });
-
-    this.spaceList$ = Observable.combineLatest(
-      this.orgSelect.valueChanges.startWith(''),
-      this.getData$
-    )
-      .do(() => this.selectedSpace = null)
-      .map(([selectedOrg, data]) => {
-        const [orgList, cfList] = data;
-        if (selectedOrg) {
-          return selectedOrg.spaces.map(space => {
-            const entity = { ...space.entity };
-            entity.guid = space.metadata.guid;
-            return entity;
-          });
-        }
-        return [];
-      });
+    // We will auto select endpoint/org/space that have been selected on the app wall.
+    const appWallPaginationState = this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey));
+    appWallPaginationState.filter(pag => !!pag).first().do(pag => {
+      this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+      this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+      this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+    }).subscribe();
   }
 
   ngAfterContentInit() {
@@ -117,6 +56,5 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       .map(() => {
         return this.cfForm.valid;
       });
-
   }
 }

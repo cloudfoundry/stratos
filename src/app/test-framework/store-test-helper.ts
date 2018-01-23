@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment.prod';
 import { AppState } from '../store/app-state';
 import { ListState } from '../store/reducers/list.reducer';
 import { ModuleWithProviders } from '@angular/core';
@@ -250,9 +251,21 @@ const testInitialStoreState: AppState = {
             ]
           },
           error: false,
-          message: ''
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            }
+          }
         },
       },
+      stack: {},
+      space: {},
+      organization: {},
+      route: {},
       event: {
         'app-events:01ccda9d-8f40-4dd0-bc39-08eea68e364f4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
           fetching: false,
@@ -404,9 +417,42 @@ const testInitialStoreState: AppState = {
             ]
           },
           error: false,
-          message: ''
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            }
+          }
         }
-      }
+      },
+      endpoint: {
+        "endpoint-list": {
+          fetching: false,
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 0,
+          params: {
+            key: 'a'
+          },
+          ids: { },
+          error: false,
+          message: '',
+          clientPagination: {
+            pageSize: 5,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            }
+          }
+        }
+      },
+      environmentVars: {},
+      stats: {},
+      summary: {}
     },
     dashboard: {
       sidenavOpen: true,
@@ -419,101 +465,6 @@ const testInitialStoreState: AppState = {
         checking: false,
         available: true,
         name: ''
-      }
-    },
-    appMetadata: {
-      values: {
-        '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
-          environmentVars: {
-            staging_env_json: {
-              http_proxy: '',
-              HTTP_PROXY: '',
-              https_proxy: '',
-              HTTPS_PROXY: '',
-              no_proxy: '',
-              NO_PROXY: ''
-            },
-            running_env_json: {
-              http_proxy: '',
-              HTTP_PROXY: '',
-              https_proxy: '',
-              HTTPS_PROXY: '',
-              no_proxy: '',
-              NO_PROXY: ''
-            },
-            environment_json: {},
-            system_env_json: {
-              VCAP_SERVICES: {}
-            },
-            application_env_json: {
-              VCAP_APPLICATION: {
-                cf_api: 'http://api.cf-dev.io',
-                limits: {
-                  fds: 16384,
-                  mem: 16,
-                  disk: 16
-                },
-                application_name: 'go-env',
-                application_uris: [],
-                name: 'go-env',
-                space_name: 'dev',
-                space_id: 'd87ba175-51ec-4cc9-916c-bee26d00e498',
-                uris: [],
-                users: null,
-                application_id: '4e4858c4-24ab-4caf-87a8-7703d1da58a0',
-                version: '2dc814c5-2dbf-4bb0-9203-78ec06ef465c',
-                application_version: '2dc814c5-2dbf-4bb0-9203-78ec06ef465c'
-              }
-            }
-          },
-          instances: {
-            '0': {
-              state: 'RUNNING',
-              stats: {
-                name: 'go-env',
-                uris: [],
-                host: '172.17.0.27',
-                port: 60000,
-                uptime: 83821,
-                mem_quota: 16777216,
-                disk_quota: 16777216,
-                fds_quota: 16384,
-                usage: {
-                  time: '2017-10-11T08:48:42.368008421Z',
-                  cpu: 0.000507393284464085,
-                  mem: 7696384,
-                  disk: 2748416
-                }
-              }
-            }
-          },
-          summary: {}
-        }
-      },
-      requests: {
-        '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
-          environmentVars: {
-            fetching: false,
-            updating: false,
-            creating: false,
-            error: false,
-            message: ''
-          },
-          instances: {
-            fetching: false,
-            updating: false,
-            creating: false,
-            error: false,
-            message: ''
-          },
-          summary: {
-            fetching: false,
-            updating: false,
-            creating: false,
-            error: false,
-            message: ''
-          }
-        }
       }
     },
     request: {
