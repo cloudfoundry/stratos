@@ -43,10 +43,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   // Observable on the running instances count for the application
   private runningInstances$: Observable<number>;
 
+  private isRunning = false;
+
   ngOnInit() {
     this.sub = this.applicationService.application$.subscribe(app => {
       if (app.app.entity) {
         this.currentCount = app.app.entity.instances;
+        this.isRunning = app.app.entity.state === 'STARTED';
       }
     });
 
