@@ -33,7 +33,8 @@ export class PaginationEntityState {
   clientPagination?: {
     pageSize: number,
     currentPage: number,
-    filter: PaginationClientFilter
+    filter: PaginationClientFilter,
+    totalResults: number
   };
 }
 

@@ -255,6 +255,7 @@ const testInitialStoreState: AppState = {
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
+            totalResults: 50,
             filter: {
               string: '',
               items: {}
@@ -421,6 +422,7 @@ const testInitialStoreState: AppState = {
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
+            totalResults: 50,
             filter: {
               string: '',
               items: {}
@@ -443,6 +445,7 @@ const testInitialStoreState: AppState = {
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
+            totalResults: 50,
             filter: {
               string: '',
               items: {}

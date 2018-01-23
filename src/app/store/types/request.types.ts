@@ -32,6 +32,8 @@ export enum RequestEntityLocation {
 export interface IRequestAction extends RequestAction {
   entity?: Schema;
   entityKey: string;
+  cnis?: string;
+  updatingKey?: string;
   // For single entity requests
   guid?: string;
   entityLocation?: RequestEntityLocation;

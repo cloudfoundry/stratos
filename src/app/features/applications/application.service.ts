@@ -33,12 +33,12 @@ import {
   AppStatsSchema,
   AppSummarySchema,
   AppSummary,
+  AppEnvVarsSchema,
 } from '../../store/types/app-metadata.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
 import { PaginationEntityState, PaginationState } from '../../store/types/pagination.types';
 import {
-  defaultPaginationEntityState,
   defaultPaginationState,
 } from '../../store/reducers/pagination-reducer/pagination.reducer';
 import { tap, map } from 'rxjs/operators';
@@ -149,7 +149,7 @@ export class ApplicationService {
     this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
       store: this.store,
       action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
-      schema: AppEnvVarSchema
+      schema: AppEnvVarsSchema
     }, true);
   }
 
@@ -173,13 +173,9 @@ export class ApplicationService {
       });
 
     this.appStatsFetching$ = this.waitForAppEntity$
-      .filter(ai => ai && ai.entity && ai.entity.entity)
+      .filter(ai => ai && ai.entity && ai.entity.entity && ai.entity.entity.state === 'STARTED')
       .mergeMap(ai => {
-        if (ai.entity.entity.state === 'STARTED') {
-          return appStats.pagination$;
-        } else {
-          return Observable.of(defaultPaginationEntityState);
-        }
+        return appStats.pagination$;
       });
 
     this.application$ = this.waitForAppEntity$
@@ -267,5 +263,4 @@ export class ApplicationService {
       { ...updatedApplication }
     ));
   }
-
 }

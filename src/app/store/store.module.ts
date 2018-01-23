@@ -1,3 +1,5 @@
+import { SetAPIFilterEffect } from './effects/set-api-filter.effect';
+import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
@@ -36,6 +38,8 @@ import { AppReducersModule } from './reducers.module';
       RouterEffect,
       SystemEffects,
       SnackBarEffects,
+      SetClientFilterEffect,
+      SetAPIFilterEffect
     ]),
   ]
 })
