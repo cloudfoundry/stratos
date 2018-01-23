@@ -9,7 +9,7 @@ export const cnsisStoreNames: {
     section: RequestSectionKeys.Other,
     type: EndpointSchema.key
   };
-
+export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
 export interface CNSISModel {
   api_endpoint?: {
     ForceQuery: boolean,
@@ -32,6 +32,7 @@ export interface CNSISModel {
   // This is generated client side when we login
   registered?: boolean;
   info?: SystemInfoEndpoint;
+  connectionStatus?: endpointConnectionStatus;
 }
 
 export interface CNSISState {

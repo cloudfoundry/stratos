@@ -33,15 +33,16 @@ import {
   AppStatsSchema,
   AppSummarySchema,
   AppSummary,
+  AppEnvVarsSchema,
 } from '../../store/types/app-metadata.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
 import { PaginationEntityState, PaginationState } from '../../store/types/pagination.types';
 import {
-  defaultPaginationEntityState,
   defaultPaginationState,
 } from '../../store/reducers/pagination-reducer/pagination.reducer';
 import { tap, map } from 'rxjs/operators';
+import { isTCPRoute, getRoute } from './routes/routes.helper';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -50,6 +51,7 @@ export interface ApplicationData {
   organisation: EntityInfo;
   stack: EntityInfo;
   cf: any;
+  appUrl: string;
 }
 
 @Injectable()
@@ -147,7 +149,7 @@ export class ApplicationService {
     this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
       store: this.store,
       action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
-      schema: AppEnvVarSchema
+      schema: AppEnvVarsSchema
     }, true);
   }
 
@@ -171,13 +173,9 @@ export class ApplicationService {
       });
 
     this.appStatsFetching$ = this.waitForAppEntity$
-      .filter(ai => ai && ai.entity && ai.entity.entity)
+      .filter(ai => ai && ai.entity && ai.entity.entity && ai.entity.entity.state === 'STARTED')
       .mergeMap(ai => {
-        if (ai.entity.entity.state === 'STARTED') {
-          return appStats.pagination$;
-        } else {
-          return Observable.of(defaultPaginationEntityState);
-        }
+        return appStats.pagination$;
       });
 
     this.application$ = this.waitForAppEntity$
@@ -195,6 +193,7 @@ export class ApplicationService {
           organisation: entity.entity.space.entity.organization,
           stack: entity.entity.stack,
           cf: cnsis[entity.entity.cfGuid],
+          appUrl: this.getAppUrl(entity)
         };
       });
 
@@ -240,6 +239,15 @@ export class ApplicationService {
     this.isFetchingStats$ = this.appStatsFetching$.map(appStats => appStats ? appStats.fetching : false).startWith(false);
   }
 
+  getAppUrl(app: EntityInfo): string {
+    const nonTCPRoutes = app.entity.routes
+    .filter(p => !isTCPRoute(p));
+    if (nonTCPRoutes.length >= 0) {
+      return getRoute(nonTCPRoutes[0], true);
+    }
+   return null;
+  }
+
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
     if (requestInfo) {
       return !requestInfo.fetching;
@@ -255,5 +263,4 @@ export class ApplicationService {
       { ...updatedApplication }
     ));
   }
-
 }

@@ -162,7 +162,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const paginationWidgetToStorePage = this.paginator.page
       .map(page => page.pageIndex)
-      .distinctUntilChanged()
       .do(pageIndex => this.paginationController.page(pageIndex));
 
 
@@ -174,7 +173,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       .do(pageSize => this.paginationController.pageSize(pageSize));
 
     const filterWidgetToStore = this.filter.valueChanges
-      .debounceTime(500)
+      .debounceTime(this.dataSource.isLocal ? 150 : 250)
       .distinctUntilChanged()
       .map(value => value as string)
       .do(filterString => {
@@ -228,6 +227,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this.uberSub.unsubscribe();
+    this.dataSource.destroy();
   }
 
   updateListView(listView: ListView) {

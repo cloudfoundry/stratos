@@ -21,7 +21,7 @@ export class ApplicationStateService {
  *   - N - must be >0
  *   - ? - matches when the value is not known
  *
- * To determine the incompelete state, we also need to look at the package_updated_at field
+ * To determine the incomplete state, we also need to look at the package_updated_at field
  *
  */
   private stateMetadata = {
@@ -58,7 +58,7 @@ export class ApplicationStateService {
       },
       '*NONE*': {
         label: 'Incomplete',
-        indicator: 'warning',
+        indicator: 'incomplete',
         actions: 'delete,cli'
       }
     },
