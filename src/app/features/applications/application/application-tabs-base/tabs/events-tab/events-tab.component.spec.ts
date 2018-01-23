@@ -40,6 +40,7 @@ describe('EventsTabComponent', () => {
         clientPagination: {
           pageSize: 5,
           currentPage: 1,
+          totalResults: 0,
           filter: {
             string: '',
             items: {}
