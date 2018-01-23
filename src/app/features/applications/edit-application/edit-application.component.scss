@@ -1,0 +1,15 @@
+.edit-app {
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    width: 100%;
+
+    &__buttons {
+        text-align: right;
+    }
+
+    &__toggler {
+      margin: 12px 0;
+    }
+   
+}

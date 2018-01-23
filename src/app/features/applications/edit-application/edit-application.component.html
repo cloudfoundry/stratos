@@ -1,3 +1,35 @@
-<p>
-  edit-application works!
-</p>
+<app-page-header>
+  <h1>Edit Application: {{ (applicationService.application$ | async)?.app.entity.name }} </h1>
+  <div class="page-header-right">
+    <button mat-icon-button mat-button routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+</app-page-header>
+<div>
+  <form class="edit-app" [formGroup]="editAppForm" validate>
+    <mat-form-field>
+      <input matInput placeholder="Application Name" formControlName="name" required>
+      <mat-error *ngIf="editAppForm.controls.name.invalid">Application name is required</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Number of Instances" formControlName="instances" type="number">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Disk Quota (MB)" formControlName="disk_quota" type="number">
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number">
+    </mat-form-field>
+    <mat-slide-toggle class="edit-app__toggler" formControlName="enable_ssh">Enable SSH to Application Instances</mat-slide-toggle>
+    <mat-slide-toggle class="edit-app__toggler" formControlName="production">Production Application</mat-slide-toggle> 
+    <div class="edit-app__buttons">
+      <button color="warn" mat-button routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">Cancel</button>
+      <button color="primary" type="submit" mat-button mat-raised-button (click)="updateApp()" [disabled]="editAppForm.invalid || !editAppForm.dirty">Update</button>
+    </div>
+  </form>
+</div>
+
+
+<p>Form value: {{ editAppForm.value | json }}</p>
+<p>Form status: {{ editAppForm.status | json }}</p>
