@@ -12,5 +12,7 @@ export const environment = {
   cfAPIVersion: 'v2',
   logLevel: LogLevel.DEBUG,
   logToConsole: true,
-  logEnableConsoleActions: true,
+  logEnableConsoleActions: false,
+  showObsDebug: false,
+  disablePolling: false
 };

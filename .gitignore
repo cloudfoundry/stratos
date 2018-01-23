@@ -47,3 +47,4 @@ Thumbs.db
 
 # Angular CLI
 proxy.conf.js
+environment.dev.ts
