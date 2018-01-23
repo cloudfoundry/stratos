@@ -126,7 +126,7 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
   }
 
   termResize(size) {
-    if (!this.msgSubscription.closed) {
+    if (!this.msgSubscription.closed && this.sshInput) {
       this.sshInput.next(JSON.stringify({cols: size.cols, rows: size.rows}));
     }
   }
