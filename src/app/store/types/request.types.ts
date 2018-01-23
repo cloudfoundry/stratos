@@ -16,9 +16,6 @@ export interface SingleEntityAction {
 export interface RequestAction extends Action, SingleEntityAction {
   cnis?: string;
   updatingKey?: string;
-  // On delete the pagination sections of all entities of that type are cleared. For some cases, like local list, we want to immediatly
-  // remove that entry instead of clearing the table and refetching all data. This flag allows that
-  removeEntityOnDelete?: boolean;
 }
 
 /**
@@ -40,6 +37,9 @@ export interface IRequestAction extends RequestAction {
   // For single entity requests
   guid?: string;
   entityLocation?: RequestEntityLocation;
+  // For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
+  // like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
+  removeEntityOnDelete?: boolean;
 }
 
 export interface IStartRequestAction {

@@ -129,7 +129,7 @@ function paginate(action, state, updatePagination) {
     const clearEntityType = action.entityKey || 'application';
     return paginationClearType(state, clearEntityType, getDefaultPaginationEntityState());
   }
-  
+
   if (action.type === CLEAR_PAGINATION_OF_ENTITY) {
     return paginationClearOfEntity(state, action);
   }

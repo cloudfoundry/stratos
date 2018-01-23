@@ -18,10 +18,8 @@ export class CardAppUsageComponent implements OnInit {
     this.appData$ = Observable.combineLatest(
       this.appMonitor.appMonitor$,
       this.appService.application$.map(data => data.app.entity.state === 'STARTED'),
-      (monitor, isRunning) => ({ monitor: monitor, isRunning: isRunning, status: !isRunning ? 'tentative' : monitor.status.usage})
+      (monitor, isRunning) => ({ monitor: monitor, isRunning: isRunning, status: !isRunning ? 'tentative' : monitor.status.usage })
     );
-
-    this.appData$.subscribe(row => console.log(row));
   }
 
 }

@@ -45,7 +45,6 @@ describe('EventsTabComponent', () => {
             string: '',
             items: {}
           },
-          totalResults: 0
         }
       }
     }
