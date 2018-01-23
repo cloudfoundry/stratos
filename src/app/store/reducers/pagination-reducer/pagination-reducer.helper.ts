@@ -3,12 +3,13 @@ import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Rx';
 
-import { AddParams, SetParams } from '../../actions/pagination.actions';
+import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
+import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay } from 'rxjs/operators';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
-import { distinctUntilChanged, tap, filter, map, share, combineLatest, withLatestFrom } from 'rxjs/operators';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -121,7 +122,7 @@ export const getPaginationObservables = <T = any>(
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
   if (action.initialParams) {
-    store.dispatch(new SetParams(entityKey, paginationKey, action.initialParams, isLocal));
+    store.dispatch(new SetInitialParams(entityKey, paginationKey, action.initialParams, isLocal));
   }
 
   const obs = getObservables<T>(
@@ -146,16 +147,19 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey));
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+    distinctUntilChanged()
+  );
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
-  const fetchPagination$ = paginationSelect$.share().pipe(
+  const fetchPagination$ = paginationSelect$.pipe(
     distinctUntilChanged((oldVals, newVals) => {
       const oldVal = getPaginationCompareString(oldVals);
       const newVal = getPaginationCompareString(newVals);
       return oldVal === newVal;
     }),
+    debounceTime(1),
     tap(pagination => {
       if (
         (!pagination && !hasDispatchedOnce) ||
@@ -164,27 +168,34 @@ function getObservables<T = any>(
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         store.dispatch(action);
       }
-    })
+    }),
+    share()
   );
   fetchPagination$.subscribe();
 
   const entities$: Observable<T[]> =
-    paginationSelect$.pipe(
-      filter(pagination => {
+    combineLatest(
+      store.select(selectEntities(entityKey)),
+      paginationSelect$
+    )
+      .pipe(
+      filter(([ent, pagination]) => {
         return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       }),
+      map(([ent, pagination]) => pagination),
       withLatestFrom(store.select(getAPIRequestDataState)),
-      map(([paginationEntity, entities]) => {
+      map(([pagination, entities]) => {
         let page;
         if (isLocal) {
-          const pages = Object.values(paginationEntity.ids);
+          const pages = Object.values(pagination.ids);
           page = [].concat.apply([], pages);
         } else {
-          page = paginationEntity.ids[paginationEntity.currentPage];
+          page = pagination.ids[pagination.currentPage];
         }
-        return page ? denormalize(page, schema, entities) : null;
+
+        return page ? denormalize(page, schema, entities).filter(ent => !!ent) : null;
       })
-    );
+      );
 
   return {
     pagination$,
@@ -201,7 +212,7 @@ function getPaginationCompareString(paginationEntity: PaginationEntityState) {
     params = JSON.stringify(paginationEntity.params);
   }
   // paginationEntity.totalResults included to ensure we cover the 'ResetPagination' case, for instance after AddParam
-  return paginationEntity.totalResults + paginationEntity.currentPage + params;
+  return paginationEntity.totalResults + paginationEntity.currentPage + params + paginationEntity.pageCount;
 }
 
 export function isPageReady(pagination: PaginationEntityState) {

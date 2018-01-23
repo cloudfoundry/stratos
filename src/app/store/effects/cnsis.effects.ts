@@ -3,8 +3,12 @@ import { APIResource, NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
   CONNECT_CNSIS,
+  CONNECT_CNSIS_FAILED,
+  CONNECT_CNSIS_SUCCESS,
   ConnectCnis,
   DISCONNECT_CNSIS,
+  DISCONNECT_CNSIS_FAILED,
+  DISCONNECT_CNSIS_SUCCESS,
   DisconnectCnis,
   EndpointSchema,
   GET_CNSIS,
@@ -12,6 +16,8 @@ import {
   GetAllCNSISFailed,
   GetAllCNSISSuccess,
   UNREGISTER_CNSIS,
+  UNREGISTER_CNSIS_FAILED,
+  UNREGISTER_CNSIS_SUCCESS,
   UnregisterCnis,
 } from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
@@ -98,7 +104,9 @@ export class CNSISEffect {
       return this.doCnisAction(
         apiAction,
         '/pp/v1/auth/login/cnsi',
-        params
+        params,
+        null,
+        [CONNECT_CNSIS_SUCCESS, CONNECT_CNSIS_FAILED]
       );
     });
 
@@ -113,7 +121,9 @@ export class CNSISEffect {
       return this.doCnisAction(
         apiAction,
         '/pp/v1/auth/logout/cnsi',
-        params
+        params,
+        null,
+        [DISCONNECT_CNSIS_SUCCESS, DISCONNECT_CNSIS_FAILED]
       );
     });
 
@@ -129,7 +139,8 @@ export class CNSISEffect {
         apiAction,
         '/pp/v1/unregister',
         params,
-        'delete'
+        'delete',
+        [UNREGISTER_CNSIS_SUCCESS, UNREGISTER_CNSIS_FAILED]
       );
     });
 
@@ -143,16 +154,28 @@ export class CNSISEffect {
   }
 
 
-  private doCnisAction(apiAction: IRequestAction, url: string, params: URLSearchParams, apiActionType: ApiRequestTypes = 'update') {
+  private doCnisAction(
+    apiAction: IRequestAction,
+    url: string,
+    params: URLSearchParams,
+    apiActionType: ApiRequestTypes = 'update',
+    actionStrings: [string, string] = [null, null]
+  ) {
     const headers = new Headers();
     headers.append('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
     return this.http.post(url, params, {
       headers
     }).map(endpoint => {
+      if (actionStrings[0]) {
+        this.store.dispatch({ type: actionStrings[0] });
+      }
       return new WrapperRequestActionSuccess(null, apiAction, apiActionType);
     })
       .catch(e => {
+        if (actionStrings[1]) {
+          this.store.dispatch({ type: actionStrings[1] });
+        }
         return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
       });
   }
