@@ -46,6 +46,10 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
   constructor(private changeDetector: ChangeDetectorRef) { }
 
   ngOnInit() {
+    if (!this.connectionStatus) {
+      return;
+    }
+
     this.connectSubscription = this.connectionStatus.subscribe((count: number) => {
       this.isConnected = (count !== 0);
       if (this.isConnected) {
@@ -70,7 +74,9 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
   }
 
   ngAfterViewChecked() {
-    this.xterm.fit();
+    if (this.xterm) {
+      this.xterm.fit();
+    }
   }
 
   ngOnDestroy() {
