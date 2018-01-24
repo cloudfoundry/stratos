@@ -98,7 +98,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     } else {
       this.page$ = letted$;
     }
-    this.page$ = this.page$.pipe(shareReplay());
+    this.page$ = this.page$.pipe(shareReplay(1));
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
 
     this.pagination$ = pagination$;
