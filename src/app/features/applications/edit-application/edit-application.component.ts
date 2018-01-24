@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy} from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ApplicationService } from '../application.service';
 import { EntityService } from '../../../core/entity-service';
 import { AppState } from '../../../store/app-state';
@@ -12,6 +12,7 @@ import { Observable, Subscription } from 'rxjs/Rx';
 import { Router } from '@angular/router';
 // import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { RouterNav } from '../../../store/actions/router.actions';
+import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-edit-application',
@@ -34,7 +35,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       name: ['', [
         Validators.required,
         // new AppNameUniqueDirective(this.store),
-       ]],
+      ]],
       instances: [0, [
         Validators.required,
         Validators.minLength(0)
@@ -64,7 +65,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     this.sub = this.applicationService.application$.filter(app => app.app.entity).take(1).map(app => app.app.entity).subscribe(app => {
       this.app = app;
       this.editAppForm.setValue({
-        name:    this.app.name,
+        name: this.app.name,
         instances: this.app.instances,
         memory: this.app.memory,
         disk_quota: this.app.disk_quota,
@@ -76,7 +77,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateApp = () =>  {
+  updateApp = () => {
     const { cfGuid, appGuid } = this.applicationService;
     const updates = {};
     // We will only send the values that were actually edited
@@ -89,9 +90,9 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     let obs$: Observable<any>;
     if (Object.keys(updates).length) {
       // We had at least one value to change - send update action
-      obs$ = this.applicationService.updateApplication(updates).map(v => ({success: !v.error}));
+      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).map(v => ({ success: !v.error }));
     } else {
-      obs$ = Observable.of({success: true});
+      obs$ = Observable.of({ success: true });
     }
 
     return obs$.take(1).do(res => {
