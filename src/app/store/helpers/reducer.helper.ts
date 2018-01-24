@@ -21,21 +21,39 @@ export const deepMergeState = (state, newState) => {
       const baseStateEnt = { ...baseState[entityKey] };
       const newStateEnt = newState[entityKey];
       Object.keys(newStateEnt).forEach(id => {
-        baseStateEnt[id] = {
-          ...baseStateEnt[id],
-          ...newStateEnt[id]
-        };
+        baseStateEnt[id] = mergeEntity(
+          baseStateEnt[id],
+          newStateEnt[id]
+        );
       });
-      baseState[entityKey] = {
-        ...baseState[entityKey],
-        ...baseStateEnt
-      };
+      baseState[entityKey] = mergeEntity(
+        baseState[entityKey],
+        baseStateEnt
+      );
     } else {
       baseState[entityKey] = newState[entityKey];
     }
   });
   return baseState;
 };
+
+function mergeEntity(baseEntity, newEntity) {
+  if (baseEntity && baseEntity.entity && baseEntity.metadata) {
+    return {
+      entity: merge(baseEntity.entity, newEntity.entity),
+      metadata: merge(baseEntity.metadata, newEntity.metadata)
+    };
+  } else {
+    return merge(baseEntity, newEntity);
+  }
+}
+
+function merge(baseObject, newObject) {
+  return {
+    ...baseObject,
+    ...newObject
+  };
+}
 
 function shouldMerge(newState, baseState, entityKey) {
   return typeof newState[entityKey] !== 'string' && baseState[entityKey] && Object.keys(baseState[entityKey]);
