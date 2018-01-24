@@ -23,6 +23,7 @@ import { Injectable } from '@angular/core';
 import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
 import { DeleteApplicationInstance } from '../../store/actions/application.actions';
 import { AppStat } from '../../store/types/app-metadata.types';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -91,9 +92,15 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     enabled: row => !!(row.value && row.value.state === 'RUNNING'),
   };
 
-  private listActionSSh: IListAction<any> = {
+
+  private listActionSsh: IListAction<any> = {
     action: (item) => {
-      window.alert('SSH!');
+      console.log(item);
+      const index = item.index;
+      const sshRoute = (
+        `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
+      );
+      this.router.navigate([sshRoute]);
     },
     icon: 'computer',
     label: 'SSH',
@@ -102,12 +109,19 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     enabled: row => !!(row.value && row.value.state === 'RUNNING'),
   };
 
+
+
   private singleActions = [
     this.listActionTerminate,
-    this.listActionSSh
+    this.listActionSsh,
   ];
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService, private utilsService: UtilsService) {
+  constructor(
+    private store: Store<AppState>,
+    private appService: ApplicationService,
+    private utilsService: UtilsService,
+    private router: Router,
+  ) {
     this.instancesSource = new CfAppInstancesDataSource(
       this.store,
       this.appService.cfGuid,

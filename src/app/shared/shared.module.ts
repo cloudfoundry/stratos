@@ -54,6 +54,7 @@ import {
   TableCellEndpointStatusComponent
 } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
+import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { TableCellAppStatusComponent } from './components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
 import {
   ApplicationStateIconComponent,
@@ -79,6 +80,7 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
+
 
 @NgModule({
   imports: [
@@ -131,6 +133,7 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     CardEndpointComponent,
     TableCellEndpointStatusComponent,
     DialogErrorComponent,
+    SshViewerComponent,
     TableCellAppStatusComponent,
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
@@ -177,6 +180,7 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     NoContentMessageComponent,
     EndpointsMissingComponent,
     ApplicationStateComponent,
+    SshViewerComponent,
     PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
