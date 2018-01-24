@@ -46,6 +46,8 @@ import { tap, map } from 'rxjs/operators';
 import { isTCPRoute, getRoute } from './routes/routes.helper';
 import { selectEntity } from '../../store/selectors/api.selectors';
 import { SpaceSchema } from '../../store/actions/space.action';
+import { selectUpdateInfo } from '../../store/selectors/api.selectors';
+import { ActionState } from '../../store/reducers/api-request-reducer/types';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -275,12 +277,21 @@ export class ApplicationService {
     }
   }
 
-  updateApplication(updatedApplication: UpdateApplication, updateEntities?: AppMetadataTypes[]) {
+  /*
+  * Update an application
+  */
+  updateApplication(updatedApplication: UpdateApplication, updateEntities?: AppMetadataTypes[]): Observable<ActionState> {
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
       { ...updatedApplication },
       updateEntities
     ));
+
+    // Create an Observable that can be used to determine when the update completed
+    const actionState = selectUpdateInfo(ApplicationSchema.key,
+      this.appGuid,
+      UpdateExistingApplication.updateKey);
+    return this.store.select(actionState).filter(item => !item.busy);
   }
 }
