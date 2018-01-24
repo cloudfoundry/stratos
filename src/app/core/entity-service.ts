@@ -1,3 +1,4 @@
+import { shareReplay } from 'rxjs/operators';
 import { IRequestAction } from '../store/types/request.types';
 import { interval } from 'rxjs/observable/interval';
 import {
@@ -22,6 +23,7 @@ import {
   selectUpdateInfo,
 } from '../store/selectors/api.selectors';
 import { Inject, Injectable } from '@angular/core';
+import { tag } from 'rxjs-spy/operators/tag';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 /**
@@ -38,8 +40,14 @@ export class EntityService {
     public action: IRequestAction,
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF
   ) {
-    this.entitySelect$ = store.select(selectEntity(entityKey, id));
-    this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id));
+    this.entitySelect$ = store.select(selectEntity(entityKey, id)).pipe(
+      shareReplay(1),
+      tag('entity-obs')
+    );
+    this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id)).pipe(
+      shareReplay(1),
+      tag('entity-request-obs')
+    );
     this.actionDispatch = (updatingKey) => {
       if (updatingKey) {
         action.updatingKey = updatingKey;
@@ -106,6 +114,7 @@ export class EntityService {
       entitySelect$,
       entityRequestSelect$
     )
+      .shareReplay(1)
       .do(([entities, entity, entityRequestInfo]) => {
         if (
           !entityRequestInfo ||
@@ -138,6 +147,9 @@ export class EntityService {
    */
   poll(interval = 10000, key = this.refreshKey) {
     return Observable.interval(interval)
+      .pipe(
+      tag('poll')
+      )
       .withLatestFrom(
       this.entitySelect$,
       this.entityRequestSelect$

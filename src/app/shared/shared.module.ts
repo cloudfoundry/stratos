@@ -79,6 +79,7 @@ import { TableCellRouteComponent } from './components/table/custom-cells/table-c
 import { TableCellTCPRouteComponent } from './components/table/custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
+import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
 
 
 @NgModule({
@@ -150,6 +151,7 @@ import { TableCellStatusDirective } from './components/table/table-cell-status.d
     TableCellRouteComponent,
     TableCellTCPRouteComponent,
     TableCellStatusDirective,
+    CardAppUsageComponent,
   ],
   exports: [
     FormsModule,
@@ -190,6 +192,7 @@ import { TableCellStatusDirective } from './components/table/table-cell-status.d
     UsageGaugeComponent,
     TableCellUsageComponent,
     TableCellStatusDirective,
+    CardAppUsageComponent,
   ],
   entryComponents: [AppEventDetailDialogComponentComponent],
   providers: [

@@ -21,7 +21,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { ClearPaginationOfType } from '../actions/pagination.actions';
+import { ClearPaginationOfType, ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes } from './../actions/request.actions';
 import { APIResource, NormalizedResponse } from './../types/api.types';
@@ -42,14 +42,6 @@ export class APIEffect {
     private actions$: Actions,
     private store: Store<AppState>
   ) { }
-
-  // @Effect() apiRequestStart$ = this.actions$.ofType<ICFAction>(ApiActionTypes.API_REQUEST)
-  //   .map(apiAction => {
-  // return new StartCFAction(
-  //   apiAction,
-  //   getRequestTypeFromMethod(apiAction.options.method)
-  // );
-  //   });
 
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
@@ -118,10 +110,15 @@ export class APIEffect {
           ));
 
           if (
+            !apiAction.updatingKey &&
             apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
             apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete
           ) {
-            actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
+            if (apiAction.removeEntityOnDelete) {
+              actions.unshift(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+            } else {
+              actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
+            }
           }
 
           return actions;
