@@ -15,12 +15,12 @@
        href="{{(applicationService.application$ | async)?.appUrl}}" target="_blank">
           <mat-icon>launch</mat-icon>
       </a>
-      <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
-        <mat-icon>delete</mat-icon>
-      </button>
       <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async"
         routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit">
         <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
+        <mat-icon>delete</mat-icon>
       </button>
       <span>
         <button mat-icon-button name="stop" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STARTED'" [disabled]="summaryDataChanging$ | async"
