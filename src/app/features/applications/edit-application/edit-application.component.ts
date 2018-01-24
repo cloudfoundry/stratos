@@ -5,10 +5,13 @@ import { AppState } from '../../../store/app-state';
 import { Store } from '@ngrx/store';
 import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { selectUpdateInfo } from '../../../store/selectors/api.selectors';
+import { selectNewAppState } from '../../../store/effects/create-app-effects';
 
 // import { UpdateApplication } from '../../../store/actions/application.actions';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Router } from '@angular/router';
+// import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
+import { RouterNav } from '../../../store/actions/router.actions';
 
 @Component({
   selector: 'app-edit-application',
@@ -19,15 +22,19 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   editAppForm: FormGroup;
 
+  checkingNameState$: Observable<string>;
+
   constructor(
     private applicationService: ApplicationService,
     private entityService: EntityService,
     private store: Store<AppState>,
     private fb: FormBuilder,
-    private router: Router
   ) {
     this.editAppForm = this.fb.group({
-      name: ['',  Validators.required],
+      name: ['', [
+        Validators.required,
+        // new AppNameUniqueDirective(this.store),
+       ]],
       instances: [0, [
         Validators.required,
         Validators.minLength(0)
@@ -53,14 +60,8 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   private error = false;
 
-  private backRouteLink: string;
-
   ngOnInit() {
-    const { cfGuid, appGuid } = this.applicationService;
-    this.backRouteLink =  `/applications/${cfGuid}/${appGuid}`;
-
     this.sub = this.applicationService.application$.filter(app => app.app.entity).take(1).map(app => app.app.entity).subscribe(app => {
-      console.log('GOT VALUES');
       this.app = app;
       this.editAppForm.setValue({
         name:    this.app.name,
@@ -76,21 +77,16 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   }
 
   updateApp = () =>  {
-    console.log('Apply Application Edit');
-    console.log(this.editAppForm);
-
+    const { cfGuid, appGuid } = this.applicationService;
     const updates = {};
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editAppForm.value)) {
-      console.log(key);
       if (!this.editAppForm.controls[key].pristine) {
         updates[key] = this.editAppForm.value[key];
       }
     }
-    console.log(updates);
 
     let obs$: Observable<any>;
-
     if (Object.keys(updates).length) {
       // We had at least one value to change - send update action
       obs$ = this.applicationService.updateApplication(updates).map(v => ({success: !v.error}));
@@ -99,11 +95,9 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     }
 
     return obs$.take(1).do(res => {
-      console.log('Update complete');
-      console.log(res);
       if (res.success) {
         // Navigate back to the application page
-        this.router.navigate([this.backRouteLink]);
+        this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, appGuid] }));
       } else {
         this.error = !res.success;
       }
