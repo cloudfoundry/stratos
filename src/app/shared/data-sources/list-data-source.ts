@@ -164,6 +164,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     delete this.editRow;
   }
 
+  trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
+
   attatchEntityLettable(entities$, entityLettable) {
     if (entityLettable) {
       return entities$.pipe(

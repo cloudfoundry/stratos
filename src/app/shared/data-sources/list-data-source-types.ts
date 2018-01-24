@@ -55,6 +55,7 @@ export interface IListDataSource<T> {
   selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId;
+  trackBy(index: number, item: T);
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
   selectClear();
