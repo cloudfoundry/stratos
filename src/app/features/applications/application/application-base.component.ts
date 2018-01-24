@@ -79,10 +79,10 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
     const { cfGuid, appGuid } = this.applicationService;
     // Auto refresh
-    // this.entityServiceAppRefresh$ = this.entityService.poll(10000, this.autoRefreshString).do(() => {
-    //   this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-    //   this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-    // }).subscribe();
+    this.entityServiceAppRefresh$ = this.entityService.poll(10000, this.autoRefreshString).do(() => {
+      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+    }).subscribe();
 
     this.appSub$ = this.applicationService.app$.subscribe(app => {
       if (
@@ -96,6 +96,6 @@ export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.appSub$.unsubscribe();
-    // this.entityServiceAppRefresh$.unsubscribe();
+    this.entityServiceAppRefresh$.unsubscribe();
   }
 }
