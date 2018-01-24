@@ -15,31 +15,10 @@ import { AppState } from '../../../store/app-state';
 import { EntityService } from '../../../core/entity-service';
 import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
 
-const entityServiceFactory = (
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute
-) => {
-  const { id, cfId } = activatedRoute.snapshot.params;
-  return new EntityService(
-    store,
-    ApplicationSchema.key,
-    ApplicationSchema,
-    id,
-    new GetApplication(id, cfId)
-  );
-};
-
 @Component({
   selector: 'app-ssh-application',
   templateUrl: './ssh-application.component.html',
   styleUrls: ['./ssh-application.component.scss'],
-  providers: [
-    {
-      provide: EntityService,
-      useFactory: entityServiceFactory,
-      deps: [Store, ActivatedRoute]
-    }
-  ]
 })
 export class SshApplicationComponent implements OnInit {
 
@@ -66,9 +45,8 @@ export class SshApplicationComponent implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,
-    private entityService: EntityService,
     private applicationService: ApplicationService,
-  ) {}
+  ) { }
 
   ngOnInit() {
 
@@ -96,12 +74,12 @@ export class SshApplicationComponent implements OnInit {
       );
 
       this.messages = connection.messages
-      .catch(e => {
-        if (e.type === 'error') {
-          this.errorMessage = 'Error connecting to web socket';
-        }
-        return [];
-      });
+        .catch(e => {
+          if (e.type === 'error') {
+            this.errorMessage = 'Error connecting to web socket';
+          }
+          return [];
+        });
 
       this.connectionStatus = connection.connectionStatus;
     }

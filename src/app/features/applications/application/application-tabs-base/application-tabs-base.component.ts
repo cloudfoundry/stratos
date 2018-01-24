@@ -55,7 +55,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
     { link: 'events', label: 'Events' },
-    { link: 'ssh', label: 'SSH' }
   ];
 
   autoRefreshString = 'auto-refresh';

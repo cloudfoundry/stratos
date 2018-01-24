@@ -1,5 +1,5 @@
 <app-page-header>
-  <h1>Application SSH ({{ (entityService.entityObs$ | async)?.entity?.entity.name }} #{{ instanceId }})</h1>
+  <h1>Application SSH ({{ (applicationService.app$ | async)?.entity?.entity.name }} #{{ instanceId }})</h1>
   <div class="page-header-right">
     <span>
       <button mat-icon-button name="stop" *ngIf="sshViewer.isConnected" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
