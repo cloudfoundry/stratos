@@ -23,8 +23,8 @@ export class LoggedInService {
   private _lastUserInteraction = Date.now();
   private _sessionChecker: Subscription;
 
-  // Check the session every 30 seconds (Note: this is vey cheap to do unless the session is about to expire)
-  private _checkSessionInterval = 1 * 1000;
+  // Check the session every 5 seconds (Note: this is vey cheap to do unless the session is about to expire)
+  private _checkSessionInterval = 5 * 1000;
 
   // Warn inactive users 2 minutes before logging them out
   private _warnBeforeLogout = 2 * 60 * 1000;
@@ -75,6 +75,7 @@ export class LoggedInService {
   }
 
   private openSessionCheckerPoll() {
+    this.closeSessionCheckerPoll();
     this._sessionChecker = interval(this._checkSessionInterval)
       .pipe(
       tap(() => {

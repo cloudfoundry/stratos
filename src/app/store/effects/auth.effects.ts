@@ -32,7 +32,6 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 import { SessionData } from '../types/auth.types';
-import { RouterNav } from '../actions/router.actions';
 
 
 @Injectable()
