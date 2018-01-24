@@ -259,7 +259,7 @@ const testInitialStoreState: AppState = {
             filter: {
               string: '',
               items: {}
-            }
+            },
           }
         },
       },
@@ -426,7 +426,7 @@ const testInitialStoreState: AppState = {
             filter: {
               string: '',
               items: {}
-            }
+            },
           }
         }
       },
@@ -449,7 +449,7 @@ const testInitialStoreState: AppState = {
             filter: {
               string: '',
               items: {}
-            }
+            },
           }
         }
       },

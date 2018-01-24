@@ -1,16 +1,99 @@
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { Component, OnInit } from '@angular/core';
+import {
+  Component, OnInit, OnDestroy, Input, ElementRef, ViewChild, Renderer,
+  ViewChildren, QueryList, ContentChildren
+} from '@angular/core';
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
+import { AppState } from '../../../../../store/app-state';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
+import { selectEntity } from '../../../../../store/selectors/api.selectors';
+import { AppStatSchema, AppStats, AppStatsSchema } from '../../../../../store/types/app-metadata.types';
+import { GetAppStatsAction, AppMetadataTypes } from '../../../../../store/actions/app-metadata.actions';
+import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Component({
   selector: 'app-card-app-instances',
   templateUrl: './card-app-instances.component.html',
   styleUrls: ['./card-app-instances.component.scss']
 })
-export class CardAppInstancesComponent implements OnInit {
-  appInstanceState$: any;
+export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
-  constructor(private applicationService: ApplicationService ) { }
+  // Should the card show the actions to scale/down the number of instances?
+  @Input('showActions') showActions = false;
 
-  ngOnInit() {}
+  @Input('busy') busy: any;
+
+  @ViewChild('instanceField') instanceField: ElementRef;
+
+  constructor(private store: Store<AppState>, private applicationService: ApplicationService, private renderer: Renderer) { }
+
+  private currentCount: 0;
+  private editCount: 0;
+
+  private sub: Subscription;
+
+  private isEditing = false;
+
+  private editValue: any;
+
+  // Observable on the running instances count for the application
+  private runningInstances$: Observable<number>;
+
+  private isRunning = false;
+
+  ngOnInit() {
+    this.sub = this.applicationService.application$.subscribe(app => {
+      if (app.app.entity) {
+        this.currentCount = app.app.entity.instances;
+        this.isRunning = app.app.entity.state === 'STARTED';
+      }
+    });
+
+    const { cfGuid, appGuid } = this.applicationService;
+    this.runningInstances$ = getPaginationPages(this.store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
+      .pipe(
+      map(appInstancesPages => {
+        const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
+        return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
+      })
+      );
+  }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+
+  scaleUp(current: number) {
+    this.applicationService.updateApplication({
+      instances: this.currentCount + 1
+    }, [AppMetadataTypes.STATS]);
+  }
+
+  scaleDown(current: number) {
+    this.applicationService.updateApplication({
+      instances: this.currentCount - 1
+    }, [AppMetadataTypes.STATS]);
+  }
+
+  edit() {
+    this.editValue = this.currentCount;
+    this.isEditing = true;
+    setTimeout(() => {
+      this.renderer.invokeElementMethod(this.instanceField.nativeElement, 'focus', []);
+    }, 0);
+  }
+
+  finishEdit(ok: boolean) {
+    this.isEditing = false;
+    if (ok) {
+      this.applicationService.updateApplication({
+        instances: parseInt(this.editValue, 10)
+      }, [AppMetadataTypes.STATS]);
+    }
+  }
 
 }

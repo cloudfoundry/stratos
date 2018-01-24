@@ -14,7 +14,7 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
     switch (action.type) {
       case successAction:
         const success = action as ISuccessRequestAction;
-        if (success.requestType === 'delete') {
+        if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
           return deepMergeState(state, success.response.entities);

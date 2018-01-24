@@ -1,7 +1,6 @@
 import { IRequestAction, IFailedRequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
-  getRequestTypeFromMethod,
   mergeUpdatingState,
   setEntityRequestState,
 } from './request-helpers';

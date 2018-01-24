@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Effect, Actions } from '@ngrx/effects';
 import { AppVariablesUpdate, AppVariables } from '../actions/app-variables.actions';
 import { UpdateExistingApplication } from '../actions/application.actions';
+import { AppMetadataTypes } from '../actions/app-metadata.actions';
 
 
 @Injectable()
@@ -19,7 +20,8 @@ export class AppVariablesEffect {
       return new UpdateExistingApplication(
         apiAction.appGuid,
         apiAction.cfGuid,
-        { ...apiAction.updatedApplication }
+        { ...apiAction.updatedApplication },
+        [AppMetadataTypes.ENV_VARS]
       );
     });
 }
