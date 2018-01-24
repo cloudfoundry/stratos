@@ -7,8 +7,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 import { UpdateApplication, DeleteApplication } from '../../../../store/actions/application.actions';
-import { GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -51,6 +51,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   tabLinks = [
     { link: 'summary', label: 'Summary' },
+    { link: 'instances', label: 'Instances' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
@@ -71,32 +72,27 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   saveEdits() {
     this.endEdit();
-    this.applicationService.updateApplication(this.appEdits);
+    this.applicationService.updateApplication(this.appEdits, [AppMetadataTypes.SUMMARY]);
   }
 
   stopApplication() {
     this.endEdit();
     const stoppedString = 'STOPPED';
-    this.applicationService.updateApplication({
-      state: stoppedString
-    });
-
+    this.applicationService.updateApplication({ state: stoppedString }, []);
     this.pollEntityService('stopping', stoppedString).subscribe();
   }
 
   pollEntityService(state, stateString) {
     return this.entityService.poll(1000, state)
-    .takeWhile(({ resource, updatingSection }) => {
-      return resource.entity.state !== stateString;
-    });
+      .takeWhile(({ resource, updatingSection }) => {
+        return resource.entity.state !== stateString;
+      });
   }
 
   startApplication() {
     this.endEdit();
     const startedString = 'STARTED';
-    this.applicationService.updateApplication({
-      state: startedString
-    });
+    this.applicationService.updateApplication({ state: startedString }, []);
 
     this.pollEntityService('starting', startedString)
       .delay(1)

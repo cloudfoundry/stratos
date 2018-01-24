@@ -10,6 +10,7 @@
 @import '../app/shared/components/dialog-error/dialog-error.component.theme';
 @import '../app/shared/components/page-subheader/page-subheader.component.theme';
 @import '../app/shared/components/card-status/card-status.component.theme';
+@import '../app/shared/components/usage-gauge/usage-gauge.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './mat-themes';
@@ -65,6 +66,7 @@ $side-nav-light-active: #484848;
   @include app-mat-tabs-theme($theme, $app-theme);
   @include app-text-status-theme($theme, $app-theme);
   @include app-card-status-theme($theme, $app-theme);
+  @include app-usage-gauge-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

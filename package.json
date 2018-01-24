@@ -43,6 +43,7 @@
     "queueing-subject": "^0.1.1",
     "reselect": "^3.0.1",
     "rxjs": "^5.5.5",
+    "rxjs-spy": "^6.1.0",
     "rxjs-websockets": "^4.0.0",
     "zone.js": "^0.8.14"
   },

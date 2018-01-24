@@ -8,6 +8,9 @@ import { ApplicationStateIconPipe } from '../../../application-state/application
 import { CoreModule } from '../../../../../core/core.module';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ApplicationServiceMock } from '../../../../../test-framework/application-service-helper';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { ApplicationStateService } from '../../../application-state/application-state.service';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('CardAppInstancesComponent', () => {
   let component: CardAppInstancesComponent;
@@ -23,10 +26,13 @@ describe('CardAppInstancesComponent', () => {
         ApplicationStateIconPipe,
       ],
       imports: [
-        CoreModule
+        CoreModule,
+        BrowserAnimationsModule,
+        createBasicStoreModule()
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        ApplicationStateService
       ]
     })
     .compileComponents();

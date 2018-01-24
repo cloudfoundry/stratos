@@ -18,6 +18,7 @@ import { ApplicationStateService } from '../../../../../../shared/components/app
 import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { cnsisStoreNames } from '../../../../../../store/types/cnsis.types';
+import { RoutesComponent } from '../../../../routes/routes.component';
 
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
@@ -29,6 +30,7 @@ describe('BuildTabComponent', () => {
       declarations: [
         BuildTabComponent,
         ViewBuildpackComponent,
+        RoutesComponent
       ],
       imports: [
         CoreModule,

@@ -1,7 +1,3 @@
-import {
-    ApplicationEnvVars,
-} from '../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { EnvVarSchema, GetAppEnvVarsAction, getPaginationKey } from './../../store/actions/app-metadata.actions';
 import { ListDataSource } from './list-data-source';
 import { DataSource } from '@angular/cdk/table';
 import { Store, Action } from '@ngrx/store';
@@ -11,21 +7,22 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
 import { ApplicationService } from '../../features/applications/application.service';
-import { EntityInfo } from '../../store/types/api.types';
 import { UpdateApplication } from '../../store/actions/application.actions';
 import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
 import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
 import { ListActionConfig, ListActions } from './list-data-source-types';
-import { AppMetadataProperties, EnvVarsSchema } from '../../store/actions/app-metadata.actions';
-import { AppMetadataType } from '../../store/types/app-metadata.types';
 import { map } from 'rxjs/operators';
+import { AppEnvVarSchema, AppEnvVarsState } from '../../store/types/app-metadata.types';
+import { APIResource } from '../../store/types/api.types';
+import { GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
+import { getPaginationKey } from '../../store/actions/pagination.actions';
 
-export interface AppEnvVar {
+export interface ListAppEnvVar {
   name: string;
   value: string;
 }
 
-export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, ApplicationEnvVars> {
+export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIResource<AppEnvVarsState>> {
 
   public cfGuid: string;
   public appGuid: string;
@@ -40,18 +37,18 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
         _appService.appGuid,
         _appService.cfGuid,
       ),
-      EnvVarSchema,
-      (object: AppEnvVar) => {
+      AppEnvVarSchema,
+      (object: ListAppEnvVar) => {
         return object.name;
       },
-      (): AppEnvVar => {
+      (): ListAppEnvVar => {
         return {
           name: '',
           value: '',
         };
       },
       getPaginationKey(
-        AppMetadataProperties.ENV_VARS,
+        AppEnvVarSchema.key,
         _appService.cfGuid,
         _appService.appGuid,
       ),
@@ -59,7 +56,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
         if (!variables || variables.length === 0) {
           return [];
         }
-        const env = variables[0].environment_json;
+        const env = variables[0].entity.environment_json;
         const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
         return rows;
       }),
@@ -85,7 +82,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
     this.cfGuid = _appService.cfGuid;
     this.appGuid = _appService.appGuid;
     const paginationKey = getPaginationKey(
-      AppMetadataProperties.ENV_VARS,
+      AppEnvVarSchema.key,
       _appService.cfGuid,
       _appService.appGuid,
     );
@@ -100,7 +97,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<AppEnvVar, Applicatio
     super.saveAdd();
   }
 
-  startEdit(row: AppEnvVar) {
+  startEdit(row: ListAppEnvVar) {
     super.startEdit({ ...row });
   }
 

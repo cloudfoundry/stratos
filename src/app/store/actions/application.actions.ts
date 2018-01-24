@@ -11,6 +11,9 @@ import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { NewApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
+import { AppMetadataTypes } from './app-metadata.actions';
+import { AppStatSchema } from '../types/app-metadata.types';
+import { getPaginationKey } from './pagination.actions';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -40,14 +43,18 @@ export const DELETE = '[Application] Delete';
 export const DELETE_SUCCESS = '[Application] Delete success';
 export const DELETE_FAILED = '[Application] Delete failed';
 
-const ApplicationEntiySchema = {
+export const DELETE_INSTANCE = '[Application Instance] Delete';
+export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
+export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
+
+const ApplicationEntitySchema = {
   entity: {
     stack: StackSchema,
     space: SpaceSchema
   }
 };
 
-export const ApplicationSchema = new schema.Entity('application', ApplicationEntiySchema, {
+export const ApplicationSchema = new schema.Entity('application', ApplicationEntitySchema, {
   idAttribute: getAPIResourceGuid
 });
 
@@ -87,8 +94,6 @@ export class GetApplication extends CFStartAction implements ICFAction {
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.options.params.set('inline-relations-depth', '2');
-    this.options.params.set('include-relations', 'space,organization,stack');
-
   }
   actions = [
     GET,
@@ -149,12 +154,14 @@ export interface UpdateApplication {
 }
 
 
-// declare function pick<T, K extends keyof T>(obj: T, ...keys: K[]): Pick<T, K>;
-
 export class UpdateExistingApplication extends CFStartAction implements ICFAction {
   static updateKey = 'Updating-Existing-Application';
 
-  constructor(public guid: string, public cnis: string, application: UpdateApplication) {
+  constructor(
+    public guid: string,
+    public cnis: string,
+    private application: UpdateApplication,
+    public updateEntities?: AppMetadataTypes[]) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
@@ -171,7 +178,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
   options: RequestOptions;
   updatingKey = UpdateExistingApplication.updateKey;
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
-    const keepFromOld = pick(oldEntities[ApplicationSchema.key][this.guid].entity, Object.keys(ApplicationEntiySchema.entity) as [string]);
+    const keepFromOld = pick(oldEntities[ApplicationSchema.key][this.guid].entity, Object.keys(ApplicationEntitySchema.entity) as [string]);
     newEntities[ApplicationSchema.key][this.guid].entity = { ...newEntities[ApplicationSchema.key][this.guid].entity, ...keepFromOld };
     return newEntities;
   }
@@ -196,5 +203,28 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
   ];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
+  options: RequestOptions;
+}
+
+export class DeleteApplicationInstance extends CFStartAction implements ICFAction {
+  guid: string;
+  constructor(public appGuid: string, private index: number, public cnis: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${appGuid}/instances/${index}`;
+    this.options.method = 'delete';
+    this.options.headers = new Headers();
+    const cnsiPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(cnsiPassthroughHeader, 'true');
+    this.guid = `${appGuid}-${index}`;
+  }
+  actions = [
+    DELETE_INSTANCE,
+    DELETE_INSTANCE_SUCCESS,
+    DELETE_INSTANCE_FAILED
+  ];
+  entity = [AppStatSchema];
+  entityKey = AppStatSchema.key;
+  removeEntityOnDelete = true;
   options: RequestOptions;
 }

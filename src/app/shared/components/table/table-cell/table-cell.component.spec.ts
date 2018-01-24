@@ -10,7 +10,10 @@ import { TableCellEntryPoints } from '../../../../test-framework/list-table-help
 import { EventTabActorIconPipe } from '../custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ValuesPipe } from '../../../pipes/values.pipe';
 import { CoreModule } from '../../../../core/core.module';
-
+import { UsageGaugeComponent } from '../../usage-gauge/usage-gauge.component';
+import { UtilsService } from '../../../../core/utils.service';
+import { SharedModule } from '../../../shared.module';
+import { PercentagePipe } from '../../../pipes/percentage.pipe';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -26,16 +29,18 @@ describe('TableCellComponent', () => {
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
+        UsageGaugeComponent,
+        PercentagePipe,
       ],
       imports: [
         CoreModule,
       ],
       providers: [
         ApplicationStateService,
+        UtilsService,
       ]
-
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {

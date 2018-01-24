@@ -1,0 +1,31 @@
+.add-route {
+
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+
+  mat-card-header {
+
+    display: block;
+    font-size: 22.5px;
+    font-weight: 700;
+  }
+
+  .add-route--form {
+
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+
+    .add-route--form-toggle {
+
+      margin-bottom: 24px;
+      margin-top: 24px;
+    }
+
+    .add-route--form-buttons {
+      display: flex;
+      flex-direction: row-reverse;
+    }
+  }
+}

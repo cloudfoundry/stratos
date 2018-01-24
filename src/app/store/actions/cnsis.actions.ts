@@ -5,7 +5,6 @@ import { Action, createSelector } from '@ngrx/store';
 
 import { AppState } from '../app-state';
 import { PaginatedAction } from '../types/pagination.types';
-import { EndpointsDataSource } from '../../shared/data-sources/endpoints-data-source';
 
 export const GET_CNSIS = '[CNSIS] Get all';
 export const GET_CNSIS_LOGIN = '[CNSIS] Get all at login';
@@ -21,6 +20,8 @@ export const DISCONNECT_CNSIS_SUCCESS = '[CNSIS] Disconnect succeed';
 export const DISCONNECT_CNSIS_FAILED = '[CNSIS] Disconnect failed';
 
 export const UNREGISTER_CNSIS = '[CNSIS] Unregister';
+export const UNREGISTER_CNSIS_SUCCESS = '[CNSIS] Unregister succeed';
+export const UNREGISTER_CNSIS_FAILED = '[CNSIS] Unregister failed';
 
 export const EndpointSchema = new schema.Entity('endpoint', {}, {
   idAttribute: 'guid'

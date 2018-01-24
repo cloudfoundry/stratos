@@ -1,7 +1,6 @@
-import { IStartRequestAction, RequestAction } from '../../types/request.types';
+import { IStartRequestAction, IRequestAction } from '../../types/request.types';
 import {
   getEntityRequestState,
-  getRequestTypeFromMethod,
   mergeUpdatingState,
   modifyRequestWithRequestType,
   setEntityRequestState,
@@ -11,7 +10,7 @@ export function startRequest(state, action: IStartRequestAction) {
   if (!action.apiAction.guid) {
     return state;
   }
-  const apiAction = action.apiAction as RequestAction;
+  const apiAction = action.apiAction as IRequestAction;
   let requestState = getEntityRequestState(state, apiAction);
 
   if (apiAction.updatingKey) {

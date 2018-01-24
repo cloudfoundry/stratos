@@ -72,8 +72,4 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
       .map(cnsis => Object.values(cnsis));
     return super.connect();
   }
-
-  destroy() {
-    super.destroy();
-  }
 }
