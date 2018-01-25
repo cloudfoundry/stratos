@@ -1,9 +1,21 @@
-import { Component, OnInit, Type, Input, ViewChild, ViewContainerRef, ComponentFactoryResolver, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
-import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
-import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
-import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
-import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
+import {
+  Component,
+  ComponentFactoryResolver,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges,
+  Type,
+  ViewChild,
+  ViewContainerRef,
+  SimpleChange,
+} from '@angular/core';
+
 import { IListDataSource } from '../../../data-sources/list-data-source-types';
+import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
+import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
+import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
+import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
 
 @Component({
   selector: 'app-card',
