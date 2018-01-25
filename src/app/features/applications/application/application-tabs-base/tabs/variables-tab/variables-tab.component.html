@@ -1,6 +1,6 @@
 <div class="variables-tab">
   <div class="variables-tab__env-table">
-    <app-list [text]="{ title: 'Environment Variables', filter: 'Filter Variables'}" [enableFilter]="true" [cardComponent]="cardComponent" [addForm]="addForm" [tableFixedRowHeight]="true">
+    <app-list [text]="{ title: 'Environment Variables', filter: 'Filter Variables'}" [enableFilter]="true" [cardComponent]="cardComponent" [addForm]="addForm" [tableFixedRowHeight]="false">
       <div app-table-add>
         <form #addForm="ngForm" novalidate>
           <mat-form-field floatPlaceholder="never">

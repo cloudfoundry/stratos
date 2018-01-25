@@ -24,8 +24,6 @@ export class RunningInstancesComponent implements OnInit {
   constructor(private store: Store<AppState>) { }
 
   ngOnInit() {
-    console.log(this.cfGuid);
-    console.log(this.appGuid);
     this.runningInstances$ =
       getPaginationPages(this.store, new GetAppStatsAction(this.appGuid, this.cfGuid), AppStatsSchema)
         .pipe(
