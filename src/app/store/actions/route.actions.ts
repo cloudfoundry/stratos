@@ -44,6 +44,7 @@ export class CreateRoute extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
+    this.cnis = cfGuid;
   }
   actions = [
     CREATE_ROUTE,
@@ -53,6 +54,7 @@ export class CreateRoute extends CFStartAction implements ICFAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
+  cnis: string;
 }
 
 export class DeleteRoute extends CFStartAction implements ICFAction {

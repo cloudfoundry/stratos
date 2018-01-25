@@ -53,10 +53,11 @@ export class CreateApplicationStep3Component implements OnInit {
       }
     ));
 
-    const routeDomainMetaData = this.form.controls.domain.value.metadata || {};
+    const routeDomainMetaData = this.form.controls.domain.value.metadata || null;
     const hostName = this.hostName;
     const shouldCreateRoute = routeDomainMetaData && hostName && this.form.valid;
-    const newRouteGuid = hostName + routeDomainMetaData.guid;
+    const domainGuid = routeDomainMetaData ? routeDomainMetaData.guid : '';
+    const newRouteGuid = hostName + domainGuid;
 
     if (shouldCreateRoute) {
       this.store.dispatch(new CreateRoute(
@@ -64,14 +65,14 @@ export class CreateApplicationStep3Component implements OnInit {
         cloudFoundry,
         {
           space_guid: space,
-          domain_guid: routeDomainMetaData.guid,
+          domain_guid: domainGuid,
           host: hostName
         }
       ));
     }
 
     this.message = `Creating application${shouldCreateRoute ? ' and route' : ''}`;
-
+    // FIXME This isn't manageable, we should split it into multiple observables.
     return Observable.combineLatest(
       this.store.select(selectRequestInfo(ApplicationSchema.key, newAppGuid)),
       // If we don't create a route, just fake it till we make it!
