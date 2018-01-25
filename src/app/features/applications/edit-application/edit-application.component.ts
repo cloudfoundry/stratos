@@ -10,14 +10,19 @@ import { selectNewAppState } from '../../../store/effects/create-app-effects';
 // import { UpdateApplication } from '../../../store/actions/application.actions';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Router } from '@angular/router';
-// import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
+import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { Http } from '@angular/http';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 
 @Component({
   selector: 'app-edit-application',
   templateUrl: './edit-application.component.html',
-  styleUrls: ['./edit-application.component.scss']
+  styleUrls: ['./edit-application.component.scss'],
+  providers: [
+    {provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher}
+  ]
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
 
@@ -25,28 +30,32 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
   checkingNameState$: Observable<string>;
 
+  uniqueNameValidator: AppNameUniqueDirective;
+
   constructor(
     private applicationService: ApplicationService,
     private entityService: EntityService,
     private store: Store<AppState>,
     private fb: FormBuilder,
+    private http: Http
   ) {
+    this.uniqueNameValidator = new AppNameUniqueDirective(this.applicationService, this.store, this.http);
     this.editAppForm = this.fb.group({
-      name: ['', [
-        Validators.required,
-        // new AppNameUniqueDirective(this.store),
-      ]],
+      name: ['',
+        [Validators.required],
+        [this.uniqueNameValidator],
+      ],
       instances: [0, [
         Validators.required,
-        Validators.minLength(0)
+        Validators.min(0)
       ]],
       disk_quota: [0, [
         Validators.required,
-        Validators.minLength(0)
+        Validators.min(0)
       ]],
       memory: [0, [
         Validators.required,
-        Validators.minLength(0)
+        Validators.min(0)
       ]],
       enable_ssh: false,
       production: false

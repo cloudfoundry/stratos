@@ -11,10 +11,11 @@
     <div>
       <form class="edit-app" [formGroup]="editAppForm" validate>
         <mat-form-field class="mat-form-field__spinner">
-          <input matInput placeholder="Application Name" formControlName="name">
-          <mat-error *ngIf="editAppForm.controls.name.invalid">Application name is required</mat-error>
+          <input matInput placeholder="Application Name" formControlName="name" autocomplete="off">
+          <mat-error *ngIf="editAppForm.controls.name.errors?.required">Application name is required</mat-error>
+          <mat-error *ngIf="editAppForm.controls.name.errors?.appNameTaken">Application name already taken</mat-error>
           <div class="inline-icon inline-icon__form">
-            <app-stateful-icon [state]="checkingNameState$ | async"></app-stateful-icon>
+            <app-stateful-icon [state]="uniqueNameValidator.state"></app-stateful-icon>
           </div>          
         </mat-form-field>
         <mat-form-field>
