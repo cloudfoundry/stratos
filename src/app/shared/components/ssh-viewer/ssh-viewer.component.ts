@@ -1,5 +1,7 @@
-import { Component, OnInit, OnDestroy, AfterViewChecked, Input, Output, ViewChild, ElementRef, ViewEncapsulation,
-  EventEmitter, HostListener } from '@angular/core';
+import {
+  Component, OnInit, OnDestroy, AfterViewChecked, Input, Output, ViewChild, ElementRef, ViewEncapsulation,
+  EventEmitter, HostListener
+} from '@angular/core';
 
 import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
@@ -16,7 +18,7 @@ import { ChangeDetectorRef } from '@angular/core';
   templateUrl: './ssh-viewer.component.html',
   styleUrls: ['./ssh-viewer.component.scss']
 })
-export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  {
+export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   @Input('errorMessage')
   errorMessage: string;
@@ -101,7 +103,7 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
     this.errorMessage = undefined;
     this.xterm.reset();
     this.msgSubscription = this.sshStream
-    .subscribe(
+      .subscribe(
       (data: string) => {
         for (const c of data.split(' ')) {
           this.xterm.write(String.fromCharCode(parseInt(c, 16)));
@@ -116,18 +118,18 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked  
           this.changeDetector.detectChanges();
         }
       }
-    );
+      );
   }
 
   termSendData(d) {
     if (!this.msgSubscription.closed) {
-      this.sshInput.next(JSON.stringify({key: d}));
+      this.sshInput.next(JSON.stringify({ key: d }));
     }
   }
 
   termResize(size) {
     if (!this.msgSubscription.closed && this.sshInput) {
-      this.sshInput.next(JSON.stringify({cols: size.cols, rows: size.rows}));
+      this.sshInput.next(JSON.stringify({ cols: size.cols, rows: size.rows }));
     }
   }
 }

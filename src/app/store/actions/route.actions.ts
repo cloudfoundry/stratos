@@ -44,6 +44,7 @@ export class CreateRoute extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
+    this.cnis = cfGuid;
   }
   actions = [
     CREATE_ROUTE,
@@ -53,6 +54,7 @@ export class CreateRoute extends CFStartAction implements ICFAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
+  cnis: string;
 }
 
 export class DeleteRoute extends CFStartAction implements ICFAction {
@@ -69,6 +71,7 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
     this.options.params = new URLSearchParams();
     this.options.params.append('recursive', recursive ? 'true' : 'false');
     this.options.params.append('async', async ? 'true' : 'false');
+    this.cnis = cfGuid;
   }
   actions = [
     RouteEvents.DELETE,
@@ -78,7 +81,7 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-
+  cnis: string;
 }
 
 
@@ -93,6 +96,7 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
     this.options.url = `routes/${routeGuid}/apps/${appGuid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
+    this.cnis = cfGuid;
   }
   actions = [
     RouteEvents.UNMAP_ROUTE,
@@ -102,7 +106,7 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-
+  cnis: string;
 }
 
 export class CheckRouteExists extends CFStartAction implements ICFAction {
@@ -115,6 +119,7 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
+    this.cnis = cfGuid;
   }
   actions = [
     CREATE_ROUTE,
@@ -124,6 +129,7 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
+  cnis: string;
 }
 
 export class GetRoutes extends CFStartAction implements PaginatedAction {
@@ -138,7 +144,7 @@ export class GetRoutes extends CFStartAction implements PaginatedAction {
     this.options.params = new URLSearchParams();
     this.options.params.append('', '');
     this.paginationKey = getPaginationKey(this.entityKey, cfGuid, guid);
-
+    this.cnis = cfGuid;
   }
   actions = [
     RouteEvents.GET_ALL,
@@ -154,4 +160,5 @@ export class GetRoutes extends CFStartAction implements PaginatedAction {
     'order-direction-field': 'host',
     'inline-relations-depth': '2'
   };
+  cnis: string;
 }
