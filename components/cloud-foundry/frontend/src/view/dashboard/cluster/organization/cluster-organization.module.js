@@ -33,9 +33,9 @@
 
       // Fetch details for every space
       _.forEach(_.get(that.cfOrganizationModel, that.spacesPath), function (space) {
-        var promiseForDetails = that.spaceModel.getSpaceDetails(that.clusterGuid, space).catch(function () {
+        var promiseForDetails = that.spaceModel.getSpaceDetails(that.clusterGuid, space).catch(function (err) {
           //Swallow errors for individual spaces
-          $log.error('Failed to fetch details for space - ' + space.entity.name);
+          $log.error('Failed to fetch details for space - ' + space.entity.name, err);
         });
         initPromises.push(promiseForDetails);
       });

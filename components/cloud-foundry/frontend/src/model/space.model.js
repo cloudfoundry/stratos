@@ -595,7 +595,7 @@
 
         // Set memory utilisation
         details.memUsed = 0;
-        _.forEach(space.entity.apps, function (app) {
+        _.forEach(vals.apps, function (app) {
           // Only count running apps, like the CF API would do
           if (app.entity.state === 'STARTED') {
             details.memUsed += parseInt(app.entity.memory, 10);
