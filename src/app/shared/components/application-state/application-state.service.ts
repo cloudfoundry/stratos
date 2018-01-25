@@ -135,21 +135,19 @@ export class ApplicationStateService {
  * @param {any} obj - object to traverse to replace 'actions' keys with maps
  */
   private mapActions(obj: any) {
-    for (const k in obj) {
-      if (obj.hasOwnProperty(k)) { continue; }
+    for (const k of Object.keys(obj)) {
       const v = obj[k];
-      if (v) {
-        this.mapActions(v);
-      } else if (k === 'actions') {
+      if (k === 'actions') {
         const map = {};
-        v.array.forEach(a => {
+        v.split(',').forEach(a => {
           map[a.trim()] = true;
         });
         obj.actions = map;
+      } else if (typeof(v) === 'object') {
+        this.mapActions(v);
       }
     }
   }
-
 
   constructor() {
     this.mapActions(this.stateMetadata);
