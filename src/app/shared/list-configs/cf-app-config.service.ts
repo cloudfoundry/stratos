@@ -14,7 +14,9 @@ import { UtilsService } from '../../core/utils.service';
 import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
 import { TableCellAppStatusComponent } from '../components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
 import { CfOrgSpaceDataService, CfOrgSpaceItem } from '../data-services/cf-org-space-service.service';
-import { TableCellAppInstancesComponent } from '../components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
+import {
+  TableCellAppInstancesComponent
+} from '../components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 @Injectable()
 export class CfAppConfigService implements IListConfig<APIResource> {

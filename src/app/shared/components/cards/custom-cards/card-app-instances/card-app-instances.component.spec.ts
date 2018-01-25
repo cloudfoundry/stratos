@@ -11,6 +11,7 @@ import { ApplicationServiceMock } from '../../../../../test-framework/applicatio
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
 
 describe('CardAppInstancesComponent', () => {
   let component: CardAppInstancesComponent;
@@ -24,6 +25,7 @@ describe('CardAppInstancesComponent', () => {
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
+        RunningInstancesComponent,
       ],
       imports: [
         CoreModule,
@@ -35,7 +37,7 @@ describe('CardAppInstancesComponent', () => {
         ApplicationStateService
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

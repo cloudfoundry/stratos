@@ -81,7 +81,9 @@ import { TableCellUsageComponent } from './components/table/custom-cells/table-c
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
-import { TableCellAppInstancesComponent } from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
+import {
+  TableCellAppInstancesComponent
+} from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 
 @NgModule({

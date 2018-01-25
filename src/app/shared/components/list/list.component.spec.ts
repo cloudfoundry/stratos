@@ -28,6 +28,7 @@ import { ListActions } from '../../data-sources/list-data-source-types';
 import { CardStatusComponent } from '../card-status/card-status.component';
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../pipes/percentage.pipe';
+import { RunningInstancesComponent } from '../running-instances/running-instances.component';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -55,6 +56,7 @@ describe('ListComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
+        RunningInstancesComponent,
       ],
       imports: [
         CoreModule,

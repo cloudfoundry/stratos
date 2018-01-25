@@ -1,6 +1,6 @@
 import { ApplicationStateComponent } from '../../../application-state/application-state.component';
 import {
-    ApplicationStateIconComponent,
+  ApplicationStateIconComponent,
 } from '../../../application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../../../application-state/application-state-icon/application-state-icon.pipe';
 import { CoreModule } from '../../../../../core/core.module';
@@ -13,6 +13,7 @@ import { CardAppComponent } from './card-app.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { APIResourceMetadata } from '../../../../../store/types/api.types';
 import { CardStatusComponent } from '../../../card-status/card-status.component';
+import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
 
 describe('CardAppComponent', () => {
   let component: CardAppComponent;
@@ -26,6 +27,7 @@ describe('CardAppComponent', () => {
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
+        RunningInstancesComponent,
       ],
       imports: [
         CoreModule,

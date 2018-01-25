@@ -1,6 +1,6 @@
 import { ApplicationStateComponent } from '../../../application-state/application-state.component';
 import {
-    ApplicationStateIconComponent,
+  ApplicationStateIconComponent,
 } from '../../../application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../../../application-state/application-state-icon/application-state-icon.pipe';
 import { TableCellComponent } from '../../../table/table-cell/table-cell.component';
@@ -15,6 +15,7 @@ import { appReducers } from '../../../../../store/reducers.module';
 import { TableCellEntryPoints } from '../../../../../test-framework/list-table-helper';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../../../pipes/percentage.pipe';
+import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
 
 
 describe('CardEventComponent', () => {
@@ -34,8 +35,9 @@ describe('CardEventComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
+        RunningInstancesComponent,
       ],
-      imports: [ CoreModule ]
+      imports: [CoreModule]
     })
       .compileComponents();
   }));
