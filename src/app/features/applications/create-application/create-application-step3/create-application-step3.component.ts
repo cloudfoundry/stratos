@@ -19,6 +19,7 @@ import { selectNewAppState } from '../../../../store/effects/create-app-effects'
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { OrganisationSchema } from '../../../../store/actions/organisation.action';
+import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 
 @Component({
   selector: 'app-create-application-step3',
@@ -42,6 +43,40 @@ export class CreateApplicationStep3Component implements OnInit {
   onNext: StepOnNextFunction = () => {
     const { cloudFoundryDetails, name } = this.newAppData;
 
+    const { cloudFoundry } = cloudFoundryDetails;
+    return Observable.combineLatest(
+      this.createApp(),
+      this.createRoute()
+    )
+      .filter(([app, route]) => {
+        return !app.creating && !route.creating;
+      })
+      .map(([app, route]) => {
+        if (app.error || route.error) {
+          throw new Error(app.error ? 'Could not create application' : 'Could not create route');
+        }
+        // Did we create a route?
+        const createdRoute = route !== 'NO_ROUTE';
+        if (createdRoute) {
+          // Then assign it to the application
+          this.store.dispatch(new AssociateRouteWithAppApplication(
+            app.response.result[0],
+            route.response.result[0],
+            cloudFoundry
+          ));
+        }
+        this.store.dispatch(new GetApplication(
+          app.response.result[0],
+          cloudFoundry
+        ));
+        this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'summary'] }));
+        return { success: true };
+      });
+  }
+
+  createApp(): Observable<RequestInfoState> {
+    const { cloudFoundryDetails, name } = this.newAppData;
+
     const { cloudFoundry, org, space } = cloudFoundryDetails;
     const newAppGuid = name + space;
 
@@ -52,14 +87,20 @@ export class CreateApplicationStep3Component implements OnInit {
         space_guid: space
       }
     ));
+    return this.store.select(selectRequestInfo(ApplicationSchema.key, newAppGuid));
+  }
 
+  createRoute(): Observable<RequestInfoState> | Observable<string> {
+    const { cloudFoundryDetails, name } = this.newAppData;
+
+    const { cloudFoundry, org, space } = cloudFoundryDetails;
     const routeDomainMetaData = this.form.controls.domain.value.metadata || null;
     const hostName = this.hostName;
-    const shouldCreateRoute = routeDomainMetaData && hostName && this.form.valid;
+    const shouldCreate = routeDomainMetaData && hostName && this.form.valid;
     const domainGuid = routeDomainMetaData ? routeDomainMetaData.guid : '';
     const newRouteGuid = hostName + domainGuid;
 
-    if (shouldCreateRoute) {
+    if (shouldCreate) {
       this.store.dispatch(new CreateRoute(
         newRouteGuid,
         cloudFoundry,
@@ -70,64 +111,7 @@ export class CreateApplicationStep3Component implements OnInit {
         }
       ));
     }
-
-    this.message = `Creating application${shouldCreateRoute ? ' and route' : ''}`;
-    // FIXME This isn't manageable, we should split it into multiple observables.
-    return Observable.combineLatest(
-      this.store.select(selectRequestInfo(ApplicationSchema.key, newAppGuid)),
-      // If we don't create a route, just fake it till we make it!
-      shouldCreateRoute ?
-        this.store.select(selectRequestInfo(RouteSchema.key, newRouteGuid)) :
-        Observable.of({ fake: true, creating: false, error: false })
-    )
-      .filter(([app, route]) => {
-        return !app.creating && !route.creating;
-      })
-      .map(([app, route]) => {
-        if (app.error || route.error) {
-          throw new Error('Nope!');
-        }
-        this.message = `Finished creating application${shouldCreateRoute ? ' and route' : ''}`;
-        let routeAssignAction;
-        if (shouldCreateRoute) {
-          routeAssignAction = new AssociateRouteWithAppApplication(
-            app.response.result[0],
-            route.response.result[0],
-            cloudFoundry
-          );
-          this.store.dispatch(routeAssignAction);
-        }
-        return { app, route, updatingKey: routeAssignAction ? routeAssignAction.updatingKey : null };
-      })
-      .delay(1)
-      .mergeMap(({ app, route, updatingKey }) => {
-        this.message = `Assigning creating application${shouldCreateRoute ? ' and route' : ''}`;
-        return (
-          shouldCreateRoute ?
-            this.store.select(selectUpdateInfo(
-              ApplicationSchema.key,
-              app.response.result[0],
-              updatingKey
-            ))
-              .filter((update) => {
-                return update.busy;
-              }) :
-            Observable.of({
-              error: false
-            })
-        ).withLatestFrom(Observable.of({ app, route, updatingKey }));
-      })
-      .map(([update, { app, route, updatingKey }]) => {
-        // We need to re-fetch the whole application to ensure we get all of the data.
-        if (!update.error) {
-          this.store.dispatch(new GetApplication(
-            app.response.result[0],
-            cloudFoundry
-          ));
-          this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'summary'] }));
-        }
-        return { success: !update };
-      });
+    return shouldCreate ? this.store.select(selectRequestInfo(RouteSchema.key, newRouteGuid)) : Observable.of('NO_ROUTE');
   }
 
   ngOnInit() {

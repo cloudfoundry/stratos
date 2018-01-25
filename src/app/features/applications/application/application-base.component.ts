@@ -65,37 +65,12 @@ const entityServiceFactory = (
 })
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
-  appSub$: Subscription;
-  entityServiceAppRefresh$: Subscription;
-  autoRefreshString = 'auto-refresh';
   constructor(
-    private applicationService: ApplicationService,
-    private store: Store<AppState>,
-    private entityService: EntityService
-
   ) { }
 
   ngOnInit(): void {
-
-    const { cfGuid, appGuid } = this.applicationService;
-    // Auto refresh
-    this.entityServiceAppRefresh$ = this.entityService.poll(10000, this.autoRefreshString).do(() => {
-      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-      this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-    }).subscribe();
-
-    this.appSub$ = this.applicationService.app$.subscribe(app => {
-      if (
-        app.entityRequestInfo.deleting.deleted ||
-        app.entityRequestInfo.error
-      ) {
-        this.store.dispatch(new RouterNav({ path: ['applications'] }));
-      }
-    });
   }
 
   ngOnDestroy(): void {
-    this.appSub$.unsubscribe();
-    this.entityServiceAppRefresh$.unsubscribe();
   }
 }
