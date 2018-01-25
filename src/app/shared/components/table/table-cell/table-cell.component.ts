@@ -1,6 +1,17 @@
 import { TableCellTCPRouteComponent } from '../custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 import { TableCellRouteComponent } from '../custom-cells/table-cell-route/table-cell-route.component';
-import { Component, ComponentFactoryResolver, Input, OnInit, Type, ViewContainerRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  Input,
+  OnInit,
+  Type,
+  ViewContainerRef,
+  ViewChild,
+  OnChanges,
+  SimpleChange,
+  SimpleChanges
+} from '@angular/core';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
@@ -41,7 +52,7 @@ import { TableCellUsageComponent } from '../custom-cells/table-cell-usage/table-
     TableCellTCPRouteComponent,
   ],
 })
-export class TableCellComponent<T> implements OnInit {
+export class TableCellComponent<T> implements OnInit, OnChanges {
 
   @ViewChild('target', { read: ViewContainerRef }) target;
 
@@ -52,6 +63,8 @@ export class TableCellComponent<T> implements OnInit {
   @Input('row') row: T;
   @Input('config') config: any;
 
+  private cellComponent: TableCellCustom<T>;
+
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
@@ -59,10 +72,21 @@ export class TableCellComponent<T> implements OnInit {
       const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
       // Add to target to ensure ngcontent is correct in new component
       const componentRef = this.target.createComponent(componentFactory);
-      const cellComponent = <TableCellCustom<T>>componentRef.instance;
-      cellComponent.row = this.row;
-      cellComponent.dataSource = this.dataSource;
-      cellComponent.config = this.config;
+      this.cellComponent = <TableCellCustom<T>>componentRef.instance;
+      this.cellComponent.row = this.row;
+      this.cellComponent.dataSource = this.dataSource;
+      this.cellComponent.config = this.config;
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    const row: SimpleChange = changes.row;
+    if (
+      row &&
+      this.cellComponent &&
+      row.previousValue !== row.currentValue
+    ) {
+      this.cellComponent.row = row.currentValue;
     }
   }
 
