@@ -16,6 +16,7 @@ import { TableCellEndpointStatusComponent } from '../custom-cells/table-cell-end
 import { IListDataSource } from '../../../data-sources/list-data-source-types';
 import { TableCellAppStatusComponent } from '../custom-cells/table-cell-app-status/table-cell-app-status.component';
 import { TableCellUsageComponent } from '../custom-cells/table-cell-usage/table-cell-usage.component';
+import { TableCellAppInstancesComponent } from '../custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 @Component({
   selector: 'app-table-cell',
@@ -34,6 +35,7 @@ import { TableCellUsageComponent } from '../custom-cells/table-cell-usage/table-
     TableCellEventDetailComponent,
     TableCellActionsComponent,
     TableCellAppNameComponent,
+    TableCellAppInstancesComponent,
     TableCellEndpointStatusComponent,
     TableCellAppStatusComponent,
     TableCellUsageComponent,

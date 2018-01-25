@@ -23,7 +23,6 @@ import { ListPagination, ListFilter, ListSort } from '../../../store/actions/lis
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TableCellActionsComponent } from '../table/table-cell-actions/table-cell-actions.component';
 import { CardAppComponent } from '../cards/custom-cards/card-app/card-app.component';
-import { TableCellAppNameComponent } from '../table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../test-framework/list-table-helper';
 import { ListActions } from '../../data-sources/list-data-source-types';
 import { CardStatusComponent } from '../card-status/card-status.component';
@@ -62,7 +61,7 @@ describe('ListComponent', () => {
         createBasicStoreModule(),
         NoopAnimationsModule
       ],
-   })
+    })
       .compileComponents();
   }));
 

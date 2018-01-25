@@ -29,7 +29,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @ViewChild('instanceField') instanceField: ElementRef;
 
-  constructor(private store: Store<AppState>, private applicationService: ApplicationService, private renderer: Renderer) { }
+  constructor(private store: Store<AppState>, public applicationService: ApplicationService, private renderer: Renderer) { }
 
   private currentCount: 0;
   private editCount: 0;
@@ -39,9 +39,6 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   private isEditing = false;
 
   private editValue: any;
-
-  // Observable on the running instances count for the application
-  private runningInstances$: Observable<number>;
 
   private isRunning = false;
 
@@ -53,14 +50,6 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
       }
     });
 
-    const { cfGuid, appGuid } = this.applicationService;
-    this.runningInstances$ = getPaginationPages(this.store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
-      .pipe(
-      map(appInstancesPages => {
-        const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
-        return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
-      })
-      );
   }
 
   ngOnDestroy(): void {
