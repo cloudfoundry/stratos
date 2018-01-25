@@ -1,6 +1,17 @@
 import { TableCellTCPRouteComponent } from '../custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 import { TableCellRouteComponent } from '../custom-cells/table-cell-route/table-cell-route.component';
-import { Component, ComponentFactoryResolver, Input, OnInit, Type, ViewContainerRef, ViewChild, OnChanges, SimpleChange, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  Input,
+  OnInit,
+  Type,
+  ViewContainerRef,
+  ViewChild,
+  OnChanges,
+  SimpleChange,
+  SimpleChanges
+} from '@angular/core';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
