@@ -1,9 +1,8 @@
-import { Component, OnInit, Type, Input, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { Component, OnInit, Type, Input, ViewChild, ViewContainerRef, ComponentFactoryResolver, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
 import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
 import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
 import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
 import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
-import { CardEndpointComponent } from '../custom-cards/card-endpoint/card-endpoint.component';
 import { IListDataSource } from '../../../data-sources/list-data-source-types';
 
 @Component({
@@ -14,16 +13,17 @@ import { IListDataSource } from '../../../data-sources/list-data-source-types';
     CardEventComponent,
     CardAppVariableComponent,
     CardAppComponent,
-    CardEndpointComponent,
   ]
 })
-export class CardComponent<T> implements OnInit {
+export class CardComponent<T> implements OnInit, OnChanges {
 
   @Input('component') component: Type<{}>;
   @Input('item') item: T;
   @Input('dataSource') dataSource = null as IListDataSource<T>;
 
   @ViewChild('target', { read: ViewContainerRef }) target;
+
+  cardComponent: TableCellCustom<T>;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
@@ -34,9 +34,20 @@ export class CardComponent<T> implements OnInit {
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
     // Add to target to ensure ngcontent is correct in new component
     const componentRef = this.target.createComponent(componentFactory);
-    const cardComponent = <TableCellCustom<T>>componentRef.instance;
-    cardComponent.row = this.item;
-    cardComponent.dataSource = this.dataSource;
+    this.cardComponent = <TableCellCustom<T>>componentRef.instance;
+    this.cardComponent.row = this.item;
+    this.cardComponent.dataSource = this.dataSource;
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    const row: SimpleChange = changes.row;
+    if (
+      row &&
+      this.cardComponent &&
+      row.previousValue !== row.currentValue
+    ) {
+      this.cardComponent.row = row.currentValue;
+    }
   }
 
 }

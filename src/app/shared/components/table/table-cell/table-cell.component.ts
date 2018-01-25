@@ -52,8 +52,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
   @Input('row') row: T;
   @Input('config') config: any;
 
-  private cellComponent: TableCellCustom<T>
-
+  private cellComponent: TableCellCustom<T>;
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
