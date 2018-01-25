@@ -45,6 +45,21 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
           orderKey: 'name',
           field: 'entity.name'
         },
+        {
+          type: 'sort',
+          orderKey: 'instances',
+          field: 'entity.instances'
+        },
+        {
+          type: 'sort',
+          orderKey: 'disk_quota',
+          field: 'entity.disk_quota'
+        },
+        {
+          type: 'sort',
+          orderKey: 'memory',
+          field: 'entity.memory'
+        },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           // Filter by cf/org/space
           const cfGuid = paginationState.clientPagination.filter.items['cf'];

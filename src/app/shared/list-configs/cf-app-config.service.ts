@@ -45,15 +45,15 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       columnId: 'status', headerCell: () => 'Status', cellFlex: '2', cellComponent: TableCellAppStatusComponent,
     },
     {
-      columnId: 'instances', headerCell: () => 'Instances', cellComponent: TableCellAppInstancesComponent, cellFlex: '1'
+      columnId: 'instances', headerCell: () => 'Instances', cellComponent: TableCellAppInstancesComponent, cellFlex: '1', sort: true
     },
     {
       columnId: 'disk', headerCell: () => 'Disk Quota',
-      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`, cellFlex: '1'
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`, cellFlex: '1', sort: true
     },
     {
       columnId: 'memory', headerCell: () => 'Memory',
-      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`, cellFlex: '1'
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`, cellFlex: '1', sort: true
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
