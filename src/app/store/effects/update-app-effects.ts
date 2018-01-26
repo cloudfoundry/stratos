@@ -1,4 +1,4 @@
-import { GetAppEnvVarsAction } from './../actions/app-metadata.actions';
+import { GetAppEnvVarsAction, GetAppStatsAction, AppMetadataTypes, GetAppSummaryAction } from './../actions/app-metadata.actions';
 import { WrapperRequestActionSuccess } from '../types/request.types';
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
@@ -10,8 +10,6 @@ import { environment } from '../../../environments/environment';
 import { AppState } from './../app-state';
 import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
 import { ApiActionTypes } from '../actions/request.actions';
-import { AppMetadataProperties } from '../actions/app-metadata.actions';
-import { AppMetadataType } from '../types/app-metadata.types';
 
 
 @Injectable()
@@ -26,10 +24,24 @@ export class UpdateAppEffects {
 
   @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperRequestActionSuccess>(UPDATE_SUCCESS)
     .mergeMap((action: WrapperRequestActionSuccess) => {
-
-      const actions = [
-        // This is done so the app metadata env vars environment_json matches that of the app
-        new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.cnis)];
+      const updateAction = action.apiAction as UpdateExistingApplication;
+      const updateEntities = updateAction.updateEntities || [AppMetadataTypes.ENV_VARS, AppMetadataTypes.STATS, AppMetadataTypes.SUMMARY];
+      const actions = [];
+      updateEntities.forEach(updateEntity => {
+        switch (updateEntity) {
+          case AppMetadataTypes.ENV_VARS:
+            // This is done so the app metadata env vars environment_json matches that of the app
+            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.cnis));
+            break;
+          case AppMetadataTypes.STATS:
+            // Should only fire this if app is running
+            actions.push(new GetAppStatsAction(action.apiAction.guid, action.apiAction.cnis));
+            break;
+          case AppMetadataTypes.SUMMARY:
+            actions.push(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.cnis));
+            break;
+        }
+      });
 
       return actions;
     });

@@ -1,9 +1,9 @@
-import { AppMetadataProperties } from '../actions/app-metadata.actions';
 import { systemStoreNames, SystemInfo } from './system.types';
 import { cnsisStoreNames, CNSISModel } from './cnsis.types';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { IRequestTypeState, IRequestEntityTypeState } from '../app-state';
 import { APIResource } from './api.types';
+import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from './app-metadata.types';
 export interface IRequestDataState extends IRequestTypeState {
   application: IRequestEntityTypeState<APIResource>;
   stack: IRequestEntityTypeState<APIResource>;
@@ -34,7 +34,7 @@ export const defaultCfEntitiesState = {
   route: {},
   event: {},
   endpoint: {},
-  [AppMetadataProperties.ENV_VARS]: {},
-  [AppMetadataProperties.INSTANCES]: {},
-  [AppMetadataProperties.SUMMARY]: {},
+  [AppEnvVarSchema.key]: {},
+  [AppStatSchema.key]: {},
+  [AppSummarySchema.key]: {},
 };

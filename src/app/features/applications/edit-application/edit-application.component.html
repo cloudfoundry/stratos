@@ -1,3 +1,35 @@
-<p>
-  edit-application works!
-</p>
+<app-page-header>
+  <h1>Edit Application: {{ (applicationService.application$ | async)?.app.entity.name }} </h1>
+  <div class="page-header-right">
+    <button mat-icon-button mat-button routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
+      <mat-icon>clear</mat-icon>
+    </button>
+  </div>
+</app-page-header>
+<app-steppers cancel="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
+  <app-step [title]="'Edit Application'" [valid]="editAppForm.valid && editAppForm.dirty" [onNext]="updateApp">
+    <div>
+      <form class="edit-app" [formGroup]="editAppForm" validate>
+        <mat-form-field class="mat-form-field__spinner">
+          <input matInput placeholder="Application Name" formControlName="name">
+          <mat-error *ngIf="editAppForm.controls.name.invalid">Application name is required</mat-error>
+          <div class="inline-icon inline-icon__form">
+            <app-stateful-icon [state]="checkingNameState$ | async"></app-stateful-icon>
+          </div>          
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Number of Instances" formControlName="instances" type="number">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Disk Quota (MB)" formControlName="disk_quota" type="number">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Memory Quota (MB)" formControlName="memory" type="number">
+        </mat-form-field>
+        <mat-slide-toggle class="edit-app__toggler" formControlName="enable_ssh">Enable SSH to Application Instances</mat-slide-toggle>
+        <mat-slide-toggle class="edit-app__toggler" formControlName="production">Production Application</mat-slide-toggle> 
+        <p *ngIf="error" class="edit-app__error">There was an error while updating the application.</p>
+      </form>
+    </div>
+  </app-step>
+</app-steppers>

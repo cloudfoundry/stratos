@@ -23,8 +23,8 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       _store,
       action,
       ApplicationSchema,
-      (object: APIResource) => {
-        return object.entity.metadata ? object.entity.metadata.guid : null;
+      (entity: APIResource) => {
+        return entity.metadata ? entity.metadata.guid : null;
       },
       () => ({} as APIResource),
       CfAppsDataSource.paginationKey,

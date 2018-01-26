@@ -16,6 +16,8 @@ import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../store/reducers.module';
 import { TableCellEntryPoints, CardEntryPoints } from '../../../../test-framework/list-table-helper';
 import { CardStatusComponent } from '../../card-status/card-status.component';
+import { UsageGaugeComponent } from '../../usage-gauge/usage-gauge.component';
+import { PercentagePipe } from '../../../pipes/percentage.pipe';
 
 describe('CardComponent', () => {
   let component: CardComponent<EntityInfo>;
@@ -33,7 +35,9 @@ describe('CardComponent', () => {
         ValuesPipe,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        UsageGaugeComponent,
+        PercentagePipe,
       ],
       imports: [
         CoreModule,

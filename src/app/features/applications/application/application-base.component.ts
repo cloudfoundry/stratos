@@ -9,13 +9,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { GetAppSummaryAction } from '../../../store/actions/app-metadata.actions';
+import { GetAppStatsAction, GetAppSummaryAction } from '../../../store/actions/app-metadata.actions';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 
 
 const applicationServiceFactory = (
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
-  entityService: EntityService,
+  entityServiceFactory: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsService
 ) => {
@@ -24,7 +25,7 @@ const applicationServiceFactory = (
     cfId,
     id,
     store,
-    entityService,
+    entityServiceFactory,
     appStateService,
     appEnvVarsService,
   );
@@ -53,7 +54,7 @@ const entityServiceFactory = (
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
-      deps: [Store, ActivatedRoute, EntityService, ApplicationStateService, ApplicationEnvVarsService]
+      deps: [Store, ActivatedRoute, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService]
     },
     {
       provide: EntityService,
@@ -64,36 +65,12 @@ const entityServiceFactory = (
 })
 export class ApplicationBaseComponent implements OnInit, OnDestroy {
 
-  appSub$: Subscription;
-  entityServiceAppRefresh$: Subscription;
-  autoRefreshString = 'auto-refresh';
   constructor(
-    private applicationService: ApplicationService,
-    private store: Store<AppState>,
-    private entityService: EntityService
-
   ) { }
 
   ngOnInit(): void {
-
-    const { cfGuid, appGuid } = this.applicationService;
-    // Auto refresh
-    this.entityServiceAppRefresh$ = this.entityService.poll(10000, this.autoRefreshString).do(() => {
-      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-    }).subscribe();
-
-    this.appSub$ = this.applicationService.app$.subscribe(app => {
-      if (
-        app.entityRequestInfo.deleting.deleted ||
-        app.entityRequestInfo.error
-      ) {
-        this.store.dispatch(new RouterNav({ path: ['applications'] }));
-      }
-    });
   }
 
   ngOnDestroy(): void {
-    this.appSub$.unsubscribe();
-    this.entityServiceAppRefresh$.unsubscribe();
   }
 }

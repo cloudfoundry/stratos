@@ -4,7 +4,6 @@ import { ActionHistoryState } from './reducers/action-history-reducer';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
-import { MetadataState } from './types/app-metadata.types';
 import { CNSISState } from './types/cnsis.types';
 import { CreateNewApplicationState } from './types/create-application.types';
 import { IRequestDataState, IRequestState } from './types/entity.types';
@@ -27,7 +26,6 @@ export interface AppState {
   request: IRequestState;
   requestData: IRequestDataState;
   dashboard: DashboardState;
-  appMetadata: MetadataState;
   createApplication: CreateNewApplicationState;
   deployApplication: DeployApplicationState;
   lists: ListsState;

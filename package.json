@@ -10,6 +10,7 @@
     "test": "ng test --code-coverage --sourcemaps=false -sr",
     "posttest": "codecov -f coverage/*.json",
     "lint": "ng lint --type-check --format stylish",
+    "sass-lint": "sass-lint -v",
     "e2e": "ng e2e --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "gate-check": "npm run lint && npm run test-debug -- --browsers ChromeHeadless --single-run",
     "climate": "codeclimate analyze $(git diff --name-only master)"
@@ -42,7 +43,9 @@
     "queueing-subject": "^0.1.1",
     "reselect": "^3.0.1",
     "rxjs": "^5.5.5",
+    "rxjs-spy": "^6.1.0",
     "rxjs-websockets": "^4.0.0",
+    "xterm": "^2.9.1",
     "zone.js": "^0.8.14"
   },
   "devDependencies": {
@@ -53,6 +56,7 @@
     "@types/jasminewd2": "~2.0.2",
     "@types/karma": "^1.7.1",
     "@types/node": "~6.0.60",
+    "@types/xterm": "^2.0.3",
     "codecov": "^3.0.0",
     "codelyzer": "~3.1.1",
     "jasmine-core": "~2.6.2",
@@ -66,6 +70,7 @@
     "karma-spec-reporter": "0.0.31",
     "ngrx-store-freeze": "^0.2.0",
     "protractor": "~5.1.2",
+    "sass-lint": "^1.12.1",
     "ts-node": "~3.2.0",
     "tslint": "~5.3.2",
     "typescript": "2.4.2"

@@ -7,8 +7,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Rx';
 import { UpdateApplication, DeleteApplication } from '../../../../store/actions/application.actions';
-import { GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppMetadataTypes, GetAppSummaryAction, GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
 
 @Component({
   selector: 'app-application-tabs-base',
@@ -32,6 +32,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   application;
   applicationActions$: Observable<string[]>;
 
+  appSub$: Subscription;
+  entityServiceAppRefresh$: Subscription;
+  autoRefreshString = 'auto-refresh';
+
   isEditSummary = false;
 
   summaryExpanded = true;
@@ -51,14 +55,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   tabLinks = [
     { link: 'summary', label: 'Summary' },
+    { link: 'instances', label: 'Instances' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
     { link: 'events', label: 'Events' },
-    { link: 'ssh', label: 'SSH' }
   ];
-
-  autoRefreshString = 'auto-refresh';
 
   startEdit() {
     this.isEditSummary = true;
@@ -71,32 +73,27 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   saveEdits() {
     this.endEdit();
-    this.applicationService.updateApplication(this.appEdits);
+    this.applicationService.updateApplication(this.appEdits, [AppMetadataTypes.SUMMARY]);
   }
 
   stopApplication() {
     this.endEdit();
     const stoppedString = 'STOPPED';
-    this.applicationService.updateApplication({
-      state: stoppedString
-    });
-
+    this.applicationService.updateApplication({ state: stoppedString }, []);
     this.pollEntityService('stopping', stoppedString).subscribe();
   }
 
   pollEntityService(state, stateString) {
     return this.entityService.poll(1000, state)
-    .takeWhile(({ resource, updatingSection }) => {
-      return resource.entity.state !== stateString;
-    });
+      .takeWhile(({ resource, updatingSection }) => {
+        return resource.entity.state !== stateString;
+      });
   }
 
   startApplication() {
     this.endEdit();
     const startedString = 'STARTED';
-    this.applicationService.updateApplication({
-      state: startedString
-    });
+    this.applicationService.updateApplication({ state: startedString }, []);
 
     this.pollEntityService('starting', startedString)
       .delay(1)
@@ -112,9 +109,24 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.setAppDefaults();
 
     const { cfGuid, appGuid } = this.applicationService;
+    // Auto refresh
+    this.entityServiceAppRefresh$ = this.entityService.poll(10000, this.autoRefreshString).do(() => {
+      this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+      this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+    }).subscribe();
+
+    this.appSub$ = this.applicationService.app$.subscribe(app => {
+      if (
+        app.entityRequestInfo.deleting.deleted ||
+        app.entityRequestInfo.error
+      ) {
+        this.store.dispatch(new RouterNav({ path: ['applications'] }));
+      }
+    });
+    this.setAppDefaults();
+
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
     const initialFetch$ = Observable.combineLatest(
@@ -157,5 +169,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sub.forEach(subscription => subscription.unsubscribe());
+    this.appSub$.unsubscribe();
+    this.entityServiceAppRefresh$.unsubscribe();
   }
 }

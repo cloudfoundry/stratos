@@ -1,3 +1,4 @@
+import { IRequestArray } from '../reducers/api-request-reducer/types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { Schema } from 'normalizr';
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
@@ -17,11 +18,28 @@ export interface RequestAction extends Action, SingleEntityAction {
   updatingKey?: string;
 }
 
+/**
+ * The entities in the response can live in a few different places. This will tell us where to look in the response to gather the entities
+ * @export
+ * @enum {number}
+ */
+export enum RequestEntityLocation {
+  RESOURCE, // The response is an object and the entities list is within a 'resource' param. Falls back to 'OBJECT' if missing.
+  ARRAY, // The response is an array which contains the entities
+  OBJECT, // The response is the entity
+}
+
 export interface IRequestAction extends RequestAction {
   entity?: Schema;
   entityKey: string;
+  cnis?: string;
+  updatingKey?: string;
   // For single entity requests
   guid?: string;
+  entityLocation?: RequestEntityLocation;
+  // For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
+  // like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
+  removeEntityOnDelete?: boolean;
 }
 
 export interface IStartRequestAction {

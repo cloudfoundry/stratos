@@ -2,12 +2,10 @@ import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
-import { SpaceSchema } from './space.actions';
-import { StackSchema } from './stack.action';
 import { PaginatedAction, QParam } from '../types/pagination.types';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { Action } from '@ngrx/store';
-import { AppEnvVar, CfAppEvnVarsDataSource } from '../../shared/data-sources/cf-app-variables-data-source';
+import { ListAppEnvVar, CfAppEvnVarsDataSource } from '../../shared/data-sources/cf-app-variables-data-source';
 import { UpdateApplication } from './application.actions';
 
 export const AppVariables = {
@@ -21,7 +19,7 @@ export class AppVariablesUpdate implements Action {
 
   constructor(public cfGuid: string, public appGuid: string) { }
 
-  protected createUpdateApplication(allEnvVars: AppEnvVar[], selectedItems: AppEnvVar[]): UpdateApplication {
+  protected createUpdateApplication(allEnvVars: ListAppEnvVar[], selectedItems: ListAppEnvVar[]): UpdateApplication {
     const updateApp: UpdateApplication = {
       environment_json: {},
     };
@@ -36,14 +34,14 @@ export class AppVariablesUpdate implements Action {
 }
 
 export class AppVariablesDelete extends AppVariablesUpdate {
-  constructor(cfGuid: string, appGuid: string, allEnvVars: AppEnvVar[], selectedItems: AppEnvVar[]) {
+  constructor(cfGuid: string, appGuid: string, allEnvVars: ListAppEnvVar[], selectedItems: ListAppEnvVar[]) {
     super(cfGuid, appGuid);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, selectedItems);
   }
 }
 
 export class AppVariablesEdit extends AppVariablesUpdate {
-  constructor(cfGuid: string, appGuid: string, allEnvVars: AppEnvVar[], editedEnvVar: AppEnvVar) {
+  constructor(cfGuid: string, appGuid: string, allEnvVars: ListAppEnvVar[], editedEnvVar: ListAppEnvVar) {
     super(cfGuid, appGuid);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, null);
     this.updatedApplication.environment_json[editedEnvVar.name] = editedEnvVar.value;
@@ -51,7 +49,7 @@ export class AppVariablesEdit extends AppVariablesUpdate {
 }
 
 export class AppVariablesAdd extends AppVariablesUpdate {
-  constructor(cfGuid: string, appGuid: string, allEnvVars: AppEnvVar[], addedEnvVar: AppEnvVar) {
+  constructor(cfGuid: string, appGuid: string, allEnvVars: ListAppEnvVar[], addedEnvVar: ListAppEnvVar) {
     super(cfGuid, appGuid);
     this.updatedApplication = this.createUpdateApplication(allEnvVars, null);
     this.updatedApplication.environment_json[addedEnvVar.name] = addedEnvVar.value;

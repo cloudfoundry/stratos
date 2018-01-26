@@ -21,7 +21,7 @@ export class ApplicationStateService {
  *   - N - must be >0
  *   - ? - matches when the value is not known
  *
- * To determine the incompelete state, we also need to look at the package_updated_at field
+ * To determine the incomplete state, we also need to look at the package_updated_at field
  *
  */
   private stateMetadata = {
@@ -58,7 +58,7 @@ export class ApplicationStateService {
       },
       '*NONE*': {
         label: 'Incomplete',
-        indicator: 'warning',
+        indicator: 'incomplete',
         actions: 'delete,cli'
       }
     },
@@ -132,24 +132,22 @@ export class ApplicationStateService {
 
   /**
  * @description Translates string list of action names into a map for easier checking if an action is supported
- * @param {any} obj - object to traverse to replace 'actions' kets with maps
+ * @param {any} obj - object to traverse to replace 'actions' keys with maps
  */
   private mapActions(obj: any) {
-    for (const k in obj) {
-      if (obj.hasOwnProperty(k)) { continue; }
+    for (const k of Object.keys(obj)) {
       const v = obj[k];
-      if (v) {
-        this.mapActions(v);
-      } else if (k === 'actions') {
+      if (k === 'actions') {
         const map = {};
-        v.array.forEach(a => {
+        v.split(',').forEach(a => {
           map[a.trim()] = true;
         });
         obj.actions = map;
+      } else if (typeof(v) === 'object') {
+        this.mapActions(v);
       }
     }
   }
-
 
   constructor() {
     this.mapActions(this.stateMetadata);
@@ -280,8 +278,8 @@ export class ApplicationStateService {
     if (value) {
       return value;
     } else if (appInstances) {
-      // Calculate form app instance metadata if available
-      return (Object.keys(appInstances).find(k => appInstances[k].state === instanceState) || []).length;
+      // Calculate from app instance metadata if available
+      return (Object.keys(appInstances).filter(k => appInstances[k].state === instanceState)).length;
     } else {
       // No value given and no instance data available, so return -1 to represent unknown
       return -1;

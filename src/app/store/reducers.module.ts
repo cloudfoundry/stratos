@@ -16,7 +16,6 @@ import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { ActionReducerMap } from '@ngrx/store/src/models';
-import { appMetaDataReducer } from './reducers/app-metadata-reducer.generator';
 
 
 export function logger(reducer) {
@@ -34,7 +33,6 @@ export const appReducers = {
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   deployApplication: deployAppReducer,
-  appMetadata: appMetaDataReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer
 } as ActionReducerMap<{}>;

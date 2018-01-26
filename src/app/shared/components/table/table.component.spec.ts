@@ -7,7 +7,6 @@ import { Observable } from 'rxjs/Rx';
 import { CoreModule } from '../../../core/core.module';
 import { TableCellEntryPoints } from '../../../test-framework/list-table-helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
-import { AppEnvVar } from '../../data-sources/cf-app-variables-data-source';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ValuesPipe } from '../../pipes/values.pipe';
 import { EventTabActorIconPipe } from './custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
@@ -22,11 +21,15 @@ import {
   ApplicationStateIconPipe
 } from '../../../shared/components/application-state/application-state-icon/application-state-icon.pipe';
 import { ListSort } from '../../../store/actions/list.actions';
+import { ListAppEnvVar } from '../../data-sources/cf-app-variables-data-source';
+import { PercentagePipe } from '../../pipes/percentage.pipe';
+import { UtilsService } from '../../../core/utils.service';
+import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 
 
 describe('TableComponent', () => {
-  let component: TableComponent<AppEnvVar>;
-  let fixture: ComponentFixture<TableComponent<AppEnvVar>>;
+  let component: TableComponent<ListAppEnvVar>;
+  let fixture: ComponentFixture<TableComponent<ListAppEnvVar>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -38,15 +41,20 @@ describe('TableComponent', () => {
         ValuesPipe,
         ApplicationStateComponent,
         ApplicationStateIconComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        UsageGaugeComponent,
+        PercentagePipe,
       ],
       imports: [
         CoreModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
+      ],
+      providers: [
+        UtilsService,
       ]
     })
-      .compileComponents();
+    .compileComponents();
   }));
 
   beforeEach(() => {
@@ -60,7 +68,7 @@ describe('TableComponent', () => {
     } as IListPaginationController<any>;
     component.dataSource = {
       connect() { return Observable.of([]); },
-    } as IListDataSource<any>;
+    } as IListDataSource<ListAppEnvVar>;
     fixture.detectChanges();
   });
 

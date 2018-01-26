@@ -3,7 +3,7 @@
     <mat-card-header class="app-table__header" [ngClass]="{'selected': (dataSource.isSelecting$ | async) }" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0">
     </mat-card-header>
     <mat-card-content class="app-table__content">
-      <mat-table class="app-table__inner" #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" [dataSource]="dataSource" matSort>
+      <mat-table class="app-table__inner" #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" [dataSource]="dataSource" [trackBy]="dataSource.trackBy" matSort>
         <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnId">
           <div *ngIf="column.sort">
             <mat-header-cell *matHeaderCellDef [ngClass]="column.class" mat-sort-header disableClear="column.sort.disableClear" [style.flex]="column.cellFlex">
@@ -16,7 +16,7 @@
             </mat-header-cell>
           </div>
           <mat-cell *matCellDef="let row" [ngClass]="column.class" [style.flex]="column.cellFlex">
-            <app-table-cell [component]="column.cellComponent" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
+            <app-table-cell [component]="column.cellComponent" [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
           </mat-cell>
         </ng-container>
         <mat-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" *matHeaderRowDef="columnNames"></mat-header-row>
