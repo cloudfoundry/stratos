@@ -1,10 +1,9 @@
-import { Action, Store } from '@ngrx/store';
+import { Action } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
-import { ListFilter, ListSort, ListView, ListPagination } from '../../store/actions/list.actions';
-import { IRequestEntityTypeState, AppState } from '../../store/app-state';
-import { ListState } from '../../store/reducers/list.reducer';
+import { ListView } from '../../store/actions/list.actions';
+import { IRequestEntityTypeState } from '../../store/app-state';
 import { PaginationEntityState } from './../../store/types/pagination.types';
 
 export interface AppEvent {
@@ -54,7 +53,7 @@ export interface IListDataSource<T> {
 
   selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
-  getRowUniqueId: getRowUniqueId;
+  getRowUniqueId: getRowUniqueId<T>;
   trackBy(index: number, item: T);
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
@@ -71,4 +70,4 @@ export interface IListDataSource<T> {
   destroy();
 }
 
-export type getRowUniqueId = (T) => string;
+export type getRowUniqueId<T> = (T) => string;
