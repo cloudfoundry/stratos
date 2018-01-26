@@ -3,6 +3,6 @@
   <p>{{ data.msg }}</p>
 </div>
 <div mat-dialog-actions class="confirm-dialog__actions">
-  <button mat-button (click)="onNoClick()">Cancel</button>
-  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>{{ data.confirm }}</button>
+  <button color="primary" mat-button (click)="onNoClick()">Cancel</button>
+  <button color="primary" mat-button [mat-dialog-close]="true" cdkFocusInitial>{{ data.confirm }}</button>
 </div>
