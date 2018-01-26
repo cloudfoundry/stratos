@@ -106,6 +106,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   deleteApplication() {
     this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
+    this.store.dispatch(new RouterNav({ path: ['applications'] }));
   }
 
   ngOnInit() {
