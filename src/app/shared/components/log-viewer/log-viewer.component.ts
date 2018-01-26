@@ -150,7 +150,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.listeningSub){
+    if (this.listeningSub) {
       this.listeningSub.unsubscribe();
     }
   }

@@ -2,7 +2,7 @@
 <form novalidate #sourceSelectionForm="ngForm">
   <div class="deploy-step2--form">
     <mat-form-field>
-      <mat-select placeholder="Source Type"  (change)="setSourceType($event.value)" required>
+      <mat-select placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
         <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
           {{ sourceType.name }}
         </mat-option>
@@ -46,7 +46,7 @@
             </mat-option>
           </mat-select>
 
-        <div *ngIf="commitInfo$| async as commitInfo" class="commit-info-group">
+        <div *ngIf="commitInfo$| async as commitInfo" class="project-info-group">
             <div >
               <img class="avatar-img"  height=51px width=51px src="{{commitInfo.author.avatar_url}}">
             </div>

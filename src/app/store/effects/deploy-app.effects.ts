@@ -49,7 +49,7 @@ export class DeployAppEffects {
   @Effect() checkAppExists$ =  this.actions$.ofType<CheckProjectExists>(CHECK_PROJECT_EXISTS)
   .withLatestFrom(this.store.select(selectDeployAppState))
   .filter(([action, state]) => {
-   return state.projectExists && state.projectExists.checking
+   return state.projectExists && state.projectExists.checking;
   })
   .switchMap(([action, state]: any) => {
       return this.http.get(`https://api.github.com/repos/${action.projectName}`)

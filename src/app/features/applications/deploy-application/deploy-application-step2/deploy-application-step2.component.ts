@@ -21,6 +21,7 @@ import {
   } from '../../../../store/selectors/deploy-application.selector';
 import { Subscription } from 'rxjs/Subscription';
 import { NgForm } from '@angular/forms';
+import { OnChanges } from '@angular/core/src/metadata/lifecycle_hooks';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -31,9 +32,11 @@ import { NgForm } from '@angular/forms';
 export class DeployApplicationStep2Component implements OnInit, OnDestroy, AfterContentInit {
   sourceTypes: SourceType[] = [{name: 'Git', id: 'git'}];
   sourceType$: Observable<SourceType>;
+  sourceType: SourceType;
   sourceSubType$: Observable<string>;
   gitSection: string;
   repositoryBranch: GitBranch = { name: null };
+  defaultBranch: string;
   repositoryBranches$: Observable<any>;
   fetchBranches$: Subscription;
   repository: any;
@@ -72,17 +75,25 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
     this.repositoryBranches$ = this.store.select(selectProjectBranches).pipe(
       filter(state => state && !state.fetching && state.success),
       map(state => state.data),
+      tap(p => {
+        this.repositoryBranch = p.find(branch => branch.name === this.defaultBranch);
+        this.fetchCommit(this.repositoryBranch);
+      })
     );
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
       filter(p => p && !!p.data),
       map(p => p.data),
       tap(p => {
-        this.repositoryBranch = p.default_branch;
+        this.defaultBranch = p.default_branch;
       })
     );
     this.commitInfo$ = this.store.select(selectNewProjectCommit).pipe(
       filter(p => !!p)
     );
+
+    // Auto select `git` type
+    this.sourceType = this.sourceTypes[0];
+    this.setSourceType(this.sourceType);
   }
 
   setSourceType = (event)  => this.store.dispatch(new SetAppSourceDetails({type: event}));

@@ -11,6 +11,7 @@
     display: flex;
     flex-flow: row;
     padding-top: 24px;
+    justify-content: center;
 
     .avatar-img {
 
@@ -22,6 +23,7 @@
 
       flex-flow: row;
       position: absolute;
+      margin-left: 24px;
 
       .centered {
 
@@ -31,9 +33,5 @@
         width: 40%;
       }
     }
-  }
-  .commit-info-group {
-
-    padding-top: 24px;
   }
 }
