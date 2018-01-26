@@ -26,7 +26,6 @@ describe('AppNameUniqueDirective', () => {
         MatDialogModule,
         createBasicStoreModule(),
         HttpModule,
-        Http,
       ]
     });
   });
