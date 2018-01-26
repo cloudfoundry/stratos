@@ -28,7 +28,7 @@ export class LoginSuccess implements Action {
 }
 
 export class LoginFailed implements Action {
-  constructor(public message: string) { }
+  constructor(public error: any) { }
   type = LOGIN_FAILED;
 }
 
