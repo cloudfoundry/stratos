@@ -33,6 +33,12 @@ import { ListPaginationController, IListPaginationController } from '../../data-
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
+export enum ListViewTypes {
+  CARD_ONLY = 'cardOnly',
+  TABLE_ONLY = 'tableOnly',
+  BOTH = 'both'
+}
+
 export interface IListConfig<T> {
   getGlobalActions: () => IGlobalListAction<T>[];
   getMultiActions: () => IMultiListAction<T>[];
@@ -62,7 +68,7 @@ export interface IListMultiFilterConfigItem {
 export class ListConfig implements IListConfig<any> {
   isLocal = false;
   pageSizeOptions = [9, 45, 90];
-  viewType: ListViewTypes = ListViewTypes.BOTH;
+  viewType = ListViewTypes.BOTH;
   getGlobalActions = () => null;
   getMultiActions = () => null;
   getSingleActions = () => null;
@@ -89,12 +95,6 @@ export interface IMultiListAction<T> extends IBaseListAction<T> {
 
 export interface IGlobalListAction<T> extends IBaseListAction<T> {
   action: () => void;
-}
-
-export enum ListViewTypes {
-  CARD_ONLY = 'cardOnly',
-  TABLE_ONLY = 'tableOnly',
-  BOTH = 'both'
 }
 
 @Component({
