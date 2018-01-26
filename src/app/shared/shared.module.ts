@@ -80,7 +80,8 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
-
+import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
+import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 
 @NgModule({
   imports: [
@@ -152,6 +153,7 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     TableCellTCPRouteComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    DialogConfirmComponent,
   ],
   exports: [
     FormsModule,
@@ -193,12 +195,17 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     TableCellUsageComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    DialogConfirmComponent,
   ],
-  entryComponents: [AppEventDetailDialogComponentComponent],
+  entryComponents: [
+    AppEventDetailDialogComponentComponent,
+    DialogConfirmComponent,
+  ],
   providers: [
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
+    ConfirmationDialogService,
   ]
 })
 export class SharedModule { }

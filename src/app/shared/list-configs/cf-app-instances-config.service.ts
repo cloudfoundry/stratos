@@ -24,6 +24,7 @@ import { TableCellActionsComponent } from '../components/table/table-cell-action
 import { DeleteApplicationInstance } from '../../store/actions/application.actions';
 import { AppStat } from '../../store/types/app-metadata.types';
 import { Router } from '@angular/router';
+import { ConfirmationDialogService, ConfirmationDialog } from '../components/confirmation-dialog.service';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -83,7 +84,14 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid));
+      const confirmation = new ConfirmationDialog(
+        'Terminate Instance?',
+        `Are you sure you want to terminate instance ${item.index}?`,
+        'Terminate');
+      this.confirmDialog.open(
+        confirmation,
+        () => this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid))
+      );
     },
     icon: 'delete',
     label: 'Terminate',
@@ -121,6 +129,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private appService: ApplicationService,
     private utilsService: UtilsService,
     private router: Router,
+    private confirmDialog: ConfirmationDialogService,
   ) {
     this.instancesSource = new CfAppInstancesDataSource(
       this.store,
