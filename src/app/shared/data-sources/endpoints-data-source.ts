@@ -1,37 +1,36 @@
 import { Store } from '@ngrx/store';
-import { filter } from 'rxjs/operator/filter';
 import { Observable } from 'rxjs/Rx';
 
-import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
+import { EndpointSchema, GetAllCNSIS } from '../../store/actions/cnsis.actions';
+import { SetListStateAction } from '../../store/actions/list.actions';
 import { AppState } from '../../store/app-state';
 import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
 import { CNSISModel } from '../../store/types/cnsis.types';
 import { ListDataSource } from './list-data-source';
-import { EndpointSchema, GetAllCNSIS } from '../../store/actions/cnsis.actions';
 
 
 export class EndpointsDataSource extends ListDataSource<CNSISModel> {
 
   isLoadingPage$: Observable<boolean>;
   data$: any;
+  store: Store<AppState>;
 
   constructor(
-    private _eStore: Store<AppState>,
+    store: Store<AppState>,
   ) {
-    super(
-      _eStore,
-      new GetAllCNSIS(),
-      EndpointSchema,
-      (object: CNSISModel) => {
-        return object.guid;
-      },
-      () => ({
+    const action = new GetAllCNSIS();
+    const paginationKey = GetAllCNSIS.storeKey;
+    super({
+      store,
+      action,
+      schema: EndpointSchema,
+      getRowUniqueId: object => object.guid,
+      getEmptyType: () => ({
         name: ''
       }),
-      GetAllCNSIS.storeKey,
-      null,
-      true, // isLocal
-      [
+      paginationKey,
+      isLocal: true,
+      entityFunctions: [
         {
           type: 'filter',
           field: 'name'
@@ -57,18 +56,18 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
           field: 'api_endpoint.Host'
         },
       ]
-    );
-
-    _eStore.dispatch(new SetListStateAction(
-      GetAllCNSIS.storeKey,
+    });
+    this.store = store;
+    store.dispatch(new SetListStateAction(
+      paginationKey,
       'table',
     ));
 
   }
 
   connect(): Observable<CNSISModel[]> {
-    this.isLoadingPage$ = this.isLoadingPage$ || this._eStore.select(cnsisStatusSelector).map((cnsis => cnsis.loading));
-    this.data$ = this.data$ || this._eStore.select(cnsisEntitiesSelector)
+    this.isLoadingPage$ = this.isLoadingPage$ || this.store.select(cnsisStatusSelector).map((cnsis => cnsis.loading));
+    this.data$ = this.data$ || this.store.select(cnsisEntitiesSelector)
       .map(cnsis => Object.values(cnsis));
     return super.connect();
   }
