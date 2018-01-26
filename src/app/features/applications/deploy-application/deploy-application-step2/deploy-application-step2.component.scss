@@ -1,5 +1,7 @@
-.deploy-step2--form{
-  .project-info-group{
+.deploy-step2--form {
+
+  .project-info-group {
+
     display: flex;
     flex-flow: row;
     padding-top: 24px;
@@ -9,17 +11,17 @@
       width: 51px;
     }
 
-    .description{
+    .description {
+
       flex-flow: row;
       position: absolute;
+
       .centered {
+
         display: block;
         margin-left: auto;
         margin-right: auto;
         width: 40%;
-        // a{
-          // text-align: center;
-        // }
       }
     }
   }

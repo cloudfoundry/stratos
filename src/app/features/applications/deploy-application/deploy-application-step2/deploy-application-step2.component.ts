@@ -64,9 +64,7 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
     this.sourceType$ = this.store.select(selectSourceType);
     this.sourceSubType$ = this.store.select(selectSourceSubType);
     this.fetchBranches$ = this.store.select(selectProjectExists).pipe(
-      filter(state => {
-        return state && !state.checking && state.exists;
-       } ),
+      filter(state => state && !state.checking && state.exists),
        tap( p => {
         this.store.dispatch(new FetchBranchesForProject(p.name));
        })
@@ -76,10 +74,8 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
       map(state => state.data),
     );
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
-      filter(p => !!p.data),
-      map(p => {
-        return p.data;
-      }),
+      filter(p => p && !!p.data),
+      map(p => p.data),
       tap(p => {
         this.repositoryBranch = p.default_branch;
       })

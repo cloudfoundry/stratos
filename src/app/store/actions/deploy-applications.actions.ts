@@ -17,6 +17,7 @@ export const FETCH_COMMIT = '[Deploy App] Fetch commit';
 export const SAVE_COMMIT = '[Deploy App] Save commit';
 export const FAILED_COMMITS_FETCH = '[Deploy App] Failed to fetch commits';
 export const SET_DEPLOY_CF_SETTINGS = '[Deploy App] Set CF Settings';
+export const DELETE_DEPLOY_APP_SECTION = '[Deploy App] Delete section';
 
 export class SetAppSourceDetails implements Action {
   constructor(public applicationSource: any) { }
@@ -97,5 +98,12 @@ export class StoreCFSettings implements Action {
   constructor(private cloudFoundryDetails: any) {
   }
   type = SET_DEPLOY_CF_SETTINGS;
+}
+
+
+export class DeleteDeployAppSection implements Action {
+  constructor() {
+  }
+  type = DELETE_DEPLOY_APP_SECTION;
 }
 

@@ -31,6 +31,8 @@ import {
    FetchCommit,
    FETCH_COMMIT,
    SaveCommitForBranch,
+   DeleteDeployAppSection,
+   DELETE_DEPLOY_APP_SECTION,
 } from '../../store/actions/deploy-applications.actions';
 import { Commit } from '../types/deploy-application.types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
@@ -50,13 +52,7 @@ export class DeployAppEffects {
    return state.projectExists && state.projectExists.checking
   })
   .switchMap(([action, state]: any) => {
-      return this.http.get(`https://api.github.com/repos/${action.projectName}`,
-      {params: {
-        // TODO
-        'client_id': 'a697171fed977a925134',
-        'client_secret': 'cc32fca90dca9b53fb1c9d8a469dcb146a263d8e'
-      }
-      })
+      return this.http.get(`https://api.github.com/repos/${action.projectName}`)
         .mergeMap(res => {
           return [new ProjectExists(action.projectName, res), new DeleteCachedBranches()];
         })
@@ -66,41 +62,23 @@ export class DeployAppEffects {
     });
 
   @Effect() fetchBranches$ =  this.actions$.ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT)
-  .take(1)
   .switchMap((action: any) => {
-      return this.http.get(`https://api.github.com/repos/${action.projectName}/branches`,
-      {params: {
-        // TODO
-        'client_id': 'a697171fed977a925134',
-        'client_secret': 'cc32fca90dca9b53fb1c9d8a469dcb146a263d8e'
-      }
-      })
+      return this.http.get(`https://api.github.com/repos/${action.projectName}/branches`)
         .map(res => {
           return new SaveBranchesForProject(res);
         })
         .catch(err => {
-          debugger
           return Observable.of(new FetchBranchesFailed());
         });
     });
 
-    @Effect() fetchCommit$ =  this.actions$.ofType<FetchCommit>(FETCH_COMMIT)
-  .take(1)
+  @Effect() fetchCommit$ =  this.actions$.ofType<FetchCommit>(FETCH_COMMIT)
   .switchMap((action: any) => {
-      return this.http.get(action.commit.url,
-      {
-        params: {
-          // TODO
-        'client_id': 'a697171fed977a925134',
-        'client_secret': 'cc32fca90dca9b53fb1c9d8a469dcb146a263d8e'
-        }
-      }
-    )
+      return this.http.get(action.commit.url)
     .map(res => {
           return new SaveCommitForBranch(res);
         })
         .catch(err => {
-          debugger
           return Observable.of(new CommitFetchFailed());
         });
     });

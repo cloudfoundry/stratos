@@ -9,9 +9,10 @@ export const getApplicationSource = (state: DeployApplicationState) => state.app
 export const getBranches = (state: DeployApplicationSource) => state && state.branches;
 export const getSourceType = (state: DeployApplicationSource ) => state && state.type;
 export const getSourceSubType = (state: SourceType ) => state && state.subType;
-export const getApplicationProjectName = (state: DeployApplicationSource) => state.projectName;
-export const getProjectExists = (state: DeployApplicationState) => state.projectExists;
-export const getCommit = (state: DeployApplicationSource) => state.commit;
+export const getApplicationProjectName = (state: DeployApplicationSource) => state && state.projectName;
+export const getProjectExists = (state: DeployApplicationState) => state && state.projectExists;
+export const getCommit = (state: DeployApplicationSource) => state && state.commit;
+
 export const selectSourceType = compose(
   getSourceType,
   getApplicationSource,

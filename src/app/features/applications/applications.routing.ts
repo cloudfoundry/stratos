@@ -16,7 +16,7 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DeployApplicationComponent } from './deploy-application/deploy-application.component';
-
+import { DeployApplicationModule } from './deploy-application/deploy-application.module';
 const appplicationsRoutes: Routes = [
   {
     path: 'new',

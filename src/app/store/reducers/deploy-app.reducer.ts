@@ -1,5 +1,4 @@
 import {
-  ,
   SET_APP_SOURCE_SUB_TYPE,
   PROJECT_EXISTS,
   PROJECT_DOESNT_EXIST,
@@ -12,6 +11,7 @@ import {
   SAVE_COMMIT,
   SET_DEPLOY_CF_SETTINGS,
   SET_APP_SOURCE_DETAILS,
+  DELETE_DEPLOY_APP_SECTION,
 } from '../actions/deploy-applications.actions';
 import { DeployApplicationState } from '../types/deploy-application.types';
 
@@ -98,6 +98,8 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         ...state, applicationSource:
         { ...state.applicationSource, commit: action.commitData}
       };
+    case DELETE_DEPLOY_APP_SECTION:
+      return defaultState;
     default:
       return state;
   }

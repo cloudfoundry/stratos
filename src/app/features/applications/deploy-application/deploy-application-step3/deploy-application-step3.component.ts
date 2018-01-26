@@ -2,18 +2,19 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { selectNewAppDetails } from '../../../../store/selectors/create-application.selectors';
-import { tap, filter, map, mergeMap, combineLatest, switchMap } from 'rxjs/operators';
+import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError } from 'rxjs/operators';
 import { getEntityById, selectEntity } from '../../../../store/selectors/api.selectors';
 import { OrganizationSchema } from '../../../../store/actions/organization.actions';
+import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import { SpaceSchema } from '../../../../store/actions/space.actions';
 import websocketConnect from 'rxjs-websockets';
 import { QueueingSubject } from 'queueing-subject/lib';
 import { Subscription } from 'rxjs/Subscription';
 import { selectDeployAppState } from '../../../../store/selectors/deploy-application.selector';
-import { DeployApplicationSource, socketEventTypes } from '../../../../store/types/deploy-application.types';
+import { DeployApplicationSource, SocketEventTypes } from '../../../../store/types/deploy-application.types';
 import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
 import * as moment from 'moment';
+import { MatSnackBar } from '@angular/material';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -23,7 +24,7 @@ import * as moment from 'moment';
 export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   connect$: Subscription;
-  streamTitle$: Observable<string>;
+  streamTitle: string;
   messages: Observable<string>;
 
   ngOnDestroy(): void {
@@ -31,7 +32,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   constructor(
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private snackBar: MatSnackBar
   ) { }
 
   ngOnInit() {
@@ -54,37 +56,31 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         );
 
         const inputStream =  new QueueingSubject<string>();
-        console.log(streamUrl);
         this.messages = websocketConnect(streamUrl, inputStream)
-        .messages
-        .share()
-        .map(message => {
-          const json = JSON.parse(message);
-          return json;
-        })
-        .filter(l => !!l)
-        .filter(l => l !== '')
-        .map(log => {
-          let { message } = log;
-          const { searchIndex } = log;
-          if (searchIndex) {
-            const colorStyles = 'color: black; background-color: yellow;';
-            const highlight = `<span style="${colorStyles}">${message.slice(searchIndex[0], searchIndex[1])}</span>`;
-            message = message.substring(0, searchIndex[0]) + highlight + message.substring(searchIndex[1]);
-          }
-          return {
-            message,
-            log
-          };
-        })
-        .map(({ log, message }) => {
-          const timesString = moment(Math.round(log.timestamp / 1000000)).format('HH:mm:ss.SSS');
-          return (
-            `[${timesString}]: ${message}`
-          );
-        });
-
-
+        .messages.pipe(
+          catchError(e =>  {
+            return [];
+          }),
+          share(),
+          map(message => {
+            const json = JSON.parse(message);
+            return json;
+          }),
+          filter(l => !!l),
+          tap((log) => {
+            // Deal with control messages
+            if (log.type !== SocketEventTypes.DATA) {
+              this.updateTitle(log);
+            }
+          }),
+          filter((log ) => log.type === SocketEventTypes.DATA),
+          map((log) => {
+            const timesString = moment(Math.round(log.timestamp / 1000000)).format('HH:mm:ss.SSS');
+            return (
+              `[${timesString}]: ${log.message}`
+            );
+          })
+        );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
 
       })
@@ -103,7 +99,6 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     return '';
   }
 
-
   sendGitHubSourceMetadata = (appSource: DeployApplicationSource) =>  {
     const github = {
       project: appSource.projectName,
@@ -114,7 +109,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     const msg = {
       message: JSON.stringify(github),
       timestamp: Math.round((new Date()).getTime() / 1000),
-      type: socketEventTypes.SOURCE_GITHUB
+      type: SocketEventTypes.SOURCE_GITHUB
     };
     return JSON.stringify(msg);
   }
@@ -129,9 +124,74 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     const msg = {
       message: JSON.stringify(giturl),
       timestamp: Math.round((new Date()).getTime() / 1000),
-      type: socketEventTypes.SOURCE_GITURL
+      type: SocketEventTypes.SOURCE_GITURL
     };
     return JSON.stringify(msg);
   }
+
+  updateTitle = (log) => {
+
+    switch (log.type) {
+      case SocketEventTypes.MANIFEST:
+        this.streamTitle = 'Starting deployment...';
+      break;
+      case SocketEventTypes.EVENT_PUSH_STARTED :
+          this.streamTitle = 'Deploying...';
+          break;
+      case SocketEventTypes.EVENT_PUSH_COMPLETED :
+          this.streamTitle = 'Deployed';
+          break;
+      case SocketEventTypes.CLOSE_SUCCESS :
+      this.close(log, null, null, true);
+          break;
+      case SocketEventTypes.CLOSE_INVALID_MANIFEST:
+        this.close(log, 'Deploy Failed - Invalid manifest!',
+        'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!', true);
+        break;
+      case SocketEventTypes.CLOSE_NO_MANIFEST:
+      this.close(log, 'Deploy Failed - No manifest present!',
+      'Failed to deploy app! Please make sure that a valid manifest.yaml is present!', true);
+        break;
+      case SocketEventTypes.CLOSE_FAILED_CLONE:
+      this.close(log,  'Deploy Failed - Failed to clone repository!',
+      'Failed to deploy app! Please make sure the repository is public!', true);
+        break;
+      case SocketEventTypes.CLOSE_FAILED_NO_BRANCH:
+      this.close(log, 'Deploy Failed - Failed to located branch!',
+      'Failed to deploy app! Please make sure that branch exists!', true);
+        break;
+      case SocketEventTypes.CLOSE_FAILURE:
+      case SocketEventTypes.CLOSE_PUSH_ERROR:
+      case SocketEventTypes.CLOSE_NO_SESSION:
+      case SocketEventTypes.CLOSE_NO_CNSI:
+      case SocketEventTypes.CLOSE_NO_CNSI_USERTOKEN:
+      this.close(log, 'Deploy Failed!',
+      'Failed to deploy app!', true);
+        break;
+      case SocketEventTypes.SOURCE_REQUIRED:
+      case SocketEventTypes.EVENT_CLONED:
+      case SocketEventTypes.EVENT_FETCHED_MANIFEST:
+      case SocketEventTypes.MANIFEST:
+        break;
+      default:
+        // noop
+      }
+  }
+
+  close(log, title, error, deleteAppSection) {
+    if (deleteAppSection) {
+      this.store.dispatch(new DeleteDeployAppSection());
+    }
+
+    if (title) {
+      this.streamTitle = title;
+    }
+
+    if (error) {
+      error = `${error}\nBackend eror: ${log.message}`;
+      this.snackBar.open(error, 'Dismiss');
+    }
+ }
+
 
 }
