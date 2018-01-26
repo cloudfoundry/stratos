@@ -1,5 +1,4 @@
 import { CardComponent } from '../../cards/card/card.component';
-import { CardEventComponent } from '../../cards/custom-cards/card-app-event/card-app-event.component';
 import { IListAction, ListConfig } from '../../list/list.component';
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191/ */
 import { Component, OnInit } from '@angular/core';

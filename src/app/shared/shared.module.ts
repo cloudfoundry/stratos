@@ -38,8 +38,6 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { CardsComponent } from './components/cards/cards.component';
 import { CardComponent } from './components/cards/card/card.component';
-import { CardAppVariableComponent } from './components/cards/custom-cards/card-app-variable/card-app-variable.component';
-import { CardEventComponent } from './components/cards/custom-cards/card-app-event/card-app-event.component';
 import {
   AppEventDetailDialogComponentComponent
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
@@ -121,8 +119,6 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     ListComponent,
     CardsComponent,
     CardComponent,
-    CardEventComponent,
-    CardAppVariableComponent,
     AppEventDetailDialogComponentComponent,
     TableCellActionsComponent,
     CardAppComponent,

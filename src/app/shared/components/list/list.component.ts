@@ -42,6 +42,7 @@ export interface IListConfig<T> {
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   isLocal?: boolean;
   pageSizeOptions: Number[];
+  viewType: ListViewTypes;
 }
 
 export interface IListMultiFilterConfig {
@@ -61,6 +62,7 @@ export interface IListMultiFilterConfigItem {
 export class ListConfig implements IListConfig<any> {
   isLocal = false;
   pageSizeOptions = [9, 45, 90];
+  viewType: ListViewTypes = ListViewTypes.BOTH;
   getGlobalActions = () => null;
   getMultiActions = () => null;
   getSingleActions = () => null;
@@ -89,11 +91,11 @@ export interface IGlobalListAction<T> extends IBaseListAction<T> {
   action: () => void;
 }
 
-const MODES = {
-  CARD_ONLY: 'cardOnly',
-  TABLE_ONLY: 'tableOnly',
-  DEFAULT: 'default'
-};
+export enum ListViewTypes {
+  CARD_ONLY = 'cardOnly',
+  TABLE_ONLY = 'tableOnly',
+  BOTH = 'both'
+}
 
 @Component({
   selector: 'app-list',
@@ -109,7 +111,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @Input('tableFixedRowHeight') tableFixedRowHeight = false;
   @Input('cardComponent') cardComponent: Type<{}>;
   @Input('addForm') addForm: NgForm;
-  @Input('listMode') listMode: string = MODES.DEFAULT;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
@@ -212,12 +213,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       sortStoreToWidget,
       multiFilterWidgetObservables
     ).subscribe();
-
-    if (this.listMode === MODES.CARD_ONLY) {
-      this.updateListView('cards');
-    } else if (this.listMode === MODES.TABLE_ONLY) {
-      this.updateListView('table');
-    }
 
   }
 

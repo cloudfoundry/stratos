@@ -7,10 +7,6 @@ import {
 import {
   TableCellAppStatusComponent,
 } from '../shared/components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
-import { CardEventComponent } from '../shared/components/cards/custom-cards/card-app-event/card-app-event.component';
-import {
-  CardAppVariableComponent,
-} from '../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
 import { CardAppComponent } from '../shared/components/cards/custom-cards/card-app/card-app.component';
 import { TableCellSelectComponent } from '../shared/components/table/table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../shared/components/table/table-header-select/table-header-select.component';
@@ -59,7 +55,5 @@ export const TableCellEntryPoints = [
 ];
 
 export const CardEntryPoints = [
-  CardEventComponent,
-  CardAppVariableComponent,
   CardAppComponent,
 ];

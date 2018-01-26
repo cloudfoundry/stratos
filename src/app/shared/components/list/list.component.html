@@ -37,7 +37,7 @@
                 <mat-icon>add</mat-icon>
               </button>
             </div>
-              <div *ngIf="listMode === 'default'">
+            <div *ngIf="listConfigService.viewType === 'both'">
               <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
                 <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'">
                   <mat-icon>grid_on</mat-icon>
@@ -51,9 +51,9 @@
         </div>
         <div class="listComponent__header__bottom">
           <div class="listComponent__header__left spacer">
-            <div class="multi-filters" [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isLoadingPage$ | async)">
+            <div class="multi-filters" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs">
-                <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
+                <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
                   <mat-option>All</mat-option>
                   <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
                     {{selectItem.label}}

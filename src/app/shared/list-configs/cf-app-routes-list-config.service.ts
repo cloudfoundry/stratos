@@ -25,6 +25,7 @@ import {
   IListAction,
   IListConfig,
   IMultiListAction,
+  ListViewTypes,
 } from '../components/list/list.component';
 import { TableCellActionsComponent } from '../components/table/table-cell-actions/table-cell-actions.component';
 
@@ -113,6 +114,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
   ];
 
   pageSizeOptions = [9, 45, 90];
+  viewType = ListViewTypes.TABLE_ONLY;
 
   dispatchDeleteAction = route => this.store.dispatch(
     new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
