@@ -166,8 +166,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
 
     const paginationWidgetToStorePageSize = this.paginator.page
-      // Ignore the initial case where it skips distinctUntilChanged (we should have gotten the widget values from the store to start with)
-      .skip(1)
       .map(page => page.pageSize)
       .distinctUntilChanged()
       .do(pageSize => this.paginationController.pageSize(pageSize));
