@@ -2,7 +2,7 @@
 
   .deploy-step2--form-radio {
 
-    display:flex;
+    display: flex;
     justify-content: space-around;
   }
 
@@ -10,8 +10,8 @@
 
     display: flex;
     flex-flow: row;
-    padding-top: 24px;
     justify-content: center;
+    padding-top: 24px;
 
     .avatar-img {
 
@@ -22,8 +22,8 @@
     .description {
 
       flex-flow: row;
-      position: absolute;
       margin-left: 24px;
+      position: absolute;
 
       .centered {
 
