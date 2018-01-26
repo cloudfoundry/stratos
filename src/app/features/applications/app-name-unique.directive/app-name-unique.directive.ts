@@ -1,4 +1,4 @@
-import { Directive, forwardRef } from '@angular/core';
+import { Directive, forwardRef, Input, OnInit } from '@angular/core';
 import { AbstractControl, NG_ASYNC_VALIDATORS, Validator, AsyncValidatorFn, AsyncValidator } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
@@ -6,7 +6,6 @@ import { Observable } from 'rxjs/Rx';
 import { IsNewAppNameFree } from '../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../store/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
-import { Subject } from 'rxjs/Subject';
 import { Headers, Http, Request, RequestOptions, QueryEncoder, URLSearchParams } from '@angular/http';
 import { ApplicationService } from '../application.service';
 import { selectEntity } from '../../../store/selectors/api.selectors';
@@ -19,35 +18,62 @@ const APP_UNIQUE_NAME_PROVIDER = {
 
 // See: https://medium.com/@kahlil/asynchronous-validation-with-angular-reactive-forms-1a392971c062
 
+export class AppNameUniqueChecking {
+  busy: boolean;
+  taken: boolean;
+  status: string;
+
+  set(busy : boolean, taken? : boolean) {
+    this.busy = busy;
+    this.taken = taken;
+
+    if (this.busy) {
+      this.status = 'busy';
+    } else {
+      this.status = this.taken ? 'error' : 'done';
+    }
+  }
+}
+
 @Directive({
   selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique][formControl],[appApplicationNameUnique][ngModel]',
   providers: [APP_UNIQUE_NAME_PROVIDER]
 })
-export class AppNameUniqueDirective implements AsyncValidator {
+export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
-  public state = 'done';
+  @Input('appApplicationNameUnique') appApplicationNameUnique: AppNameUniqueChecking;
 
   constructor(
-    private applicationService: ApplicationService,
     private store: Store<AppState>,
-    private http: Http
-  ) {}
+    private http: Http,
+  ) {
+    if (!this.appApplicationNameUnique) {
+      this.appApplicationNameUnique = new AppNameUniqueChecking();
+    }
+  }
+
+  ngOnInit(): void {
+    this.appApplicationNameUnique.set(false, false);
+  }
 
   public validate(control: AbstractControl): Observable<{ appNameTaken: boolean } | null> {
-    const { cfGuid, appGuid } = this.applicationService;
     if (!control.dirty) {
       return Observable.of(null);
     }
-    this.state = 'busy';
+    this.appApplicationNameUnique.set(true);
     return Observable.timer(500).take(1)
-    .combineLatest(this.store.select(selectEntity('application', appGuid)).take(1))
-    .switchMap((v) => {
-      const spaceGuid = v[1].entity.space_guid;
-      const currentName = v[1].entity.name;
+    //.combineLatest(this.store.select(selectNewAppState)this.store.select(selectEntity('application', appGuid)).take(1))
+    .combineLatest(this.store.select(selectNewAppState).take(1))
+    .switchMap((v) =>
+    {
+      const cfGuid = v[1].cloudFoundryDetails.cloudFoundry;
+      const spaceGuid = v[1].cloudFoundryDetails.space;
+      const currentName = v[1].name;
       return this.checkAppName(cfGuid, spaceGuid, currentName, control.value);
+      //return Observable.of(null);
     })
     .map(v => {
-      this.state = v ? 'done' : 'error';
+      this.appApplicationNameUnique.set(false, !v);
       return v ? null : {appNameTaken: true};
     });
   }

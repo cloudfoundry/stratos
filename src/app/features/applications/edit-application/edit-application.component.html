@@ -15,7 +15,7 @@
           <mat-error *ngIf="editAppForm.controls.name.errors?.required">Application name is required</mat-error>
           <mat-error *ngIf="editAppForm.controls.name.errors?.appNameTaken">Application name already taken</mat-error>
           <div class="inline-icon inline-icon__form">
-            <app-stateful-icon [state]="uniqueNameValidator.state"></app-stateful-icon>
+            <app-stateful-icon [state]="uniqueNameValidator.appApplicationNameUnique.status"></app-stateful-icon>
           </div>          
         </mat-form-field>
         <mat-form-field>
