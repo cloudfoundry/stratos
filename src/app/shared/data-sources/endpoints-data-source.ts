@@ -55,7 +55,14 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
           orderKey: 'address',
           field: 'api_endpoint.Host'
         },
-      ]
+      ],
+      rowsState: Observable.of({
+        '2fa75a76-c2e6-490f-acac-02eabb1bbf6a': {
+          busy: true,
+          error: true,
+          message: 'UPS'
+        }
+      })
     });
     this.store = store;
     store.dispatch(new SetListStateAction(

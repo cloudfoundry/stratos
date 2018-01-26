@@ -13,9 +13,12 @@ import { TableCellEventDetailComponent } from '../custom-cells/table-cell-event-
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { TableCellEndpointStatusComponent } from '../custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { IListDataSource } from '../../../data-sources/list-data-source-types';
+import { IListDataSource, RowsState, RowState, getDefaultRowState } from '../../../data-sources/list-data-source-types';
 import { TableCellAppStatusComponent } from '../custom-cells/table-cell-app-status/table-cell-app-status.component';
 import { TableCellUsageComponent } from '../custom-cells/table-cell-usage/table-cell-usage.component';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators/tap';
 
 @Component({
   selector: 'app-table-cell',
@@ -61,8 +64,16 @@ export class TableCellComponent<T> implements OnInit {
       const componentRef = this.target.createComponent(componentFactory);
       const cellComponent = <TableCellCustom<T>>componentRef.instance;
       cellComponent.row = this.row;
+
       cellComponent.dataSource = this.dataSource;
       cellComponent.config = this.config;
+      const { rowsState } = this.dataSource;
+      if (rowsState) {
+        cellComponent.rowState = rowsState.pipe(
+          tap(() => console.log('tap')),
+          map(state => state[this.dataSource.getRowUniqueId(this.row)] || getDefaultRowState())
+        );
+      }
     }
   }
 
