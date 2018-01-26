@@ -23,7 +23,7 @@ export class AppNameUniqueChecking {
   taken: boolean;
   status: string;
 
-  set(busy : boolean, taken? : boolean) {
+  set(busy: boolean, taken?: boolean) {
     this.busy = busy;
     this.taken = taken;
 
@@ -62,15 +62,12 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     }
     this.appApplicationNameUnique.set(true);
     return Observable.timer(500).take(1)
-    //.combineLatest(this.store.select(selectNewAppState)this.store.select(selectEntity('application', appGuid)).take(1))
     .combineLatest(this.store.select(selectNewAppState).take(1))
-    .switchMap((v) =>
-    {
+    .switchMap((v) => {
       const cfGuid = v[1].cloudFoundryDetails.cloudFoundry;
       const spaceGuid = v[1].cloudFoundryDetails.space;
       const currentName = v[1].name;
       return this.checkAppName(cfGuid, spaceGuid, currentName, control.value);
-      //return Observable.of(null);
     })
     .map(v => {
       this.appApplicationNameUnique.set(false, !v);
