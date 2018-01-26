@@ -17,6 +17,7 @@ import * as moment from 'moment';
 import { MatSnackBar } from '@angular/material';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../store/actions/router.actions';
+import { GetAllApplications } from '../../../../store/actions/application.actions';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -198,7 +199,11 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   onNext: StepOnNextFunction = () => {
+    // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
+    // Refetch apps
+    this.store.dispatch(new GetAllApplications('applicationWall'));
+    // Take user to applications
     this.store.dispatch(new RouterNav({ path: ['applications'] }));
     return Observable.create(true);
   }
