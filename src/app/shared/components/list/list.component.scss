@@ -30,7 +30,7 @@
     }
     &__left,
     &__right {
-      & > div:not():last-of-type {
+      & > div:not(:last-of-type) {
         padding-right: $title-content-padding;
       }
     }
