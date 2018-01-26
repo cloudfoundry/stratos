@@ -11,7 +11,7 @@ import { createBasicStoreModule } from '../../../test-framework/store-test-helpe
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
 import { MockBackend } from '@angular/http/testing';
-import { HttpModule, Http } from '@angular/http';
+import { HttpModule, Http, ConnectionBackend } from '@angular/http';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -26,6 +26,13 @@ describe('AppNameUniqueDirective', () => {
         MatDialogModule,
         createBasicStoreModule(),
         HttpModule,
+      ],
+      providers: [
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend
+        },
+        Http
       ]
     });
   });
