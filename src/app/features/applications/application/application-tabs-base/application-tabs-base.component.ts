@@ -37,11 +37,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   public async: any;
 
-  sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
   application;
   applicationActions$: Observable<string[]>;
 
+  summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
@@ -114,10 +114,20 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ).map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
       return isFetchingApp || isFetchingEnvVars || isFetchingStats;
     }).distinctUntilChanged();
+
+    this.summaryDataChanging$ = Observable.combineLatest(
+      initialFetch$,
+      this.applicationService.isUpdatingApp$,
+      this.autoRefreshing$
+    ).map(([isFetchingApp, isUpdating, autoRefresh]) => {
+      if (autoRefresh.busy) {
+        return false;
+      }
+      return isFetchingApp || isUpdating;
+    });
   }
 
   ngOnDestroy() {
-    this.sub.forEach(subscription => subscription.unsubscribe());
     this.appSub$.unsubscribe();
     this.entityServiceAppRefresh$.unsubscribe();
   }
