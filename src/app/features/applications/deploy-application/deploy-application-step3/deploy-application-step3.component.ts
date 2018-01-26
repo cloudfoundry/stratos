@@ -15,6 +15,8 @@ import { DeployApplicationSource, SocketEventTypes } from '../../../../store/typ
 import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
 import * as moment from 'moment';
 import { MatSnackBar } from '@angular/material';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { RouterNav } from '../../../../store/actions/router.actions';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -26,6 +28,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   connect$: Subscription;
   streamTitle: string;
   messages: Observable<string>;
+  appData: any;
 
   ngOnDestroy(): void {
     this.connect$.unsubscribe();
@@ -75,7 +78,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
           }),
           filter((log ) => log.type === SocketEventTypes.DATA),
           map((log) => {
-            const timesString = moment(Math.round(log.timestamp / 1000000)).format('HH:mm:ss.SSS');
+            const timesString = moment(log.timestamp * 1000).format('HH:mm:ss.SSS');
             return (
               `[${timesString}]: ${log.message}`
             );
@@ -134,7 +137,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
-      break;
+        this.appData = JSON.parse(log.message);
+        break;
       case SocketEventTypes.EVENT_PUSH_STARTED :
           this.streamTitle = 'Deploying...';
           break;
@@ -191,7 +195,12 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       error = `${error}\nBackend eror: ${log.message}`;
       this.snackBar.open(error, 'Dismiss');
     }
- }
+  }
 
+  onNext: StepOnNextFunction = () => {
+    this.store.dispatch(new DeleteDeployAppSection());
+    this.store.dispatch(new RouterNav({ path: ['applications'] }));
+    return Observable.create(true);
+  }
 
 }

@@ -1,5 +1,11 @@
 .deploy-step2--form {
 
+  .deploy-step2--form-radio {
+
+    display:flex;
+    justify-content: space-around;
+  }
+
   .project-info-group {
 
     display: flex;
@@ -7,6 +13,7 @@
     padding-top: 24px;
 
     .avatar-img {
+
       height: 51px;
       width: 51px;
     }
@@ -24,5 +31,9 @@
         width: 40%;
       }
     }
+  }
+  .commit-info-group {
+
+    padding-top: 24px;
   }
 }
