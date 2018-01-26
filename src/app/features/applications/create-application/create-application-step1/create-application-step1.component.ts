@@ -18,8 +18,7 @@ import { ApplicationSchema } from '../../../../store/actions/application.actions
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
-  styleUrls: ['./create-application-step1.component.scss'],
-  // providers: [CfOrgSpaceDataService]
+  styleUrls: ['./create-application-step1.component.scss']
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 

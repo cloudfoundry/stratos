@@ -1,12 +1,5 @@
 <mat-card>
-    <!-- <mat-form-field> -->
-      <!-- <input matInput ngModel #searchFilter="ngModel" placeholder="Filter"> -->
-    <!-- </mat-form-field> -->
-
-    <!-- <app-log-viewer [title]="streamTitle$ | async" [logStream]="messages"></app-log-viewer> -->
-    <div *ngIf="messages">
-
+  <div *ngIf="messages">
     <app-log-viewer [title]="streamTitle" [logStream]="messages"></app-log-viewer>
   </div>
-
-  </mat-card>
+</mat-card>

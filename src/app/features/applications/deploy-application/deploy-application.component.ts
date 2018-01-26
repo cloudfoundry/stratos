@@ -12,10 +12,7 @@ import { StoreCFSettings } from '../../../store/actions/deploy-applications.acti
   styleUrls: ['./deploy-application.component.scss'],
 
 })
-export class DeployApplicationComponent implements OnInit {
-
-  ngOnInit() {
-  }
+export class DeployApplicationComponent {
 
   constructor(private store: Store<AppState>, public cfOrgSpaceService: CfOrgSpaceDataService) { }
 
