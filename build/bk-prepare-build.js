@@ -71,7 +71,7 @@
     // see CF deployment script deploy/cloud-foundry/package.sh
     if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
-      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
+      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep;
       tempDbMigratorSrcPath = tempPath + path.sep + conf.goPathDbMigrator;
       return done();
     } else {
@@ -81,7 +81,7 @@
             throw err;
           }
           tempPath = path_;
-          tempSrcPath = path.join(tempPath, conf.goPath, 'components');
+          tempSrcPath = path.join(tempPath, conf.goPath);
           tempDbMigratorSrcPath = path.join(tempPath, conf.goPathDbMigrator);
           done();
         });
@@ -104,18 +104,15 @@
 
   gulp.task('copy-portal-proxy', ['create-temp'], function (done) {
 
-    var plugins = require('./../plugins.json');
+    // var plugins = require('./../plugins.json');
     fs.ensureDir(tempSrcPath, function (err) {
       if (err) {
         throw err;
       }
 
+      // Copy the whole of the backend source folder to the the folder in the correct path
       var promises = [];
-      _.each(plugins.enabledPlugins, function (plugin) {
-        promises.push(fsCopyQ('./components/' + plugin, tempSrcPath + '/' + plugin));
-      });
-      promises.push(fsCopyQ('./components/app-core', tempSrcPath + '/app-core'));
-
+      promises.push(fsCopyQ('./src/backend', tempSrcPath));
       Q.all(promises)
         .then(function () {
           done();

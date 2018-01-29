@@ -17,13 +17,10 @@
   module.exports.init = function () {
     env = process.env;
     env.GOPATH = prepareBuild.getGOPATH();
-    env.GOOS = 'linux';
-    env.GOARCH = 'amd64';
   };
 
   module.exports.runGlideInstall = runGlideInstall;
   module.exports.build = build;
-  module.exports.buildPlugin = buildPlugin;
   module.exports.test = test;
   module.exports.localDevSetup = localDevSetup;
   module.exports.isLocalDevBuild = isLocalDevBuild;
@@ -95,23 +92,12 @@
     return !!getDevConfig().localDevBuild;
   }
 
-  function buildPlugin(pluginPath, pluginName) {
-
-    var goFiles = _.filter(fs.readdirSync(pluginPath), function (file) {
-      return path.extname(file) === '.go';
-    });
-    var args = ['build'];
-
-    if (!prepareBuild.getNoGoInstall()) {
-      args.push('-i');
-    }
-    args = args.concat(['-buildmode=plugin', '-o', pluginName + '.so']);
-    args = args.concat(goFiles);
-    return spawnProcess('go', args, pluginPath, env);
-  }
-
-  function build(path, exeName) {
+  function build(srcPath, exeName, plugins) {
     var args = ['build', '-i', '-o', exeName];
+
+    if (plugins && plugins.length) {
+      prepareBuildWithoutPluginSupport(srcPath, plugins);
+    }
 
     // Set the console version from that of the package.json and the git commit
     return getVersion().then(function (version) {
@@ -119,7 +105,7 @@
         args.push('-ldflags');
         args.push('-X=main.appVersion=' + version);
       }
-      return spawnProcess('go', args, path, env);
+      return spawnProcess('go', args, srcPath, env);
     });
   }
 
@@ -146,6 +132,30 @@
       deferred.resolve('dev');
     }
     return deferred.promise;
+  }
+
+  function prepareBuildWithoutPluginSupport(srcPath, pluginsToInclude) {
+    var imports = '';
+    var inits = '';
+
+    _.each(pluginsToInclude, function (plugin) {
+      var pkgName = replaceAll(plugin.pluginName, '-', '');
+      pkgName = replaceAll(plugin.pluginName, '_', '');
+      imports += '\t"github.com/SUSE/stratos-ui/' + pkgName + '"\n';
+      inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tpp.Plugins["' + pkgName + '"] = plugin\n';
+      inits += '\tlog.Info("Loaded plugin: ' + pkgName + '")\n';
+    });
+
+    // Patch the static plugin loader
+    var pluginLoader = path.join(srcPath, 'load_plugins.go');
+    var loader = fs.readFileSync(pluginLoader).toString();
+    loader = loader.replace('//@@IMPORTS@@', imports);
+    loader = loader.replace('//@@INITS@@', inits);
+    fs.writeFileSync(pluginLoader, loader);
+  }
+
+  function replaceAll(target, search, replacement) {
+    return target.split(search).join(replacement);
   }
 
 })();
