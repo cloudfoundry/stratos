@@ -1,4 +1,4 @@
-package: github.com/SUSE/stratos-ui/components/cf-app-ssh/backend
+package: github.com/SUSE/stratos-ui/appssh
 import:
 - package: github.com/Sirupsen/logrus
   version: ^0.11.5

@@ -1,4 +1,4 @@
-package: .
+package: github.com/SUSE/stratos-ui/apppush
 import:
 - package: github.com/Sirupsen/logrus
   version: ~1.0.0
