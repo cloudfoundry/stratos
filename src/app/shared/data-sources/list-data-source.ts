@@ -122,17 +122,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.entityFunctions = config.entityFunctions;
     this.rowsState = config.rowsState ? config.rowsState.pipe(
       shareReplay(1)
-    ) : null;
+    ) : Observable.of({}).first();
   }
-
+  /**
+   * Will return the row state with default values.
+   * @param row The data for the current row
+   */
   getRowState(row: T) {
-    if (this.rowsState) {
-      return this.rowsState.pipe(
-        map(state => state[this.getRowUniqueId(row)] || getDefaultRowState())
-      );
-    } else {
-      return Observable.of(getDefaultRowState()).first();
-    }
+    return this.rowsState.pipe(
+      map(state => ({
+        ...getDefaultRowState(),
+        ...(state[this.getRowUniqueId(row)] || {})
+      }))
+    );
   }
 
   disconnect() {

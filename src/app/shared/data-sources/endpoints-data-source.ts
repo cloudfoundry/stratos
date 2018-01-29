@@ -61,7 +61,7 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
         return {
           '2fa75a76-c2e6-490f-acac-02eabb1bbf6a': {
             busy: !bool,
-            error: bool,
+            // error: bool,
             message: '<a href="#">Lorem ipsum dolor</a> sit amet, consectetur adipiscing elit. Nulla malesuada ullamcorper massa eu euismod. Aenean vel varius nunc, id blandit erat. Sed congue id velit et molestie.Vivamus nec quam eros. Nullam consectetur nisl non justo rutrum, sit amet interdum nibh imperdiet. Suspendisse eu fermentum enim.',
             blocked: bool
           },

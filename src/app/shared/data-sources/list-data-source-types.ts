@@ -77,17 +77,18 @@ export interface RowsState {
 }
 
 export interface RowState {
-  busy: boolean;
-  error: boolean;
-  message: string;
-  blocked: boolean;
+  busy?: boolean;
+  error?: boolean;
+  message?: string;
+  blocked?: boolean;
   metadata?: {
     [key: string]: any
   };
 }
 
-export const getDefaultRowState = () => ({
+export const getDefaultRowState = (): RowState => ({
   busy: false,
   error: false,
+  blocked: false,
   message: null
 });
