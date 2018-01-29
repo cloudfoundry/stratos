@@ -21,9 +21,9 @@
 .table-row {
   position: relative;
   &__error {
-    background-color: #ff00;
-    border-color: #ff00;
-    color: #ffff;
+    background-color: #f00;
+    border-color: #f00;
+    color: #fff;
     display: none;
     justify-content: middle;
     &-message {
@@ -36,7 +36,7 @@
       padding-left: 13px;
     }
     a {
-      color: #ffff;
+      color: #fff;
     }
   }
   &__blocker {
