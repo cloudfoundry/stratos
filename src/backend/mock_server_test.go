@@ -6,20 +6,19 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"plugin"
 	"strings"
 	"testing"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/crypto"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/SUSE/stratos-ui/cloudfoundry"
 )
 
 type mockServer struct {
@@ -112,14 +111,7 @@ func setupMockPGStore(db *sql.DB) *mockPGStore {
 }
 
 func initCFPlugin(pp *portalProxy) interfaces.StratosPlugin {
-	p, err := plugin.Open("../../cloud-foundry/backend/cloud-foundry.so")
-	if err != nil {
-		log.Printf("Failed to load plugin!")
-	}
-	init, _ := p.Lookup("Init")
-
-	plugin, _ := init.(func(interfaces.PortalProxy) (interfaces.StratosPlugin, error))(pp)
-
+	plugin, _ := cloudfoundry.Init(pp)
 	return plugin
 }
 

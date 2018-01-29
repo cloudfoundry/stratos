@@ -25,13 +25,13 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/console_config"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens"
+	"github.com/SUSE/stratos-ui/config"
+	"github.com/SUSE/stratos-ui/datastore"
+	"github.com/SUSE/stratos-ui/repository/cnsis"
+	"github.com/SUSE/stratos-ui/repository/console_config"
+	"github.com/SUSE/stratos-ui/repository/crypto"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/tokens"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database

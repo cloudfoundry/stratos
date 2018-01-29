@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/gorilla/sessions"
 )
 

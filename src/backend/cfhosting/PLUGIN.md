@@ -1,0 +1,1 @@
+Backend support for when Stratos is deployed as a Cloud Foundry application.

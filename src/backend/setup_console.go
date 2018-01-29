@@ -13,9 +13,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/console_config"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/config"
+	"github.com/SUSE/stratos-ui/repository/console_config"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 )
 
 type setupMiddleware struct {
