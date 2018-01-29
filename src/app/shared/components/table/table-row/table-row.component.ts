@@ -13,10 +13,6 @@ import { map } from 'rxjs/operators';
   selector: 'app-table-row',
   templateUrl: './table-row.component.html',
   styleUrls: ['./table-row.component.scss'],
-  // tslint:disable-next-line:use-host-property-decorator
-  host: {
-    'role': 'row',
-  },
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   preserveWhitespaces: false,

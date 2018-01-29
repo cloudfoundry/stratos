@@ -74,10 +74,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private entityLettable: OperatorFunction<A[], T[]> = null;
   public isLocal = false;
   public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[];
-<<<<<<< HEAD
   public rowsState?: Observable<RowsState>;
-=======
->>>>>>> master
 
   constructor(
     private config: IListDataSourceConfig<A, T>
