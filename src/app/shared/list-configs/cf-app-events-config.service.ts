@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { ApplicationService } from '../../features/applications/application.service';
 import { CfAppEventsDataSource } from '../data-sources/cf-app-events-data-source';
-import { IListConfig } from '../components/list/list.component';
+import { IListConfig, ListViewTypes } from '../components/list/list.component';
 import { EntityInfo } from '../../store/types/api.types';
 import { ITableColumn } from '../components/table/table.types';
 import {
@@ -38,6 +38,7 @@ export class CfAppEventsConfigService implements IListConfig<EntityInfo> {
     },
   ];
   pageSizeOptions = [5, 25, 50];
+  viewType = ListViewTypes.TABLE_ONLY;
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {
     this.eventSource = new CfAppEventsDataSource(

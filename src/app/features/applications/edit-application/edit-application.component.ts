@@ -10,43 +10,53 @@ import { selectNewAppState } from '../../../store/effects/create-app-effects';
 // import { UpdateApplication } from '../../../store/actions/application.actions';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Router } from '@angular/router';
-// import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
+import { AppNameUniqueDirective, AppNameUniqueChecking } from '../app-name-unique.directive/app-name-unique.directive';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { Http } from '@angular/http';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { SetNewAppName, SetCFDetails } from '../../../store/actions/create-applications-page.actions';
 
 @Component({
   selector: 'app-edit-application',
   templateUrl: './edit-application.component.html',
-  styleUrls: ['./edit-application.component.scss']
+  styleUrls: ['./edit-application.component.scss'],
+  providers: [
+    {provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher}
+  ]
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
 
   editAppForm: FormGroup;
 
-  checkingNameState$: Observable<string>;
+  uniqueNameValidator: AppNameUniqueDirective;
+
+  appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   constructor(
     private applicationService: ApplicationService,
     private entityService: EntityService,
     private store: Store<AppState>,
     private fb: FormBuilder,
+    private http: Http,
   ) {
+    this.uniqueNameValidator = new AppNameUniqueDirective(this.store, this.http);
     this.editAppForm = this.fb.group({
-      name: ['', [
-        Validators.required,
-        // new AppNameUniqueDirective(this.store),
-      ]],
+      name: ['',
+        [Validators.required],
+        [this.uniqueNameValidator],
+      ],
       instances: [0, [
         Validators.required,
-        Validators.minLength(0)
+        Validators.min(0)
       ]],
       disk_quota: [0, [
         Validators.required,
-        Validators.minLength(0)
+        Validators.min(0)
       ]],
       memory: [0, [
         Validators.required,
-        Validators.minLength(0)
+        Validators.min(0)
       ]],
       enable_ssh: false,
       production: false
@@ -64,13 +74,20 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.sub = this.applicationService.application$.filter(app => app.app.entity).take(1).map(app => app.app.entity).subscribe(app => {
       this.app = app;
+      this.store.dispatch(new SetCFDetails({
+        cloudFoundry: this.applicationService.cfGuid,
+        org: '',
+        space: this.app.space_guid,
+      }));
+
+      this.store.dispatch(new SetNewAppName(this.app.name));
       this.editAppForm.setValue({
         name: this.app.name,
         instances: this.app.instances,
         memory: this.app.memory,
         disk_quota: this.app.disk_quota,
         production: this.app.production,
-        enable_ssh: this.app.enable_ssh
+        enable_ssh: this.app.enable_ssh,
       });
       // Don't want the values to change while the user is editing
       this.clearSub();
@@ -78,7 +95,6 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   }
 
   updateApp = () => {
-    const { cfGuid, appGuid } = this.applicationService;
     const updates = {};
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editAppForm.value)) {
@@ -96,11 +112,10 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     }
 
     return obs$.take(1).do(res => {
+      this.error = !res.success;
       if (res.success) {
         // Navigate back to the application page
-        this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, appGuid] }));
-      } else {
-        this.error = !res.success;
+        this.store.dispatch(new RouterNav({ path: ['applications', this.applicationService.cfGuid, this.applicationService.appGuid] }));
       }
     });
   }

@@ -15,7 +15,7 @@ import { AppState } from '../../store/app-state';
 import { CNSISEffect } from '../../store/effects/cnsis.effects';
 import { selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { CNSISModel, cnsisStoreNames } from '../../store/types/cnsis.types';
-import { IGlobalListAction, IListAction, IListConfig, IMultiListAction } from '../components/list/list.component';
+import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../components/list/list.component';
 import {
   TableCellEndpointStatusComponent,
 } from '../components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -147,6 +147,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   isLocal = true;
   dataSource: EndpointsDataSource;
   pageSizeOptions = [9, 45, 90];
+  viewType = ListViewTypes.TABLE_ONLY;
 
   private handleAction(item, effectKey, handleChange) {
     const disSub = this.store.select(selectUpdateInfo(

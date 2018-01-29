@@ -1,4 +1,5 @@
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
+
 export function getDataFunctionList(entityFunctions: (DataFunction<any> | DataFunctionDefinition)[]) {
   return entityFunctions.map(functionOrDef => {
     const def = functionOrDef as DataFunctionDefinition;

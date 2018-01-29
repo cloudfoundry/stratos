@@ -8,7 +8,7 @@ import {
 import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
 import { APIResource } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
-import { IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction } from '../components/list/list.component';
+import { IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../components/list/list.component';
 import { AppState } from '../../store/app-state';
 import { UtilsService } from '../../core/utils.service';
 import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
@@ -64,6 +64,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
     },
   ];
   pageSizeOptions = [9, 45, 90];
+  viewType = ListViewTypes.BOTH;
 
   getGlobalActions = () => null;
   getMultiActions = () => null;

@@ -1,21 +1,15 @@
-import { ListDataSource } from './list-data-source';
-import { DataSource } from '@angular/cdk/table';
-import { Store, Action } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { MatPaginator, MatSort, Sort, PageEvent, MatSortable } from '@angular/material';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { EventEmitter, PACKAGE_ROOT_URL } from '@angular/core';
-import { ApplicationService } from '../../features/applications/application.service';
-import { UpdateApplication } from '../../store/actions/application.actions';
-import { ListFilter, ListSort, SetListStateAction } from '../../store/actions/list.actions';
-import { AppVariablesDelete, AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
-import { ListActionConfig, ListActions } from './list-data-source-types';
+import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-import { AppEnvVarSchema, AppEnvVarsState } from '../../store/types/app-metadata.types';
-import { APIResource } from '../../store/types/api.types';
+
+import { ApplicationService } from '../../features/applications/application.service';
 import { GetAppEnvVarsAction } from '../../store/actions/app-metadata.actions';
+import { AppVariablesAdd, AppVariablesEdit } from '../../store/actions/app-variables.actions';
+import { SetListStateAction } from '../../store/actions/list.actions';
 import { getPaginationKey } from '../../store/actions/pagination.actions';
+import { AppState } from '../../store/app-state';
+import { APIResource } from '../../store/types/api.types';
+import { AppEnvVarSchema, AppEnvVarsState } from '../../store/types/app-metadata.types';
+import { ListDataSource } from './list-data-source';
 
 export interface ListAppEnvVar {
   name: string;
@@ -28,31 +22,29 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
   public appGuid: string;
 
   constructor(
-    protected _store: Store<AppState>,
-    private _appService: ApplicationService,
+    store: Store<AppState>,
+    _appService: ApplicationService,
   ) {
-    super(
-      _store,
-      new GetAppEnvVarsAction(
-        _appService.appGuid,
-        _appService.cfGuid,
-      ),
-      AppEnvVarSchema,
-      (object: ListAppEnvVar) => {
-        return object.name;
-      },
-      (): ListAppEnvVar => {
-        return {
-          name: '',
-          value: '',
-        };
-      },
-      getPaginationKey(
-        AppEnvVarSchema.key,
-        _appService.cfGuid,
-        _appService.appGuid,
-      ),
-      map(variables => {
+    const action = new GetAppEnvVarsAction(
+      _appService.appGuid,
+      _appService.cfGuid,
+    );
+    const paginationKey = getPaginationKey(
+      AppEnvVarSchema.key,
+      _appService.cfGuid,
+      _appService.appGuid,
+    );
+    super({
+      store,
+      action,
+      schema: AppEnvVarSchema,
+      getRowUniqueId: object => object.name,
+      getEmptyType: () => ({
+        name: '',
+        value: '',
+      }),
+      paginationKey,
+      entityLettable: map(variables => {
         if (!variables || variables.length === 0) {
           return [];
         }
@@ -60,8 +52,8 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
         const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
         return rows;
       }),
-      true,
-      [
+      isLocal: true,
+      entityFunctions: [
         {
           type: 'sort',
           orderKey: 'name',
@@ -77,23 +69,18 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
           field: 'name'
         },
       ]
-    );
+    });
 
     this.cfGuid = _appService.cfGuid;
     this.appGuid = _appService.appGuid;
-    const paginationKey = getPaginationKey(
-      AppEnvVarSchema.key,
-      _appService.cfGuid,
-      _appService.appGuid,
-    );
-    _store.dispatch(new SetListStateAction(
+    store.dispatch(new SetListStateAction(
       paginationKey,
       'table',
     ));
   }
 
   saveAdd() {
-    this._store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.entityLettabledRows, this.addItem));
+    this.store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.entityLettabledRows, this.addItem));
     super.saveAdd();
   }
 
@@ -102,7 +89,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
   }
 
   saveEdit() {
-    this._store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.entityLettabledRows, this.editRow));
+    this.store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.entityLettabledRows, this.editRow));
     super.saveEdit();
   }
 

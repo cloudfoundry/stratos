@@ -38,8 +38,6 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { CardsComponent } from './components/cards/cards.component';
 import { CardComponent } from './components/cards/card/card.component';
-import { CardAppVariableComponent } from './components/cards/custom-cards/card-app-variable/card-app-variable.component';
-import { CardEventComponent } from './components/cards/custom-cards/card-app-event/card-app-event.component';
 import {
   AppEventDetailDialogComponentComponent
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
@@ -49,7 +47,6 @@ import { CardAppComponent } from './components/cards/custom-cards/card-app/card-
 import { TableCellAppNameComponent } from './components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
-import { CardEndpointComponent } from './components/cards/custom-cards/card-endpoint/card-endpoint.component';
 import {
   TableCellEndpointStatusComponent
 } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -82,9 +79,10 @@ import { TableCellStatusDirective } from './components/table/table-cell-status.d
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import {
+import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
+import { ConfirmationDialogService } from './components/confirmation-dialog.service';
   TableCellAppInstancesComponent
 } from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
-
 
 @NgModule({
   imports: [
@@ -126,15 +124,12 @@ import {
     ListComponent,
     CardsComponent,
     CardComponent,
-    CardEventComponent,
-    CardAppVariableComponent,
     AppEventDetailDialogComponentComponent,
     TableCellActionsComponent,
     CardAppComponent,
     TableCellAppNameComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
-    CardEndpointComponent,
     TableCellEndpointStatusComponent,
     DialogErrorComponent,
     SshViewerComponent,
@@ -157,6 +152,7 @@ import {
     TableCellStatusDirective,
     CardAppUsageComponent,
     RunningInstancesComponent,
+    DialogConfirmComponent,
     TableCellAppInstancesComponent,
   ],
   exports: [
@@ -199,12 +195,17 @@ import {
     TableCellUsageComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    DialogConfirmComponent,
   ],
-  entryComponents: [AppEventDetailDialogComponentComponent],
+  entryComponents: [
+    AppEventDetailDialogComponentComponent,
+    DialogConfirmComponent,
+  ],
   providers: [
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
+    ConfirmationDialogService,
   ]
 })
 export class SharedModule { }

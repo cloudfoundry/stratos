@@ -48,7 +48,8 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             this.error = auth.error && !auth.sessionData;
 
             if (this.error) {
-              this.message = `Couldn't log in, please try again.`;
+              this.message = auth.error && auth.errorResponse && auth.errorResponse.status === 401 ?
+                `Username and password combination incorrect. Please try again.` : `Couldn't log in, please try again.`;
             } else if (auth.verifying) {
               this.message = 'Verifying session...';
             } else if (cnsis.loading) {

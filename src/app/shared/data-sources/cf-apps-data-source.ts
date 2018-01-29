@@ -1,36 +1,32 @@
-import { Subscription } from 'rxjs/Rx';
-import { ListDataSource } from './list-data-source';
 import { Store } from '@ngrx/store';
+
+import { ApplicationSchema, GetAllApplications } from '../../store/actions/application.actions';
+import { SetListStateAction } from '../../store/actions/list.actions';
 import { AppState } from '../../store/app-state';
-import { GetAllApplications, ApplicationSchema } from '../../store/actions/application.actions';
-import { SetListStateAction, ListFilter } from '../../store/actions/list.actions';
-import { SortDirection } from '@angular/material';
-import { AddParams, RemoveParams } from '../../store/actions/pagination.actions';
 import { APIResource } from '../../store/types/api.types';
-import { ListActions } from './list-data-source-types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
+import { ListDataSource } from './list-data-source';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
 
   constructor(
-    _store: Store<AppState>,
+    store: Store<AppState>,
   ) {
-    const action = new GetAllApplications(CfAppsDataSource.paginationKey);
+    const { paginationKey } = CfAppsDataSource;
+    const action = new GetAllApplications(paginationKey);
 
-    super(
-      _store,
+    super({
+      store,
       action,
-      ApplicationSchema,
-      (entity: APIResource) => {
+      schema: ApplicationSchema,
+      getRowUniqueId: (entity: APIResource) => {
         return entity.metadata ? entity.metadata.guid : null;
       },
-      () => ({} as APIResource),
-      CfAppsDataSource.paginationKey,
-      null,
-      true,
-      [
+      paginationKey,
+      isLocal: true,
+      entityFunctions: [
         {
           type: 'filter',
           field: 'entity.name'
@@ -73,10 +69,11 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
           });
         }
       ]
+    }
     );
 
-    _store.dispatch(new SetListStateAction(
-      CfAppsDataSource.paginationKey,
+    store.dispatch(new SetListStateAction(
+      paginationKey,
       'cards',
     ));
   }
