@@ -2,7 +2,7 @@
   &__blocked {
     .table-row {
       cursor: not-allowed;
-      opacity: 0.22;
+      opacity: .22;
     }
     .table-row__blocker {
       display: block;
@@ -10,7 +10,7 @@
   }
   &__errored {
     .table-row {
-      background-color: rgba(255, 0, 0, 0.1);
+      background-color: rgba(255, 0, 0, .1);
     }
     .table-row__error {
       display: flex;
@@ -21,9 +21,9 @@
 .table-row {
   position: relative;
   &__error {
-    background-color: red;
-    border-color: red;
-    color: white;
+    background-color: #ff0000;
+    border-color: #ff0000;
+    color: #ffffff;
     display: none;
     justify-content: middle;
     &-message {
@@ -36,16 +36,16 @@
       padding-left: 13px;
     }
     a {
-      color: white;
+      color: #ffffff;
     }
   }
   &__blocker {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
     bottom: 0;
-    z-index: 999;
     display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 999;
   }
 }
