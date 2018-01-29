@@ -125,7 +125,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ) : Observable.of({}).first();
   }
   /**
-   * Will return the row state with default values.
+   * Will return the row state with default values filled in.
    * @param row The data for the current row
    */
   getRowState(row: T) {
@@ -133,7 +133,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       map(state => ({
         ...getDefaultRowState(),
         ...(state[this.getRowUniqueId(row)] || {})
-      }))
+      })),
+      distinctUntilChanged()
     );
   }
 

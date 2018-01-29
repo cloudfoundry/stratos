@@ -1,14 +1,30 @@
+.table-row-wrapper {
+  &__blocked {
+    .table-row {
+      cursor: not-allowed;
+      opacity: 0.22;
+    }
+    .table-row__blocker {
+      display: block;
+    }
+  }
+  &__errored {
+    .table-row {
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+    .table-row__error {
+      display: flex;
+    }
+  }
+}
+
 .table-row {
   position: relative;
-  &__blocked {
-    opacity: 0.22;
-    cursor: not-allowed;
-  }
   &__error {
     background-color: red;
     border-color: red;
     color: white;
-    display: flex;
+    display: none;
     justify-content: middle;
     &-message {
       flex: 1;
@@ -30,5 +46,6 @@
     right: 0;
     bottom: 0;
     z-index: 999;
+    display: none;
   }
 }
