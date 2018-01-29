@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { CoreModule } from '../../core/core.module';
 import { ApplicationsModule } from '../../features/applications/applications.module';
 import { RouterTestingModule } from '@angular/router/testing';
+import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
 
 describe('CfAppInstancesConfigService', () => {
 
