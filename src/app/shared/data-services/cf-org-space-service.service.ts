@@ -48,15 +48,15 @@ export class CfOrgSpaceDataService {
     this.createSpace();
 
     const orgResetSub = this.cf.select.asObservable().distinctUntilChanged().do(() => {
-      this.org.select.next(null);
-      this.space.select.next(null);
+      this.org.select.next(undefined);
+      this.space.select.next(undefined);
     }).subscribe();
     this.cf.select.asObservable().finally(() => {
       orgResetSub.unsubscribe();
     });
 
     const spaceResetSub = this.org.select.asObservable().distinctUntilChanged().do(() => {
-      this.space.select.next(null);
+      this.space.select.next(undefined);
     }).subscribe();
     this.org.select.asObservable().finally(() => {
       spaceResetSub.unsubscribe();
@@ -77,7 +77,7 @@ export class CfOrgSpaceDataService {
     this.cf = {
       list$: this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis)),
       loading$: Observable.of(false),
-      select: new BehaviorSubject(null),
+      select: new BehaviorSubject(undefined),
     };
   }
 
@@ -98,7 +98,7 @@ export class CfOrgSpaceDataService {
     this.org = {
       list$: orgList$,
       loading$: this.allOrgs$.pagination$.map(pag => pag.fetching),
-      select: new BehaviorSubject(null),
+      select: new BehaviorSubject(undefined),
     };
   }
 
@@ -126,7 +126,7 @@ export class CfOrgSpaceDataService {
     this.space = {
       list$: spaceList$,
       loading$: this.org.loading$,
-      select: new BehaviorSubject(null),
+      select: new BehaviorSubject(undefined),
     };
   }
 }
