@@ -18,6 +18,7 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
   constructor(
     store: Store<AppState>,
   ) {
+    let bool = true;
     const action = new GetAllCNSIS();
     const paginationKey = GetAllCNSIS.storeKey;
     super({
@@ -56,13 +57,23 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
           field: 'api_endpoint.Host'
         },
       ],
-      rowsState: Observable.of({
-        '2fa75a76-c2e6-490f-acac-02eabb1bbf6a': {
-          busy: true,
-          error: true,
-          message: 'UPS'
-        }
+      rowsState: Observable.interval(1000).map(() => {
+        return {
+          '2fa75a76-c2e6-490f-acac-02eabb1bbf6a': {
+            busy: !bool,
+            error: bool,
+            message: '<a href="#">Lorem ipsum dolor</a> sit amet, consectetur adipiscing elit. Nulla malesuada ullamcorper massa eu euismod. Aenean vel varius nunc, id blandit erat. Sed congue id velit et molestie.Vivamus nec quam eros. Nullam consectetur nisl non justo rutrum, sit amet interdum nibh imperdiet. Suspendisse eu fermentum enim.',
+            blocked: bool
+          },
+          '6dd897cb-2e93-422d-b707-15ce24e76bdb': {
+            busy: bool,
+            error: !bool,
+            message: 'Me too',
+            blocked: bool
+          }
+        };
       })
+        .do(() => bool = !bool)
     });
     this.store = store;
     store.dispatch(new SetListStateAction(

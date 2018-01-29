@@ -15,7 +15,7 @@ import { schema } from 'normalizr';
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
 import { AddParams, RemoveParams, SetClientPage, SetPage, SetResultCount } from '../../store/actions/pagination.actions';
-import { IListDataSource, getRowUniqueId, RowsState } from './list-data-source-types';
+import { IListDataSource, getRowUniqueId, RowsState, getDefaultRowState } from './list-data-source-types';
 import { map, shareReplay } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators';
 import { composeFn } from '../../store/helpers/reducer.helper';
@@ -120,7 +120,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.entityLettable = config.entityLettable;
     this.isLocal = config.isLocal || false;
     this.entityFunctions = config.entityFunctions;
-    this.rowsState = config.rowsState || null;
+    this.rowsState = config.rowsState ? config.rowsState.pipe(
+      shareReplay(1)
+    ) : null;
+  }
+
+  getRowState(row: T) {
+    if (this.rowsState) {
+      return this.rowsState.pipe(
+        map(state => state[this.getRowUniqueId(row)] || getDefaultRowState())
+      );
+    } else {
+      return Observable.of(getDefaultRowState()).first();
+    }
   }
 
   disconnect() {

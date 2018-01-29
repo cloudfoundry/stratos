@@ -4,7 +4,6 @@
 </div>
 <div class="table-row__error mat-row" *ngIf="inErrorState$ | async">
   <mat-icon class="table-row__error-icon">warning</mat-icon>
-  <div class="table-row__error-message">
-    {{ errorMessage$ | async }}
+  <div class="table-row__error-message" [innerHTML]="errorMessage$ | async">
   </div>
 </div>
