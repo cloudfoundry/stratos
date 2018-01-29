@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { ApplicationService } from '../../features/applications/application.service';
 import { CfAppInstancesDataSource, ListAppInstance } from '../data-sources/cf-app-instances-data-source';
-import { IListAction, IListConfig } from '../components/list/list.component';
+import { IListAction, IListConfig, ListViewTypes } from '../components/list/list.component';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
 import { ITableColumn } from '../components/table/table.types';
 import {
@@ -24,6 +24,7 @@ import { TableCellActionsComponent } from '../components/table/table-cell-action
 import { DeleteApplicationInstance } from '../../store/actions/application.actions';
 import { AppStat } from '../../store/types/app-metadata.types';
 import { Router } from '@angular/router';
+import { ConfirmationDialogService, ConfirmationDialog } from '../components/confirmation-dialog.service';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -79,11 +80,19 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     }
   ];
   pageSizeOptions = [5, 25, 50];
+  viewType = ListViewTypes.TABLE_ONLY;
 
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid));
+      const confirmation = new ConfirmationDialog(
+        'Terminate Instance?',
+        `Are you sure you want to terminate instance ${item.index}?`,
+        'Terminate');
+      this.confirmDialog.open(
+        confirmation,
+        () => this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid))
+      );
     },
     icon: 'delete',
     label: 'Terminate',
@@ -120,6 +129,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     private appService: ApplicationService,
     private utilsService: UtilsService,
     private router: Router,
+    private confirmDialog: ConfirmationDialogService,
   ) {
     this.instancesSource = new CfAppInstancesDataSource(
       this.store,

@@ -38,8 +38,6 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { CardsComponent } from './components/cards/cards.component';
 import { CardComponent } from './components/cards/card/card.component';
-import { CardAppVariableComponent } from './components/cards/custom-cards/card-app-variable/card-app-variable.component';
-import { CardEventComponent } from './components/cards/custom-cards/card-app-event/card-app-event.component';
 import {
   AppEventDetailDialogComponentComponent
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
@@ -49,7 +47,6 @@ import { CardAppComponent } from './components/cards/custom-cards/card-app/card-
 import { TableCellAppNameComponent } from './components/table/custom-cells/table-cell-app-name/table-cell-app-name.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
-import { CardEndpointComponent } from './components/cards/custom-cards/card-endpoint/card-endpoint.component';
 import {
   TableCellEndpointStatusComponent
 } from './components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -84,6 +81,8 @@ import { TableRowComponent } from './components/table/table-row/table-row.compon
 import { CdkCellOutlet } from '@angular/cdk/table';
 import { CdkTableModule } from '@angular/cdk/table';
 
+import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
+import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 
 @NgModule({
   imports: [
@@ -108,7 +107,7 @@ import { CdkTableModule } from '@angular/cdk/table';
     ValuesPipe,
     LoadingPageComponent,
     DetailsCardComponent,
-    FocusDirective,
+    FocusDirective, §
     UniqueDirective,
     CodeBlockComponent,
     TableComponent,
@@ -126,15 +125,12 @@ import { CdkTableModule } from '@angular/cdk/table';
     ListComponent,
     CardsComponent,
     CardComponent,
-    CardEventComponent,
-    CardAppVariableComponent,
     AppEventDetailDialogComponentComponent,
     TableCellActionsComponent,
     CardAppComponent,
     TableCellAppNameComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
-    CardEndpointComponent,
     TableCellEndpointStatusComponent,
     DialogErrorComponent,
     SshViewerComponent,
@@ -156,7 +152,8 @@ import { CdkTableModule } from '@angular/cdk/table';
     TableCellTCPRouteComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
-    TableRowComponent
+    TableRowComponent,
+    DialogConfirmComponent,
   ],
   exports: [
     FormsModule,
@@ -198,12 +195,17 @@ import { CdkTableModule } from '@angular/cdk/table';
     TableCellUsageComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    DialogConfirmComponent,
   ],
-  entryComponents: [AppEventDetailDialogComponentComponent],
+  entryComponents: [
+    AppEventDetailDialogComponentComponent,
+    DialogConfirmComponent,
+  ],
   providers: [
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
+    ConfirmationDialogService,
   ]
 })
 export class SharedModule { }

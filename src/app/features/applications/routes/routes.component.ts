@@ -26,9 +26,8 @@ export class RoutesComponent implements OnInit {
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;
   }
 
-  cardComponent = null;
   routesDataSource: CfAppRoutesDataSource;
 
   ngOnInit() {
-   }
+  }
 }

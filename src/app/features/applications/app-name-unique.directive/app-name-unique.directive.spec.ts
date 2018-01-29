@@ -10,6 +10,8 @@ import { AppNameUniqueDirective } from './app-name-unique.directive';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
+import { MockBackend } from '@angular/http/testing';
+import { HttpModule, Http, ConnectionBackend } from '@angular/http';
 
 describe('AppNameUniqueDirective', () => {
 
@@ -23,11 +25,19 @@ describe('AppNameUniqueDirective', () => {
         RouterTestingModule,
         MatDialogModule,
         createBasicStoreModule(),
+        HttpModule,
+      ],
+      providers: [
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend
+        },
+        Http
       ]
     });
   });
-  it('should create an instance', inject([Store], (store: Store<AppState>) => {
-    const directive = new AppNameUniqueDirective(store);
+  it('should create an instance', inject([Store, Http], (store: Store<AppState>, http: Http) => {
+    const directive = new AppNameUniqueDirective(store, http);
     expect(directive).toBeTruthy();
   }));
 });

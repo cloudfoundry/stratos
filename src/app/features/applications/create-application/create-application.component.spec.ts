@@ -12,6 +12,8 @@ import { CreateApplicationStep1Component } from './create-application-step1/crea
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 import { CreateApplicationComponent } from './create-application.component';
+import { Http, HttpModule, ConnectionBackend } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
 
 describe('CreateApplicationComponent', () => {
   let component: CreateApplicationComponent;
@@ -29,12 +31,20 @@ describe('CreateApplicationComponent', () => {
       imports: [
         CommonModule,
         CoreModule,
+        HttpModule,
         SharedModule,
         RouterTestingModule,
         BrowserAnimationsModule,
         StoreModule.forRoot(
           appReducers
         )
+      ],
+      providers: [
+        Http,
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend
+        },
       ]
     })
       .compileComponents();
