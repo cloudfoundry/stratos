@@ -1,6 +1,12 @@
 # Default application configuration that all configurations inherit from.
 
 scss_files: "**/*.scss"
+exclude:
+  - '/dist/*'
+  - '/tmp/*'
+  - '/out-tsc/*'
+  - '/out/*'
+  - '/node_modules/*'
 plugin_directories: ['.scss-linters']
 
 # List of gem names to load custom linters from (make sure they are already
@@ -31,7 +37,7 @@ linters:
     enabled: true
 
   ColorVariable:
-    enabled: true
+    enabled: false
 
   Comment:
     enabled: true
@@ -110,7 +116,7 @@ linters:
 
   NestingDepth:
     enabled: true
-    max_depth: 3
+    max_depth: 6
     ignore_parent_selectors: false
 
   PlaceholderInExtend:
