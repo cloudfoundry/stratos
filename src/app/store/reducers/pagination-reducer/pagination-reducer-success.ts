@@ -22,7 +22,7 @@ export function paginationSuccess(state: PaginationEntityState, action) {
       ...state.ids,
       [state.currentPage]: action.response.result
     },
-    pageCount: state.pageCount + 1,
+    pageCount: action.totalPages,
     totalResults,
     clientPagination: {
       ...state.clientPagination,

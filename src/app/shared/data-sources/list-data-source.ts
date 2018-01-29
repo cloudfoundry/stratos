@@ -27,6 +27,14 @@ export interface DataFunctionDefinition {
   field: string;
 }
 
+export function distinctPageUntilChanged(dataSource) {
+  return (oldPage, newPage) => {
+    const oldPageKeys = (oldPage || []).map(dataSource.getRowUniqueId).join();
+    const newPageKeys = (newPage || []).map(dataSource.getRowUniqueId).join();
+    return oldPageKeys === newPageKeys;
+  };
+}
+
 export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
 export abstract class ListDataSource<T, A = T> extends DataSource<T> implements IListDataSource<T> {
 
