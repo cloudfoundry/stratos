@@ -31,15 +31,17 @@ export class TableRowComponent extends CdkRow implements OnInit {
   private isBlocked$: Observable<boolean>;
 
   ngOnInit() {
-    this.inErrorState$ = this.rowState.pipe(
-      map(state => state.error)
-    );
-    this.errorMessage$ = this.rowState.pipe(
-      map(state => state.message)
-    );
-    this.isBlocked$ = this.rowState.pipe(
-      map(state => state.blocked)
-    );
+    if (this.rowState) {
+      this.inErrorState$ = this.rowState.pipe(
+        map(state => state.error)
+      );
+      this.errorMessage$ = this.rowState.pipe(
+        map(state => state.message)
+      );
+      this.isBlocked$ = this.rowState.pipe(
+        map(state => state.blocked)
+      );
+    }
   }
 
 }

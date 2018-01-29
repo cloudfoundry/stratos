@@ -81,7 +81,6 @@ import { TableCellUsageComponent } from './components/table/custom-cells/table-c
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
 import { TableRowComponent } from './components/table/table-row/table-row.component';
-import { TableHeaderComponent } from './components/table/table-header/table-header.component';
 import { CdkCellOutlet } from '@angular/cdk/table';
 import { CdkTableModule } from '@angular/cdk/table';
 

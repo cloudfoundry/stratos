@@ -25,6 +25,8 @@ import { ListAppEnvVar } from '../../data-sources/cf-app-variables-data-source';
 import { PercentagePipe } from '../../pipes/percentage.pipe';
 import { UtilsService } from '../../../core/utils.service';
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
+import { CdkTableModule } from '@angular/cdk/table';
+import { TableRowComponent } from './table-row/table-row.component';
 
 
 describe('TableComponent', () => {
@@ -44,9 +46,11 @@ describe('TableComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
+        TableRowComponent
       ],
       imports: [
         CoreModule,
+        CdkTableModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
       ],
@@ -54,7 +58,7 @@ describe('TableComponent', () => {
         UtilsService,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
