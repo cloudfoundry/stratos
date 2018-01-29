@@ -1,2 +1,10 @@
-<ng-container cdkCellOutlet></ng-container>
-<div>Test</div>
+<div class="mat-row table-row" [ngClass]="{'table-row__blocked': isBlocked$ | async}">
+  <div *ngIf="isBlocked$ | async" class="table-row__blocker"></div>
+  <ng-container cdkCellOutlet></ng-container>
+</div>
+<div class="table-row__error mat-row" *ngIf="inErrorState$ | async">
+  <mat-icon class="table-row__error-icon">warning</mat-icon>
+  <div class="table-row__error-message">
+    {{ errorMessage$ | async }}
+  </div>
+</div>

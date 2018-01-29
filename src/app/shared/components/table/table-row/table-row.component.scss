@@ -1,0 +1,31 @@
+.table-row {
+  position: relative;
+  &__blocked {
+    opacity: 0.22;
+    cursor: not-allowed;
+  }
+  &__error {
+    background-color: red;
+    border-color: red;
+    color: white;
+    display: flex;
+    justify-content: middle;
+    &-message {
+      flex: 1;
+      line-height: 20px;
+      margin: 15px 20%;
+      text-align: center;
+    }
+    &-icon {
+      padding-left: 13px;
+    }
+  }
+  &__blocker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999;
+  }
+}

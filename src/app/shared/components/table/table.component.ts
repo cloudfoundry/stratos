@@ -10,15 +10,16 @@ import { ListSort } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from './table.types';
-import { TableRowComponent } from './table-row/table-row.component';
+import { TableRowComponent, TableCellOutlet } from './table-row/table-row.component';
+import { CdkCellOutlet } from '@angular/cdk/table';
 
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
-  providers: [
-    { provide: MatRow, useClass: TableRowComponent }
-  ]
+  // providers: [
+  //   { provide: CdkCellOutlet, useClass: TableCellOutlet }
+  // ]
 })
 export class TableComponent<T extends object> implements OnInit, OnDestroy {
 

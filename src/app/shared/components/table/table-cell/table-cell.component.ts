@@ -67,13 +67,6 @@ export class TableCellComponent<T> implements OnInit {
 
       cellComponent.dataSource = this.dataSource;
       cellComponent.config = this.config;
-      const { rowsState } = this.dataSource;
-      if (rowsState) {
-        cellComponent.rowState = rowsState.pipe(
-          tap(() => console.log('tap')),
-          map(state => state[this.dataSource.getRowUniqueId(this.row)] || getDefaultRowState())
-        );
-      }
     }
   }
 
