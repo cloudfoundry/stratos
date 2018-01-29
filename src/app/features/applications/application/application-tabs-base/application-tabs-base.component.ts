@@ -10,10 +10,6 @@ import { UpdateApplication, DeleteApplication } from '../../../../store/actions/
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppMetadataTypes, GetAppSummaryAction, GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
 
-import websocketConnect from 'rxjs-websockets';
-import { QueueingSubject } from 'queueing-subject/lib';
-import { LoggerService } from '../../../../core/logger.service';
-
 @Component({
   selector: 'app-application-tabs-base',
   templateUrl: './application-tabs-base.component.html',
@@ -27,12 +23,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private entityService: EntityService,
     private store: Store<AppState>,
-    private logService: LoggerService,
   ) { }
 
   public async: any;
-
-  messages: Observable<string>;
 
   sub: Subscription[] = [];
   isFetching$: Observable<boolean>;
@@ -171,69 +164,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           environment_json: application.app.entity.environment_json
         };
       }));
-
-      this.setupstreamingStatusWebSocket();
   }
-
-  setupstreamingStatusWebSocket() {
-    const host = window.location.host;
-    const streamUrl = (
-      `wss://${host}/pp/v1/${this.applicationService.cfGuid}/apps/${this.applicationService.appGuid}/status`
-    );
-    this.messages = websocketConnect(
-      streamUrl,
-      new QueueingSubject<string>()
-    )
-      .messages
-      .catch(e => {
-        this.logService.error('Error while connecting to socket: ' + JSON.stringify(e));
-        return [];
-      })
-      .share()
-      .map(message => {
-        const json = JSON.parse(message);
-        return json;
-      })
-      .filter(l => !!l)
-      .do(m => {
-        if (m.logMessage && m.logMessage.message) {
-          console.log(this.base64Decode(m.logMessage.message));
-        }
-        console.log(JSON.stringify(m, undefined, 2));
-      });
-
-      this.sub.push(this.messages.subscribe());
-    }
-
-    base64Decode(str : string) {
-      if (!(/^[a-z0-9+/]+={0,2}$/i.test(str)) || str.length %4 != 0) {
-        throw Error('Not base64 string');
-      }
-      const b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-      let o1, o2, o3, h1, h2, h3, h4, bits, d=[];
-  
-      for (const c=0; c<str.length; c+=4) {  // unpack four hexets into three octets
-          h1 = b64.indexOf(str.charAt(c));
-          h2 = b64.indexOf(str.charAt(c+1));
-          h3 = b64.indexOf(str.charAt(c+2));
-          h4 = b64.indexOf(str.charAt(c+3));
-  
-          bits = h1<<18 | h2<<12 | h3<<6 | h4;
-  
-          o1 = bits>>>16 & 0xff;
-          o2 = bits>>>8 & 0xff;
-          o3 = bits & 0xff;
-  
-          d[c/4] = String.fromCharCode(o1, o2, o3);
-          // check for padding
-          if (h4 == 0x40) d[c/4] = String.fromCharCode(o1, o2);
-          if (h3 == 0x40) d[c/4] = String.fromCharCode(o1);
-      }
-      str = d.join('');  // use Array.join() for better performance than repeated string appends
-  
-      return str;
-  }
-
 
   ngOnDestroy() {
     this.sub.forEach(subscription => subscription.unsubscribe());

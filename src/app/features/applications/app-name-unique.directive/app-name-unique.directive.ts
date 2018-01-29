@@ -9,6 +9,7 @@ import { selectNewAppState } from '../../../store/effects/create-app-effects';
 import { Headers, Http, Request, RequestOptions, QueryEncoder, URLSearchParams } from '@angular/http';
 import { ApplicationService } from '../application.service';
 import { selectEntity } from '../../../store/selectors/api.selectors';
+import { environment } from '../../../../environments/environment';
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -17,6 +18,8 @@ const APP_UNIQUE_NAME_PROVIDER = {
 /* tslint:enable */
 
 // See: https://medium.com/@kahlil/asynchronous-validation-with-angular-reactive-forms-1a392971c062
+
+const { proxyAPIVersion, cfAPIVersion } = environment;
 
 export class AppNameUniqueChecking {
   busy: boolean;
@@ -72,6 +75,10 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     .map(v => {
       this.appApplicationNameUnique.set(false, !v);
       return v ? null : {appNameTaken: true};
+    })
+    .catch(err => {
+      this.appApplicationNameUnique.set(false, false);
+      return Observable.throw(err);
     });
   }
 
@@ -80,7 +87,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
       return Observable.of(true);
     }
     const options = new RequestOptions();
-    options.url = '/pp/v1/proxy/v2/apps';
+    options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/apps`;
     options.params = new URLSearchParams('');
     options.params.set('q', 'name:' + name);
     options.params.append('q', 'space_guid:' + spaceGuid);
@@ -88,7 +95,8 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     options.headers = new Headers();
     options.headers.set('x-cap-cnsi-list', cfGuid);
     options.headers.set('x-cap-passthrough', 'true');
-    return this.http.request(new Request(options)).map(response => {
+    return this.http.request(new Request(options))
+    .map(response => {
       let resData;
       try {
         resData = response.json();
