@@ -48,6 +48,9 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   private editValue: any;
 
+  // Observable on the running instances count for the application
+  private runningInstances$: Observable<number>;
+
   private isRunning = false;
 
   ngOnInit() {
@@ -69,7 +72,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   }
 
   scaleDown(current: number) {
-    this.setInstanceCount(this.currentCount - 1 );
+    this.setInstanceCount(this.currentCount - 1);
   }
 
   edit() {
