@@ -133,7 +133,7 @@
     }
     return deferred.promise;
   }
-  
+
   function prepareBuildWithoutPluginSupport(srcPath, pluginsToInclude) {
     var imports = '';
     var inits = '';
