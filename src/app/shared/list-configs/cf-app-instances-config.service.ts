@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { ApplicationService } from '../../features/applications/application.service';
 import { CfAppInstancesDataSource, ListAppInstance } from '../data-sources/cf-app-instances-data-source';
-import { IListAction, IListConfig } from '../components/list/list.component';
+import { IListAction, IListConfig, ListViewTypes } from '../components/list/list.component';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
 import { ITableColumn } from '../components/table/table.types';
 import {
@@ -79,6 +79,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     }
   ];
   pageSizeOptions = [5, 25, 50];
+  viewType = ListViewTypes.TABLE_ONLY;
 
 
   private listActionTerminate: IListAction<any> = {
