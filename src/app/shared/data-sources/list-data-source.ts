@@ -21,6 +21,7 @@ import { withLatestFrom } from 'rxjs/operators';
 import { composeFn } from '../../store/helpers/reducer.helper';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { getListStateObservable, getListStateObservables, ListState } from '../../store/reducers/list.reducer';
+import { IListDataSourceConfig } from './list-data-source-config';
 export interface DataFunctionDefinition {
   type: 'sort' | 'filter';
   orderKey?: string;
@@ -64,36 +65,39 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private entityLettabledSubscription: Subscription;
   private paginationToStringFn: (PaginationEntityState) => string;
 
+  protected store: Store<AppState>;
+  protected action: PaginatedAction;
+  protected sourceScheme: schema.Entity;
+  public getRowUniqueId: getRowUniqueId<T>;
+  private getEmptyType: () => T;
+  public paginationKey: string;
+  private entityLettable: OperatorFunction<A[], T[]> = null;
+  public isLocal = false;
+  public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[];
+
   constructor(
-    protected _store: Store<AppState>,
-    protected action: PaginatedAction,
-    protected sourceScheme: schema.Entity,
-    public getRowUniqueId: getRowUniqueId,
-    private getEmptyType: () => T,
-    public paginationKey: string,
-    private entityLettable: OperatorFunction<A[], T[]> = null,
-    public isLocal = false,
-    public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[] // Config
+    private config: IListDataSourceConfig<A, T>
   ) {
     super();
+    this.init(config);
     this.addItem = this.getEmptyType();
-    const { view, } = getListStateObservables(this._store, paginationKey);
+    const { view, } = getListStateObservables(this.store, this.paginationKey);
     this.view$ = view;
 
-    this.entityKey = sourceScheme.key;
+    this.entityKey = this.sourceScheme.key;
     const { pagination$, entities$ } = getPaginationObservables({
-      store: this._store,
+      store: this.store,
       action: this.action,
       schema: [this.sourceScheme]
     },
-      isLocal
+      this.isLocal
     );
 
-    const dataFunctions = entityFunctions ? getDataFunctionList(entityFunctions) : null;
+    const dataFunctions = this.entityFunctions ? getDataFunctionList(this.entityFunctions) : null;
     const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
     this.entityLettabledSubscription = letted$.do(items => this.entityLettabledRows = items).subscribe();
 
-    if (isLocal) {
+    if (this.isLocal) {
       this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
     } else {
       this.page$ = letted$;
@@ -103,6 +107,18 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+  }
+
+  init(config: IListDataSourceConfig<A, T>) {
+    this.store = config.store;
+    this.action = config.action;
+    this.sourceScheme = config.schema;
+    this.getRowUniqueId = config.getRowUniqueId;
+    this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
+    this.paginationKey = config.paginationKey;
+    this.entityLettable = config.entityLettable;
+    this.isLocal = config.isLocal || false;
+    this.entityFunctions = config.entityFunctions;
   }
 
   disconnect() {
@@ -192,7 +208,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
           paginationEntity.totalResults !== entities.length ||
           paginationEntity.clientPagination.totalResults !== entities.length
         ) {
-          this._store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+          this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
         const pageIndex = paginationEntity.clientPagination.currentPage - 1;
         return pages[pageIndex];

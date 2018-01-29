@@ -7,6 +7,9 @@ import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
 import { appReducers } from '../../../../store/reducers.module';
 import { CreateApplicationStep2Component } from './create-application-step2.component';
+import { AppNameUniqueDirective } from '../../app-name-unique.directive/app-name-unique.directive';
+import { HttpModule, ConnectionBackend, Http } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
 
 describe('CreateApplicationStep2Component', () => {
   let component: CreateApplicationStep2Component;
@@ -14,7 +17,10 @@ describe('CreateApplicationStep2Component', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CreateApplicationStep2Component],
+      declarations: [
+        CreateApplicationStep2Component,
+        AppNameUniqueDirective,
+      ],
       imports: [
         CommonModule,
         CoreModule,
@@ -22,7 +28,15 @@ describe('CreateApplicationStep2Component', () => {
         BrowserAnimationsModule,
         StoreModule.forRoot(
           appReducers
-        )
+        ),
+        HttpModule,
+      ],
+      providers: [
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend,
+        },
+        Http
       ]
     })
       .compileComponents();

@@ -1,12 +1,8 @@
-import { PaginationEntityState, PaginationClientFilter } from '../../store/types/pagination.types';
-import { Observable } from 'rxjs/Observable';
 import { SortDirection } from '@angular/material';
-
-import { ListPagination, ListSort, ListFilter } from './../../store/actions/list.actions';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { IListDataSource } from '../data-sources/list-data-source-types';
-import { map, filter } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
+import { filter, map } from 'rxjs/operators';
+
 import {
   AddParams,
   SetClientFilter,
@@ -14,8 +10,12 @@ import {
   SetClientPageSize,
   SetPage,
 } from '../../store/actions/pagination.actions';
+import { AppState } from '../../store/app-state';
 import { defaultClientPaginationPageSize } from '../../store/reducers/pagination-reducer/pagination.reducer';
-import { IListMultiFilterConfigItem, IListMultiFilterConfig } from '../components/list/list.component';
+import { PaginationClientFilter, PaginationEntityState } from '../../store/types/pagination.types';
+import { IListMultiFilterConfig } from '../components/list/list.component';
+import { IListDataSource } from '../data-sources/list-data-source-types';
+import { ListFilter, ListPagination, ListSort } from './../../store/actions/list.actions';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
