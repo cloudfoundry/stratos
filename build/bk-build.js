@@ -19,12 +19,11 @@
 
   var fsMoveQ = Q.denodeify(fs.move);
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
-  var fsWriteJsonQ = Q.denodeify(fs.writeJson);
 
   buildUtils.localDevSetup();
 
   // Get the list of plugins - look for folders with a PLUGIN.md file
-    gulp.task('get-plugins-data', [], function () {
+  gulp.task('get-plugins-data', [], function () {
     var folders = fs.readdirSync(conf.srcPath);
     _.each(folders, function (file) {
       var stats = fs.lstatSync(path.join(conf.srcPath,file));
