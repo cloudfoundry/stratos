@@ -3,12 +3,9 @@ import {
   PROJECT_EXISTS,
   PROJECT_DOESNT_EXIST,
   CHECK_PROJECT_EXISTS,
-  SAVE_BRANCHES_FOR_PROJECT,
   FETCH_BRANCHES_FOR_PROJECT,
-  FAILED_TO_FETCH_BRANCHES,
   SAVE_APP_DETAILS,
   DELETE_CACHED_BRANCHES,
-  SAVE_COMMIT,
   SET_DEPLOY_CF_SETTINGS,
   SET_APP_SOURCE_DETAILS,
   DELETE_DEPLOY_APP_SECTION,
@@ -29,7 +26,7 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
         ...state, applicationSource: action.applicationSource, projectExists: {checking: false, exists: false, name: ''}
       };
     case SET_APP_SOURCE_SUB_TYPE:
-      const sourceType = { ...state.applicationSource.type, subType: action.subType};
+      const sourceType = { ...state.applicationSource.type, subType: action.subType.id};
       const appSource = { ...state.applicationSource, type: sourceType};
       return { ...state, applicationSource: appSource};
     case SET_DEPLOY_CF_SETTINGS:
@@ -61,24 +58,6 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
           name: action.projectName
         }
       };
-    case SAVE_BRANCHES_FOR_PROJECT:
-        return {
-          ...state, applicationSource:
-          { ...state.applicationSource, branches: {
-            fetching: false,
-            success: true,
-            data: action.branches
-          }}
-        };
-    case FAILED_TO_FETCH_BRANCHES || DELETE_CACHED_BRANCHES:
-        return {
-          ...state, applicationSource:
-          { ...state.applicationSource, branches: {
-            fetching: false,
-            success: false,
-            data: null
-          }}
-        };
     case FETCH_BRANCHES_FOR_PROJECT:
       return {
         ...state, applicationSource:
@@ -92,11 +71,6 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
       return {
         ...state, applicationSource:
         { ...state.applicationSource, ...action.appDetails}
-      };
-    case SAVE_COMMIT:
-      return {
-        ...state, applicationSource:
-        { ...state.applicationSource, commit: action.commitData}
       };
     case DELETE_DEPLOY_APP_SECTION:
       return defaultState;

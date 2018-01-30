@@ -18,6 +18,7 @@ import { MatSnackBar } from '@angular/material';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetAllApplications } from '../../../../store/actions/application.actions';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -30,6 +31,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   streamTitle: string;
   messages: Observable<string>;
   appData: any;
+  proxyAPIVersion = environment.proxyAPIVersion;
 
   ngOnDestroy(): void {
     this.connect$.unsubscribe();
@@ -54,7 +56,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       tap(p => {
         const host = window.location.host;
         const streamUrl = (
-          `wss://${host}/pp/v1/${p[0].cloudFoundryDetails.cloudFoundry}/` +
+          `wss://${host}/pp/${this.proxyAPIVersion}/${p[0].cloudFoundryDetails.cloudFoundry}/` +
           `${p[0].cloudFoundryDetails.org}/${p[0].cloudFoundryDetails.space}/deploy` +
           `?org=${p[1].entity.name}&space=${p[2].entity.name}`
         );
@@ -193,7 +195,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     }
 
     if (error) {
-      error = `${error}\nBackend eror: ${log.message}`;
+      error = `${error}\nReason: ${log.message}`;
       this.snackBar.open(error, 'Dismiss');
     }
   }

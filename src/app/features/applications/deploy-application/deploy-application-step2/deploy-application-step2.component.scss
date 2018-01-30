@@ -1,32 +1,34 @@
-.deploy-step2--form {
+.deploy-step2-form {
 
-  .deploy-step2--form-radio {
-
-    display: flex;
-    justify-content: space-around;
+  .reset-margin {
+    margin-top: 0;
   }
 
-  .project-info-group {
+  &__radio {
+    display: flex;
+    justify-content: left;
+    mat-radio-button {
+      padding-right: 20px;
+    }
+  }
 
+  &__project-info-group {
     display: flex;
     flex-flow: row;
     justify-content: center;
     padding-top: 24px;
 
-    .avatar-img {
-
+    img {
       height: 51px;
       width: 51px;
     }
 
     .description {
-
       flex-flow: row;
       margin-left: 24px;
       position: absolute;
 
       .centered {
-
         display: block;
         margin-left: auto;
         margin-right: auto;

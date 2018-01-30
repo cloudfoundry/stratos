@@ -13,6 +13,8 @@ export interface IRequestDataState extends IRequestTypeState {
   event: IRequestEntityTypeState<APIResource>;
   endpoint: IRequestEntityTypeState<CNSISModel>;
   system: IRequestEntityTypeState<SystemInfo>;
+  githubBranches: IRequestEntityTypeState<APIResource>;
+  githubCommits: IRequestEntityTypeState<APIResource>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -24,6 +26,8 @@ export interface IRequestState extends IRequestTypeState {
   event: IRequestEntityTypeState<RequestInfoState>;
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   system: IRequestEntityTypeState<RequestInfoState>;
+  githubBranches:  IRequestEntityTypeState<RequestInfoState>;
+  githubCommits: IRequestEntityTypeState<APIResource>;
 }
 
 export const defaultCfEntitiesState = {
@@ -34,6 +38,7 @@ export const defaultCfEntitiesState = {
   route: {},
   event: {},
   endpoint: {},
+  githubBranches: {},
   [AppEnvVarSchema.key]: {},
   [AppStatSchema.key]: {},
   [AppSummarySchema.key]: {},

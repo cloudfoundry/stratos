@@ -9,6 +9,7 @@ import { requestDataReducerFactory } from './api-request-data-reducer/request-da
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
 import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
+import { GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../types/deploy-application.types';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -53,6 +54,8 @@ const entities = [
   'routerReducer',
   'createApplication',
   'uaaSetup',
+  GITHUB_BRANCHES_ENTITY_KEY,
+  GITHUB_COMMIT_ENTITY_KEY,
   AppEnvVarSchema.key,
   AppStatSchema.key,
   AppSummarySchema.key,
