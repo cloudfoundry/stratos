@@ -93,23 +93,30 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
       entityKey: GITHUB_BRANCHES_ENTITY_KEY,
       paginationKey: 'branches'
     } as PaginatedAction;
-    this.repositoryBranches$ = getPaginationPages(this.store, action, BranchesSchema).pipe(
+    const repositoryBranches$ = getPaginationPages(this.store, action, BranchesSchema).pipe(
       filter(p => {
         return !!p[0] && !!Object.keys(p[0]).length;
       }),
-      map(p => p[0]),
-      tap(p => {
-        this.repositoryBranch = p.find(branch => branch.name === this.defaultBranch);
-        this.fetchCommit(this.repositoryBranch);
-      }),
+      map(p => p[0])
     );
+
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
-      filter(p => p && !!p.data),
+      filter(p => {
+        return p && !!p.data;
+      }),
       map(p => p.data),
       tap(p => {
         this.defaultBranch = p.default_branch;
       })
     );
+
+    // Fetch the commit, but only when we have a valid project and it's default_branch
+    this.repositoryBranches$ = combineLatest(repositoryBranches$, this.projectInfo$)
+      .map(([branches, projectInfo]) => branches)
+      .do(p => {
+        this.repositoryBranch = p.find(branch => branch.name === this.defaultBranch);
+        this.fetchCommit(this.repositoryBranch);
+      });
 
     // Auto select `git` type
     this.sourceType = this.sourceTypes[0];
@@ -121,6 +128,9 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
   setSourceType = (event) => this.store.dispatch(new SetAppSourceDetails({ type: event }));
 
   fetchCommit = (branch) => {
+    if (!branch) {
+      return;
+    }
     this.store.dispatch(new FetchCommit(branch.commit));
     this.commitInfo$ = combineLatest(
       this.store.select<Commit>(selectEntity(GITHUB_COMMIT_ENTITY_KEY, this.repositoryBranch.commit.sha)),
