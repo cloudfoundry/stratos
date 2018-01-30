@@ -19,7 +19,6 @@
 
   var fsMoveQ = Q.denodeify(fs.move);
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
-  var fsWriteJsonQ = Q.denodeify(fs.writeJson);
 
   buildUtils.localDevSetup();
 
