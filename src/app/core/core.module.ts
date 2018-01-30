@@ -15,6 +15,7 @@ import { LoggerService } from './logger.service';
 import { EndpointsService } from './endpoints.service';
 import { UserService } from './user.service';
 import { EntityServiceFactory } from './entity-service-factory.service';
+import { TruncatePipe } from './truncate.pipe';
 
 @NgModule({
   imports: [
@@ -25,7 +26,8 @@ import { EntityServiceFactory } from './entity-service-factory.service';
     RouterModule,
     FormsModule,
     ReactiveFormsModule,
-    LogOutDialogComponent
+    LogOutDialogComponent,
+    TruncatePipe
   ],
   providers: [
     AuthGuardService,
@@ -38,7 +40,10 @@ import { EntityServiceFactory } from './entity-service-factory.service';
     UserService,
     EntityServiceFactory,
   ],
-  declarations: [LogOutDialogComponent],
+  declarations: [
+    LogOutDialogComponent,
+    TruncatePipe
+  ],
   entryComponents: [
     LogOutDialogComponent
   ],

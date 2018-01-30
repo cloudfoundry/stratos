@@ -13,7 +13,6 @@ import { AppState } from '../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { SetCFDetails } from '../../../store/actions/create-applications-page.actions';
 import { Observable } from 'rxjs/Observable';
-import { TruncatePipe } from './deploy-application-step2/truncate.pipe';
 
 @NgModule({
   imports: [
@@ -27,10 +26,9 @@ import { TruncatePipe } from './deploy-application-step2/truncate.pipe';
     DeployApplicationStep2Component,
     GithubProjectExistsDirective,
     DeployApplicationStep3Component,
-    TruncatePipe,
   ],
   exports: [
     DeployApplicationComponent
   ]
 })
-export class DeployApplicationModule {}
+export class DeployApplicationModule { }

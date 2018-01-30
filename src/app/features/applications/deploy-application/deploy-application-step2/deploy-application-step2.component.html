@@ -41,7 +41,7 @@
           </div>
         </div>
         <mat-form-field>
-          <mat-select class="reset-margin" placeholder="Branch" [disabled]="!repository" [(ngModel)]="repositoryBranch" name="repositoryBranch" (change)="fetchCommit($event.value)" required>
+          <mat-select class="reset-margin" placeholder="Branch" [disabled]="!repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (change)="fetchCommit($event.value)" required>
             <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
               {{ branch.name }}
             </mat-option>

@@ -85,9 +85,8 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-export const getPaginationPages = <T = any>(store: Store<AppState>, action: PaginatedAction, schema: Schema): {
-  [key: string]: any
-} => {
+export const getPaginationPages = <T = any>(store: Store<AppState>, action: PaginatedAction, schema: Schema):
+  Observable<Array<Array<T>>> => {
   const { entityKey, paginationKey } = action;
 
   // One observable to emit when pagination changes
