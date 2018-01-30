@@ -124,7 +124,7 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
     this.store.dispatch(new FetchCommit(branch.commit));
     this.commitInfo$ = combineLatest(
       this.store.select<Commit>(selectEntity(GITHUB_COMMIT_ENTITY_KEY, this.repositoryBranch.commit.sha)),
-      this.sourceSelectionForm.controls.projectName.statusChanges
+      this.sourceSelectionForm.controls.projectName.statusChanges.startWith('VALID')
     ).map(([commit, projectValid]: [Commit, string]) => {
       if (projectValid === 'VALID') {
         return commit;
