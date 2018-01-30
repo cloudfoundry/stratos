@@ -1,4 +1,3 @@
-import { CardComponent } from '../../../shared/components/cards/card/card.component';
 import { GetSystemInfo } from './../../../store/actions/system.actions';
 import { SystemEffects } from './../../../store/effects/system.effects';
 import { Store } from '@ngrx/store';

@@ -7,11 +7,16 @@ import { Observable } from 'rxjs/Rx';
 import { SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
+import { AppNameUniqueChecking } from '../../app-name-unique.directive/app-name-unique.directive';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 
 @Component({
   selector: 'app-create-application-step2',
   templateUrl: './create-application-step2.component.html',
-  styleUrls: ['./create-application-step2.component.scss']
+  styleUrls: ['./create-application-step2.component.scss'],
+  providers: [
+    {provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher}
+  ]
 })
 export class CreateApplicationStep2Component implements OnInit {
 
@@ -23,7 +28,7 @@ export class CreateApplicationStep2Component implements OnInit {
 
   validate: Observable<boolean>;
 
-  checkingNameState$: Observable<string>;
+  appNameChecking: AppNameUniqueChecking = new AppNameUniqueChecking();
 
   name: string;
 
@@ -37,13 +42,6 @@ export class CreateApplicationStep2Component implements OnInit {
       .map(() => {
         return this.form.valid;
       });
-
-    this.checkingNameState$ = this.store.select(selectNewAppState).map(state => {
-      if (state.nameCheck.checking) {
-        return 'busy';
-      }
-      return state.nameCheck.available ? 'done' : 'error';
-    });
   }
 
 }

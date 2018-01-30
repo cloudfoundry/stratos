@@ -48,6 +48,7 @@ export class CfOrgSpaceDataService {
     this.createSpace();
 
     const orgResetSub = this.cf.select.asObservable().distinctUntilChanged().do(() => {
+      // When this service is refactored we need to update these at the same time as the cf select change occurs
       this.org.select.next(undefined);
       this.space.select.next(undefined);
     }).subscribe();
@@ -56,6 +57,7 @@ export class CfOrgSpaceDataService {
     });
 
     const spaceResetSub = this.org.select.asObservable().distinctUntilChanged().do(() => {
+      // When this service is refactored we need to update these at the same time as the cf select change occurs
       this.space.select.next(undefined);
     }).subscribe();
     this.org.select.asObservable().finally(() => {

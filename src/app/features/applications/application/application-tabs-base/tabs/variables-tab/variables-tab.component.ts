@@ -6,9 +6,6 @@ import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import {
-  CardAppVariableComponent,
-} from '../../../../../../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
 
 @Component({
   selector: 'app-variables-tab',
@@ -33,7 +30,6 @@ export class VariablesTabComponent implements OnInit {
     names: String[],
     values: {}
   }>;
-  cardComponent = CardAppVariableComponent;
   envVarsDataSource: CfAppEvnVarsDataSource;
 
   ngOnInit() {

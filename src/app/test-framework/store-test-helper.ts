@@ -11,7 +11,7 @@ const testInitialStoreState: AppState = {
       loggingIn: false,
       user: null,
       error: false,
-      errorMessage: '',
+      errorResponse: '',
       sessionData: {
         version: {
           proxy_version: '0.9.5-a77102d6',

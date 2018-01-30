@@ -18,6 +18,7 @@ import {
   IListAction,
   IListConfig,
   IMultiListAction,
+  ListViewTypes,
 } from '../components/list/list.component';
 import { AppEnvVarsState } from '../../store/types/app-metadata.types';
 
@@ -64,6 +65,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   ];
 
   pageSizeOptions = [9, 45, 90];
+  viewType = ListViewTypes.TABLE_ONLY;
 
   private dispatchDeleteAction() {
     this.store.dispatch(
