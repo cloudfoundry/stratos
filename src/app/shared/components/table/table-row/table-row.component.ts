@@ -1,10 +1,10 @@
+import { RowState } from './../../../data-sources/list-data-source-types';
 import { CdkRow } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, HostBinding, OnInit, ViewEncapsulation, ViewContainerRef, Directive } from '@angular/core';
 import { CdkCellDef } from '@angular/cdk/table';
 import { CdkCellOutlet } from '@angular/cdk/table';
 import { Input } from '@angular/core';
 import { ListDataSource } from '../../../data-sources/list-data-source';
-import { RowState } from '../../../data-sources/list-data-source-types';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 

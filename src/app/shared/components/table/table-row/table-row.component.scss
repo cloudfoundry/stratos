@@ -9,9 +9,6 @@
     }
   }
   &__errored {
-    .table-row {
-      background-color: rgba(255, 0, 0, .1);
-    }
     .table-row__error {
       display: flex;
     }
@@ -21,9 +18,6 @@
 .table-row {
   position: relative;
   &__error {
-    background-color: #f00;
-    border-color: #f00;
-    color: #fff;
     display: none;
     justify-content: middle;
     &-message {
@@ -34,9 +28,6 @@
     }
     &-icon {
       padding-left: 13px;
-    }
-    a {
-      color: #fff;
     }
   }
   &__blocker {

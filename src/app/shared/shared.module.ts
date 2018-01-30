@@ -107,7 +107,7 @@ import { ConfirmationDialogService } from './components/confirmation-dialog.serv
     ValuesPipe,
     LoadingPageComponent,
     DetailsCardComponent,
-    FocusDirective, §
+    FocusDirective,
     UniqueDirective,
     CodeBlockComponent,
     TableComponent,
@@ -195,7 +195,7 @@ import { ConfirmationDialogService } from './components/confirmation-dialog.serv
     TableCellUsageComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
-    DialogConfirmComponent,
+    DialogConfirmComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
