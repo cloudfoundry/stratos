@@ -29,6 +29,7 @@ import { ListActions } from '../../data-sources/list-data-source-types';
 import { CardStatusComponent } from '../card-status/card-status.component';
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../pipes/percentage.pipe';
+import { TableRowComponent } from '../table/table-row/table-row.component';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -56,13 +57,14 @@ describe('ListComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
+        TableRowComponent
       ],
       imports: [
         CoreModule,
         createBasicStoreModule(),
         NoopAnimationsModule
       ],
-   })
+    })
       .compileComponents();
   }));
 

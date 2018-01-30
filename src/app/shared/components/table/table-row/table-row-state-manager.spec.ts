@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { skip } from 'rxjs/operators';
 
 
-fdescribe('TableHeaderSelectComponent', () => {
+describe('TableHeaderSelectComponent', () => {
     let sub: Subscription;
     let stateManager: TableRowStateManager;
     let obs: Observable<RowsState>;

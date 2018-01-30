@@ -37,7 +37,6 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
     });
     interval(5000).pipe(
       map(() => {
-        debugger;
         rowStateManager.updateRowState('2fa75a76-c2e6-490f-acac-02eabb1bbf6a', {
           error: false
         });
