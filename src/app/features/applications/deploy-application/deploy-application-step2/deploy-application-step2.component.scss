@@ -1,9 +1,7 @@
 .deploy-step2-form {
-
   .reset-margin {
     margin-top: 0;
   }
-
   &__radio {
     display: flex;
     justify-content: left;
@@ -11,23 +9,20 @@
       padding-right: 20px;
     }
   }
-
   &__project-info-group {
     display: flex;
     flex-flow: row;
-    justify-content: center;
-    padding-top: 24px;
-
+    > div {
+      padding-right: 10px;
+    }
     img {
       height: 51px;
       width: 51px;
     }
-
     .description {
       flex-flow: row;
       margin-left: 24px;
       position: absolute;
-
       .centered {
         display: block;
         margin-left: auto;
