@@ -81,9 +81,7 @@ export interface RowState {
   error?: boolean;
   message?: string;
   blocked?: boolean;
-  metadata?: {
-    [key: string]: any
-  };
+  [customState: string]: any;
 }
 
 export const getDefaultRowState = (): RowState => ({
