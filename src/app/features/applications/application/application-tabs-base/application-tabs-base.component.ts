@@ -139,8 +139,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   containsGitHubInfo(appVars) {
     if (appVars.STRATOS_PROJECT) {
-      const details = JSON.parse(appVars.STRATOS_PROJECT);
-      return details.deploySource && details.deploySource.type === 'github';
+      try {
+        const details = JSON.parse(appVars.STRATOS_PROJECT);
+        return details.deploySource && details.deploySource.type === 'github';
+      } catch (err) {
+        // noop
+      }
     }
     return false;
   }
