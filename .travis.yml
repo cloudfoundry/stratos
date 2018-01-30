@@ -32,7 +32,7 @@ jobs:
     - CI_ENV=true
     script:
     - npm test
-    stage: Backend
+  - stage: Backend
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
     - chmod +x ~/bin/gimme
