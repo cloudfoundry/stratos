@@ -1,3 +1,5 @@
+import { interval } from 'rxjs/observable/interval';
+import { TableRowStateManager } from './../components/table/table-row/table-row-state-manager';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
@@ -7,6 +9,7 @@ import { AppState } from '../../store/app-state';
 import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../store/selectors/cnsis.selectors';
 import { CNSISModel } from '../../store/types/cnsis.types';
 import { ListDataSource } from './list-data-source';
+import { map } from 'rxjs/operators';
 
 
 export class EndpointsDataSource extends ListDataSource<CNSISModel> {
@@ -55,7 +58,7 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
           orderKey: 'address',
           field: 'api_endpoint.Host'
         },
-      ]
+      ],
     });
     this.store = store;
     store.dispatch(new SetListStateAction(

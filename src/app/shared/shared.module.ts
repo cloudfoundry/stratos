@@ -77,6 +77,10 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
+import { TableRowComponent } from './components/table/table-row/table-row.component';
+import { CdkCellOutlet } from '@angular/cdk/table';
+import { CdkTableModule } from '@angular/cdk/table';
+
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
@@ -92,7 +96,8 @@ import {
     RouterModule,
     SteppersModule,
     VirtualScrollModule,
-    CfAuthModule
+    CfAuthModule,
+    CdkTableModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -151,6 +156,7 @@ import {
     TableCellTCPRouteComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    TableRowComponent,
     RunningInstancesComponent,
     DialogConfirmComponent,
     TableCellAppInstancesComponent,
@@ -195,7 +201,7 @@ import {
     TableCellUsageComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
-    DialogConfirmComponent,
+    DialogConfirmComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

@@ -104,7 +104,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private listActionSsh: IListAction<any> = {
     action: (item) => {
-      console.log(item);
       const index = item.index;
       const sshRoute = (
         `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`

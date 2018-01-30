@@ -1,7 +1,7 @@
 import { IListPaginationController } from '../../data-sources/list-pagination-controller';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { MatSort, Sort } from '@angular/material';
+import { MatSort, Sort, MatRow } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -10,6 +10,8 @@ import { ListSort } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { IListDataSource } from '../../data-sources/list-data-source-types';
 import { ITableColumn, ITableText } from './table.types';
+import { TableRowComponent } from './table-row/table-row.component';
+import { CdkCellOutlet } from '@angular/cdk/table';
 
 @Component({
   selector: 'app-table',

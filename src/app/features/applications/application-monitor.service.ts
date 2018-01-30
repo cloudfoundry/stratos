@@ -65,8 +65,6 @@ export class ApplicationMonitorService {
   ) {
     // Do we need share()? Or should this be on the app stats observable?
     this.appMonitor$ = this.applicationService.appStats$.map(stats => {
-      // console.log('APP MONITOR');
-      // console.log(item);
       const res = new AppMonitorState();
       if (!stats) {
         return res;

@@ -5,7 +5,8 @@ import { OperatorFunction } from 'rxjs/interfaces';
 import { AppState } from '../../store/app-state';
 import { PaginatedAction } from '../../store/types/pagination.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
-import { getRowUniqueId } from './list-data-source-types';
+import { getRowUniqueId, RowsState } from './list-data-source-types';
+import { Observable } from 'rxjs/Observable';
 
 export interface IListDataSourceConfig<A, T> {
   store: Store<AppState>;
@@ -13,6 +14,7 @@ export interface IListDataSourceConfig<A, T> {
   schema: schema.Entity;
   getRowUniqueId: getRowUniqueId<T>;
   paginationKey: string;
+  rowsState?: Observable<RowsState>;
   getEmptyType?: () => T;
   /**
    * A function that will map the type coming from the store (A)

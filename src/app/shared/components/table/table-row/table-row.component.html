@@ -1,0 +1,11 @@
+<div class="table-row-wrapper" [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__errored': inErrorState$ | async}">
+  <div role="row" class="mat-row table-row">
+    <div class="table-row__blocker"></div>
+    <ng-container cdkCellOutlet></ng-container>
+  </div>
+  <div class="table-row__error mat-row">
+    <mat-icon class="table-row__error-icon">warning</mat-icon>
+    <div class="table-row__error-message" [innerHTML]="errorMessage$ | async">
+    </div>
+  </div>
+</div>

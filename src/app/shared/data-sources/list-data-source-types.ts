@@ -36,6 +36,7 @@ export class ListActions<T> {
 export interface IListDataSource<T> {
   view$: Observable<ListView>;
   // state$: Observable<ListState>;
+  rowsState?: Observable<RowsState>;
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
   localDataFunctions?: ((entities: T[], paginationState: PaginationEntityState) => T[])[];
@@ -65,9 +66,27 @@ export interface IListDataSource<T> {
 
   getFilterFromParams(pag: PaginationEntityState): string;
   setFilterParam(filter: string, pag: PaginationEntityState);
-
   connect(): Observable<T[]>;
   destroy();
+
 }
 
 export type getRowUniqueId<T> = (T) => string;
+export interface RowsState {
+  [rowUID: string]: RowState;
+}
+
+export interface RowState {
+  busy?: boolean;
+  error?: boolean;
+  message?: string;
+  blocked?: boolean;
+  [customState: string]: any;
+}
+
+export const getDefaultRowState = (): RowState => ({
+  busy: false,
+  error: false,
+  blocked: false,
+  message: null
+});

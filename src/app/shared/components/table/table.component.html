@@ -19,8 +19,9 @@
             <app-table-cell [component]="column.cellComponent" [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
           </mat-cell>
         </ng-container>
-        <mat-header-row class="app-table__header-row" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" *matHeaderRowDef="columnNames"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: columnNames;" class="app-table__row" [class.fixedRowHeight]="app-table__inner--fixed-row-height"></mat-row>
+        <mat-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" class="app-table__header-row" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"
+          *matHeaderRowDef="columnNames"></mat-header-row>
+        <app-table-row [class.fixedRowHeight]="app-table__inner--fixed-row-height" class="app-table__row" *matRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight" [rowState]="dataSource.getRowState(row)"></app-table-row>
       </mat-table>
     </mat-card-content>
   </mat-card>

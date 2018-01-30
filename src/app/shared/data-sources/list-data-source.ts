@@ -15,7 +15,7 @@ import { schema } from 'normalizr';
 import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
 import { AppState } from '../../store/app-state';
 import { AddParams, RemoveParams, SetClientPage, SetPage, SetResultCount } from '../../store/actions/pagination.actions';
-import { IListDataSource, getRowUniqueId } from './list-data-source-types';
+import { IListDataSource, getRowUniqueId, RowsState, getDefaultRowState } from './list-data-source-types';
 import { map, shareReplay } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators';
 import { composeFn } from '../../store/helpers/reducer.helper';
@@ -74,6 +74,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private entityLettable: OperatorFunction<A[], T[]> = null;
   public isLocal = false;
   public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[];
+  public rowsState?: Observable<RowsState>;
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -119,6 +120,22 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.entityLettable = config.entityLettable;
     this.isLocal = config.isLocal || false;
     this.entityFunctions = config.entityFunctions;
+    this.rowsState = config.rowsState ? config.rowsState.pipe(
+      shareReplay(1)
+    ) : Observable.of({}).first();
+  }
+  /**
+   * Will return the row state with default values filled in.
+   * @param row The data for the current row
+   */
+  getRowState(row: T) {
+    return this.rowsState.pipe(
+      map(state => ({
+        ...getDefaultRowState(),
+        ...(state[this.getRowUniqueId(row)] || {})
+      })),
+      distinctUntilChanged()
+    );
   }
 
   disconnect() {
