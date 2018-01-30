@@ -793,12 +793,13 @@
      * @description restart an application
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
+     * @returns {promise} a promise object
      * @public
      */
     function restartApp(cnsiGuid, guid) {
 
-      stopApp(cnsiGuid, guid).then(function () {
-        startApp(cnsiGuid, guid);
+      return stopApp(cnsiGuid, guid).then(function () {
+        return startApp(cnsiGuid, guid);
       });
     }
 

@@ -14,10 +14,12 @@
   //var REPLACE_REGEX = /\[\[:@(.*)]]/g;
   var REPLACE_REGEX = /\[\[(@:.*?)\]\]/g;
 
-  module.exports = function (prettyPrint, initJsonAllLocales) {
+  module.exports = function (prettyPrint, initJsonAllLocales, onlyTheseLocales) {
     // Translations
     var translations = {};
     var firstFiles = {};
+    var permittedLocales = _.keyBy(onlyTheseLocales);
+    var loggedIgnored = {};
 
     function replace(obj, current) {
       _.each(current, function (v, k) {
@@ -55,8 +57,18 @@
       if (Object.keys(firstFiles).length === 0) {
         return cb();
       }
+
+      var allLocales = _.sortBy(_.map(translations, function (v, locale) {
+        return locale;
+      })).join(',');
+
       _.each(translations, function (v, locale) {
         replace(v, v);
+
+        if (v && v.locales && v.locales.locales) {
+          // Update the list of locales based on the locales read from file
+          v.locales.locales = allLocales;
+        }
         var res = prettyPrint ? JSON.stringify(v, undefined, 2) : JSON.stringify(v);
         var file = new gutil.File({
           cwd: firstFiles[locale].cwd,
@@ -73,6 +85,15 @@
     }
 
     function addStrings(locale, file) {
+
+      if (onlyTheseLocales && !permittedLocales[locale]) {
+        if (!loggedIgnored[locale]) {
+          loggedIgnored[locale] = true;
+          gutil.log('Ignoring locale:', gutil.colors.magenta(locale));
+        }
+        return;
+      }
+
       if (!translations[locale]) {
         translations[locale] = _.cloneDeep(initJsonAllLocales || {});
         firstFiles[locale] = file;

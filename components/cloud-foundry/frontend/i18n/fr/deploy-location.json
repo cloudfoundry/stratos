@@ -1,0 +1,11 @@
+{
+  "app.deploy-location": {
+    "title": "Sélectionner pour [[@:cloud-foundry]] une instance  une organisation et un espace pour l'application.",
+    "cf-label": "[[@:cloud-foundry]]",
+    "cf-placeholder": "Sélectionner [[@:cloud-foundry]]",
+    "org-label": "[[@:organization]]",
+    "org-placeholder": "Sélectionner [[@:organization]]",
+    "space-label": "[[@:space]]",
+    "space-placeholder": "Sélectionner [[@:space]]"
+  }
+}

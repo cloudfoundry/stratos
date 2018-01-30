@@ -1,0 +1,22 @@
+{
+  "login": {
+    "login": "Se connecter",
+    "console": "@:product.console",
+    "logo": "",
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "username": "@:auth.username",
+    "password": "@:auth.password",
+    "authenticating": "Authentification des informations d'identification",
+    "welcome": "Utilisez [[@:product.console]] pour développer, composer et gérer les charges de travail Cloud Native.",
+    "error": {
+      "credentials": "Le nom d'utilisateur ou le mot de passe que vous avez utilisé est incorrecte. Veuillez réessayer.",
+      "server": "Une erreur de serveur s'est produite lors de la tentative de connexion. Veuillez réessayer. Si cette erreur persiste, veuillez contacter l'administrateur.",
+      "no-response": "Le serveur d'authentification n'a pas pu répondre. Veuillez réessayer. Si cette erreur persiste, veuillez contacter l'administrateur."
+    },
+    "timeout": {
+      "prompt": "Êtes-vous encore là?",
+      "notice": "Vous avez été inactif pendant un moment. Pour votre protection, nous vous déconnectons automatiquement {{timeout}}",
+      "confirm": "Je suis toujours là"
+    }
+  }
+}

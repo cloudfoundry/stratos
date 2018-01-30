@@ -3,8 +3,7 @@ resources:
   type: git
   source:
     repo: SUSE/stratos-ui
-    uri: git@github.com:suse/stratos-ui.git
-    private_key: {{github-private-key}}
+    uri: https://github.com/SUSE/stratos-ui.git
     branch: {{stratos-ui-branch}}
 - name: aio-docker-image
   type: docker-image

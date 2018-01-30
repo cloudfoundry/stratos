@@ -5,11 +5,14 @@ $login-bg-color: #eee;
 
 .brand {
 
+  .login-landing-page .landing-content>.landing-spacer-content {
+     align-self: center;
+  }
+
   .landing-container {
     .landing-content>.landing-spacer-content {
       display: flex;
       justify-content: center;
-      align-self: center;
     }
 
     login-form {
