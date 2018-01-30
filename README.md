@@ -1,7 +1,7 @@
 # Stratos UI
-<a href="https://travis-ci.org/SUSE/stratos"><img src="https://travis-ci.org/SUSE/stratos.svg?branch=master"></a>
-<a href="https://codeclimate.com/github/SUSE/stratos"><img src="https://img.shields.io/codeclimate/maintainability/SUSE/stratos.svg"></a>
-<a href="https://codecov.io/gh/SUSE/stratos"><img src="https://codecov.io/gh/SUSE/stratos/branch/master/graph/badge.svg"/></a>
+<a href="https://travis-ci.org/cloudfoundry-incubator/stratos"><img src="https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=master"></a>
+<a href="https://codeclimate.com/github/cloudfoundry-incubator/stratos"><img src="https://img.shields.io/codeclimate/maintainability/cloudfoundry-incubator/stratos.svg"></a>
+<a href="https://codecov.io/gh/cloudfoundry-incubator/stratos"><img src="https://codecov.io/gh/cloudfoundry-incubator/stratos/branch/master/graph/badge.svg"/></a>
 <a href="https://zenhub.com"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"/></a>
 [![GitHub release](https://img.shields.io/github/release/SUSE/stratos-ui.svg)](https://github.com/SUSE/stratos-ui/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/SUSE/stratos-ui/blob/master/LICENSE.md)
