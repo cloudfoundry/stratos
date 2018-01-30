@@ -11,6 +11,7 @@ import { ApplicationServiceMock } from '../../../../../test-framework/applicatio
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
 import { CommonModule } from '@angular/common';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 
@@ -26,6 +27,7 @@ describe('CardAppInstancesComponent', () => {
         ApplicationStateComponent,
         ApplicationStateIconComponent,
         ApplicationStateIconPipe,
+        RunningInstancesComponent,
       ],
       imports: [
         CoreModule,
@@ -39,7 +41,7 @@ describe('CardAppInstancesComponent', () => {
         ConfirmationDialogService,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

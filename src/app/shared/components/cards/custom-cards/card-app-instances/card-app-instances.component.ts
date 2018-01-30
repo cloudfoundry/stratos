@@ -35,7 +35,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store<AppState>,
-    private applicationService: ApplicationService,
+    public applicationService: ApplicationService,
     private renderer: Renderer,
     private confirmDialog: ConfirmationDialogService) { }
 
@@ -61,14 +61,6 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
       }
     });
 
-    const { cfGuid, appGuid } = this.applicationService;
-    this.runningInstances$ = getPaginationPages(this.store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
-      .pipe(
-      map(appInstancesPages => {
-        const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
-        return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
-      })
-    );
   }
 
   ngOnDestroy(): void {
@@ -80,7 +72,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   }
 
   scaleDown(current: number) {
-    this.setInstanceCount(this.currentCount - 1 );
+    this.setInstanceCount(this.currentCount - 1);
   }
 
   edit() {

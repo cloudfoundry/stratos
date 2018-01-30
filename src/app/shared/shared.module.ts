@@ -77,8 +77,12 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
+import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
+import {
+  TableCellAppInstancesComponent
+} from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 @NgModule({
   imports: [
@@ -147,7 +151,9 @@ import { ConfirmationDialogService } from './components/confirmation-dialog.serv
     TableCellTCPRouteComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    RunningInstancesComponent,
     DialogConfirmComponent,
+    TableCellAppInstancesComponent,
   ],
   exports: [
     FormsModule,
