@@ -8,6 +8,9 @@ import { skip } from 'rxjs/operators';
 
 
 fdescribe('TableHeaderSelectComponent', () => {
+    let sub: Subscription;
+    let stateManager: TableRowStateManager;
+    let obs: Observable<RowsState>;
     const checkState = (manager: TableRowStateManager, actualState: RowState, expectedState: RowState) => {
         const fake = {
             'FAKE': {
@@ -19,9 +22,6 @@ fdescribe('TableHeaderSelectComponent', () => {
         expect(actualState).not.toEqual(fake);
         expect(stateManager.rowState).not.toEqual(fake);
     };
-    let sub: Subscription;
-    let stateManager: TableRowStateManager;
-    let obs: Observable<RowsState>;
     beforeEach(async(() => {
         stateManager = new TableRowStateManager();
         obs = stateManager.observable;
