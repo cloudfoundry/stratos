@@ -1,0 +1,32 @@
+.log-viewer {
+  position: relative;
+  overflow: visible;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  &__warn-icon {
+    margin-left: 10px;
+  }
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.log-scroller {
+  overflow-y: auto;
+  background-color: #373B41;
+  display: block;
+  height: 100%;
+  position: relative;
+  transform: translate3d(0, 0, 0);
+  padding: 5px;
+  height: 500px;
+  &__content {
+    color: #C5C8C6;
+  }
+}
+
+.last-chance-saloon {
+  display: none;
+}

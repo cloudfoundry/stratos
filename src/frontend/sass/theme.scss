@@ -1,0 +1,6 @@
+@import '~@angular/material/theming';
+@import './mat-themes';
+@import './all-theme';
+@include mat-core();
+@include angular-material-theme($base-theme);
+@include app-theme($base-theme, $base-app-theme);

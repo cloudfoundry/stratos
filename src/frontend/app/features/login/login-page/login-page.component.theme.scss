@@ -1,0 +1,17 @@
+@mixin login-page-theme($theme, $app-theme) {
+  $warn: map-get($theme, warn);
+  $primary: map-get($theme, primary);
+  .login {
+    background-color: map-get($app-theme, app-background-color);
+    &__title {
+      background-color: mat-color($primary);
+      color: mat-contrast($primary, 500);
+    }
+    &-message {
+      color: map-get($app-theme, app-background-text-color);
+      &-error {
+        color: mat-color($warn)
+      }
+    }
+  }
+}

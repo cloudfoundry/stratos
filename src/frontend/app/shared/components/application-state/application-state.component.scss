@@ -1,0 +1,11 @@
+.app-state {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  app-application-state-icon {
+    padding-right: 5px;
+  }
+  &__with-icon {
+    height: 25px;
+  }
+}

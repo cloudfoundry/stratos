@@ -1,0 +1,8 @@
+@import '~@angular/material/theming';
+@mixin variables-tab-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+  $foreground-colors: map-get($theme, foreground);
+  .listComponent__header.selected .mat-card {
+    background-color: mat-color($primary, 50);
+  }
+}

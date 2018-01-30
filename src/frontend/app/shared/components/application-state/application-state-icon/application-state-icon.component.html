@@ -1,0 +1,4 @@
+<div class="app-state-icon">
+  <mat-icon [ngClass]="state?.indicator | applicationStateIcon:'class'">{{state?.indicator | applicationStateIcon:'icon'}}</mat-icon>
+  <!-- <mat-progress-spinner *ngIf="state?.indicator === 'busy'" mode="indeterminate" color="primary"></mat-progress-spinner> -->
+</div>

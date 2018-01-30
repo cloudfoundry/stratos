@@ -1,0 +1,42 @@
+.table-row-wrapper {
+  &__blocked {
+    .table-row {
+      cursor: not-allowed;
+      opacity: .22;
+    }
+    .table-row__blocker {
+      display: block;
+    }
+  }
+  &__errored {
+    .table-row__error {
+      display: flex;
+    }
+  }
+}
+
+.table-row {
+  position: relative;
+  &__error {
+    display: none;
+    justify-content: middle;
+    &-message {
+      flex: 1;
+      line-height: 20px;
+      margin: 15px 20%;
+      text-align: center;
+    }
+    &-icon {
+      padding-left: 13px;
+    }
+  }
+  &__blocker {
+    bottom: 0;
+    display: none;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 999;
+  }
+}
