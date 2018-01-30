@@ -32,7 +32,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   messages: Observable<string>;
   appData: any;
   proxyAPIVersion = environment.proxyAPIVersion;
-
+  validate = Observable.of(false);
   ngOnDestroy(): void {
     this.connect$.unsubscribe();
   }

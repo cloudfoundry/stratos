@@ -34,6 +34,15 @@ export class StepComponent implements OnInit {
   @Input('valid')
   valid = true;
 
+  @Input('nextButtonText')
+  nextButtonText = 'Next';
+
+  @Input('finishButtonText')
+  finishButtonText = 'Finish';
+
+  @Input('disablePrevious')
+  disablePrevious = false;
+
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
 
