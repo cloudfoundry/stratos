@@ -9,8 +9,8 @@ import (
 
 	"errors"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/config"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )
@@ -21,7 +21,7 @@ type CloudFoundrySpecification struct {
 }
 
 const (
-	EndpointType = "cf"
+	EndpointType  = "cf"
 	CLIENT_ID_KEY = "CF_CLIENT"
 )
 
@@ -70,7 +70,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
 
 	// CF auto reg url missing, continue as normal
-	if (cfAPI == "") {
+	if cfAPI == "" {
 		return nil
 	}
 
@@ -108,7 +108,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 	} else {
 		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
 		_, err := c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID)
-		return err;
+		return err
 	}
 
 	return nil
@@ -117,7 +117,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, interfaces.CNSIRecord, error) {
 	cfAPI := c.portalProxy.GetConfig().AutoRegisterCFUrl
 
-	if (cfAPI == "") {
+	if cfAPI == "" {
 		return "", interfaces.CNSIRecord{}, nil
 	}
 	// Error is populated if there was an error OR there was no record

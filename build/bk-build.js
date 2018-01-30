@@ -24,21 +24,14 @@
   buildUtils.localDevSetup();
 
   gulp.task('get-plugins-data', [], function () {
-
-    var plugins = require('../plugins.json');
-    if (plugins.enabledPlugins.length === 0) {
-      // nothing to do
-      enabledPlugins = [];
-    } else {
-
-      _.each(plugins.enabledPlugins, function (plugin) {
-        var pluginInfo = {};
-        pluginInfo.libraryPath = plugin + '.so';
-        pluginInfo.pluginPath = plugin;
-        pluginInfo.pluginName = plugin;
-        enabledPlugins.push(pluginInfo);
-      });
-    }
+    var plugins = prepareBuild.getPlugins();
+    _.each(plugins, function (plugin) {
+      var pluginInfo = {};
+      pluginInfo.libraryPath = plugin + '.so';
+      pluginInfo.pluginPath = plugin;
+      pluginInfo.pluginName = plugin;
+      enabledPlugins.push(pluginInfo);
+    });
   });
 
   gulp.task('init-build', ['copy-portal-proxy', 'copy-dbmigrator', 'create-outputs'], function () {
@@ -57,7 +50,7 @@
 
     var promise = Q.resolve();
     _.each(enabledPlugins, function (pluginInfo) {
-      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
+      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath);
       if (fs.existsSync(fullPluginPath)) {
         promise = promise
           .then(function () {
@@ -74,7 +67,7 @@
         });
     }
 
-    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend');
+    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core');
 
     if (fs.existsSync(fullCorePath)) {
       promise = promise.then(function () {
@@ -108,8 +101,8 @@
     var promise = Q.resolve();
     var promises = [];
     _.each(enabledPlugins, function (pluginInfo) {
-      var pluginVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', 'vendor');
-      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', '__vendor');
+      var pluginVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'vendor');
+      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, '__vendor');
       // sequentially chain promise
       promise
         .then(function () {
@@ -151,12 +144,12 @@
       });
 
     // App Core
-    var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
+    var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'vendor');
     if (fs.existsSync(coreVendorPath)) {
       promise = promise.then(function () {
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
-        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', 'vendor');
-        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'backend', '__vendor');
+        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'vendor');
+        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', '__vendor');
         mergeDirs.default(coreVendorPath, goSrc);
         if (fs.existsSync(coreCheckedInVendorPath)) {
           mergeDirs.default(coreCheckedInVendorPath, goSrc);
@@ -180,7 +173,7 @@
     var promise = Q.resolve();
     // Build all plugins
     _.each(enabledPlugins, function (pluginInfo) {
-      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend');
+      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath);
       promise = promise.then(function () {
         return buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
       });
@@ -231,7 +224,7 @@
     var outputPath = conf.outputPath + path.sep;
     var promise = fsEnsureDirQ(outputPath);
     _.each(enabledPlugins, function (pluginInfo) {
-      var compiledPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'backend', pluginInfo.pluginName + '.so');
+      var compiledPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, pluginInfo.pluginName + '.so');
       var outputsPluginPath = path.join(outputPath, pluginInfo.pluginName + '.so');
       promise
         .then(function () {

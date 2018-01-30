@@ -1,8 +1,8 @@
 package cnsis
 
 import (
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	"net/url"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 )
 
 // RegisteredCluster - <TBD>
@@ -26,6 +26,6 @@ type Repository interface {
 	Save(guid string, cnsiRecord interfaces.CNSIRecord) error
 }
 
-type Endpoint interface{
-	Init() ()
+type Endpoint interface {
+	Init()
 }

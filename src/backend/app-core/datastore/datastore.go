@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
+	"github.com/SUSE/stratos-ui/app-core/config"
 
 	log "github.com/Sirupsen/logrus"
 	// Mysql driver

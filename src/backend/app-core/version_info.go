@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/goose-db-version"
+	"github.com/SUSE/stratos-ui/app-core/repository/goose-db-version"
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )

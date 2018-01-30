@@ -9,11 +9,12 @@
       return path.join(srcPath, 'vendor', 'github.com', 'SUSE', 'stratos-ui');
     },
     getCorePath: function (srcPath, executable) {
-      return path.join(srcPath, 'app-core', 'backend', executable ? executable : '');
+      return path.join(srcPath, 'app-core', executable ? executable : '');
     },
     coreName: 'portal-proxy',
     dbMigratorName: 'stratos-dbmigrator',
     outputPath: path.join(__dirname, '..', 'outputs'),
-    srcPath: path.join(__dirname, 'components')
+    srcPath: path.join(__dirname, 'src', 'backend'),
+    pluginFolder: path.join(__dirname, '..', 'src', 'backend')
   };
 })();

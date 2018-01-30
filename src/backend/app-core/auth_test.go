@@ -10,8 +10,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/repository/crypto"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"

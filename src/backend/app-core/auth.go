@@ -16,8 +16,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/repository/tokens"
 )
 
 // UAAResponse - Response returned by Cloud Foundry UAA Service

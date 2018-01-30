@@ -10,8 +10,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/datastore"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 )
 
 var getConsoleConfig = `SELECT uaa_endpoint, console_admin_scope, console_client, console_client_secret, skip_ssl_validation

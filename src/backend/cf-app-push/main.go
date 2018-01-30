@@ -5,7 +5,7 @@ import (
 
 	"code.cloudfoundry.org/cli/cf/commands/application"
 	"code.cloudfoundry.org/cli/cf/flags"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	"github.com/labstack/echo"
 )
 

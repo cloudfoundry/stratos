@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"

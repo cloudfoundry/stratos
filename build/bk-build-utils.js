@@ -96,28 +96,16 @@
   }
 
   function buildPlugin(pluginPath, pluginName) {
-
     var goFiles = _.filter(fs.readdirSync(pluginPath), function (file) {
       return path.extname(file) === '.go';
     });
 
-    if (!platformSupportsPlugins()) {
-      pluginsToInclude.push({
-        name: pluginName,
-        path: pluginPath,
-        files: goFiles
-      });
-      return Q.resolve();
-    }
-
-    var args = ['build'];
-    if (!prepareBuild.getNoGoInstall()) {
-      args.push('-i');
-    }
-    args = args.concat(['-buildmode=plugin', '-o', pluginName + '.so']);
-
-    args = args.concat(goFiles);
-    return spawnProcess('go', args, pluginPath, env);
+    pluginsToInclude.push({
+      name: pluginName,
+      path: pluginPath,
+      files: goFiles
+    });
+    return Q.resolve();
   }
 
   function build(srcPath, exeName, skipPlugins) {
@@ -162,7 +150,7 @@
     return deferred.promise;
   }
   function platformSupportsPlugins() {
-    return process.platform === 'linux';
+    return false;
   }
 
   function prepareBuildWithoutPluginSupport(srcPath) {
@@ -188,13 +176,13 @@
         fs.writeFileSync(dest, data);
       });
 
-      imports += '\t"github.com/SUSE/stratos-ui/components/app-core/backend/' + pkgName + '"\n';
+      imports += '\t"github.com/SUSE/stratos-ui/app-core/' + pkgName + '"\n';
       inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tpp.Plugins["' + pkgName + '"] = plugin\n';
       inits += '\tlog.Info("Loaded plugin: ' + plugin.name + '")\n';
     });
 
     // Patch the static plugin loader
-    var pluginLoader = path.join(srcPath, 'load_plugins.static.go');
+    var pluginLoader = path.join(srcPath, 'load_plugins.go');
     var loader = fs.readFileSync(pluginLoader).toString();
     loader = loader.replace('//@@IMPORTS@@', imports);
     loader = loader.replace('//@@INITS@@', inits);

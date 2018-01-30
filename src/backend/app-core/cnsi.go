@@ -13,9 +13,9 @@ import (
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens"
+	"github.com/SUSE/stratos-ui/app-core/repository/cnsis"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/repository/tokens"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
@@ -285,7 +285,7 @@ func (p *portalProxy) GetCNSIRecordByEndpoint(endpoint string) (interfaces.CNSIR
 func (p *portalProxy) cnsiRecordExists(endpoint string) bool {
 	log.Debug("cnsiRecordExists")
 
-	_, err := p.GetCNSIRecordByEndpoint(endpoint);
+	_, err := p.GetCNSIRecordByEndpoint(endpoint)
 	return err == nil
 }
 

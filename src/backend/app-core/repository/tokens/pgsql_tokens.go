@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/datastore"
+	"github.com/SUSE/stratos-ui/app-core/repository/crypto"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -195,7 +195,6 @@ func (p *PgsqlTokenRepository) FindUAAToken(userGUID string, encryptionKey []byt
 	return *tr, nil
 }
 
-
 // SaveCNSIToken - Save the CNSI (UAA) token to the datastore
 func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, tr interfaces.TokenRecord, encryptionKey []byte) error {
 	log.Println("SaveCNSIToken")
@@ -317,7 +316,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	)
 
 	var err error
-	if (includeDisconnected) {
+	if includeDisconnected {
 		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
 	} else {
 		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
@@ -350,7 +349,6 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 
 	return *tr, nil
 }
-
 
 // ListCNSITokensForUser - <TBD>
 func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*interfaces.TokenRecord, error) {

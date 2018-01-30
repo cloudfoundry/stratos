@@ -15,8 +15,8 @@ import (
 	"github.com/labstack/echo/engine/standard"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/config"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 )
 
 const (
@@ -37,7 +37,10 @@ func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) 
 }
 
 func (ch *CFHosting) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
-	return ch, nil
+	if config.IsSet(VCapApplication) {
+		return ch, nil
+	}
+	return nil, errors.New("Not running as a Cloud Foundry application")
 }
 
 func (ch *CFHosting) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
@@ -170,15 +173,14 @@ func (ch *CFHosting) Init() error {
 
 		// Store the space and id of the ConsocfLoginHookle application - we can use these to prevent stop/delete in the front-end
 		ch.portalProxy.GetConfig().CloudFoundryInfo = &interfaces.CFInfo{
-			SpaceGUID:    appData.SpaceID,
-			AppGUID:      appData.ApplicationID,
+			SpaceGUID: appData.SpaceID,
+			AppGUID:   appData.ApplicationID,
 		}
 
 		log.Info("All done for Cloud Foundry deployment")
 	}
 	return nil
 }
-
 
 func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
