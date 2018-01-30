@@ -1,0 +1,59 @@
+<app-tile-grid>
+
+<app-tile-group>
+  <app-tile>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Deployment Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="app-metadata">
+          <div class="app-metadata__two-cols">
+            <app-metadata-item label="Repository">{{stratosProject.deploySource.project }}</app-metadata-item>
+            <app-metadata-item  label="Branch">{{ stratosProject.deploySource.branch}}</app-metadata-item>
+            <app-metadata-item  label="Commit">{{ stratosProject.deploySource.commit}}</app-metadata-item>
+            <app-metadata-item label="Deploy at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </app-tile>
+  </app-tile-group>
+<app-tile-group>
+  <app-tile>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Repository Details</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="app-metadata">
+          <div class="app-metadata__two-cols">
+            <app-metadata-item label="Full Name">{{stratosProject.deploySource.project }}</app-metadata-item>
+            <app-metadata-item  label="Owner">{{ stratosProject.deploySource.branch}}</app-metadata-item>
+            <app-metadata-item  label="Description">{{ stratosProject.deploySource.commit}}</app-metadata-item>
+            <app-metadata-item label="Created at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+            <app-metadata-item label="Last Updated at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </app-tile>
+  <app-tile>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Commit Details</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="app-metadata">
+          <div class="app-metadata__two-cols">
+            <app-metadata-item label="Repository">{{stratosProject.deploySource.project }}</app-metadata-item>
+            <app-metadata-item  label="Branch">{{ stratosProject.deploySource.branch}}</app-metadata-item>
+            <app-metadata-item  label="Commit">{{ stratosProject.deploySource.commit}}</app-metadata-item>
+            <app-metadata-item label="Deploy at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </app-tile>
+</app-tile-group>
+</app-tile-grid>
