@@ -8,7 +8,7 @@
       <app-running-instances [instances]="(applicationService.application$ | async)?.app.entity?.instances" [cfGuid]="applicationService.cfGuid" [appGuid]="this.applicationService.appGuid">
       </app-running-instances>
     </div>
-    <form [hidden]="!isEditing" class="exampcard-app-instances_form">
+    <form [hidden]="!isEditing" class="card-app-instances__form">
       <mat-form-field>
         <input #instanceField matInput type="number" name="instances" [(ngModel)]="editValue" value="{{ editCount }}">
       </mat-form-field>
