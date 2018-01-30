@@ -225,24 +225,24 @@ export class E2EHelpers {
     });
   }
 
-  /**
-   * @isSetupMode
-   * @description Check if console is in setup mode
-   */
-  isSetupMode(): Promise<any> {
-    const req = this.newRequest();
-    return new Promise((resolve, reject) => {
-      return req.post(this.getHost() + '/pp/v1/auth/login/uaa', {})
-        .on('error', reject)
-        .on('response', (response) => {
-          if (response.statusCode === 503) {
-            resolve();
-          } else {
-            reject();
-          }
-        });
-    });
-  }
+  // /**
+  //  * @isSetupMode
+  //  * @description Check if console is in setup mode
+  //  */
+  // isSetupMode(): Promise<any> {
+  //   const req = this.newRequest();
+  //   return new Promise((resolve, reject) => {
+  //     return req.post(this.getHost() + '/pp/v1/auth/login/uaa', {})
+  //       .on('error', reject)
+  //       .on('response', (response) => {
+  //         if (response.statusCode === 503) {
+  //           resolve();
+  //         } else {
+  //           reject();
+  //         }
+  //       });
+  //   });
+  // }
 
   /**
    * @forceDate
