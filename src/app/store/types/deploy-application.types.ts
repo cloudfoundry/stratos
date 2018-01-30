@@ -85,6 +85,13 @@ export interface DeployApplicationState {
   };
 }
 
+export interface AppData {
+  Name: string;
+  cloudFoundry: string;
+  org: string;
+  space: string;
+}
+
 export const GITHUB_BRANCHES_ENTITY_KEY = 'githubBranches';
 export const GITHUB_COMMIT_ENTITY_KEY = 'githubCommits';
 

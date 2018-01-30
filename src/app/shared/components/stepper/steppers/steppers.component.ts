@@ -114,4 +114,8 @@ export class SteppersComponent implements OnInit, AfterContentInit {
       this.steps[ currentIndex ].finishButtonText;
   }
 
+  getCancelButtonText(currentIndex: number): string {
+      return this.steps[ currentIndex ].cancelButtonText;
+  }
+
 }

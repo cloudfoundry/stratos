@@ -40,6 +40,9 @@ export class StepComponent implements OnInit {
   @Input('finishButtonText')
   finishButtonText = 'Finish';
 
+  @Input('cancelButtonText')
+  cancelButtonText = 'Cancel';
+
   @Input('disablePrevious')
   disablePrevious = false;
 

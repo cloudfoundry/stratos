@@ -19,7 +19,7 @@
       <div class="steppers__navigation">
         <button *ngIf="steps.length !== 1" color="accent" mat-button mat-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
         <div class="steppers__navigation-right">
-          <button color="warn" mat-button [routerLink]="cancel" *ngIf="cancel">Cancel</button>
+          <button color="warn" mat-button [routerLink]="cancel" *ngIf="cancel">{{ this.getCancelButtonText(currentIndex) }}</button>
           <button color="primary" type="submit" mat-button mat-raised-button (click)="goNext(currentIndex)" [disabled]="!canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex) }}</button>
         </div>
       </div>
