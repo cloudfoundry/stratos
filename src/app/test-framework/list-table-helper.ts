@@ -34,6 +34,9 @@ import {
   TableCellEndpointStatusComponent
 } from '../shared/components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellUsageComponent } from '../shared/components/table/custom-cells/table-cell-usage/table-cell-usage.component';
+import {
+  TableCellAppInstancesComponent
+} from '../shared/components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 export const TableCellEntryPoints = [
   TableCellSelectComponent,
@@ -46,6 +49,7 @@ export const TableCellEntryPoints = [
   TableCellEventDetailComponent,
   TableCellActionsComponent,
   TableCellAppNameComponent,
+  TableCellAppInstancesComponent,
   TableCellEndpointStatusComponent,
   TableCellAppStatusComponent,
   TableCellUsageComponent,

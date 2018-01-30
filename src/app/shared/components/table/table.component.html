@@ -6,21 +6,22 @@
       <mat-table class="app-table__inner" #table [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" [dataSource]="dataSource" [trackBy]="dataSource.trackBy" matSort>
         <ng-container *ngFor="let column of columns" [matColumnDef]="column.columnId">
           <div *ngIf="column.sort">
-            <mat-header-cell *matHeaderCellDef [ngClass]="column.class" mat-sort-header disableClear="column.sort.disableClear" [style.flex]="column.cellFlex">
+            <mat-header-cell class="app-table__header-cell" *matHeaderCellDef [ngClass]="column.class" mat-sort-header disableClear="column.sort.disableClear" [style.flex]="column.cellFlex">
               <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
             </mat-header-cell>
           </div>
           <div *ngIf="!column.sort">
-            <mat-header-cell *matHeaderCellDef [ngClass]="column.class" [style.flex]="column.cellFlex">
+            <mat-header-cell class="app-table__header-cell" *matHeaderCellDef [ngClass]="column.class" [style.flex]="column.cellFlex">
               <app-table-cell [component]="column.headerCellComponent" [func]="column.headerCell" [dataSource]="dataSource"></app-table-cell>
             </mat-header-cell>
           </div>
-          <mat-cell *matCellDef="let row" [ngClass]="column.class" [style.flex]="column.cellFlex">
+          <mat-cell class="app-table__cell" *matCellDef="let row" [ngClass]="column.class" [style.flex]="column.cellFlex">
             <app-table-cell [component]="column.cellComponent" [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
           </mat-cell>
         </ng-container>
-        <mat-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" *matHeaderRowDef="columnNames"></mat-header-row>
-        <app-table-row *matRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight" [rowState]="dataSource.getRowState(row)"></app-table-row>
+        <mat-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" class="app-table__header-row" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"
+          *matHeaderRowDef="columnNames"></mat-header-row>
+        <app-table-row [class.fixedRowHeight]="app-table__inner--fixed-row-height" class="app-table__row" *matRowDef="let row; columns: columnNames;" [class.fixedRowHeight]="fixedRowHeight" [rowState]="dataSource.getRowState(row)"></app-table-row>
       </mat-table>
     </mat-card-content>
   </mat-card>

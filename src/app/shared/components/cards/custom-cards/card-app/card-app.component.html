@@ -13,7 +13,10 @@
     </div>
     <div class="card-app__meta">
       <div class="card-app__label">Instances:</div>
-      <div class="card-app__value">{{ row.entity.instances }}</div>
+      <div class="card-app__value">
+        <app-running-instances [instances]="row.entity.instances" [cfGuid]="row.entity.cfGuid" [appGuid]="row.entity.guid">
+        </app-running-instances>
+      </div>
     </div>
     <div class="card-app__meta">
       <div class="card-app__label">Created:</div>

@@ -27,6 +27,7 @@ import { UtilsService } from '../../../core/utils.service';
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { CdkTableModule } from '@angular/cdk/table';
 import { TableRowComponent } from './table-row/table-row.component';
+import { RunningInstancesComponent } from '../running-instances/running-instances.component';
 
 
 describe('TableComponent', () => {
@@ -46,7 +47,8 @@ describe('TableComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
-        TableRowComponent
+        TableRowComponent,
+        RunningInstancesComponent
       ],
       imports: [
         CoreModule,

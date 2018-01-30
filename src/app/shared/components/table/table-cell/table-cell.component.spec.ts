@@ -1,6 +1,6 @@
 import { ApplicationStateComponent } from '../../application-state/application-state.component';
 import {
-    ApplicationStateIconComponent,
+  ApplicationStateIconComponent,
 } from '../../application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from '../../application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateService } from '../../application-state/application-state.service';
@@ -14,6 +14,7 @@ import { UsageGaugeComponent } from '../../usage-gauge/usage-gauge.component';
 import { UtilsService } from '../../../../core/utils.service';
 import { SharedModule } from '../../../shared.module';
 import { PercentagePipe } from '../../../pipes/percentage.pipe';
+import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -31,6 +32,7 @@ describe('TableCellComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
+        RunningInstancesComponent
       ],
       imports: [
         CoreModule,
@@ -40,7 +42,7 @@ describe('TableCellComponent', () => {
         UtilsService,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -81,8 +81,12 @@ import { TableRowComponent } from './components/table/table-row/table-row.compon
 import { CdkCellOutlet } from '@angular/cdk/table';
 import { CdkTableModule } from '@angular/cdk/table';
 
+import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
+import {
+  TableCellAppInstancesComponent
+} from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 @NgModule({
   imports: [
@@ -153,7 +157,9 @@ import { ConfirmationDialogService } from './components/confirmation-dialog.serv
     TableCellStatusDirective,
     CardAppUsageComponent,
     TableRowComponent,
+    RunningInstancesComponent,
     DialogConfirmComponent,
+    TableCellAppInstancesComponent,
   ],
   exports: [
     FormsModule,

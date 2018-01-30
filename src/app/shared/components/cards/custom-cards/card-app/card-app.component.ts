@@ -1,7 +1,6 @@
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
-import { tap } from 'rxjs/operators';
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { APIResource } from '../../../../../store/types/api.types';
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';

@@ -123,7 +123,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
       columnId: 'edit',
       headerCell: () => 'Actions',
       cellComponent: TableCellActionsComponent,
-      class: 'table-column-edit',
+      class: 'app-table__cell--table-column-edit',
       cellFlex: '1'
     },
   ];
