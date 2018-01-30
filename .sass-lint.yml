@@ -2,7 +2,7 @@ options:
   formatter: stylish
 files:
   include: 'src/**/*.s+(a|c)ss'
-  ignore: 
+  ignore:
     - '/dist/*'
     - '/tmp/*'
     - '/out-tsc/*'
@@ -26,7 +26,7 @@ rules:
   no-attribute-selectors: 0
   no-color-hex: 0
   no-color-keywords: 1
-  no-color-literals: 1
+  no-color-literals: 0
   no-combinators: 0
   no-css-comments: 1
   no-debug: 1
@@ -59,7 +59,7 @@ rules:
   # Name Formats
   class-name-format:
     - 1
-    - convention: strictbem
+    - convention: hyphenatedbem
   function-name-format: 1
   id-name-format: 0
   mixin-name-format: 1

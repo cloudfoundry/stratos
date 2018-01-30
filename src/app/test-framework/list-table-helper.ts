@@ -7,10 +7,6 @@ import {
 import {
   TableCellAppStatusComponent,
 } from '../shared/components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
-import { CardEventComponent } from '../shared/components/cards/custom-cards/card-app-event/card-app-event.component';
-import {
-  CardAppVariableComponent,
-} from '../shared/components/cards/custom-cards/card-app-variable/card-app-variable.component';
 import { CardAppComponent } from '../shared/components/cards/custom-cards/card-app/card-app.component';
 import { TableCellSelectComponent } from '../shared/components/table/table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../shared/components/table/table-header-select/table-header-select.component';
@@ -38,6 +34,9 @@ import {
   TableCellEndpointStatusComponent
 } from '../shared/components/table/custom-cells/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellUsageComponent } from '../shared/components/table/custom-cells/table-cell-usage/table-cell-usage.component';
+import {
+  TableCellAppInstancesComponent
+} from '../shared/components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 export const TableCellEntryPoints = [
   TableCellSelectComponent,
@@ -50,6 +49,7 @@ export const TableCellEntryPoints = [
   TableCellEventDetailComponent,
   TableCellActionsComponent,
   TableCellAppNameComponent,
+  TableCellAppInstancesComponent,
   TableCellEndpointStatusComponent,
   TableCellAppStatusComponent,
   TableCellUsageComponent,
@@ -59,7 +59,5 @@ export const TableCellEntryPoints = [
 ];
 
 export const CardEntryPoints = [
-  CardEventComponent,
-  CardAppVariableComponent,
   CardAppComponent,
 ];

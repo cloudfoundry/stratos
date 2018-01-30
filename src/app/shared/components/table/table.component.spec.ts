@@ -25,6 +25,7 @@ import { ListAppEnvVar } from '../../data-sources/cf-app-variables-data-source';
 import { PercentagePipe } from '../../pipes/percentage.pipe';
 import { UtilsService } from '../../../core/utils.service';
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
+import { RunningInstancesComponent } from '../running-instances/running-instances.component';
 
 
 describe('TableComponent', () => {
@@ -44,6 +45,7 @@ describe('TableComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
+        RunningInstancesComponent
       ],
       imports: [
         CoreModule,
@@ -54,7 +56,7 @@ describe('TableComponent', () => {
         UtilsService,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

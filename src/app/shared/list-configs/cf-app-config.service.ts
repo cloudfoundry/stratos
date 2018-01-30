@@ -8,12 +8,15 @@ import {
 import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
 import { APIResource } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
-import { IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction } from '../components/list/list.component';
+import { IListAction, IListConfig, IListMultiFilterConfig, IMultiListAction, ListViewTypes } from '../components/list/list.component';
 import { AppState } from '../../store/app-state';
 import { UtilsService } from '../../core/utils.service';
 import { ApplicationStateService } from '../../shared/components/application-state/application-state.service';
 import { TableCellAppStatusComponent } from '../components/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
 import { CfOrgSpaceDataService, CfOrgSpaceItem } from '../data-services/cf-org-space-service.service';
+import {
+  TableCellAppInstancesComponent
+} from '../components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 @Injectable()
 export class CfAppConfigService implements IListConfig<APIResource> {
@@ -41,20 +44,18 @@ export class CfAppConfigService implements IListConfig<APIResource> {
       columnId: 'name', headerCell: () => 'Application Name', cellComponent: TableCellAppNameComponent, cellFlex: '2', sort: true
     },
     {
-      columnId: 'status', headerCell: () => 'Status',
-      cellFlex: '1',
-      cellComponent: TableCellAppStatusComponent,
+      columnId: 'status', headerCell: () => 'Status', cellFlex: '2', cellComponent: TableCellAppStatusComponent,
     },
     {
-      columnId: 'instances', headerCell: () => 'Instances', cell: (row: APIResource) => `${row.entity.instances}`, cellFlex: '1'
+      columnId: 'instances', headerCell: () => 'Instances', cellComponent: TableCellAppInstancesComponent, cellFlex: '1', sort: true
     },
     {
       columnId: 'disk', headerCell: () => 'Disk Quota',
-      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`, cellFlex: '1'
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`, cellFlex: '1', sort: true
     },
     {
       columnId: 'memory', headerCell: () => 'Memory',
-      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`, cellFlex: '1'
+      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`, cellFlex: '1', sort: true
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
@@ -63,6 +64,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
     },
   ];
   pageSizeOptions = [9, 45, 90];
+  viewType = ListViewTypes.BOTH;
 
   getGlobalActions = () => null;
   getMultiActions = () => null;

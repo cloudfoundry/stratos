@@ -38,8 +38,6 @@ import { TableCellEventDetailComponent } from './components/table/custom-cells/t
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { CardsComponent } from './components/cards/cards.component';
 import { CardComponent } from './components/cards/card/card.component';
-import { CardAppVariableComponent } from './components/cards/custom-cards/card-app-variable/card-app-variable.component';
-import { CardEventComponent } from './components/cards/custom-cards/card-app-event/card-app-event.component';
 import {
   AppEventDetailDialogComponentComponent
 } from './components/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
@@ -79,7 +77,12 @@ import { TableCellTCPRouteComponent } from './components/table/custom-cells/tabl
 import { TableCellUsageComponent } from './components/table/custom-cells/table-cell-usage/table-cell-usage.component';
 import { TableCellStatusDirective } from './components/table/table-cell-status.directive';
 import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-usage/card-app-usage.component';
-
+import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
+import { ConfirmationDialogService } from './components/confirmation-dialog.service';
+import {
+  TableCellAppInstancesComponent
+} from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 
 @NgModule({
   imports: [
@@ -121,8 +124,6 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     ListComponent,
     CardsComponent,
     CardComponent,
-    CardEventComponent,
-    CardAppVariableComponent,
     AppEventDetailDialogComponentComponent,
     TableCellActionsComponent,
     CardAppComponent,
@@ -150,6 +151,9 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     TableCellTCPRouteComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    RunningInstancesComponent,
+    DialogConfirmComponent,
+    TableCellAppInstancesComponent,
   ],
   exports: [
     FormsModule,
@@ -191,12 +195,17 @@ import { CardAppUsageComponent } from './components/cards/custom-cards/card-app-
     TableCellUsageComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
+    DialogConfirmComponent,
   ],
-  entryComponents: [AppEventDetailDialogComponentComponent],
+  entryComponents: [
+    AppEventDetailDialogComponentComponent,
+    DialogConfirmComponent,
+  ],
   providers: [
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
+    ConfirmationDialogService,
   ]
 })
 export class SharedModule { }

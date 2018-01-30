@@ -23,18 +23,18 @@ export interface AuthState {
   loggingIn: boolean;
   user: AuthUser;
   error: boolean;
-  errorMessage: string;
+  errorResponse: any;
   sessionData: SessionData;
   verifying: boolean;
   redirectPath?: string;
 }
 
-const defaultState = {
+const defaultState: AuthState = {
   loggedIn: false,
   loggingIn: false,
   user: null,
   error: false,
-  errorMessage: '',
+  errorResponse: '',
   sessionData: null,
   verifying: false,
   redirectPath: null,
@@ -46,12 +46,12 @@ export function authReducer(state: AuthState = defaultState, action) {
       return { ...state, loggingIn: true, loggedIn: false, error: false };
     case LOGIN_SUCCESS:
       const loginSuccess = action as LoginSuccess;
-      return { ...state, loggingIn: false, loggedIn: true, error: false, errorMessage: '' };
+      return { ...state, loggingIn: false, loggedIn: true, error: false, errorResponse: undefined };
     case LOGIN_FAILED:
       const loginFailed = action as LoginFailed;
-      return { ...state, error: true, errorMessage: loginFailed.message, loggingIn: false, loggedIn: false };
+      return { ...state, error: true, errorResponse: loginFailed.error, loggingIn: false, loggedIn: false };
     case VERIFY_SESSION:
-      return { ...state, error: false, errorMessage: '', verifying: true };
+      return { ...state, error: false, errorResponse: undefined, verifying: true };
     case SESSION_VERIFIED:
       return {
         ...state,

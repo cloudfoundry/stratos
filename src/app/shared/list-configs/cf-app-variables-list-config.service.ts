@@ -18,6 +18,7 @@ import {
   IListAction,
   IListConfig,
   IMultiListAction,
+  ListViewTypes,
 } from '../components/list/list.component';
 import { AppEnvVarsState } from '../../store/types/app-metadata.types';
 
@@ -53,17 +54,19 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
       class: 'table-column-select', cellFlex: '1'
     },
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: true, cellFlex: '3'
+      columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: true, cellFlex: '5'
     },
     {
-      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '4'
+      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '10'
     },
     {
-      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'table-column-edit', cellFlex: '1'
+      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'app-table__cell--table-column-edit',
+      cellFlex: '2'
     },
   ];
 
   pageSizeOptions = [9, 45, 90];
+  viewType = ListViewTypes.TABLE_ONLY;
 
   private dispatchDeleteAction() {
     this.store.dispatch(

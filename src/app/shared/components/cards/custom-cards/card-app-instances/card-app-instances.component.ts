@@ -14,6 +14,10 @@ import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { AppStatSchema, AppStats, AppStatsSchema } from '../../../../../store/types/app-metadata.types';
 import { GetAppStatsAction, AppMetadataTypes } from '../../../../../store/actions/app-metadata.actions';
 import { getPaginationPages } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+
+const appInstanceScaleToZeroConfirmation = new ConfirmationDialog('Set Instance count to 0',
+  'Are you sure you want to set the instance count to 0?', 'Confirm');
 
 @Component({
   selector: 'app-card-app-instances',
@@ -29,7 +33,11 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @ViewChild('instanceField') instanceField: ElementRef;
 
-  constructor(private store: Store<AppState>, private applicationService: ApplicationService, private renderer: Renderer) { }
+  constructor(
+    private store: Store<AppState>,
+    public applicationService: ApplicationService,
+    private renderer: Renderer,
+    private confirmDialog: ConfirmationDialogService) { }
 
   private currentCount: 0;
   private editCount: 0;
@@ -53,14 +61,6 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
       }
     });
 
-    const { cfGuid, appGuid } = this.applicationService;
-    this.runningInstances$ = getPaginationPages(this.store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
-      .pipe(
-      map(appInstancesPages => {
-        const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
-        return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
-      })
-      );
   }
 
   ngOnDestroy(): void {
@@ -68,15 +68,11 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   }
 
   scaleUp(current: number) {
-    this.applicationService.updateApplication({
-      instances: this.currentCount + 1
-    }, [AppMetadataTypes.STATS]);
+    this.setInstanceCount(this.currentCount + 1);
   }
 
   scaleDown(current: number) {
-    this.applicationService.updateApplication({
-      instances: this.currentCount - 1
-    }, [AppMetadataTypes.STATS]);
+    this.setInstanceCount(this.currentCount - 1);
   }
 
   edit() {
@@ -90,10 +86,17 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   finishEdit(ok: boolean) {
     this.isEditing = false;
     if (ok) {
-      this.applicationService.updateApplication({
-        instances: parseInt(this.editValue, 10)
-      }, [AppMetadataTypes.STATS]);
+      this.setInstanceCount(parseInt(this.editValue, 10));
     }
   }
 
+  // Set instance count. Ask for confirmation if setting count to 0
+  private setInstanceCount(value: number) {
+    const doUpdate = () => this.applicationService.updateApplication({ instances: value }, [AppMetadataTypes.STATS]);
+    if (value === 0) {
+      this.confirmDialog.open(appInstanceScaleToZeroConfirmation, doUpdate);
+    } else {
+      doUpdate();
+    }
+  }
 }

@@ -13,6 +13,8 @@ import { ApplicationSchema, GetApplication } from '../../../store/actions/applic
 import { EntityService } from '../../../core/entity-service';
 import { ApplicationEnvVarsService } from '../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { Http, HttpModule, ConnectionBackend } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
 
 const appId = '4e4858c4-24ab-4caf-87a8-7703d1da58a0';
 const cfId = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
@@ -30,6 +32,7 @@ describe('EditApplicationComponent', () => {
         SharedModule,
         createBasicStoreModule(),
         RouterTestingModule,
+        HttpModule,
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
@@ -40,7 +43,12 @@ describe('EditApplicationComponent', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsService
+        ApplicationEnvVarsService,
+        {
+          provide: ConnectionBackend,
+          useClass: MockBackend
+        },
+        Http
       ]
     })
     .compileComponents();

@@ -8,21 +8,21 @@
             <div [hidden]="!(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           </div>
           <div class="listComponent__header__right">
-            <div [hidden]="!(dataSource.isSelecting$ | async)">
+            <div *ngIf="(dataSource.isSelecting$ | async)">
               <ng-container *ngFor="let action of multiActions">
                 <button mat-icon-button *ngIf="action.visible(row)" (click)="executeActionMultiple(action)" [disabled]="!action.enabled(row)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
                   <mat-icon>{{action.icon}}</mat-icon>
                 </button>
               </ng-container>
             </div>
-            <div [hidden]="(dataSource.isSelecting$ | async)">
+            <div *ngIf="!(dataSource.isSelecting$ | async)">
               <ng-container *ngFor="let action of globalActions">
                 <button mat-icon-button *ngIf="action.visible(row)" (click)="executeActionGlobal(action)" [disabled]="!action.enabled(row)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
                   <mat-icon>{{action.icon}}</mat-icon>
                 </button>
               </ng-container>
             </div>
-            <div [hidden]="!(dataSource.isAdding$ | async)" class="add-container">
+            <div *ngIf="addForm && (dataSource.isAdding$ | async) && !(dataSource.isSelecting$ | async)" class="add-container">
               <div class="spacer"></div>
               <ng-content select="[app-table-add]"></ng-content>
               <button mat-icon-button (click)="dataSource.saveAdd()" [disabled]="!safeAddForm().valid">
@@ -32,28 +32,26 @@
                 <mat-icon>clear</mat-icon>
               </button>
             </div>
-            <div [hidden]="(dataSource.isSelecting$ | async)">
-              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="addForm && !(dataSource.isAdding$ | async)" (click)="safeAddForm().reset();dataSource.startAdd();">
+            <div *ngIf="addForm && !(dataSource.isAdding$ | async) && !(dataSource.isSelecting$ | async)">
+              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="safeAddForm().reset();dataSource.startAdd();">
                 <mat-icon>add</mat-icon>
               </button>
             </div>
-              <div *ngIf="listMode === 'default'">
-              <div [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
-                <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'">
+            <div *ngIf="listConfigService.viewType === 'both' && !(dataSource.isSelecting$ | async) && (dataSource.pagination$ | async)?.totalResults > 0">
+              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'">
                   <mat-icon>grid_on</mat-icon>
                 </button>
-                <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'">
+              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'">
                   <mat-icon>list</mat-icon>
                 </button>
-              </div>
             </div>
           </div>
         </div>
         <div class="listComponent__header__bottom">
           <div class="listComponent__header__left spacer">
-            <div class="multi-filters" [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isLoadingPage$ | async)">
+            <div class="multi-filters" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs">
-                <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
+                <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
                   <mat-option>All</mat-option>
                   <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
                     {{selectItem.label}}

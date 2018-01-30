@@ -1,3 +1,4 @@
+import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { CoreModule } from '../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ApplicationStateComponent } from '../../../../shared/components/application-state/application-state.component';
@@ -38,6 +39,7 @@ describe('CardComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
+        RunningInstancesComponent
       ],
       imports: [
         CoreModule,

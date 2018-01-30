@@ -13,8 +13,6 @@ import {
 
 import { IListDataSource } from '../../../data-sources/list-data-source-types';
 import { TableCellCustom } from '../../table/table-cell/table-cell-custom';
-import { CardEventComponent } from '../custom-cards/card-app-event/card-app-event.component';
-import { CardAppVariableComponent } from '../custom-cards/card-app-variable/card-app-variable.component';
 import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
 
 @Component({
@@ -22,8 +20,6 @@ import { CardAppComponent } from '../custom-cards/card-app/card-app.component';
   templateUrl: './card.component.html',
   styleUrls: ['./card.component.scss'],
   entryComponents: [
-    CardEventComponent,
-    CardAppVariableComponent,
     CardAppComponent,
   ]
 })

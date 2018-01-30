@@ -1,15 +1,7 @@
 <app-page-header>
   <h1>{{ (applicationService.application$ | async)?.app.entity.name }} </h1>
   <div class="page-header-right">
-    <span *ngIf="isEditSummary">
-      <button mat-icon-button mat-button (click)="saveEdits()" [disabled]="!summaryForm.valid">
-        <mat-icon>done</mat-icon>
-      </button>
-      <button mat-icon-button name="cancel" mat-button (click)="endEdit()">
-        <mat-icon>clear</mat-icon>
-      </button>
-    </span>
-    <span *ngIf="!isEditSummary">
+    <span>
       <a  mat-icon-button *ngIf="(applicationService.application$ | async)?.appUrl != ''
       && (applicationService.application$ | async)?.app.entity.state === 'STARTED' "
        href="{{(applicationService.application$ | async)?.appUrl}}" target="_blank">
