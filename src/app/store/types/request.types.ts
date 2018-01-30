@@ -104,7 +104,8 @@ export class WrapperRequestActionSuccess extends RequestSuccessAction implements
     public response: NormalizedResponse,
     public apiAction: IRequestAction | PaginatedAction,
     public requestType: ApiRequestTypes = 'fetch',
-    public totalResults?: number
+    public totalResults?: number,
+    public totalPages?: number
   ) {
     super();
   }

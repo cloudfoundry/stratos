@@ -99,14 +99,15 @@ export class APIEffect {
       return request
         .map(resData => this.handleMultiEndpoints(resData, apiAction)) // Check for errors and fetch entities
         .mergeMap(response => {
-          const { entities, totalResults } = response;
+          const { entities, totalResults, totalPages } = response;
           const actions = [];
           actions.push({ type: apiAction.actions[1], apiAction });
           actions.push(new WrapperRequestActionSuccess(
             entities,
             apiAction,
             requestType,
-            totalResults
+            totalResults,
+            totalPages
           ));
 
           if (
@@ -177,16 +178,21 @@ export class APIEffect {
 
   getEntities(apiAction: IRequestAction, data): {
     entities: NormalizedResponse
-    totalResults: number
+    totalResults: number,
+    totalPages: number,
   } {
     let totalResults = 0;
+    let totalPages = 0;
     const allEntities = Object.keys(data)
       .filter(guid => data[guid] !== null)
       .map(cfGuid => {
         const cfData = data[cfGuid];
         switch (apiAction.entityLocation) {
           case RequestEntityLocation.ARRAY: // The response is an array which contains the entities
-            return Object.keys(cfData).map(key => {
+            const keys = Object.keys(cfData);
+            totalResults = keys.length;
+            totalPages = 1;
+            return keys.map(key => {
               const guid = apiAction.guid + '-' + key;
               const result = this.completeResourceEntity(cfData[key], cfGuid, guid);
               result.entity.guid = guid;
@@ -200,7 +206,8 @@ export class APIEffect {
               // Treat the response as RequestEntityLocation.OBJECT
               return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
             }
-            totalResults += cfData['total_results'];
+            totalResults = cfData['total_results'];
+            totalPages = cfData['total_pages'];
             if (!cfData.resources.length) {
               return null;
             }
@@ -212,7 +219,8 @@ export class APIEffect {
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
     return {
       entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,
-      totalResults
+      totalResults,
+      totalPages
     };
   }
 
@@ -264,7 +272,8 @@ export class APIEffect {
   private handleMultiEndpoints(resData, apiAction): {
     resData,
     entities,
-    totalResults
+    totalResults,
+    totalPages
   } {
     if (resData) {
       const cnsisErrors = this.getErrors(resData);
@@ -275,11 +284,13 @@ export class APIEffect {
     }
     let entities;
     let totalResults = 0;
+    let totalPages = 0;
 
     if (resData) {
       const entityData = this.getEntities(apiAction, resData);
       entities = entityData.entities;
       totalResults = entityData.totalResults;
+      totalPages = entityData.totalPages;
     }
 
     entities = entities || {
@@ -290,7 +301,8 @@ export class APIEffect {
     return {
       resData,
       entities,
-      totalResults
+      totalResults,
+      totalPages
     };
   }
 

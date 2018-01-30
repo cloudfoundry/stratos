@@ -470,7 +470,12 @@ const testInitialStoreState: AppState = {
         name: ''
       }
     },
+    deployApplication: {
+      cloudFoundryDetails: null,
+    },
     request: {
+      githubBranches:{},
+      githubCommits:{},
         endpoint: {
           '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
             fetching: false,
@@ -3645,6 +3650,8 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      githubBranches:{},
+      githubCommits:{},
         application: {
           '4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
             entity: {

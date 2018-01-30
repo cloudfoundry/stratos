@@ -30,6 +30,7 @@ import {
   MatTabsModule,
   MatToolbarModule,
   MatTooltipModule,
+  MatRadioModule,
 } from '@angular/material';
 
 const importExport = [
@@ -60,7 +61,8 @@ const importExport = [
   MatButtonToggleModule,
   MatMenuModule,
   MatSnackBarModule,
-  MatListModule
+  MatListModule,
+  MatRadioModule
 ];
 
 @NgModule({

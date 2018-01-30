@@ -126,7 +126,9 @@ describe('PaginationReducer', () => {
         entity: {},
         options: {}
       },
-      'fetch'
+      'fetch',
+      2,
+      1,
     );
     const newState = paginationReducer({
       ...defaultPaginationState,

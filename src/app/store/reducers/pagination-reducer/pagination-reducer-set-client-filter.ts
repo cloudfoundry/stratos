@@ -7,7 +7,13 @@ export function paginationSetClientFilter(state: PaginationEntityState, action: 
     error: false,
     clientPagination: {
       ...state.clientPagination,
-      filter: action.filter
+      filter: {
+        ...state.clientPagination.filter,
+        items: {
+          ...state.clientPagination.filter.items,
+          ...action.filter.items
+        }
+      }
     }
   };
 }

@@ -10,6 +10,7 @@ import { requestDataReducer, requestReducer } from './reducers/api-request-reduc
 import { authReducer } from './reducers/auth.reducer';
 import { cnsisReducer } from './reducers/cnsis.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
+import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
@@ -31,6 +32,7 @@ export const appReducers = {
   requestData: requestDataReducer,
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
+  deployApplication: deployAppReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer
 } as ActionReducerMap<{}>;

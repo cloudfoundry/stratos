@@ -23,7 +23,8 @@ import { CreateApplicationComponent } from './create-application.component';
     AppNameUniqueDirective
   ],
   exports: [
-    CreateApplicationComponent
+    CreateApplicationComponent,
+    CreateApplicationStep1Component
   ]
 })
 export class CreateApplicationModule { }

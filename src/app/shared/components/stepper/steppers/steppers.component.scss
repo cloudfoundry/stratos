@@ -1,7 +1,7 @@
 .steppers {
   display: flex;
-  flex-direction: column;
   flex: 1;
+  flex-direction: column;
   position: relative;
   &__inner {
     display: flex;
@@ -13,62 +13,59 @@
     display: flex;
   }
   &__header {
-    flex: 1;
-    display: flex;
     align-items: center;
+    display: flex;
+    flex: 1;
     &-inner {
-      flex: 1;
-      display: flex;
       align-items: center;
+      display: flex;
+      flex: 1;
       padding: 0 10px;
     }
-    &:after {
+    &::after {
+      background-color: #808080;
       content: '';
       height: 1px;
-      background-color: grey;
-    }
-    &:after {
       width: 100%;
     }
     &:first-child {
-      &:before {
+      &::before {
         content: none;
       }
     }
     &:last-child {
       flex: none;
-      &:after {
+      &::after {
         content: none;
       }
     }
     &-icon {
-      border-radius: 50%;
-      height: 15px;
-      width: 15px;
-      padding: 5px;
-      display: flex;
       align-items: center;
+      border-radius: 50%;
+      display: flex;
+      height: 15px;
       justify-content: center;
       padding: 15px;
+      width: 15px;
     }
     &-text {
-      white-space: nowrap;
       padding-left: 10px;
+      white-space: nowrap;
     }
   }
   &__contents {
-    height: 100%;
     flex: 1;
+    height: 100%;
     margin: 30px 80px;
   }
   &__wrapper {
-    min-height: 100%;
     display: flex;
+    min-height: 100%;
   }
   &__navigation {
-    margin-top: 50px;
     display: flex;
-    justify-content: space-between
+    justify-content: space-between;
+    margin-top: 50px;
   }
   &__navigation-right {
     flex: 1;

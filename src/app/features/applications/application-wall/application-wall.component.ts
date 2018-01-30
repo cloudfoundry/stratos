@@ -13,7 +13,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { ApplicationSchema } from '../../../store/actions/application.actions';
 import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-source';
-import { ListDataSource } from '../../../shared/data-sources/list-data-source';
+import { ListDataSource, distinctPageUntilChanged } from '../../../shared/data-sources/list-data-source';
 import { APIResource } from '../../../store/types/api.types';
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 
@@ -50,6 +50,8 @@ export class ApplicationWallComponent implements OnDestroy {
     const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
 
     this.statsSub = dataSource.page$.pipe(
+      // The page observable will fire often, here we're only interested in updating the stats on actual page changes
+      distinctUntilChanged(distinctPageUntilChanged(dataSource)),
       withLatestFrom(dataSource.pagination$),
       tap(([page, pagination]) => {
         if (!page) {

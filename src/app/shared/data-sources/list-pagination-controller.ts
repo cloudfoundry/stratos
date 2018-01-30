@@ -95,14 +95,20 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     }
   }
   multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
-    if (this.dataSource.isLocal && this.pag && this.pag.clientPagination.filter.items[filterConfig.key] !== filterValue) {
-      const newFilter = this.cloneMultiFilter(this.pag.clientPagination.filter);
-      newFilter.items[filterConfig.key] = filterValue;
-      this.store.dispatch(new SetClientFilter(
-        this.dataSource.entityKey,
-        this.dataSource.paginationKey,
-        newFilter
-      ));
+    if (this.dataSource.isLocal && this.pag) {
+      // We don't want to dispatch  actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
+      // chained actions from firing.
+      const storeFilterParamValue = this.cleanFilterParam(this.pag.clientPagination.filter.items[filterConfig.key]);
+      const newFilterParamValue = this.cleanFilterParam(filterValue);
+      if (storeFilterParamValue !== newFilterParamValue) {
+        const newFilter = this.cloneMultiFilter(this.pag.clientPagination.filter);
+        newFilter.items[filterConfig.key] = filterValue;
+        this.store.dispatch(new SetClientFilter(
+          this.dataSource.entityKey,
+          this.dataSource.paginationKey,
+          newFilter
+        ));
+      }
     }
   }
 
@@ -145,5 +151,13 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         items: pag.clientPagination.filter.items
       }))
     );
+  }
+
+  private cleanFilterParam(filter) {
+    // Flatten some specific falsies into the same value.
+    if (filter === null || filter === undefined || filter === '') {
+      return undefined;
+    }
+    return filter;
   }
 }

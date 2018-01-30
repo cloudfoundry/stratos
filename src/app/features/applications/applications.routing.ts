@@ -15,10 +15,16 @@ import { CreateApplicationModule } from './create-application/create-application
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
+import { DeployApplicationComponent } from './deploy-application/deploy-application.component';
+import { DeployApplicationModule } from './deploy-application/deploy-application.module';
 const appplicationsRoutes: Routes = [
   {
     path: 'new',
     component: CreateApplicationComponent,
+  },
+  {
+    path: 'deploy',
+    component: DeployApplicationComponent
   },
   {
     path: '',
@@ -69,6 +75,7 @@ const appplicationsRoutes: Routes = [
 @NgModule({
   imports: [
     CreateApplicationModule,
+    DeployApplicationModule,
     RouterModule.forChild(appplicationsRoutes)
 
   ]

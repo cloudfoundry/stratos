@@ -19,7 +19,6 @@ import { ApplicationSchema } from '../../../../store/actions/application.actions
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
-  providers: [CfOrgSpaceDataService]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
@@ -57,4 +56,5 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
         return this.cfForm.valid;
       });
   }
+
 }

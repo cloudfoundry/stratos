@@ -1,12 +1,9 @@
 
-
-
 export interface NewAppCFDetails {
   cloudFoundry: any;
   org: any;
   space: any;
 }
-
 
 export interface CreateNewApplicationState {
   cloudFoundryDetails: NewAppCFDetails;
