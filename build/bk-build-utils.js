@@ -27,7 +27,6 @@
   module.exports.localDevSetup = localDevSetup;
   module.exports.isLocalDevBuild = isLocalDevBuild;
   module.exports.skipGlideInstall = skipGlideInstall;
-  module.exports.platformSupportsPlugins = platformSupportsPlugins;
 
   function localDevSetup() {
     if (isLocalDevBuild()) {
@@ -111,7 +110,7 @@
   function build(srcPath, exeName, skipPlugins) {
     var args = ['build', '-i', '-o', exeName];
 
-    if (!skipPlugins && !platformSupportsPlugins()) {
+    if (!skipPlugins) {
       prepareBuildWithoutPluginSupport(srcPath);
     }
 
@@ -148,9 +147,6 @@
       deferred.resolve('dev');
     }
     return deferred.promise;
-  }
-  function platformSupportsPlugins() {
-    return false;
   }
 
   function prepareBuildWithoutPluginSupport(srcPath) {

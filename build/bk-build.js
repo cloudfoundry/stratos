@@ -27,7 +27,6 @@
     var plugins = prepareBuild.getPlugins();
     _.each(plugins, function (plugin) {
       var pluginInfo = {};
-      pluginInfo.libraryPath = plugin + '.so';
       pluginInfo.pluginPath = plugin;
       pluginInfo.pluginName = plugin;
       enabledPlugins.push(pluginInfo);
@@ -262,17 +261,6 @@
 
   });
 
-  gulp.task('write-plugins-yaml', ['copy-artefacts'], function () {
-    var plugins = _.values(enabledPlugins);
-    fsWriteJsonQ(path.join(conf.outputPath, 'plugins.json'), plugins)
-      .then(function () {
-        done();
-      })
-      .catch(function (err) {
-        done(err);
-      });
-  });
-
   gulp.task('local-dev-build', function (done) {
     if (!buildUtils.isLocalDevBuild()) {
       return done();
@@ -309,7 +297,7 @@
     return runSequence(
       'init-build',
       'dedup-vendor',
-      'write-plugins-yaml',
+      'copy-artefacts',
       'delete-temp',
       'local-dev-build'
     );
@@ -320,7 +308,7 @@
     return runSequence(
       'init-build-migrator',
       'dedup-vendor',
-      'write-plugins-yaml',
+      'copy-artefacts',
       'delete-temp',
       'local-dev-build'
     );
@@ -339,7 +327,7 @@
     return runSequence(
       'init-build',
       'get-plugins-data',
-      'write-plugins-yaml',
+      'copy-artefacts',
       'delete-temp'
     );
   });
