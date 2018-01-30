@@ -57,12 +57,12 @@ export interface AppEnvVarsState {
 
 
 export interface AppEnvVarStratosProject {
-  deploySource : {
-    type: string,
-    timestamp: number,
-    project: string,
-    branch: string,
-    url: string,
-    commit: string
-  }
+  deploySource: {
+    type: string;
+    timestamp: number;
+    project: string;
+    branch: string;
+    url: string;
+    commit: string;
+  };
 }

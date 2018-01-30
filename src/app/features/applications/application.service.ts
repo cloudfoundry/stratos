@@ -231,7 +231,7 @@ export class ApplicationService {
       });
 
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
-      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
+      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
     });
   }
 
