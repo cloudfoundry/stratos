@@ -1,5 +1,4 @@
-<app-tile-grid>
-
+<app-tile-grid class="github-tab" *ngIf="stratosProject$ | async as stratosProject">
 <app-tile-group>
   <app-tile>
     <mat-card>
@@ -7,8 +6,8 @@
         <mat-card-title>Deployment Information</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="app-metadata">
-          <div class="app-metadata__two-cols">
+        <div >
+          <div>
             <app-metadata-item label="Repository">{{stratosProject.deploySource.project }}</app-metadata-item>
             <app-metadata-item  label="Branch">{{ stratosProject.deploySource.branch}}</app-metadata-item>
             <app-metadata-item  label="Commit">{{ stratosProject.deploySource.commit}}</app-metadata-item>
@@ -26,13 +25,19 @@
         <mat-card-title>Repository Details</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="app-metadata">
-          <div class="app-metadata__two-cols">
-            <app-metadata-item label="Full Name">{{stratosProject.deploySource.project }}</app-metadata-item>
-            <app-metadata-item  label="Owner">{{ stratosProject.deploySource.branch}}</app-metadata-item>
-            <app-metadata-item  label="Description">{{ stratosProject.deploySource.commit}}</app-metadata-item>
-            <app-metadata-item label="Created at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
-            <app-metadata-item label="Last Updated at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+
+        <div *ngIf="gitHubRepo$ | async as githubRepo">
+          <div class="github-tab__avatar">
+            <img src={{githubRepo.owner.avatar_url}}>
+          </div>
+          <div >
+              <app-metadata-item label="Full Name">
+              <a href="{{ githubRepo.html_url }}">{{ githubRepo.full_name }}</a>
+            </app-metadata-item>
+            <app-metadata-item  label="Owner">{{  githubRepo.owner.login }}</app-metadata-item>
+            <app-metadata-item  label="Description">{{ githubRepo.description }}</app-metadata-item>
+            <app-metadata-item label="Created at:">{{ githubRepo.created_at | date:'medium' }}</app-metadata-item>
+            <app-metadata-item label="Last Pushed at:">{{ githubRepo.pushed_at  | date:'medium' }}</app-metadata-item>
           </div>
         </div>
       </mat-card-content>
@@ -44,12 +49,17 @@
         <mat-card-title>Commit Details</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div class="app-metadata">
-          <div class="app-metadata__two-cols">
-            <app-metadata-item label="Repository">{{stratosProject.deploySource.project }}</app-metadata-item>
-            <app-metadata-item  label="Branch">{{ stratosProject.deploySource.branch}}</app-metadata-item>
-            <app-metadata-item  label="Commit">{{ stratosProject.deploySource.commit}}</app-metadata-item>
-            <app-metadata-item label="Deploy at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+        <div *ngIf="commit$ | async as commitInfo">
+            <div class="github-tab__avatar">
+                <img src={{commitInfo.author.avatar_url}}>
+              </div>
+            <div >
+                <app-metadata-item label="SHA">
+              <a href={{commitInfo.html_url}}>{{ commitInfo.sha }}</a>
+            </app-metadata-item>
+            <app-metadata-item  label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
+            <app-metadata-item  label="Author">{{ commitInfo.commit.author.name }} <{{ commitInfo.commit.author.email }}></app-metadata-item>
+            <app-metadata-item label="Date:">{{  commitInfo.commit.author.date | date:'medium' }}</app-metadata-item>
           </div>
         </div>
       </mat-card-content>

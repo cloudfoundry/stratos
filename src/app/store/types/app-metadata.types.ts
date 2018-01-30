@@ -54,15 +54,3 @@ export interface AppEnvVarsState {
   system_env_json?: any;
   name?: any;
 }
-
-
-export interface AppEnvVarStratosProject {
-  deploySource: {
-    type: string;
-    timestamp: number;
-    project: string;
-    branch: string;
-    url: string;
-    commit: string;
-  };
-}

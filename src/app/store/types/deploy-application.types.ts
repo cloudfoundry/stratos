@@ -1,5 +1,6 @@
 import { NewAppCFDetails } from './create-application.types';
 import { schema } from 'normalizr';
+import { GithubCommit } from './github.types';
 
 
 export interface SourceType {
@@ -16,7 +17,7 @@ export interface ProjectBranches {
 
 export interface GitBranch {
   name: string;
-  commit: Commit;
+  commit: GithubCommit;
 }
 
 export enum DeployState {
@@ -66,11 +67,6 @@ export interface DeployApplicationSource {
 export interface GitAppDetails {
   projectName: string;
   branch: GitBranch;
-}
-
-export interface Commit {
-  sha: string;
-  url: string;
 }
 
 

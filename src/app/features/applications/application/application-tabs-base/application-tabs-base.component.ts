@@ -42,6 +42,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   applicationActions$: Observable<string[]>;
   addedGitHubTab = false;
   summaryDataChanging$: Observable<boolean>;
+  summarySubscription$: Subscription;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
@@ -125,9 +126,18 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
       return isFetchingApp || isUpdating;
     });
+
+    this.summarySubscription$ = this.applicationService.app$.subscribe(app => {
+      if (app.entity && app.entity.entity && app.entity.entity.environment_json) {
+        if (this.containsGitHubInfo(app.entity.entity.environment_json)) {
+          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+          this.summarySubscription$.unsubscribe();
+        }
+      }
+    });
   }
 
-  containsGitHubInfo = appVars => {
+  containsGitHubInfo(appVars) {
     if (appVars.STRATOS_PROJECT) {
       const details = JSON.parse(appVars.STRATOS_PROJECT);
       return details.deploySource && details.deploySource.type === 'github';
