@@ -9,7 +9,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../store/actions/app-metadata.actions';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 
 

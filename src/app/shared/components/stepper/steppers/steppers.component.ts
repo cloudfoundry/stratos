@@ -27,11 +27,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   currentIndex = 0;
 
-  nextButtonText = 'Next';
-
-  finishButtonText = 'Finish';
-
-  ngOnInit() {
+   ngOnInit() {
   }
 
   ngAfterContentInit() {
@@ -76,7 +72,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   canGoto(index: number) {
     const step = this.steps[this.currentIndex];
-    if (!step || step.busy) {
+    if (!step || step.busy || step.disablePrevious) {
       return false;
     }
     if (index === this.currentIndex) {
@@ -112,10 +108,14 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     return 'done';
   }
 
-  getNextButtonText(nextIndex: number): string {
-    return nextIndex < this.steps.length ?
-      this.nextButtonText :
-      this.finishButtonText;
+  getNextButtonText(currentIndex: number): string {
+    return currentIndex + 1 < this.steps.length ?
+      this.steps[ currentIndex ].nextButtonText :
+      this.steps[ currentIndex ].finishButtonText;
+  }
+
+  getCancelButtonText(currentIndex: number): string {
+      return this.steps[ currentIndex ].cancelButtonText;
   }
 
 }

@@ -5,7 +5,7 @@ import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-spac
   selector: 'app-create-application',
   templateUrl: './create-application.component.html',
   styleUrls: ['./create-application.component.scss'],
-  providers: [CfOrgSpaceDataService]
+  providers: [CfOrgSpaceDataService],
 })
 export class CreateApplicationComponent implements OnInit {
 

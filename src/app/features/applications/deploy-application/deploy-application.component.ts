@@ -10,7 +10,7 @@ import { StoreCFSettings } from '../../../store/actions/deploy-applications.acti
   selector: 'app-deploy-application',
   templateUrl: './deploy-application.component.html',
   styleUrls: ['./deploy-application.component.scss'],
-
+  providers: [CfOrgSpaceDataService]
 })
 export class DeployApplicationComponent {
 

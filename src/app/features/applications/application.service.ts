@@ -266,7 +266,7 @@ export class ApplicationService {
     }
     const nonTCPRoutes = app.entity.routes
       .filter(p => !isTCPRoute(p));
-    if (nonTCPRoutes.length >= 0) {
+    if (nonTCPRoutes.length > 0) {
       return getRoute(nonTCPRoutes[0], true);
     }
     return null;

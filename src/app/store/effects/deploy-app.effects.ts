@@ -24,18 +24,16 @@ import {
    CHECK_PROJECT_EXISTS,
    FetchBranchesForProject,
    FETCH_BRANCHES_FOR_PROJECT,
-   SaveBranchesForProject,
-   FetchBranchesFailed,
    DeleteCachedBranches,
-   CommitFetchFailed,
    FetchCommit,
    FETCH_COMMIT,
-   SaveCommitForBranch,
    DeleteDeployAppSection,
    DELETE_DEPLOY_APP_SECTION,
 } from '../../store/actions/deploy-applications.actions';
-import { Commit } from '../types/deploy-application.types';
+import { Commit, GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../types/deploy-application.types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
+import { StartRequestAction, WrapperRequestActionSuccess, IRequestAction, WrapperRequestActionFailed } from '../types/request.types';
+import { NormalizedResponse } from '../types/api.types';
 @Injectable()
 export class DeployAppEffects {
 
@@ -62,24 +60,56 @@ export class DeployAppEffects {
     });
 
   @Effect() fetchBranches$ =  this.actions$.ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT)
-  .switchMap((action: any) => {
+  .flatMap(action => {
+    const actionType = 'fetch';
+    const apiAction = {
+      entityKey: GITHUB_BRANCHES_ENTITY_KEY,
+      type: action.type,
+      paginationKey: 'branches'
+    };
+    this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return this.http.get(`https://api.github.com/repos/${action.projectName}/branches`)
-        .map(res => {
-          return new SaveBranchesForProject(res);
+        .mergeMap(response => {
+          const branches = response.json();
+          const mappedData = {
+            entities: { githubBranches: {}},
+            result: []
+          } as NormalizedResponse;
+
+          branches.forEach(b => {
+            mappedData.entities[GITHUB_BRANCHES_ENTITY_KEY][b.name] = b;
+            mappedData.result.push(b.name);
+          });
+          return [
+            new WrapperRequestActionSuccess(mappedData, apiAction, actionType),
+          ];
         })
-        .catch(err => {
-          return Observable.of(new FetchBranchesFailed());
-        });
+        .catch(err => [new WrapperRequestActionFailed(err.message, apiAction, actionType)]);
     });
 
   @Effect() fetchCommit$ =  this.actions$.ofType<FetchCommit>(FETCH_COMMIT)
-  .switchMap((action: any) => {
-      return this.http.get(action.commit.url)
-    .map(res => {
-          return new SaveCommitForBranch(res);
+  .flatMap(action => {
+    const actionType = 'fetch';
+    const apiAction = {
+      entityKey: GITHUB_COMMIT_ENTITY_KEY,
+      type: action.type,
+    };
+    this.store.dispatch(new StartRequestAction(apiAction, actionType));
+    return this.http.get(action.commit.url)
+    .mergeMap(response => {
+          const commit = response.json();
+          const mappedData = {
+            entities: { githubCommits: {}},
+            result: []
+          } as NormalizedResponse;
+          const commitId = commit.sha;
+          mappedData.entities.githubCommits[commitId] = commit;
+          mappedData.result.push(commitId);
+          return [
+            new WrapperRequestActionSuccess(mappedData, apiAction, actionType),
+          ];
         })
-        .catch(err => {
-          return Observable.of(new CommitFetchFailed());
-        });
+        .catch(err => [new WrapperRequestActionFailed(err.message, apiAction, actionType)]);
     });
+
 }

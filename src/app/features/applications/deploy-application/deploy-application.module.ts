@@ -31,4 +31,4 @@ import { Observable } from 'rxjs/Observable';
     DeployApplicationComponent
   ]
 })
-export class DeployApplicationModule {}
+export class DeployApplicationModule { }

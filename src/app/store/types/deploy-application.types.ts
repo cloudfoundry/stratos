@@ -1,4 +1,5 @@
 import { NewAppCFDetails } from './create-application.types';
+import { schema } from 'normalizr';
 
 
 export interface SourceType {
@@ -15,6 +16,7 @@ export interface ProjectBranches {
 
 export interface GitBranch {
   name: string;
+  commit: Commit;
 }
 
 export enum DeployState {
@@ -82,3 +84,16 @@ export interface DeployApplicationState {
     data: any
   };
 }
+
+export interface AppData {
+  Name: string;
+  cloudFoundry: string;
+  org: string;
+  space: string;
+}
+
+export const GITHUB_BRANCHES_ENTITY_KEY = 'githubBranches';
+export const GITHUB_COMMIT_ENTITY_KEY = 'githubCommits';
+
+export const BranchSchema = new schema.Entity(GITHUB_BRANCHES_ENTITY_KEY, {}, { idAttribute: 'name' });
+export const BranchesSchema = new schema.Array(BranchSchema);
