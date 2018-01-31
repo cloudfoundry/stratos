@@ -69,9 +69,7 @@
     "rxjs-spy": "^6.1.0",
     "rxjs-websockets": "^4.0.0",
     "xterm": "^2.9.1",
-    "zone.js": "^0.8.14",
-    "@angular/cli": "^1.6.1",
-    "typescript": "2.4.2"
+    "zone.js": "^0.8.14"
   },
   "engines": {
     "node": "8.x.x"
@@ -85,8 +83,6 @@
     "stratos-merge-dirs": "^0.2.1",
     "q": "^1.4.1",
     "run-sequence": "^1.1.5",
-    "eslint": "^4.4.1",
-    "eslint-plugin-angular": "^3.0.2",
     "express": "^4.15.4",
     "http-proxy": "^1.16.2",
     "imagemin": "^5.3.1",
@@ -110,6 +106,7 @@
     "request": "^2.81.0",
     "shelljs": "^0.7.8",
     "toSrc": "^0.1.4",
+    "@angular/cli": "^1.6.1",
     "@angular/compiler-cli": "^5.1.1",
     "@angular/language-service": "^4.4.6",
     "@types/jasmine": "^2.6.2",
@@ -125,6 +122,7 @@
     "ngrx-store-freeze": "^0.2.0",
     "sass-lint": "^1.12.1",
     "ts-node": "~3.2.0",
-    "tslint": "~5.3.2"
+    "tslint": "~5.3.2",
+    "typescript": "2.4.2"
   }
 }
