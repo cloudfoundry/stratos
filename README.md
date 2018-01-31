@@ -48,5 +48,5 @@ You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - a
 
 ## License
 
-The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE.md).
+The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE).
 
