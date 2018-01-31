@@ -10,6 +10,7 @@ import { UpdateApplication, DeleteApplication } from '../../../../store/actions/
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppMetadataTypes, GetAppSummaryAction, GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
 import { ConfirmationDialogService, ConfirmationDialog } from '../../../../shared/components/confirmation-dialog.service';
+import { take } from 'rxjs/operators';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialog('Stop Application', 'Are you sure you want to stop this Application?', 'Stop');
@@ -42,7 +43,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   applicationActions$: Observable<string[]>;
   addedGitHubTab = false;
   summaryDataChanging$: Observable<boolean>;
-  summarySubscription$: Subscription;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
@@ -127,11 +127,12 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       return isFetchingApp || isUpdating;
     });
 
-    this.summarySubscription$ = this.applicationService.app$.subscribe(app => {
+    this.applicationService.app$.pipe(
+      take(1)
+    ).subscribe(app => {
       if (app.entity && app.entity.entity && app.entity.entity.environment_json) {
         if (this.containsGitHubInfo(app.entity.entity.environment_json)) {
           this.tabLinks.push({ link: 'github', label: 'GitHub' });
-          this.summarySubscription$.unsubscribe();
         }
       }
     });

@@ -1,8 +1,22 @@
-.github-tab{
-  .github-tab__avatar{
-    img{
-      height:100px;
-      width:100px;
+.github-tab {
+
+  &__deployment {
+    &__commit-warning {
+      display: flex;
+      flex-flow: row;
+      &__msg{
+        padding-left: 24px;
+      }
+    }
+    &__deploy {
+      display: flex;
+      flex-flow: row-reverse;
+    }
+  }
+  .github-tab__avatar {
+    img {
+      height: 100px;
+      width: 100px;
       float: right;
     }
   }

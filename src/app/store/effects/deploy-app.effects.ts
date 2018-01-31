@@ -77,8 +77,11 @@ export class DeployAppEffects {
           } as NormalizedResponse;
 
           branches.forEach(b => {
-            mappedData.entities[GITHUB_BRANCHES_ENTITY_KEY][b.name] = b;
-            mappedData.result.push(b.name);
+            const id = `${action.projectName}-${b.name}`;
+            b.projectId = action.projectName;
+            b.entityId = id;
+            mappedData.entities[GITHUB_BRANCHES_ENTITY_KEY][id] = b;
+            mappedData.result.push(id);
           });
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType),

@@ -6,14 +6,37 @@
         <mat-card-title>Deployment Information</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <div >
-          <div>
-            <app-metadata-item label="Repository">{{stratosProject.deploySource.project }}</app-metadata-item>
-            <app-metadata-item  label="Branch">{{ stratosProject.deploySource.branch}}</app-metadata-item>
-            <app-metadata-item  label="Commit">{{ stratosProject.deploySource.commit}}</app-metadata-item>
+        <div class="github-tab__deployment" >
+            <app-metadata-item label="Repository">
+              <a href="{{(gitHubRepo$ | async)?.html_url}}">
+                {{stratosProject.deploySource.project }}
+              </a>
+            </app-metadata-item>
+            <app-metadata-item  label="Branch">
+              <a href="{{(gitHubRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}">
+                {{ stratosProject.deploySource.branch}}
+              </a>
+            </app-metadata-item>
+            <div class="github-tab__deployment__commit">
+              <div>
+                  <app-metadata-item  label="Commit">
+                      <a href="{{(commit$ | async)?.html_url}}">
+                          {{ stratosProject.deploySource.commit}}
+                      </a>
+                    </app-metadata-item>
+              </div>
+              <div class="github-tab__deployment__commit-warning" *ngIf="!isHead$ | async">
+                    <div><mat-icon>warning</mat-icon> </div>
+                    <div class="github-tab__deployment__commit-warning__msg">The branch {{ stratosProject.deploySource.branch}} has been updated since this app was pushed. Redeploy to update application!</div>
+              </div>
+              </div>
             <app-metadata-item label="Deploy at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
-          </div>
         </div>
+        <div class="github-tab__deployment__deploy" >
+            <div class="github-tab__deployment__deploy__button">
+                <button mat-button color="primary" *ngIf="isHead$ | async" (click)="deployApp(stratosProject)">Redploy App</button>
+            </div>
+          </div>
       </mat-card-content>
     </mat-card>
   </app-tile>
@@ -54,7 +77,8 @@
                 <img src={{commitInfo.author.avatar_url}}>
               </div>
             <div >
-                <app-metadata-item label="SHA">
+            <app-metadata-item  label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
+            <app-metadata-item label="SHA">
               <a href={{commitInfo.html_url}}>{{ commitInfo.sha }}</a>
             </app-metadata-item>
             <app-metadata-item  label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
