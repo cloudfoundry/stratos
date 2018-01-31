@@ -38,7 +38,7 @@ Configuration information can be found in two places
     }
     ```
 
-* `./src/environments/environment.ts` for UAA config
+* `./src/frontend/environments/environment.ts` for UAA config
   * This contains more general settings for the frontend
   * By default we output every Redux action to the console. If this is too verbose for yourself, simply set `logEnableConsoleActions` to false
 

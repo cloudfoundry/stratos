@@ -31,7 +31,7 @@ module.exports = function (config) {
     browsers: process.env.CI_ENV ? ['ChromeHeadless'] : ['Chrome'],
     singleRun: process.env.CI_ENV ? true : false,
     files: [{
-        pattern: './src/**/*.spec.ts',
+        pattern: './src/frontend**/*.spec.ts',
         watched: false
       },
       {
