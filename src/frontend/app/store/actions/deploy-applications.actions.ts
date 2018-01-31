@@ -1,7 +1,8 @@
 import { Action, compose } from '@ngrx/store';
 
 import { AppState } from '../app-state';
-import { DeployApplicationSource, GitAppDetails, Commit, SourceType } from '../types/deploy-application.types';
+import { DeployApplicationSource, GitAppDetails, SourceType } from '../types/deploy-application.types';
+import { GithubCommit } from '../types/github.types';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const SET_APP_SOURCE_SUB_TYPE = '[Deploy App] Set App Source Sub Type';
@@ -59,7 +60,7 @@ export class DeleteCachedBranches implements Action {
 }
 
 export class FetchCommit implements Action {
-  constructor(public commit: Commit) {}
+  constructor(public commit: GithubCommit) {}
   type = FETCH_COMMIT;
 }
 

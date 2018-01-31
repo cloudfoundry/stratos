@@ -19,6 +19,10 @@ export interface GithubUser {
   type: string;
 }
 
+export interface GitBranch {
+  name: string;
+  commit: GithubCommit;
+}
 
 export interface GithubCommit {
   sha: string;

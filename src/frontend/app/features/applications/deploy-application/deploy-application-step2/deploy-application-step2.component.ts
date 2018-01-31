@@ -13,8 +13,6 @@ import {
 import { filter, mergeMap, tap, skipWhile, switchMap, merge, map, take } from 'rxjs/operators';
 import {
   SourceType,
-  Commit,
-  GitBranch,
   BranchesSchema,
   BranchSchema,
   GITHUB_BRANCHES_ENTITY_KEY,
@@ -36,6 +34,7 @@ import { PaginatedAction } from '../../../../store/types/pagination.types';
 import { selectEntity } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { GitBranch, GithubCommit } from '../../../../store/types/github.types';
 @Component({
   selector: 'app-deploy-application-step2',
   templateUrl: './deploy-application-step2.component.html',
@@ -57,7 +56,7 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
   repository: any;
   validate: Observable<boolean>;
   projectInfo$: Observable<any>;
-  commitInfo$: Observable<Commit>;
+  commitInfo$: Observable<GithubCommit>;
 
   @ViewChild('sourceSelectionForm')
   sourceSelectionForm: NgForm;
@@ -126,9 +125,9 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
     }
     this.store.dispatch(new FetchCommit(branch.commit));
     this.commitInfo$ = combineLatest(
-      this.store.select<Commit>(selectEntity(GITHUB_COMMIT_ENTITY_KEY, this.repositoryBranch.commit.sha)),
+      this.store.select<GithubCommit>(selectEntity(GITHUB_COMMIT_ENTITY_KEY, this.repositoryBranch.commit.sha)),
       this.sourceSelectionForm.controls.projectName.statusChanges.startWith('VALID')
-    ).map(([commit, projectValid]: [Commit, string]) => {
+    ).map(([commit, projectValid]: [GithubCommit, string]) => {
       if (projectValid === 'VALID') {
         return commit;
       }

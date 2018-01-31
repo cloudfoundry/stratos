@@ -30,7 +30,7 @@ import {
    DeleteDeployAppSection,
    DELETE_DEPLOY_APP_SECTION,
 } from '../../store/actions/deploy-applications.actions';
-import { Commit, GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../types/deploy-application.types';
+import { GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../types/deploy-application.types';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { StartRequestAction, WrapperRequestActionSuccess, IRequestAction, WrapperRequestActionFailed } from '../types/request.types';
 import { NormalizedResponse } from '../types/api.types';

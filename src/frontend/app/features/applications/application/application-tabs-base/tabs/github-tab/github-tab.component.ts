@@ -9,7 +9,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.actions';
-import { GithubRepo, GITHUB_REPO_ENTITY_KEY, GithubCommit } from '../../../../../../store/types/github.types';
+import { GithubRepo, GITHUB_REPO_ENTITY_KEY, GithubCommit, GitBranch } from '../../../../../../store/types/github.types';
 import { GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../../../../../../store/types/deploy-application.types';
 import { FetchCommit, FetchBranchesForProject, CheckProjectExists } from '../../../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
@@ -41,7 +41,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
           this.store.dispatch(new FetchCommit({sha: commitId, url: url }));
           this.store.dispatch(new FetchBranchesForProject( stProject.deploySource.project));
           this.commit$ = this.store.select(selectEntity(GITHUB_COMMIT_ENTITY_KEY, commitId));
-          this.isHead$ = this.store.select(selectEntity(GITHUB_BRANCHES_ENTITY_KEY,
+          this.isHead$ = this.store.select(selectEntity<GitBranch>(GITHUB_BRANCHES_ENTITY_KEY,
              `${stProject.deploySource.project}-${stProject.deploySource.branch}`))
             .pipe(
               filter(p => !!p),
