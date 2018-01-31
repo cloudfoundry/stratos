@@ -1,7 +1,7 @@
 options:
   formatter: stylish
 files:
-  include: 'src/**/*.s+(a|c)ss'
+  include: 'src/frontend/**/*.s+(a|c)ss'
   ignore:
     - '/dist/*'
     - '/tmp/*'
