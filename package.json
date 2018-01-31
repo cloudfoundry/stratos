@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "clean": "gulp clean",
-    "build": "ng build",
+    "build": "ng build --prod --aot=false",
+    "dev-build": "ng build --dev",
     "build-backend": "gulp build-backend",
     "build-migrator": "gulp build-migrator",
     "cf-get-backend-deps": "gulp cf-get-backend-deps",
