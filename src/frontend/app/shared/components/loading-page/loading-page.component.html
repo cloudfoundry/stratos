@@ -1,0 +1,8 @@
+<ng-content *ngIf="done"></ng-content>
+<div *ngIf="!done" [@leaveLoaderAnimation] class="loading-page">
+  <div class="loading-page__indicator">
+    {{ text }}
+    <mat-progress-bar class="loading-page__indicator-bar" [color]="'primary'" [mode]="'query'">
+    </mat-progress-bar>
+  </div>
+</div>

@@ -1,0 +1,84 @@
+.steppers {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+  &__inner {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 50px;
+  }
+  &__headers {
+    display: flex;
+  }
+  &__header {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    &-inner {
+      align-items: center;
+      display: flex;
+      flex: 1;
+      padding: 0 10px;
+    }
+    &::after {
+      background-color: #808080;
+      content: '';
+      height: 1px;
+      width: 100%;
+    }
+    &:first-child {
+      &::before {
+        content: none;
+      }
+    }
+    &:last-child {
+      flex: none;
+      &::after {
+        content: none;
+      }
+    }
+    &-icon {
+      align-items: center;
+      border-radius: 50%;
+      display: flex;
+      height: 15px;
+      justify-content: center;
+      padding: 15px;
+      width: 15px;
+    }
+    &-text {
+      padding-left: 10px;
+      white-space: nowrap;
+    }
+  }
+  &__contents {
+    flex: 1;
+    height: 100%;
+    margin: 30px 80px;
+  }
+  &__wrapper {
+    display: flex;
+    min-height: 100%;
+  }
+  &__navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 50px;
+  }
+  &__navigation-right {
+    flex: 1;
+    text-align: right;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    max-width: 60%;
+    mat-select,
+    mat-form-field {
+      margin-top: 20px;
+      width: 100%;
+    }
+  }
+}

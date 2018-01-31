@@ -1,0 +1,73 @@
+.listComponent {
+  *[hidden],
+  .sort[hidden],
+  .filter[hidden],
+  .add-container[hidden] {
+    display: none;
+  }
+  &__header {
+    &__left[hidden],
+    &__right[hidden],
+    &__top[hidden],
+    &__bottom[hidden] {
+      display: none;
+    }
+  }
+  $title-left-padding: 25px;
+  $title-content-padding: 10px;
+  &__header {
+    mat-card-header {
+      padding: 15px;
+    }
+    &__left,
+    &__right,
+    &__top,
+    &__bottom {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      height: 55px;
+    }
+    &__left,
+    &__right {
+      > div:not(:last-of-type) {
+        padding-right: $title-content-padding;
+      }
+    }
+    &__left .multi-filters mat-form-field {
+      padding-right: $title-content-padding;
+    }
+    &__right {
+      .add-container {
+        display: flex;
+        align-items: center;
+      }
+      .mat-paginator {
+        padding: 0;
+      }
+    }
+    &__bottom {
+      justify-content: flex-end;
+      align-items: flex-end;
+    }
+    mat-card {
+      padding: 0 10px;
+      mat-card-header {
+        display: flex;
+        flex-direction: column;
+        div:not([hidden]).spacer {
+          flex-grow: 99;
+        }
+      }
+    }
+  }
+  &__body {
+    padding-top: 15px;
+    .no-rows {
+      padding: 20px $title-left-padding;
+    }
+    mat-card[hidden] {
+      display: none;
+    }
+  }
+}

@@ -1,39 +1,67 @@
-.idea
-*.iml
+# compiled output
+/dist
+/tmp
+/out-tsc
+/out
+
+# dependencies
+/node_modules
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+.vscode/settings.json
+!.vscode/tasks.json
+.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
 npm-debug.log
-phantomjsdriver.log
-node_modules
-dist
+testem.log
+/typings
+yarn-error.log
+
+# e2e
+src/test-e2e/*.js
+src/test-e2e/*.map
+src/test-e2e/e2e.secrets.ts
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Git
+*.orig
+
+# Angular CLI
+proxy.conf.js
+environment.dev.ts
+
+#v1
+*.iml
 docs/src
 lib
 tools/test-backend/config/mock.config.json
-src/index.scss
-src/plugins/.plugins.scss
-src/framework.scss
 tools/.coverage-karma/
-build/dev_config.json
-tools/dev_config.json
-translations/js
-translations/**/*.mo
-framework/examples/dist/
-oem/scss
-oem/tmp
-tmp
-out/
-bower_components/
-.vscode/*.rc
-.nfs*
-demo/*
 dev-certs/*
-console-database.db
-.vcs-migrated
 vendor/
 **/vendor
 **/*.so
 .glide
 tools/ssl
 build/secrets.json
-
 deploy/data/
 deploy/hsc-upgrade-volume/
 deploy/development.rc

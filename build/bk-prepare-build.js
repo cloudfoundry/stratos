@@ -1,4 +1,4 @@
-/* eslint-disable no-process-env */
+/* eslint-disable no-process-env, no-sync */
 (function () {
   'use strict';
 
@@ -44,6 +44,22 @@
     return tempDbMigratorSrcPath;
   };
 
+  function getPlugins() {
+    var plugins = [];
+    // Enumerate all folders in the src/backend folder
+    var folders = fs.readdirSync(conf.pluginFolder);
+    _.each(folders, function (plugin) {
+      var fPath = path.join(conf.pluginFolder, plugin);
+      var stat = fs.lstatSync(fPath);
+      if (stat.isDirectory() && plugin !== 'app-core') {
+        plugins.push(plugin);
+      }
+    });
+    return plugins;
+  }
+
+  module.exports.getPlugins = getPlugins;
+
   gulp.task('clean-backend', function (done) {
     // Local dev build - only remove plugins and main binary
     if (module.exports.localDevSetup) {
@@ -66,12 +82,12 @@
     }
   });
 
-  gulp.task('create-temp', [], function (done) {
+  gulp.task('create-temp', function (done) {
     // If STRATOS_TEMP is set, then a staged build is being carried out
     // see CF deployment script deploy/cloud-foundry/package.sh
     if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
-      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
+      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep;
       tempDbMigratorSrcPath = tempPath + path.sep + conf.goPathDbMigrator;
       return done();
     } else {
@@ -81,14 +97,14 @@
             throw err;
           }
           tempPath = path_;
-          tempSrcPath = path.join(tempPath, conf.goPath, 'components');
+          tempSrcPath = path.join(tempPath, conf.goPath);
           tempDbMigratorSrcPath = path.join(tempPath, conf.goPathDbMigrator);
           done();
         });
     }
   });
 
-  gulp.task('delete-temp', [], function (done) {
+  gulp.task('delete-temp', function (done) {
     if (module.exports.localDevSetup) {
       return done();
     } else {
@@ -102,19 +118,19 @@
     }
   });
 
-  gulp.task('copy-portal-proxy', ['create-temp'], function (done) {
+  gulp.task('copy-portal-proxy', function (done) {
 
-    var plugins = require('./../plugins.json');
+    var plugins = getPlugins();
     fs.ensureDir(tempSrcPath, function (err) {
       if (err) {
         throw err;
       }
 
       var promises = [];
-      _.each(plugins.enabledPlugins, function (plugin) {
-        promises.push(fsCopyQ('./components/' + plugin, tempSrcPath + '/' + plugin));
+      _.each(plugins, function (plugin) {
+        promises.push(fsCopyQ('./src/backend/' + plugin, tempSrcPath + '/' + plugin));
       });
-      promises.push(fsCopyQ('./components/app-core', tempSrcPath + '/app-core'));
+      promises.push(fsCopyQ('./src/backend/app-core', tempSrcPath + '/app-core'));
 
       Q.all(promises)
         .then(function () {
@@ -127,7 +143,7 @@
     });
   });
 
-  gulp.task('create-outputs', ['clean-backend'], function (done) {
+  gulp.task('create-outputs', gulp.series('clean-backend'), function (done) {
     var outputPath = conf.outputPath;
     fsEnsureDirQ(outputPath)
       .then(function () {
@@ -139,7 +155,7 @@
   });
 
   // DB Migrator
-  gulp.task('copy-dbmigrator', ['create-temp'], function (done) {
+  gulp.task('copy-dbmigrator', function (done) {
     fs.ensureDir(tempDbMigratorSrcPath, function (err) {
       if (err) {
         throw err;

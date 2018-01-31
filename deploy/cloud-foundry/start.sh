@@ -2,7 +2,7 @@
 
 set -e
 
-echo "Starting Stratos UI"
+echo "Starting Stratos"
 
 CF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TOP_LEVEL=${CF_DIR}/../../

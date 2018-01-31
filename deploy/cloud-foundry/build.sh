@@ -16,20 +16,16 @@ export STRATOS_TEMP=$(mktemp -d)
 # Copy the config file
 cp ${CF_DIR}/config.properties ${TOP_LEVEL}
 
-mv ${TOP_LEVEL}/plugins.json ${TOP_LEVEL}/plugins.json.bk
-sed '2 a"cloud-foundry-hosting",' ${TOP_LEVEL}/plugins.json.bk > ${TOP_LEVEL}/plugins.json
-
 # Hack for deleting testImports in glide files
 # because unfortunately `glide install --skip-test` doesn't seem to work
 find . -name glide.lock -exec sed -i '/^testImports.*/q' {} \;
 find . -name glide.lock -exec sed -i 's/^testImports:$/testImports: []/g' {} \;
 
-npm install -g gulp bower
+npm install -g gulp@^4.0.0
 
 cd ${TOP_LEVEL}
 
-npm install --only=prod
-${BOWER_PATH}/bower install
+npm install
 
 # Fetch Glide dependencies
 npm run cf-get-backend-deps
@@ -49,6 +45,7 @@ rm -rf ./outputs
 
 # Don't need the source code after build
 rm -rf ./components
+rm -rf ./src
 
 echo "All done"
 

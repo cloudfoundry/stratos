@@ -1,0 +1,26 @@
+.card-app {
+  &__title {
+    flex: 1;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  &__meta {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+  }
+  &__label {
+    flex: 1;
+  }
+  &__Value {
+    align-content: flex-end;
+    flex: 1;
+  }
+}
+
+.mat-card {
+  cursor: pointer;
+  &-header-text {
+    margin: 0;
+  }
+}

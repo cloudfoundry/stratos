@@ -1,6 +1,9 @@
 # Stratos
 
 [![Build Status](https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/stratos)
+<a href="https://codeclimate.com/github/cloudfoundry-incubator/stratos"><img src="https://img.shields.io/codeclimate/maintainability/cloudfoundry-incubator/stratos.svg"></a>
+<a href="https://codecov.io/gh/cloudfoundry-incubator/stratos"><img src="https://codecov.io/gh/cloudfoundry-incubator/stratos/branch/master/graph/badge.svg"/></a>
+<a href="https://app.zenhub.com/workspace/o/cloudfoundry-incubator/stratos/boards"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"/></a>
 [![GitHub release](https://img.shields.io/github/release/cloudfoundry-incubator/stratos.svg)](https://github.com/cloudfoundry-incubator/stratos/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry-incubator/stratos/blob/master/LICENSE)
 
@@ -28,6 +31,11 @@ $ docker run -p 4443:443 splatform/stratos-ui:latest
 
 You can access the UI on `https://localhost:4443`
 
+## Project Planning
+We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/SUSE/stratos#boards)
+tab and have a look through our pipelines and milestones. Please note in order to view the ZenHub Boards tab you will need the [ZenHub
+browser extension](https://www.zenhub.com/extension)
+
 ## Further Reading
  
 Take a look at the [Feature Set](docs/features.md) for details on the feature set that Stratos provides.
@@ -35,6 +43,11 @@ Take a look at the [Feature Set](docs/features.md) for details on the feature se
 Get an [Overview](docs/overview.md) of Stratos, its components and the different ways in which it can be deployed.
 
 Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading.
+
+Browse through features and issues in the project's [issues](https://github.com/SUSE/stratos-ui/issues) page or [Zenhub Board](https://github.com/SUSE/stratos-ui#boards).
+
+What kind of code is in Stratos? We've integrated [Code Climate](https://codeclimate.com) for some code quality and maintainability metrics. Take a stroll around the [project page](https://codeclimate.com/github/SUSE/stratos)
+
 
 ## Contributing
 
@@ -51,4 +64,3 @@ You can join the Cloud Foundry Slack here - https://slack.cloudfoundry.org/  - a
 ## License
 
 The work done has been licensed under Apache License 2.0. The license file can be found [here](LICENSE).
-

@@ -12,13 +12,12 @@
   var prepareBuild = require('./bk-prepare-build');
   var nodePackageFile = require('../package.json');
 
-  var env, devConfig;
+  var env, devConfig, pluginsToInclude;
 
   module.exports.init = function () {
     env = process.env;
     env.GOPATH = prepareBuild.getGOPATH();
-    env.GOOS = 'linux';
-    env.GOARCH = 'amd64';
+    pluginsToInclude = [];
   };
 
   module.exports.runGlideInstall = runGlideInstall;
@@ -96,22 +95,24 @@
   }
 
   function buildPlugin(pluginPath, pluginName) {
-
     var goFiles = _.filter(fs.readdirSync(pluginPath), function (file) {
       return path.extname(file) === '.go';
     });
-    var args = ['build'];
 
-    if (!prepareBuild.getNoGoInstall()) {
-      args.push('-i');
-    }
-    args = args.concat(['-buildmode=plugin', '-o', pluginName + '.so']);
-    args = args.concat(goFiles);
-    return spawnProcess('go', args, pluginPath, env);
+    pluginsToInclude.push({
+      name: pluginName,
+      path: pluginPath,
+      files: goFiles
+    });
+    return Q.resolve();
   }
 
-  function build(path, exeName) {
+  function build(srcPath, exeName, skipPlugins) {
     var args = ['build', '-i', '-o', exeName];
+
+    if (!skipPlugins) {
+      prepareBuildWithoutPluginSupport(srcPath);
+    }
 
     // Set the console version from that of the package.json and the git commit
     return getVersion().then(function (version) {
@@ -119,7 +120,7 @@
         args.push('-ldflags');
         args.push('-X=main.appVersion=' + version);
       }
-      return spawnProcess('go', args, path, env);
+      return spawnProcess('go', args, srcPath, env);
     });
   }
 
@@ -146,6 +147,46 @@
       deferred.resolve('dev');
     }
     return deferred.promise;
+  }
+
+  function prepareBuildWithoutPluginSupport(srcPath) {
+    var imports = '';
+    var inits = '';
+
+    _.each(pluginsToInclude, function (plugin) {
+      var pkgName = 'plugin_' + plugin.name;
+      pkgName = replaceAll(pkgName, '-', '');
+
+      var destPath = path.join(srcPath, pkgName);
+
+      _.each(plugin.files, function (name) {
+        var src = path.join(plugin.path, name);
+        var dest = path.join(destPath, name);
+        fs.mkdirpSync(destPath);
+
+        var data = fs.readFileSync(src);
+        // Re-write the package for the plugin's files
+        if (data.indexOf('package main') === 0) {
+          data = 'package ' + pkgName + data.toString().substring(12);
+        }
+        fs.writeFileSync(dest, data);
+      });
+
+      imports += '\t"github.com/SUSE/stratos-ui/app-core/' + pkgName + '"\n';
+      inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tpp.Plugins["' + pkgName + '"] = plugin\n';
+      inits += '\tlog.Info("Loaded plugin: ' + plugin.name + '")\n';
+    });
+
+    // Patch the static plugin loader
+    var pluginLoader = path.join(srcPath, 'load_plugins.go');
+    var loader = fs.readFileSync(pluginLoader).toString();
+    loader = loader.replace('//@@IMPORTS@@', imports);
+    loader = loader.replace('//@@INITS@@', inits);
+    fs.writeFileSync(pluginLoader, loader);
+  }
+
+  function replaceAll(target, search, replacement) {
+    return target.split(search).join(replacement);
   }
 
 })();

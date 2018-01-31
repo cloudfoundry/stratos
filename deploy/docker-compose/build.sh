@@ -14,7 +14,7 @@ while getopts ":ho:r:t:lu:n" opt; do
   case $opt in
     h)
       echo
-      echo "--- To build images of Stratos UI: "
+      echo "--- To build images of Stratos: "
       echo
       echo " ./build.sh -t 1.0.13"
       echo
@@ -58,7 +58,7 @@ done
 
 echo
 echo "=============================================================================="
-echo "Stratos UI Docker Compose Build"
+echo "Stratos Docker Compose Build"
 echo "=============================================================================="
 echo
 echo "TAG: ${TAG}"
@@ -152,7 +152,6 @@ function cleanup {
   echo "-- Cleaning up ${STRATOS_UI_PATH}"
   rm -rf ${STRATOS_UI_PATH}/dist
   rm -rf ${STRATOS_UI_PATH}/node_modules
-  rm -rf ${STRATOS_UI_PATH}/bower_components
   echo
   echo "-- Cleaning up ${STRATOS_UI_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_UI_PATH}/deploy/containers/nginx/dist

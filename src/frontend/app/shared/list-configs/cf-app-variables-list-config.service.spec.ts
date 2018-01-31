@@ -1,0 +1,47 @@
+import { CommonModule } from '@angular/common';
+import { inject, TestBed } from '@angular/core/testing';
+
+import { CoreModule } from '../../core/core.module';
+import { ApplicationsModule } from '../../features/applications/applications.module';
+import { ApplicationSchema, GetApplication } from '../../store/actions/application.actions';
+import { cnsisStoreNames } from '../../store/types/cnsis.types';
+import { generateTestApplicationServiceProvider } from '../../test-framework/application-service-helper';
+import { generateTestEntityServiceProvider } from '../../test-framework/entity-service.helper';
+import { createBasicStoreModule, getInitialTestStoreState } from '../../test-framework/store-test-helper';
+import { SharedModule } from '../shared.module';
+import { CfAppVariablesListConfigService } from './cf-app-variables-list-config.service';
+
+
+describe('CfAppVariablesListConfigService', () => {
+
+  const initialState = getInitialTestStoreState();
+  const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.type])[0];
+  const appGuid = Object.keys(initialState.requestData.application)[0];
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        CfAppVariablesListConfigService,
+        generateTestEntityServiceProvider(
+          appGuid,
+          ApplicationSchema,
+          new GetApplication(appGuid, cfGuid)
+        ),
+        generateTestApplicationServiceProvider(appGuid, cfGuid)
+      ],
+      imports: [
+        CommonModule,
+        CoreModule,
+        SharedModule,
+        createBasicStoreModule(),
+        ApplicationsModule
+      ]
+    });
+  });
+
+  it('should be created', inject(
+    [CfAppVariablesListConfigService],
+    (service: CfAppVariablesListConfigService) => {
+      expect(service).toBeTruthy();
+    }));
+});

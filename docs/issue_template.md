@@ -1,11 +1,23 @@
 <!--- For bugs and general issues -->
-### Deployment type
-(select the type below by replacing the space with an `x`)
+### Frontent Deployment type
+<!--- Where is the frontend deployed? -->
+<!--- Put an 'x' in one of the boxes below.  -->
+<!--- Put an 'x' in one or more boxes below.  -->
 * [ ] Cloud Foundry Application (cf push)
 * [ ] Kubernetes, using a helm chart
 * [ ] Docker, using docker compose
 * [ ] Docker, single container deploying all components
-* [ ] Other (please provide below)
+* [ ] npm run start
+* [ ] Other (please specify below)
+
+### Backend (portal-proxy) Deployment type
+<!--- Where is the backend deployed?  -->
+<!--- Put an 'x' in one or more boxes below.  -->
+* [ ] Cloud Foundry Application (cf push)
+* [ ] Kubernetes, using a helm chart
+* [ ] Docker, using docker compose
+* [ ] Docker, single container deploying all components
+* [ ] Other (please specify below)
 
 ### Expected behaviour
 
@@ -15,7 +27,7 @@
 
 ### Log output covering before error and any error statements
 ```
-Insert log here
+Insert log hereCopy
 ```
 
 

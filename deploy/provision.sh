@@ -15,24 +15,12 @@ if [ ! -z "${CREATE_USER}" ]; then
   fi
 fi
 
-npm install --production
+npm install
 export PATH=$PATH:$WORK_DIR/node_modules/.bin
 
-# Change the bower file to build with different components, if specified (used for SUSE/OS builds)
-if [ ! -z "${STRATOS_BOWER}" ]; then
-  BOWER_OVERRIDE=./deploy/${STRATOS_BOWER}/bower.json
-  if [ -f $BOWER_OVERRIDE ]; then
-    rm bower.json
-    cp ${BOWER_OVERRIDE} bower.json
-    echo "** Changed bower.json - copied from ${BOWER_OVERRIDE}"
-  fi
-fi
-
-bower install --allow-root --force
 npm run build
 
 if [ ! -z "${CREATE_USER}" ]; then
   chown -R ${USER_ID}:${GROUP_ID} node_modules
-  chown -R ${USER_ID}:${GROUP_ID} bower_components
   chown -R ${USER_ID}:${GROUP_ID} dist
 fi

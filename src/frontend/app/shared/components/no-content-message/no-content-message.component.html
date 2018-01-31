@@ -1,0 +1,6 @@
+<div class="container">
+  <mat-icon>{{icon}}</mat-icon>
+  <div class="first-line">{{firstLine}}</div>
+  <div class="second-line">
+    <a *ngIf="secondLine?.link" [routerLink]="secondLine?.link">{{secondLine?.linkText}}</a>{{secondLine?.text}}</div>
+</div>

@@ -1,7 +1,0 @@
-{
-  "errors": {
-    "no-cf-connected": "Aucun endpoint n'est connecté pour [[@:cloud-foundry]] .",
-    "no-cf-connected-text": "<a class=\"btn-link\" href=\"/#!/endpoint\">Utiliser le tableau de bord des Endpoints</a> pour réparer vos connexions ou vous connecter à de nouveaux endpoints.",
-    "no-cf-connected-cant-fix-text": "Veuillez contacter votre administrateur."
-  }
-}
