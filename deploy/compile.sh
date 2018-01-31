@@ -2,7 +2,7 @@
 set -e
 
 rm -rf node_modules
-npm install --production
+npm install
 if [ ! -z ${BUILD_DB_MIGRATOR} ]; then
 npm run build-migrator
 else

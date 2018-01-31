@@ -5,7 +5,6 @@
   var paths = {
     dist: './dist/',
     src: './src/',
-    lib: './bower_components',
     translations: './translations/',
     tools: './tools/',
     build: './build/',
@@ -26,37 +25,6 @@
 
   // Now returned as an object so require always returns same object
   module.exports = {
-    bower: {
-      bowerJson: require('../bower.json'),
-      directory: './bower_components/',
-      ignorePath: './src/',
-      exclude: [/.js$/],
-      overrides: {
-        angular: {
-          dependencies: {
-            jquery: '*'
-          }
-        },
-        'angular-toastr': {
-          main: [
-            './dist/angular-toastr.tpls.js'
-          ]
-        },
-        lodash: {
-          main: [
-            './lodash.js'
-          ]
-        },
-        'bootstrap-sass': {
-          main: [
-            // 'assets/stylesheets/_bootstrap.scss'
-          ]
-        }
-      }
-    },
-
-    browserSyncPort: 3100,
-
     istanbul: {
       instrumentation: {
         'include-all-sources': true,

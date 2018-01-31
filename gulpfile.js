@@ -1,5 +1,5 @@
 (function () {
   'use strict';
-  require('./build/main.gulp');
+  require('./build/fe-build');
   require('./build/bk-build');
 })();

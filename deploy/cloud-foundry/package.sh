@@ -18,19 +18,17 @@ cp ${CF_DIR}/config.properties ${TOP_LEVEL}
 find . -name glide.lock -exec sed -i '/^testImports.*/q' {} \;
 find . -name glide.lock -exec sed -i 's/^testImports:$/testImports: []/g' {} \;
 
-npm install -g gulp bower
+npm install -g gulp
 
 cd ${TOP_LEVEL}
 
-npm install --only=prod & NPM_INSTALL=$!
-${BOWER_PATH}/bower install & BOWER_INSTALL=$!
+npm install & NPM_INSTALL=$!
 
 wait ${NPM_INSTALL}
 # Fetch Glide dependencies, since this is I/O intensive
 # it won't interfere with UI build
 npm run cf-get-backend-deps & BK_BUILD=$!
 
-wait ${BOWER_INSTALL}
 npm run build & UI_BUILD=$!
 wait ${BK_BUILD}
 wait ${UI_BUILD}
