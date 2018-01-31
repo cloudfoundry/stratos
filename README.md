@@ -34,6 +34,8 @@ Take a look at the [Feature Set](docs/features.md) for details on the feature se
  
 Get an [Overview](docs/overview.md) of Stratos, its components and the different ways in which it can be deployed.
 
+Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading.
+
 ## Contributing
 
 We very much welcome developers who would like to get involved and contribute to the development of the Stratos project. Please refer to the [Contributing guide](CONTRIBUTING.md) for more information.
