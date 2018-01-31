@@ -10,6 +10,7 @@ import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounce
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { distinctPageUntilChanged } from '../../../shared/data-sources/list-data-source';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -146,19 +147,16 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    distinctUntilChanged()
-  );
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey))
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
-    distinctUntilChanged((oldVals, newVals) => {
-      const oldVal = getPaginationCompareString(oldVals);
-      const newVal = getPaginationCompareString(newVals);
-      return oldVal === newVal;
-    }),
-    debounceTime(1),
+    // distinctUntilChanged((oldVals, newVals) => {
+    //   const oldVal = getPaginationCompareString(oldVals);
+    //   const newVal = getPaginationCompareString(newVals);
+    //   return oldVal === newVal;
+    // }),
     tap(pagination => {
       if (
         (!pagination && !hasDispatchedOnce) ||
@@ -168,16 +166,23 @@ function getObservables<T = any>(
         store.dispatch(action);
       }
     }),
-    share()
+    shareReplay(1)
   );
-  fetchPagination$.subscribe();
 
   const entities$: Observable<T[]> =
     combineLatest(
       store.select(selectEntities(entityKey)),
-      paginationSelect$
+      fetchPagination$
     )
       .pipe(
+      // distinctUntilChanged((x, y) => {
+      //   const defaultPag = {
+      //     ids: {}
+      //   }
+      //   const xPag = x[1] || defaultPag;
+      //   const yPag = y[1] || defaultPag;
+      //   return Object.keys(xPag.ids).join('') === Object.keys(yPag.ids).join('');
+      // }),
       filter(([ent, pagination]) => {
         return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       }),
@@ -193,7 +198,8 @@ function getObservables<T = any>(
         }
 
         return page ? denormalize(page, schema, entities).filter(ent => !!ent) : null;
-      })
+      }),
+      shareReplay(1)
       );
 
   return {

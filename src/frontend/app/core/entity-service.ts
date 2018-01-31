@@ -1,29 +1,29 @@
-import { shareReplay } from 'rxjs/operators';
-import { IRequestAction } from '../store/types/request.types';
+import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { denormalize, Schema } from 'normalizr';
+import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
+import { debounceTime, filter, map, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
+import { Observable } from 'rxjs/Rx';
+
+import { AppState } from '../store/app-state';
 import {
   ActionState,
-  RequestSectionKeys,
   RequestInfoState,
+  RequestSectionKeys,
   TRequestTypeKeys,
   UpdatingSection,
 } from '../store/reducers/api-request-reducer/types';
-import { composeFn } from './../store/helpers/reducer.helper';
-import { Action, compose, Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
-import { denormalize, Schema } from 'normalizr';
-import { Observable } from 'rxjs/Rx';
-import { APIResource, EntityInfo } from '../store/types/api.types';
 import {
   getAPIRequestDataState,
   getEntityUpdateSections,
   getUpdateSectionById,
   selectEntity,
   selectRequestInfo,
-  selectUpdateInfo,
 } from '../store/selectors/api.selectors';
-import { Inject, Injectable } from '@angular/core';
-import { tag } from 'rxjs-spy/operators/tag';
+import { APIResource, EntityInfo } from '../store/types/api.types';
+import { IRequestAction } from '../store/types/request.types';
+import { composeFn } from './../store/helpers/reducer.helper';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 /**
@@ -42,7 +42,7 @@ export class EntityService {
   ) {
     this.entitySelect$ = store.select(selectEntity(entityKey, id)).pipe(
       shareReplay(1),
-      tag('entity-obs')
+      // tag('entity-obs')
     );
     this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id)).pipe(
       shareReplay(1),
@@ -66,9 +66,9 @@ export class EntityService {
       this.entityRequestSelect$
     );
 
-    this.updatingSection$ = this.entityObs$.map(ei => ei.entityRequestInfo.updating);
-
-    this.isDeletingEntity$ = this.entityObs$.map(a => a.entityRequestInfo.deleting.busy).startWith(false);
+    this.updatingSection$ = this.entityRequestSelect$.map(request => request.updating).distinctUntilChanged();
+    this.isDeletingEntity$ = this.entityRequestSelect$.map(request => request.deleting.busy).distinctUntilChanged();
+    this.isFetchingEntity$ = this.entityRequestSelect$.map(request => request.fetching).distinctUntilChanged();
 
     this.waitForEntity$ = this.entityObs$
       .filter((entityInfo) => {
@@ -82,7 +82,7 @@ export class EntityService {
       })
       .delay(1);
 
-    this.isFetchingEntity$ = this.entityObs$.map(ei => ei.entityRequestInfo.fetching);
+
   }
 
   refreshKey = 'updating';
@@ -148,28 +148,29 @@ export class EntityService {
   poll(interval = 10000, key = this.refreshKey) {
     return Observable.interval(interval)
       .pipe(
-      tag('poll')
-      )
-      .withLatestFrom(
-      this.entitySelect$,
-      this.entityRequestSelect$
-      )
-      .map(a => ({
+      tag('poll'),
+      withLatestFrom(
+        this.entitySelect$,
+        this.entityRequestSelect$
+      ),
+      map(a => ({
         resource: a[1],
         updatingSection: composeFn(
           getUpdateSectionById(key),
           getEntityUpdateSections,
           () => a[2]
         )
-      }))
-      .do(({ resource, updatingSection }) => {
+      })),
+      tap(({ resource, updatingSection }) => {
         if (!updatingSection || !updatingSection.busy) {
           this.actionDispatch(key);
         }
-      })
-      .filter(({ resource, updatingSection }) => {
+      }),
+      filter(({ resource, updatingSection }) => {
         return !!updatingSection;
-      });
+      }),
+      shareReplay(1)
+      );
   }
 
 }

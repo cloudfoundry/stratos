@@ -79,7 +79,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       this.pollEntityService('starting', startedString)
         .delay(1)
         .subscribe();
-      });
+    });
   }
 
   deleteApplication() {
