@@ -1,8 +1,8 @@
 # Stratos
 
-[![Build Status](https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubatorSUSE/stratos)
+[![Build Status](https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=master)](https://travis-ci.org/cloudfoundry-incubator/stratos)
 [![GitHub release](https://img.shields.io/github/release/cloudfoundry-incubator/stratos.svg)](https://github.com/cloudfoundry-incubator/stratos/releases/latest)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry-incubator/stratos/blob/master/LICENSE.md)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry-incubator/stratos/blob/master/LICENSE)
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
