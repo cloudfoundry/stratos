@@ -106,6 +106,7 @@
     "request": "^2.81.0",
     "shelljs": "^0.7.8",
     "toSrc": "^0.1.4",
+    "node-sass": "^4.7.2",
     "@angular/cli": "^1.6.1",
     "@angular/compiler-cli": "^5.1.1",
     "@angular/language-service": "^4.4.6",
