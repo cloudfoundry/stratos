@@ -1,4 +1,4 @@
-# Accessing the Console UI
+# Accessing Stratos
 
 Depending on the deployment mode, you may require access to an UAA.
 

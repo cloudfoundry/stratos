@@ -1,14 +1,14 @@
-# Stratos UI Overview
+# Stratos Overview
 
-The Stratos UI Console provides a web-based UI to allow developers and administrators to manage their applications and cloud foundry deployment(s).
+The Stratos Console provides a web-based UI to allow developers and administrators to manage their applications and cloud foundry deployment(s).
 
-It is designed to manage one or more Cloud Foundry deployments. It does so by managing "endpoints", where each endpoint is a reference to a Cloud Foundry deployment. The notion of an endpoint is not specific to Cloud Foundry, allowing Stratos UI to connect to other service types in the future.
+It is designed to manage one or more Cloud Foundry deployments. It does so by managing "endpoints", where each endpoint is a reference to a Cloud Foundry deployment. The notion of an endpoint is not specific to Cloud Foundry, allowing Stratos to connect to other service types in the future.
 
-Stratos UI stores endpoint metadata in a relational database. Administrators of Stratos UI are able to register (add) new endpoints to the Console. All users are able to then connect to these endpoints using their credentials, ensuring that they get the appropriate level of access when interacting with Cloud Foundry.
+Stratos stores endpoint metadata in a relational database. Administrators of Stratos are able to register (add) new endpoints to the Console. All users are able to then connect to these endpoints using their credentials, ensuring that they get the appropriate level of access when interacting with Cloud Foundry.
 
-The high-level architecture of Stratos UI is shown in the diagram below:
+The high-level architecture of Stratos is shown in the diagram below:
 
-![Stratos UI High-Level Architecture](images/high-level-arch.png)
+![Stratos High-Level Architecture](images/high-level-arch.png)
 
 The main components:
 
@@ -37,7 +37,7 @@ There are differences between the deployments as follows:
 
 ### Deployed in Cloud Foundry as an application
 
-In this case, Stratos UI is deployed in a manner optimized for the management of a single Cloud Foundry instance. The 'Endpoints Dashboard' that allows multiple Cloud Foundry endpoints to be registered is not deployed. An extra component is deployed that detects that the Console is running as Cloud Foundry which does the following:
+In this case, Stratos is deployed in a manner optimized for the management of a single Cloud Foundry instance. The 'Endpoints Dashboard' that allows multiple Cloud Foundry endpoints to be registered is not deployed. An extra component is deployed that detects that the Console is running as Cloud Foundry which does the following:
 
 - Automatically detects the Cloud Foundry endpoint and located the UAA Endpoint to use for authentication
 - Authenticates directly against the UAA for the Clound Foundry where the Console is deployed and assumes that Cloud Foundry admins are also Console admins (the UAA Scope 'cloud_controller.admin' is used to identify admins)

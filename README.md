@@ -42,6 +42,8 @@ Take a look at the [Feature Set](docs/features.md) for details on the feature se
  
 Get an [Overview](docs/overview.md) of Stratos, its components and the different ways in which it can be deployed.
 
+Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading.
+
 Browse through features and issues in the project's [issues](https://github.com/SUSE/stratos-ui/issues) page or [Zenhub Board](https://github.com/SUSE/stratos-ui#boards).
 
 What kind of code is in Stratos? We've integrated [Code Climate](https://codeclimate.com) for some code quality and maintainability metrics. Take a stroll around the [project page](https://codeclimate.com/github/SUSE/stratos)

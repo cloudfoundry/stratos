@@ -1,4 +1,4 @@
-# Developing the Stratos UI Console
+# Developing the Stratos Console
 
 > **Note:** This document is work in progress.
 
