@@ -1,4 +1,4 @@
-/* eslint-disable no-process-env */
+/* eslint-disable no-process-env, no-sync */
 (function () {
   'use strict';
 
@@ -44,6 +44,22 @@
     return tempDbMigratorSrcPath;
   };
 
+  function getPlugins() {
+    var plugins = [];
+    // Enumerate all folders in the src/backend folder
+    var folders = fs.readdirSync(conf.pluginFolder);
+    _.each(folders, function (plugin) {
+      var fPath = path.join(conf.pluginFolder, plugin);
+      var stat = fs.lstatSync(fPath);
+      if (stat.isDirectory() && plugin !== 'app-core') {
+        plugins.push(plugin);
+      }
+    });
+    return plugins;
+  }
+
+  module.exports.getPlugins = getPlugins;
+
   gulp.task('clean-backend', function (done) {
     // Local dev build - only remove plugins and main binary
     if (module.exports.localDevSetup) {
@@ -71,7 +87,7 @@
     // see CF deployment script deploy/cloud-foundry/package.sh
     if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
-      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep + 'components';
+      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep;
       tempDbMigratorSrcPath = tempPath + path.sep + conf.goPathDbMigrator;
       return done();
     } else {
@@ -81,7 +97,7 @@
             throw err;
           }
           tempPath = path_;
-          tempSrcPath = path.join(tempPath, conf.goPath, 'components');
+          tempSrcPath = path.join(tempPath, conf.goPath);
           tempDbMigratorSrcPath = path.join(tempPath, conf.goPathDbMigrator);
           done();
         });
@@ -104,17 +120,17 @@
 
   gulp.task('copy-portal-proxy', ['create-temp'], function (done) {
 
-    var plugins = require('./../plugins.json');
+    var plugins = getPlugins();
     fs.ensureDir(tempSrcPath, function (err) {
       if (err) {
         throw err;
       }
 
       var promises = [];
-      _.each(plugins.enabledPlugins, function (plugin) {
-        promises.push(fsCopyQ('./components/' + plugin, tempSrcPath + '/' + plugin));
+      _.each(plugins, function (plugin) {
+        promises.push(fsCopyQ('./src/backend/' + plugin, tempSrcPath + '/' + plugin));
       });
-      promises.push(fsCopyQ('./components/app-core', tempSrcPath + '/app-core'));
+      promises.push(fsCopyQ('./src/backend/app-core', tempSrcPath + '/app-core'));
 
       Q.all(promises)
         .then(function () {

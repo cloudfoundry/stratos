@@ -1,8 +1,0 @@
-{
-  "enabledPlugins": [
-    "cloud-foundry",
-    "cf-app-ssh",
-    "cf-app-push",
-    "user-info"
-  ]
-}
