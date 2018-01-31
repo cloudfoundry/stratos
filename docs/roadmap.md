@@ -11,7 +11,7 @@ The current high-level features are:
 
 ## Agile
 
-We work on a 2-week Sprint cycle. Sprints start on Wednesdays.
+We work on a 2-week Sprint cycle. Sprints start on Wednesdays. For reference, Sprint 22 started 24 Jan 2018.
 
 We are using GitHub issues to track all work items. We use ZenHub to manage these in an agile fashion - see:
 
@@ -33,7 +33,7 @@ Stack:
 - Angular Material
 - Material Design => Adopt material design while keeping essence of the current Angular 1 app
 
-We plan to accomplish this work in a number of milestones, so that we reach parity with the AngularJS version. For references, Sprint 22 started 24 Jan 2018.
+We plan to accomplish this work in a number of milestones, so that we reach parity with the AngularJS version.
 
 ### Milestone 1: CF Applications -> Endpoint mgmt and Application views (Complete in Sprint 22)
 
