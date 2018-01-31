@@ -19,7 +19,9 @@
 
   exports.config = protractorConfig.config;
   var onPrepare = exports.config.onPrepare;
-  exports.config.plugins = [{path: path.join(__dirname, 'waitPlugin.js')}];
+  exports.config.plugins = [{
+    path: path.join(__dirname, 'waitPlugin.js')
+  }];
   exports.config.onPrepare = function () {
     onPrepare();
 
@@ -64,9 +66,13 @@
           _.each(results, function (r) {
             collector.add(r);
           });
-          istanbul.Report.create('html', {dir: path.join(coverageDir, 'e2e-html')})
+          istanbul.Report.create('html', {
+              dir: path.join(coverageDir, 'e2e-html')
+            })
             .writeReport(collector, true);
-          istanbul.Report.create('json', {dir: path.join(coverageDir, '_json')})
+          istanbul.Report.create('json', {
+              dir: path.join(coverageDir, '_json')
+            })
             .writeReport(collector, true);
           fs.renameSync(path.join(coverageDir, '_json', 'coverage-final.json'), path.join(coverageDir, '_json', 'e2e-coverage.json'));
           waitPlugin.resolve();

@@ -28,7 +28,9 @@
   });
 
   gulp.task('e2e:clean:dist', function (next) {
-    del('../tmp', {force: true}, next);
+    del('../tmp', {
+      force: true
+    }, next);
   });
 
   gulp.task('coverage-combine', function (cb) {
@@ -111,7 +113,9 @@
       '!**/*.spec.js',
       '!**/*.mock.js'
     ]);
-    return gulp.src(sources.dist, {base: paths.dist})
+    return gulp.src(sources.dist, {
+        base: paths.dist
+      })
       .pipe(ngAnnotate({
         single_quotes: true
       }))

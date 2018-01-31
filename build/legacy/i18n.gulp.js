@@ -149,4 +149,3 @@
     return through.obj(bufferContents, endStream);
   };
 })();
-

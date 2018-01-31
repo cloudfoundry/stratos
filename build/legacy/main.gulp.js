@@ -15,7 +15,7 @@
   var gulpinject = require('gulp-inject');
   var gulpreplace = require('gulp-replace');
   var gutil = require('gulp-util');
-  var ngAnnotate = require('gulp-ng-annotate');
+  // var ngAnnotate = require('gulp-ng-annotate');
   var nodeUrl = require('url');
   var path = require('path');
   var plumber = require('gulp-plumber');
@@ -69,7 +69,9 @@
 
   // Clean dist dir
   gulp.task('clean', function (next) {
-    del(paths.dist + '**/*', {force: true}, next);
+    del(paths.dist + '**/*', {
+      force: true
+    }, next);
   });
 
   // Legacy task name
@@ -146,8 +148,13 @@
       })))
       .pipe(gutil.env.devMode ? sourcemaps.init() : gutil.noop())
       .pipe(sass().on('error', sass.logError))
-      .pipe(gutil.env.devMode ? sourcemaps.write({ includeContent: false}) : gutil.noop())
-      .pipe(autoprefixer({ browsers: ['last 2 version'], cascade: false }))
+      .pipe(gutil.env.devMode ? sourcemaps.write({
+        includeContent: false
+      }) : gutil.noop())
+      .pipe(autoprefixer({
+        browsers: ['last 2 version'],
+        cascade: false
+      }))
       .pipe(gutil.env.devMode ? sourcemaps.write() : gutil.noop())
       .pipe(gulp.dest(paths.dist));
   });
@@ -158,7 +165,9 @@
     cssFiles.push(path.join(paths.dist, 'index.css'));
     return gulp.src(cssFiles)
       .pipe(concat('index.css'))
-      .pipe(gutil.env.devMode ? sourcemaps.init({loadMaps: true}) : gutil.noop())
+      .pipe(gutil.env.devMode ? sourcemaps.init({
+        loadMaps: true
+      }) : gutil.noop())
       .pipe(cleanCSS())
       .pipe(gutil.env.devMode ? sourcemaps.write() : gutil.noop())
       .pipe(gulp.dest(paths.dist));
@@ -208,15 +217,19 @@
 
     var sources = gulp.src(
       jsDevFiles
-        .concat(paths.dist + config.jsLibsFile)
-        .concat(paths.dist + config.jsFile)
-        .concat(paths.dist + config.jsTemplatesFile)
-        .concat(config.cssFiles), {read: false});
+      .concat(paths.dist + config.jsLibsFile)
+      .concat(paths.dist + config.jsFile)
+      .concat(paths.dist + config.jsTemplatesFile)
+      .concat(config.cssFiles), {
+        read: false
+      });
 
     return gulp
       .src(path.join(distPath, 'index.html'))
       .pipe(wiredep(components.getWiredep()))
-      .pipe(gulpinject(sources, {relative: true}))
+      .pipe(gulpinject(sources, {
+        relative: true
+      }))
       .pipe(concat.header())
       .pipe(gulpreplace('@@PRODUCT_NAME@@', enStrings.product.name))
       .pipe(gulp.dest(paths.dist));
@@ -255,7 +268,11 @@
   });
 
   gulp.task('i18n', function () {
-    var productVersion = {product: {version: utils.getMajorMinor(packageJson.version)}};
+    var productVersion = {
+      product: {
+        version: utils.getMajorMinor(packageJson.version)
+      }
+    };
     var bower = components.getBowerConfig();
     return gulp.src(i18nFiles.bower)
       .pipe(i18n(gutil.env.devMode, productVersion, bower.stratosLocales))
@@ -267,8 +284,7 @@
   // Task is used by dev task. Don't use externally.
   gulp.task('watch', function () {
 
-    var callback = browserSync.active ? browserSync.reload : function () {
-    };
+    var callback = browserSync.active ? browserSync.reload : function () {};
 
     // Watch the local components folders and copy only the changed file to the corresponding location in bower_components
     // The other watches are then watching for changes to those files
@@ -279,7 +295,11 @@
       }
     });
 
-    gulp.watch(jsSourceFiles.bower, {interval: 1000, usePoll: true, verbose: true}, ['copy:js', callback]);
+    gulp.watch(jsSourceFiles.bower, {
+      interval: 1000,
+      usePoll: true,
+      verbose: true
+    }, ['copy:js', callback]);
     gulp.watch(scssFiles.bower, ['css', callback]);
     gulp.watch(i18nFiles.bower, ['i18n', callback]);
     gulp.watch(assetFiles.bower, ['copy:assets', callback]);
@@ -341,7 +361,9 @@
           var p = proxiedRequest(url);
           p.on('error', function (e) {
             gutil.log(e);
-            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.writeHead(500, {
+              'Content-Type': 'text/plain'
+            });
             res.write(e.toString());
             res.end();
           });

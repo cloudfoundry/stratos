@@ -140,7 +140,7 @@
       });
     });
     // Exclude backend/vendor folder from bower_component plugins
-    globs.bowerFull.push('!' + path.relative(baseFolder,path.join(wildBowerFolder, 'backend/vendor/**')));
+    globs.bowerFull.push('!' + path.relative(baseFolder, path.join(wildBowerFolder, 'backend/vendor/**')));
     return globs;
   }
 
@@ -157,7 +157,9 @@
         var componentBower = JSON.parse(fs.readFileSync(path.join(config.bower.directory, name, 'bower.json'), 'utf8'));
         var deps = componentBower.dependencies || {};
         _.defaults(deps, o);
-        depends[name] = { dependencies: deps };
+        depends[name] = {
+          dependencies: deps
+        };
       });
       // Allow the main files for a component to be overridden
       _.each(component.frontend.overrides, function (o, name) {
