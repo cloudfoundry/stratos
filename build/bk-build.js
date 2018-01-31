@@ -7,7 +7,6 @@
   var gulp = require('gulp');
   var _ = require('lodash');
   var mergeDirs = require('stratos-merge-dirs');
-  var runSequence = require('run-sequence');
   var Q = require('q');
 
   var conf = require('./bk-conf');
@@ -22,7 +21,7 @@
 
   buildUtils.localDevSetup();
 
-  gulp.task('get-plugins-data', [], function () {
+  gulp.task('get-plugins-data', function (done) {
     var plugins = prepareBuild.getPlugins();
     _.each(plugins, function (plugin) {
       var pluginInfo = {};
@@ -30,18 +29,20 @@
       pluginInfo.pluginName = plugin;
       enabledPlugins.push(pluginInfo);
     });
+    return done();
   });
 
-  gulp.task('init-build', ['copy-portal-proxy', 'copy-dbmigrator', 'create-outputs'], function () {
+  gulp.task('init-build', gulp.series('create-temp', 'copy-portal-proxy', 'copy-dbmigrator', 'create-outputs', function (done) {
     buildUtils.init();
-  });
+    done();
+  }));
 
-  gulp.task('init-build-migrator', ['copy-dbmigrator', 'create-outputs'], function () {
+  gulp.task('init-build-migrator', gulp.series('create-temp', 'copy-dbmigrator', 'create-outputs', function (done) {
     buildUtils.init();
-  });
+    done();
+  }));
 
-  gulp.task('prepare-deps', ['get-plugins-data'], function (done) {
-
+  gulp.task('prepare-deps', gulp.series('get-plugins-data', function (done) {
     if (buildUtils.skipGlideInstall()) {
       return done();
     }
@@ -76,20 +77,17 @@
       enabledPlugins = [];
     }
 
-    promise
-      .then(function () {
-        done();
-      })
-      .catch(function (err) {
-        done(err);
-      });
-
-  });
+    promise.then(function () {
+      done();
+    }).catch(function (err) {
+      done(err);
+    });
+  }));
 
   // If plugins are using different version of the same dependency,
   // than we will end up overwriting one of them. Therefore, plugins should use
   // the same version of dependencies.
-  gulp.task('dedup-vendor', ['prepare-deps'], function (done) {
+  gulp.task('dedup-vendor', gulp.series('prepare-deps', function (done) {
 
     if (buildUtils.skipGlideInstall()) {
       return done();
@@ -164,9 +162,9 @@
       .catch(function (err) {
         done(err);
       });
-  });
+  }));
 
-  gulp.task('build-all', [], function (done) {
+  gulp.task('build-all', function (done) {
     buildUtils.init();
     var promise = Q.resolve();
     // Build all plugins
@@ -193,7 +191,7 @@
       });
   });
 
-  gulp.task('build-dbmigrator', [], function (done) {
+  gulp.task('build-dbmigrator', function (done) {
     buildUtils.init();
     var dbMigratorPath = prepareBuild.getDbMigratorSourcePath();
     buildUtils.build(dbMigratorPath, conf.dbMigratorName, true)
@@ -205,8 +203,7 @@
       });
   });
 
-  gulp.task('run-tests', ['build-all'], function (done) {
-
+  gulp.task('run-tests', gulp.series('build-all', function (done) {
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     buildUtils.test(corePath)
       .then(function () {
@@ -215,10 +212,9 @@
       .catch(function (err) {
         done(err);
       });
+    }));
 
-  });
-
-  gulp.task('copy-artefacts', ['build-all', 'build-dbmigrator'], function (done) {
+  gulp.task('copy-artefacts', gulp.series('build-all', 'build-dbmigrator', function (done) {
     var outputPath = conf.outputPath + path.sep;
     var promise = fsEnsureDirQ(outputPath);
     _.each(enabledPlugins, function (pluginInfo) {
@@ -257,8 +253,7 @@
       .catch(function (err) {
         done(err);
       });
-
-  });
+  }));
 
   gulp.task('local-dev-build', function (done) {
     if (!buildUtils.isLocalDevBuild()) {
@@ -291,62 +286,56 @@
     }
   });
 
-  gulp.task('build-backend', function () {
+  gulp.task('build-backend', gulp.series(
+    'init-build',
+    'dedup-vendor',
+    'copy-artefacts',
+    'delete-temp',
+    'local-dev-build'
+  ));
 
-    return runSequence(
-      'init-build',
-      'dedup-vendor',
-      'copy-artefacts',
-      'delete-temp',
-      'local-dev-build'
-    );
-  });
+  gulp.task('build-migrator', gulp.series(
+    'init-build-migrator',
+    'dedup-vendor',
+    'copy-artefacts',
+    'delete-temp',
+    'local-dev-build'
+  ));
 
-  gulp.task('build-migrator', function () {
-
-    return runSequence(
-      'init-build-migrator',
-      'dedup-vendor',
-      'copy-artefacts',
-      'delete-temp',
-      'local-dev-build'
-    );
-  });
-
-  gulp.task('bosh-build-backend', function () {
-    // Doesn't perform a `go build -i` buiild
+  gulp.task('set-no-glide-install', function (done) {
     prepareBuild.setNoGoInstall(true);
-    return runSequence(
-      'build-backend'
-    );
+    return done();
   });
 
-  gulp.task('cf-build-backend', function () {
+  // Doesn't perform a `go build -i` buiild
+  gulp.task('bosh-build-backend', gulp.series(
+    'set-no-glide-install',
+    'build-backend'
+  ));
 
-    return runSequence(
-      'init-build',
-      'get-plugins-data',
-      'copy-artefacts',
-      'delete-temp'
-    );
-  });
-  gulp.task('cf-get-backend-deps', function () {
-    return runSequence(
-      'init-build',
-      'dedup-vendor'
-    );
-  });
+  gulp.task('cf-build-backend', gulp.series(
+    'init-build',
+    'get-plugins-data',
+    'copy-artefacts',
+    'delete-temp'
+  ));
 
-  gulp.task('test-backend', function () {
+  gulp.task('cf-get-backend-deps', gulp.series(
+    'init-build',
+    'dedup-vendor'
+  ));
 
+  gulp.task('set-build-test', function (done) {
     prepareBuild.setBuildTest(true);
-
-    return runSequence(
-      'init-build',
-      'dedup-vendor',
-      'run-tests',
-      'delete-temp'
-    );
+    return done();
   });
+
+  gulp.task('test-backend', gulp.series(
+    'set-build-test',
+    'init-build',
+    'dedup-vendor',
+    'run-tests',
+    'delete-temp'
+  ));
 
 })();

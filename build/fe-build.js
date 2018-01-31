@@ -12,11 +12,10 @@
   var path = require('path');
   var os = require('os');
 
-  var runSequence = require('run-sequence');
   var config = require('./gulp.config');
   var paths = config.paths;
 
-/*
+  /*
   var angularFilesort = require('gulp-angular-filesort');
   var autoprefixer = require('gulp-autoprefixer');
   var concat = require('gulp-concat-util');
@@ -51,17 +50,14 @@
   });
 
   // Legacy task name
-  gulp.task('clean:dist', ['clean']);
-
-  // Default task is to build for production
-  gulp.task('default', ['build']);
+  gulp.task('clean:dist', gulp.series('clean'));
 
   gulp.task('ng-build', function (cb) {
     var rootFolder = path.resolve(__dirname, '..');
-    var cmd = 'npm'
+    var cmd = 'npm';
     var windowsEnvironment = os.platform().startsWith('win');
     if (windowsEnvironment) {
-      cmd = 'npm.cmd'
+      cmd = 'npm.cmd';
     }
     var child = spawn(cmd, ['run', 'build'], { cwd: rootFolder });
     child.stdout.on('data', function(data) {
@@ -78,14 +74,15 @@
       var err = code === 0 ? undefined : 'Build exited with code: ' + code;
       cb(err);
     });
-  })  
+  });
 
   // Production build
-  gulp.task('build', function (next) {
-    runSequence(
-      'clean',
-      'ng-build',
-      next
-    );
-  });
+  gulp.task('build', gulp.series(
+    'clean',
+    'ng-build'
+  ));
+
+  // Default task is to build for production
+  gulp.task('default', gulp.series('build'));
+
 })();

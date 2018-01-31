@@ -82,7 +82,7 @@
     }
   });
 
-  gulp.task('create-temp', [], function (done) {
+  gulp.task('create-temp', function (done) {
     // If STRATOS_TEMP is set, then a staged build is being carried out
     // see CF deployment script deploy/cloud-foundry/package.sh
     if (process.env.STRATOS_TEMP) {
@@ -104,7 +104,7 @@
     }
   });
 
-  gulp.task('delete-temp', [], function (done) {
+  gulp.task('delete-temp', function (done) {
     if (module.exports.localDevSetup) {
       return done();
     } else {
@@ -118,7 +118,7 @@
     }
   });
 
-  gulp.task('copy-portal-proxy', ['create-temp'], function (done) {
+  gulp.task('copy-portal-proxy', function (done) {
 
     var plugins = getPlugins();
     fs.ensureDir(tempSrcPath, function (err) {
@@ -143,7 +143,7 @@
     });
   });
 
-  gulp.task('create-outputs', ['clean-backend'], function (done) {
+  gulp.task('create-outputs', gulp.series('clean-backend'), function (done) {
     var outputPath = conf.outputPath;
     fsEnsureDirQ(outputPath)
       .then(function () {
@@ -155,7 +155,7 @@
   });
 
   // DB Migrator
-  gulp.task('copy-dbmigrator', ['create-temp'], function (done) {
+  gulp.task('copy-dbmigrator', function (done) {
     fs.ensureDir(tempDbMigratorSrcPath, function (err) {
       if (err) {
         throw err;

@@ -45,6 +45,7 @@ rm -rf ./outputs
 
 # Don't need the source code after build
 rm -rf ./components
+rm -rf ./src
 
 echo "All done"
 

@@ -1,8 +1,6 @@
 applications:
-- name: console
-  memory: 256M
-  disk_quota: 256M
-  host: console
+  memory: 1024M
+  disk_quota: 1024M
   timeout: 180
-  buildpack: https://github.com/SUSE/stratos-buildpack
+  buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v2
   health-check-type: port
