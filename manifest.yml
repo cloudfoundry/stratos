@@ -1,6 +1,8 @@
 applications:
-  memory: 1024M
-  disk_quota: 1024M
-  timeout: 180
-  buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v2
-  health-check-type: port
+  - name: console
+    memory: 1024M
+    disk_quota: 1024M
+    host: console
+    timeout: 180
+    buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v2
+    health-check-type: port
