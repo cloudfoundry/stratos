@@ -200,15 +200,9 @@ export class DeployApplicationStep2Component implements OnInit, OnDestroy, After
   }
 
   ngAfterContentInit() {
-    if (this.isReDeploy) {
-      this.validate = Observable.of(true);
-    } else {
       this.validate = this.sourceSelectionForm.statusChanges
       .map(() => {
-        return this.sourceSelectionForm.valid;
+        return this.sourceSelectionForm.valid || this.isReDeploy;
       });
     }
-
-  }
-
 }

@@ -59,7 +59,9 @@ export class GithubTabComponent implements OnInit, OnDestroy {
              `${stProject.deploySource.project}-${stProject.deploySource.branch}`))
             .pipe(
               filter(p => !!p),
-              map(p => p.commit.sha === stProject.deploySource.commit.trim()),
+              map(p => {
+               return p.commit.sha === stProject.deploySource.commit.trim();
+              })
             );
 
         }

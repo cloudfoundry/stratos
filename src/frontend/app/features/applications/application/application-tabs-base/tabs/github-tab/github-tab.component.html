@@ -8,24 +8,24 @@
       <mat-card-content>
         <div class="github-tab__deployment" >
             <app-metadata-item label="Repository">
-              <a href="{{(gitHubRepo$ | async)?.html_url}}">
+              <a href="{{(gitHubRepo$ | async)?.html_url}}" target="_blank">
                 {{stratosProject.deploySource.project }}
               </a>
             </app-metadata-item>
             <app-metadata-item  label="Branch">
-              <a href="{{(gitHubRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}">
+              <a href="{{(gitHubRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}" target="_blank">
                 {{ stratosProject.deploySource.branch}}
               </a>
             </app-metadata-item>
             <div class="github-tab__deployment__commit">
               <div>
                   <app-metadata-item  label="Commit">
-                      <a href="{{(commit$ | async)?.html_url}}">
+                      <a href="{{(commit$ | async)?.html_url}}" target="_blank">
                           {{ stratosProject.deploySource.commit}}
                       </a>
                     </app-metadata-item>
               </div>
-              <div class="github-tab__deployment__commit-warning" *ngIf="!isHead$ | async">
+              <div class="github-tab__deployment__commit-warning" *ngIf="!(isHead$ | async)">
                     <div><mat-icon>warning</mat-icon> </div>
                     <div class="github-tab__deployment__commit-warning__msg">The branch {{ stratosProject.deploySource.branch}} has been updated since this app was pushed. Redeploy to update application!</div>
               </div>
@@ -34,7 +34,7 @@
         </div>
         <div class="github-tab__deployment__deploy" >
             <div class="github-tab__deployment__deploy__button">
-                <button mat-button color="primary" *ngIf="isHead$ | async" (click)="deployApp(stratosProject)">Redploy App</button>
+                <button mat-button color="primary" *ngIf="!(isHead$ | async)" (click)="deployApp(stratosProject)">Redeploy App</button>
             </div>
           </div>
       </mat-card-content>
@@ -55,7 +55,7 @@
           </div>
           <div >
               <app-metadata-item label="Full Name">
-              <a href="{{ githubRepo.html_url }}">{{ githubRepo.full_name }}</a>
+              <a href="{{ githubRepo.html_url }}" target="_blank">{{ githubRepo.full_name }}</a>
             </app-metadata-item>
             <app-metadata-item  label="Owner">{{  githubRepo.owner.login }}</app-metadata-item>
             <app-metadata-item  label="Description">{{ githubRepo.description }}</app-metadata-item>
@@ -79,7 +79,7 @@
             <div >
             <app-metadata-item  label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
             <app-metadata-item label="SHA">
-              <a href={{commitInfo.html_url}}>{{ commitInfo.sha }}</a>
+              <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha }}</a>
             </app-metadata-item>
             <app-metadata-item  label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
             <app-metadata-item  label="Author">{{ commitInfo.commit.author.name }} <{{ commitInfo.commit.author.email }}></app-metadata-item>

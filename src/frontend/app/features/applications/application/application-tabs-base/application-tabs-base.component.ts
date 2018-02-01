@@ -10,7 +10,7 @@ import { UpdateApplication, DeleteApplication } from '../../../../store/actions/
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppMetadataTypes, GetAppSummaryAction, GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
 import { ConfirmationDialogService, ConfirmationDialog } from '../../../../shared/components/confirmation-dialog.service';
-import { take } from 'rxjs/operators';
+import { take, filter } from 'rxjs/operators';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialog('Stop Application', 'Are you sure you want to stop this Application?', 'Stop');
@@ -128,6 +128,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
 
     this.applicationService.app$.pipe(
+      filter(p => !!p.entity),
       take(1)
     ).subscribe(app => {
       if (app.entity && app.entity.entity && app.entity.entity.environment_json) {

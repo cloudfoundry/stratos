@@ -32,7 +32,7 @@
             </div>
             <div src="description">
               <div>
-                <a href="{{projectInfo.html_url}}">{{projectInfo.full_name}}</a>
+                <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
               </div>
               <div class="centered">
                 <a>{{projectInfo.description}}</a>
@@ -42,9 +42,8 @@
         </div>
         <mat-form-field>
           <mat-select class="reset-margin"
-          [disabled]="isReDeploy"
           placeholder="Branch"
-          [disabled]="!repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')"
+          [disabled]="isReDeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')"
           [(ngModel)]="repositoryBranch"
           name="repositoryBranch"
           (change)="updateBranchName($event.value)" required>
@@ -59,7 +58,7 @@
           </div>
           <div src="description">
             <div>
-              <a href="{{commitInfo.html_url}}">{{commitInfo.sha | limitTo:8}}</a>
+              <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
             </div>
             <div>
               <a>{{commitInfo.commit.message}}</a>
@@ -80,7 +79,7 @@
           <input matInput [disabled]="isReDeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" required>
         </mat-form-field>
         <mat-form-field>
-          <input matInput [disabled]="isReDeploy"  [(ngModel)]="repositoryBranch.name" placeholder="Branch or Tag" name="projectBranch" required>
+          <input matInput  [(ngModel)]="repositoryBranch.name" placeholder="Branch or Tag" name="projectBranch" required>
         </mat-form-field>
       </div>
     </div>
