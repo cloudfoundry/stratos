@@ -7,7 +7,7 @@
 [![GitHub release](https://img.shields.io/github/release/cloudfoundry-incubator/stratos.svg)](https://github.com/cloudfoundry-incubator/stratos/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry-incubator/stratos/blob/master/LICENSE)
 
-> **NOTE** This is a work-in-progress Angular 2.x version of Stratos. For the current Angular 1 based version see [https://github.com/cloudfoundry-incubator/stratos/tree/master](https://github.com/cloudfoundry-incubator/stratos/tree/master). This version is at an early development stage and we welcome feedback, input and contributions. This version does not have feature parity with the Angular 1 version.
+> **NOTE** This is a work-in-progress Angular 2.x version of Stratos. For the current Angular 1 based version see [https://github.com/cloudfoundry-incubator/stratos/tree/master](https://github.com/cloudfoundry-incubator/stratos/tree/master). This version is at an early development stage and we welcome feedback, input and contributions. This version does not currently have feature parity with the Angular 1 version - see the [Development Roadmap](docs/roadmap.md) for more information.
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
