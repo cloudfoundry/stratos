@@ -3,7 +3,8 @@
     <mat-progress-bar class="login-loading-bar" [color]="error ? 'warn' : 'primary'" [mode]="loggingIn ? 'query' : 'solid'">
     </mat-progress-bar>
     <div class="login__title">
-      <h1 class="mat-h1">Login</h1>
+      <img class="login__logo" src="/assets/cff-logo_rgb.png" />
+      <h1 class="mat-h1 login__header">Stratos</h1>
     </div>
     <form class="login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
       <mat-form-field>
