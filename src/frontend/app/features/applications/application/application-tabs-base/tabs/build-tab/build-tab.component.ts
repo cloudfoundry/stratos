@@ -8,11 +8,15 @@ import { EntityInfo } from '../../../../../../store/types/api.types';
 import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 
 import { Store } from '@ngrx/store';
+import { ApplicationMonitorService } from '../../../../application-monitor.service';
 
 @Component({
   selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',
-  styleUrls: ['./build-tab.component.scss']
+  styleUrls: ['./build-tab.component.scss'],
+  providers: [
+    ApplicationMonitorService,
+  ]
 })
 export class BuildTabComponent implements OnInit {
   constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
