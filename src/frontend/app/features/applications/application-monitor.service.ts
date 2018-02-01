@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { _MatRadioButtonMixinBase } from '@angular/material';
 
 export class AppMonitorState {
+  
   avg = {
     mem: 0,
     disk: 0,
