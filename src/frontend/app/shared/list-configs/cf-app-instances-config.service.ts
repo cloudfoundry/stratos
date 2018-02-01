@@ -35,7 +35,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: true, cellFlex: '1'
     },
     {
-      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: true, cellFlex: '1'
+      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: true, cellFlex: '1',
+      class: 'app-table__cell--table-column-nowrap',
     },
     {
       columnId: 'memory', headerCell: () => 'Memory',
@@ -98,7 +99,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     label: 'Terminate',
     description: ``, // Description depends on console user permission
     visible: row => true,
-    enabled: row => !!(row.value && row.value.state === 'RUNNING'),
+    enabled: row => true,
   };
 
 
