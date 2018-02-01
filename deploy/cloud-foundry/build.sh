@@ -21,8 +21,6 @@ cp ${CF_DIR}/config.properties ${TOP_LEVEL}
 find . -name glide.lock -exec sed -i '/^testImports.*/q' {} \;
 find . -name glide.lock -exec sed -i 's/^testImports:$/testImports: []/g' {} \;
 
-npm install -g gulp@^4.0.0
-
 cd ${TOP_LEVEL}
 
 npm install
