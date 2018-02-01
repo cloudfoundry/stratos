@@ -66,9 +66,9 @@ export class EntityService {
       this.entityRequestSelect$
     );
 
-    this.updatingSection$ = this.entityRequestSelect$.map(request => request.updating).distinctUntilChanged();
-    this.isDeletingEntity$ = this.entityRequestSelect$.map(request => request.deleting.busy).distinctUntilChanged();
-    this.isFetchingEntity$ = this.entityRequestSelect$.map(request => request.fetching).distinctUntilChanged();
+    this.updatingSection$ = this.entityRequestSelect$.map(request => request.updating).distinctUntilChanged().shareReplay(1);
+    this.isDeletingEntity$ = this.entityRequestSelect$.map(request => request.deleting.busy).distinctUntilChanged().shareReplay(1);
+    this.isFetchingEntity$ = this.entityRequestSelect$.map(request => request.fetching).distinctUntilChanged().shareReplay(1);
 
     this.waitForEntity$ = this.entityObs$
       .filter((entityInfo) => {
@@ -80,7 +80,8 @@ export class EntityService {
           available
         );
       })
-      .delay(1);
+      .delay(1)
+      .shareReplay(1);
 
 
   }
@@ -109,8 +110,9 @@ export class EntityService {
     entitySelect$: Observable<APIResource>,
     entityRequestSelect$: Observable<RequestInfoState>
   ): Observable<EntityInfo> => {
+    const apiRequestData$ = this.store.select(getAPIRequestDataState).shareReplay(1);
     return Observable.combineLatest(
-      this.store.select(getAPIRequestDataState),
+      apiRequestData$,
       entitySelect$,
       entityRequestSelect$
     )

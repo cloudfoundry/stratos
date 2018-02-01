@@ -143,7 +143,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         ...getDefaultRowState(),
         ...(state[this.getRowUniqueId(row)] || {})
       })),
-      distinctUntilChanged()
+      distinctUntilChanged(),
+      shareReplay(1)
     );
   }
 
