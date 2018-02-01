@@ -1,7 +1,6 @@
 import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { _MatRadioButtonMixinBase } from '@angular/material';
 
 export class AppMonitorState {
 
