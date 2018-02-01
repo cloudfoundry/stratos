@@ -1,0 +1,16 @@
+<mat-card *ngIf="appData$ | async as appData" class="card-app-uptime">
+  <div class="card-app-uptime__contents">
+    <div class="card-app-uptime__main">
+      <mat-card-header>
+        <mat-card-title>Uptime</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="card-app-uptime__compact">
+        <div class="card-app-uptime__large">{{ appData.monitor.max.uptime | uptime }}</div>
+      </mat-card-content>
+    </div>    
+    <div class="card-app-uptime__detail" *ngIf="appData.monitor.running > 1">
+      <app-metadata-item class="card-app-uptime__metric" label="Average">{{ appData.monitor.avg.uptime | uptime }}</app-metadata-item>
+      <app-metadata-item class="card-app-uptime__metric" label="Minimum">{{ appData.monitor.min.uptime | uptime }}</app-metadata-item>
+    </div>
+  </div>
+</mat-card>
