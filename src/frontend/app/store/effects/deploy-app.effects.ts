@@ -14,7 +14,6 @@ import {
 } from '../actions/create-applications-page.actions';
 import { AppState } from './../app-state';
 import { NewAppCFDetails, CreateNewApplicationState } from '../types/create-application.types';
-import { combineAll } from 'rxjs/operator/combineAll';
 import {
    CheckProjectExists,
    ProjectDoesntExist,
@@ -24,7 +23,6 @@ import {
    CHECK_PROJECT_EXISTS,
    FetchBranchesForProject,
    FETCH_BRANCHES_FOR_PROJECT,
-   DeleteCachedBranches,
    FetchCommit,
    FETCH_COMMIT,
    DeleteDeployAppSection,
@@ -51,9 +49,7 @@ export class DeployAppEffects {
   })
   .switchMap(([action, state]: any) => {
       return this.http.get(`https://api.github.com/repos/${action.projectName}`)
-        .mergeMap(res => {
-          return [new ProjectExists(action.projectName, res), new DeleteCachedBranches()];
-        })
+        .map(res => new ProjectExists(action.projectName, res))
         .catch(err => {
           return Observable.of(new ProjectDoesntExist(action.projectName));
         });

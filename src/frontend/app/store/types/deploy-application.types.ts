@@ -9,12 +9,6 @@ export interface SourceType {
   subType?: string;
 }
 
-export interface ProjectBranches {
-  fetching: boolean;
-  success: boolean;
-  data: any;
-}
-
 export enum DeployState {
   UNKNOWN = 1,
   CLONED,
@@ -55,8 +49,8 @@ export interface DeployApplicationSource {
   type: SourceType;
   projectName?: string;
   branch?: GitBranch;
-  branches?: ProjectBranches;
-  commit?: any;
+  commit?: GithubCommit;
+  branchName?: string;
 }
 
 export interface GitAppDetails {
@@ -64,16 +58,16 @@ export interface GitAppDetails {
   branch: GitBranch;
 }
 
-
+export interface ProjectExists {
+  checking: boolean;
+  exists: boolean;
+  name: string;
+  data?: any;
+}
 export interface DeployApplicationState {
   cloudFoundryDetails: NewAppCFDetails;
   applicationSource?: DeployApplicationSource;
-  projectExists?: {
-    checking: boolean,
-    exists: boolean,
-    name: string,
-    data: any
-  };
+  projectExists?: ProjectExists;
 }
 
 export interface AppData {

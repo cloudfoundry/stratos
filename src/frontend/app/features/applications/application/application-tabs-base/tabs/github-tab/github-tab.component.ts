@@ -1,18 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { ApplicationService } from '../../../../application.service';
-import { tap, map, filter } from 'rxjs/operators';
+import { tap, map, filter, combineAll, combineLatest, take } from 'rxjs/operators';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/app-state';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
+import { selectEntity, selectEntities } from '../../../../../../store/selectors/api.selectors';
 import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.actions';
 import { GithubRepo, GITHUB_REPO_ENTITY_KEY, GithubCommit, GitBranch } from '../../../../../../store/types/github.types';
 import { GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../../../../../../store/types/deploy-application.types';
-import { FetchCommit, FetchBranchesForProject, CheckProjectExists } from '../../../../../../store/actions/deploy-applications.actions';
+import {
+  FetchCommit,
+  FetchBranchesForProject,
+  CheckProjectExists,
+  StoreCFSettings,
+  SetAppSourceDetails,
+  SetAppSourceSubType,
+  SetBranch,
+  SetDeployBranch
+} from '../../../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
+import { CfOrgSpaceDataService } from '../../../../../../shared/data-services/cf-org-space-service.service';
+import { selectDeployAppState } from '../../../../../../store/selectors/deploy-application.selector';
 @Component({
   selector: 'app-github-tab',
   templateUrl: './github-tab.component.html',
@@ -27,7 +38,10 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
   }
 
-  constructor(private applicationService: ApplicationService, private store: Store<AppState>) { }
+  constructor(
+    private applicationService: ApplicationService,
+    private store: Store<AppState>,
+  ) { }
 
   ngOnInit() {
     this.stratosProject$ = this.applicationService.application$.pipe(
@@ -56,15 +70,30 @@ export class GithubTabComponent implements OnInit, OnDestroy {
 
   deployApp(stratosProject: EnvVarStratosProject) {
 
-    this.applicationService.application$.pipe(
-      tap(p => {
+    Observable.combineLatest(
+      this.applicationService.application$,
+      this.store.select(selectEntities('space')),
+      this.store.select(selectEntity<GitBranch>(GITHUB_BRANCHES_ENTITY_KEY,
+        `${stratosProject.deploySource.project}-${stratosProject.deploySource.branch}`))).pipe(
+      take(1),
+     tap(([app, spaces, branch]) => {
+        // set CF data
+        const spaceGuid = app.app.entity.space_guid;
+        this.store.dispatch(new StoreCFSettings({
+          cloudFoundry: app.app.entity.cfGuid,
+          org: spaces[spaceGuid].entity.organization_guid,
+          space: spaceGuid
+        }));
+
         // set Project data
         this.store.dispatch(new CheckProjectExists(stratosProject.deploySource.project));
-        this.store.dispatch(new RouterNav({ path: ['/applications/deploy'] }));
+        // Set Source type
+        this.store.dispatch(new SetAppSourceDetails({ name: 'Git', id: 'git', subType: 'github' }));
+        // Set branch
+        this.store.dispatch(new SetDeployBranch(branch.name));
 
+       this.store.dispatch(new RouterNav({ path: ['/applications/deploy'], query: { redeploy: true } }));
       })
-    ).subscribe();
-
-
+      ).subscribe();
   }
 }

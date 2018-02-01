@@ -21,7 +21,7 @@ export interface GithubUser {
 
 export interface GitBranch {
   name: string;
-  commit: GithubCommit;
+  commit?: GithubCommit;
 }
 
 export interface GithubCommit {
