@@ -24,18 +24,22 @@ import {
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { CfOrgSpaceDataService } from '../../../../../../shared/data-services/cf-org-space-service.service';
 import { selectDeployAppState } from '../../../../../../store/selectors/deploy-application.selector';
+import { Subscription } from 'rxjs/Subscription';
 @Component({
   selector: 'app-github-tab',
   templateUrl: './github-tab.component.html',
   styleUrls: ['./github-tab.component.scss']
 })
 export class GithubTabComponent implements OnInit, OnDestroy {
+
+  deployAppSubscription: Subscription;
   stratosProject$: Observable<EnvVarStratosProject>;
   gitHubRepo$: Observable<GithubRepo>;
   commit$: Observable<GithubCommit>;
   isHead$: Observable<boolean>;
 
   ngOnDestroy(): void {
+    this.deployAppSubscription.unsubscribe();
   }
 
   constructor(
@@ -69,10 +73,9 @@ export class GithubTabComponent implements OnInit, OnDestroy {
     );
   }
 
-
   deployApp(stratosProject: EnvVarStratosProject) {
 
-    Observable.combineLatest(
+    this.deployAppSubscription = Observable.combineLatest(
       this.applicationService.application$,
       this.store.select(selectEntities('space')),
       this.store.select(selectEntity<GitBranch>(GITHUB_BRANCHES_ENTITY_KEY,
