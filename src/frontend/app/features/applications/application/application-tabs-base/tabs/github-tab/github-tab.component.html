@@ -79,7 +79,7 @@
             <div >
             <app-metadata-item  label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
             <app-metadata-item label="SHA">
-              <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha }}</a>
+              <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
             </app-metadata-item>
             <app-metadata-item  label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
             <app-metadata-item  label="Author">{{ commitInfo.commit.author.name }} <{{ commitInfo.commit.author.email }}></app-metadata-item>
