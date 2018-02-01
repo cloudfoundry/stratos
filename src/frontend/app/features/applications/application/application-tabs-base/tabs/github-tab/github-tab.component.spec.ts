@@ -8,6 +8,7 @@ import { ApplicationServiceMock } from '../../../../../../test-framework/applica
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../../../store/reducers.module';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+import { SharedModule } from '../../../../../../shared/shared.module';
 
 describe('GithubTabComponent', () => {
   let component: GithubTabComponent;
@@ -19,6 +20,7 @@ describe('GithubTabComponent', () => {
       declarations: [ GithubTabComponent ],
       imports: [
         CoreModule,
+        SharedModule,
         RouterTestingModule,
         StoreModule.forRoot(
           appReducers,

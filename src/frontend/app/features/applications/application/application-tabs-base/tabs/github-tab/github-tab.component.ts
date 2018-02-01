@@ -49,6 +49,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.stratosProject$ = this.applicationService.application$.pipe(
+      filter(p => !!p.app.entity.environment_json),
       map(p => JSON.parse(p.app.entity.environment_json.STRATOS_PROJECT)),
       tap((stProject: EnvVarStratosProject) => {
         if (!this.gitHubRepo$) {
