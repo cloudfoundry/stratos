@@ -13,6 +13,7 @@ filter_secrets: false
 branches:
   only:
   - master
+  - v2-master
 cache:
   directories:
   - "$HOME/.npm"
