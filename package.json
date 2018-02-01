@@ -12,7 +12,7 @@
     "build-cf": "gulp deploy:cf",
     "test-backend": "gulp test-backend",
     "update-webdriver": "webdriver-manager update",
-    "build": "ng build --prod --aot=false",
+    "build": "ng build --prod --aot=false --build-optimizer=false",
     "build-dev": "ng build --dev",
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
