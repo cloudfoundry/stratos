@@ -15,6 +15,9 @@
       transform: translateY(-24px);
     }
   }
+  &__actions {
+    justify-content: flex-end;
+  }
 }
 
 app-connect-endpoint-dialog {
