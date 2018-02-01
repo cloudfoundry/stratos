@@ -1,0 +1,7 @@
+FROM splatform/stratos-bk-base:opensuse
+
+COPY outputs/* /srv/
+COPY dev-certs dev-certs
+RUN chmod +x portal-proxy
+EXPOSE 443
+ENTRYPOINT ["/srv/portal-proxy"]

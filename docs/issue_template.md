@@ -1,6 +1,12 @@
 <!--- For bugs and general issues -->
 ### Frontent Deployment type
+<!--- Where is the frontend deployed? -->
 <!--- Put an 'x' in one of the boxes below.  -->
+<!--- Put an 'x' in one or more boxes below.  -->
+* [ ] Cloud Foundry Application (cf push)
+* [ ] Kubernetes, using a helm chart
+* [ ] Docker, using docker compose
+* [ ] Docker, single container deploying all components
 * [ ] npm run start
 * [ ] Other (please specify below)
 
@@ -21,7 +27,7 @@
 
 ### Log output covering before error and any error statements
 ```
-Copy and paste log here
+Insert log hereCopy
 ```
 
 

@@ -53,7 +53,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
             } else if (auth.verifying) {
               this.message = 'Verifying session...';
             } else if (cnsis.loading) {
-              this.message = 'Fetching Cloud Foundry information...';
+              this.message = 'Retrieving Cloud Foundry metadata...';
             } else if (auth.loggingIn) {
               this.message = 'Logging in...';
             }

@@ -1,0 +1,71 @@
+resources:
+- name: stratos-ui
+  type: git
+  source:
+    repo: SUSE/stratos-ui
+    uri: https://github.com/SUSE/stratos-ui.git
+    branch: {{stratos-ui-branch}}
+- name: aio-docker-image
+  type: docker-image
+  source:
+    username: {{docker-username}}
+    password: {{docker-password}}
+    repository: splatform/stratos-ui
+- name: after-midnight
+  type: time
+  source:
+    start: 12:00 AM
+    stop: 2:00 AM
+    location: UTC
+groups:
+- name: tests
+  jobs:
+  - build-helm-images
+  - build-dc-images
+  - build-aio-image
+
+jobs:
+- name: build-helm-images
+  plan:
+  - get: stratos-ui
+  - get: after-midnight
+    trigger: true
+  - do:
+    - task: generete-certs
+      timeout: 2m
+      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/build-images/build-helm.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
+- name: build-dc-images
+  plan:
+  - get: stratos-ui
+  - get: after-midnight
+    trigger: true
+  - do:
+    - task: generete-certs
+      timeout: 2m
+      file: stratos-ui/deploy/ci/tasks/build-images/generate-certs.yml
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos-ui/deploy/ci/tasks/build-images/build-dc.yml
+      params:
+        DOCKER_USERNAME: {{docker-username}}
+        DOCKER_PASSWORD: {{docker-password}}
+
+- name: build-aio-image
+  public: true
+  serial: true
+  plan:
+  - get: stratos-ui
+  - get: after-midnight
+    trigger: true
+  - put: aio-docker-image
+    params:
+      build: stratos-ui
+      dockerfile: stratos-ui/deploy/Dockerfile.all-in-one

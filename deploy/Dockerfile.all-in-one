@@ -1,0 +1,24 @@
+FROM splatform/stratos-aio-base:opensuse
+
+COPY *.json ./
+COPY gulpfile.js ./
+COPY components ./components
+COPY build ./build/
+COPY deploy/tools/generate_cert.sh generate_cert.sh
+COPY deploy/db deploy/db
+COPY deploy/all-in-one/config.all-in-one.properties config.properties
+
+RUN npm install -g gulp bower \
+    && bower install --allow-root \
+    && npm install --only=prod \
+    && npm run build \
+    && npm run build-backend \
+    && npm run build-cf
+
+# Generate dev-certs
+RUN CERTS_PATH=/go/dev-certs ./generate_cert.sh \
+    && chmod +x portal-proxy
+
+EXPOSE 443
+
+ENTRYPOINT ["./portal-proxy"]

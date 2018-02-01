@@ -1,32 +1,47 @@
-sudo: required
 language: node_js
 node_js:
 - '8.4'
-branches:
-  only:
-  - master
+sudo: required
+dist: trusty
+services:
+- docker
 addons:
   chrome: stable
 install:
 - npm install
+filter_secrets: false
+branches:
+  only:
+  - master
+  - v2-master
 cache:
   directories:
   - "$HOME/.npm"
   - "$HOME/.cache"
   - node_modules
 stages:
-- Lint
-- Unit Tests
+- Frontend Lint
+- Frontend Unit Tests
+- Backend
 jobs:
   include:
-  - stage: Lint
+  - stage: Frontend Lint
     script:
     - npm run lint
-  - stage: Unit Tests
+  - stage: Frontend Unit Tests
     env:
     - CI_ENV=true
     script:
     - npm test
+    - npm run codecov
+  - stage: Backend
+    before_script:
+    - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+    - chmod +x ~/bin/gimme
+    - eval "$(gimme 1.9)"
+    - curl https://glide.sh/get | sh
+    script:
+    - npm run test-backend
 notifications:
   slack:
     rooms:

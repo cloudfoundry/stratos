@@ -1,0 +1,85 @@
+version: '2'
+services:
+
+  ##############################################################################
+  # These two "services" are not meant to be instantiated, but instead extended.
+  # This is necessary for those who require a web proxty.
+  ##############################################################################
+
+  imageCommon:
+    environment:
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - no_proxy=${no_proxy}
+
+
+  buildCommon:
+    extends: imageCommon
+    build:
+      args:
+        - http_proxy=${http_proxy}
+        - https_proxy=${https_proxy}
+        - no_proxy=${no_proxy}
+
+  ##############################################################################
+
+
+  mariadb:
+    extends: buildCommon
+    build:
+      context: ../deploy/db
+      dockerfile: Dockerfile.mariadb
+    env_file:
+      ./mariadb.env
+    ports:
+      - "3306:3306"
+
+
+  goose:
+    extends: buildCommon
+    build:
+      context: ../
+      dockerfile: deploy/db/Dockerfile.goose.dev
+    environment:
+      - DATABASE_PROVIDER=mysql
+
+
+  proxy:
+    extends: buildCommon
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.bk.dev
+    ports:
+      - "3003:3003"
+    env_file:
+      ./proxy.env
+  nginx:
+    extends: buildCommon
+    build:
+      context: ../deploy/containers/nginx
+      dockerfile: Dockerfile.dev
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ../dist:/usr/share/nginx/html:ro
+
+
+  ui:
+    extends: buildCommon
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.ui.dev
+      args:
+        - USER_ID
+        - GROUP_ID
+        - USER_NAME
+    volumes:
+      - ../:/usr/src/app
+
+  uaa:
+    extends: imageCommon
+    # NOTE: This is required so that the tests run against
+    # a UAA instance that has all the correct roles
+    image: splatform/stratos-uaa
+    

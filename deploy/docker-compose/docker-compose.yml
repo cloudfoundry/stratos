@@ -1,0 +1,41 @@
+version: '2'
+services:
+
+  mariadb:
+    image: splatform/stratos-dc-mariadb:latest
+    env_file:
+      ../mariadb.env
+
+  goose:
+    image: splatform/stratos-dc-goose:latest
+    env_file:
+      ../mariadb.env
+    links:
+    - mariadb:mariadb
+    ports:
+    - "3306:3306"
+
+  proxy:
+    image: splatform/stratos-dc-proxy:latest
+    ports:
+      - "3003:3003"
+    env_file:
+      ../proxy.env
+    links:
+      - goose:goose
+      - uaa:uaa
+      - mariadb:mariadb
+
+  nginx:
+    image: splatform/stratos-dc-console:latest
+    ports:
+      - 80:80
+      - 443:443
+    links:
+      - proxy:proxy
+
+  uaa:
+    extends:
+      file: ../common.yml
+      service: uaa
+

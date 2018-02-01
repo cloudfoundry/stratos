@@ -1,0 +1,20 @@
+# These folders are ignored when pushing the console to CF
+node_modules/
+bower_components/
+dist/
+components/*/backend/vendor
+dev-certs/
+out/
+outputs/
+tmp/
+tools/
+CHANGELOG.md
+test/
+deploy/all-in-one/
+deploy/ci/
+deploy/containers/
+deploy/docker-compose/
+deploy/stratos-ui-release/
+deploy/kubernetes/
+docs/
+build/dev_config.json
