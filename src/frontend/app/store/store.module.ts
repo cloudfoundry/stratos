@@ -19,6 +19,7 @@ import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { AppReducersModule } from './reducers.module';
 import { DeployAppEffects } from './effects/deploy-app.effects';
+import { GithubEffects } from './effects/github.effects';
 
 @NgModule({
   imports: [
@@ -40,7 +41,8 @@ import { DeployAppEffects } from './effects/deploy-app.effects';
       SnackBarEffects,
       SetClientFilterEffect,
       SetAPIFilterEffect,
-      DeployAppEffects
+      DeployAppEffects,
+      GithubEffects
     ]),
   ]
 })
