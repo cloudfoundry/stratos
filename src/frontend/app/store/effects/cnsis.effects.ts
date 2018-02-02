@@ -19,6 +19,10 @@ import {
   UNREGISTER_CNSIS_FAILED,
   UNREGISTER_CNSIS_SUCCESS,
   UnregisterCnis,
+  REGISTER_CNSIS,
+  REGISTER_CNSIS_FAILED,
+  REGISTER_CNSIS_SUCCESS,
+  RegisterCnis,
 } from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
@@ -40,6 +44,7 @@ export class CNSISEffect {
 
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
+  static registeringKey = 'registering';
   static unregisteringKey = 'unregistering';
 
   constructor(
@@ -144,6 +149,25 @@ export class CNSISEffect {
       );
     });
 
+  @Effect() register$ = this.actions$.ofType<RegisterCnis>(REGISTER_CNSIS)
+  .flatMap(action => {
+
+    const apiAction = this.getEndpointAction(action.guid(), action.type, CNSISEffect.registeringKey);
+
+    const params: URLSearchParams = new URLSearchParams();
+    params.append('cnsi_name', action.name);
+    params.append('api_endpoint', action.endpoint);
+    params.append('skip_ssl_validation', action.skipSslValidation ? 'true' : 'false');
+
+    return this.doCnisAction(
+      apiAction,
+      '/pp/v1/register/cf',
+      params,
+      'create',
+      [REGISTER_CNSIS_SUCCESS, REGISTER_CNSIS_FAILED]
+    );
+  });
+    
   private getEndpointAction(guid, type, updatingKey) {
     return {
       entityKey: cnsisStoreNames.type,
@@ -152,7 +176,6 @@ export class CNSISEffect {
       updatingKey,
     } as IRequestAction;
   }
-
 
   private doCnisAction(
     apiAction: IRequestAction,

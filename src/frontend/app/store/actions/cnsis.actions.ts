@@ -19,6 +19,10 @@ export const DISCONNECT_CNSIS = '[CNSIS] Disconnect';
 export const DISCONNECT_CNSIS_SUCCESS = '[CNSIS] Disconnect succeed';
 export const DISCONNECT_CNSIS_FAILED = '[CNSIS] Disconnect failed';
 
+export const REGISTER_CNSIS = '[CNSIS] Register';
+export const REGISTER_CNSIS_SUCCESS = '[CNSIS] Register succeed';
+export const REGISTER_CNSIS_FAILED = '[CNSIS] Register failed';
+
 export const UNREGISTER_CNSIS = '[CNSIS] Unregister';
 export const UNREGISTER_CNSIS_SUCCESS = '[CNSIS] Unregister succeed';
 export const UNREGISTER_CNSIS_FAILED = '[CNSIS] Unregister failed';
@@ -67,6 +71,18 @@ export class DisconnectCnis implements Action {
   type = DISCONNECT_CNSIS;
 }
 
+export class RegisterCnis implements Action {
+  constructor(
+    public name: string,
+    public endpoint: string,
+    public skipSslValidation: boolean,
+  ) { }
+  type = REGISTER_CNSIS;
+
+  public guid(): string {
+    return 'NewEndpoint.' + this.name;
+  }
+}
 export class UnregisterCnis implements Action {
   constructor(
     public guid: string
