@@ -14,8 +14,8 @@ import { map } from 'rxjs/operators';
 
 export class EndpointsDataSource extends ListDataSource<CNSISModel> {
 
-  isLoadingPage$: Observable<boolean>;
-  data$: any;
+  // isLoadingPage$: Observable<boolean>;
+  // data$: any;
   store: Store<AppState>;
 
   constructor(
@@ -68,10 +68,10 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
 
   }
 
-  connect(): Observable<CNSISModel[]> {
-    this.isLoadingPage$ = this.isLoadingPage$ || this.store.select(cnsisStatusSelector).map((cnsis => cnsis.loading));
-    this.data$ = this.data$ || this.store.select(cnsisEntitiesSelector)
-      .map(cnsis => Object.values(cnsis));
-    return super.connect();
-  }
+  // connect(): Observable<CNSISModel[]> {
+  //   // this.isLoadingPage$ = this.isLoadingPage$ || this.store.select(cnsisStatusSelector).map((cnsis => cnsis.loading));
+  //   // this.data$ = this.data$ || this.store.select(cnsisEntitiesSelector)
+  //   //   .map(cnsis => Object.values(cnsis));
+  //   return super.connect();
+  // }
 }

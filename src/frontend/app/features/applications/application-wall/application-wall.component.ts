@@ -16,6 +16,7 @@ import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-sour
 import { ListDataSource, distinctPageUntilChanged } from '../../../shared/data-sources/list-data-source';
 import { APIResource } from '../../../store/types/api.types';
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
+import { tag } from 'rxjs-spy/operators/tag';
 
 @Component({
   selector: 'app-application-wall',
@@ -66,8 +67,8 @@ export class ApplicationWallComponent implements OnDestroy {
             this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
           }
         });
-      })
-    ).subscribe();
+      }),
+      tag('stat-obs')).subscribe();
   }
 
   cardComponent = CardAppComponent;
