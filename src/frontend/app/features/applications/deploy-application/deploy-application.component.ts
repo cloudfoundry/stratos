@@ -1,20 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { SetCFDetails } from '../../../store/actions/create-applications-page.actions';
-import { StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
-import { selectNewAppCFDetails } from '../../../store/selectors/create-application.selectors';
-import { selectCfDetails } from '../../../store/selectors/deploy-application.selector';
-import { filter, tap, take, first } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
-import { Observable } from 'rxjs/Observable';
-import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
-import { ApplicationSchema } from '../../../store/actions/application.actions';
-import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-source';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { filter, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-source';
+import { ApplicationSchema } from '../../../store/actions/application.actions';
+import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
+import { AppState } from '../../../store/app-state';
+import { selectCfDetails } from '../../../store/selectors/deploy-application.selector';
+import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 
 @Component({
   selector: 'app-deploy-application',
@@ -74,6 +73,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
           this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
         })
       ).subscribe());
+      // Delete any state in deployApplication
+      this.store.dispatch(new DeleteDeployAppSection());
     }
   }
 }
