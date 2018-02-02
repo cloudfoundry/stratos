@@ -70,4 +70,10 @@
       display: none;
     }
   }
+  &__paginator {
+    padding: 4px;
+    mat-paginator-container {
+      padding: 0;
+    }
+  }
 }
