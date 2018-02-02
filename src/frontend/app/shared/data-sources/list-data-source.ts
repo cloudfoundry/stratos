@@ -260,9 +260,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     if (!entites || !entites.length) {
       return [];
     }
-    // if (entites.length <= pageSize) {
-    //   return [entites];
-    // }
+    if (entites.length <= pageSize) {
+      return [entites];
+    }
     const array = [...entites];
     const pages = [];
 

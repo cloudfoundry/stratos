@@ -42,7 +42,7 @@ import { PaginationEntityState, PaginationState } from '../../store/types/pagina
 import {
   defaultPaginationState,
 } from '../../store/reducers/pagination-reducer/pagination.reducer';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, withLatestFrom, switchMap } from 'rxjs/operators';
 import { isTCPRoute, getRoute } from './routes/routes.helper';
 import { selectEntity } from '../../store/selectors/api.selectors';
 import { SpaceSchema } from '../../store/actions/space.action';
@@ -167,7 +167,7 @@ export class ApplicationService {
 
     this.waitForAppEntity$ = this.appEntityService.waitForEntity$.shareReplay(1);
 
-    this.appSummary$ = this.waitForAppEntity$.mergeMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
+    this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
 
     this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
       store: this.store,
@@ -187,7 +187,7 @@ export class ApplicationService {
 
     this.appStats$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity)
-      .mergeMap(ai => {
+      .switchMap(ai => {
         if (ai.entity.entity.state === 'STARTED') {
           return appStats.entities$;
         } else {
@@ -197,7 +197,7 @@ export class ApplicationService {
 
     this.appStatsFetching$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity && ai.entity.entity.state === 'STARTED')
-      .mergeMap(ai => {
+      .switchMap(ai => {
         return appStats.pagination$;
       }).shareReplay(1);
 
@@ -219,13 +219,13 @@ export class ApplicationService {
       }).shareReplay(1);
 
     this.applicationState$ = this.waitForAppEntity$
-      .combineLatest(this.appStats$)
+      .withLatestFrom(this.appStats$)
       .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
       }).shareReplay(1);
 
     this.applicationInstanceState$ = this.waitForAppEntity$
-      .combineLatest(this.appStats$)
+      .withLatestFrom(this.appStats$)
       .switchMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
       }).shareReplay(1);
