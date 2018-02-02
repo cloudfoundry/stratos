@@ -15,6 +15,7 @@
 @import '../app/shared/components/table/table-row/table-row.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
+@import './components/hyperlinks.theme';
 @import './mat-themes';
 // Defaults
 $side-nav-light-text: #fff;
@@ -59,6 +60,7 @@ $side-nav-light-active: #484848;
   @include app-usage-gauge-theme($theme, $app-theme);
   @include app-ssh-viewer-theme($theme, $app-theme);
   @include table-row-theme($theme, $app-theme);
+  @include app-hyperlinks($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

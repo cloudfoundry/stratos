@@ -87,6 +87,7 @@ import { ConfirmationDialogService } from './components/confirmation-dialog.serv
 import {
   TableCellAppInstancesComponent
 } from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
+import { CardAppUptimeComponent } from './components/cards/custom-cards/card-app-uptime/card-app-uptime.component';
 
 @NgModule({
   imports: [
@@ -160,6 +161,7 @@ import {
     RunningInstancesComponent,
     DialogConfirmComponent,
     TableCellAppInstancesComponent,
+    CardAppUptimeComponent,
   ],
   exports: [
     FormsModule,
@@ -201,7 +203,8 @@ import {
     TableCellUsageComponent,
     TableCellStatusDirective,
     CardAppUsageComponent,
-    DialogConfirmComponent
+    DialogConfirmComponent,
+    CardAppUptimeComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
