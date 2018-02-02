@@ -1,11 +1,14 @@
-import { CfAppEvnVarsDataSource } from '../../../../../../shared/data-sources/cf-app-variables-data-source';
-import { CfAppVariablesListConfigService } from '../../../../../../shared/list-configs/cf-app-variables-list-config.service';
-import { ListConfig } from '../../../../../../shared/components/list/list.component';
+import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+
+import { CfAppEvnVarsDataSource } from '../../../../../../shared/components/list/data-sources/cf-app-variables-data-source';
+import {
+  CfAppVariablesListConfigService,
+} from '../../../../../../shared/components/list/list-configs/cf-app-variables-list-config.service';
+import { ListConfig } from '../../../../../../shared/components/list/list.component';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-variables-tab',

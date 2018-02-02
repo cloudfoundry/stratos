@@ -1,4 +1,4 @@
-import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
+import { CfAppsDataSource } from '../components/list/data-sources/cf-apps-data-source';
 import { EntityInfo } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';

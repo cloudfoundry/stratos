@@ -3,7 +3,7 @@ import { SystemEffects } from './../../../store/effects/system.effects';
 import { Store } from '@ngrx/store';
 import { CNSISModel } from '../../../store/types/cnsis.types';
 import { ListConfig } from '../../../shared/components/list/list.component';
-import { EndpointsListConfigService } from '../../../shared/list-configs/endpoints-list-config.service';
+import { EndpointsListConfigService } from '../../../shared/components/list/list-configs/endpoints-list-config.service';
 import { Component } from '@angular/core';
 import { AppState } from '../../../store/app-state';
 import { EndpointsService } from '../../../core/endpoints.service';

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
-import { CfAppInstancesConfigService } from '../../../../../../shared/list-configs/cf-app-instances-config.service';
+import { CfAppInstancesConfigService } from '../../../../../../shared/components/list/list-configs/cf-app-instances-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component';
 
 @Component({

@@ -11,7 +11,7 @@ import { AppState } from '../../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { Subscription } from 'rxjs/Subscription';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
-import { CfAppsDataSource } from '../../../../shared/data-sources/cf-apps-data-source';
+import { CfAppsDataSource } from '../../../../shared/components/list/data-sources/cf-apps-data-source';
 import { ApplicationSchema } from '../../../../store/actions/application.actions';
 
 

@@ -25,11 +25,11 @@ import {
   SetListViewAction,
 } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
-import { IListDataSource } from '../../data-sources/list-data-source-types';
-import { ITableColumn, ITableText } from '../table/table.types';
+import { IListDataSource } from './data-sources/list-data-source-types';
+import { ITableColumn, ITableText } from './table/table.types';
 import { StaticInjector } from '@angular/core/src/di/injector';
-import { ListDataSource } from '../../data-sources/list-data-source';
-import { ListPaginationController, IListPaginationController } from '../../data-sources/list-pagination-controller';
+import { ListDataSource } from './data-sources/list-data-source';
+import { ListPaginationController, IListPaginationController } from './data-sources/list-pagination-controller';
 import { distinctUntilChanged, map, tap } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
