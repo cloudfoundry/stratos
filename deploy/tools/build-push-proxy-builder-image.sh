@@ -1,8 +1,51 @@
 #!/usr/bin/env bash
-set -eux
+set -eu
+
+# set defaults
+DOCKER_REGISTRY=docker.io
+DOCKER_ORG=splatform
+
+NO_PUSH="false"
+
+while getopts ":o:r:n" opt; do
+  case $opt in
+     r)
+      DOCKER_REGISTRY="${OPTARG}"
+      ;;
+    o)
+      DOCKER_ORG="${OPTARG}"
+      ;;
+ 
+    n)
+      NO_PUSH="true"
+      ;;
+    \?)
+      echo "Invalid option: -${OPTARG}" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
 
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
 DOCKER_ORG=${DOCKER_ORG:-splatform}
+
+echo
+echo "=============================================================================="
+echo "Stratos: Backend Builder: Image Creator"
+echo "=============================================================================="
+echo
+
+if [ "${NO_PUSH}" != "false" ]; then
+  echo "Images will NOT be pushed"
+else
+  echo "Images will be pushed"
+  echo "  REGISTRY: ${DOCKER_REGISTRY}"
+  echo "  ORG: ${DOCKER_ORG}"
+fi
 NAME=stratos-proxy-builder
 TAG=${TAG:-opensuse}
 BK_BUILD_BASE=${BK_BUILD_BASE:-splatform/stratos-bk-build-base:opensuse}
@@ -18,17 +61,6 @@ echo "Building Docker Image for $NAME"
 pushd deploy
 
 # Generate Glide cache
-cat << EOT > ../run-glide.sh
-#!/bin/sh
-BACKEND_PATHS=\$(find /stratos-ui/components -name backend)
-for backend in \${BACKEND_PATHS};
-do
-    cd \$backend
-    glide install;
-done
-EOT
-chmod +x ../run-glide.sh
-
 docker run \
        -ti \
        --rm \
@@ -37,7 +69,7 @@ docker run \
        --volume ${PWD}/glide-cache:/.glide \
        --volume $PWD/../:/stratos-ui \
        ${BK_BUILD_BASE} \
-       sh /stratos-ui/run-glide.sh
+       sh /stratos-ui/deploy/tools/glide_install_cache.sh
 
 # Generate NPM cache
 docker run \
@@ -63,4 +95,7 @@ popd
 
 echo "Tag ${SHARED_IMAGE_URL} and push the shared image"
 docker tag ${NAME} ${SHARED_IMAGE_URL}
-docker push ${SHARED_IMAGE_URL}
+if [ "${NO_PUSH}" = "false" ]; then
+  echo "Pushing docker image: ${SHARED_IMAGE_URL}"
+  docker push ${SHARED_IMAGE_URL}
+fi
