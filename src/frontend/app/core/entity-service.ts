@@ -42,7 +42,7 @@ export class EntityService {
   ) {
     this.entitySelect$ = store.select(selectEntity(entityKey, id)).pipe(
       shareReplay(1),
-      // tag('entity-obs')
+      tag('entity-obs')
     );
     this.entityRequestSelect$ = store.select(selectRequestInfo(entityKey, id)).pipe(
       shareReplay(1),
@@ -66,9 +66,10 @@ export class EntityService {
       this.entityRequestSelect$
     );
 
-    this.updatingSection$ = this.entityRequestSelect$.map(request => request.updating).distinctUntilChanged().shareReplay(1);
-    this.isDeletingEntity$ = this.entityRequestSelect$.map(request => request.deleting.busy).distinctUntilChanged().shareReplay(1);
-    this.isFetchingEntity$ = this.entityRequestSelect$.map(request => request.fetching).distinctUntilChanged().shareReplay(1);
+    const filteredRequest$ = this.entityRequestSelect$.filter(request => !!request);
+    this.updatingSection$ = filteredRequest$.map(request => request.updating).distinctUntilChanged().shareReplay(1);
+    this.isDeletingEntity$ = filteredRequest$.map(request => request.deleting.busy).distinctUntilChanged().shareReplay(1);
+    this.isFetchingEntity$ = filteredRequest$.map(request => request.fetching).distinctUntilChanged().shareReplay(1);
 
     this.waitForEntity$ = this.entityObs$
       .filter((entityInfo) => {
