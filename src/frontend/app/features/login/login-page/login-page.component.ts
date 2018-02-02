@@ -45,11 +45,21 @@ export class LoginPageComponent implements OnInit, OnDestroy {
           } else {
             this.loggedIn = auth.loggedIn;
             this.loggingIn = auth.loggingIn;
-            this.error = auth.error && !auth.sessionData;
+            // auth.sessionData will be populated if user has been redirected here after attempting to access a protected page without
+            // a valid session
+            this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid);
 
             if (this.error) {
-              this.message = auth.error && auth.errorResponse && auth.errorResponse.status === 401 ?
-                `Username and password combination incorrect. Please try again.` : `Couldn't log in, please try again.`;
+              if (auth.error && auth.errorResponse && auth.errorResponse === 'Invalid session') {
+                // Invalid session (redirected after attempting to access a protected page). Don't show any error
+                this.message = '';
+              } else if (auth.error && auth.errorResponse && auth.errorResponse.status === 401) {
+                // User supplied invalid credentials
+                this.message = 'Username and password combination incorrect. Please try again.';
+              } else {
+                // All other errors
+                this.message = 'Couldn\'t log in, please try again.';
+              }
             } else if (auth.verifying) {
               this.message = 'Verifying session...';
             } else if (cnsis.loading) {
