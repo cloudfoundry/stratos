@@ -45,7 +45,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private entityService: EntityService,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService
-  ) {}
+  ) { }
 
   public async: any;
 
@@ -155,6 +155,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       .pipe(take(1))
       .subscribe(stratProject => {
         if (
+          stratProject &&
           stratProject.deploySource &&
           stratProject.deploySource.type === 'github'
         ) {

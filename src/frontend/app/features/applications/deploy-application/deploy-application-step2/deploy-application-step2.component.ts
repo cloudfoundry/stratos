@@ -87,7 +87,7 @@ export class DeployApplicationStep2Component
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   onNext = () => {
     this.store.dispatch(
@@ -108,17 +108,20 @@ export class DeployApplicationStep2Component
     const fetchBranches = this.store
       .select(selectProjectExists)
       .pipe(
-        filter(state => state && !state.checking && state.exists),
-        tap(p => {
-          this.branchesSubscription = getPaginationObservables<APIResource>(
-            {
-              store: this.store,
-              action: new FetchBranchesForProject(p.name),
-              schema: GithubBranchesSchema
-            },
-            true
-          ).entities$.subscribe();
-        })
+      filter(state => state && !state.checking && state.exists),
+      tap(p => {
+        if (this.branchesSubscription) {
+          this.branchesSubscription.unsubscribe();
+        }
+        this.branchesSubscription = getPaginationObservables<APIResource>(
+          {
+            store: this.store,
+            action: new FetchBranchesForProject(p.name),
+            schema: GithubBranchesSchema
+          },
+          true
+        ).entities$.subscribe();
+      })
       )
       .subscribe();
 
@@ -157,7 +160,7 @@ export class DeployApplicationStep2Component
         );
       }),
       map(([p, q]) => p)
-    );
+      );
 
     const updateBranchAndCommit = Observable.combineLatest(
       this.repositoryBranches$,
@@ -181,15 +184,15 @@ export class DeployApplicationStep2Component
           }
           this.commitSubscription = commitEntityService.entityObs$
             .pipe(
-              map(p => p.entity.entity),
-              tap(p => {
-                this.commitInfo = p;
-              })
+            map(p => p.entity.entity),
+            tap(p => {
+              this.commitInfo = p;
+            })
             )
             .subscribe();
         }
       })
-    );
+      );
 
     this.subscriptions.push(updateBranchAndCommit.subscribe());
 
