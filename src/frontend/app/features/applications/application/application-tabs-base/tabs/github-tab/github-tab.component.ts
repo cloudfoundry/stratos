@@ -20,7 +20,7 @@ import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { selectEntities } from '../../../../../../store/selectors/api.selectors';
 import {
-  GithubBranchesSchema,
+  GithubBranchSchema,
   GithubCommit,
   GithubCommitSchema,
   GithubRepo,
@@ -81,8 +81,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
 
         const branchKey = `${projectName}-${stProject.deploySource.branch}`;
         this.gitBranchEntityService = this.entityServiceFactory.create(
-          GithubBranchesSchema.key,
-          GithubBranchesSchema,
+          GithubBranchSchema.key,
+          GithubBranchSchema,
           branchKey,
           new FetchBranchesForProject(projectName)
         );

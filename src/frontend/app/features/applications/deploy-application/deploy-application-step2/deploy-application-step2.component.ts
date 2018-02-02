@@ -97,7 +97,7 @@ export class DeployApplicationStep2Component
       })
     );
     return Observable.of({ success: true });
-  };
+  }
 
   ngOnInit() {
     this.isReDeploy = this.route.snapshot.queryParams['redeploy'];
@@ -226,7 +226,7 @@ export class DeployApplicationStep2Component
   setSourceType = event => this.store.dispatch(new SetAppSourceDetails(event));
 
   setSourceSubType = event =>
-    this.store.dispatch(new SetAppSourceSubType(event));
+    this.store.dispatch(new SetAppSourceSubType(event))
 
   updateBranchName(branch: GitBranch) {
     this.store.dispatch(new SetDeployBranch(branch.name));

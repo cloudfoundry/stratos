@@ -8,7 +8,7 @@ import { IRequestAction } from '../types/request.types';
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const SET_APP_SOURCE_SUB_TYPE = '[Deploy App] Set App Source Sub Type';
 export const CHECK_PROJECT_EXISTS = '[Deploy App] Check Projet exists';
-export const PROJECT_DOESNT_EXIST = "[Deploy App] Project Doesn't exist";
+export const PROJECT_DOESNT_EXIST = '[Deploy App] Project Doesn\'t exist';
 export const PROJECT_EXISTS = '[Deploy App] Project exists';
 export const FETCH_BRANCHES_FOR_PROJECT = '[Deploy App] Fetch branches';
 export const SAVE_APP_DETAILS = '[Deploy App] Save app details';
