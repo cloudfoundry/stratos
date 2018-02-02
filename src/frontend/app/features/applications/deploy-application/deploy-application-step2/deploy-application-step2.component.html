@@ -2,7 +2,7 @@
 <form novalidate #sourceSelectionForm="ngForm">
   <div class="deploy-step2-form">
     <mat-form-field>
-      <mat-select class="reset-margin"  [disabled]="isReDeploy"  placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
+      <mat-select class="reset-margin" [disabled]="isReDeploy" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
         <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
           {{ sourceType.name }}
         </mat-option>
@@ -41,18 +41,14 @@
           </div>
         </div>
         <mat-form-field>
-          <mat-select class="reset-margin"
-          placeholder="Branch"
-          [disabled]="isReDeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')"
-          [(ngModel)]="repositoryBranch"
-          name="repositoryBranch"
-          (change)="updateBranchName($event.value)" required>
+          <mat-select class="reset-margin" placeholder="Branch" [disabled]="isReDeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (change)="updateBranchName($event.value)"
+            required>
             <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
               {{ branch.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <div *ngIf="commitInfo$| async as commitInfo" class="deploy-step2-form__project-info-group">
+        <div *ngIf="commitInfo" class="deploy-step2-form__project-info-group">
           <div>
             <img src="{{commitInfo.author.avatar_url}}">
           </div>
@@ -79,7 +75,7 @@
           <input matInput [disabled]="isReDeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" required>
         </mat-form-field>
         <mat-form-field>
-          <input matInput  [(ngModel)]="repositoryBranch.name" placeholder="Branch or Tag" name="projectBranch" required>
+          <input matInput [(ngModel)]="repositoryBranch.name" placeholder="Branch or Tag" name="projectBranch" required>
         </mat-form-field>
       </div>
     </div>

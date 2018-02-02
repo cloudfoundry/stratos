@@ -26,15 +26,15 @@
                     </app-metadata-item>
               </div>
               <div class="github-tab__deployment__commit-warning" *ngIf="!(isHead$ | async)">
-                    <div><mat-icon>warning</mat-icon> </div>
-                    <div class="github-tab__deployment__commit-warning__msg">The branch {{ stratosProject.deploySource.branch}} has been updated since this app was pushed. Redeploy to update application!</div>
+                    <div><mat-icon color="warn">warning</mat-icon> </div>
+                    <div class="github-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}} branch has been updated since this app was pushed. Redeploy to update</div>
               </div>
               </div>
-            <app-metadata-item label="Deploy at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+            <app-metadata-item label="Deployed at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
         </div>
         <div class="github-tab__deployment__deploy" >
             <div class="github-tab__deployment__deploy__button">
-                <button mat-button color="primary" *ngIf="!(isHead$ | async)" (click)="deployApp(stratosProject)">Redeploy App</button>
+                <button mat-button color="primary" (click)="deployApp(stratosProject)">Redeploy App</button>
             </div>
           </div>
       </mat-card-content>

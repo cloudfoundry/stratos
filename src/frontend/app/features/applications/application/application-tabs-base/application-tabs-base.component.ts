@@ -127,30 +127,14 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       return isFetchingApp || isUpdating;
     });
 
-    this.applicationService.app$.pipe(
-      filter(p => !!p.entity),
+    this.applicationService.applicationStratProject$.pipe(
       take(1)
-    ).subscribe(app => {
-      if (app.entity && app.entity.entity && app.entity.entity.environment_json) {
-        if (this.containsGitHubInfo(app.entity.entity.environment_json)) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
-        }
+    ).subscribe(stratProject => {
+      if (stratProject.deploySource && stratProject.deploySource.type === 'github') {
+        this.tabLinks.push({ link: 'github', label: 'GitHub' });
       }
     });
   }
-
-  containsGitHubInfo(appVars) {
-    if (appVars.STRATOS_PROJECT) {
-      try {
-        const details = JSON.parse(appVars.STRATOS_PROJECT);
-        return details.deploySource && details.deploySource.type === 'github';
-      } catch (err) {
-        // noop
-      }
-    }
-    return false;
-  }
-
 
   ngOnDestroy() {
     this.appSub$.unsubscribe();
