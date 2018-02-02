@@ -1,3 +1,4 @@
+import { ListModule } from './components/list/list.module';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
@@ -98,7 +99,8 @@ import { CardAppUptimeComponent } from './components/cards/custom-cards/card-app
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule
+    CdkTableModule,
+    ListModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -127,7 +129,6 @@ import { CardAppUptimeComponent } from './components/cards/custom-cards/card-app
     TableCellEventDetailComponent,
     EventTabActorIconPipe,
     LogViewerComponent,
-    ListComponent,
     CardsComponent,
     CardComponent,
     AppEventDetailDialogComponentComponent,
@@ -185,7 +186,6 @@ import { CardAppUptimeComponent } from './components/cards/custom-cards/card-app
     CodeBlockComponent,
     TableComponent,
     LogViewerComponent,
-    ListComponent,
     CardsComponent,
     NoContentMessageComponent,
     EndpointsMissingComponent,
