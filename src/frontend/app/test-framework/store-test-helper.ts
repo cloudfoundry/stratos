@@ -474,6 +474,7 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      domain:{},
       githubBranches:{},
       githubCommits:{},
         endpoint: {
@@ -3650,6 +3651,7 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      domain:{},
       githubBranches:{},
       githubCommits:{},
         application: {

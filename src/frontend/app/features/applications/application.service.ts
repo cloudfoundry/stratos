@@ -1,53 +1,48 @@
-import { OrganizationSchema } from '../../store/actions/organization.actions';
-import {
-  getPaginationObservables,
-  PaginationObservables,
-  getPaginationPages,
-} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { EntityService } from '../../core/entity-service';
-import { cnsisEntitiesSelector } from '../../store/selectors/cnsis.selectors';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
 
-import { ApplicationSchema } from '../../store/actions/application.actions';
-import {
-  GetApplication,
-  UpdateApplication,
-  UpdateExistingApplication,
-} from '../../store/actions/application.actions';
-import { AppState } from '../../store/app-state';
-import {
-  ApplicationEnvVarsService,
-  EnvVarStratosProject
-} from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { EntityService } from '../../core/entity-service';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
-import { EntityInfo, APIResource } from '../../store/types/api.types';
-import { combineLatest } from 'rxjs/operators/combineLatest';
 import {
-  AppEnvVarSchema,
+  AppMetadataTypes,
+  GetAppEnvVarsAction,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from '../../store/actions/app-metadata.actions';
+import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
+import { ApplicationSchema } from '../../store/actions/application.actions';
+import { SpaceSchema } from '../../store/actions/space.action';
+import { AppState } from '../../store/app-state';
+import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { selectEntity } from '../../store/selectors/api.selectors';
+import { selectUpdateInfo } from '../../store/selectors/api.selectors';
+import { cnsisEntitiesSelector } from '../../store/selectors/cnsis.selectors';
+import { APIResource, EntityInfo } from '../../store/types/api.types';
+import {
+  AppEnvVarsSchema,
   AppEnvVarsState,
   AppStat,
   AppStatsSchema,
-  AppSummarySchema,
   AppSummary,
-  AppEnvVarsSchema,
+  AppSummarySchema,
 } from '../../store/types/app-metadata.types';
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction, AppMetadataTypes } from '../../store/actions/app-metadata.actions';
-import { PaginationEntityState, PaginationState } from '../../store/types/pagination.types';
+import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
-  defaultPaginationState,
-} from '../../store/reducers/pagination-reducer/pagination.reducer';
-import { tap, map } from 'rxjs/operators';
-import { isTCPRoute, getRoute } from './routes/routes.helper';
-import { selectEntity } from '../../store/selectors/api.selectors';
-import { SpaceSchema } from '../../store/actions/space.action';
-import { selectUpdateInfo } from '../../store/selectors/api.selectors';
-import { ActionState } from '../../store/reducers/api-request-reducer/types';
+  getPaginationObservables,
+  getPaginationPages,
+  PaginationObservables,
+} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  ApplicationEnvVarsService,
+  EnvVarStratosProject,
+} from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { getRoute, isTCPRoute } from './routes/routes.helper';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -70,19 +65,21 @@ export class ApplicationService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
-    private appEnvVarsService: ApplicationEnvVarsService) {
-
+    private appEnvVarsService: ApplicationEnvVarsService
+  ) {
     this.appEntityService = this.entityServiceFactory.create(
       ApplicationSchema.key,
       ApplicationSchema,
       appGuid,
-      new GetApplication(appGuid, cfGuid));
+      new GetApplication(appGuid, cfGuid)
+    );
 
     this.appSummaryEntityService = this.entityServiceFactory.create(
       AppSummarySchema.key,
       AppSummarySchema,
       appGuid,
-      new GetAppSummaryAction(appGuid, cfGuid));
+      new GetAppSummaryAction(appGuid, cfGuid)
+    );
 
     this.constructCoreObservables();
     this.constructAmalgamatedObservables();
@@ -129,18 +126,23 @@ export class ApplicationService {
     appStateService: ApplicationStateService,
     app,
     appGuid: string,
-    cfGuid: string): Observable<ApplicationStateData> {
-    return getPaginationPages(store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
-      .pipe(
+    cfGuid: string
+  ): Observable<ApplicationStateData> {
+    return getPaginationPages(
+      store,
+      new GetAppStatsAction(appGuid, cfGuid),
+      AppStatsSchema
+    ).pipe(
       map(appInstancesPages => {
-        const appInstances = [].concat.apply([], Object.values(appInstancesPages))
+        const appInstances = [].concat
+          .apply([], Object.values(appInstancesPages))
           .filter(apiResource => !!apiResource)
           .map(apiResource => {
             return apiResource.entity;
           });
         return appStateService.get(app, appInstances);
       })
-      );
+    );
   }
 
   private constructCoreObservables() {
@@ -150,15 +152,23 @@ export class ApplicationService {
     // App org and space
     this.app$
       .filter(entityInfo => {
-        return entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid;
+        return (
+          entityInfo.entity &&
+          entityInfo.entity.entity &&
+          entityInfo.entity.entity.cfGuid
+        );
       })
       .map(entityInfo => {
         return entityInfo.entity.entity;
       })
       .do(app => {
-        this.appSpace$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid));
+        this.appSpace$ = this.store.select(
+          selectEntity(SpaceSchema.key, app.space_guid)
+        );
         // See https://github.com/SUSE/stratos/issues/158 (Failing to populate entity store with a space's org)
-        this.appOrg$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid)).map(space => space.entity.organization);
+        this.appOrg$ = this.store
+          .select(selectEntity(SpaceSchema.key, app.space_guid))
+          .map(space => space.entity.organization);
       })
       .take(1)
       .subscribe();
@@ -167,23 +177,31 @@ export class ApplicationService {
 
     this.waitForAppEntity$ = this.appEntityService.waitForEntity$;
 
-    this.appSummary$ = this.waitForAppEntity$.mergeMap(() => this.appSummaryEntityService.entityObs$);
+    this.appSummary$ = this.waitForAppEntity$.mergeMap(
+      () => this.appSummaryEntityService.entityObs$
+    );
 
-    this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
-      store: this.store,
-      action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
-      schema: AppEnvVarsSchema
-    }, true);
+    this.appEnvVars = getPaginationObservables<AppEnvVarsState>(
+      {
+        store: this.store,
+        action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
+        schema: AppEnvVarsSchema
+      },
+      true
+    );
   }
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
 
-    const appStats = getPaginationObservables<APIResource<AppStat>>({
-      store: this.store,
-      action: new GetAppStatsAction(this.appGuid, this.cfGuid),
-      schema: AppStatsSchema
-    }, true);
+    const appStats = getPaginationObservables<APIResource<AppStat>>(
+      {
+        store: this.store,
+        action: new GetAppStatsAction(this.appGuid, this.cfGuid),
+        schema: AppStatsSchema
+      },
+      true
+    );
 
     this.appStats$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity)
@@ -196,78 +214,112 @@ export class ApplicationService {
       });
 
     this.appStatsFetching$ = this.waitForAppEntity$
-      .filter(ai => ai && ai.entity && ai.entity.entity && ai.entity.entity.state === 'STARTED')
+      .filter(
+        ai =>
+          ai &&
+          ai.entity &&
+          ai.entity.entity &&
+          ai.entity.entity.state === 'STARTED'
+      )
       .mergeMap(ai => {
         return appStats.pagination$;
       });
 
     this.application$ = this.waitForAppEntity$
-      .combineLatest(
-      this.store.select(cnsisEntitiesSelector),
-    )
+      .combineLatest(this.store.select(cnsisEntitiesSelector))
       .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
       })
-      .map(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]): ApplicationData => {
-        return {
-          fetching: entityRequestInfo.fetching,
-          app: entity,
-          stack: entity.entity.stack,
-          cf: cnsis[entity.entity.cfGuid],
-          appUrl: this.getAppUrl(entity)
-        };
-      });
+      .map(
+        ([{ entity, entityRequestInfo }, cnsis]: [
+          EntityInfo,
+          any
+        ]): ApplicationData => {
+          return {
+            fetching: entityRequestInfo.fetching,
+            app: entity,
+            stack: entity.entity.stack,
+            cf: cnsis[entity.entity.cfGuid],
+            appUrl: this.getAppUrl(entity)
+          };
+        }
+      );
 
     this.applicationState$ = this.waitForAppEntity$
       .combineLatest(this.appStats$)
       .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
+        return this.appStateService.get(
+          appInfo.entity.entity,
+          appStatsArray.map(apiResource => apiResource.entity)
+        );
       });
 
     this.applicationInstanceState$ = this.waitForAppEntity$
       .combineLatest(this.appStats$)
-      .mergeMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
-      });
+      .mergeMap(
+        ([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
+          return ApplicationService.getApplicationState(
+            this.store,
+            this.appStateService,
+            appInfo.entity.entity,
+            this.appGuid,
+            this.cfGuid
+          );
+        }
+      );
 
-    this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
-      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
-    });
+    this.applicationStratProject$ = this.appEnvVars.entities$.map(
+      applicationEnvVars => {
+        return this.appEnvVarsService.FetchStratosProject(
+          applicationEnvVars[0]
+        );
+      }
+    );
   }
 
   private constructStatusObservables() {
     /**
      * An observable based on the core application entity
-    */
+     */
     this.isFetchingApp$ = Observable.combineLatest(
       this.app$.map(ei => ei.entityRequestInfo.fetching),
       this.appSummary$.map(as => as.entityRequestInfo.fetching)
-    )
-      .map((fetching) => fetching[0] || fetching[1]);
+    ).map(fetching => fetching[0] || fetching[1]);
 
-    this.isUpdatingApp$ =
-      this.app$.map(a => {
-        const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || {
-          busy: false
-        };
-        return updatingSection.busy || false;
-      });
+    this.isUpdatingApp$ = this.app$.map(a => {
+      const updatingSection = a.entityRequestInfo.updating[
+        UpdateExistingApplication.updateKey
+      ] || {
+        busy: false
+      };
+      return updatingSection.busy || false;
+    });
 
-    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching).startWith(false);
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$
+      .map(ev => ev.fetching)
+      .startWith(false);
 
-    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching && ev.ids[ev.currentPage]).startWith(false);
+    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$
+      .map(ev => ev.fetching && ev.ids[ev.currentPage])
+      .startWith(false);
 
-    this.isFetchingStats$ = this.appStatsFetching$.map(appStats => appStats ? appStats.fetching : false).startWith(false);
+    this.isFetchingStats$ = this.appStatsFetching$
+      .map(appStats => (appStats ? appStats.fetching : false))
+      .startWith(false);
   }
 
   getAppUrl(app: EntityInfo): string {
     if (!app.entity.routes) {
       return null;
     }
-    const nonTCPRoutes = app.entity.routes
-      .filter(p => !isTCPRoute(p));
+    const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
     if (nonTCPRoutes.length > 0) {
-      return getRoute(nonTCPRoutes[0], true);
+      return getRoute(
+        nonTCPRoutes[0],
+        true,
+        false,
+        nonTCPRoutes[0].entity.domain
+      );
     }
     return null;
   }
@@ -283,18 +335,25 @@ export class ApplicationService {
   /*
   * Update an application
   */
-  updateApplication(updatedApplication: UpdateApplication, updateEntities?: AppMetadataTypes[]): Observable<ActionState> {
-    this.store.dispatch(new UpdateExistingApplication(
-      this.appGuid,
-      this.cfGuid,
-      { ...updatedApplication },
-      updateEntities
-    ));
+  updateApplication(
+    updatedApplication: UpdateApplication,
+    updateEntities?: AppMetadataTypes[]
+  ): Observable<ActionState> {
+    this.store.dispatch(
+      new UpdateExistingApplication(
+        this.appGuid,
+        this.cfGuid,
+        { ...updatedApplication },
+        updateEntities
+      )
+    );
 
     // Create an Observable that can be used to determine when the update completed
-    const actionState = selectUpdateInfo(ApplicationSchema.key,
+    const actionState = selectUpdateInfo(
+      ApplicationSchema.key,
       this.appGuid,
-      UpdateExistingApplication.updateKey);
+      UpdateExistingApplication.updateKey
+    );
     return this.store.select(actionState).filter(item => !item.busy);
   }
 }

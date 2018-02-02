@@ -12,38 +12,35 @@ import { ListDataSource } from './list-data-source';
 export const RouteSchema = new schema.Entity('route');
 
 export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
-
   public cfGuid: string;
   public appGuid: string;
 
-  constructor(
-    store: Store<AppState>,
-    appService: ApplicationService,
-  ) {
+  constructor(store: Store<AppState>, appService: ApplicationService) {
     const action = new GetRoutes(appService.appGuid, appService.cfGuid);
-    const paginationKey = getPaginationKey('route', appService.cfGuid, appService.appGuid);
+    const paginationKey = getPaginationKey(
+      'route',
+      appService.cfGuid,
+      appService.appGuid
+    );
 
     super({
       store,
       action,
       schema: RouteSchema,
-      getRowUniqueId: (object: EntityInfo) => object.entity ? object.entity.guid : null,
+      getRowUniqueId: (object: EntityInfo) =>
+        object.entity ? object.entity.guid : null,
       paginationKey,
       entityFunctions: [
         {
           type: 'sort',
           orderKey: 'host',
           field: 'host'
-        },
+        }
       ]
     });
 
     this.cfGuid = appService.cfGuid;
     this.appGuid = appService.appGuid;
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-    ));
+    store.dispatch(new SetListStateAction(paginationKey, 'table'));
   }
-
 }
