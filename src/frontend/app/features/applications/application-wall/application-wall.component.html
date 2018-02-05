@@ -11,5 +11,5 @@
 </app-page-header>
 <app-endpoints-missing #appEndpointsMissing></app-endpoints-missing>
 <!-- <p *ngIf="error">We're sorry, we couldn't fetch all of your applications. Please try again later.</p> -->
-<app-list [text]="{ title: '', filter: 'Filter Applications'}" [enableFilter]="true" [cardComponent]="cardComponent" [hidden]="!(endpointsService.haveRegistered$ | async) || !(endpointsService.haveConnected$ | async)">
+<app-list [text]="{ title: '', filter: 'Search by name'}" [enableFilter]="true" [cardComponent]="cardComponent" [hidden]="!(endpointsService.haveRegistered$ | async) || !(endpointsService.haveConnected$ | async)">
 </app-list>
