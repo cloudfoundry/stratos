@@ -1,3 +1,4 @@
+import { IListConfig } from '../list.component.types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
@@ -12,6 +13,24 @@ import { IListDataSource } from '../data-sources-controllers/list-data-source-ty
 import { ITableColumn, ITableText } from './table.types';
 import { TableRowComponent } from './table-row/table-row.component';
 import { CdkCellOutlet } from '@angular/cdk/table';
+import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
+import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
+import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
+
+const tableColumnSelect = {
+  columnId: 'select',
+  headerCellComponent: TableHeaderSelectComponent,
+  cellComponent: TableCellSelectComponent,
+  class: 'table-column-select', cellFlex: '1'
+};
+
+const tableColumnAction = {
+  columnId: 'actions',
+  headerCell: () => 'Actions',
+  cellComponent: TableCellActionsComponent,
+  class: 'app-table__cell--table-column-edit',
+  cellFlex: '1'
+};
 
 @Component({
   selector: 'app-table',
@@ -26,7 +45,8 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
 
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
-  @Input('dataSource') dataSource = null as IListDataSource<T>;
+  @Input('listConfig') listConfig = null as IListConfig<T>;
+  dataSource = null as IListDataSource<T>;
   @Input('paginationController') paginationController = null as IListPaginationController<T>;
   @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
@@ -43,9 +63,25 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   constructor(
     private _store: Store<AppState>,
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
+    this.dataSource = this.listConfig.getDataSource();
+
+    const addSelect = (this.listConfig.getMultiActions() || []).length > 0;
+    const addActions = (this.listConfig.getSingleActions() || []).length > 0;
+    if (addSelect || addActions) {
+      const newColumns = [...this.columns];
+      if (addSelect) {
+        newColumns.splice(0, 0, tableColumnSelect);
+      }
+      if (addActions) {
+        newColumns.push(tableColumnAction);
+      }
+      this.columns = newColumns;
+    }
+
     this.columnNames = this.columns.map(x => x.columnId);
 
     const sortStoreToWidget = this.paginationController.sort$.do((sort: ListSort) => {

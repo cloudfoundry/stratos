@@ -4,9 +4,6 @@ import { Store } from '@ngrx/store';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';
 import { AppState } from '../../../../../store/app-state';
-import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
-import { TableCellSelectComponent } from '../../list-table/table-cell-select/table-cell-select.component';
-import { TableHeaderSelectComponent } from '../../list-table/table-header-select/table-header-select.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppEvnVarsDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
@@ -40,18 +37,10 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   columns: Array<ITableColumn<ListAppEnvVar>> = [
     {
-      columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
-      class: 'table-column-select', cellFlex: '1'
-    },
-    {
       columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: true, cellFlex: '5'
     },
     {
       columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '10'
-    },
-    {
-      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'app-table__cell--table-column-edit',
-      cellFlex: '2'
     },
   ];
 

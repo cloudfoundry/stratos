@@ -13,9 +13,6 @@ import { AppState } from '../../../../../store/app-state';
 import { CNSISEffect } from '../../../../../store/effects/cnsis.effects';
 import { selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { CNSISModel, cnsisStoreNames } from '../../../../../store/types/cnsis.types';
-import { TableCellActionsComponent } from '../../list-table/table-cell-actions/table-cell-actions.component';
-import { TableCellSelectComponent } from '../../list-table/table-cell-select/table-cell-select.component';
-import { TableHeaderSelectComponent } from '../../list-table/table-header-select/table-header-select.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
@@ -99,12 +96,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   columns: ITableColumn<CNSISModel>[] = [
     {
-      columnId: 'select',
-      headerCellComponent: TableHeaderSelectComponent,
-      cellComponent: TableCellSelectComponent,
-      class: 'table-column-select', cellFlex: '1'
-    },
-    {
       columnId: 'name',
       headerCell: () => 'Name',
       cell: row => row.name,
@@ -131,13 +122,6 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       cell: row => row.api_endpoint ? `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}` : 'Unknown',
       sort: true,
       cellFlex: '5'
-    },
-    {
-      columnId: 'edit',
-      headerCell: () => 'Actions',
-      cellComponent: TableCellActionsComponent,
-      class: 'app-table__cell--table-column-edit',
-      cellFlex: '1'
     },
   ];
   isLocal = true;

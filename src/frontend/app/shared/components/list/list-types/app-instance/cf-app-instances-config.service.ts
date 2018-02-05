@@ -7,7 +7,6 @@ import { ApplicationService } from '../../../../../features/applications/applica
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { TableCellActionsComponent } from '../../list-table/table-cell-actions/table-cell-actions.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
@@ -58,13 +57,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     {
       columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
         (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
-    },
-    {
-      columnId: 'edit',
-      headerCell: () => 'Actions',
-      cellComponent: TableCellActionsComponent,
-      class: 'app-table__cell--table-column-edit',
-      cellFlex: '1'
     }
   ];
   pageSizeOptions = [5, 25, 50];

@@ -8,9 +8,6 @@ import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { TableCellActionsComponent } from '../../list-table/table-cell-actions/table-cell-actions.component';
-import { TableCellSelectComponent } from '../../list-table/table-cell-select/table-cell-select.component';
-import { TableHeaderSelectComponent } from '../../list-table/table-header-select/table-header-select.component';
 import { ITableColumn } from '../../list-table/table.types';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
@@ -92,10 +89,6 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
 
   columns: Array<ITableColumn<EntityInfo>> = [
     {
-      columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
-      class: 'table-column-select', cellFlex: '1'
-    },
-    {
       columnId: 'route', headerCell: () => 'Route',
       cellComponent: TableCellRouteComponent, sort: true, cellFlex: '3'
     },
@@ -103,13 +96,6 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
       columnId: 'tcproute', headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
       sort: true, cellFlex: '3'
-    },
-    {
-      columnId: 'edit',
-      headerCell: () => 'Actions',
-      cellComponent: TableCellActionsComponent,
-      class: 'app-table__cell--table-column-edit',
-      cellFlex: '1'
     },
   ];
 
