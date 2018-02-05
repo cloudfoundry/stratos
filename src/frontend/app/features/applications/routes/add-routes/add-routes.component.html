@@ -7,7 +7,15 @@
   </mat-progress-bar>
 
   <mat-card class="add-route__card">
-    <div class="add-route__card__form">
+    <div>
+      <mat-radio-group [(ngModel)]="addRouteMode">
+        <mat-radio-button *ngFor="let mode of addRouteModes" [value]="mode">
+          {{ mode.label }}
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+
+    <div class="add-route__card__form" *ngIf="addRouteMode?.id === 'create'">
       <div>
         Please specify details for the new route.
       </div>
@@ -70,6 +78,23 @@
           </button>
         </div>
       </form>
+    </div>
+
+    <div class="add-route__card__form" *ngIf="addRouteMode?.id === 'map'">
+      <div>
+        Please select the route you wish to map
+      </div>
+      <form>
+        <app-map-routes></app-map-routes>
+      </form>
+      <div class="add-route__form-buttons">
+        <button mat-button name="submit" color="primary" (click)="onSubmit('tcp')" [disabled]="!addTCPRoute.valid">
+              Submit
+          </button>
+        <button type="button" mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
+            Cancel
+          </button>
+      </div>
     </div>
   </mat-card>
 </div>

@@ -15,6 +15,7 @@ import {
 import { IListDataSource } from '../../../data-sources/list-data-source-types';
 import { TableCellAppInstancesComponent } from '../custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from '../custom-cells/table-cell-app-name/table-cell-app-name.component';
+import { TableCellAppRouteComponent } from '../custom-cells/table-cell-app-route/table-cell-app-route.component';
 import { TableCellAppStatusComponent } from '../custom-cells/table-cell-app-status/table-cell-app-status.component';
 import { TableCellEditVariableComponent } from '../custom-cells/table-cell-edit-variable/table-cell-edit-variable.component';
 import {
@@ -59,11 +60,12 @@ import { TableCellCustom } from './table-cell-custom';
     TableCellUsageComponent,
     TableCellRouteComponent,
     TableCellTCPRouteComponent,
-  ],
+    TableCellAppRouteComponent
+  ]
 })
 export class TableCellComponent<T> implements OnInit, OnChanges {
-
-  @ViewChild('target', { read: ViewContainerRef }) target;
+  @ViewChild('target', { read: ViewContainerRef })
+  target;
 
   @Input('dataSource') dataSource = null as IListDataSource<T>;
 
@@ -74,11 +76,13 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
   private cellComponent: TableCellCustom<T>;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
+  constructor(private componentFactoryResolver: ComponentFactoryResolver) {}
 
   ngOnInit() {
     if (this.component) {
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(this.component);
+      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(
+        this.component
+      );
       // Add to target to ensure ngcontent is correct in new component
       const componentRef = this.target.createComponent(componentFactory);
       this.cellComponent = <TableCellCustom<T>>componentRef.instance;
@@ -90,13 +94,8 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     const row: SimpleChange = changes.row;
-    if (
-      row &&
-      this.cellComponent &&
-      row.previousValue !== row.currentValue
-    ) {
+    if (row && this.cellComponent && row.previousValue !== row.currentValue) {
       this.cellComponent.row = row.currentValue;
     }
   }
-
 }
