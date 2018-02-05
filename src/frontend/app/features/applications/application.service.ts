@@ -104,7 +104,7 @@ export class ApplicationService {
   appSummary$: Observable<EntityInfo<AppSummary>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
-  appEnvVars: PaginationObservables<AppEnvVarsState>;
+  appEnvVars: PaginationObservables<APIResource>;
   appOrg$: Observable<APIResource<any>>;
   appSpace$: Observable<APIResource<any>>;
 
@@ -169,7 +169,7 @@ export class ApplicationService {
 
     this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
 
-    this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
+    this.appEnvVars = getPaginationObservables<APIResource>({
       store: this.store,
       action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
       schema: AppEnvVarsSchema
@@ -231,7 +231,7 @@ export class ApplicationService {
       }).shareReplay(1);
 
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
-      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
+      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
     }).shareReplay(1);
   }
 

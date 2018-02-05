@@ -2,7 +2,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction, ICFAction } from '../types/request.types';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { RequestOptions, URLSearchParams } from '@angular/http';
+import { RequestOptions, Headers, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';

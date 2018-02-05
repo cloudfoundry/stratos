@@ -17,6 +17,7 @@ import { EditApplicationComponent } from './edit-application/edit-application.co
 import { ApplicationTabsBaseComponent } from './application/application-tabs-base/application-tabs-base.component';
 import { DeployApplicationComponent } from './deploy-application/deploy-application.component';
 import { DeployApplicationModule } from './deploy-application/deploy-application.module';
+import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
 const appplicationsRoutes: Routes = [
   {
     path: 'new',
@@ -60,6 +61,7 @@ const appplicationsRoutes: Routes = [
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },
               { path: 'events', component: EventsTabComponent },
+              { path: 'github', component: GithubTabComponent },
             ]
           },
           {
