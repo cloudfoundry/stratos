@@ -2,10 +2,10 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { OperatorFunction } from 'rxjs/interfaces';
 
-import { AppState } from '../../../../../store/app-state';
-import { PaginatedAction } from '../../../../../store/types/pagination.types';
-import { DataFunction, DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
-import { getRowUniqueId, RowsState } from '../../data-sources-controllers/list-data-source-types';
+import { AppState } from '../../../../store/app-state';
+import { PaginatedAction } from '../../../../store/types/pagination.types';
+import { DataFunction, DataFunctionDefinition } from './list-data-source';
+import { getRowUniqueId, RowsState } from './list-data-source-types';
 import { Observable } from 'rxjs/Observable';
 
 export interface IListDataSourceConfig<A, T> {

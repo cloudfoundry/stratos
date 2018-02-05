@@ -21,7 +21,7 @@ import { withLatestFrom } from 'rxjs/operators';
 import { composeFn } from '../../../../store/helpers/reducer.helper';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { getListStateObservable, getListStateObservables, ListState } from '../../../../store/reducers/list.reducer';
-import { IListDataSourceConfig } from '../list-types/app-instance/list-data-source-config';
+import { IListDataSourceConfig } from './list-data-source-config';
 import { tag } from 'rxjs-spy/operators/tag';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 export interface DataFunctionDefinition {
