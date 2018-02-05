@@ -14,7 +14,7 @@ import {
 import { AppState } from '../../../../store/app-state';
 import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagination-reducer/pagination.reducer';
 import { PaginationClientFilter, PaginationEntityState } from '../../../../store/types/pagination.types';
-import { IListMultiFilterConfig } from '../list.component';
+import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource } from './list-data-source-types';
 
 export interface IListPaginationController<T> {

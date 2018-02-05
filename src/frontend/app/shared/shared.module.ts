@@ -32,7 +32,7 @@ import {
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
-import { ListComponent, ListConfig } from './components/list/list.component';
+import { ListComponent } from './components/list/list.component';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
@@ -59,6 +59,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { listCardComponents } from './components/list/list-cards/card.types';
+import { ListConfig } from './components/list/list.component.types';
 
 @NgModule({
   imports: [

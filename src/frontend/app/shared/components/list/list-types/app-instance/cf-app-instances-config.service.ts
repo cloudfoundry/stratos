@@ -1,30 +1,17 @@
-import { UtilsService } from '../../../../../core/utils.service';
-import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/app-state';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
-import { IListAction, IListConfig, ListViewTypes } from '../../list.component';
-import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
-import { ITableColumn } from '../../list-table/table.types';
-import {
-  TableCellEventTimestampComponent,
-} from '../app-event/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from '../app-event/table-cell-event-type/table-cell-event-type.component';
-import {
-  TableCellEventActionComponent,
-} from '../app-event/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from '../app-event/table-cell-event-detail/table-cell-event-detail.component';
 import { Injectable } from '@angular/core';
-import { TableCellActionsComponent } from '../../list-table/table-cell-actions/table-cell-actions.component';
-import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
-import { AppStat } from '../../../../../store/types/app-metadata.types';
 import { Router } from '@angular/router';
-import { ConfirmationDialogService, ConfirmationDialog } from '../../../confirmation-dialog.service';
+import { Store } from '@ngrx/store';
+
+import { UtilsService } from '../../../../../core/utils.service';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
+import { AppState } from '../../../../../store/app-state';
+import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { TableCellActionsComponent } from '../../list-table/table-cell-actions/table-cell-actions.component';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
+import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {

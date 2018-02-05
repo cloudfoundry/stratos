@@ -1,26 +1,16 @@
-import { ITableColumn } from '../../list-table/table.types';
-import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
-import {
-  TableCellEditVariableComponent,
-} from './table-cell-edit-variable/table-cell-edit-variable.component';
-import { TableCellSelectComponent } from '../../list-table/table-cell-select/table-cell-select.component';
-import { TableHeaderSelectComponent } from '../../list-table/table-header-select/table-header-select.component';
+import { Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
+
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';
-import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
-import { ListAppEnvVar, CfAppEvnVarsDataSource } from './cf-app-variables-data-source';
-import { Injectable } from '@angular/core';
-import { EntityInfo } from '../../../../../store/types/api.types';
-import {
-  IBaseListAction,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component';
-import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
+import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
+import { TableCellSelectComponent } from '../../list-table/table-cell-select/table-cell-select.component';
+import { TableHeaderSelectComponent } from '../../list-table/table-header-select/table-header-select.component';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import { CfAppEvnVarsDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
+import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 
 @Injectable()
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
@@ -67,6 +57,10 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
+  text: {
+    title: 'Environment Variables', filter: 'Filter Variables'
+  };
+  enableTextFilter: true;
 
   private dispatchDeleteAction() {
     this.store.dispatch(
