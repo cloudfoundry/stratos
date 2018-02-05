@@ -1,7 +1,7 @@
 import { paginationAddParams } from '../../store/reducers/pagination-reducer/pagination-reducer-add-params';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { OperatorFunction } from 'rxjs/interfaces';
-import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables, getCurrentPageRequestInfo } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
 import { ListPagination, ListSort, ListFilter, ListView } from '../../store/actions/list.actions';
 import { fileExists } from 'ts-node/dist';
@@ -116,7 +116,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     }
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
-    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => {
+      return getCurrentPageRequestInfo(pag).busy && !pag.ids[pag.currentPage];
+    });
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -253,7 +255,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       + paginationEntity.params['order-direction']
       + paginationEntity.clientPagination.filter.string
       + Object.values(paginationEntity.clientPagination.filter.items)
-      + paginationEntity.fetching; // Some outlier cases actually fetch independently from this list (looking at you app variables)
+      + getCurrentPageRequestInfo(paginationEntity).busy;
+    // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }
 
   splitClientPages(entites: T[], pageSize: number): T[][] {

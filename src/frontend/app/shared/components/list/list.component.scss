@@ -1,9 +1,21 @@
-.listComponent {
+.list-component {
   *[hidden],
   .sort[hidden],
   .filter[hidden],
   .add-container[hidden] {
     display: none;
+  }
+  &__blocker {
+    background-color: rgba(0, 0, 0, 0.15);
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 999;
+  }
+  &__body-inner {
+    position: relative;
   }
   &__header {
     &__left[hidden],

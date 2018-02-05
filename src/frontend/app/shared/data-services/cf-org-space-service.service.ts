@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { cnsisRegisteredEntitiesSelector } from '../../store/selectors/cnsis.selectors';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables, getCurrentPageRequestInfo } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { GetAllOrganizations, OrganizationSchema } from '../../store/actions/organization.actions';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CNSISModel } from '../../store/types/cnsis.types';
@@ -69,7 +69,7 @@ export class CfOrgSpaceDataService {
   private init() {
     this.getEndpointsAndOrgs$ = Observable.combineLatest(
       this.allOrgs$.pagination$.filter(paginationEntity => {
-        return !paginationEntity.fetching;
+        return !getCurrentPageRequestInfo(paginationEntity).busy;
       }).first(),
       this.cf.list$
     );
@@ -99,7 +99,7 @@ export class CfOrgSpaceDataService {
 
     this.org = {
       list$: orgList$,
-      loading$: this.allOrgs$.pagination$.map(pag => pag.fetching),
+      loading$: this.allOrgs$.pagination$.map(pag => getCurrentPageRequestInfo(pag).busy),
       select: new BehaviorSubject(undefined),
     };
   }

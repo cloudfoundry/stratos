@@ -1,13 +1,13 @@
-<div class="listComponent">
-  <div class="listComponent__header" [ngClass]="{'selected': (dataSource.isSelecting$ | async) }">
+<div class="list-component">
+  <div class="list-component__header" [ngClass]="{'selected': (dataSource.isSelecting$ | async) }">
     <mat-card>
       <mat-card-header>
-        <div class="listComponent__header__top">
-          <div class="listComponent__header__left spacer">
+        <div class="list-component__header__top">
+          <div class="list-component__header__left spacer">
             <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">{{ text?.title }}</div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           </div>
-          <div class="listComponent__header__right">
+          <div class="list-component__header__right">
             <div *ngIf="(dataSource.isSelecting$ | async)">
               <ng-container *ngFor="let action of multiActions">
                 <button mat-icon-button *ngIf="action.visible(row)" (click)="executeActionMultiple(action)" [disabled]="!action.enabled(row)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
@@ -47,8 +47,8 @@
             </div>
           </div>
         </div>
-        <div class="listComponent__header__bottom">
-          <div class="listComponent__header__left spacer">
+        <div class="list-component__header__bottom">
+          <div class="list-component__header__left spacer">
             <div class="multi-filters" [hidden]="((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
               <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs">
                 <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
@@ -60,7 +60,7 @@
               </mat-form-field>
             </div>
           </div>
-          <div class="listComponent__header__right">
+          <div class="list-component__header__right">
             <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <button mat-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='asc'">
                 <mat-icon>sort</mat-icon>
@@ -91,11 +91,14 @@
       </div>
     </div>
   </div>
-  <div class="listComponent__body">
-    <app-cards *ngIf="(dataSource.view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
-    <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [paginationController]="paginationController" [columns]="columns" [text]="text" [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
-    </app-table>
-    <mat-card class="listComponent__paginator" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
+  <div class="list-component__body">
+    <div class="list-component__body-inner">
+      <div *ngIf="dataSource.isLoadingPage$ | async" class="list-component__blocker"></div>
+      <app-cards *ngIf="(dataSource.view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
+      <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [paginationController]="paginationController" [columns]="columns" [text]="text" [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
+      </app-table>
+    </div>
+    <mat-card class="list-component__paginator" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
       <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
       </mat-paginator>
     </mat-card>
