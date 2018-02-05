@@ -8,13 +8,14 @@ import (
 	"testing"
 	"time"
 
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
+
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/SUSE/stratos-ui/app-core/repository/crypto"
 	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 const (
@@ -132,7 +133,7 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 			// WithArgs(mockUserGUID).
 			WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
-		// --- set up the database expectation for pp.saveUAAToken
+		// --- set up the database expectation for pp.saveAuthToken
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 
