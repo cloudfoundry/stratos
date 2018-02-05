@@ -2,12 +2,11 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { map } from 'rxjs/operators';
 
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
+import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { AppStat, AppStatSchema } from '../../../../../store/types/app-metadata.types';
-import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 
 export interface ListAppInstanceUsage {
@@ -90,10 +89,6 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
       }
     );
 
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-    ));
   }
 
   // Need to calculate usage as a fraction for sorting

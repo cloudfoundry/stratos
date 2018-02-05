@@ -1,7 +1,6 @@
 import { Store } from '@ngrx/store';
 
 import { ApplicationSchema, GetAllApplications } from '../../../../../store/actions/application.actions';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
@@ -74,9 +73,5 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     }
     );
 
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'cards',
-    ));
   }
 }

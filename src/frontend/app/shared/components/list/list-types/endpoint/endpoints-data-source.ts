@@ -1,15 +1,9 @@
-import { interval } from 'rxjs/observable/interval';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
 import { EndpointSchema, GetAllCNSIS } from '../../../../../store/actions/cnsis.actions';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
-import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../../../../store/selectors/cnsis.selectors';
 import { CNSISModel } from '../../../../../store/types/cnsis.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { map } from 'rxjs/operators';
 
 
 export class EndpointsDataSource extends ListDataSource<CNSISModel> {
@@ -58,10 +52,5 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
       ],
     });
     this.store = store;
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-    ));
-
   }
 }

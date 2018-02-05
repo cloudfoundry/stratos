@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
 import { Type } from '@angular/core';
+import { ListView } from '../../../store/actions/list.actions';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -20,11 +21,12 @@ export interface IListConfig<T> {
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   isLocal?: boolean;
   pageSizeOptions: Number[];
-  viewType: ListViewTypes;
-  text?: ITableText;
-  enableTextFilter?: boolean;
-  tableFixedRowHeight?: boolean;
-  cardComponent?: any;
+  viewType: ListViewTypes; // What different views the user can select (table/cards)
+  defaultView?: ListView; // What is the initial view that the list will be displayed as (table/cards)
+  text?: ITableText; // Override the default list text
+  enableTextFilter?: boolean; // Enable a few text filter... other config required
+  tableFixedRowHeight?: boolean; // Fix the height of a table row
+  cardComponent?: any; // The card component used in card view
 }
 
 export interface IListMultiFilterConfig {
@@ -45,6 +47,11 @@ export class ListConfig implements IListConfig<any> {
   isLocal = false;
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.BOTH;
+  text = null;
+  enableTextFilter = false;
+  tableFixedRowHeight = false;
+  cardComponent = null;
+  defaultView = 'table' as ListView;
   getGlobalActions = () => null;
   getMultiActions = () => null;
   getSingleActions = () => null;

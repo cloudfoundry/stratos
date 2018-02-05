@@ -14,6 +14,7 @@ import { TableCellAppInstancesComponent } from './table-cell-app-instances/table
 import { TableCellAppNameComponent } from './table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from './table-cell-app-status/table-cell-app-status.component';
 import { CardAppComponent } from './card/card-app.component';
+import { ListView } from '../../../../../store/actions/list.actions';
 
 
 @Injectable()
@@ -69,6 +70,7 @@ export class CfAppConfigService implements IListConfig<APIResource> {
   };
   enableTextFilter = true;
   cardComponent = CardAppComponent;
+  defaultView = 'cards' as ListView;
 
   getGlobalActions = () => null;
   getMultiActions = () => null;

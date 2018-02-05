@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { GetRoutes } from '../../../../../store/actions/route.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -40,10 +39,6 @@ export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
 
     this.cfGuid = appService.cfGuid;
     this.appGuid = appService.appGuid;
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-    ));
   }
 
 }

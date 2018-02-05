@@ -4,7 +4,6 @@ import { map } from 'rxjs/operators';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { GetAppEnvVarsAction } from '../../../../../store/actions/app-metadata.actions';
 import { AppVariablesAdd, AppVariablesEdit } from '../../../../../store/actions/app-variables.actions';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -73,10 +72,6 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
 
     this.cfGuid = _appService.cfGuid;
     this.appGuid = _appService.appGuid;
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-    ));
   }
 
   saveAdd() {

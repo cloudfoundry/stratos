@@ -26,7 +26,9 @@ import {
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
+  ListViewTypes,
 } from './list.component.types';
+import { getListStateObservables } from '../../../store/reducers/list.reducer';
 
 
 @Component({
@@ -37,6 +39,8 @@ import {
 
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
+
+  view$: Observable<ListView>;
 
   @Input('addForm') addForm: NgForm;
 
@@ -67,13 +71,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   constructor(
-    private _store: Store<AppState>,
+    private store: Store<AppState>,
     private cd: ChangeDetectorRef,
     public config: ListConfig
   ) { }
 
   ngOnInit() {
-
     this.globalActions = this.config.getGlobalActions();
     this.multiActions = this.config.getMultiActions();
     this.singleActions = this.config.getSingleActions();
@@ -81,7 +84,18 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource = this.config.getDataSource();
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
-    this.paginationController = new ListPaginationController(this._store, this.dataSource);
+    // Set up an obervable containing the current view (card/table)
+    const { view, } = getListStateObservables(this.store, this.dataSource.paginationKey);
+    this.view$ = view;
+
+    // If this is the first time the user has used this lis then set the view to the default
+    this.view$.first().subscribe(listView => {
+      if (!listView) {
+        this.updateListView(this.config.defaultView || 'table');
+      }
+    });
+
+    this.paginationController = new ListPaginationController(this.store, this.dataSource);
 
     this.paginator.pageSizeOptions = this.config.pageSizeOptions;
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
@@ -152,7 +166,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateListView(listView: ListView) {
-    this._store.dispatch(new SetListViewAction(this.dataSource.paginationKey, listView));
+    this.store.dispatch(new SetListViewAction(this.dataSource.paginationKey, listView));
   }
 
   updateListSort(field: string, direction: SortDirection) {
