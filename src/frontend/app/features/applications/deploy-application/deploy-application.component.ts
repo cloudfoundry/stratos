@@ -1,10 +1,19 @@
 import { Component, OnInit } from '@angular/core';
+import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { SetCFDetails } from '../../../store/actions/create-applications-page.actions';
 import { Observable } from 'rxjs/Observable';
-import { StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
+import { filter, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfAppsDataSource } from '../../../shared/components/list/data-sources/cf-apps-data-source';
+import { ApplicationSchema } from '../../../store/actions/application.actions';
+import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
+import { RouterNav } from '../../../store/actions/router.actions';
+import { AppState } from '../../../store/app-state';
+import { selectCfDetails } from '../../../store/selectors/deploy-application.selector';
+import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 
 @Component({
   selector: 'app-deploy-application',
@@ -12,9 +21,15 @@ import { StoreCFSettings } from '../../../store/actions/deploy-applications.acti
   styleUrls: ['./deploy-application.component.scss'],
   providers: [CfOrgSpaceDataService]
 })
-export class DeployApplicationComponent {
+export class DeployApplicationComponent implements OnInit, OnDestroy {
 
-  constructor(private store: Store<AppState>, public cfOrgSpaceService: CfOrgSpaceDataService) { }
+  initCfOrgSpaceService: Subscription[] = [];
+
+  constructor(
+    private store: Store<AppState>,
+    private cfOrgSpaceService: CfOrgSpaceDataService,
+    private activatedRoute: ActivatedRoute
+  ) { }
 
   onNext = () => {
     this.store.dispatch(new StoreCFSettings({
@@ -24,4 +39,43 @@ export class DeployApplicationComponent {
     }));
     return Observable.of({ success: true });
   }
+
+  ngOnDestroy(): void {
+    this.initCfOrgSpaceService.forEach(p => p.unsubscribe());
+  }
+
+  ngOnInit(): void {
+
+    const isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'];
+
+    if (isRedeploy) {
+      this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
+        filter(p => !!p),
+        tap(p => {
+          this.cfOrgSpaceService.cf.select.next(p.cloudFoundry);
+          this.cfOrgSpaceService.org.select.next(p.org);
+          this.cfOrgSpaceService.space.select.next(p.space);
+        })
+      ).subscribe());
+      // In case user has specified the query param manually
+      this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
+        filter(p => !p),
+        tap(p => {
+          this.store.dispatch(new RouterNav({ path: ['applications', 'deploy'] }));
+        })
+      ).subscribe());
+    } else {
+      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey)).pipe(
+        filter((pag) => !!pag),
+        tap(pag => {
+          this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+          this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+          this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+        })
+      ).subscribe());
+      // Delete any state in deployApplication
+      this.store.dispatch(new DeleteDeployAppSection());
+    }
+  }
 }
+

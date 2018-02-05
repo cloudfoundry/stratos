@@ -2,7 +2,7 @@
 <form novalidate #sourceSelectionForm="ngForm">
   <div class="deploy-step2-form">
     <mat-form-field>
-      <mat-select class="reset-margin" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
+      <mat-select class="reset-margin" [disabled]="isReDeploy" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
         <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
           {{ sourceType.name }}
         </mat-option>
@@ -10,7 +10,7 @@
     </mat-form-field>
     <div *ngIf="(sourceType$ | async)?.id === 'git'">
       <div>
-        <mat-radio-group [(ngModel)]="sourceSubType" name="sourceSubType" (change)="setSourceSubType($event.value)" class="deploy-step2-form__radio" required>
+        <mat-radio-group [disabled]="isReDeploy" [(ngModel)]="sourceSubType" name="sourceSubType" (change)="setSourceSubType($event.value)" class="deploy-step2-form__radio" required>
           <mat-radio-button *ngFor="let type of sourceSubTypes" name="sourceSubType" [value]="type">
             {{ type.name }}
           </mat-radio-button>
@@ -20,7 +20,7 @@
         <div class="github-project-details">
           <div>
             <mat-form-field>
-              <input matInput [(ngModel)]="repository" placeholder="Project" name="projectName" appGithubProjectExists required>
+              <input matInput [disabled]="isReDeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" appGithubProjectExists required>
               <mat-error *ngIf="sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')">
                 Project doesn't exist
               </mat-error>
@@ -32,7 +32,7 @@
             </div>
             <div src="description">
               <div>
-                <a href="{{projectInfo.html_url}}">{{projectInfo.full_name}}</a>
+                <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
               </div>
               <div class="centered">
                 <a>{{projectInfo.description}}</a>
@@ -41,19 +41,20 @@
           </div>
         </div>
         <mat-form-field>
-          <mat-select class="reset-margin" placeholder="Branch" [disabled]="!repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (change)="fetchCommit($event.value)" required>
+          <mat-select class="reset-margin" placeholder="Branch" [disabled]="isReDeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (change)="updateBranchName($event.value)"
+            required>
             <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
               {{ branch.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <div *ngIf="commitInfo$| async as commitInfo" class="deploy-step2-form__project-info-group">
+        <div *ngIf="commitInfo" class="deploy-step2-form__project-info-group">
           <div>
             <img src="{{commitInfo.author.avatar_url}}">
           </div>
           <div src="description">
             <div>
-              <a href="{{commitInfo.html_url}}">{{commitInfo.sha | limitTo:8}}</a>
+              <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
             </div>
             <div>
               <a>{{commitInfo.commit.message}}</a>
@@ -71,7 +72,7 @@
       </div>
       <div *ngIf="(sourceSubType$ | async) === 'giturl'">
         <mat-form-field>
-          <input matInput [(ngModel)]="repository" placeholder="Project" name="projectName" required>
+          <input matInput [disabled]="isReDeploy" [(ngModel)]="repository" placeholder="Project" name="projectName" required>
         </mat-form-field>
         <mat-form-field>
           <input matInput [(ngModel)]="repositoryBranch.name" placeholder="Branch or Tag" name="projectBranch" required>

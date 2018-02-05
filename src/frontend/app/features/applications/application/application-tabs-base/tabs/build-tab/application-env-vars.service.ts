@@ -22,9 +22,14 @@ export class ApplicationEnvVarsService {
     if (!appEnvVars) {
       return null;
     }
-    // const envVars: ApplicationEnvVars = JSON.parse(appEnvVars);
     const stratosProjectString = appEnvVars.environment_json ? appEnvVars.environment_json.STRATOS_PROJECT : null;
-    const res = stratosProjectString ? JSON.parse(stratosProjectString) as EnvVarStratosProject : null;
-    return res;
+    try {
+      const res = stratosProjectString ? JSON.parse(stratosProjectString) as EnvVarStratosProject : null;
+      return res;
+    } catch (err) {
+      // noop
+    }
+    return null;
+
   }
 }
