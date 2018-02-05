@@ -23,9 +23,11 @@ import { DisplayValueComponent } from './components/display-value/display-value.
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
+/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+/* tslint:enable:max-line-length */
 import {
   CardAppInstancesComponent,
 } from './components/cards/card-app-instances/card-app-instances.component';

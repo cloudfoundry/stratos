@@ -6,8 +6,8 @@ import { SharedModule } from '../../../../shared.module';
 
 import { DatePipe } from '@angular/common';
 import { TestBed, inject } from '@angular/core/testing';
+import { CfAppConfigService } from './cf-app-config.service';
 
-import { CfAppConfigService } from '../../list-configs/cf-app-config.service';
 
 describe('CfAppConfigService', () => {
   beforeEach(() => {
