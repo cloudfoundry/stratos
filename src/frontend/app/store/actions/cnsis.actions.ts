@@ -23,6 +23,10 @@ export const UNREGISTER_CNSIS = '[CNSIS] Unregister';
 export const UNREGISTER_CNSIS_SUCCESS = '[CNSIS] Unregister succeed';
 export const UNREGISTER_CNSIS_FAILED = '[CNSIS] Unregister failed';
 
+export const REGISTER_CNSIS = '[CNSIS] Register';
+export const REGISTER_CNSIS_SUCCESS = '[CNSIS] Register succeed';
+export const REGISTER_CNSIS_FAILED = '[CNSIS] Register failed';
+
 export const EndpointSchema = new schema.Entity('endpoint', {}, {
   idAttribute: 'guid'
 });
@@ -72,4 +76,18 @@ export class UnregisterCnis implements Action {
     public guid: string
   ) { }
   type = UNREGISTER_CNSIS;
+}
+
+
+export class RegisterCnis implements Action {
+  constructor(
+    public name: string,
+    public endpoint: string,
+    public skipSslValidation: boolean,
+  ) { }
+  type = REGISTER_CNSIS;
+
+  public guid(): string {
+    return '<New Endpoint>' + this.name;
+  }
 }

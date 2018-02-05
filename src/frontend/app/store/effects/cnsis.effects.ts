@@ -19,6 +19,10 @@ import {
   UNREGISTER_CNSIS_FAILED,
   UNREGISTER_CNSIS_SUCCESS,
   UnregisterCnis,
+  REGISTER_CNSIS,
+  REGISTER_CNSIS_FAILED,
+  REGISTER_CNSIS_SUCCESS,
+  RegisterCnis,
 } from './../actions/cnsis.actions';
 import { AppState } from './../app-state';
 import { Injectable } from '@angular/core';
@@ -41,6 +45,7 @@ export class CNSISEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static unregisteringKey = 'unregistering';
+  static registeringKey = 'registering';
 
   constructor(
     private http: Http,
@@ -143,6 +148,24 @@ export class CNSISEffect {
         [UNREGISTER_CNSIS_SUCCESS, UNREGISTER_CNSIS_FAILED]
       );
     });
+
+  @Effect() register$ = this.actions$.ofType<RegisterCnis>(REGISTER_CNSIS)
+  .flatMap(action => {
+
+    const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.registeringKey);
+
+    const params: URLSearchParams = new URLSearchParams();
+    params.append('cnsi_guid', action.guid);
+
+    return this.doCnisAction(
+      apiAction,
+      '/pp/v1/register',
+      params,
+      'create',
+      [REGISTER_CNSIS_SUCCESS, REGISTER_CNSIS_FAILED]
+    );
+  });
+
 
   private getEndpointAction(guid, type, updatingKey) {
     return {
