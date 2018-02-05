@@ -137,8 +137,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     )
       .map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
         return isFetchingApp || isFetchingEnvVars || isFetchingStats;
-      })
-      .distinctUntilChanged();
+      });
 
     this.summaryDataChanging$ = Observable.combineLatest(
       initialFetch$,
@@ -148,7 +147,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       if (autoRefresh.busy) {
         return false;
       }
-      return isFetchingApp || isUpdating;
+      return !!(isFetchingApp || isUpdating);
     });
 
     this.applicationService.applicationStratProject$
