@@ -1,3 +1,4 @@
+<h1>Register new Endpoint</h1>
 <p>
   Register an existing Cloud Foundry endpoint to allow your development team to create and manage their applications.
 </p>
@@ -5,10 +6,21 @@
   When registering, choose a unique, recognizable name so that your developers can easily know which Cloud Foundry endpoint
   they are working with.
 </p>
+<p>
+  Supply the API Url for your Cloud Foundry endpoint
+</p>
 <form #form="ngForm">
   <mat-form-field>
-    <input matInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="endpointNames | async">
+    <input matInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="(existingEndpoints | async)?.names">
     <mat-error *ngIf="nameField.errors && nameField.errors.required">Name is required</mat-error>
     <mat-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</mat-error>
   </mat-form-field>
+  <mat-form-field novalidate>
+    <input matInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Cloud Foundry API Endpoint"
+      pattern="{{utilsService.urlValidationExpression}}" [appUnique]="(existingEndpoints | async)?.urls">
+    <mat-error *ngIf="urlField.errors && urlField.errors.required">URL is required</mat-error>
+    <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
+    <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
+  </mat-form-field>
+  <mat-checkbox matInput name="skipSll" #skipSllField="ngModel" [ngModel]="skipSllValue">Skip SSL validation for the endpoint</mat-checkbox>
 </form>
