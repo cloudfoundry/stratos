@@ -8,11 +8,16 @@ export class AppMonitorState {
     mem: 0,
     disk: 0,
     cpu: 0,
+    uptime: 0,
   };
   max = {
     mem: 0,
     disk: 0,
     cpu: 0,
+    uptime: 0,
+  };
+  min = {
+    uptime: Number.MAX_SAFE_INTEGER,
   };
   running = 0;
   status = {
@@ -83,18 +88,22 @@ export class ApplicationMonitorService {
           res.avg.disk += disk;
           res.avg.mem += mem;
           res.avg.cpu += usage.cpu;
+          res.avg.uptime += stat.stats.uptime;
           res.max.disk = Math.max(res.max.disk, disk);
           res.max.mem = Math.max(res.max.mem, mem);
           res.max.cpu = Math.max(res.max.cpu, usage.cpu);
+          res.max.uptime = Math.max(res.max.uptime, stat.stats.uptime);
+          res.min.uptime = Math.min(res.min.uptime, stat.stats.uptime);
           validStatsCount++;
         }
         res.running += stat.state === 'RUNNING' ? 1 : 0;
       });
 
       // Average
-      res.avg.disk = res.avg.disk / validStatsCount;
-      res.avg.mem = res.avg.mem / validStatsCount;
-      res.avg.cpu = res.avg.cpu / validStatsCount;
+      res.avg.disk = this.roundTwoPlaces(res.avg.disk / validStatsCount);
+      res.avg.mem = this.roundTwoPlaces(res.avg.mem / validStatsCount);
+      res.avg.cpu = this.roundTwoPlaces(res.avg.cpu / validStatsCount);
+      res.avg.uptime = Math.round(res.avg.uptime / validStatsCount);
 
       res.updateStatuses();
 
@@ -105,4 +114,7 @@ export class ApplicationMonitorService {
     }).share();
   }
 
+  roundTwoPlaces(num: number): number {
+    return Math.round(num * 100) / 100;
+  }
 }

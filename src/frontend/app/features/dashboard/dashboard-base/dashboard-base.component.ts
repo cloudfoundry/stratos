@@ -51,6 +51,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/applications'
     },
     {
+      text: 'Services',
+      matIcon: 'library_books',
+      link: '/service-catalogue'
+    },
+    {
       text: 'Cloud Foundry',
       matIcon: 'cloud',
       link: '/cloud-foundry'
@@ -59,11 +64,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       text: 'Endpoints',
       matIcon: 'settings_input_component',
       link: '/endpoints'
-    },
-    {
-      text: 'Service Catalogue',
-      matIcon: 'library_books',
-      link: '/service-catalogue'
     },
   ];
 

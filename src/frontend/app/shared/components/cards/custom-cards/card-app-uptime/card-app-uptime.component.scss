@@ -1,0 +1,32 @@
+.card-app-uptime {
+  &__large {
+    font-size: 16px;
+  }
+
+  &__compact {
+    margin-bottom: 0;
+  }
+
+  &__contents {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &__main {
+    flex: 5;
+  }
+
+  &__detail {
+    flex: 3;
+  }
+
+  &__metric {
+    margin: 0 0 6px 0;
+    font-size: 13px;
+
+    &:last-child {
+      margin: 0;
+    }
+  }
+
+}

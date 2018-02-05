@@ -5,26 +5,33 @@ import {
   CHECK_PROJECT_EXISTS,
   FETCH_BRANCHES_FOR_PROJECT,
   SAVE_APP_DETAILS,
-  DELETE_CACHED_BRANCHES,
   SET_DEPLOY_CF_SETTINGS,
   SET_APP_SOURCE_DETAILS,
   DELETE_DEPLOY_APP_SECTION,
+  SET_BRANCH,
+  SET_DEPLOY_BRANCH,
 } from '../actions/deploy-applications.actions';
 import { DeployApplicationState } from '../types/deploy-application.types';
 
 
 const defaultState: DeployApplicationState = {
   cloudFoundryDetails: null,
-  applicationSource: null,
-  projectExists: null
+  applicationSource: {
+    type: null
+  },
+  projectExists:  {
+    checking: false,
+    exists: false,
+    name: ''
+  }
 };
 
 export function deployAppReducer(state: DeployApplicationState = defaultState, action) {
   switch (action.type) {
     case SET_APP_SOURCE_DETAILS:
       return {
-        ...state, applicationSource: action.applicationSource, projectExists: {checking: false, exists: false, name: ''}
-      };
+          ...state, applicationSource: {...state.applicationSource, type: action.sourceType }
+        };
     case SET_APP_SOURCE_SUB_TYPE:
       const sourceType = { ...state.applicationSource.type, subType: action.subType.id};
       const appSource = { ...state.applicationSource, type: sourceType};
@@ -71,6 +78,16 @@ export function deployAppReducer(state: DeployApplicationState = defaultState, a
       return {
         ...state, applicationSource:
         { ...state.applicationSource, ...action.appDetails}
+      };
+    case SET_BRANCH:
+      return {
+        ...state, applicationSource:
+        { ...state.applicationSource, ...{branch: action.branch}}
+      };
+    case SET_DEPLOY_BRANCH:
+      return {
+        ...state, applicationSource:
+        { ...state.applicationSource, ...{branchName: action.branch}}
       };
     case DELETE_DEPLOY_APP_SECTION:
       return defaultState;
