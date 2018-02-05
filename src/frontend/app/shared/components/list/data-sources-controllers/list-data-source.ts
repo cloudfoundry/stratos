@@ -22,6 +22,8 @@ import { composeFn } from '../../../../store/helpers/reducer.helper';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { getListStateObservable, getListStateObservables, ListState } from '../../../../store/reducers/list.reducer';
 import { IListDataSourceConfig } from '../list-types/app-instance/list-data-source-config';
+import { tag } from 'rxjs-spy/operators/tag';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 export interface DataFunctionDefinition {
   type: 'sort' | 'filter';
   orderKey?: string;
@@ -69,8 +71,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // ------------- Private
   private entities$: Observable<T>;
-  private pageSubscription: Subscription;
-  private entityLettabledSubscription: Subscription;
   private paginationToStringFn: (PaginationEntityState) => string;
 
   protected store: Store<AppState>;
@@ -83,6 +83,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public isLocal = false;
   public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[];
   public rowsState?: Observable<RowsState>;
+
+  private pageSubscription: Subscription;
+  private entityLettabledSubscription: Subscription;
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -109,11 +112,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     if (this.isLocal) {
       this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
     } else {
-      this.page$ = letted$;
+      this.page$ = letted$.pipe(shareReplay(1));
     }
-    this.page$ = this.page$.pipe(shareReplay(1));
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
-
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
   }
@@ -142,7 +143,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         ...getDefaultRowState(),
         ...(state[this.getRowUniqueId(row)] || {})
       })),
-      distinctUntilChanged()
+      distinctUntilChanged(),
+      shareReplay(1)
     );
   }
 
@@ -220,9 +222,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   getLocalPagesObservable(page$, pagination$: Observable<PaginationEntityState>, dataFunctions) {
-    return page$.pipe(
-      withLatestFrom(pagination$),
-      map(([entities, paginationEntity]) => {
+    return combineLatest(
+      pagination$,
+      page$
+    ).pipe(
+      map(([paginationEntity, entities]) => {
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
@@ -237,8 +241,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         }
         const pageIndex = paginationEntity.clientPagination.currentPage - 1;
         return pages[pageIndex];
-      })
-    );
+      }),
+      shareReplay(1),
+      tag('local-list')
+      );
   }
 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {
@@ -254,6 +260,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     if (!entites || !entites.length) {
       return [];
     }
+    if (entites.length <= pageSize) {
+      return [entites];
+    }
     const array = [...entites];
     const pages = [];
 
@@ -264,7 +273,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   connect(): Observable<T[]> {
-    return this.page$;
+    return this.page$.tag('actual-page-obs');
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {

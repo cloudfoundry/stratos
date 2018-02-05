@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { AppState } from './store/app-state';
 import { LoggedInService } from './logged-in.service';
-import { create } from 'rxjs-spy';
+import { create, PartialLogger } from 'rxjs-spy';
 import { environment } from '../environments/environment';
 
 
@@ -24,8 +24,15 @@ export class AppComponent implements OnInit, AfterContentInit {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();
         if (environment.showObsDebug) {
-          spy.log('entity-obs');
-          spy.log('entity-request-obs');
+          // spy.log('entity-obs');
+          // spy.log('entity-request-obs');
+          spy.log('list-pagination');
+          spy.log('list-sort');
+          spy.log('local-list');
+          spy.log('pageSubObs');
+          spy.log('actual-page-obs');
+          spy.log('stat-obs');
+          // spy.log('list');
         }
         if (environment.disablePolling) {
           spy.pause('poll');

@@ -132,7 +132,8 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           pageSize,
           pageIndex
         };
-      });
+      })
+      .tag('list-pagination');
   }
 
   private createSortObservable(dataSource: IListDataSource<T>): Observable<ListSort> {
@@ -141,7 +142,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       field: pag.params['order-direction-field']
     })).filter(x => !!x).distinctUntilChanged((x, y) => {
       return x.direction === y.direction && x.field === y.field;
-    });
+    }).tag('list-sort');
   }
 
   private createFilterObservable(dataSource: IListDataSource<T>): Observable<ListFilter> {
@@ -150,7 +151,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
         string: dataSource.isLocal ? pag.clientPagination.filter.string : dataSource.getFilterFromParams(pag),
         items: pag.clientPagination.filter.items
       }))
-    );
+    ).tag('list-filter');
   }
 
   private cleanFilterParam(filter) {

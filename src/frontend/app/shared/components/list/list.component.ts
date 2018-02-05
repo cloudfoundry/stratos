@@ -130,6 +130,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   multiFilterConfigs: IListMultiFilterConfig[];
 
   paginationController: IListPaginationController<T>;
+  multiFilterWidgetObservables = new Array<Subscription>();
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -179,12 +180,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         return this.paginationController.filterByString(filterString);
       });
 
-    const multiFilterWidgetObservables = new Array<Subscription>();
+    this.multiFilterWidgetObservables = new Array<Subscription>();
     Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
       const sub = filterConfig.select.asObservable().do((filterItem: string) => {
         this.paginationController.multiFilter(filterConfig, filterItem);
       });
-      multiFilterWidgetObservables.push(sub.subscribe());
+      this.multiFilterWidgetObservables.push(sub.subscribe());
     });
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
@@ -202,14 +203,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.uberSub = Observable.combineLatest(
-      this.dataSource.page$,
       paginationStoreToWidget,
       paginationWidgetToStorePage,
       paginationWidgetToStorePageSize,
       filterStoreToWidget,
       filterWidgetToStore,
-      sortStoreToWidget,
-      multiFilterWidgetObservables
+      sortStoreToWidget
     ).subscribe();
 
   }
@@ -219,6 +218,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy() {
+    this.multiFilterWidgetObservables.forEach(sub => sub.unsubscribe());
     this.uberSub.unsubscribe();
     this.dataSource.destroy();
   }

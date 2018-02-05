@@ -15,6 +15,7 @@ import { ListConfig } from '../../../shared/components/list/list.component';
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource } from '../../../store/types/api.types';
+import { tag } from 'rxjs-spy/operators/tag';
 
 @Component({
   selector: 'app-application-wall',
@@ -65,8 +66,8 @@ export class ApplicationWallComponent implements OnDestroy {
             this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
           }
         });
-      })
-    ).subscribe();
+      }),
+      tag('stat-obs')).subscribe();
   }
 
   cardComponent = CardAppComponent;

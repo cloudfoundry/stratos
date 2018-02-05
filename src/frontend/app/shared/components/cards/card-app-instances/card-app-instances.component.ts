@@ -60,7 +60,6 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
         this.isRunning = app.app.entity.state === 'STARTED';
       }
     });
-
   }
 
   ngOnDestroy(): void {
