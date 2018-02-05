@@ -99,28 +99,44 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
       columnId: 'name',
       headerCell: () => 'Name',
       cell: row => row.name,
-      sort: true,
+      sort: {
+        type: 'sort',
+        orderKey: 'name',
+        field: 'name'
+      },
       cellFlex: '2'
     },
     {
       columnId: 'connection',
       headerCell: () => 'Status',
       cellComponent: TableCellEndpointStatusComponent,
-      sort: true,
+      sort: {
+        type: 'sort',
+        orderKey: 'connection',
+        field: 'info.user'
+      },
       cellFlex: '1'
     },
     {
       columnId: 'type',
       headerCell: () => 'Type',
       cell: getEndpointTypeString,
-      sort: true,
+      sort: {
+        type: 'sort',
+        orderKey: 'type',
+        field: 'cnsi_type'
+      },
       cellFlex: '2'
     },
     {
       columnId: 'address',
       headerCell: () => 'Address',
       cell: row => row.api_endpoint ? `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}` : 'Unknown',
-      sort: true,
+      sort: {
+        type: 'sort',
+        orderKey: 'address',
+        field: 'api_endpoint.Host'
+      },
       cellFlex: '5'
     },
   ];
@@ -155,7 +171,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     private store: Store<AppState>,
     private dialog: MatDialog
   ) {
-    this.dataSource = new EndpointsDataSource(this.store);
+    this.dataSource = new EndpointsDataSource(this.store, this);
   }
 
   public getGlobalActions = () => this.globalActions;

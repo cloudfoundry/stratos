@@ -7,6 +7,7 @@ import { GetRoutes } from '../../../../../store/actions/route.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 export const RouteSchema = new schema.Entity('route');
 
@@ -28,13 +29,6 @@ export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
       schema: RouteSchema,
       getRowUniqueId: (object: EntityInfo) => object.entity ? object.entity.guid : null,
       paginationKey,
-      entityFunctions: [
-        {
-          type: 'sort',
-          orderKey: 'host',
-          field: 'host'
-        },
-      ]
     });
 
     this.cfGuid = appService.cfGuid;

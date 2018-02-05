@@ -45,7 +45,7 @@ export class ApplicationWallComponent implements OnDestroy {
   constructor(
     public endpointsService: EndpointsService,
     private store: Store<AppState>,
-    private appListConfig: ListConfig,
+    private appListConfig: ListConfig<APIResource>,
   ) {
     const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
 

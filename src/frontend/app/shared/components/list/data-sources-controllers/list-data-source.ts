@@ -18,10 +18,17 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 
-export interface DataFunctionDefinition {
+export class DataFunctionDefinition {
   type: 'sort' | 'filter';
   orderKey?: string;
   field: string;
+  static is(obj) {
+    if (obj) {
+      const typed = <DataFunctionDefinition>obj;
+      return typed.type && typed.orderKey && typed.field;
+    }
+    return false;
+  }
 }
 
 export function distinctPageUntilChanged(dataSource) {
@@ -72,13 +79,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
-  private entityLettable: OperatorFunction<A[], T[]> = null;
+  private transformEntity: OperatorFunction<A[], T[]> = null;
   public isLocal = false;
-  public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[];
+  public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[];
   public rowsState?: Observable<RowsState>;
 
   private pageSubscription: Subscription;
-  private entityLettabledSubscription: Subscription;
+  private transformedEntitiesSubscription: Subscription;
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -96,14 +103,23 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.isLocal
     );
 
-    const dataFunctions = this.entityFunctions ? getDataFunctionList(this.entityFunctions) : null;
-    const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
-    this.entityLettabledSubscription = letted$.do(items => this.entityLettabledRows = items).subscribe();
+    const transformEntities = this.transformEntities || [];
+    // Add any additional functions via an optional listConfig, such as sorting from the column definition
+    const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
+    listColumns.forEach(column => {
+      if (DataFunctionDefinition.is(column.sort)) {
+        transformEntities.push(column.sort as DataFunctionDefinition);
+      }
+    });
+
+    const dataFunctions = getDataFunctionList(transformEntities);
+    const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
+    this.transformedEntitiesSubscription = transformedEntities$.do(items => this.entityLettabledRows = items).subscribe();
 
     if (this.isLocal) {
-      this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
+      this.page$ = this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions);
     } else {
-      this.page$ = letted$.pipe(shareReplay(1));
+      this.page$ = transformedEntities$.pipe(shareReplay(1));
     }
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
@@ -118,9 +134,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
-    this.entityLettable = config.entityLettable;
+    this.transformEntity = config.transformEntity;
     this.isLocal = config.isLocal || false;
-    this.entityFunctions = config.entityFunctions;
+    this.transformEntities = config.transformEntities;
     this.rowsState = config.rowsState ? config.rowsState.pipe(
       shareReplay(1)
     ) : Observable.of({}).first();
@@ -142,7 +158,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   disconnect() {
     this.pageSubscription.unsubscribe();
-    this.entityLettabledSubscription.unsubscribe();
+    this.transformedEntitiesSubscription.unsubscribe();
   }
 
   destroy() {
@@ -201,10 +217,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
 
-  attatchEntityLettable(entities$, entityLettable) {
+  attachTransformEntity(entities$, entityLettable) {
     if (entityLettable) {
       return entities$.pipe(
-        this.entityLettable
+        this.transformEntity
       );
     } else {
       return entities$.pipe(

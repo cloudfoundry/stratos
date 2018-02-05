@@ -43,7 +43,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
         value: '',
       }),
       paginationKey,
-      entityLettable: map(variables => {
+      transformEntity: map(variables => {
         if (!variables || variables.length === 0) {
           return [];
         }
@@ -52,7 +52,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
         return rows;
       }),
       isLocal: true,
-      entityFunctions: [
+      transformEntities: [
         {
           type: 'sort',
           orderKey: 'name',

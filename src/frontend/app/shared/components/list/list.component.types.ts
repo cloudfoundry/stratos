@@ -43,7 +43,7 @@ export interface IListMultiFilterConfigItem {
   value: string;
 }
 
-export class ListConfig implements IListConfig<any> {
+export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.BOTH;
@@ -52,12 +52,12 @@ export class ListConfig implements IListConfig<any> {
   tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
-  getColumns = () => null;
+  getGlobalActions = (): IGlobalListAction<T>[] => null;
+  getMultiActions = (): IMultiListAction<T>[] => null;
+  getSingleActions = (): IListAction<T>[] => null;
+  getColumns = (): ITableColumn<T>[] => null;
   getDataSource = () => null;
-  getMultiFiltersConfigs = () => [];
+  getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }
 
 export interface IBaseListAction<T> {

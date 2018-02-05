@@ -8,6 +8,7 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { AppStat, AppStatSchema } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 export interface ListAppInstanceUsage {
   mem: number;
@@ -28,6 +29,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
     store: Store<AppState>,
     _cfGuid: string,
     _appGuid: string,
+    listConfig: IListConfig<ListAppInstance>
   ) {
     const paginationKey = getPaginationKey(AppStatSchema.key, _cfGuid, _appGuid);
     const action = new GetAppStatsAction(_appGuid, _cfGuid);
@@ -39,7 +41,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
         schema: AppStatSchema,
         getRowUniqueId: (row: ListAppInstance) => row.index.toString(),
         paginationKey,
-        entityLettable: map(instances => {
+        transformEntity: map(instances => {
           if (!instances || instances.length === 0) {
             return [];
           }
@@ -54,38 +56,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
           return res;
         }),
         isLocal: true,
-        entityFunctions: [
-          {
-            type: 'sort',
-            orderKey: 'index',
-            field: 'index',
-          },
-          {
-            type: 'sort',
-            orderKey: 'state',
-            field: 'value.state'
-          },
-          {
-            type: 'sort',
-            orderKey: 'memory',
-            field: 'usage.mem'
-          },
-          {
-            type: 'sort',
-            orderKey: 'disk',
-            field: 'usage.disk'
-          },
-          {
-            type: 'sort',
-            orderKey: 'cpu',
-            field: 'usage.cpu'
-          },
-          {
-            type: 'sort',
-            orderKey: 'uptime',
-            field: 'value.stats.uptime'
-          }
-        ]
+        listConfig
       }
     );
 

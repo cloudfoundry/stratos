@@ -4,6 +4,7 @@ import { EndpointSchema, GetAllCNSIS } from '../../../../../store/actions/cnsis.
 import { AppState } from '../../../../../store/app-state';
 import { CNSISModel } from '../../../../../store/types/cnsis.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 
 export class EndpointsDataSource extends ListDataSource<CNSISModel> {
@@ -11,6 +12,7 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
 
   constructor(
     store: Store<AppState>,
+    listConfig: IListConfig<CNSISModel>
   ) {
     const action = new GetAllCNSIS();
     const paginationKey = GetAllCNSIS.storeKey;
@@ -24,32 +26,13 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
       }),
       paginationKey,
       isLocal: true,
-      entityFunctions: [
+      transformEntities: [
         {
           type: 'filter',
           field: 'name'
         },
-        {
-          type: 'sort',
-          orderKey: 'name',
-          field: 'name'
-        },
-        {
-          type: 'sort',
-          orderKey: 'connection',
-          field: 'info.user'
-        },
-        {
-          type: 'sort',
-          orderKey: 'type',
-          field: 'cnsi_type'
-        },
-        {
-          type: 'sort',
-          orderKey: 'address',
-          field: 'api_endpoint.Host'
-        },
       ],
+      listConfig
     });
     this.store = store;
   }

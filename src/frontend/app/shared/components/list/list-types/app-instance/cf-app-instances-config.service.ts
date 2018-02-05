@@ -18,10 +18,18 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   instancesSource: CfAppInstancesDataSource;
   columns: Array<ITableColumn<ListAppInstance>> = [
     {
-      columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: true, cellFlex: '1'
+      columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: {
+        type: 'sort',
+        orderKey: 'index',
+        field: 'index',
+      }, cellFlex: '1'
     },
     {
-      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: true, cellFlex: '1',
+      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: {
+        type: 'sort',
+        orderKey: 'state',
+        field: 'value.state'
+      }, cellFlex: '1',
       class: 'app-table__cell--table-column-nowrap',
     },
     {
@@ -33,7 +41,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
           row.usage.hasStats ? row.value.stats.mem_quota : 0
         ])
       },
-      cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
+      cellComponent: TableCellUsageComponent, sort: {
+        type: 'sort',
+        orderKey: 'memory',
+        field: 'usage.mem'
+      }, cellFlex: '3'
     },
     {
       columnId: 'disk', headerCell: () => 'Disk',
@@ -44,7 +56,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
           row.usage.hasStats ? row.value.stats.disk_quota : 0
         ])
       },
-      cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
+      cellComponent: TableCellUsageComponent, sort: {
+        type: 'sort',
+        orderKey: 'disk',
+        field: 'usage.disk'
+      }, cellFlex: '3'
     },
     {
       columnId: 'cpu', headerCell: () => 'CPU',
@@ -52,11 +68,19 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         value: (row) => row.usage.cpu,
         label: (row) => this.utilsService.percent(row.usage.hasStats ? row.value.stats.usage.cpu : 0)
       },
-      cellComponent: TableCellUsageComponent, sort: true, cellFlex: '2'
+      cellComponent: TableCellUsageComponent, sort: {
+        type: 'sort',
+        orderKey: 'cpu',
+        field: 'usage.cpu'
+      }, cellFlex: '2'
     },
     {
       columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
-        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
+        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: {
+          type: 'sort',
+          orderKey: 'uptime',
+          field: 'value.stats.uptime'
+        }, cellFlex: '5'
     }
   ];
   pageSizeOptions = [5, 25, 50];
@@ -115,6 +139,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
+      this,
     );
   }
 

@@ -16,7 +16,6 @@ import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcp
 
 @Injectable()
 export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
-  isLocal?: boolean;
   routesDataSource: CfAppRoutesDataSource;
 
   private multiListActionDelete: IMultiListAction<EntityInfo> = {
@@ -95,7 +94,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     {
       columnId: 'tcproute', headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
-      sort: true, cellFlex: '3'
+      cellFlex: '3'
     },
   ];
 

@@ -6,7 +6,6 @@ import { AppState } from '../../../../../store/app-state';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../table-cell/table-cell-custom';
 
-
 @Component({
   selector: 'app-table-cell-actions',
   templateUrl: './table-cell-actions.component.html',
@@ -15,7 +14,7 @@ import { TableCellCustom } from '../table-cell/table-cell-custom';
 export class TableCellActionsComponent<T> extends TableCellCustom<T> {
   constructor(
     private store: Store<AppState>,
-    public listConfig: ListConfig
+    public listConfig: ListConfig<T>
   ) {
     super();
   }

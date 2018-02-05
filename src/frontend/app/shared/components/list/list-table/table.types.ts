@@ -1,8 +1,8 @@
+import { DataFunctionDefinition } from '../data-sources-controllers/list-data-source';
+import { TableCellStatusDirective } from './table-cell-status.directive';
 import { listTableCells, TableCellComponent } from './table-cell/table-cell.component';
-import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
 import { TableRowComponent } from './table-row/table-row.component';
 import { TableComponent } from './table.component';
-import { TableCellStatusDirective } from './table-cell-status.directive';
 
 export interface ITableColumn<T> {
   columnId: string;
@@ -12,7 +12,7 @@ export interface ITableColumn<T> {
   headerCell?: () => string; // Either headerCell OR headerCellComponent should be defined
   headerCellComponent?: any;
   class?: string;
-  sort?: boolean;
+  sort?: boolean | DataFunctionDefinition;
   cellFlex?: string;
 }
 

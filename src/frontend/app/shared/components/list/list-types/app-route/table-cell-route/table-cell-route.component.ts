@@ -13,7 +13,7 @@ export class TableCellRouteComponent<T> extends TableCellCustom<T> implements On
   isRouteTCP: boolean;
   constructor() {
     super();
-   }
+  }
 
   ngOnInit() {
     this.routeUrl = getRoute(this.row);

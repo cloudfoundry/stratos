@@ -6,7 +6,6 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  Type,
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
@@ -17,18 +16,17 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
+import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
-import { ITableColumn, ITableText } from './list-table/table.types';
+import { ITableColumn } from './list-table/table.types';
 import {
   IGlobalListAction,
   IListAction,
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
-  ListViewTypes,
 } from './list.component.types';
-import { getListStateObservables } from '../../../store/reducers/list.reducer';
 
 
 @Component({
@@ -73,7 +71,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private store: Store<AppState>,
     private cd: ChangeDetectorRef,
-    public config: ListConfig
+    public config: ListConfig<T>
   ) { }
 
   ngOnInit() {

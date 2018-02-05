@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import {
   CfAppEvnVarsDataSource,
+  ListAppEnvVar,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import {
   CfAppVariablesListConfigService,
@@ -26,7 +27,7 @@ export class VariablesTabComponent implements OnInit {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig
+    private listConfig: ListConfig<ListAppEnvVar>
   ) {
     this.envVarsDataSource = listConfig.getDataSource() as CfAppEvnVarsDataSource;
   }
