@@ -152,11 +152,6 @@ function getObservables<T = any>(
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
-    // distinctUntilChanged((oldVals, newVals) => {
-    //   const oldVal = getPaginationCompareString(oldVals);
-    //   const newVal = getPaginationCompareString(newVals);
-    //   return oldVal === newVal;
-    // }),
     tap(pagination => {
       if (
         (!pagination && !hasDispatchedOnce) ||
@@ -175,14 +170,6 @@ function getObservables<T = any>(
       fetchPagination$
     )
       .pipe(
-      // distinctUntilChanged((x, y) => {
-      //   const defaultPag = {
-      //     ids: {}
-      //   }
-      //   const xPag = x[1] || defaultPag;
-      //   const yPag = y[1] || defaultPag;
-      //   return Object.keys(xPag.ids).join('') === Object.keys(yPag.ids).join('');
-      // }),
       filter(([ent, pagination]) => {
         return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       }),

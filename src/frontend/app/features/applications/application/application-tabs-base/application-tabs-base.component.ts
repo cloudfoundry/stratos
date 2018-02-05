@@ -137,8 +137,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     )
       .map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
         return isFetchingApp || isFetchingEnvVars || isFetchingStats;
-    });
-      .distinctUntilChanged();
+      });
 
     this.summaryDataChanging$ = Observable.combineLatest(
       initialFetch$,
