@@ -40,4 +40,14 @@ export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
     this.appGuid = appService.appGuid;
     store.dispatch(new SetListStateAction(paginationKey, 'table'));
   }
+
+  selectedRowToggle(row: EntityInfo) {
+    this.selectedRows.clear();
+    this.selectedRows.set(this.getRowUniqueId(row), row);
+    this.isSelecting$.next(this.selectedRows.size > 0);
+  }
+
+  selectAllFilteredRows() {
+    // noop
+  }
 }
