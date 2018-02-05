@@ -151,7 +151,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
   dispatchDeleteAction = route =>
     this.store.dispatch(
       new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
-    );
+    )
   dispatchUnmapAction = route =>
     this.store.dispatch(
       new UnmapRoute(
@@ -159,12 +159,12 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
         this.routesDataSource.appGuid,
         this.routesDataSource.cfGuid
       )
-    );
+    )
   getGlobalActions = () => [this.listActionAdd];
   getMultiActions = () => [
     this.multiListActionUnmap,
     this.multiListActionDelete
-  ];
+  ]
   getSingleActions = () => [this.listActionDelete, this.listActionUnmap];
   getColumns = () => this.columns;
   getDataSource = () => this.routesDataSource;
