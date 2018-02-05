@@ -61,7 +61,7 @@
             </div>
           </div>
           <div class="listComponent__header__right">
-            <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+            <div class="sort" [hidden]="sortColumns.length < 1 || (dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <button mat-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='asc'">
                 <mat-icon>sort</mat-icon>
               </button>
