@@ -6,8 +6,8 @@ import { Observable } from 'rxjs/Observable';
 import { filter, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { CfAppsDataSource } from '../../../shared/components/list/data-sources/cf-apps-data-source';
 import { ApplicationSchema } from '../../../store/actions/application.actions';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../store/actions/router.actions';

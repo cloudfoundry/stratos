@@ -1,4 +1,4 @@
-import { CfAppEventsConfigService } from '../../../../../../shared/components/list/list-configs/cf-app-events-config.service';
+import { CfAppEventsConfigService } from '../../../../../../shared/components/list/list-types/app-event/cf-app-events-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component';
 import { Component } from '@angular/core';
 
