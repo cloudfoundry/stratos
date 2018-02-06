@@ -6,9 +6,7 @@ import { RouterModule } from '@angular/router';
 import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
-import {
-  ApplicationStateIconComponent,
-} from './components/application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconComponent } from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
@@ -28,13 +26,12 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
-import {
-  AppEventDetailDialogComponentComponent,
-} from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+/* tslint:disable:max-line-length */
+import { AppEventDetailDialogComponentComponent } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+/* tslint:enable:max-line-length */
+
 import { listTableComponents } from './components/list/list-table/table.types';
-import {
-  EventTabActorIconPipe,
-} from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { EventTabActorIconPipe } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -59,8 +56,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
 @NgModule({
   imports: [
     CommonModule,

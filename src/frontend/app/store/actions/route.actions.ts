@@ -132,7 +132,7 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
 }
 
 // Refactor to satisfy CodeClimate
-export class _GetRoutes extends CFStartAction implements PaginatedAction {
+export class ListRoutes extends CFStartAction implements PaginatedAction {
   constructor(
     public guid: string,
     public cfGuid: string,
@@ -160,7 +160,7 @@ export class _GetRoutes extends CFStartAction implements PaginatedAction {
   cnis: string;
 }
 
-export class GetAppRoutes extends _GetRoutes implements PaginatedAction {
+export class GetAppRoutes extends ListRoutes implements PaginatedAction {
   constructor(public guid: string, public cfGuid: string) {
     super(guid, cfGuid, `apps/${guid}/routes`, [
       RouteEvents.GET_APP_ALL,
@@ -170,7 +170,7 @@ export class GetAppRoutes extends _GetRoutes implements PaginatedAction {
   }
 }
 
-export class GetSpaceRoutes extends _GetRoutes implements PaginatedAction {
+export class GetSpaceRoutes extends ListRoutes implements PaginatedAction {
   constructor(public spaceGuid: string, public cfGuid: string) {
     super(spaceGuid, cfGuid, `spaces/${spaceGuid}/routes`, [
       RouteEvents.GET_SPACE_ALL,

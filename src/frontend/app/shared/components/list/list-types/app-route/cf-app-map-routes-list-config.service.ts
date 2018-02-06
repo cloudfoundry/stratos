@@ -6,12 +6,20 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
-import { DeleteRoute, GetSpaceRoutes, UnmapRoute } from '../../../../../store/actions/route.actions';
+import {
+  DeleteRoute,
+  GetSpaceRoutes,
+  UnmapRoute
+} from '../../../../../store/actions/route.actions';
 import { AppState } from '../../../../../store/app-state';
-import { EntityInfo } from '../../../../../store/types/api.types';
+import { APIResource } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IMultiListAction, ListViewTypes } from '../../list.component.types';
+import {
+  IMultiListAction,
+  ListViewTypes,
+  IListConfig
+} from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-app-route.component';
 import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
@@ -19,21 +27,11 @@ import { TableCellRouteComponent } from './table-cell-route/table-cell-route.com
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 
 @Injectable()
-export class CfAppMapRoutesListConfigService {
-  appSubscription: Subscription;
-  isLocal?: boolean;
+export class CfAppMapRoutesListConfigService
+  implements IListConfig<APIResource> {
   routesDataSource: CfAppRoutesDataSource;
 
-  private listMapRoute: IMultiListAction<EntityInfo> = {
-    action: (row: EntityInfo[]) => {},
-    icon: 'link',
-    label: 'Map',
-    description: 'Map route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true
-  };
-
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
       columnId: 'radio',
       headerCell: () => '',
