@@ -36,7 +36,7 @@ You can access the UI on `https://localhost:4443`
 ## Project Planning
 We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/SUSE/stratos#boards)
 tab and have a look through our pipelines and milestones. Please note in order to view the ZenHub Boards tab you will need the [ZenHub
-browser extension](https://www.zenhub.com/extension)
+browser extension](https://www.zenhub.com/extension).
 
 ## Further Reading
  

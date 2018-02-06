@@ -1,12 +1,14 @@
-import { GetSystemInfo } from './../../../store/actions/system.actions';
-import { SystemEffects } from './../../../store/effects/system.effects';
-import { Store } from '@ngrx/store';
-import { CNSISModel } from '../../../store/types/cnsis.types';
-import { ListConfig } from '../../../shared/components/list/list.component';
-import { EndpointsListConfigService } from '../../../shared/list-configs/endpoints-list-config.service';
 import { Component } from '@angular/core';
-import { AppState } from '../../../store/app-state';
+import { Store } from '@ngrx/store';
+
 import { EndpointsService } from '../../../core/endpoints.service';
+import {
+  EndpointsListConfigService,
+} from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
+import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { AppState } from '../../../store/app-state';
+import { CNSISModel } from '../../../store/types/cnsis.types';
+import { GetSystemInfo } from './../../../store/actions/system.actions';
 
 function getEndpointTypeString(endpoint: CNSISModel): string {
   return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
