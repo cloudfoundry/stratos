@@ -273,9 +273,9 @@ cleanup
 updateTagForRelease
 
 # Build all of the components that make up the Console
-#buildProxy
-#buildGoose
-#buildUI
+buildProxy
+buildGoose
+buildUI
 buildMariaDb
 
 # Done
