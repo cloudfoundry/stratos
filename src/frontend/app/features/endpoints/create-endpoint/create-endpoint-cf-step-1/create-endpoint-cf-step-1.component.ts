@@ -50,7 +50,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
         return {
           names: endpoints.map(ep => ep.name),
           urls: endpoints.map(ep => `${ep.api_endpoint.Scheme}://${ep.api_endpoint.Host}`),
-        }
+        };
       })
     );
   }
@@ -63,17 +63,13 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       this.urlField.value,
       !!this.skipSllField.value
     );
-    
+
     this.store.dispatch(action);
 
-    // const entityRequestSelect$ = this.store.select(selectRequestInfo(cnsisStoreNames.type, action.guid())).pipe(
-    //   shareReplay(1),
-    // );
-    
     const update$ = this.store.select(
       this.getUpdateSelector(action.guid())
     ).filter(update => !!update);
-    
+
     return update$.pairwise()
     .filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy))
     .map(([oldVal, newVal]) => newVal)
@@ -83,7 +79,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       }
       return {
         success: !result.error
-      }
+      };
     });
   }
 

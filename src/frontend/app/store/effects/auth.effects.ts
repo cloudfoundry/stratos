@@ -78,7 +78,7 @@ export class AuthEffect {
         .mergeMap(data => {
           const sessionData: SessionData = data.json();
           sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
-          return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateCNSIs)]
+          return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateCNSIs)];
         })
         .catch((err, caught) => {
           return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
