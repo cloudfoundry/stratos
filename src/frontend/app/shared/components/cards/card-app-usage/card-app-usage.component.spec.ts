@@ -12,11 +12,11 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
 import { ApplicationStateService } from '../../application-state/application-state.service';
 import { CardAppStatusComponent } from '../card-app-status/card-app-status.component';
-import { TableCellAppStatusComponent } from '../../list/table/custom-cells/table-cell-app-status/table-cell-app-status.component';
+import { TableCellAppStatusComponent } from '../../list/list-types/app/table-cell-app-status/table-cell-app-status.component';
 import { PercentagePipe } from '../../../pipes/percentage.pipe';
 import { UtilsService } from '../../../../core/utils.service';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
-import { TableCellStatusDirective } from '../../list/table/table-cell-status.directive';
+import { TableCellStatusDirective } from '../../list/list-table/table-cell-status.directive';
 
 describe('CardAppUsageComponent', () => {
   let component: CardAppUsageComponent;

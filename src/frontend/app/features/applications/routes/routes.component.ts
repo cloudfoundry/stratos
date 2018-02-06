@@ -1,7 +1,7 @@
-import { CfAppRoutesListConfigService } from '../../../shared/components/list/list-configs/cf-app-routes-list-config.service';
+import { CfAppRoutesListConfigService } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component';
 import { ApplicationService } from '../application.service';
-import { CfAppRoutesDataSource } from '../../../shared/components/list/data-sources/cf-app-routes-data-source';
+import { CfAppRoutesDataSource } from '../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';

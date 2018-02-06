@@ -25,7 +25,7 @@ import { EndpointsMissingComponent } from './components/endpoints-missing/endpoi
 import { FocusDirective } from './components/focus.directive';
 import {
   AppEventDetailDialogComponentComponent,
-} from './components/list/cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+} from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 import {
   CardAppInstancesComponent,
 } from './components/cards/card-app-instances/card-app-instances.component';
@@ -35,8 +35,8 @@ import { CardAppUsageComponent } from './components/cards/card-app-usage/card-ap
 import { ListComponent, ListConfig } from './components/list/list.component';
 import {
   EventTabActorIconPipe,
-} from './components/list/table/custom-cells/table-cell-event-action/event-tab-actor-icon.pipe';
-import { listTableComponents } from './components/list/table/table.types';
+} from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { listTableComponents } from './components/list/list-table/table.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
@@ -58,7 +58,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { listCardComponents } from './components/list/cards/card.types';
+import { listCardComponents } from './components/list/list-cards/card.types';
 
 @NgModule({
   imports: [
