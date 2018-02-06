@@ -42,7 +42,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
         return rows;
       }),
       isLocal: true,
-      transformEntities: [{ type: 'filter', field: 'name' },],
+      transformEntities: [{ type: 'filter', field: 'name' }],
       listConfig
     });
 
