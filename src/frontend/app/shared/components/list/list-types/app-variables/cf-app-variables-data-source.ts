@@ -26,19 +26,13 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
     _appService: ApplicationService,
     listConfig: IListConfig<ListAppEnvVar>
   ) {
-    const action = new GetAppEnvVarsAction(_appService.appGuid, _appService.cfGuid);
-    const paginationKey = getPaginationKey(AppEnvVarSchema.key, _appService.cfGuid, _appService.appGuid, );
-
     super({
       store,
-      action,
+      action: new GetAppEnvVarsAction(_appService.appGuid, _appService.cfGuid),
       schema: AppEnvVarSchema,
       getRowUniqueId: object => object.name,
-      getEmptyType: () => ({
-        name: '',
-        value: '',
-      }),
-      paginationKey,
+      getEmptyType: () => ({ name: '', value: '', }),
+      paginationKey: getPaginationKey(AppEnvVarSchema.key, _appService.cfGuid, _appService.appGuid, ),
       transformEntity: map(variables => {
         if (!variables || variables.length === 0) {
           return [];
@@ -48,12 +42,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
         return rows;
       }),
       isLocal: true,
-      transformEntities: [
-        {
-          type: 'filter',
-          field: 'name'
-        },
-      ],
+      transformEntities: [{ type: 'filter', field: 'name' },],
       listConfig
     });
 
