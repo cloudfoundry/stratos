@@ -10,14 +10,14 @@ import { getInitialTestStoreState } from '../../../../../../test-framework/store
 import { ApplicationService } from '../../../../application.service';
 import { GithubTabComponent } from './github-tab.component';
 
-fdescribe('GithubTabComponent', () => {
+describe('GithubTabComponent', () => {
   let component: GithubTabComponent;
   let fixture: ComponentFixture<GithubTabComponent>;
   const initialState = getInitialTestStoreState();
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GithubTabComponent ],
+      declarations: [GithubTabComponent],
       imports: [
         CoreModule,
         SharedModule,
@@ -33,7 +33,7 @@ fdescribe('GithubTabComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

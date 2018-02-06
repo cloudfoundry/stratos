@@ -24,8 +24,8 @@ export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 
-export function getPaginationKey(entityKey, cnis, guid) {
-  return `${entityKey}:${cnis}:${guid}`;
+export function getPaginationKey(entityKey, endpointGuid, guid) {
+  return `${entityKey}:${endpointGuid}:${guid}`;
 }
 
 export class ClearPaginationOfType implements Action {

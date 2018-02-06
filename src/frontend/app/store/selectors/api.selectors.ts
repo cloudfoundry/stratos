@@ -18,9 +18,9 @@ export const getEntityById = <T>(guid: string) => (entities): T => {
 };
 
 export const getNestedEntityWithKeys = <T>(entityKeys: string[]) => (entities): T => {
-let entity = entities;
-entityKeys.forEach(k => entity = entity[k]);
-return entity;
+  let entity = entities;
+  entityKeys.forEach(k => entity = entity[k]);
+  return entity;
 };
 
 export const getEntityDeleteSections = (request: RequestInfoState) => {
@@ -85,7 +85,7 @@ export function selectNestedEntity<T = APIResource[]>(entityType: string, guid: 
 }
 
 // Base selectors
-// T => APIResource || base entity (e.g. CNISModel)
+// T => APIResource || base entity (e.g. EndpointModel)
 export function getRequestEntityType<T>(entityType: string) {
   return (state: IRequestTypeState): IRequestEntityTypeState<T> => {
     return state[entityType] || {};

@@ -1,10 +1,10 @@
 import {
-  GET_CNSIS_FAILED,
-  GET_CNSIS_SUCCESS,
-  GetAllCNSIS,
-  GetAllCNSISFailed,
-  GetAllCNSISSuccess,
-} from './../actions/cnsis.actions';
+  GET_ENDPOINTS_FAILED,
+  GET_ENDPOINTS_SUCCESS,
+  GetAllEndpoints,
+  GetAllEndpointsFailed,
+  GetAllEndpointsSuccess,
+} from '../actions/endpoint.actions';
 import { AppState } from './../app-state';
 import {
   InvalidSession,
@@ -77,7 +77,7 @@ export class AuthEffect {
         .mergeMap(data => {
           const sessionData: SessionData = data.json();
           sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
-          return [new VerifiedSession(sessionData, action.updateCNSIs)];
+          return [new VerifiedSession(sessionData, action.updateEndpoints)];
         })
         .catch((err, caught) => {
           return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
@@ -86,14 +86,14 @@ export class AuthEffect {
 
   @Effect() verifiedAuth$ = this.actions$.ofType<VerifiedSession>(SESSION_VERIFIED)
     .mergeMap(action => {
-      if (action.updateCNSIs) {
-        return [new GetAllCNSIS(true)];
+      if (action.updateEndpoints) {
+        return [new GetAllEndpoints(true)];
       }
       return [];
     });
 
 
-  @Effect() CnsisSuccess$ = this.actions$.ofType<GetAllCNSISSuccess>(GET_CNSIS_SUCCESS)
+  @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS)
     .mergeMap(action => {
       if (action.login) {
         return [new LoginSuccess()];
@@ -101,10 +101,10 @@ export class AuthEffect {
       return [];
     });
 
-  @Effect() CnsisFailed$ = this.actions$.ofType<GetAllCNSISFailed>(GET_CNSIS_FAILED)
+  @Effect() EndpointsFailed$ = this.actions$.ofType<GetAllEndpointsFailed>(GET_ENDPOINTS_FAILED)
     .map(action => {
       if (action.login) {
-        return new LoginFailed(`Couldn't fetch cnsis.`);
+        return new LoginFailed(`Couldn't fetch endpoints.`);
       }
     });
 

@@ -1,8 +1,8 @@
 import { SystemInfoEndpoint } from './system.types';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
-import { EndpointSchema } from '../actions/cnsis.actions';
+import { EndpointSchema } from '../actions/endpoint.actions';
 
-export const cnsisStoreNames: {
+export const endpointStoreNames: {
   section: TRequestTypeKeys,
   type: string
 } = {
@@ -10,7 +10,7 @@ export const cnsisStoreNames: {
     type: EndpointSchema.key
   };
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
-export interface CNSISModel {
+export interface EndpointModel {
   api_endpoint?: {
     ForceQuery: boolean,
     Fragment: string,
@@ -35,7 +35,7 @@ export interface CNSISModel {
   connectionStatus?: endpointConnectionStatus;
 }
 
-export interface CNSISState {
+export interface EndpointState {
   loading: boolean;
   error: boolean;
   message: string;

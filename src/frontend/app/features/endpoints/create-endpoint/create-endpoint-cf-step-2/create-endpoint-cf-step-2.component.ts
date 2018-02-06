@@ -5,9 +5,9 @@ import { StepOnNextFunction, IStepperStep } from '../../../../shared/components/
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { UtilsService } from '../../../../core/utils.service';
-import { CNSISModel, CNSISState, cnsisStoreNames } from '../../../../store/types/cnsis.types';
+import { EndpointModel, EndpointState, endpointStoreNames } from '../../../../store/types/endpoint.types';
 import { NgForm, NgModel } from '@angular/forms';
-import { cnsisEntitiesSelector } from '../../../../store/selectors/cnsis.selectors';
+import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-2',
@@ -25,10 +25,10 @@ export class CreateEndpointCfStep2Component implements OnInit, IStepperStep, Aft
   @ViewChild('skipSllField') skipSllField: NgModel;
 
   constructor(store: Store<AppState>, public utilsService: UtilsService) {
-    this.endpointUrls = store.select(cnsisEntitiesSelector)
-      .map(cnsis => Object.values(cnsis).map(cnsi => {
-        if (cnsi.api_endpoint) {
-          return `${cnsi.api_endpoint.Scheme}://${cnsi.api_endpoint.Host}`;
+    this.endpointUrls = store.select(endpointEntitiesSelector)
+      .map(endpoints => Object.values(endpoints).map(endpoint => {
+        if (endpoint.api_endpoint) {
+          return `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}`;
         } else {
           return 'Unknown';
         }

@@ -94,7 +94,7 @@ const testInitialStoreState: AppState = {
       message: '',
       settingUp: false
     },
-    cnsis: {
+    endpoints: {
       loading: false,
       error: false,
       message: ''

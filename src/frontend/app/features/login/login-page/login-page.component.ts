@@ -1,4 +1,4 @@
-import { CNSISState } from '../../../store/types/cnsis.types';
+import { EndpointState } from '../../../store/types/endpoint.types';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms/src/directives';
 import { Router } from '@angular/router';
@@ -37,8 +37,8 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription =
-      this.store.select(s => [s.auth, s.cnsis])
-        .subscribe(([auth, cnsis]: [AuthState, CNSISState]) => {
+      this.store.select(s => [s.auth, s.endpoints])
+        .subscribe(([auth, endpoints]: [AuthState, EndpointState]) => {
           if (!auth.loggingIn && auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
             this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
             this.store.dispatch(new RouterNav({ path: [auth.redirectPath || '/'] }, null));
@@ -52,7 +52,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
                 `Username and password combination incorrect. Please try again.` : `Couldn't log in, please try again.`;
             } else if (auth.verifying) {
               this.message = 'Verifying session...';
-            } else if (cnsis.loading) {
+            } else if (endpoints.loading) {
               this.message = 'Retrieving Cloud Foundry metadata...';
             } else if (auth.loggingIn) {
               this.message = 'Logging in...';

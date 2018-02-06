@@ -1,5 +1,5 @@
 import { systemStoreNames, SystemInfo } from './system.types';
-import { cnsisStoreNames, CNSISModel } from './cnsis.types';
+import { endpointStoreNames, EndpointModel } from './endpoint.types';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { IRequestTypeState, IRequestEntityTypeState } from '../app-state';
 import { APIResource } from './api.types';
@@ -11,7 +11,7 @@ export interface IRequestDataState extends IRequestTypeState {
   organization: IRequestEntityTypeState<APIResource>;
   route: IRequestEntityTypeState<APIResource>;
   event: IRequestEntityTypeState<APIResource>;
-  endpoint: IRequestEntityTypeState<CNSISModel>;
+  endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   githubBranches: IRequestEntityTypeState<APIResource>;
   githubCommits: IRequestEntityTypeState<APIResource>;
@@ -26,7 +26,7 @@ export interface IRequestState extends IRequestTypeState {
   event: IRequestEntityTypeState<RequestInfoState>;
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   system: IRequestEntityTypeState<RequestInfoState>;
-  githubBranches:  IRequestEntityTypeState<RequestInfoState>;
+  githubBranches: IRequestEntityTypeState<RequestInfoState>;
   githubCommits: IRequestEntityTypeState<APIResource>;
 }
 
