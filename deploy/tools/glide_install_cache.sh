@@ -23,6 +23,3 @@ do
   cd $backend
   glide install
 done
-
-
-
