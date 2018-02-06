@@ -2,10 +2,13 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { GetRoutes } from '../../../../../store/actions/route.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 export const RouteSchema = new schema.Entity('route');
 
@@ -20,6 +23,9 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
     paginationKey: string,
     mapRoute = false
   ) {
+    const action = new GetRoutes(appService.appGuid, appService.cfGuid);
+    const paginationKey = getPaginationKey('route', appService.cfGuid, appService.appGuid);
+
     super({
       store,
       action,
@@ -40,4 +46,5 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
       this.selectAllFilteredRows = () => {};
     }
   }
+
 }
