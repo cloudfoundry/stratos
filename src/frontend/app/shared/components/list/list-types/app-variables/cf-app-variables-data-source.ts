@@ -9,6 +9,7 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { AppEnvVarSchema, AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 export interface ListAppEnvVar {
   name: string;
@@ -23,16 +24,11 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
   constructor(
     store: Store<AppState>,
     _appService: ApplicationService,
+    listConfig: IListConfig<ListAppEnvVar>
   ) {
-    const action = new GetAppEnvVarsAction(
-      _appService.appGuid,
-      _appService.cfGuid,
-    );
-    const paginationKey = getPaginationKey(
-      AppEnvVarSchema.key,
-      _appService.cfGuid,
-      _appService.appGuid,
-    );
+    const action = new GetAppEnvVarsAction(_appService.appGuid, _appService.cfGuid);
+    const paginationKey = getPaginationKey(AppEnvVarSchema.key, _appService.cfGuid, _appService.appGuid, );
+
     super({
       store,
       action,
@@ -54,20 +50,11 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
       isLocal: true,
       transformEntities: [
         {
-          type: 'sort',
-          orderKey: 'name',
-          field: 'name'
-        },
-        {
-          type: 'sort',
-          orderKey: 'value',
-          field: 'value'
-        },
-        {
           type: 'filter',
           field: 'name'
         },
-      ]
+      ],
+      listConfig
     });
 
     this.cfGuid = _appService.cfGuid;

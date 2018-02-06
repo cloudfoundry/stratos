@@ -92,9 +92,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   ) {
     super();
     this.init(config);
-    this.addItem = this.getEmptyType();
 
-    this.entityKey = this.sourceScheme.key;
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
       action: this.action,
@@ -122,7 +120,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
-
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -138,6 +135,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.rowsState = config.rowsState ? config.rowsState.pipe(
       shareReplay(1)
     ) : Observable.of({}).first();
+
+    this.addItem = this.getEmptyType();
+    this.entityKey = this.sourceScheme.key;
   }
   /**
    * Will return the row state with default values filled in.

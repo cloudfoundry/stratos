@@ -13,20 +13,66 @@ export enum ListViewTypes {
 }
 
 export interface IListConfig<T> {
+  /**
+   * List of actions that are presented as individual buttons and applies to general activities surrounding the list (not specific to rows).
+   * For example `Add`
+   */
   getGlobalActions: () => IGlobalListAction<T>[];
+  /**
+   * List of actions that are presented as individual buttons when one or more rows are selected. For example `Delete` of selected rows.
+   */
   getMultiActions: () => IMultiListAction<T>[];
+  /**
+   * List of actions that are presented in a mat-menu for an individual entity. For example `unmap` an application route
+   */
   getSingleActions: () => IListAction<T>[];
+  /**
+   * Collection of column definitions to show when the list is in table mode
+   */
   getColumns: () => ITableColumn<T>[];
+  /**
+   * The data source used to provide list entries. This will be custom per data type
+   */
   getDataSource: () => IListDataSource<T>;
+  /**
+   * Collection of configuration objects to support multiple drops downs for filtering local lists. For example the application wall filters
+   * by cloud foundry, organisation and space. This mechanism supports only the showing and storing of such filters. An additional function
+   * to the data sources transformEntities collection should be used to apply these custom settings to the data.
+   */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
+  /**
+   * Local lists expect ALL entries to be fetched by the data sources action. This allows custom sorting and filtering. Non-local lists
+   * must sort and filter via their supporting api requests.
+   */
   isLocal?: boolean;
+  /**
+   * A collection of numbers used to define how many entries per page should be shown
+   */
   pageSizeOptions: Number[];
-  viewType: ListViewTypes; // What different views the user can select (table/cards)
-  defaultView?: ListView; // What is the initial view that the list will be displayed as (table/cards)
-  text?: ITableText; // Override the default list text
-  enableTextFilter?: boolean; // Enable a few text filter... other config required
-  tableFixedRowHeight?: boolean; // Fix the height of a table row
-  cardComponent?: any; // The card component used in card view
+  /**
+   * What different views the user can select (table/cards)
+   */
+  viewType: ListViewTypes;
+  /**
+   * What is the initial view that the list will be displayed as (table/cards)
+   */
+  defaultView?: ListView;
+  /**
+   * Override the default list text
+   */
+  text?: ITableText;
+  /**
+   * Enable a few text filter... other config required
+   */
+  enableTextFilter?: boolean;
+  /**
+   * Fix the height of a table row
+   */
+  tableFixedRowHeight?: boolean;
+  /**
+   * The card component used in card view
+   */
+  cardComponent?: any;
 }
 
 export interface IListMultiFilterConfig {

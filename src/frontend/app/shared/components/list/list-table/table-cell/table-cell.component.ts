@@ -64,22 +64,6 @@ export const listTableCells = [
   // NgComponentOutlet (create in html with custom external module factory). Alternatively try marking as entry component where they live?
   entryComponents: [
     ...listTableCells
-    // TableCellSelectComponent,
-    // TableHeaderSelectComponent,
-    // TableCellEditComponent,
-    // TableCellEditVariableComponent,
-    // TableCellEventTimestampComponent,
-    // TableCellEventTypeComponent,
-    // TableCellEventActionComponent,
-    // TableCellEventDetailComponent,
-    // TableCellActionsComponent,
-    // TableCellAppNameComponent,
-    // TableCellAppInstancesComponent,
-    // TableCellEndpointStatusComponent,
-    // TableCellAppStatusComponent,
-    // TableCellUsageComponent,
-    // TableCellRouteComponent,
-    // TableCellTCPRouteComponent,
   ],
 })
 export class TableCellComponent<T> implements OnInit, OnChanges {
