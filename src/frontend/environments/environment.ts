@@ -13,6 +13,6 @@ export const environment = {
   logLevel: LogLevel.DEBUG,
   logToConsole: true,
   logEnableConsoleActions: false,
-  showObsDebug: true,
+  showObsDebug: false,
   disablePolling: false
 };
