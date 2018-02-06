@@ -1,33 +1,34 @@
-import { paginationAddParams } from '../../../../store/reducers/pagination-reducer/pagination-reducer-add-params';
-import { getDataFunctionList } from './local-filtering-sorting';
-import { OperatorFunction } from 'rxjs/interfaces';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { resultPerPageParam, } from '../../../../store/reducers/pagination-reducer/pagination-reducer.types';
-import { ListPagination, ListSort, ListFilter, ListView } from '../../../../store/actions/list.actions';
-import { fileExists } from 'ts-node/dist';
 import { DataSource } from '@angular/cdk/table';
-import { Observable, Subscribable } from 'rxjs/Observable';
-import { Sort, MatPaginator, MatSort } from '@angular/material';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { PaginationEntityState, PaginatedAction, QParam } from '../../../../store/types/pagination.types';
-import { AppState } from '../../../../store/app-state';
-import { AddParams, RemoveParams, SetClientPage, SetPage, SetResultCount } from '../../../../store/actions/pagination.actions';
-import { IListDataSource, getRowUniqueId, RowsState, getDefaultRowState } from './list-data-source-types';
-import { map, shareReplay } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators';
-import { composeFn } from '../../../../store/helpers/reducer.helper';
-import { distinctUntilChanged } from 'rxjs/operators';
-import { getListStateObservable, getListStateObservables, ListState } from '../../../../store/reducers/list.reducer';
-import { IListDataSourceConfig } from './list-data-source-config';
 import { tag } from 'rxjs-spy/operators/tag';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { OperatorFunction } from 'rxjs/interfaces';
+import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-export interface DataFunctionDefinition {
+import { distinctUntilChanged } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { SetResultCount } from '../../../../store/actions/pagination.actions';
+import { AppState } from '../../../../store/app-state';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
+import { IListDataSourceConfig } from './list-data-source-config';
+import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
+import { getDataFunctionList } from './local-filtering-sorting';
+
+export class DataFunctionDefinition {
   type: 'sort' | 'filter';
   orderKey?: string;
   field: string;
+  static is(obj) {
+    if (obj) {
+      const typed = <DataFunctionDefinition>obj;
+      return typed.type && typed.orderKey && typed.field;
+    }
+    return false;
+  }
 }
 
 export function distinctPageUntilChanged(dataSource) {
@@ -43,7 +44,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // -------------- Public
   // Core observables
-  public view$: Observable<ListView>;
   public pagination$: Observable<PaginationEntityState>;
   public page$: Observable<T[]>;
 
@@ -79,13 +79,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public getRowUniqueId: getRowUniqueId<T>;
   private getEmptyType: () => T;
   public paginationKey: string;
-  private entityLettable: OperatorFunction<A[], T[]> = null;
+  private transformEntity: OperatorFunction<A[], T[]> = null;
   public isLocal = false;
-  public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[];
+  public transformEntities?: (DataFunction<T> | DataFunctionDefinition)[];
   public rowsState?: Observable<RowsState>;
 
   private pageSubscription: Subscription;
-  private entityLettabledSubscription: Subscription;
+  private transformedEntitiesSubscription: Subscription;
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -93,8 +93,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     super();
     this.init(config);
     this.addItem = this.getEmptyType();
-    const { view, } = getListStateObservables(this.store, this.paginationKey);
-    this.view$ = view;
 
     this.entityKey = this.sourceScheme.key;
     const { pagination$, entities$ } = getPaginationObservables({
@@ -105,14 +103,26 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.isLocal
     );
 
-    const dataFunctions = this.entityFunctions ? getDataFunctionList(this.entityFunctions) : null;
-    const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
-    this.entityLettabledSubscription = letted$.do(items => this.entityLettabledRows = items).subscribe();
-    this.page$ = this.isLocal ? this.getLocalPagesObservable(letted$, pagination$, dataFunctions) : letted$.pipe(shareReplay(1));
+    const transformEntities = this.transformEntities || [];
+    // Add any additional functions via an optional listConfig, such as sorting from the column definition
+    const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
+    listColumns.forEach(column => {
+      if (DataFunctionDefinition.is(column.sort)) {
+        transformEntities.push(column.sort as DataFunctionDefinition);
+      }
+    });
+
+    const dataFunctions = getDataFunctionList(transformEntities);
+    const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
+    this.transformedEntitiesSubscription = transformedEntities$.do(items => this.entityLettabledRows = items).subscribe();
+    this.page$ = this.isLocal ?
+      this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions)
+      : transformedEntities$.pipe(shareReplay(1));
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -122,9 +132,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
     this.paginationKey = config.paginationKey;
-    this.entityLettable = config.entityLettable;
+    this.transformEntity = config.transformEntity;
     this.isLocal = config.isLocal || false;
-    this.entityFunctions = config.entityFunctions;
+    this.transformEntities = config.transformEntities;
     this.rowsState = config.rowsState ? config.rowsState.pipe(
       shareReplay(1)
     ) : Observable.of({}).first();
@@ -146,7 +156,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   disconnect() {
     this.pageSubscription.unsubscribe();
-    this.entityLettabledSubscription.unsubscribe();
+    this.transformedEntitiesSubscription.unsubscribe();
   }
 
   destroy() {
@@ -205,10 +215,10 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   trackBy = (index: number, item: T) => this.getRowUniqueId(item) || item;
 
-  attatchEntityLettable(entities$, entityLettable) {
+  attachTransformEntity(entities$, entityLettable) {
     if (entityLettable) {
       return entities$.pipe(
-        this.entityLettable
+        this.transformEntity
       );
     } else {
       return entities$.pipe(

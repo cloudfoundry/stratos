@@ -6,7 +6,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellActionsComponent } from './table-cell-actions.component';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ListActions, IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { ListConfig } from '../../list.component';
+import { ListConfig } from '../../list.component.types';
 
 describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;

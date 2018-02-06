@@ -1,15 +1,10 @@
-import { interval } from 'rxjs/observable/interval';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
 import { EndpointSchema, GetAllCNSIS } from '../../../../../store/actions/cnsis.actions';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
-import { cnsisEntitiesSelector, cnsisStatusSelector } from '../../../../../store/selectors/cnsis.selectors';
 import { CNSISModel } from '../../../../../store/types/cnsis.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { map } from 'rxjs/operators';
+import { IListConfig } from '../../list.component.types';
 
 
 export class EndpointsDataSource extends ListDataSource<CNSISModel> {
@@ -17,6 +12,7 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
 
   constructor(
     store: Store<AppState>,
+    listConfig: IListConfig<CNSISModel>
   ) {
     const action = new GetAllCNSIS();
     const paginationKey = GetAllCNSIS.storeKey;
@@ -30,38 +26,14 @@ export class EndpointsDataSource extends ListDataSource<CNSISModel> {
       }),
       paginationKey,
       isLocal: true,
-      entityFunctions: [
+      transformEntities: [
         {
           type: 'filter',
           field: 'name'
         },
-        {
-          type: 'sort',
-          orderKey: 'name',
-          field: 'name'
-        },
-        {
-          type: 'sort',
-          orderKey: 'connection',
-          field: 'info.user'
-        },
-        {
-          type: 'sort',
-          orderKey: 'type',
-          field: 'cnsi_type'
-        },
-        {
-          type: 'sort',
-          orderKey: 'address',
-          field: 'api_endpoint.Host'
-        },
       ],
+      listConfig
     });
     this.store = store;
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-    ));
-
   }
 }

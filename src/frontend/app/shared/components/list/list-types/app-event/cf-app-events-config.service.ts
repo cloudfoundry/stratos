@@ -1,26 +1,19 @@
+import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/app-state';
+
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfAppEventsDataSource } from './cf-app-events-data-source';
-import { IListConfig, ListViewTypes } from '../../list.component';
+import { AppState } from '../../../../../store/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  TableCellEventTimestampComponent,
-} from './table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from './table-cell-event-type/table-cell-event-type.component';
-import {
-  TableCellEventActionComponent,
-} from './table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from './table-cell-event-detail/table-cell-event-detail.component';
-import { Injectable } from '@angular/core';
+import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { CfAppEventsDataSource } from './cf-app-events-data-source';
+import { TableCellEventActionComponent } from './table-cell-event-action/table-cell-event-action.component';
+import { TableCellEventDetailComponent } from './table-cell-event-detail/table-cell-event-detail.component';
+import { TableCellEventTimestampComponent } from './table-cell-event-timestamp/table-cell-event-timestamp.component';
+import { TableCellEventTypeComponent } from './table-cell-event-type/table-cell-event-type.component';
 
 @Injectable()
-export class CfAppEventsConfigService implements IListConfig<EntityInfo> {
+export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements IListConfig<EntityInfo> {
 
   eventSource: CfAppEventsDataSource;
   columns: Array<ITableColumn<EntityInfo>> = [
@@ -39,8 +32,12 @@ export class CfAppEventsConfigService implements IListConfig<EntityInfo> {
   ];
   pageSizeOptions = [5, 25, 50];
   viewType = ListViewTypes.TABLE_ONLY;
+  text = {
+    title: 'Events',
+  };
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {
+    super();
     this.eventSource = new CfAppEventsDataSource(
       this.store,
       this.appService.cfGuid,

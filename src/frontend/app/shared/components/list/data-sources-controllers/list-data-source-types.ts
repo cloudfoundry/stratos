@@ -34,7 +34,6 @@ export class ListActions<T> {
   singleActions = new Array<ListActionConfig<T>>();
 }
 export interface IListDataSource<T> {
-  view$: Observable<ListView>;
   // state$: Observable<ListState>;
   rowsState?: Observable<RowsState>;
   pagination$: Observable<PaginationEntityState>;

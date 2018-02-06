@@ -1,30 +1,16 @@
-import { UtilsService } from '../../../../../core/utils.service';
-import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/app-state';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
-import { IListAction, IListConfig, ListViewTypes } from '../../list.component';
-import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
-import { ITableColumn } from '../../list-table/table.types';
-import {
-  TableCellEventTimestampComponent,
-} from '../app-event/table-cell-event-timestamp/table-cell-event-timestamp.component';
-import {
-  TableCellEventTypeComponent,
-} from '../app-event/table-cell-event-type/table-cell-event-type.component';
-import {
-  TableCellEventActionComponent,
-} from '../app-event/table-cell-event-action/table-cell-event-action.component';
-import {
-  TableCellEventDetailComponent,
-} from '../app-event/table-cell-event-detail/table-cell-event-detail.component';
 import { Injectable } from '@angular/core';
-import { TableCellActionsComponent } from '../../list-table/table-cell-actions/table-cell-actions.component';
-import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
-import { AppStat } from '../../../../../store/types/app-metadata.types';
 import { Router } from '@angular/router';
-import { ConfirmationDialogService, ConfirmationDialog } from '../../../confirmation-dialog.service';
+import { Store } from '@ngrx/store';
+
+import { UtilsService } from '../../../../../core/utils.service';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
+import { AppState } from '../../../../../store/app-state';
+import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
+import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -32,10 +18,18 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   instancesSource: CfAppInstancesDataSource;
   columns: Array<ITableColumn<ListAppInstance>> = [
     {
-      columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: true, cellFlex: '1'
+      columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: {
+        type: 'sort',
+        orderKey: 'index',
+        field: 'index',
+      }, cellFlex: '1'
     },
     {
-      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: true, cellFlex: '1',
+      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: {
+        type: 'sort',
+        orderKey: 'state',
+        field: 'value.state'
+      }, cellFlex: '1',
       class: 'app-table__cell--table-column-nowrap',
     },
     {
@@ -47,7 +41,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
           row.usage.hasStats ? row.value.stats.mem_quota : 0
         ])
       },
-      cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
+      cellComponent: TableCellUsageComponent, sort: {
+        type: 'sort',
+        orderKey: 'memory',
+        field: 'usage.mem'
+      }, cellFlex: '3'
     },
     {
       columnId: 'disk', headerCell: () => 'Disk',
@@ -58,7 +56,11 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
           row.usage.hasStats ? row.value.stats.disk_quota : 0
         ])
       },
-      cellComponent: TableCellUsageComponent, sort: true, cellFlex: '3'
+      cellComponent: TableCellUsageComponent, sort: {
+        type: 'sort',
+        orderKey: 'disk',
+        field: 'usage.disk'
+      }, cellFlex: '3'
     },
     {
       columnId: 'cpu', headerCell: () => 'CPU',
@@ -66,18 +68,19 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         value: (row) => row.usage.cpu,
         label: (row) => this.utilsService.percent(row.usage.hasStats ? row.value.stats.usage.cpu : 0)
       },
-      cellComponent: TableCellUsageComponent, sort: true, cellFlex: '2'
+      cellComponent: TableCellUsageComponent, sort: {
+        type: 'sort',
+        orderKey: 'cpu',
+        field: 'usage.cpu'
+      }, cellFlex: '2'
     },
     {
       columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
-        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: true, cellFlex: '5'
-    },
-    {
-      columnId: 'edit',
-      headerCell: () => 'Actions',
-      cellComponent: TableCellActionsComponent,
-      class: 'app-table__cell--table-column-edit',
-      cellFlex: '1'
+        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: {
+          type: 'sort',
+          orderKey: 'uptime',
+          field: 'value.stats.uptime'
+        }, cellFlex: '5'
     }
   ];
   pageSizeOptions = [5, 25, 50];
@@ -136,6 +139,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       this.store,
       this.appService.cfGuid,
       this.appService.appGuid,
+      this,
     );
   }
 

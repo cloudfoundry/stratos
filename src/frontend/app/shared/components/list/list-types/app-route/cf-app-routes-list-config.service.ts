@@ -1,39 +1,21 @@
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
-import {
-  TableCellTCPRouteComponent,
-} from './table-cell-tcproute/table-cell-tcproute.component';
-import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
-import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
-import { ITableColumn } from '../../list-table/table.types';
-import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
-import {
-  TableCellEditVariableComponent,
-} from '../app-variables/table-cell-edit-variable/table-cell-edit-variable.component';
-import { TableCellSelectComponent } from '../../list-table/table-cell-select/table-cell-select.component';
-import { TableHeaderSelectComponent } from '../../list-table/table-header-select/table-header-select.component';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/app-state';
-import { CfAppEvnVarsDataSource } from '../app-variables/cf-app-variables-data-source';
 import { Injectable } from '@angular/core';
-import { EntityInfo } from '../../../../../store/types/api.types';
-import {
-  IBaseListAction,
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component';
-import { TableCellActionsComponent } from '../../list-table/table-cell-actions/table-cell-actions.component';
-import { ConfirmationDialogService, ConfirmationDialog } from '../../../confirmation-dialog.service';
+import { Store } from '@ngrx/store';
+
+import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
+import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
+import { RouterNav } from '../../../../../store/actions/router.actions';
+import { AppState } from '../../../../../store/app-state';
+import { EntityInfo } from '../../../../../store/types/api.types';
+import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ITableColumn } from '../../list-table/table.types';
+import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
+import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
+import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 
 @Injectable()
 export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
-  isLocal?: boolean;
   routesDataSource: CfAppRoutesDataSource;
 
   private multiListActionDelete: IMultiListAction<EntityInfo> = {
@@ -74,7 +56,6 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     enabled: (row: EntityInfo) => true,
   };
 
-
   private listActionDelete: IListAction<EntityInfo> = {
     action: (item: EntityInfo) => this.deleteSingleRoute(item),
     icon: 'delete',
@@ -107,29 +88,21 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
 
   columns: Array<ITableColumn<EntityInfo>> = [
     {
-      columnId: 'select', headerCellComponent: TableHeaderSelectComponent, cellComponent: TableCellSelectComponent,
-      class: 'table-column-select', cellFlex: '1'
-    },
-    {
       columnId: 'route', headerCell: () => 'Route',
       cellComponent: TableCellRouteComponent, sort: true, cellFlex: '3'
     },
     {
       columnId: 'tcproute', headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
-      sort: true, cellFlex: '3'
-    },
-    {
-      columnId: 'edit',
-      headerCell: () => 'Actions',
-      cellComponent: TableCellActionsComponent,
-      class: 'app-table__cell--table-column-edit',
-      cellFlex: '1'
+      cellFlex: '3'
     },
   ];
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
+  text: {
+    title: 'Routes'
+  };
 
   dispatchDeleteAction = route => this.store.dispatch(
     new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)

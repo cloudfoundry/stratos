@@ -1,4 +1,3 @@
-
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -7,95 +6,28 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  Type,
   ViewChild,
-  Injector,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/material';
+import { MatPaginator, MatSelect, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
-import {
-  ListFilter,
-  ListPagination,
-  ListSort,
-  ListView,
-  SetListViewAction,
-} from '../../../store/actions/list.actions';
+import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
+import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
-import { ITableColumn, ITableText } from './list-table/table.types';
-import { StaticInjector } from '@angular/core/src/di/injector';
-import { ListDataSource } from './data-sources-controllers/list-data-source';
-import { ListPaginationController, IListPaginationController } from './data-sources-controllers/list-pagination-controller';
-import { distinctUntilChanged, map, tap } from 'rxjs/operators';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
+import { ITableColumn } from './list-table/table.types';
+import {
+  IGlobalListAction,
+  IListAction,
+  IListMultiFilterConfig,
+  IMultiListAction,
+  ListConfig,
+} from './list.component.types';
 
-export enum ListViewTypes {
-  CARD_ONLY = 'cardOnly',
-  TABLE_ONLY = 'tableOnly',
-  BOTH = 'both'
-}
-
-export interface IListConfig<T> {
-  getGlobalActions: () => IGlobalListAction<T>[];
-  getMultiActions: () => IMultiListAction<T>[];
-  getSingleActions: () => IListAction<T>[];
-  getColumns: () => ITableColumn<T>[];
-  getDataSource: () => IListDataSource<T>;
-  getMultiFiltersConfigs: () => IListMultiFilterConfig[];
-  isLocal?: boolean;
-  pageSizeOptions: Number[];
-  viewType: ListViewTypes;
-}
-
-export interface IListMultiFilterConfig {
-  key: string;
-  label: string;
-  list$: Observable<IListMultiFilterConfigItem[]>;
-  loading$: Observable<boolean>;
-  select: BehaviorSubject<any>;
-}
-
-export interface IListMultiFilterConfigItem {
-  label: string;
-  item: any;
-  value: string;
-}
-
-export class ListConfig implements IListConfig<any> {
-  isLocal = false;
-  pageSizeOptions = [9, 45, 90];
-  viewType = ListViewTypes.BOTH;
-  getGlobalActions = () => null;
-  getMultiActions = () => null;
-  getSingleActions = () => null;
-  getColumns = () => null;
-  getDataSource = () => null;
-  getMultiFiltersConfigs = () => [];
-}
-
-export interface IBaseListAction<T> {
-  icon: string;
-  label: string;
-  description: string;
-  visible: (row: T) => boolean;
-  enabled: (row: T) => boolean;
-}
-
-export interface IListAction<T> extends IBaseListAction<T> {
-  action: (item: T) => void;
-}
-
-export interface IMultiListAction<T> extends IBaseListAction<T> {
-  action: (items: T[]) => void;
-}
-
-export interface IGlobalListAction<T> extends IBaseListAction<T> {
-  action: () => void;
-}
 
 @Component({
   selector: 'app-list',
@@ -106,10 +38,8 @@ export interface IGlobalListAction<T> extends IBaseListAction<T> {
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
-  @Input('text') text = null as ITableText;
-  @Input('enableFilter') enableFilter = false;
-  @Input('tableFixedRowHeight') tableFixedRowHeight = false;
-  @Input('cardComponent') cardComponent: Type<{}>;
+  view$: Observable<ListView>;
+
   @Input('addForm') addForm: NgForm;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -139,23 +69,33 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   constructor(
-    private _store: Store<AppState>,
+    private store: Store<AppState>,
     private cd: ChangeDetectorRef,
-    private listConfigService: ListConfig
+    public config: ListConfig<T>
   ) { }
 
   ngOnInit() {
+    this.globalActions = this.config.getGlobalActions();
+    this.multiActions = this.config.getMultiActions();
+    this.singleActions = this.config.getSingleActions();
+    this.columns = this.config.getColumns();
+    this.dataSource = this.config.getDataSource();
+    this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
-    this.globalActions = this.listConfigService.getGlobalActions();
-    this.multiActions = this.listConfigService.getMultiActions();
-    this.singleActions = this.listConfigService.getSingleActions();
-    this.columns = this.listConfigService.getColumns();
-    this.dataSource = this.listConfigService.getDataSource();
-    this.multiFilterConfigs = this.listConfigService.getMultiFiltersConfigs();
+    // Set up an obervable containing the current view (card/table)
+    const { view, } = getListStateObservables(this.store, this.dataSource.paginationKey);
+    this.view$ = view;
 
-    this.paginationController = new ListPaginationController(this._store, this.dataSource);
+    // If this is the first time the user has used this lis then set the view to the default
+    this.view$.first().subscribe(listView => {
+      if (!listView) {
+        this.updateListView(this.config.defaultView || 'table');
+      }
+    });
 
-    this.paginator.pageSizeOptions = this.listConfigService.pageSizeOptions;
+    this.paginationController = new ListPaginationController(this.store, this.dataSource);
+
+    this.paginator.pageSizeOptions = this.config.pageSizeOptions;
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
       this.paginator.pageIndex = pagination.pageIndex - 1;
@@ -224,7 +164,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateListView(listView: ListView) {
-    this._store.dispatch(new SetListViewAction(this.dataSource.paginationKey, listView));
+    this.store.dispatch(new SetListViewAction(this.dataSource.paginationKey, listView));
   }
 
   updateListSort(field: string, direction: SortDirection) {

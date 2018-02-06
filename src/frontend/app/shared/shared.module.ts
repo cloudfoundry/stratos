@@ -12,6 +12,10 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
+import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
+import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
+import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
@@ -23,20 +27,18 @@ import { DisplayValueComponent } from './components/display-value/display-value.
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
+import { listCardComponents } from './components/list/list-cards/card.types';
+/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-import {
-  CardAppInstancesComponent,
-} from './components/cards/card-app-instances/card-app-instances.component';
-import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
-import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
-import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
-import { ListComponent, ListConfig } from './components/list/list.component';
+/* tslint:enable:max-line-length */
+import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import { listTableComponents } from './components/list/list-table/table.types';
+import { ListComponent } from './components/list/list.component';
+import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
@@ -58,7 +60,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { listCardComponents } from './components/list/list-cards/card.types';
+
 
 @NgModule({
   imports: [

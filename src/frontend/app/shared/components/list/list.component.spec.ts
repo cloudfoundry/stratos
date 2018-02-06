@@ -12,7 +12,7 @@ import { TableComponent } from './list-table/table.component';
 import { EntityInfo } from '../../../store/types/api.types';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ListComponent, ListConfig } from './list.component';
+import { ListComponent } from './list.component';
 import { CoreModule } from '../../../core/core.module';
 import { CardsComponent } from './list-cards/cards.component';
 import { async } from '@angular/core/testing';
@@ -28,6 +28,7 @@ import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../pipes/percentage.pipe';
 import { TableRowComponent } from './list-table/table-row/table-row.component';
 import { RunningInstancesComponent } from '../running-instances/running-instances.component';
+import { ListConfig } from './list.component.types';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;

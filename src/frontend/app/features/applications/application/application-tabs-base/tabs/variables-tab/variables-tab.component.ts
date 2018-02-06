@@ -2,11 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
-import { CfAppEvnVarsDataSource } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+import {
+  CfAppEvnVarsDataSource,
+  ListAppEnvVar,
+} from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import {
   CfAppVariablesListConfigService,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-list-config.service';
-import { ListConfig } from '../../../../../../shared/components/list/list.component';
+import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
 
@@ -24,7 +27,7 @@ export class VariablesTabComponent implements OnInit {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig
+    private listConfig: ListConfig<ListAppEnvVar>
   ) {
     this.envVarsDataSource = listConfig.getDataSource() as CfAppEvnVarsDataSource;
   }

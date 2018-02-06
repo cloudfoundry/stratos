@@ -1,9 +1,10 @@
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191/ */
-import { IListAction, ListConfig } from '../../list.component';
-import { Component, OnInit } from '@angular/core';
-import { TableCellCustom } from '../table-cell/table-cell-custom';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
+
 import { AppState } from '../../../../../store/app-state';
+import { IListAction, ListConfig } from '../../list.component.types';
+import { TableCellCustom } from '../table-cell/table-cell-custom';
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -13,7 +14,7 @@ import { AppState } from '../../../../../store/app-state';
 export class TableCellActionsComponent<T> extends TableCellCustom<T> {
   constructor(
     private store: Store<AppState>,
-    public listConfig: ListConfig
+    public listConfig: ListConfig<T>
   ) {
     super();
   }

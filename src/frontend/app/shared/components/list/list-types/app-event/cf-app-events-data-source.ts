@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
 import { EventSchema, GetAllAppEvents } from '../../../../../store/actions/app-event.actions';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { AddParams, RemoveParams } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
@@ -51,11 +50,6 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
         paginationKey,
       }
     );
-
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'table',
-    ));
 
   }
 

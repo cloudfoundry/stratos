@@ -1,11 +1,11 @@
 import { Store } from '@ngrx/store';
 
 import { ApplicationSchema, GetAllApplications } from '../../../../../store/actions/application.actions';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 
 
@@ -15,6 +15,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   constructor(
     store: Store<AppState>,
+    listConfig?: IListConfig<APIResource>
   ) {
     const { paginationKey } = CfAppsDataSource;
     const action = new GetAllApplications(paginationKey);
@@ -28,35 +29,10 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       },
       paginationKey,
       isLocal: true,
-      entityFunctions: [
+      transformEntities: [
         {
           type: 'filter',
           field: 'entity.name'
-        },
-        {
-          type: 'sort',
-          orderKey: 'creation',
-          field: 'metadata.created_at'
-        },
-        {
-          type: 'sort',
-          orderKey: 'name',
-          field: 'entity.name'
-        },
-        {
-          type: 'sort',
-          orderKey: 'instances',
-          field: 'entity.instances'
-        },
-        {
-          type: 'sort',
-          orderKey: 'disk_quota',
-          field: 'entity.disk_quota'
-        },
-        {
-          type: 'sort',
-          orderKey: 'memory',
-          field: 'entity.memory'
         },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           // Filter by cf/org/space
@@ -70,13 +46,10 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
             return validCF && validOrg && validSpace;
           });
         }
-      ]
+      ],
+      listConfig
     }
     );
 
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'cards',
-    ));
   }
 }

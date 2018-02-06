@@ -1,6 +1,7 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
@@ -11,11 +12,10 @@ import {
 } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
-import { ListConfig } from '../../../shared/components/list/list.component';
+import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource } from '../../../store/types/api.types';
-import { tag } from 'rxjs-spy/operators/tag';
 
 @Component({
   selector: 'app-application-wall',
@@ -45,7 +45,7 @@ export class ApplicationWallComponent implements OnDestroy {
   constructor(
     public endpointsService: EndpointsService,
     private store: Store<AppState>,
-    private appListConfig: ListConfig,
+    private appListConfig: ListConfig<APIResource>,
   ) {
     const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
 

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
+import {
+  CfAppInstancesConfigService,
+} from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
+import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
-import { CfAppInstancesConfigService } from '../../../../../../shared/components/list/list-types/app-instance/cf-app-instances-config.service';
-import { ListConfig } from '../../../../../../shared/components/list/list.component';
 
 @Component({
   selector: 'app-instances-tab',
@@ -12,13 +14,13 @@ import { ListConfig } from '../../../../../../shared/components/list/list.compon
     provide: ListConfig,
     useClass: CfAppInstancesConfigService,
   },
-  ApplicationMonitorService
-]
+    ApplicationMonitorService
+  ]
 })
 export class InstancesTabComponent implements OnInit {
 
   constructor(private appMonitor: ApplicationMonitorService) { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
 }
