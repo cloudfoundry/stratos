@@ -3,8 +3,8 @@
   app-card {
     $space: 15px;
     $space-row: $space + 10px;
-    width: 100%;
     margin-bottom: $space;
+    width: 100%;
     @include breakpoint(desktop) {
       width: calc(25% - #{$space-row});
     }
