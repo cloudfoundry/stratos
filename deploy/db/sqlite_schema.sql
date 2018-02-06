@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS tokens (
   refresh_token BYTEA       NOT NULL,
   token_expiry  BIGINT      NOT NULL,
   disconnected  BOOLEAN     NOT NULL DEFAULT 0,
+  aith_type     VARCHAR(255) DEFAULT "OAuth2",
+  meta_data     TEXT,
   last_updated  TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

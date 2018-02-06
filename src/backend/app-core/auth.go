@@ -211,18 +211,27 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 			"No CNSI registered with GUID %s: %s", cnsiGUID, err)
 	}
 
-	if cnsiRecord.AuthType == interfaces.OAuth2 {
+	authTypeStr := c.FormValue("auth")
+	authType := interfaces.OAuth2
+	switch authTypeStr {
+	case "http":
+		authType = interfaces.HttpBasic
+	default:
+		authType = interfaces.OAuth2
+	}
+
+	if authType == interfaces.OAuth2 {
 		return p.fetchOAuth2Token(cnsiRecord, c)
 	}
 
-	if cnsiRecord.AuthType == interfaces.HttpBasic {
+	if authType == interfaces.HttpBasic {
 		return p.fetchHttpBasicToken(cnsiRecord, c)
 	}
 
 	return nil, nil, nil, interfaces.NewHTTPShadowError(
 		http.StatusBadRequest,
 		"Unknown Auth Type",
-		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, cnsiRecord.AuthType)
+		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, authTypeStr)
 }
 
 func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {

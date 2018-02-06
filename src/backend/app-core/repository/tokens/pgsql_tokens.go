@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto"
-	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
+	"github.com/SUSE/stratos-ui/app-core/datastore"
+	"github.com/SUSE/stratos-ui/app-core/repository/crypto"
+	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -103,11 +103,11 @@ func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr interfaces.Toke
 	}
 	var ciphertextRefreshToken []byte
 	if tr.RefreshToken != "" {
-	log.Println("Encrypting Refresh Token")
+		log.Println("Encrypting Refresh Token")
 		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 	}
 
 	// Is there an existing token?
@@ -220,11 +220,11 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 	var ciphertextRefreshToken []byte
 	if tr.RefreshToken != "" {
-	log.Println("Encrypting Refresh Token")
+		log.Println("Encrypting Refresh Token")
 		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 	}
 
 	// Is there an existing token?
