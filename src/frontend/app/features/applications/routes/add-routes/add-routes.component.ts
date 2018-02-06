@@ -198,8 +198,10 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         take(1),
         tap(p => {
           if (p.error) {
-            const message = 'Failed to associate route with the app!';
-            this.snackBar.open(message, 'Dismiss');
+            this.snackBar.open(
+              'Failed to associate route with the app!',
+              'Dismiss'
+            );
           } else {
             this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
             this.store.dispatch(

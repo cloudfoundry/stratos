@@ -7,9 +7,9 @@
 
   &__radios {
     display: flex;
-    // justify-content: space-around;
-    margin-top: 24px;
     margin-bottom: 24px;
+    margin-top: 24px;
+
     &__btn {
       margin-left: 24px;
     }
@@ -21,7 +21,6 @@
     font-weight: 700;
   }
   &__card {
-    // height: 100%;
     flex: 1;
     &__form {
       display: flex;
@@ -41,18 +40,14 @@
         margin-top: 24px;
       }
       &__fields {
-        // height: 50%;
         display: flex;
-        flex-direction: column;
         flex: 1;
-        // flex-grow: 1;
+        flex-direction: column;
       }
       &__buttons {
         display: flex;
-        margin-top: 24px;
-        // flex-direction: row;
         justify-content: flex-end;
-        // flex-grow: 1;
+        margin-top: 24px;
       }
     }
   }

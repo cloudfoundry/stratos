@@ -131,22 +131,23 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   cnis: string;
 }
 
-export class GetAppRoutes extends CFStartAction implements PaginatedAction {
-  constructor(public guid: string, public cfGuid: string) {
+// Refactor to satisfy CodeClimate
+export class _GetRoutes extends CFStartAction implements PaginatedAction {
+  constructor(
+    public guid: string,
+    public cfGuid: string,
+    private routeUrl: string,
+    private actions: string[]
+  ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/routes`;
+    this.options.url = routeUrl;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-    this.options.params.append('', '');
     this.paginationKey = getPaginationKey(this.entityKey, cfGuid, guid);
     this.cnis = cfGuid;
+    actions = this.actions;
   }
-  actions = [
-    RouteEvents.GET_APP_ALL,
-    RouteEvents.GET_APP_ALL_SUCCESS,
-    RouteEvents.GET_APP_ALL_FAILED
-  ];
   paginationKey: string;
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
@@ -159,32 +160,24 @@ export class GetAppRoutes extends CFStartAction implements PaginatedAction {
   cnis: string;
 }
 
-export class GetSpaceRoutes extends CFStartAction implements PaginatedAction {
-  constructor(public spaceGuid: string, public cfGuid: string) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `spaces/${spaceGuid}/routes`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.options.params.append('', '');
-    this.paginationKey = getPaginationKey(this.entityKey, cfGuid, spaceGuid);
-    this.cnis = cfGuid;
+export class GetAppRoutes extends _GetRoutes implements PaginatedAction {
+  constructor(public guid: string, public cfGuid: string) {
+    super(guid, cfGuid, `apps/${guid}/routes`, [
+      RouteEvents.GET_APP_ALL,
+      RouteEvents.GET_APP_ALL_SUCCESS,
+      RouteEvents.GET_APP_ALL_FAILED
+    ]);
   }
-  actions = [
-    RouteEvents.GET_SPACE_ALL,
-    RouteEvents.GET_SPACE_ALL_SUCCESS,
-    RouteEvents.GET_SPACE_ALL_FAILED
-  ];
-  paginationKey: string;
-  entity = [RouteSchema];
-  entityKey = RouteSchema.key;
-  options: RequestOptions;
-  initialParams = {
-    'order-direction': 'desc',
-    'order-direction-field': 'host',
-    'inline-relations-depth': '2'
-  };
-  cnis: string;
+}
+
+export class GetSpaceRoutes extends _GetRoutes implements PaginatedAction {
+  constructor(public spaceGuid: string, public cfGuid: string) {
+    super(spaceGuid, cfGuid, `spaces/${spaceGuid}/routes`, [
+      RouteEvents.GET_SPACE_ALL,
+      RouteEvents.GET_SPACE_ALL_SUCCESS,
+      RouteEvents.GET_SPACE_ALL_FAILED
+    ]);
+  }
 }
 
 export class MapRouteSelected implements Action {
