@@ -81,6 +81,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 	// get the CNSI Endpoints
 	cnsiList, _ := p.buildCNSIList(c)
 	for _, cnsi := range cnsiList {
+		// Extend the CNSI record
 		endpoint := &EndpointDetail{CNSIRecord: cnsi}
 		// try to get the user info for this cnsi for the user
 		cnsiUser, ok := p.GetCNSIUser(cnsi.GUID, userGUID)
