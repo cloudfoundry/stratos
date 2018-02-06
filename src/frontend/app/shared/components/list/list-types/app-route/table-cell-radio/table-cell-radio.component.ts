@@ -17,9 +17,12 @@ export class TableCellRadioComponent<T> extends TableCellCustom<T>
   }
 
   ngOnInit() {
-    const foundApp = this.row.entity.apps.find(
-      a => a.metadata.guid === this.appService.appGuid
-    );
+    const foundApp =
+      this.row.entity &&
+      this.row.entity.apps &&
+      this.row.entity.apps.find(
+        a => a.metadata.guid === this.appService.appGuid
+      );
     this.disable = foundApp && foundApp.length !== 0;
   }
 }

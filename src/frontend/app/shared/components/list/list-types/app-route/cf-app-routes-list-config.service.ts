@@ -8,7 +8,8 @@ import { getPaginationKey } from '../../../../../store/actions/pagination.action
 import { DeleteRoute, GetAppRoutes, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
+import { selectEntity } from '../../../../../store/selectors/api.selectors';
+import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
@@ -174,24 +175,42 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   }
 
   private deleteSingleRoute(item: APIResource) {
-    const routeUrl = getRoute(item);
-    const confirmation = new ConfirmationDialog(
-      'Delete Route',
-      `Are you sure you want to delete the route \'${routeUrl}\'?`,
-      'Delete'
-    );
-    this.confirmDialog.open(confirmation, () =>
-      this.dispatchDeleteAction(item)
-    );
+    this.store
+      .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
+      .pipe(
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialog(
+            'Delete Route',
+            `Are you sure you want to delete the route \'${routeUrl}\'?`,
+            'Delete'
+          );
+          this.confirmDialog.open(confirmation, () =>
+            this.dispatchDeleteAction(item)
+          );
+        })
+      )
+      .subscribe();
   }
 
   private unmapSingleRoute(item: APIResource) {
-    const routeUrl = getRoute(item);
-    const confirmation = new ConfirmationDialog(
-      'Unmap Route from Application',
-      `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-      'Unmap'
-    );
-    this.confirmDialog.open(confirmation, () => this.dispatchUnmapAction(item));
+    this.store
+      .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
+      .pipe(
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialog(
+            'Unmap Route from Application',
+            `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+            'Unmap'
+          );
+          this.confirmDialog.open(confirmation, () =>
+            this.dispatchUnmapAction(item)
+          );
+        })
+      )
+      .subscribe();
   }
 }
