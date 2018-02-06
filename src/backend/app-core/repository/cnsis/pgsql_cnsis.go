@@ -144,7 +144,7 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 // Find - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) Find(guid string) (interfaces.CNSIRecord, error) {
 	log.Println("Find")
-	return p.findBy(findCNSI, endpoint)
+	return p.findBy(findCNSI, guid)
 }
 
 // FindByAPIEndpoint - Returns a single CNSI Record
