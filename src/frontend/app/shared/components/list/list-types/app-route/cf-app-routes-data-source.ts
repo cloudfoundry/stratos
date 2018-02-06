@@ -2,7 +2,6 @@ import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { SetListStateAction } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
@@ -32,8 +31,6 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
 
     this.cfGuid = appService.cfGuid;
     this.appGuid = appService.appGuid;
-    store.dispatch(new SetListStateAction(paginationKey, 'table'));
-
     if (mapRoute) {
       this.selectedRowToggle = (row: APIResource) => {
         this.selectedRows.clear();
