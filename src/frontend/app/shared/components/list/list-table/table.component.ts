@@ -84,6 +84,10 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
     this.columnNames = this.columns.map(x => x.columnId);
 
+    this.initWidgetStore();
+  }
+
+  initWidgetStore() {
     const sortStoreToWidget = this.paginationController.sort$.do((sort: ListSort) => {
       if (this.sort.active !== sort.field || this.sort.direction !== sort.direction) {
         this.sort.sort({

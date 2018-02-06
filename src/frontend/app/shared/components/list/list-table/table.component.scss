@@ -25,6 +25,9 @@ $row-height: 62px;
   &__header-cell {
     flex: 1 1 200px;
     padding: 2px 10px;
+    app-table-cell {
+      width: 100%;
+    }
   }
   &__cell {
     &--table-column-edit {
@@ -37,6 +40,12 @@ $row-height: 62px;
   }
   &__row {
     min-height: $row-height;
+    mat-cell {
+      // Ensure the cell consumes at least height of the row. This ensure the animation on select is correct and edit row doesn't wiggle
+      align-items: center;
+      display: flex;
+      min-height: $row-height;
+    }
     &:hover {
       background-color: rgba(0, 0, 0, .05);
     }

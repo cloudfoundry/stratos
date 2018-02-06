@@ -75,25 +75,7 @@ export const listTableCells = [
   encapsulation: ViewEncapsulation.None,
   // When we look at modules we should think about swapping this approach (create + insert in code, hard code types here) with
   // NgComponentOutlet (create in html with custom external module factory). Alternatively try marking as entry component where they live?
-  entryComponents: [
-    ...listTableCells
-    // TableCellSelectComponent,
-    // TableHeaderSelectComponent,
-    // TableCellEditComponent,
-    // TableCellEditVariableComponent,
-    // TableCellEventTimestampComponent,
-    // TableCellEventTypeComponent,
-    // TableCellEventActionComponent,
-    // TableCellEventDetailComponent,
-    // TableCellActionsComponent,
-    // TableCellAppNameComponent,
-    // TableCellAppInstancesComponent,
-    // TableCellEndpointStatusComponent,
-    // TableCellAppStatusComponent,
-    // TableCellUsageComponent,
-    // TableCellRouteComponent,
-    // TableCellTCPRouteComponent,
-  ]
+  entryComponents: [...listTableCells]
 })
 export class TableCellComponent<T> implements OnInit, OnChanges {
   @ViewChild('target', { read: ViewContainerRef })

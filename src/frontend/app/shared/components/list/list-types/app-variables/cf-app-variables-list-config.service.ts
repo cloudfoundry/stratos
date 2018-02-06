@@ -8,6 +8,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppEvnVarsDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
+import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 
 @Injectable()
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
@@ -37,10 +38,22 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   columns: Array<ITableColumn<ListAppEnvVar>> = [
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: true, cellFlex: '5'
+      columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: {
+        type: 'sort',
+        orderKey: 'name',
+        field: 'name'
+      }, cellFlex: '5'
     },
     {
-      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: true, cellFlex: '10'
+      columnId: 'value', headerCell: () => 'Value', cellComponent: TableCellEditVariableComponent, sort: {
+        type: 'sort',
+        orderKey: 'value',
+        field: 'value'
+      }, cellFlex: '10'
+    },
+    {
+      columnId: 'edit', headerCell: () => '', cellComponent: TableCellEditComponent, class: 'app-table__cell--table-column-edit',
+      cellFlex: '2'
     },
   ];
 
@@ -73,7 +86,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     private store: Store<AppState>,
     private appService: ApplicationService
   ) {
-    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService);
+    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService, this);
   }
 
 }
