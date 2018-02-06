@@ -4,11 +4,12 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, map, tap } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { filter, map, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { AssociateRouteWithAppApplication } from '../../../../store/actions/application.actions';
-import { CreateRoute, RouteSchema } from '../../../../store/actions/route.actions';
+import { CreateRoute, GetAppRoutes, RouteSchema } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectEntity, selectNestedEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
@@ -23,19 +24,23 @@ import { ApplicationService } from '../../application.service';
   styleUrls: ['./add-routes.component.scss']
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
+  subscriptions: Subscription[] = [];
   submitted: boolean;
   model: Route;
   domains: APIResource<Domain>[] = [];
   addTCPRoute: FormGroup;
   addHTTPRoute: FormGroup;
   domains$: Subscription;
-  space$: Subscription;
-  associateRoute$: Subscription;
   appGuid: string;
   cfGuid: string;
   spaceGuid: string;
   createTCPRoute = false;
   selectedDomain: APIResource<any>;
+  selectedRoute$ = new BehaviorSubject<any>({
+    entity: {},
+    metadata: {}
+  });
+  isRouteSelected$ = new BehaviorSubject<boolean>(false);
   addRouteModes: RouteMode[] = [
     { id: 'create', label: 'Create and map new route' },
     { id: 'map', label: 'Map existing route' }
@@ -69,7 +74,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       ])
     });
 
-    this.space$ = this.store
+    const space$ = this.store
       .select(selectEntity('application', this.appGuid))
       .pipe(
         filter(p => !!p),
@@ -93,8 +98,16 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             )
             .subscribe();
         })
-      )
-      .subscribe();
+      );
+
+    this.subscriptions.push(space$.subscribe());
+
+    const selRoute$ = this.selectedRoute$.subscribe(x => {
+      if (x.metadata.guid) {
+        this.isRouteSelected$.next(true);
+      }
+    });
+    this.subscriptions.push(selRoute$);
   }
 
   getDomainValues() {
@@ -132,7 +145,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         )
       )
     );
-    this.associateRoute$ = this.store
+    const associateRoute$ = this.store
       .select(selectRequestInfo(RouteSchema.key, newRouteGuid))
       .pipe(
         filter(route => !route.creating),
@@ -165,8 +178,41 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             );
           }
         })
-      )
-      .subscribe();
+      );
+
+    this.subscriptions.push(associateRoute$.subscribe());
+  }
+
+  mapRouteSubmit() {
+    this.selectedRoute$.subscribe(route => {
+      this.store.dispatch(
+        new AssociateRouteWithAppApplication(
+          this.appGuid,
+          route.metadata.guid,
+          this.cfGuid
+        )
+      );
+      const appServiceSub$ = this.appService.app$.pipe(
+        map(p => p.entityRequestInfo.updating['Assigning-Route']),
+        filter(p => !p.busy),
+        take(1),
+        tap(p => {
+          if (p.error) {
+            const message = 'Failed to associate route with the app!';
+            this.snackBar.open(message, 'Dismiss');
+          } else {
+            this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
+            this.store.dispatch(
+              new RouterNav({
+                path: ['applications', this.cfGuid, this.appGuid]
+              })
+            );
+          }
+        })
+      );
+
+      this.subscriptions.push(appServiceSub$.subscribe());
+    });
   }
 
   toggleCreateTCPRoute() {
@@ -176,9 +222,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     if (this.domains$) {
       this.domains$.unsubscribe();
     }
-    this.space$.unsubscribe();
-    if (this.associateRoute$) {
-      this.associateRoute$.unsubscribe();
-    }
+
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 }

@@ -1,5 +1,3 @@
-import { SetAPIFilterEffect } from './effects/set-api-filter.effect';
-import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { HttpModule } from '@angular/http';
@@ -11,15 +9,18 @@ import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AuthEffect } from './effects/auth.effects';
 import { CNSISEffect } from './effects/cnsis.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
+import { DeployAppEffects } from './effects/deploy-app.effects';
+import { GithubEffects } from './effects/github.effects';
 import { PaginationEffects } from './effects/pagination.effects';
+import { RouteEffects } from './effects/route.effects';
 import { RouterEffect } from './effects/router.effects';
+import { SetAPIFilterEffect } from './effects/set-api-filter.effect';
+import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { AppReducersModule } from './reducers.module';
-import { DeployAppEffects } from './effects/deploy-app.effects';
-import { GithubEffects } from './effects/github.effects';
 
 @NgModule({
   imports: [
@@ -42,8 +43,9 @@ import { GithubEffects } from './effects/github.effects';
       SetClientFilterEffect,
       SetAPIFilterEffect,
       DeployAppEffects,
-      GithubEffects
-    ]),
+      GithubEffects,
+      RouteEffects
+    ])
   ]
 })
-export class AppStoreModule { }
+export class AppStoreModule {}

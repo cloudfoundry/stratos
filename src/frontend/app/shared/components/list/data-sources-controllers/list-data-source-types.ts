@@ -2,7 +2,6 @@ import { Action } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
-import { ListView } from '../../../../store/actions/list.actions';
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 
@@ -51,7 +50,6 @@ export interface IListDataSource<T> {
   page$: Observable<T[]>;
 
   addItem: T;
-  disable$: BehaviorSubject<boolean>;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
 

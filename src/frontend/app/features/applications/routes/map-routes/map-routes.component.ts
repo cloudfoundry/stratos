@@ -1,10 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { filter, tap } from 'rxjs/operators';
 
-import { ListConfig } from '../../../../shared/components/list/list.component';
-import { CfAppRoutesDataSource } from '../../../../shared/data-sources/cf-app-routes-data-source';
-import { CfAppMapRoutesListConfigService } from '../../../../shared/list-configs/cf-app-map-routes-list-config.service';
+import {
+  CfAppMapRoutesListConfigService,
+} from '../../../../shared/components/list/list-types/app-route/cf-app-map-routes-list-config.service';
+import { CfAppRoutesDataSource } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
+import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../store/app-state';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { ApplicationService } from '../../application.service';
 
 @Component({
@@ -18,15 +25,33 @@ import { ApplicationService } from '../../application.service';
     }
   ]
 })
-export class MapRoutesComponent implements OnInit {
+export class MapRoutesComponent implements OnInit, OnDestroy {
+  subscription: Subscription;
+  @Input() selectedRoute$: BehaviorSubject<APIResource>;
+
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig
+    private listConfig: ListConfig<EntityInfo>
   ) {
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;
   }
   routesDataSource: CfAppRoutesDataSource;
+  ngOnInit() {
+    this.subscription = this.routesDataSource.isSelecting$
+      .pipe(
+        filter(p => p),
+        tap(p => {
+          const selectedRow = Array.from(
+            this.routesDataSource.selectedRows.values()
+          );
+          this.selectedRoute$.next(selectedRow[0]);
+        })
+      )
+      .subscribe();
+  }
 
-  ngOnInit() {}
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 }

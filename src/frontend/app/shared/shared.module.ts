@@ -28,11 +28,9 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
-/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-/* tslint:enable:max-line-length */
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -61,7 +59,8 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 
-
+/* tslint:disable:max-line-length */
+/* tslint:enable:max-line-length */
 @NgModule({
   imports: [
     CommonModule,
@@ -71,7 +70,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule,
+    CdkTableModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -111,8 +110,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     RunningInstancesComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
-    TableCellAppRouteComponent,
-    TableCellRadioComponent
+    ListComponent,
+    ...listCardComponents,
+    ...listTableComponents
   ],
   exports: [
     FormsModule,
@@ -151,17 +151,17 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardAppUsageComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
-    ListComponent,
+    ListComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
-    DialogConfirmComponent,
+    DialogConfirmComponent
   ],
   providers: [
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
-    ConfirmationDialogService,
+    ConfirmationDialogService
   ]
 })
-export class SharedModule { }
+export class SharedModule {}

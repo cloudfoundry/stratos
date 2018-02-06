@@ -1,10 +1,10 @@
-import { EntityInfo } from './../../../store/types/api.types';
+import { APIResource } from './../../../store/types/api.types';
 
-export const isTCPRoute = (route: EntityInfo) =>
+export const isTCPRoute = (route: APIResource) =>
   route.entity.port !== null && route.entity.port !== '';
 
 export const getRoute = (
-  route: EntityInfo,
+  route: APIResource,
   browsable: boolean = false,
   secure: boolean = false
 ) => {
@@ -28,6 +28,6 @@ export const getRoute = (
   }
 };
 
-export const getMappedApps = (route: EntityInfo): EntityInfo[] => {
+export const getMappedApps = (route: APIResource): APIResource[] => {
   return route.entity.apps;
 };

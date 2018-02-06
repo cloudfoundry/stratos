@@ -86,10 +86,13 @@
         Please select the route you wish to map
       </div>
       <form>
-        <app-map-routes></app-map-routes>
+        <app-map-routes [selectedRoute$]="selectedRoute$"></app-map-routes>
       </form>
       <div class="add-route__card__form__buttons">
-        <button type="button" mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
+        <button mat-button name="submit" color="primary" (click)="mapRouteSubmit()" [disabled]="!(isRouteSelected$ | async)">
+              Submit
+          </button>
+        <button type="button " mat-button name="cancel " color="warn" [routerLink]="[ '/applications', cfGuid, appGuid] ">
             Cancel
           </button>
       </div>

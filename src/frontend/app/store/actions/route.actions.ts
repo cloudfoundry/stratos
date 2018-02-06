@@ -1,7 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
+import { Action } from '@ngrx/store';
 import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { EntityInfo } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getPaginationKey } from './pagination.actions';
@@ -10,6 +12,7 @@ export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
 export const CREATE_ROUTE_ERROR = '[Route] Create error';
 
+export const MAP_ROUTE_SELECTED = '[Map Route] Selected route';
 export const RouteEvents = {
   GET_APP_ALL: '[Application Routes] Get all',
   GET_APP_ALL_SUCCESS: '[Application Routes] Get all success',
@@ -182,4 +185,9 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction {
     'inline-relations-depth': '2'
   };
   cnis: string;
+}
+
+export class MapRouteSelected implements Action {
+  constructor(routeEntity: EntityInfo) {}
+  type = MAP_ROUTE_SELECTED;
 }
