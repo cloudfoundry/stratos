@@ -144,39 +144,17 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*RegisteredClust
 // Find - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) Find(guid string) (interfaces.CNSIRecord, error) {
 	log.Println("Find")
-	var (
-		pCNSIType string
-		pURL      string
-	)
-
-	cnsi := new(interfaces.CNSIRecord)
-
-	err := p.db.QueryRow(findCNSI, guid).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
-		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
-
-	switch {
-	case err == sql.ErrNoRows:
-		return interfaces.CNSIRecord{}, errors.New("No match for that GUID")
-	case err != nil:
-		return interfaces.CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
-	default:
-		// do nothing
-	}
-
-	// TODO(wchrisjohnson): discover a way to do this automagically
-	// These two fields need to be converted manually
-	cnsi.CNSIType = pCNSIType
-
-	if cnsi.APIEndpoint, err = url.Parse(pURL); err != nil {
-		return interfaces.CNSIRecord{}, fmt.Errorf("Unable to parse API Endpoint: %v", err)
-	}
-
-	return *cnsi, nil
+	return p.findBy(findCNSI, guid)
 }
 
 // FindByAPIEndpoint - Returns a single CNSI Record
 func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.CNSIRecord, error) {
-	log.Println("Find")
+	log.Println("FindByAPIEndpoint")
+	return p.findBy(findCNSIByAPIEndpoint, endpoint)
+}
+
+// FindBy - Returns a single CNSI Record found using the given query looking for match
+func (p *PostgresCNSIRepository) findBy(query, match string) (interfaces.CNSIRecord, error) {
 	var (
 		pCNSIType string
 		pURL      string
@@ -184,12 +162,12 @@ func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.
 
 	cnsi := new(interfaces.CNSIRecord)
 
-	err := p.db.QueryRow(findCNSIByAPIEndpoint, endpoint).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
+	err := p.db.QueryRow(query, match).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
 		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
 
 	switch {
 	case err == sql.ErrNoRows:
-		return interfaces.CNSIRecord{}, errors.New("No match for that API Endpoint")
+		return interfaces.CNSIRecord{}, errors.New("No match for that Endpoint")
 	case err != nil:
 		return interfaces.CNSIRecord{}, fmt.Errorf("Error trying to Find CNSI record: %v", err)
 	default:

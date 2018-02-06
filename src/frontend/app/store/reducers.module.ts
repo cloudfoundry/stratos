@@ -45,17 +45,24 @@ if (!environment.production) {
   }
 }
 
-@NgModule({
-  imports: [
-    StoreModule.forRoot(
-      appReducers,
-      {
-        metaReducers
-      }
-    ),
+const imports = [
+  StoreModule.forRoot(
+    appReducers,
+    {
+      metaReducers
+    }
+  )
+];
+
+if (!environment.production) {
+  imports.push(
     StoreDevtoolsModule.instrument({
-      maxAge: 100
-    }),
-  ],
+      maxAge: 100,
+    })
+  );
+}
+
+@NgModule({
+  imports
 })
 export class AppReducersModule { }
