@@ -3,27 +3,26 @@
   flex-flow: wrap;
   justify-content: space-between;
   .mat-card {
-    &:after {
-      box-shadow: 0 2px 15px 2px rgba(0, 0, 0, 0.3);
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
-      content: '';
-      position: absolute;
-      top: 0;
+    &::after {
       bottom: 0;
+      box-shadow: 0 2px 15px 2px rgba(0, 0, 0, .3);
+      content: '';
       left: 0;
+      opacity: 0;
+      position: absolute;
       right: 0;
+      top: 0;
+      transition: opacity .3s ease-in-out;
     }
     &:hover {
       cursor: pointer;
-      &:after {
+      &::after {
         opacity: 1;
       }
     }
   }
-  &__card-row {}
   .row-filler {
-    opacity: 0;
     height: 1px;
+    opacity: 0;
   }
 }

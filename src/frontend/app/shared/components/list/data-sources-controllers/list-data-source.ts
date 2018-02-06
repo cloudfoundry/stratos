@@ -108,12 +108,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const dataFunctions = this.entityFunctions ? getDataFunctionList(this.entityFunctions) : null;
     const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
     this.entityLettabledSubscription = letted$.do(items => this.entityLettabledRows = items).subscribe();
+    this.page$ = this.isLocal ? this.getLocalPagesObservable(letted$, pagination$, dataFunctions) : letted$.pipe(shareReplay(1));
 
-    if (this.isLocal) {
-      this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
-    } else {
-      this.page$ = letted$.pipe(shareReplay(1));
-    }
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
     this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);

@@ -49,7 +49,7 @@
         </div>
         <div class="listComponent__header__bottom">
           <div class="listComponent__header__left spacer">
-            <div class="multi-filters" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+            <div class="multi-filters" [hidden]="((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
               <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs">
                 <mat-select matInput shouldLabelFloat="false" [(value)]="multiFilters[multiFilterConfig.key]" placeholder="{{multiFilterConfig.label}}" [disabled]="(dataSource.isLoadingPage$ | async)" (change)="multiFilterConfig.select.next($event.value)">
                   <mat-option>All</mat-option>
@@ -95,8 +95,10 @@
     <app-cards *ngIf="(dataSource.view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
     <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [paginationController]="paginationController" [columns]="columns" [text]="text" [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
     </app-table>
-    <mat-paginator #paginator [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize" [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
-    </mat-paginator>
+    <mat-card class="listComponent__paginator" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
+      <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
+      </mat-paginator>
+    </mat-card>
     <mat-card [hidden]="(dataSource.isLoadingPage$ | async) || (dataSource.pagination$ | async)?.totalResults > 0">
       <mat-card-content>
         <div class="no-rows">There are no entries.</div>
