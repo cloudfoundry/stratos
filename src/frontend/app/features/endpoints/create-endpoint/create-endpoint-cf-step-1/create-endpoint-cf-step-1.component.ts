@@ -16,7 +16,7 @@ import { CNSISEffect } from '../../../../store/effects/cnsis.effects';
 import { shareReplay, withLatestFrom, map } from 'rxjs/operators';
 import { tag } from 'rxjs-spy/operator/tag';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
-import { EndpointsDataSource } from '../../../../shared/data-sources/endpoints-data-source';
+import { EndpointsDataSource } from '../../../../shared/components/list/list-types/endpoint/endpoints-data-source';
 import { denormalize } from 'normalizr';
 
 @Component({
