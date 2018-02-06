@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { debounceTime, filter, map, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { AppState } from '../store/app-state';
@@ -172,8 +172,9 @@ export class EntityService {
       filter(({ resource, updatingSection }) => {
         return !!updatingSection;
       }),
-      shareReplay(1)
-      );
+      publishReplay(1),
+      refCount(),
+    );
   }
 
 }
