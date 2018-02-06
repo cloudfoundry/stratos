@@ -27,6 +27,7 @@ import { UsageGaugeComponent } from '../../usage-gauge/usage-gauge.component';
 import { CdkTableModule } from '@angular/cdk/table';
 import { TableRowComponent } from './table-row/table-row.component';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
+import { EntityInfo } from '../../../../store/types/api.types';
 
 
 describe('TableComponent', () => {
@@ -65,7 +66,6 @@ describe('TableComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableComponent);
     component = fixture.componentInstance;
-
     const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
     component.columns = new Array<ITableColumn<any>>();
     component.paginationController = {
