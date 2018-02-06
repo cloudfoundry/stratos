@@ -12,6 +12,7 @@ import { AppState } from '../../../store/app-state';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
+import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 
 @Component({
   selector: 'app-routes',
@@ -24,7 +25,7 @@ import { ApplicationService } from '../application.service';
     }
   ]
 })
-export class RoutesComponent implements OnInit {
+export class RoutesComponent implements OnInit, OnDestroy {
   paginationSubscription: Subscription;
   constructor(
     private store: Store<AppState>,
