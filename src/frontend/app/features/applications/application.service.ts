@@ -42,7 +42,7 @@ import { PaginationEntityState, PaginationState } from '../../store/types/pagina
 import {
   defaultPaginationState,
 } from '../../store/reducers/pagination-reducer/pagination.reducer';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, withLatestFrom, switchMap } from 'rxjs/operators';
 import { isTCPRoute, getRoute } from './routes/routes.helper';
 import { selectEntity } from '../../store/selectors/api.selectors';
 import { SpaceSchema } from '../../store/actions/space.action';
@@ -104,7 +104,7 @@ export class ApplicationService {
   appSummary$: Observable<EntityInfo<AppSummary>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
-  appEnvVars: PaginationObservables<AppEnvVarsState>;
+  appEnvVars: PaginationObservables<APIResource>;
   appOrg$: Observable<APIResource<any>>;
   appSpace$: Observable<APIResource<any>>;
 
@@ -140,12 +140,12 @@ export class ApplicationService {
           });
         return appStateService.get(app, appInstances);
       })
-      );
+      ).shareReplay(1);
   }
 
   private constructCoreObservables() {
     // First set up all the base observables
-    this.app$ = this.appEntityService.entityObs$;
+    this.app$ = this.appEntityService.entityObs$.shareReplay(1);
 
     // App org and space
     this.app$
@@ -163,13 +163,13 @@ export class ApplicationService {
       .take(1)
       .subscribe();
 
-    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$;
+    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.shareReplay(1);
 
-    this.waitForAppEntity$ = this.appEntityService.waitForEntity$;
+    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.shareReplay(1);
 
-    this.appSummary$ = this.waitForAppEntity$.mergeMap(() => this.appSummaryEntityService.entityObs$);
+    this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
 
-    this.appEnvVars = getPaginationObservables<AppEnvVarsState>({
+    this.appEnvVars = getPaginationObservables<APIResource>({
       store: this.store,
       action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
       schema: AppEnvVarsSchema
@@ -187,7 +187,7 @@ export class ApplicationService {
 
     this.appStats$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity)
-      .mergeMap(ai => {
+      .switchMap(ai => {
         if (ai.entity.entity.state === 'STARTED') {
           return appStats.entities$;
         } else {
@@ -197,9 +197,9 @@ export class ApplicationService {
 
     this.appStatsFetching$ = this.waitForAppEntity$
       .filter(ai => ai && ai.entity && ai.entity.entity && ai.entity.entity.state === 'STARTED')
-      .mergeMap(ai => {
+      .switchMap(ai => {
         return appStats.pagination$;
-      });
+      }).shareReplay(1);
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
@@ -216,23 +216,23 @@ export class ApplicationService {
           cf: cnsis[entity.entity.cfGuid],
           appUrl: this.getAppUrl(entity)
         };
-      });
+      }).shareReplay(1);
 
     this.applicationState$ = this.waitForAppEntity$
-      .combineLatest(this.appStats$)
+      .withLatestFrom(this.appStats$)
       .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
-      });
+      }).shareReplay(1);
 
     this.applicationInstanceState$ = this.waitForAppEntity$
-      .combineLatest(this.appStats$)
-      .mergeMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
+      .withLatestFrom(this.appStats$)
+      .switchMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
-      });
+      }).shareReplay(1);
 
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
-      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0]);
-    });
+      return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
+    }).shareReplay(1);
   }
 
   private constructStatusObservables() {
@@ -243,7 +243,7 @@ export class ApplicationService {
       this.app$.map(ei => ei.entityRequestInfo.fetching),
       this.appSummary$.map(as => as.entityRequestInfo.fetching)
     )
-      .map((fetching) => fetching[0] || fetching[1]);
+      .map((fetching) => fetching[0] || fetching[1]).shareReplay(1);
 
     this.isUpdatingApp$ =
       this.app$.map(a => {
@@ -253,11 +253,11 @@ export class ApplicationService {
         return updatingSection.busy || false;
       });
 
-    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching).startWith(false);
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching).startWith(false).shareReplay(1);
 
-    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching && ev.ids[ev.currentPage]).startWith(false);
+    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching && ev.ids[ev.currentPage]).startWith(false).shareReplay(1);
 
-    this.isFetchingStats$ = this.appStatsFetching$.map(appStats => appStats ? appStats.fetching : false).startWith(false);
+    this.isFetchingStats$ = this.appStatsFetching$.map(appStats => appStats ? appStats.fetching : false).startWith(false).shareReplay(1);
   }
 
   getAppUrl(app: EntityInfo): string {

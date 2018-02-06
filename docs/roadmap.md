@@ -23,7 +23,7 @@ The focus for the first part of 2018 is to complete the move from AngularJS to A
 
 Note:
 - Back-end stays the same (folder structure will most likely be moved around)
-- Deployment and other scrpts, artiefcts remaint the sames (tweaks as neccessary to build the V2 code)
+- Deployment and other scrpts, artefacts remaint the sames (tweaks as neccessary to build the V2 code)
 
 Stack:
 
