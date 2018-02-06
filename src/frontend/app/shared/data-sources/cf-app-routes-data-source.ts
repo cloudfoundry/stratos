@@ -5,7 +5,7 @@ import { ApplicationService } from '../../features/applications/application.serv
 import { SetListStateAction } from '../../store/actions/list.actions';
 import { AppState } from '../../store/app-state';
 import { EntityInfo } from '../../store/types/api.types';
-import { PaginatedAction } from '../../store/types/pagination.types';
+import { PaginatedAction, PaginationEntityState } from '../../store/types/pagination.types';
 import { ListDataSource } from './list-data-source';
 
 export const RouteSchema = new schema.Entity('route');
@@ -18,7 +18,8 @@ export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
     store: Store<AppState>,
     appService: ApplicationService,
     action: PaginatedAction,
-    paginationKey: string
+    paginationKey: string,
+    mapRoute = false
   ) {
     super({
       store,
@@ -32,6 +33,13 @@ export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
           type: 'sort',
           orderKey: 'host',
           field: 'host'
+        },
+        (entities: EntityInfo[], paginationState: PaginationEntityState) => {
+          const appGuid = appService.appGuid;
+          return entities.filter(e => {
+            console.log(e);
+            return true;
+          });
         }
       ]
     });
@@ -39,15 +47,14 @@ export class CfAppRoutesDataSource extends ListDataSource<EntityInfo> {
     this.cfGuid = appService.cfGuid;
     this.appGuid = appService.appGuid;
     store.dispatch(new SetListStateAction(paginationKey, 'table'));
-  }
 
-  selectedRowToggle(row: EntityInfo) {
-    this.selectedRows.clear();
-    this.selectedRows.set(this.getRowUniqueId(row), row);
-    this.isSelecting$.next(this.selectedRows.size > 0);
-  }
-
-  selectAllFilteredRows() {
-    // noop
+    if (mapRoute) {
+      this.selectedRowToggle = (row: EntityInfo) => {
+        this.selectedRows.clear();
+        this.selectedRows.set(this.getRowUniqueId(row), row);
+        this.isSelecting$.next(this.selectedRows.size > 0);
+      };
+      this.selectAllFilteredRows = () => {};
+    }
   }
 }

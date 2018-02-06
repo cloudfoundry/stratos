@@ -1,27 +1,24 @@
-import { paginationAddParams } from '../../store/reducers/pagination-reducer/pagination-reducer-add-params';
-import { getDataFunctionList } from './local-filtering-sorting';
-import { OperatorFunction } from 'rxjs/interfaces';
-import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { resultPerPageParam, } from './../../store/reducers/pagination-reducer/pagination-reducer.types';
-import { ListPagination, ListSort, ListFilter, ListView } from '../../store/actions/list.actions';
-import { fileExists } from 'ts-node/dist';
 import { DataSource } from '@angular/cdk/table';
-import { Observable, Subscribable } from 'rxjs/Observable';
-import { Sort, MatPaginator, MatSort } from '@angular/material';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Subscription';
 import { schema } from 'normalizr';
-import { PaginationEntityState, PaginatedAction, QParam } from '../../store/types/pagination.types';
-import { AppState } from '../../store/app-state';
-import { AddParams, RemoveParams, SetClientPage, SetPage, SetResultCount } from '../../store/actions/pagination.actions';
-import { IListDataSource, getRowUniqueId, RowsState, getDefaultRowState } from './list-data-source-types';
-import { map, shareReplay } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators';
-import { composeFn } from '../../store/helpers/reducer.helper';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { OperatorFunction } from 'rxjs/interfaces';
+import { Observable } from 'rxjs/Observable';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { getListStateObservable, getListStateObservables, ListState } from '../../store/reducers/list.reducer';
+import { withLatestFrom } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { ListView } from '../../store/actions/list.actions';
+import { SetResultCount } from '../../store/actions/pagination.actions';
+import { AppState } from '../../store/app-state';
+import { getListStateObservables } from '../../store/reducers/list.reducer';
+import { PaginatedAction, PaginationEntityState } from '../../store/types/pagination.types';
+import { getPaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { IListDataSourceConfig } from './list-data-source-config';
+import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
+import { getDataFunctionList } from './local-filtering-sorting';
+
 export interface DataFunctionDefinition {
   type: 'sort' | 'filter';
   orderKey?: string;
@@ -36,9 +33,12 @@ export function distinctPageUntilChanged(dataSource) {
   };
 }
 
-export type DataFunction<T> = ((entities: T[], paginationState: PaginationEntityState) => T[]);
-export abstract class ListDataSource<T, A = T> extends DataSource<T> implements IListDataSource<T> {
-
+export type DataFunction<T> = ((
+  entities: T[],
+  paginationState: PaginationEntityState
+) => T[]);
+export abstract class ListDataSource<T, A = T> extends DataSource<T>
+  implements IListDataSource<T> {
   // -------------- Public
   // Core observables
   public view$: Observable<ListView>;
@@ -51,6 +51,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // Add item
   public addItem: T;
   public isAdding$ = new BehaviorSubject<boolean>(false);
+
+  // Disable item
+  public disable$ = new BehaviorSubject<boolean>(false);
 
   // Select item/s
   public selectedRows = new Map<string, T>();
@@ -84,38 +87,49 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public entityFunctions?: (DataFunction<T> | DataFunctionDefinition)[];
   public rowsState?: Observable<RowsState>;
 
-  constructor(
-    private config: IListDataSourceConfig<A, T>
-  ) {
+  constructor(private config: IListDataSourceConfig<A, T>) {
     super();
     this.init(config);
     this.addItem = this.getEmptyType();
-    const { view, } = getListStateObservables(this.store, this.paginationKey);
+    const { view } = getListStateObservables(this.store, this.paginationKey);
     this.view$ = view;
 
     this.entityKey = this.sourceScheme.key;
-    const { pagination$, entities$ } = getPaginationObservables({
-      store: this.store,
-      action: this.action,
-      schema: [this.sourceScheme]
-    },
+    const { pagination$, entities$ } = getPaginationObservables(
+      {
+        store: this.store,
+        action: this.action,
+        schema: [this.sourceScheme]
+      },
       this.isLocal
     );
 
-    const dataFunctions = this.entityFunctions ? getDataFunctionList(this.entityFunctions) : null;
+    const dataFunctions = this.entityFunctions
+      ? getDataFunctionList(this.entityFunctions)
+      : null;
     const letted$ = this.attatchEntityLettable(entities$, this.entityLettable);
-    this.entityLettabledSubscription = letted$.do(items => this.entityLettabledRows = items).subscribe();
+    this.entityLettabledSubscription = letted$
+      .do(items => (this.entityLettabledRows = items))
+      .subscribe();
 
     if (this.isLocal) {
-      this.page$ = this.getLocalPagesObservable(letted$, pagination$, dataFunctions);
+      this.page$ = this.getLocalPagesObservable(
+        letted$,
+        pagination$,
+        dataFunctions
+      );
     } else {
       this.page$ = letted$;
     }
     this.page$ = this.page$.pipe(shareReplay(1));
-    this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
+    this.pageSubscription = this.page$
+      .do(items => (this.filteredRows = items))
+      .subscribe();
 
     this.pagination$ = pagination$;
-    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+    this.isLoadingPage$ = this.pagination$.map(
+      (pag: PaginationEntityState) => pag.fetching
+    );
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -123,14 +137,16 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.action = config.action;
     this.sourceScheme = config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
-    this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
+    this.getEmptyType = config.getEmptyType
+      ? config.getEmptyType
+      : () => ({} as T);
     this.paginationKey = config.paginationKey;
     this.entityLettable = config.entityLettable;
     this.isLocal = config.isLocal || false;
     this.entityFunctions = config.entityFunctions;
-    this.rowsState = config.rowsState ? config.rowsState.pipe(
-      shareReplay(1)
-    ) : Observable.of({}).first();
+    this.rowsState = config.rowsState
+      ? config.rowsState.pipe(shareReplay(1))
+      : Observable.of({}).first();
   }
   /**
    * Will return the row state with default values filled in.
@@ -209,17 +225,17 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   attatchEntityLettable(entities$, entityLettable) {
     if (entityLettable) {
-      return entities$.pipe(
-        this.entityLettable
-      );
+      return entities$.pipe(this.entityLettable);
     } else {
-      return entities$.pipe(
-        map(res => res as T[])
-      );
+      return entities$.pipe(map(res => res as T[]));
     }
   }
 
-  getLocalPagesObservable(page$, pagination$: Observable<PaginationEntityState>, dataFunctions) {
+  getLocalPagesObservable(
+    page$,
+    pagination$: Observable<PaginationEntityState>,
+    dataFunctions
+  ) {
     return page$.pipe(
       withLatestFrom(pagination$),
       map(([entities, paginationEntity]) => {
@@ -228,12 +244,21 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
             return fn(value, paginationEntity);
           }, entities);
         }
-        const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
+        const pages = this.splitClientPages(
+          entities,
+          paginationEntity.clientPagination.pageSize
+        );
         if (
           paginationEntity.totalResults !== entities.length ||
           paginationEntity.clientPagination.totalResults !== entities.length
         ) {
-          this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+          this.store.dispatch(
+            new SetResultCount(
+              this.entityKey,
+              this.paginationKey,
+              entities.length
+            )
+          );
         }
         const pageIndex = paginationEntity.clientPagination.currentPage - 1;
         return pages[pageIndex];
@@ -242,12 +267,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {
-    return Object.values(paginationEntity.clientPagination).join('.')
-      + paginationEntity.params['order-direction-field']
-      + paginationEntity.params['order-direction']
-      + paginationEntity.clientPagination.filter.string
-      + Object.values(paginationEntity.clientPagination.filter.items)
-      + paginationEntity.fetching; // Some outlier cases actually fetch independently from this list (looking at you app variables)
+    return (
+      Object.values(paginationEntity.clientPagination).join('.') +
+      paginationEntity.params['order-direction-field'] +
+      paginationEntity.params['order-direction'] +
+      paginationEntity.clientPagination.filter.string +
+      Object.values(paginationEntity.clientPagination.filter.items) +
+      paginationEntity.fetching
+    ); // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }
 
   splitClientPages(entites: T[], pageSize: number): T[][] {

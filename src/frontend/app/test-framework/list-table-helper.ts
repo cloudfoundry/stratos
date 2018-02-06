@@ -30,6 +30,9 @@ import {
   TableCellEventTypeComponent,
 } from '../shared/components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
 import {
+  TableCellRadioComponent,
+} from '../shared/components/table/custom-cells/table-cell-radio/table-cell-radio.component';
+import {
   TableCellRouteComponent,
 } from '../shared/components/table/custom-cells/table-cell-route/table-cell-route.component';
 import {
@@ -60,7 +63,8 @@ export const TableCellEntryPoints = [
   TableCellUsageComponent,
   TableCellRouteComponent,
   TableCellTCPRouteComponent,
-  TableCellAppRouteComponent
+  TableCellAppRouteComponent,
+  TableCellRadioComponent
 ];
 
 export const CardEntryPoints = [CardAppComponent];

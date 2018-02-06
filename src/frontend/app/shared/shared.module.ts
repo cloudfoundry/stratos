@@ -75,6 +75,7 @@ import {
 import {
   TableCellEventTypeComponent,
 } from './components/table/custom-cells/table-cell-event-type/table-cell-event-type.component';
+import { TableCellRadioComponent } from './components/table/custom-cells/table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './components/table/custom-cells/table-cell-route/table-cell-route.component';
 import {
   TableCellTCPRouteComponent,
@@ -129,6 +130,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     TableComponent,
     TableCellComponent,
     TableCellSelectComponent,
+    TableCellRadioComponent,
     TableHeaderSelectComponent,
     TableCellEditComponent,
     TableCellEditVariableComponent,
@@ -174,7 +176,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     DialogConfirmComponent,
     TableCellAppInstancesComponent,
     CardAppUptimeComponent,
-    TableCellAppRouteComponent
+    TableCellAppRouteComponent,
+    TableCellRadioComponent
   ],
   exports: [
     FormsModule,

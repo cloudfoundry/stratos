@@ -21,7 +21,10 @@ export interface AppEvent {
 }
 
 export class ListActionConfig<T> {
-  createAction: (dataSource: IListDataSource<T>, items: IRequestEntityTypeState<T>) => Action;
+  createAction: (
+    dataSource: IListDataSource<T>,
+    items: IRequestEntityTypeState<T>
+  ) => Action;
   icon: string;
   label: string;
   description: string;
@@ -39,14 +42,17 @@ export interface IListDataSource<T> {
   rowsState?: Observable<RowsState>;
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
-  localDataFunctions?: ((entities: T[], paginationState: PaginationEntityState) => T[])[];
-
+  localDataFunctions?: ((
+    entities: T[],
+    paginationState: PaginationEntityState
+  ) => T[])[];
   entityKey: string;
   paginationKey: string;
 
   page$: Observable<T[]>;
 
   addItem: T;
+  disable$: BehaviorSubject<boolean>;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
 
@@ -68,7 +74,6 @@ export interface IListDataSource<T> {
   setFilterParam(filter: string, pag: PaginationEntityState);
   connect(): Observable<T[]>;
   destroy();
-
 }
 
 export type getRowUniqueId<T> = (T) => string;

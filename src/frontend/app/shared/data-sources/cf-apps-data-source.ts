@@ -8,12 +8,9 @@ import { PaginationEntityState } from '../../store/types/pagination.types';
 import { ListDataSource } from './list-data-source';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
-
   public static paginationKey = 'applicationWall';
 
-  constructor(
-    store: Store<AppState>,
-  ) {
+  constructor(store: Store<AppState>) {
     const { paginationKey } = CfAppsDataSource;
     const action = new GetAllApplications(paginationKey);
 
@@ -60,21 +57,22 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
           // Filter by cf/org/space
           const cfGuid = paginationState.clientPagination.filter.items['cf'];
           const orgGuid = paginationState.clientPagination.filter.items['org'];
-          const spaceGuid = paginationState.clientPagination.filter.items['space'];
+          const spaceGuid =
+            paginationState.clientPagination.filter.items['space'];
           return entities.filter(e => {
             const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
-            const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
-            const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+            const validOrg = !(
+              orgGuid && orgGuid !== e.entity.space.entity.organization_guid
+            );
+            const validSpace = !(
+              spaceGuid && spaceGuid !== e.entity.space_guid
+            );
             return validCF && validOrg && validSpace;
           });
         }
       ]
-    }
-    );
+    });
 
-    store.dispatch(new SetListStateAction(
-      paginationKey,
-      'cards',
-    ));
+    store.dispatch(new SetListStateAction(paginationKey, 'cards'));
   }
 }

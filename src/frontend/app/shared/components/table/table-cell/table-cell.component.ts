@@ -27,6 +27,7 @@ import {
   TableCellEventTimestampComponent,
 } from '../custom-cells/table-cell-event-timestamp/table-cell-event-timestamp.component';
 import { TableCellEventTypeComponent } from '../custom-cells/table-cell-event-type/table-cell-event-type.component';
+import { TableCellRadioComponent } from '../custom-cells/table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from '../custom-cells/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from '../custom-cells/table-cell-tcproute/table-cell-tcproute.component';
 import { TableCellUsageComponent } from '../custom-cells/table-cell-usage/table-cell-usage.component';
@@ -60,7 +61,8 @@ import { TableCellCustom } from './table-cell-custom';
     TableCellUsageComponent,
     TableCellRouteComponent,
     TableCellTCPRouteComponent,
-    TableCellAppRouteComponent
+    TableCellAppRouteComponent,
+    TableCellRadioComponent
   ]
 })
 export class TableCellComponent<T> implements OnInit, OnChanges {

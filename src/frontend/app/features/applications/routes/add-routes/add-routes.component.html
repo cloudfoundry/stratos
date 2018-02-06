@@ -7,9 +7,10 @@
   </mat-progress-bar>
 
   <mat-card class="add-route__card">
+    <div>Create a new route or map an existing one. </div>
     <div>
-      <mat-radio-group [(ngModel)]="addRouteMode">
-        <mat-radio-button *ngFor="let mode of addRouteModes" [value]="mode">
+      <mat-radio-group [(ngModel)]="addRouteMode" class="add-route__radios">
+        <mat-radio-button *ngFor="let mode of addRouteModes" [value]="mode" class="add-route__radios__btn">
           {{ mode.label }}
         </mat-radio-button>
       </mat-radio-group>
@@ -23,7 +24,7 @@
         Create TCP Route
         <mat-checkbox name="createTcp" [(ngModel)]="createTCPRoute"></mat-checkbox>
       </div>
-      <form [formGroup]="addHTTPRoute" *ngIf="!createTCPRoute" class="add-route__card__form__fields">
+      <form [formGroup]="addHTTPRoute" *ngIf="!createTCPRoute">
         <div class="add-route__card__form__fields">
           <div>
             <mat-form-field>
@@ -53,7 +54,7 @@
         </div>
       </form>
 
-      <form [formGroup]="addTCPRoute" *ngIf="createTCPRoute" class="add-route__card__form__fields">
+      <form [formGroup]="addTCPRoute" *ngIf="createTCPRoute">
         <div class="add-route__card__form__fields">
           <div>
             <mat-form-field>
@@ -69,7 +70,7 @@
             </mat-form-field>
           </div>
         </div>
-        <div class="add-route__form-buttons">
+        <div class="add-route__card__form__buttons">
           <button mat-button name="submit" color="primary" (click)="onSubmit('tcp')" [disabled]="!addTCPRoute.valid">
               Submit
           </button>
@@ -81,16 +82,13 @@
     </div>
 
     <div class="add-route__card__form" *ngIf="addRouteMode?.id === 'map'">
-      <div>
+      <div class="add-route__card__form__message">
         Please select the route you wish to map
       </div>
       <form>
         <app-map-routes></app-map-routes>
       </form>
-      <div class="add-route__form-buttons">
-        <button mat-button name="submit" color="primary" (click)="onSubmit('tcp')" [disabled]="!addTCPRoute.valid">
-              Submit
-          </button>
+      <div class="add-route__card__form__buttons">
         <button type="button" mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
             Cancel
           </button>

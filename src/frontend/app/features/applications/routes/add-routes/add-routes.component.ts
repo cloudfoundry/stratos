@@ -59,7 +59,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       domain: new FormControl('', [<any>Validators.required]),
       path: new FormControl('')
     });
-    // this.addRouteMode = this.addRouteModes[0];
+    this.addRouteMode = this.addRouteModes[0];
 
     this.addTCPRoute = new FormGroup({
       domain: new FormControl('', [<any>Validators.required]),
