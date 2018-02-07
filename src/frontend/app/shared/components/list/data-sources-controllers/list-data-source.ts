@@ -12,7 +12,10 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getCurrentPageRequestInfo,
+  getPaginationObservables,
+} from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
