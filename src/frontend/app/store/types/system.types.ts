@@ -1,29 +1,16 @@
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
+import { CNSISModel, EndpointUser } from './cnsis.types';
 export interface SystemInfo {
   version: {
     proxy_version: string,
     database_version: number
   };
-  user: SystemInfoUser;
+  user: EndpointUser;
   endpoints: {
     cf: {
-      [key: string]: SystemInfoEndpoint
+      [key: string]: CNSISModel
     }
   };
-}
-
-export interface SystemInfoEndpoint {
-  guid: string;
-  name: string;
-  version: string;
-  user: SystemInfoUser;
-  type: string;
-}
-
-export interface SystemInfoUser {
-  guid: string;
-  name: string;
-  admin: boolean;
 }
 
 export const systemStoreNames: {
