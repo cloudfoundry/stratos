@@ -1,5 +1,6 @@
 import { inject, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../core/core.module';
@@ -15,24 +16,29 @@ describe('CfAppMapRoutesListConfigService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfAppMapRoutesListConfigService,
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
+      providers: [
+        CfAppMapRoutesListConfigService,
+        { provide: ApplicationService, useClass: ApplicationServiceMock }
       ],
-        imports: [
-          SharedModule,
-          CoreModule,
-          StoreModule.forRoot(
-            appReducers,
-            {
-              initialState
-            }
-          ),
-          NoopAnimationsModule,
-        ]
+      imports: [
+        SharedModule,
+        CoreModule,
+        RouterTestingModule,
+        StoreModule.forRoot(appReducers, {
+          initialState
+        }),
+        NoopAnimationsModule
+      ]
     });
   });
 
-  it('should be created', inject([CfAppMapRoutesListConfigService], (service: CfAppMapRoutesListConfigService) => {
-    expect(service).toBeTruthy();
-  }));
+  it(
+    'should be created',
+    inject(
+      [CfAppMapRoutesListConfigService],
+      (service: CfAppMapRoutesListConfigService) => {
+        expect(service).toBeTruthy();
+      }
+    )
+  );
 });

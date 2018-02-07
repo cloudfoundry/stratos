@@ -1,4 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { CoreModule } from '../../../../core/core.module';
@@ -13,23 +14,24 @@ describe('MapRoutesComponent', () => {
   let component: MapRoutesComponent;
   let fixture: ComponentFixture<MapRoutesComponent>;
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ MapRoutesComponent ],
-      providers: [
-        ListConfig,
-        { provide: ApplicationService, useClass: ApplicationServiceMock }
-
-      ],
-      imports: [
-        CoreModule,
-        SharedModule,
-        createBasicStoreModule(),
-        RouterTestingModule
-      ]
+  beforeEach(
+    async(() => {
+      TestBed.configureTestingModule({
+        declarations: [MapRoutesComponent],
+        providers: [
+          ListConfig,
+          { provide: ApplicationService, useClass: ApplicationServiceMock }
+        ],
+        imports: [
+          CoreModule,
+          SharedModule,
+          createBasicStoreModule(),
+          NoopAnimationsModule,
+          RouterTestingModule
+        ]
+      }).compileComponents();
     })
-    .compileComponents();
-  }));
+  );
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MapRoutesComponent);

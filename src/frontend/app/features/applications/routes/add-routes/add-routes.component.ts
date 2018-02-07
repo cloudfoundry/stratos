@@ -145,6 +145,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       return false;
     }
   }
+
   submit = () => {
     if (this.addRouteMode && this.addRouteMode.id === 'create') {
       // Creating new route
@@ -152,7 +153,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     } else {
       return this.mapRouteSubmit();
     }
-  };
+  }
 
   onSubmit(routeType) {
     this.submitted = true;
