@@ -89,7 +89,7 @@ import {
 } from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 import { CardAppUptimeComponent } from './components/cards/custom-cards/card-app-uptime/card-app-uptime.component';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory.service';
+import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 
 @NgModule({
   imports: [

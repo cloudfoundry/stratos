@@ -12,7 +12,7 @@ import { CNSISModel } from '../../store/types/cnsis.types';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import { ApplicationSchema } from '../../store/actions/application.actions';
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory.service';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 export interface CfOrgSpaceItem {
   list$: Observable<CNSISModel[] | any[]>;

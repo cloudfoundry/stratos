@@ -21037,7 +21037,7 @@ const testInitialStoreState: AppState = {
   /* tslint:enable */
 
 export function getInitialTestStoreState() {
-    return testInitialStoreState;
+    return {...testInitialStoreState};
 }
 
 export function createBasicStoreModule(): ModuleWithProviders {

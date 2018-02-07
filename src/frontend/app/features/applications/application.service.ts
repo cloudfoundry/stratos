@@ -50,7 +50,7 @@ import { selectEntity } from '../../store/selectors/api.selectors';
 import { SpaceSchema } from '../../store/actions/space.action';
 import { selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { ActionState } from '../../store/reducers/api-request-reducer/types';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { schema } from 'normalizr';
 
 export interface ApplicationData {

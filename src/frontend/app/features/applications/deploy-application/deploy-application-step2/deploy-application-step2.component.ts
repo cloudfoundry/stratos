@@ -40,7 +40,7 @@ import {
   GithubBranchSchema,
 } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-deploy-application-step2',

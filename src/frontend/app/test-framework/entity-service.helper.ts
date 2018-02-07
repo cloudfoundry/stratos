@@ -28,6 +28,6 @@ export function generateTestEntityServiceProvider(
   return {
     provide: EntityService,
     useFactory,
-    deps: [Store]
+    deps: [Store, EntityServiceFactory]
   };
 }

@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 
 const applicationServiceFactory = (

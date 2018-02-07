@@ -13,7 +13,7 @@ import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { AppStat, AppSummary } from '../store/types/app-metadata.types';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
-import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory.service';
+import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
@@ -71,7 +71,8 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
       Store,
       EntityServiceFactory,
       ApplicationStateService,
-      ApplicationEnvVarsService
+      ApplicationEnvVarsService,
+      PaginationMonitorFactory
     ]
   };
 }

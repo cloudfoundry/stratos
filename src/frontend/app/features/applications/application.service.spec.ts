@@ -15,6 +15,8 @@ import { ApplicationsModule } from './applications.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { generateTestApplicationServiceProvider } from '../../test-framework/application-service-helper';
 import { CoreModule } from '../../core/core.module';
+import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 
 describe('ApplicationService', () => {
 
@@ -36,7 +38,9 @@ describe('ApplicationService', () => {
         ),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
-        ApplicationEnvVarsService
+        ApplicationEnvVarsService,
+        EntityMonitorFactory,
+        PaginationMonitorFactory
       ]
     });
   });
