@@ -31,7 +31,7 @@ export class SystemEffects {
       this.store.dispatch(new StartRequestAction(apiAction));
       return this.httpClient.get('/pp/v1/info')
         .mergeMap((info: SystemInfo) => {
-          return [new GetSystemSuccess(info), new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)];
+          return [new GetSystemSuccess(info, action.login), new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)];
         }).catch((e) => {
           return [new GetSystemFailed(), new WrapperRequestActionFailed('Could not fetch system info', apiAction)];
         });
