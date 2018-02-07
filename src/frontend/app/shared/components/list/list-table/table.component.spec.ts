@@ -27,7 +27,7 @@ import { UsageGaugeComponent } from '../../usage-gauge/usage-gauge.component';
 import { CdkTableModule } from '@angular/cdk/table';
 import { TableRowComponent } from './table-row/table-row.component';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
-import { EntityInfo } from '../../../../store/types/api.types';
+import { IListConfig } from '../list.component.types';
 
 
 describe('TableComponent', () => {
@@ -71,9 +71,13 @@ describe('TableComponent', () => {
     component.paginationController = {
       sort$: Observable.of({} as ListSort)
     } as IListPaginationController<any>;
-    component.dataSource = {
-      connect() { return Observable.of([]); },
-    } as IListDataSource<ListAppEnvVar>;
+    component.listConfig = {
+      getDataSource: () => ({
+        connect() { return Observable.of([]); },
+      } as IListDataSource<ListAppEnvVar>),
+      getMultiActions: () => [],
+      getSingleActions: () => []
+    } as IListConfig<ListAppEnvVar>;
     fixture.detectChanges();
   });
 
