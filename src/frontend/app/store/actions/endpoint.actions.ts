@@ -19,6 +19,10 @@ export const DISCONNECT_ENDPOINTS = '[Endpoints] Disconnect';
 export const DISCONNECT_ENDPOINTS_SUCCESS = '[Endpoints] Disconnect succeed';
 export const DISCONNECT_ENDPOINTS_FAILED = '[Endpoints] Disconnect failed';
 
+export const REGISTER_ENDPOINTS = '[Endpoints] Register';
+export const REGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Register succeed';
+export const REGISTER_ENDPOINTS_FAILED = '[Endpoints] Register failed';
+
 export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
@@ -72,4 +76,17 @@ export class UnregisterEndpoint implements Action {
     public guid: string
   ) { }
   type = UNREGISTER_ENDPOINTS;
+}
+
+export class RegisterEndpoint implements Action {
+  constructor(
+    public name: string,
+    public endpoint: string,
+    public skipSslValidation: boolean,
+  ) { }
+  type = REGISTER_ENDPOINTS;
+
+  public guid(): string {
+    return '<New Endpoint>' + this.name;
+  }
 }

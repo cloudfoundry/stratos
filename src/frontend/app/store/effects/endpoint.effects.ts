@@ -15,10 +15,14 @@ import {
   GetAllEndpoints,
   GetAllEndpointsFailed,
   GetAllEndpointsSuccess,
+  REGISTER_ENDPOINTS,
+  RegisterEndpoint,
   UNREGISTER_ENDPOINTS,
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
+  REGISTER_ENDPOINTS_SUCCESS,
+  REGISTER_ENDPOINTS_FAILED,
 } from '../actions/endpoint.actions';
 import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
@@ -53,13 +57,13 @@ export class EndpointsEffect {
 
   @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
     .pipe(mergeMap(action => {
-      const paginationAction = new GetAllEndpoints(action.login);
+      const endpointsActions = new GetAllEndpoints(action.login);
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(paginationAction, actionType));
+      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
 
-      const endpoints = action.payload.endpoints.cf;
+      const endpoints = action.payload.endpoints.cf; // We're only storing cf's??
 
-      // Data is an aarray of endpoints
+      // Data is an array of endpoints
       const mappedData = {
         entities: {
           [endpointStoreNames.type]: {}
@@ -79,8 +83,8 @@ export class EndpointsEffect {
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
       return [
-        new WrapperRequestActionSuccess(mappedData, paginationAction, actionType),
-        new GetAllEndpointsSuccess(paginationAction.login),
+        new WrapperRequestActionSuccess(mappedData, endpointsActions, actionType),
+        new GetAllEndpointsSuccess(mappedData, endpointsActions.login),
       ];
     }));
 
@@ -143,10 +147,10 @@ export class EndpointsEffect {
       );
     });
 
-  @Effect() register$ = this.actions$.ofType<RegisterCnis>(REGISTER_CNSIS)
+  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid(), action.type, CNSISEffect.registeringKey);
+      const apiAction = this.getEndpointAction(action.guid(), action.type, EndpointsEffect.registeringKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_name': action.name,
@@ -155,12 +159,12 @@ export class EndpointsEffect {
         }
       });
 
-      return this.doCnisAction(
+      return this.doEndpointAction(
         apiAction,
         '/pp/v1/register/cf',
         params,
         'create',
-        [REGISTER_CNSIS_SUCCESS, REGISTER_CNSIS_FAILED]
+        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED]
       );
     });
 

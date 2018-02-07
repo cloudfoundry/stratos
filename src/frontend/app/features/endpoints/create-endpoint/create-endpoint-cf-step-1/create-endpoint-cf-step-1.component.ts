@@ -9,15 +9,15 @@ import { UtilsService } from '../../../../core/utils.service';
 import { StepOnNextFunction, IStepperStep } from '../../../../shared/components/stepper/step/step.component';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { RegisterCnis, GetAllCNSIS, EndpointSchema } from '../../../../store/actions/cnsis.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { selectEntity, selectUpdateInfo, selectRequestInfo, getAPIRequestDataState } from '../../../../store/selectors/api.selectors';
-import { CNSISEffect } from '../../../../store/effects/cnsis.effects';
 import { shareReplay, withLatestFrom, map } from 'rxjs/operators';
 import { tag } from 'rxjs-spy/operator/tag';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { EndpointsDataSource } from '../../../../shared/components/list/list-types/endpoint/endpoints-data-source';
 import { denormalize } from 'normalizr';
+import { EndpointSchema, GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/endpoint.actions';
+import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
@@ -28,7 +28,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
   existingEndpoints: Observable<{
     names: string[],
-    urls:  string[],
+    urls: string[],
   }>;
 
   validate: Observable<boolean>;
@@ -40,8 +40,8 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
   constructor(private store: Store<AppState>, public utilsService: UtilsService) {
 
-    this.existingEndpoints = store.select(selectPaginationState(cnsisStoreNames.type, GetAllCNSIS.storeKey))
-    .pipe(
+    this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
+      .pipe(
       withLatestFrom(store.select(getAPIRequestDataState)),
       map(([pagination, entities]) => {
         const pages = Object.values(pagination.ids);
@@ -52,13 +52,13 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
           urls: endpoints.map(ep => `${ep.api_endpoint.Scheme}://${ep.api_endpoint.Host}`),
         };
       })
-    );
+      );
   }
 
-  ngOnInit() {}
+  ngOnInit() { }
 
   onNext: StepOnNextFunction = () => {
-    const action = new RegisterCnis(
+    const action = new RegisterEndpoint(
       this.nameField.value,
       this.urlField.value,
       !!this.skipSllField.value
@@ -71,23 +71,23 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
     ).filter(update => !!update);
 
     return update$.pairwise()
-    .filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy))
-    .map(([oldVal, newVal]) => newVal)
-    .map(result => {
-      if (!result.error) {
-        this.store.dispatch(new RouterNav({ path: ['endpoints'] }));
-      }
-      return {
-        success: !result.error
-      };
-    });
+      .filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy))
+      .map(([oldVal, newVal]) => newVal)
+      .map(result => {
+        if (!result.error) {
+          this.store.dispatch(new RouterNav({ path: ['endpoints'] }));
+        }
+        return {
+          success: !result.error
+        };
+      });
   }
 
   private getUpdateSelector(guid) {
     return selectUpdateInfo(
-      cnsisStoreNames.type,
+      endpointStoreNames.type,
       guid,
-      CNSISEffect.registeringKey,
+      EndpointsEffect.registeringKey,
     );
   }
 
