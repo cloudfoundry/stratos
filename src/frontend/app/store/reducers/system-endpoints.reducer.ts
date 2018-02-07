@@ -40,8 +40,7 @@ function succeedEndpointInfo(state, action) {
     const endpointInfo = payload.endpoints.cf[guid];
     newState[guid] = {
       ...newState[guid],
-      info: payload.endpoints.cf[guid],
-      connectionStatus: endpointInfo ? endpointInfo.user ? 'connected' : 'disconnected' : 'unknown'
+      ...endpointInfo
     };
   });
   return newState;
