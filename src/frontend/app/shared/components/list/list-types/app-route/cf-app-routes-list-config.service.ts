@@ -107,14 +107,13 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
       columnId: 'route',
       headerCell: () => 'Route',
       cellComponent: TableCellRouteComponent,
-      sort: true,
-      cellFlex: '3'
+      cellFlex: '4'
     },
     {
       columnId: 'tcproute',
       headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
-      cellFlex: '3'
+      cellFlex: '4'
     }
   ];
 
@@ -162,18 +161,18 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-        take(1),
-        tap(domain => {
-          const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialog(
-            'Delete Route',
-            `Are you sure you want to delete the route \'${routeUrl}\'?`,
-            'Delete'
-          );
-          this.confirmDialog.open(confirmation, () =>
-            this.dispatchDeleteAction(item)
-          );
-        })
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialog(
+          'Delete Route',
+          `Are you sure you want to delete the route \'${routeUrl}\'?`,
+          'Delete'
+        );
+        this.confirmDialog.open(confirmation, () =>
+          this.dispatchDeleteAction(item)
+        );
+      })
       )
       .subscribe();
   }
@@ -182,18 +181,18 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-        take(1),
-        tap(domain => {
-          const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialog(
-            'Unmap Route from Application',
-            `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-            'Unmap'
-          );
-          this.confirmDialog.open(confirmation, () =>
-            this.dispatchUnmapAction(item)
-          );
-        })
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialog(
+          'Unmap Route from Application',
+          `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+          'Unmap'
+        );
+        this.confirmDialog.open(confirmation, () =>
+          this.dispatchUnmapAction(item)
+        );
+      })
       )
       .subscribe();
   }
