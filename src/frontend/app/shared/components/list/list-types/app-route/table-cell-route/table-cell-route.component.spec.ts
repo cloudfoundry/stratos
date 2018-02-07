@@ -2,6 +2,9 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellRouteComponent } from './table-cell-route.component';
 import { EntityInfo } from '../../../../../../store/types/api.types';
+import { SharedModule } from '../../../../../shared.module';
+import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 
 describe('TableCellRouteComponent', () => {
   let component: TableCellRouteComponent<any>;
@@ -9,7 +12,12 @@ describe('TableCellRouteComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellRouteComponent ]
+      declarations: [ TableCellRouteComponent ],
+      imports: [
+        SharedModule,
+        RouterTestingModule,
+        createBasicStoreModule(),
+      ]
     })
     .compileComponents();
   }));
