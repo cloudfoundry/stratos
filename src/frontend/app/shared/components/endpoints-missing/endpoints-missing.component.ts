@@ -65,7 +65,8 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
 
       setTimeout(() => {
         this.firstLine = showNoneConnected ? this.noneConnectedText.firstLineText : this.noneRegisteredText.firstLineText;
-        this.secondLine = showNoneConnected ? this.noneConnectedText.secondLineText : this.showToolbarHint ? {} : this.noneRegisteredText.secondLineText;
+        this.secondLine = showNoneConnected ? this.noneConnectedText.secondLineText :
+          this.showToolbarHint ? {} : this.noneRegisteredText.secondLineText;
         this.toolbarLink = showNoneConnected ? {} : this.showToolbarHint ? this.noneRegisteredText.toolbarLink : {};
         this.hide = !showNoneRegistered && !showNoneConnected;
         this.showSnackBar(this.showSnackForNoneConnected && haveRegistered && !haveConnected);
