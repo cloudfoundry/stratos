@@ -12,14 +12,13 @@ describe('TableCellRouteComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellRouteComponent ],
+      declarations: [TableCellRouteComponent],
       imports: [
-        SharedModule,
         RouterTestingModule,
         createBasicStoreModule(),
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
