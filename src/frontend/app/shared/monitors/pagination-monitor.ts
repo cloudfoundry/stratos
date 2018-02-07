@@ -32,13 +32,11 @@ export class PaginationMonitor<T = any> {
   constructor(
     private store: Store<AppState>,
     private paginationKey: string,
-    private entityKey: string,
     private schema: schema.Entity
   ) {
     this.init(
       store,
       paginationKey,
-      entityKey,
       schema
     );
   }
@@ -76,12 +74,11 @@ export class PaginationMonitor<T = any> {
   private init(
     store: Store<AppState>,
     paginationKey: string,
-    entityKey: string,
     schema: schema.Entity
   ) {
     this.pagination$ = this.createPaginationObservable(
       store,
-      entityKey,
+      schema.key,
       paginationKey
     );
     this.currentPage$ = this.createPageObservable(
@@ -107,13 +104,13 @@ export class PaginationMonitor<T = any> {
   ) {
     return combineLatest(
       pagination$,
-      this.store.select(selectEntities<T>(this.entityKey)),
+      this.store.select(selectEntities<T>(this.schema.key)),
     ).pipe(
       filter(([pagination, entities]) => this.isPageReady(pagination)),
       withLatestFrom(this.store.select(getAPIRequestDataState)),
       map(([[pagination, entities], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
-        return page.length ? denormalize(page, [schema], entities).filter(ent => !!ent) : null;
+        return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : null;
       }),
       shareReplay(1)
       );

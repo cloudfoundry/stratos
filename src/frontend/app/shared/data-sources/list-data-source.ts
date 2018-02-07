@@ -24,6 +24,7 @@ import { getListStateObservable, getListStateObservables, ListState } from '../.
 import { IListDataSourceConfig } from './list-data-source-config';
 import { tag } from 'rxjs-spy/operators/tag';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { PaginationMonitor } from '../monitors/pagination-monitor';
 export interface DataFunctionDefinition {
   type: 'sort' | 'filter';
   orderKey?: string;
@@ -92,15 +93,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   ) {
     super();
     this.init(config);
+    const paginationMonitor = new PaginationMonitor(
+      this.store,
+      this.paginationKey,
+      this.sourceScheme
+    );
     this.addItem = this.getEmptyType();
     const { view, } = getListStateObservables(this.store, this.paginationKey);
     this.view$ = view;
-
     this.entityKey = this.sourceScheme.key;
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
       action: this.action,
-      schema: [this.sourceScheme]
+      paginationMonitor
     },
       this.isLocal
     );

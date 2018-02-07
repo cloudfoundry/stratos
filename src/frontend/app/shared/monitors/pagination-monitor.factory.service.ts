@@ -15,17 +15,15 @@ export class PaginationMonitorFactory {
 
   public create(
     paginationKey: string,
-    entityKey: string,
     schema: schema.Entity,
   ) {
-    const cacheKey = paginationKey + entityKey;
+    const cacheKey = paginationKey + schema.key;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {
       const monitor = new PaginationMonitor(
         this.store,
         paginationKey,
-        entityKey,
         schema
       );
       this.monitorCache[cacheKey] = monitor;

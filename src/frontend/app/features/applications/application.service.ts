@@ -36,6 +36,7 @@ import {
   AppSummarySchema,
   AppSummary,
   AppEnvVarsSchema,
+  AppStatSchema,
 } from '../../store/types/app-metadata.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction, AppMetadataTypes } from '../../store/actions/app-metadata.actions';
@@ -49,6 +50,8 @@ import { selectEntity } from '../../store/selectors/api.selectors';
 import { SpaceSchema } from '../../store/actions/space.action';
 import { selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory.service';
+import { schema } from 'normalizr';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -71,7 +74,9 @@ export class ApplicationService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
-    private appEnvVarsService: ApplicationEnvVarsService) {
+    private appEnvVarsService: ApplicationEnvVarsService,
+    private paginationMonitorFactory: PaginationMonitorFactory
+  ) {
 
     this.appEntityService = this.entityServiceFactory.create(
       ApplicationSchema.key,
@@ -169,21 +174,27 @@ export class ApplicationService {
     this.waitForAppEntity$ = this.appEntityService.waitForEntity$.shareReplay(1);
 
     this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
-
+    const action = new GetAppEnvVarsAction(this.appGuid, this.cfGuid);
     this.appEnvVars = getPaginationObservables<APIResource>({
       store: this.store,
-      action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
-      schema: AppEnvVarsSchema
+      action,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        action.paginationKey,
+        AppEnvVarSchema
+      )
     }, true);
   }
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
-
+    const action = new GetAppStatsAction(this.appGuid, this.cfGuid);
     const appStats = getPaginationObservables<APIResource<AppStat>>({
       store: this.store,
-      action: new GetAppStatsAction(this.appGuid, this.cfGuid),
-      schema: AppStatsSchema
+      action,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        action.paginationKey,
+        AppStatSchema
+      )
     }, true);
 
     this.appStats$ = this.waitForAppEntity$

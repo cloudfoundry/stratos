@@ -7,6 +7,7 @@ import { PaginatedAction } from '../../store/types/pagination.types';
 import { DataFunction, DataFunctionDefinition } from './list-data-source';
 import { getRowUniqueId, RowsState } from './list-data-source-types';
 import { Observable } from 'rxjs/Observable';
+import { PaginationMonitor } from '../monitors/pagination-monitor';
 
 export interface IListDataSourceConfig<A, T> {
   store: Store<AppState>;

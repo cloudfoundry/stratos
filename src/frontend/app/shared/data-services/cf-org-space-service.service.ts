@@ -12,6 +12,7 @@ import { CNSISModel } from '../../store/types/cnsis.types';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import { ApplicationSchema } from '../../store/actions/application.actions';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory.service';
 
 export interface CfOrgSpaceItem {
   list$: Observable<CNSISModel[] | any[]>;
@@ -36,12 +37,18 @@ export class CfOrgSpaceDataService {
   private allOrgs$ = getPaginationObservables({
     store: this.store,
     action: this.paginationAction,
-    schema: [OrganizationSchema]
+    paginationMonitor: this.paginationMonitorFactory.create(
+      this.paginationAction.paginationKey,
+      OrganizationSchema
+    )
   });
 
   private getEndpointsAndOrgs$: Observable<any>;
 
-  constructor(private store: Store<AppState>) {
+  constructor(
+    private store: Store<AppState>,
+    public paginationMonitorFactory: PaginationMonitorFactory
+  ) {
     this.createCf();
     this.init();
     this.createOrg();

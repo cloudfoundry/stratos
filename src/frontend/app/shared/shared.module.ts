@@ -89,6 +89,7 @@ import {
 } from './components/table/custom-cells/table-cell-app-instances/table-cell-app-instances.component';
 import { CardAppUptimeComponent } from './components/cards/custom-cards/card-app-uptime/card-app-uptime.component';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory.service';
 
 @NgModule({
   imports: [
@@ -216,7 +217,8 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
     ApplicationStateService,
     CfOrgSpaceDataService,
     ConfirmationDialogService,
-    EntityMonitorFactory
+    EntityMonitorFactory,
+    PaginationMonitorFactory
   ]
 })
 export class SharedModule { }

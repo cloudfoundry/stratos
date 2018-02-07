@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory.service';
 
 
 const applicationServiceFactory = (
@@ -17,7 +18,8 @@ const applicationServiceFactory = (
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   appStateService: ApplicationStateService,
-  appEnvVarsService: ApplicationEnvVarsService
+  appEnvVarsService: ApplicationEnvVarsService,
+  paginationMonitorFactory: PaginationMonitorFactory
 ) => {
   const { id, cfId } = activatedRoute.snapshot.params;
   return new ApplicationService(
@@ -27,6 +29,7 @@ const applicationServiceFactory = (
     entityServiceFactory,
     appStateService,
     appEnvVarsService,
+    paginationMonitorFactory
   );
 };
 
@@ -53,7 +56,7 @@ const entityServiceFactory = (
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
-      deps: [Store, ActivatedRoute, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService]
+      deps: [Store, ActivatedRoute, EntityServiceFactory, ApplicationStateService, ApplicationEnvVarsService, PaginationMonitorFactory]
     },
     {
       provide: EntityService,

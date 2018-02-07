@@ -37,8 +37,10 @@ import {
   GithubCommit,
   GithubCommitSchema,
   GithubRepo,
+  GithubBranchSchema,
 } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory.service';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -86,7 +88,8 @@ export class DeployApplicationStep2Component
   constructor(
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) { }
 
   onNext = () => {
@@ -113,11 +116,15 @@ export class DeployApplicationStep2Component
         if (this.branchesSubscription) {
           this.branchesSubscription.unsubscribe();
         }
+        const action = new FetchBranchesForProject(p.name);
         this.branchesSubscription = getPaginationObservables<APIResource>(
           {
             store: this.store,
-            action: new FetchBranchesForProject(p.name),
-            schema: GithubBranchesSchema
+            action,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              action.paginationKey,
+              GithubBranchSchema
+            )
           },
           true
         ).entities$.subscribe();

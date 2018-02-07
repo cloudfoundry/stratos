@@ -6,12 +6,13 @@ import { Observable } from 'rxjs/Rx';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
-import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay, switchMap } from 'rxjs/operators';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { distinctPageUntilChanged } from '../../../shared/data-sources/list-data-source';
 import { ActionState } from '../api-request-reducer/types';
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -115,7 +116,7 @@ export const getPaginationPages = <T = any>(store: Store<AppState>, action: Pagi
 };
 
 export const getPaginationObservables = <T = any>(
-  { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
+  { store, action, paginationMonitor }: { store: Store<AppState>, action: PaginatedAction, paginationMonitor: PaginationMonitor },
   isLocal = false
 ): PaginationObservables<T> => {
   const { entityKey, paginationKey } = action;
@@ -131,7 +132,7 @@ export const getPaginationObservables = <T = any>(
     entityKey,
     paginationKey,
     action,
-    schema,
+    paginationMonitor,
     isLocal
   );
 
@@ -143,8 +144,9 @@ function getObservables<T = any>(
   entityKey: string,
   paginationKey: string,
   action: PaginatedAction,
-  schema: Schema,
-  isLocal = false)
+  paginationMonitor: PaginationMonitor,
+  isLocal = false
+)
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
@@ -174,19 +176,7 @@ function getObservables<T = any>(
       filter(([ent, pagination]) => {
         return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       }),
-      map(([ent, pagination]) => pagination),
-      withLatestFrom(store.select(getAPIRequestDataState)),
-      map(([pagination, entities]) => {
-        let page;
-        if (isLocal) {
-          const pages = Object.values(pagination.ids);
-          page = [].concat.apply([], pages);
-        } else {
-          page = pagination.ids[pagination.currentPage];
-        }
-
-        return page ? denormalize(page, schema, entities).filter(ent => !!ent) : null;
-      }),
+      switchMap(() => paginationMonitor.currentPage$),
       shareReplay(1)
       );
 
