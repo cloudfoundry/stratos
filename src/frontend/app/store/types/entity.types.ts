@@ -1,9 +1,10 @@
-import { systemStoreNames, SystemInfo } from './system.types';
-import { cnsisStoreNames, CNSISModel } from './cnsis.types';
+import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
-import { IRequestTypeState, IRequestEntityTypeState } from '../app-state';
 import { APIResource } from './api.types';
-import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from './app-metadata.types';
+import { AppEnvVarSchema, AppStatSchema, AppSummarySchema } from './app-metadata.types';
+import { CNSISModel } from './cnsis.types';
+import { SystemInfo } from './system.types';
+
 export interface IRequestDataState extends IRequestTypeState {
   application: IRequestEntityTypeState<APIResource>;
   stack: IRequestEntityTypeState<APIResource>;
@@ -15,6 +16,7 @@ export interface IRequestDataState extends IRequestTypeState {
   system: IRequestEntityTypeState<SystemInfo>;
   githubBranches: IRequestEntityTypeState<APIResource>;
   githubCommits: IRequestEntityTypeState<APIResource>;
+  domain: IRequestEntityTypeState<APIResource>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -26,8 +28,9 @@ export interface IRequestState extends IRequestTypeState {
   event: IRequestEntityTypeState<RequestInfoState>;
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   system: IRequestEntityTypeState<RequestInfoState>;
-  githubBranches:  IRequestEntityTypeState<RequestInfoState>;
+  githubBranches: IRequestEntityTypeState<RequestInfoState>;
   githubCommits: IRequestEntityTypeState<APIResource>;
+  domain: IRequestEntityTypeState<APIResource>;
 }
 
 export const defaultCfEntitiesState = {
@@ -39,7 +42,8 @@ export const defaultCfEntitiesState = {
   event: {},
   endpoint: {},
   githubBranches: {},
+  domain: {},
   [AppEnvVarSchema.key]: {},
   [AppStatSchema.key]: {},
-  [AppSummarySchema.key]: {},
+  [AppSummarySchema.key]: {}
 };
