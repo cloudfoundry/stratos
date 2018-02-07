@@ -1,4 +1,3 @@
-import { SystemInfoEndpoint } from './system.types';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 import { EndpointSchema } from '../actions/endpoint.actions';
 
@@ -31,8 +30,15 @@ export interface EndpointModel {
   token_endpoint?: string;
   // This is generated client side when we login
   registered?: boolean;
-  info?: SystemInfoEndpoint;
+  user?: EndpointUser;
   connectionStatus?: endpointConnectionStatus;
+}
+
+// Metadata for the user connected to an endpoint
+export interface EndpointUser {
+  guid: string;
+  name: string;
+  admin: boolean;
 }
 
 export interface EndpointState {

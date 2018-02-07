@@ -32,6 +32,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 import { SessionData } from '../types/auth.types';
+import { GetSystemInfo } from '../actions/system.actions';
 
 
 @Injectable()
@@ -77,21 +78,12 @@ export class AuthEffect {
         .mergeMap(data => {
           const sessionData: SessionData = data.json();
           sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
-          return [new VerifiedSession(sessionData, action.updateEndpoints)];
+          return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
         })
         .catch((err, caught) => {
           return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
         });
     });
-
-  @Effect() verifiedAuth$ = this.actions$.ofType<VerifiedSession>(SESSION_VERIFIED)
-    .mergeMap(action => {
-      if (action.updateEndpoints) {
-        return [new GetAllEndpoints(true)];
-      }
-      return [];
-    });
-
 
   @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS)
     .mergeMap(action => {
@@ -99,13 +91,6 @@ export class AuthEffect {
         return [new LoginSuccess()];
       }
       return [];
-    });
-
-  @Effect() EndpointsFailed$ = this.actions$.ofType<GetAllEndpointsFailed>(GET_ENDPOINTS_FAILED)
-    .map(action => {
-      if (action.login) {
-        return new LoginFailed(`Couldn't fetch endpoints.`);
-      }
     });
 
   @Effect() invalidSessionAuth$ = this.actions$.ofType<VerifySession>(SESSION_INVALID)

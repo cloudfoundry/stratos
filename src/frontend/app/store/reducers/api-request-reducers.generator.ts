@@ -51,6 +51,7 @@ const entities = [
   'route',
   'event',
   endpointStoreNames.type,
+  'domain',
   'system',
   'routerReducer',
   'createApplication',

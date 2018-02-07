@@ -264,10 +264,14 @@ export class ApplicationService {
     if (!app.entity.routes) {
       return null;
     }
-    const nonTCPRoutes = app.entity.routes
-      .filter(p => !isTCPRoute(p));
+    const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
     if (nonTCPRoutes.length > 0) {
-      return getRoute(nonTCPRoutes[0], true);
+      return getRoute(
+        nonTCPRoutes[0],
+        true,
+        false,
+        nonTCPRoutes[0].entity.domain
+      );
     }
     return null;
   }

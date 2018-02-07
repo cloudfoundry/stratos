@@ -55,9 +55,4 @@ export const defaultRequestState = {
   message: ''
 };
 
-export type IRequestArray = [
-  string,
-  string,
-  string
-];
-
+export type IRequestArray = [string, string, string];

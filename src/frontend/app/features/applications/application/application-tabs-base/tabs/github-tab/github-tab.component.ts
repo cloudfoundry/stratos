@@ -44,6 +44,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   gitHubRepo$: Observable<GithubRepo>;
   commit$: Observable<GithubCommit>;
   isHead$: Observable<boolean>;
+  initialised$: Observable<boolean>;
   private githubProjectEntityService: EntityService;
 
   ngOnDestroy(): void {
@@ -100,7 +101,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
               p.entity.entity.commit.sha ===
               stProject.deploySource.commit.trim()
             );
-          })
+          }),
+          tap(p => (this.initialised$ = Observable.of(true)))
         );
       })
     );

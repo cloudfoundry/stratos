@@ -5,7 +5,7 @@ Last Updated: 31 January 2018
 The current high-level features are:
 
 * Angular 2 - move to Angular 2 for the front-end UI
-* Services - make Services a first-class citizen in the UI
+* Services - make Services a first-class citizen in the UI - See [here](planning/services.md)
 * Metrics - add metrics to Stratos. See [here](planning/metrics.md) for some initial thoughts
 
 
