@@ -1,4 +1,4 @@
-.container {
+.app-no-content-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -10,14 +10,13 @@
   &>* {
     margin-bottom: 20px;
   }
-  mat-icon {
-    transform: rotate(90deg);
-    font-size: 45px;
-    height: 45px;
-    width: 45px;
+  > mat-icon {
+    font-size: 96px;
+    height: 96px;
+    width: 96px;
   }
   .first-line {
-    font-size: 28px;
+    font-size: 30px;
   }
   .second-line {
     font-size: 24px;
@@ -25,5 +24,23 @@
   .first-line,
   .second-line {
     max-width: 700px;
+  }
+
+  &__link {
+    position: absolute;
+    top: 54px;
+    right: 54px;
+    display: flex;
+
+    &-icon {
+      transform: rotate(90deg);
+      font-size: 44px;
+      height: 44px;
+      width: 44px;
+    }
+    &-text {
+      margin-top: 26px;
+      font-size: 16px;
+    }
   }
 }
