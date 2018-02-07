@@ -1,15 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterTestingModule } from '@angular/router/testing';
+import { StoreModule } from '@ngrx/store';
 
-import { AddRoutesComponent } from './add-routes.component';
 import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../../shared/shared.module';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ApplicationService } from '../../application.service';
-import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
-import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../../../../store/reducers.module';
+import { ApplicationServiceMock } from '../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ApplicationService } from '../../application.service';
+import { AddRoutesComponent } from './add-routes.component';
+import { MapRoutesComponent } from '../map-routes/map-routes.component';
 
 describe('AddRoutesComponent', () => {
   let component: AddRoutesComponent;
@@ -18,7 +19,7 @@ describe('AddRoutesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddRoutesComponent ],
+      declarations: [ AddRoutesComponent, MapRoutesComponent ],
       imports: [
         CoreModule,
         SharedModule,

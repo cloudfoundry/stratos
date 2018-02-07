@@ -9,14 +9,23 @@ import { filter, map, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { AssociateRouteWithAppApplication } from '../../../../store/actions/application.actions';
-import { CreateRoute, GetAppRoutes, RouteSchema } from '../../../../store/actions/route.actions';
+import {
+  CreateRoute,
+  GetAppRoutes,
+  RouteSchema
+} from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { selectEntity, selectNestedEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import {
+  selectEntity,
+  selectNestedEntity,
+  selectRequestInfo
+} from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-add-routes',
@@ -40,6 +49,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     entity: {},
     metadata: {}
   });
+  appUrl: string;
   isRouteSelected$ = new BehaviorSubject<boolean>(false);
   addRouteModes: RouteMode[] = [
     { id: 'create', label: 'Create and map new route' },
@@ -54,6 +64,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
+    this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/summary`;
   }
 
   appService = this.applicationService;
@@ -121,6 +132,28 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     return form.value[key] !== '' ? form.value[key] : null;
   }
 
+  validate(): boolean {
+    if (this.addRouteMode && this.addRouteMode.id === 'create') {
+      return this.createTCPRoute
+        ? this.addTCPRoute.valid
+        : this.addHTTPRoute.valid;
+    } else {
+      try {
+        return this.isRouteSelected$.getValue();
+      } catch (e) {}
+
+      return false;
+    }
+  }
+  submit = () => {
+    if (this.addRouteMode && this.addRouteMode.id === 'create') {
+      // Creating new route
+      return this.createTCPRoute ? this.onSubmit('tcp') : this.onSubmit('http');
+    } else {
+      return this.mapRouteSubmit();
+    }
+  };
+
   onSubmit(routeType) {
     this.submitted = true;
     const formGroup =
@@ -171,13 +204,20 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       );
 
     this.subscriptions.push(associateRoute$.subscribe());
+    return Observable.of({ success: true });
   }
 
   private displaySnackBar() {
     if (this.createTCPRoute) {
-      this.snackBar.open('Failed to create route! Please ensure the domain has a TCP routing group associated', 'Dismiss');
+      this.snackBar.open(
+        'Failed to create route! Please ensure the domain has a TCP routing group associated',
+        'Dismiss'
+      );
     } else {
-      this.snackBar.open('Failed to create route! The hostname may have been taken, please try again with a different name', 'Dismiss');
+      this.snackBar.open(
+        'Failed to create route! The hostname may have been taken, please try again with a different name',
+        'Dismiss'
+      );
     }
   }
 
@@ -207,10 +247,17 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
       this.subscriptions.push(appServiceSub$.subscribe());
     });
+    return Observable.of({ success: true });
   }
 
   private associateRoute(route: any) {
-    this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, route.metadata.guid, this.cfGuid));
+    this.store.dispatch(
+      new AssociateRouteWithAppApplication(
+        this.appGuid,
+        route.metadata.guid,
+        this.cfGuid
+      )
+    );
   }
 
   toggleCreateTCPRoute() {

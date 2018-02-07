@@ -14,7 +14,6 @@ describe('TableCellRouteComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ TableCellRouteComponent ],
       imports: [
-        SharedModule,
         RouterTestingModule,
         createBasicStoreModule(),
       ]
