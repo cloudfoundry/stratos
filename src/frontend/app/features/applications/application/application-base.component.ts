@@ -31,12 +31,12 @@ const applicationServiceFactory = (
 };
 
 const entityServiceFactory = (
-  store: Store<AppState>,
+  _entityServiceFactory: EntityServiceFactory,
   activatedRoute: ActivatedRoute
 ) => {
   const { id, cfId } = activatedRoute.snapshot.params;
-  return new EntityService(
-    store,
+  // const entityMonitor = new en
+  return _entityServiceFactory.create(
     ApplicationSchema.key,
     ApplicationSchema,
     id,
@@ -58,7 +58,7 @@ const entityServiceFactory = (
     {
       provide: EntityService,
       useFactory: entityServiceFactory,
-      deps: [Store, ActivatedRoute]
+      deps: [EntityServiceFactory, ActivatedRoute]
     }
   ]
 })

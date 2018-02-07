@@ -4,6 +4,8 @@ import { AppState } from '../store/app-state';
 import { EntityService } from '../core/entity-service';
 import { schema } from 'normalizr';
 import { RequestSectionKeys } from '../store/reducers/api-request-reducer/types';
+import { EntityMonitor } from '../shared/monitors/entity-monitor';
+import { EntityServiceFactory } from '../core/entity-service-factory.service';
 
 export function generateTestEntityServiceProvider(
   guid: string,
@@ -11,10 +13,10 @@ export function generateTestEntityServiceProvider(
   action: IRequestAction
 ) {
   const useFactory = (
-    store: Store<AppState>
+    store: Store<AppState>,
+    entityServiceFactory: EntityServiceFactory
   ) => {
-    return new EntityService(
-      store,
+    return entityServiceFactory.create(
       schema.key,
       schema,
       guid,

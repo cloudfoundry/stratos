@@ -43,7 +43,7 @@ export interface RequestInfoState {
   message: string;
 }
 
-export const defaultRequestState = {
+const defaultRequestState = {
   fetching: false,
   updating: {
     _root_: getDefaultActionState()
@@ -54,6 +54,10 @@ export const defaultRequestState = {
   response: null,
   message: ''
 };
+
+export function getDefaultRequestState() {
+  return { ...defaultRequestState };
+}
 
 export type IRequestArray = [
   string,
