@@ -152,17 +152,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         map(route => {
           if (route.error) {
             this.submitted = false;
-            if (this.createTCPRoute) {
-              this.snackBar.open(
-                'Failed to create route! Please ensure the domain has a TCP routing group associated',
-                'Dismiss'
-              );
-            } else {
-              this.snackBar.open(
-                'Failed to create route! The hostname may have been taken, please try again with a different name',
-                'Dismiss'
-              );
-            }
+            this.displaySnackBar();
           } else {
             const routeAssignAction = new AssociateRouteWithAppApplication(
               this.appGuid,
@@ -183,15 +173,17 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.subscriptions.push(associateRoute$.subscribe());
   }
 
+  private displaySnackBar() {
+    if (this.createTCPRoute) {
+      this.snackBar.open('Failed to create route! Please ensure the domain has a TCP routing group associated', 'Dismiss');
+    } else {
+      this.snackBar.open('Failed to create route! The hostname may have been taken, please try again with a different name', 'Dismiss');
+    }
+  }
+
   mapRouteSubmit() {
     this.selectedRoute$.subscribe(route => {
-      this.store.dispatch(
-        new AssociateRouteWithAppApplication(
-          this.appGuid,
-          route.metadata.guid,
-          this.cfGuid
-        )
-      );
+      this.associateRoute(route);
       const appServiceSub$ = this.appService.app$.pipe(
         map(p => p.entityRequestInfo.updating['Assigning-Route']),
         filter(p => !p.busy),
@@ -215,6 +207,10 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
       this.subscriptions.push(appServiceSub$.subscribe());
     });
+  }
+
+  private associateRoute(route: any) {
+    this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, route.metadata.guid, this.cfGuid));
   }
 
   toggleCreateTCPRoute() {
