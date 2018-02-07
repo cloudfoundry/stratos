@@ -48,7 +48,7 @@ $side-nav-light-active: #484848;
   html {
     background-color: $app-background-color;
   }
-  
+
   // App Theme defines a set of colors used by stratos components
   $app-theme: (
     app-background-color: $app-background-color,
@@ -57,7 +57,7 @@ $side-nav-light-active: #484848;
     status: app-generate-status-theme($theme, $status-theme),
     subdued-color: $subdued
   );
-  
+
   // Pass the Material theme and the App Theme to components that need to be themed
   @include dialog-error-theme($theme, $app-theme);
   @include login-page-theme($theme, $app-theme);

@@ -27,20 +27,20 @@
   }
 
   &__link {
-    position: absolute;
-    top: 54px;
-    right: 54px;
     display: flex;
+    position: absolute;
+    right: 54px;
+    top: 54px;
 
     &-icon {
-      transform: rotate(90deg);
       font-size: 44px;
       height: 44px;
+      transform: rotate(90deg);
       width: 44px;
     }
     &-text {
-      margin-top: 26px;
       font-size: 16px;
+      margin-top: 26px;
     }
   }
 }
