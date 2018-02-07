@@ -6,8 +6,8 @@ import { Observable } from 'rxjs/Observable';
 import { filter, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { CfAppsDataSource } from '../../../shared/data-sources/cf-apps-data-source';
 import { ApplicationSchema } from '../../../store/actions/application.actions';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
@@ -25,11 +25,11 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   initCfOrgSpaceService: Subscription[] = [];
 
-  constructor (
+  constructor(
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
-  ) {}
+  ) { }
 
   onNext = () => {
     this.store.dispatch(new StoreCFSettings({
@@ -61,7 +61,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !p),
         tap(p => {
-            this.store.dispatch(new RouterNav({path: ['applications', 'deploy'] }));
+          this.store.dispatch(new RouterNav({ path: ['applications', 'deploy'] }));
         })
       ).subscribe());
     } else {

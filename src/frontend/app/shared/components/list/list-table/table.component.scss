@@ -1,0 +1,53 @@
+$row-height: 62px;
+.app-table {
+  &__card {
+    padding: 0;
+    padding-top: 24px;
+  }
+  &__inner {
+    &[hidden] * {
+      display: none;
+    }
+    &--fixed-row-height {
+      height: $row-height;
+    }
+  }
+  &__row,
+  &__header-row {
+    &[hidden] {
+      *,
+      &.mat-header-row {
+        display: none;
+      }
+    }
+  }
+  &__cell,
+  &__header-cell {
+    flex: 1 1 200px;
+    padding: 2px 10px;
+    app-table-cell {
+      width: 100%;
+    }
+  }
+  &__cell {
+    &--table-column-edit {
+      display: flex;
+      flex-direction: row;
+      flex-grow: 0;
+      justify-content: flex-end;
+      min-width: inherit;
+    }
+  }
+  &__row {
+    min-height: $row-height;
+    mat-cell {
+      // Ensure the cell consumes at least height of the row. This ensure the animation on select is correct and edit row doesn't wiggle
+      align-items: center;
+      display: flex;
+      min-height: $row-height;
+    }
+    &:hover {
+      background-color: rgba(0, 0, 0, .05);
+    }
+  }
+}

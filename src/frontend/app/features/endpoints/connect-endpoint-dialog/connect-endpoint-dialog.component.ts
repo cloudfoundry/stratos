@@ -87,7 +87,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
     )
-      .map(request => !!(request && request.info && request.info.user));
+      .map(request => !!(request && request.api_endpoint && request.user));
 
     this.connecting$ =
       this.update$

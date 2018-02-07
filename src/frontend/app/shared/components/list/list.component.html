@@ -4,7 +4,7 @@
       <mat-card-header>
         <div class="list-component__header__top">
           <div class="list-component__header__left spacer">
-            <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">{{ text?.title }}</div>
+            <div [hidden]="(dataSource.isSelecting$ | async) || (dataSource.isAdding$ | async)">{{ config.text?.title }}</div>
             <div [hidden]="!(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
           </div>
           <div class="list-component__header__right">
@@ -37,11 +37,11 @@
                 <mat-icon>add</mat-icon>
               </button>
             </div>
-            <div *ngIf="listConfigService.viewType === 'both' && !(dataSource.isSelecting$ | async) && (dataSource.pagination$ | async)?.totalResults > 0">
-              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(dataSource.view$ | async)==='table'">
+            <div *ngIf="config.viewType === 'both' && !(dataSource.isSelecting$ | async) && (dataSource.pagination$ | async)?.totalResults > 0">
+              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(view$ | async)==='table'">
                   <mat-icon>grid_on</mat-icon>
                 </button>
-              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(dataSource.view$ | async)==='cards'">
+              <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(view$ | async)==='cards'">
                   <mat-icon>list</mat-icon>
                 </button>
             </div>
@@ -61,7 +61,7 @@
             </div>
           </div>
           <div class="list-component__header__right">
-            <div class="sort" [hidden]="(dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
+            <div class="sort" [hidden]="sortColumns.length < 1 || (dataSource.isSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0)">
               <button mat-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='asc'">
                 <mat-icon>sort</mat-icon>
               </button>
@@ -76,9 +76,9 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="filter" [hidden]="!enableFilter || ((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
+            <div class="filter" [hidden]="!config.enableTextFilter || ((dataSource.pagination$ | async)?.totalResults === 0 && !filter) || (dataSource.isSelecting$ | async)">
               <mat-form-field floatPlaceholder="never">
-                <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{text?.filter || 'Filter'}}">
+                <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
               </mat-form-field>
             </div>
           </div>
@@ -94,8 +94,8 @@
   <div class="list-component__body">
     <div class="list-component__body-inner">
       <div *ngIf="dataSource.isLoadingPage$ | async" class="list-component__blocker"></div>
-      <app-cards *ngIf="(dataSource.view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
-      <app-table *ngIf="(dataSource.view$ | async) === 'table'" #table [dataSource]="dataSource" [paginationController]="paginationController" [columns]="columns" [text]="text" [enableFilter]="true" [fixedRowHeight]="tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
+        <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
+        <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
       </app-table>
     </div>
     <mat-card class="list-component__paginator" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">

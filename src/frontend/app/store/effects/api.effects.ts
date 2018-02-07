@@ -1,6 +1,4 @@
 import { cnsisEntitiesSelector } from '../selectors/cnsis.selectors';
-import { request } from 'http';
-import { totalmem } from 'os';
 import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
