@@ -1,12 +1,11 @@
-import { AfterContentInit, Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { NgForm, NgModel } from '@angular/forms';
+import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { CfAppsDataSource } from '../../../../shared/data-sources/cf-apps-data-source';
 
 
 @Component({

@@ -4,10 +4,10 @@ import { OperatorFunction } from 'rxjs/interfaces';
 
 import { AppState } from '../../store/app-state';
 import { PaginatedAction } from '../../store/types/pagination.types';
-import { DataFunction, DataFunctionDefinition } from './list-data-source';
-import { getRowUniqueId, RowsState } from './list-data-source-types';
 import { Observable } from 'rxjs/Observable';
 import { PaginationMonitor } from '../monitors/pagination-monitor';
+import { getRowUniqueId, RowsState } from '../components/list/data-sources-controllers/list-data-source-types';
+import { DataFunction, DataFunctionDefinition } from '../components/list/data-sources-controllers/list-data-source';
 
 export interface IListDataSourceConfig<A, T> {
   store: Store<AppState>;
