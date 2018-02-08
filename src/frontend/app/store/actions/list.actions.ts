@@ -23,8 +23,7 @@ export class ListFilter {
 
 export const ListStateActionTypes = {
   SET: '[List] Set',
-  SET_VIEW: '[List] Set View',
-  SET_METADATA: '[List] Set metadata'
+  SET_VIEW: '[List] Set View'
 };
 
 export type ListView = 'table' | 'cards';
@@ -37,9 +36,4 @@ export class SetListStateAction implements Action {
 export class SetListViewAction implements Action {
   constructor(public key: string, public view: ListView) {}
   type = ListStateActionTypes.SET_VIEW;
-}
-
-export class SetListMetadataAction implements Action {
-  constructor(public key: string, public metadata: Object) {}
-  type = ListStateActionTypes.SET_METADATA;
 }
