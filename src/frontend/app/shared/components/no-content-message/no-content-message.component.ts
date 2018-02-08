@@ -14,6 +14,9 @@ export class NoContentMessageComponent implements OnInit {
     linkText?: string;
     text: string;
   };
+  @Input('toolbarLink') toolbarLink: {
+    text: string;
+  };
 
   constructor() { }
 

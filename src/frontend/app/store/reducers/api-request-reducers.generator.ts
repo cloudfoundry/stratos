@@ -2,7 +2,7 @@ import { RequestTypes } from './../actions/request.actions';
 import { ApiActionTypes } from '../actions/request.actions';
 import { RequestSectionKeys, IRequestArray } from './api-request-reducer/types';
 import { OtherEntityStateNames } from '../types/other-entity.types';
-import { cnsisStoreNames } from '../types/cnsis.types';
+import { endpointStoreNames } from '../types/endpoint.types';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { Action, ActionReducerMap, combineReducers } from '@ngrx/store';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
@@ -50,8 +50,8 @@ const entities = [
   'organization',
   'route',
   'event',
+  endpointStoreNames.type,
   'domain',
-  cnsisStoreNames.type,
   'system',
   'routerReducer',
   'createApplication',
@@ -73,7 +73,7 @@ export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
-    [cnsisStoreNames.type]: [
+    [endpointStoreNames.type]: [
       systemEndpointsReducer
     ],
     'application': [

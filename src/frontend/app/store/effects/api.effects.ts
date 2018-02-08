@@ -1,4 +1,4 @@
-import { cnsisEntitiesSelector } from '../selectors/cnsis.selectors';
+import { endpointEntitiesSelector } from '../selectors/endpoint.selectors';
 import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
@@ -26,7 +26,7 @@ import { APIResource, NormalizedResponse } from './../types/api.types';
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
-import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
+import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
 import { map, mergeMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 
@@ -86,7 +86,7 @@ export class APIEffect {
 
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
     options.headers = this.addBaseHeaders(
-      apiAction.cnis ||
+      apiAction.endpointGuid ||
       state.requestData.endpoint, options.headers
     );
 
@@ -172,13 +172,13 @@ export class APIEffect {
       .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
-        const cnsis = resData[cfGuid];
-        return cnsis.error ? {
-          error: cnsis.error,
+        const endpoints = resData[cfGuid];
+        return endpoints.error ? {
+          error: endpoints.error,
           guid: cfGuid
         } : null;
       })
-      .filter(cnsisError => !!cnsisError);
+      .filter(endpointErrors => !!endpointErrors);
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -233,20 +233,20 @@ export class APIEffect {
     return { ...entity, ...metadata, cfGuid };
   }
 
-  addBaseHeaders(cnsis: IRequestEntityTypeState<CNSISModel> | string, header: Headers): Headers {
-    const cnsiHeader = 'x-cap-cnsi-list';
+  addBaseHeaders(endpoints: IRequestEntityTypeState<EndpointModel> | string, header: Headers): Headers {
+    const endpointHeader = 'x-cap-cnsi-list';
     const headers = header || new Headers();
-    if (typeof cnsis === 'string') {
-      headers.set(cnsiHeader, cnsis);
+    if (typeof endpoints === 'string') {
+      headers.set(endpointHeader, endpoints);
     } else {
-      const registeredCNSIGuids = [];
-      Object.keys(cnsis).forEach(cnsiGuid => {
-        const cnsi = cnsis[cnsiGuid];
-        if (cnsi.registered) {
-          registeredCNSIGuids.push(cnsi.guid);
+      const registeredEndpointGuids = [];
+      Object.keys(endpoints).forEach(endpointGuid => {
+        const endpoint = endpoints[endpointGuid];
+        if (endpoint.registered) {
+          registeredEndpointGuids.push(endpoint.guid);
         }
       });
-      headers.set(cnsiHeader, registeredCNSIGuids);
+      headers.set(endpointHeader, registeredEndpointGuids);
     }
     return headers;
   }
@@ -281,10 +281,10 @@ export class APIEffect {
     totalPages
   } {
     if (resData) {
-      const cnsisErrors = this.getErrors(resData);
-      if (cnsisErrors.length) {
-        // We should consider not completely failing the whole if some cnsis return.
-        throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+      const endpointsErrors = this.getErrors(resData);
+      if (endpointsErrors.length) {
+        // We should consider not completely failing the whole if some endpoints return.
+        throw Observable.throw(`Error from endpoints: ${endpointsErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
       }
     }
     let entities;

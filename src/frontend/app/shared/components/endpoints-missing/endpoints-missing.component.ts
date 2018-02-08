@@ -15,8 +15,11 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
 
   @Input('showSnackForNoneConnected') showSnackForNoneConnected = false;
 
+  @Input('showToolbarHint') showToolbarHint = false;
+
   firstLine;
   secondLine;
+  toolbarLink;
   hide = true;
 
   snackBarText = {
@@ -27,20 +30,19 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
 
   noneRegisteredText = {
     firstLineText: 'There are no registered endpoints',
+    toolbarLink: {
+      text: 'Register an endpoint'
+    },
     secondLineText: {
-      link: '/endpoints/new',
-      linkText: 'Register an endpoint',
-      text: ' to make it available to developers.',
-    }
+      text: 'Use the Endpoints view to register'
+    },
   };
 
   noneConnectedText = {
     firstLineText: 'There are no connected endpoints',
     secondLineText: {
-      link: '/endpoints',
-      linkText: 'Connect with your personal credentials',
-      text: ' to access your cloud native workloads and other related third party services',
-    }
+      text: 'Use the Endpoints view to connect'
+    },
   };
 
   subscription: Subscription;
@@ -63,7 +65,9 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
 
       setTimeout(() => {
         this.firstLine = showNoneConnected ? this.noneConnectedText.firstLineText : this.noneRegisteredText.firstLineText;
-        this.secondLine = showNoneConnected ? this.noneConnectedText.secondLineText : this.noneRegisteredText.secondLineText;
+        this.secondLine = showNoneConnected ? this.noneConnectedText.secondLineText :
+          this.showToolbarHint ? {} : this.noneRegisteredText.secondLineText;
+        this.toolbarLink = showNoneConnected ? {} : this.showToolbarHint ? this.noneRegisteredText.toolbarLink : {};
         this.hide = !showNoneRegistered && !showNoneConnected;
         this.showSnackBar(this.showSnackForNoneConnected && haveRegistered && !haveConnected);
       });

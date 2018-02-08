@@ -1,25 +1,24 @@
 .login {
-  height: 100vh;
   align-items: center;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
   background-image: url('/assets/login-bg.jpg');
   background-position: center;
   background-size: cover;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: center;
   &__logo {
-    width: 240px;
     align-self: center;
-    padding: 12px 0 16px 0;
+    padding: 12px 0 16px;
+    width: 240px;
   }
   &__header {
-    text-align: center;
     font-size: 28px;
     font-weight: 500;
     letter-spacing: 2px;
     margin: 0;
+    text-align: center;
     text-transform: uppercase;
-    margin: 0;
   }
   &__card {
     padding: 0;
@@ -30,9 +29,9 @@
   }
   &__title {
     display: flex;
-    padding-top: 24px;
     flex-direction: column;
     justify-content: center;
+    padding-top: 24px;
   }
   &__form {
     padding: 24px;
@@ -41,14 +40,18 @@
     width: 100%;
   }
   &-message {
+    font-size: 18px;
     height: 20px;
     padding-top: 20px;
-    font-size: 18px;
   }
-  &-loading-bar {
-    position: absolute;
+  &__loading-bar {
+    display: none;
     left: 0;
+    position: absolute;
     right: 0;
     top: 0;
+    &__logging-in {
+      display: inherit;
+    }
   }
 }

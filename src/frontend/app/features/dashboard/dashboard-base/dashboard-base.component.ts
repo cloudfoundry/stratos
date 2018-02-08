@@ -62,7 +62,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     },
     {
       text: 'Endpoints',
-      matIcon: 'settings_input_component',
+      matIcon: 'settings_ethernet',
       link: '/endpoints'
     },
   ];

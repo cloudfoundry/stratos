@@ -12,7 +12,7 @@ export const getNestedEntityWithKeys = <T>(entityKeys: string[]) => (
   entities
 ): T => {
   let entity = entities;
-  entityKeys.forEach(k => (entity = entity[k]));
+  entityKeys.forEach(k => entity = entity[k]);
   return entity;
 };
 
@@ -86,7 +86,7 @@ export function selectNestedEntity<T = APIResource[]>(
 }
 
 // Base selectors
-// T => APIResource || base entity (e.g. CNISModel)
+// T => APIResource || base entity (e.g. EndpointModel)
 export function getRequestEntityType<T>(entityType: string) {
   return (state: IRequestTypeState): IRequestEntityTypeState<T> => {
     return state[entityType] || {};

@@ -52,13 +52,13 @@ export class CreateRoute extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
 
 export class DeleteRoute extends CFStartAction implements ICFAction {
@@ -75,7 +75,7 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
     this.options.params = new URLSearchParams();
     this.options.params.append('recursive', recursive ? 'true' : 'false');
     this.options.params.append('async', async ? 'true' : 'false');
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
   actions = [
     RouteEvents.DELETE,
@@ -85,7 +85,7 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
 
 export class UnmapRoute extends CFStartAction implements ICFAction {
@@ -99,7 +99,7 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
     this.options.url = `routes/${routeGuid}/apps/${appGuid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
   actions = [
     RouteEvents.UNMAP_ROUTE,
@@ -109,7 +109,7 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
 
 export class CheckRouteExists extends CFStartAction implements ICFAction {
@@ -122,13 +122,13 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
 
 // Refactor to satisfy CodeClimate
@@ -145,8 +145,7 @@ export class ListRoutes extends CFStartAction implements PaginatedAction {
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.paginationKey = getPaginationKey(this.entityKey, cfGuid, guid);
-    this.cnis = cfGuid;
-    actions = this.actions;
+    this.endpointGuid = cfGuid;
   }
   paginationKey: string;
   entity = [RouteSchema];
@@ -155,7 +154,7 @@ export class ListRoutes extends CFStartAction implements PaginatedAction {
   initialParams = {
     'inline-relations-depth': '2'
   };
-  cnis: string;
+  endpointGuid: string;
 }
 
 export class GetAppRoutes extends ListRoutes implements PaginatedAction {
