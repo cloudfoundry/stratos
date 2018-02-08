@@ -137,7 +137,7 @@ export class ListRoutes extends CFStartAction implements PaginatedAction {
     public guid: string,
     public cfGuid: string,
     private routeUrl: string,
-    private actions: string[]
+    public actions: string[]
   ) {
     super();
     this.options = new RequestOptions();
