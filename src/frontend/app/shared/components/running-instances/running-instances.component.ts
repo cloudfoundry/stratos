@@ -6,7 +6,8 @@ import { map } from 'rxjs/operators';
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
 import { getPaginationPages } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { AppStatsSchema } from '../../../store/types/app-metadata.types';
+import { AppStatSchema, AppStatsSchema } from '../../../store/types/app-metadata.types';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-running-instances',
@@ -22,11 +23,19 @@ export class RunningInstancesComponent implements OnInit {
   // Observable on the running instances count for the application
   private runningInstances$: Observable<number>;
 
-  constructor(private store: Store<AppState>) { }
+  constructor(
+    private store: Store<AppState>,
+    private paginationMonitorFactory: PaginationMonitorFactory
+  ) { }
 
   ngOnInit() {
+    const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);
+    const paginationMonitor = this.paginationMonitorFactory.create(
+      dummyAction.paginationKey,
+      AppStatSchema
+    );
     this.runningInstances$ =
-      getPaginationPages(this.store, new GetAppStatsAction(this.appGuid, this.cfGuid), AppStatsSchema)
+      paginationMonitor.currentPage$
         .pipe(
         map(appInstancesPages => {
           const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
