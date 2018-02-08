@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RunningInstancesComponent } from './running-instances.component';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 describe('RunningInstancesComponent', () => {
   let component: RunningInstancesComponent;
@@ -14,6 +15,9 @@ describe('RunningInstancesComponent', () => {
       imports: [
         CoreModule,
         createBasicStoreModule(),
+      ],
+      providers: [
+        PaginationMonitorFactory
       ]
     })
       .compileComponents();
