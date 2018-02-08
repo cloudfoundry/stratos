@@ -50,6 +50,7 @@ const entities = [
   'organization',
   'route',
   'event',
+  'domain',
   cnsisStoreNames.type,
   'system',
   'routerReducer',

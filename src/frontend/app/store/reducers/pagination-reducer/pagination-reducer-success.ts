@@ -3,7 +3,7 @@ import { State } from '@ngrx/store';
 import { AppState } from '../../app-state';
 import { PaginationAction, PaginationEntityState } from '../../types/pagination.types';
 
-export function paginationSuccess(state: PaginationEntityState, action) {
+export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {
   const params = {};
   const { apiAction } = action;
   if (apiAction.options && apiAction.options.params) {
@@ -13,14 +13,20 @@ export function paginationSuccess(state: PaginationEntityState, action) {
     });
   }
   const totalResults = action.totalResults || action.response.result.length;
+  const page = action.apiAction.pageNumber || state.currentPage;
   return {
     ...state,
-    fetching: false,
-    error: false,
-    message: '',
+    pageRequests: {
+      ...state.pageRequests,
+      [page]: {
+        busy: false,
+        error: false,
+        message: ''
+      }
+    },
     ids: {
       ...state.ids,
-      [state.currentPage]: action.response.result
+      [page]: action.response.result
     },
     pageCount: action.totalPages,
     totalResults,

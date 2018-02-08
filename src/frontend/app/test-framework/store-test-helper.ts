@@ -102,7 +102,6 @@ const testInitialStoreState: AppState = {
     pagination: {
       application: {
         applicationWall: {
-          fetching: false,
           pageCount: 1,
           currentPage: 1,
           totalResults: 0,
@@ -250,8 +249,8 @@ const testInitialStoreState: AppState = {
               'dbc5f72a-8703-4c9a-8919-b9e900392acb'
             ]
           },
-          error: false,
-          message: '',
+          pageRequests: {
+          },
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
@@ -269,7 +268,6 @@ const testInitialStoreState: AppState = {
       route: {},
       event: {
         'app-events:01ccda9d-8f40-4dd0-bc39-08eea68e364f4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
-          fetching: false,
           pageCount: 1,
           currentPage: 1,
           totalResults: 0,
@@ -417,8 +415,8 @@ const testInitialStoreState: AppState = {
               'dbc5f72a-8703-4c9a-8919-b9e900392acb'
             ]
           },
-          error: false,
-          message: '',
+          pageRequests: {
+          },
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
@@ -432,16 +430,15 @@ const testInitialStoreState: AppState = {
       },
       endpoint: {
         "endpoint-list": {
-          fetching: false,
           pageCount: 1,
           currentPage: 1,
           totalResults: 0,
           params: {
             key: 'a'
           },
+          pageRequests: {
+          },
           ids: { },
-          error: false,
-          message: '',
           clientPagination: {
             pageSize: 5,
             currentPage: 1,
@@ -474,6 +471,7 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      domain:{},
       githubBranches:{},
       githubCommits:{},
         endpoint: {
@@ -3650,6 +3648,7 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      domain:{},
       githubBranches:{},
       githubCommits:{},
         application: {
