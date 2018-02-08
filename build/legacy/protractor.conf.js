@@ -1,5 +1,5 @@
 /* eslint-disable angular/di,angular/document-service,no-sync,no-console,no-process-exit,angular/log */
-(function() {
+(function () {
   'use strict';
 
   var skipPlugin = require('../components/app-core/frontend/test/e2e/po/skip-plugin.js');
@@ -71,12 +71,12 @@
       skipSSlValidation: true,
       caCert: '',
       appWithLogStream: 'node-env',
-      cnsi: {
+      endpoint: {
         cf: {
           cf1: {
             register: {
               api_endpoint: secrets.cloudFoundry.url,
-              cnsi_name: 'cf',
+              endpoint_name: 'cf',
               skip_ssl_validation: 'true'
             },
             admin: secrets.cloudFoundry.admin,
@@ -106,13 +106,13 @@
       }
     },
 
-    beforeLaunch: function() {
-      return new Promise(function(resolve) {
+    beforeLaunch: function () {
+      return new Promise(function (resolve) {
         reporter.beforeLaunch(resolve);
       });
     },
 
-    onPrepare: function() {
+    onPrepare: function () {
 
       skipPlugin.install(jasmine);
 
@@ -123,8 +123,8 @@
       // }));
 
       // Disable animations so e2e tests run more quickly
-      var disableNgAnimate = function() {
-        angular.module('disableNgAnimate', []).run(['$animate', function($animate) {
+      var disableNgAnimate = function () {
+        angular.module('disableNgAnimate', []).run(['$animate', function ($animate) {
           $animate.enabled(false);
           // disable css animations
           var style = document.createElement('style');
@@ -142,8 +142,8 @@
 
       browser.addMockModule('disableNgAnimate', disableNgAnimate);
 
-      var setLocale = function() {
-        angular.module('setLocale', []).config(['$injector', function($injector) {
+      var setLocale = function () {
+        angular.module('setLocale', []).config(['$injector', function ($injector) {
           // Override whatever language the running browser is in, this removes unexpected http request to
           // locale_<browser locale>.json
           var languageServiceProvider = $injector.get('languageServiceProvider');
@@ -164,8 +164,8 @@
       jasmine.getEnv().addReporter(skipPlugin.reporter());
     },
 
-    afterLaunch: function(exitCode) {
-      return new Promise(function(resolve) {
+    afterLaunch: function (exitCode) {
+      return new Promise(function (resolve) {
         reporter.afterLaunch(resolve.bind(this, exitCode));
       });
     },
@@ -173,7 +173,7 @@
     jasmineNodeOpts: {
       defaultTimeoutInterval: 45000,
       // disable default jasmine report (using jasmine-spec-reporter)
-      print: function() {}
+      print: function () {}
     }
   };
 
@@ -182,7 +182,7 @@
   }
 
   var componentTestFiles = components.removeEmptyGlobs(components.getGlobs(['test/e2e/**/*.spec.js']).local);
-  exports.config.suites.components = _.map(componentTestFiles, function(glob) {
+  exports.config.suites.components = _.map(componentTestFiles, function (glob) {
     return '../' + glob;
   });
 })();

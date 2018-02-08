@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment';
 import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestDataReducer, requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
-import { cnsisReducer } from './reducers/cnsis.reducer';
+import { endpointsReducer } from './reducers/endpoints.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
 import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
@@ -26,7 +26,7 @@ export function logger(reducer) {
 export const appReducers = {
   auth: authReducer,
   uaaSetup: uaaSetupReducer,
-  cnsis: cnsisReducer,
+  endpoints: endpointsReducer,
   pagination: requestPaginationReducer,
   request: requestReducer,
   requestData: requestDataReducer,

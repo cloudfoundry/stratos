@@ -1,5 +1,5 @@
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
-import { CNSISModel, EndpointUser } from './cnsis.types';
+import { EndpointUser, EndpointModel } from './endpoint.types';
 export interface SystemInfo {
   version: {
     proxy_version: string,
@@ -8,7 +8,7 @@ export interface SystemInfo {
   user: EndpointUser;
   endpoints: {
     cf: {
-      [key: string]: CNSISModel
+      [key: string]: EndpointModel
     }
   };
 }

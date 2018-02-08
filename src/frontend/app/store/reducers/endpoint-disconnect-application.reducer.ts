@@ -1,11 +1,11 @@
 import { APIResource } from '../types/api.types';
 import { IRequestEntityTypeState } from '../app-state';
-import { DISCONNECT_CNSIS_SUCCESS, DisconnectCnis, UNREGISTER_CNSIS } from '../actions/cnsis.actions';
+import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS } from '../actions/endpoint.actions';
 export function endpointDisconnectApplicationReducer(entityKey) {
-  return function (state: APIResource, action: DisconnectCnis) {
+  return function (state: APIResource, action: DisconnectEndpoint) {
     switch (action.type) {
-      case DISCONNECT_CNSIS_SUCCESS:
-      case UNREGISTER_CNSIS:
+      case DISCONNECT_ENDPOINTS_SUCCESS:
+      case UNREGISTER_ENDPOINTS:
         return deletionApplicationFromEndpoint(state, action.guid, entityKey);
     }
     return state;

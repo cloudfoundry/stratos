@@ -6,7 +6,7 @@ import {
   getCurrentPageRequestInfo,
 } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityService } from '../../core/entity-service';
-import { cnsisEntitiesSelector } from '../../store/selectors/cnsis.selectors';
+import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -211,17 +211,17 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
-      this.store.select(cnsisEntitiesSelector),
+      this.store.select(endpointEntitiesSelector),
     )
-      .filter(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]) => {
+      .filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
       })
-      .map(([{ entity, entityRequestInfo }, cnsis]: [EntityInfo, any]): ApplicationData => {
+      .map(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]): ApplicationData => {
         return {
           fetching: entityRequestInfo.fetching,
           app: entity,
           stack: entity.entity.stack,
-          cf: cnsis[entity.entity.cfGuid],
+          cf: endpoints[entity.entity.cfGuid],
           appUrl: this.getAppUrl(entity)
         };
       }).shareReplay(1);
