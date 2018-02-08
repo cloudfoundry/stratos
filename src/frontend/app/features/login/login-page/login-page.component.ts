@@ -37,26 +37,14 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription =
-      this.store.select(s => [s.auth, s.endpoints])
-        .subscribe(([auth, endpoints]: [AuthState, EndpointState]) => {
-          if (!auth.loggingIn && auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
-            this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
-            this.store.dispatch(new RouterNav({ path: [auth.redirectPath || '/'] }, null));
+      this.store.select(s => ({ auth: s.auth, endpoints: s.endpoints }))
+        .subscribe(({ auth, endpoints }) => {
+          const loggedIn = !auth.loggingIn && auth.loggedIn;
+          const validSession = auth.sessionData && auth.sessionData.valid;
+          if (loggedIn && validSession) {
+            this.handleSuccess(auth);
           } else {
-            this.loggedIn = auth.loggedIn;
-            this.loggingIn = auth.loggingIn;
-            this.error = auth.error && !auth.sessionData;
-
-            if (this.error) {
-              this.message = auth.error && auth.errorResponse && auth.errorResponse.status === 401 ?
-                `Username and password combination incorrect. Please try again.` : `Couldn't log in, please try again.`;
-            } else if (auth.verifying) {
-              this.message = 'Verifying session...';
-            } else if (endpoints.loading) {
-              this.message = 'Retrieving Cloud Foundry metadata...';
-            } else if (auth.loggingIn) {
-              this.message = 'Logging in...';
-            }
+            this.handleOther(auth, endpoints);
           }
         });
   }
@@ -68,6 +56,38 @@ export class LoginPageComponent implements OnInit, OnDestroy {
   login() {
     this.message = '';
     this.store.dispatch(new Login(this.username, this.password));
+  }
+
+  private handleSuccess(auth) {
+    this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
+    this.store.dispatch(new RouterNav({ path: [auth.redirectPath || '/'] }, null));
+  }
+
+  private handleOther(auth: AuthState, endpoints: EndpointState) {
+    this.loggedIn = auth.loggedIn;
+    this.loggingIn = auth.loggingIn;
+    // auth.sessionData will be populated if user has been redirected here after attempting to access a protected page without
+    // a valid session
+    this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid);
+
+    if (this.error) {
+      if (auth.error && auth.errorResponse && auth.errorResponse === 'Invalid session') {
+        // Invalid session (redirected after attempting to access a protected page). Don't show any error
+        this.message = '';
+      } else if (auth.error && auth.errorResponse && auth.errorResponse.status === 401) {
+        // User supplied invalid credentials
+        this.message = 'Username and password combination incorrect. Please try again.';
+      } else {
+        // All other errors
+        this.message = 'Couldn\'t log in, please try again.';
+      }
+    } else if (auth.verifying) {
+      this.message = 'Verifying session...';
+    } else if (endpoints.loading) {
+      this.message = 'Retrieving Cloud Foundry metadata...';
+    } else if (auth.loggingIn) {
+      this.message = 'Logging in...';
+    }
   }
 
 }

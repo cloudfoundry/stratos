@@ -13,7 +13,6 @@ import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
 import { PaginationEffects } from './effects/pagination.effects';
 import { RouterEffect } from './effects/router.effects';
-import { SetAPIFilterEffect } from './effects/set-api-filter.effect';
 import { SetClientFilterEffect } from './effects/set-client-filter.effect';
 import { SnackBarEffects } from './effects/snackBar.effects';
 import { SystemEffects } from './effects/system.effects';
@@ -40,10 +39,9 @@ import { AppReducersModule } from './reducers.module';
       SystemEffects,
       SnackBarEffects,
       SetClientFilterEffect,
-      SetAPIFilterEffect,
       DeployAppEffects,
       GithubEffects
     ])
   ]
 })
-export class AppStoreModule {}
+export class AppStoreModule { }

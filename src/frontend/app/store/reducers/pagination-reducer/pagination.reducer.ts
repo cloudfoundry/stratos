@@ -38,16 +38,15 @@ import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-o
 
 export const defaultClientPaginationPageSize = 9;
 
-const defaultPaginationEntityState = {
-  fetching: false,
+const defaultPaginationEntityState: PaginationEntityState = {
   pageCount: 0,
   currentPage: 1,
   totalResults: 0,
   ids: {},
+  pageRequests: {
+  },
   params: {
   },
-  error: false,
-  message: '',
   clientPagination: {
     pageSize: defaultClientPaginationPageSize,
     currentPage: 1,
@@ -69,10 +68,10 @@ export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
+  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actsionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
-        return paginationStart(state);
+        return paginationStart(state, action);
       case successType:
         return paginationSuccess(state, action);
       case failureType:

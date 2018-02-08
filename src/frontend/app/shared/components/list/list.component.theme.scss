@@ -2,7 +2,8 @@
 @mixin variables-tab-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   $foreground-colors: map-get($theme, foreground);
-  .listComponent__header.selected .mat-card {
+  $background-colors: map-get($theme, background);
+  .list-component__header.selected .mat-card {
     background-color: mat-color($primary, 50);
   }
 }
