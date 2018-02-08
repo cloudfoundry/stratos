@@ -10,8 +10,8 @@ import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounce
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { ActionState } from '../api-request-reducer/types';
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;

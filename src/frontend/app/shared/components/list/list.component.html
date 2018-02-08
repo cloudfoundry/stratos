@@ -92,9 +92,13 @@
     </div>
   </div>
   <div class="list-component__body">
-    <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
-    <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
-    </app-table>
+
+    <div class="list-component__body-inner">
+      <div *ngIf="dataSource.isLoadingPage$ | async" class="list-component__blocker"></div>
+      <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"></app-cards>
+      <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0">
+      </app-table>
+    </div>
     <mat-card class="list-component__paginator" [hidden]="(dataSource.pagination$ | async)?.totalResults === 0 || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
       <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
       </mat-paginator>

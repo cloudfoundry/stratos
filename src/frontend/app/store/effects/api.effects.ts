@@ -102,8 +102,7 @@ export class APIEffect {
     }
 
     return request
-      .withLatestFrom(Observable.of({ ...paginatedAction }).first())
-      .mergeMap(([response, _action]) => {
+      .mergeMap(response => {
         response = this.handleMultiEndpoints(response, paginatedAction);
         const { entities, totalResults, totalPages } = response;
         const actions = [];

@@ -13,8 +13,8 @@ import { Subscription } from 'rxjs/Subscription';
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
 import {
+  getCurrentPageRequestInfo,
   getPaginationObservables,
-  getCurrentPageRequestInfo
 } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListDataSourceConfig } from './list-data-source-config';
