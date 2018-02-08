@@ -67,7 +67,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Cached collections
   public filteredRows: Array<T>;
-  public entityLettabledRows: Array<T>;
+  public transformedEntities: Array<T>;
 
   // Misc
   public isLoadingPage$: Observable<boolean> = Observable.of(false);
@@ -115,7 +115,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     const dataFunctions = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
-    this.transformedEntitiesSubscription = transformedEntities$.do(items => this.entityLettabledRows = items).subscribe();
+    this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
     this.page$ = this.isLocal ?
       this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions)
       : transformedEntities$.pipe(shareReplay(1));

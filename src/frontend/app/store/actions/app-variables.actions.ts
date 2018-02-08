@@ -5,7 +5,7 @@ import { ApiActionTypes } from './request.actions';
 import { PaginatedAction, QParam } from '../types/pagination.types';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { Action } from '@ngrx/store';
-import { ListAppEnvVar, CfAppEvnVarsDataSource } from '../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
+import { ListAppEnvVar, CfAppVariablesDataSource } from '../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import { UpdateApplication } from './application.actions';
 
 export const AppVariables = {

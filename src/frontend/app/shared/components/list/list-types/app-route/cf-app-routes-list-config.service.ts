@@ -119,8 +119,8 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text: {
-    title: 'Routes';
+  text = {
+    title: 'Routes'
   };
 
   dispatchDeleteAction = route =>

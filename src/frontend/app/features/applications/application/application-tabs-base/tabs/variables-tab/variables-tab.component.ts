@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
 import {
-  CfAppEvnVarsDataSource,
+  CfAppVariablesDataSource,
   ListAppEnvVar,
 } from '../../../../../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import {
@@ -29,14 +29,14 @@ export class VariablesTabComponent implements OnInit {
     private appService: ApplicationService,
     private listConfig: ListConfig<ListAppEnvVar>
   ) {
-    this.envVarsDataSource = listConfig.getDataSource() as CfAppEvnVarsDataSource;
+    this.envVarsDataSource = listConfig.getDataSource() as CfAppVariablesDataSource;
   }
 
   envVars$: Observable<{
     names: String[],
     values: {}
   }>;
-  envVarsDataSource: CfAppEvnVarsDataSource;
+  envVarsDataSource: CfAppVariablesDataSource;
 
   ngOnInit() {
     this.envVars$ = this.appService.waitForAppEntity$.map(app => ({
