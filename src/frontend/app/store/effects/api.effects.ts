@@ -106,7 +106,7 @@ export class APIEffect {
         response = this.handleMultiEndpoints(response, paginatedAction);
         const { entities, totalResults, totalPages } = response;
         const actions = [];
-        actions.push({ type: paginatedAction.actions[1], paginatedAction });
+        actions.push({ type: paginatedAction.actions[1], apiAction: paginatedAction });
         actions.push(new WrapperRequestActionSuccess(
           entities,
           paginatedAction,
@@ -131,7 +131,7 @@ export class APIEffect {
       })
       .catch(err => {
         return [
-          { type: paginatedAction.actions[2], paginatedAction },
+          { type: paginatedAction.actions[2], apiAction: paginatedAction },
           new WrapperRequestActionFailed(
             err.message,
             paginatedAction,

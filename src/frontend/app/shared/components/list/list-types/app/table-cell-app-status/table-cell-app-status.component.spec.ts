@@ -14,6 +14,7 @@ import {
 } from '../../../../application-state/application-state-icon/application-state-icon.pipe';
 import { CoreModule } from '../../../../../../core/core.module';
 import { StoreModule } from '@ngrx/store';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 
 describe('TableCellAppStatusComponent', () => {
   let component: TableCellAppStatusComponent<any>;
@@ -33,7 +34,8 @@ describe('TableCellAppStatusComponent', () => {
         createBasicStoreModule()
       ],
       providers: [
-        ApplicationStateService
+        ApplicationStateService,
+        PaginationMonitorFactory
       ]
     })
       .compileComponents();
