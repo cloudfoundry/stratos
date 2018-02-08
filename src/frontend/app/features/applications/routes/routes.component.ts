@@ -32,10 +32,7 @@ export class RoutesComponent implements OnInit, OnDestroy {
     private appService: ApplicationService,
     private listConfig: ListConfig<EntityInfo>
   ) {
-    this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;
   }
-
-  routesDataSource: CfAppRoutesDataSource;
 
   ngOnInit() {
     const { cfGuid } = this.appService;

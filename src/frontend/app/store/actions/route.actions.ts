@@ -156,8 +156,6 @@ export class GetRoutes extends CFStartAction implements PaginatedAction {
   entityKey = RouteSchema.key;
   options: RequestOptions;
   initialParams = {
-    'order-direction': 'desc',
-    'order-direction-field': 'host',
     'inline-relations-depth': '2'
   };
   cnis: string;
