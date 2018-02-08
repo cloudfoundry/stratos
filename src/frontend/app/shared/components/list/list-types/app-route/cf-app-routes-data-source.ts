@@ -39,7 +39,7 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
         this.selectedRows.set(this.getRowUniqueId(row), row);
         this.isSelecting$.next(this.selectedRows.size > 0);
       };
-      this.selectAllFilteredRows = () => {};
+      this.selectAllFilteredRows = () => { };
     }
   }
 

@@ -165,6 +165,10 @@ export class GetAppRoutes extends ListRoutes implements PaginatedAction {
       RouteEvents.GET_APP_ALL_FAILED
     ]);
   }
+  initialParams = {
+    'results-per-page': 9, // Match that of the page size used by the matching list config
+    'inline-relations-depth': '1'
+  };
 }
 
 export class GetSpaceRoutes extends ListRoutes implements PaginatedAction {
@@ -178,6 +182,6 @@ export class GetSpaceRoutes extends ListRoutes implements PaginatedAction {
 }
 
 export class MapRouteSelected implements Action {
-  constructor(routeEntity: EntityInfo) {}
+  constructor(routeEntity: EntityInfo) { }
   type = MAP_ROUTE_SELECTED;
 }

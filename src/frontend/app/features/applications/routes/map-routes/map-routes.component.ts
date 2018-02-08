@@ -18,6 +18,7 @@ import {
   DomainSchema
 } from '../../../../store/actions/domains.actions';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-map-routes',
@@ -38,7 +39,8 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig<EntityInfo>
+    private listConfig: ListConfig<APIResource>,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.routesDataSource = listConfig.getDataSource() as CfAppRoutesDataSource;
   }
@@ -46,21 +48,25 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.routesDataSource.isSelecting$
       .pipe(
-        filter(p => p),
-        tap(p => {
-          const selectedRow = Array.from(
-            this.routesDataSource.selectedRows.values()
-          );
-          this.selectedRoute$.next(selectedRow[0]);
-        })
+      filter(p => p),
+      tap(p => {
+        const selectedRow = Array.from(
+          this.routesDataSource.selectedRows.values()
+        );
+        this.selectedRoute$.next(selectedRow[0]);
+      })
       )
       .subscribe();
 
+    const action = new FetchAllDomains(this.appService.cfGuid);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {
         store: this.store,
-        action: new FetchAllDomains(this.appService.cfGuid),
-        schema: [DomainSchema]
+        action,
+        paginationMonitor: this.paginationMonitorFactory.create(
+          action.paginationKey,
+          DomainSchema
+        )
       },
       true
     ).entities$.subscribe();

@@ -158,9 +158,9 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
-    ConfirmationDialogService
+    ConfirmationDialogService,
     EntityMonitorFactory,
     PaginationMonitorFactory
   ]
 })
-export class SharedModule {}
+export class SharedModule { }
