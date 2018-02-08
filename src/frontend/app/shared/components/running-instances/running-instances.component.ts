@@ -1,11 +1,12 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { getPaginationPages } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
-import { AppStatsSchema } from '../../../store/types/app-metadata.types';
+import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
+
+import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
+import { AppState } from '../../../store/app-state';
+import { getPaginationPages } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { AppStatsSchema } from '../../../store/types/app-metadata.types';
 
 @Component({
   selector: 'app-running-instances',

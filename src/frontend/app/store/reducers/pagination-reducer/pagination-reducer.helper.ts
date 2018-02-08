@@ -1,17 +1,16 @@
-import { RequestTypes } from './../../actions/request.actions';
-import { Action, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
-import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay, switchMap } from 'rxjs/operators';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
+import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;

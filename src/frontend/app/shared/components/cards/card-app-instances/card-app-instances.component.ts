@@ -1,19 +1,11 @@
-import { getPaginationKey } from '../../../../store/actions/pagination.actions';
-import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { ApplicationService } from '../../../../features/applications/application.service';
-import {
-  Component, OnInit, OnDestroy, Input, ElementRef, ViewChild, Renderer,
-  ViewChildren, QueryList, ContentChildren
-} from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs/Observable';
-import { AppState } from '../../../../store/app-state';
+import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
-import { selectEntity } from '../../../../store/selectors/api.selectors';
-import { AppStatSchema, AppStats, AppStatsSchema } from '../../../../store/types/app-metadata.types';
-import { GetAppStatsAction, AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
-import { getPaginationPages } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
+
+import { ApplicationService } from '../../../../features/applications/application.service';
+import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
+import { AppState } from '../../../../store/app-state';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../confirmation-dialog.service';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialog('Set Instance count to 0',
