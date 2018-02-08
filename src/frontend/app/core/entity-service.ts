@@ -103,14 +103,7 @@ export class EntityService<T = any> {
     const apiRequestData$ = this.store.select(getAPIRequestDataState).shareReplay(1);
     return entityMonitor.entityRequest$
       .do(entityRequestInfo => {
-        if (
-          !entityRequestInfo ||
-          !entityRequestInfo.response &&
-          !entityRequestInfo.fetching &&
-          !entityRequestInfo.error &&
-          !entityRequestInfo.deleting.busy &&
-          !entityRequestInfo.deleting.deleted
-        ) {
+        if (this.shouldCallAction(entityRequestInfo)) {
           actionDispatch();
         }
       })
@@ -125,6 +118,16 @@ export class EntityService<T = any> {
         };
       });
   }
+
+  private shouldCallAction(entityRequestInfo: RequestInfoState) {
+    return !entityRequestInfo ||
+      !entityRequestInfo.response &&
+      !entityRequestInfo.fetching &&
+      !entityRequestInfo.error &&
+      !entityRequestInfo.deleting.busy &&
+      !entityRequestInfo.deleting.deleted;
+  }
+
   /**
    * @param interval - The polling interval in ms.
    * @param key - The store updating key for the poll

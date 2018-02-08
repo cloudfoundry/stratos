@@ -155,12 +155,8 @@ export class ApplicationService {
 
     // App org and space
     this.app$
-      .filter(entityInfo => {
-        return entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid;
-      })
-      .map(entityInfo => {
-        return entityInfo.entity.entity;
-      })
+      .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
+      .map(entityInfo => entityInfo.entity.entity)
       .do(app => {
         this.appSpace$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid));
         // See https://github.com/SUSE/stratos/issues/158 (Failing to populate entity store with a space's org)
