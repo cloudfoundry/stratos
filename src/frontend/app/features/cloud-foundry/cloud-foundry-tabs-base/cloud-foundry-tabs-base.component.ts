@@ -26,12 +26,5 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
 
   ngOnInit() {
     this.isFetching$ = Observable.of(false);
-    this.cfEndpointService.endpoint$
-      .pipe(
-        tap(p => {
-          console.log(p);
-        })
-      )
-      .subscribe();
   }
 }
