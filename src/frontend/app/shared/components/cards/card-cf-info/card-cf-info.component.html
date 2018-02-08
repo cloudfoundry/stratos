@@ -7,7 +7,7 @@
       <div class="app-metadata">
         <app-metadata-item icon="memory" label="Instance Address">{{ apiUrl }}</app-metadata-item>
         <app-metadata-item icon="memory" label="CF Interactions">N/A</app-metadata-item>
-        <app-metadata-item icon="memory" label="CF API Version">N/A</app-metadata-item>
+        <app-metadata-item icon="memory" label="CF API Version">{{ (cfEndpointService.info$ | async)?.entity.entity.api_version }}</app-metadata-item>
       </div>
     </mat-card-content>
   </mat-card>

@@ -13,7 +13,7 @@ const cfEndpointServiceFactory = (
   entityServiceFactory: EntityServiceFactory
 ) => {
   const { cfId } = activatedRoute.snapshot.params;
-  return new CloudFoundryEndpointService(cfId, entityServiceFactory);
+  return new CloudFoundryEndpointService(cfId, store, entityServiceFactory);
 };
 
 @Component({
