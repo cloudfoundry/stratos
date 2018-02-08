@@ -6,13 +6,13 @@ import { Observable } from 'rxjs/Observable';
 import { GetAllOrganizations, OrganizationSchema } from '../../store/actions/organization.actions';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables, getCurrentPageRequestInfo } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { cnsisRegisteredEntitiesSelector } from '../../store/selectors/cnsis.selectors';
-import { CNSISModel } from '../../store/types/cnsis.types';
+import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
+import { EndpointModel } from '../../store/types/endpoint.types';
 
 export interface CfOrgSpaceItem {
-  list$: Observable<CNSISModel[] | any[]>;
+  list$: Observable<EndpointModel[] | any[]>;
   loading$: Observable<boolean>;
-  select: BehaviorSubject<CNSISModel | any>;
+  select: BehaviorSubject<EndpointModel | any>;
 }
 
 @Injectable()
@@ -73,7 +73,7 @@ export class CfOrgSpaceDataService {
 
   private createCf() {
     this.cf = {
-      list$: this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis)),
+      list$: this.store.select(endpointsRegisteredEntitiesSelector).first().map(endpoints => Object.values(endpoints)),
       loading$: Observable.of(false),
       select: new BehaviorSubject(undefined),
     };
@@ -85,7 +85,7 @@ export class CfOrgSpaceDataService {
       this.getEndpointsAndOrgs$,
       this.allOrgs$.entities$
     )
-      .map(([selectedCF, endpointsAndOrgs, entities]: [CNSISModel, any, any]) => {
+      .map(([selectedCF, endpointsAndOrgs, entities]: [EndpointModel, any, any]) => {
         const [pag, cfList] = endpointsAndOrgs;
         if (selectedCF && entities) {
           return entities.map(org => org.entity).filter(org => org.cfGuid === selectedCF);

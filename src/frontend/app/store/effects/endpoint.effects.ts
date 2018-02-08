@@ -1,34 +1,34 @@
-import { IRequestAction, StartCFAction } from './../types/request.types';
+import { IRequestAction, StartCFAction } from '../types/request.types';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { Observable } from 'rxjs/Rx';
 import {
-  CONNECT_CNSIS,
-  CONNECT_CNSIS_FAILED,
-  CONNECT_CNSIS_SUCCESS,
-  ConnectCnis,
-  DISCONNECT_CNSIS,
-  DISCONNECT_CNSIS_FAILED,
-  DISCONNECT_CNSIS_SUCCESS,
-  DisconnectCnis,
+  CONNECT_ENDPOINTS,
+  CONNECT_ENDPOINTS_FAILED,
+  CONNECT_ENDPOINTS_SUCCESS,
+  ConnectEndpoint,
+  DISCONNECT_ENDPOINTS,
+  DISCONNECT_ENDPOINTS_FAILED,
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  DisconnectEndpoint,
   EndpointSchema,
-  GET_CNSIS,
-  GetAllCNSIS,
-  GetAllCNSISFailed,
-  GetAllCNSISSuccess,
-  UNREGISTER_CNSIS,
-  UNREGISTER_CNSIS_FAILED,
-  UNREGISTER_CNSIS_SUCCESS,
-  UnregisterCnis,
-  REGISTER_CNSIS,
-  REGISTER_CNSIS_FAILED,
-  REGISTER_CNSIS_SUCCESS,
-  RegisterCnis,
-} from './../actions/cnsis.actions';
-import { AppState } from './../app-state';
+  GET_ENDPOINTS,
+  GetAllEndpoints,
+  GetAllEndpointsFailed,
+  GetAllEndpointsSuccess,
+  REGISTER_ENDPOINTS,
+  RegisterEndpoint,
+  UNREGISTER_ENDPOINTS,
+  UNREGISTER_ENDPOINTS_FAILED,
+  UNREGISTER_ENDPOINTS_SUCCESS,
+  UnregisterEndpoint,
+  REGISTER_ENDPOINTS_SUCCESS,
+  REGISTER_ENDPOINTS_FAILED,
+} from '../actions/endpoint.actions';
+import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
-import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
+import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
 import {
   StartRequestAction,
   WrapperRequestActionFailed,
@@ -42,7 +42,7 @@ import { map, mergeMap, catchError } from 'rxjs/operators';
 import { GetSystemInfo, GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 
 @Injectable()
-export class CNSISEffect {
+export class EndpointsEffect {
 
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
@@ -55,24 +55,24 @@ export class CNSISEffect {
     private store: Store<AppState>
   ) { }
 
-  @Effect() getAllCNSIS$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
+  @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
     .pipe(mergeMap(action => {
-      const paginationAction = new GetAllCNSIS(action.login);
+      const endpointsActions = new GetAllEndpoints(action.login);
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(paginationAction, actionType));
+      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
 
-      const endpoints = action.payload.endpoints.cf;
+      const endpoints = action.payload.endpoints.cf; // We're only storing cf's??
 
-      // Data is an aarray of endpoints
+      // Data is an array of endpoints
       const mappedData = {
         entities: {
-          [cnsisStoreNames.type]: {}
+          [endpointStoreNames.type]: {}
         },
         result: []
       } as NormalizedResponse;
 
       const data = Object.values(endpoints).forEach(endpointInfo => {
-        mappedData.entities[cnsisStoreNames.type][endpointInfo.guid] = {
+        mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
           ...endpointInfo,
           connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
           registered: !!endpointInfo.user,
@@ -81,17 +81,17 @@ export class CNSISEffect {
       });
 
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
-      // (cnsi success)
+      // (endpoint success)
       return [
-        new WrapperRequestActionSuccess(mappedData, paginationAction, actionType),
-        new GetAllCNSISSuccess(paginationAction.login),
+        new WrapperRequestActionSuccess(mappedData, endpointsActions, actionType),
+        new GetAllEndpointsSuccess(mappedData, endpointsActions.login),
       ];
     }));
 
-  @Effect() connectCnis$ = this.actions$.ofType<ConnectCnis>(CONNECT_CNSIS)
+  @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS)
     .flatMap(action => {
       const actionType = 'update';
-      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.connectingKey);
+      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid,
@@ -100,57 +100,57 @@ export class CNSISEffect {
         }
       });
 
-      return this.doCnisAction(
+      return this.doEndpointAction(
         apiAction,
         '/pp/v1/auth/login/cnsi',
         params,
         null,
-        [CONNECT_CNSIS_SUCCESS, CONNECT_CNSIS_FAILED]
+        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED]
       );
     });
 
-  @Effect() disconnect$ = this.actions$.ofType<DisconnectCnis>(DISCONNECT_CNSIS)
+  @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.disconnectingKey);
+      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid
         }
       });
 
-      return this.doCnisAction(
+      return this.doEndpointAction(
         apiAction,
         '/pp/v1/auth/logout/cnsi',
         params,
         null,
-        [DISCONNECT_CNSIS_SUCCESS, DISCONNECT_CNSIS_FAILED]
+        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED]
       );
     });
 
-  @Effect() unregister$ = this.actions$.ofType<UnregisterCnis>(UNREGISTER_CNSIS)
+  @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.unregisteringKey);
+      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.unregisteringKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid
         }
       });
 
-      return this.doCnisAction(
+      return this.doEndpointAction(
         apiAction,
         '/pp/v1/unregister',
         params,
         'delete',
-        [UNREGISTER_CNSIS_SUCCESS, UNREGISTER_CNSIS_FAILED]
+        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED]
       );
     });
 
-  @Effect() register$ = this.actions$.ofType<RegisterCnis>(REGISTER_CNSIS)
+  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid(), action.type, CNSISEffect.registeringKey);
+      const apiAction = this.getEndpointAction(action.guid(), action.type, EndpointsEffect.registeringKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_name': action.name,
@@ -159,25 +159,25 @@ export class CNSISEffect {
         }
       });
 
-      return this.doCnisAction(
+      return this.doEndpointAction(
         apiAction,
         '/pp/v1/register/cf',
         params,
         'create',
-        [REGISTER_CNSIS_SUCCESS, REGISTER_CNSIS_FAILED]
+        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED]
       );
     });
 
   private getEndpointAction(guid, type, updatingKey) {
     return {
-      entityKey: cnsisStoreNames.type,
+      entityKey: endpointStoreNames.type,
       guid,
       type,
       updatingKey,
     } as IRequestAction;
   }
 
-  private doCnisAction(
+  private doEndpointAction(
     apiAction: IRequestAction,
     url: string,
     params: HttpParams,

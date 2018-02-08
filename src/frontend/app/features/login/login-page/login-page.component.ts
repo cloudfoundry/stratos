@@ -1,4 +1,4 @@
-import { CNSISState } from '../../../store/types/cnsis.types';
+import { EndpointState } from '../../../store/types/endpoint.types';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms/src/directives';
 import { Router } from '@angular/router';
@@ -37,14 +37,14 @@ export class LoginPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription =
-      this.store.select(s => [s.auth, s.cnsis])
-        .subscribe(([auth, cnsis]: [AuthState, CNSISState]) => {
+      this.store.select(s => ({ auth: s.auth, endpoints: s.endpoints }))
+        .subscribe(({ auth, endpoints }) => {
           const loggedIn = !auth.loggingIn && auth.loggedIn;
           const validSession = auth.sessionData && auth.sessionData.valid;
           if (loggedIn && validSession) {
             this.handleSuccess(auth);
           } else {
-            this.handleOther(auth, cnsis);
+            this.handleOther(auth, endpoints);
           }
         });
   }
@@ -63,7 +63,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.store.dispatch(new RouterNav({ path: [auth.redirectPath || '/'] }, null));
   }
 
-  private handleOther(auth, cnsis) {
+  private handleOther(auth: AuthState, endpoints: EndpointState) {
     this.loggedIn = auth.loggedIn;
     this.loggingIn = auth.loggingIn;
     // auth.sessionData will be populated if user has been redirected here after attempting to access a protected page without
@@ -83,7 +83,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       }
     } else if (auth.verifying) {
       this.message = 'Verifying session...';
-    } else if (cnsis.loading) {
+    } else if (endpoints.loading) {
       this.message = 'Retrieving Cloud Foundry metadata...';
     } else if (auth.loggingIn) {
       this.message = 'Logging in...';

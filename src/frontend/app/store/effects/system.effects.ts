@@ -2,7 +2,7 @@ import { StartRequestAction, WrapperRequestActionSuccess, WrapperRequestActionFa
 import {
   IRequestAction
 } from '../types/request.types';
-import { cnsisStoreNames } from '../types/cnsis.types';
+import { endpointStoreNames } from '../types/endpoint.types';
 import { SystemInfo, systemStoreNames } from './../types/system.types';
 import { HttpClient } from '@angular/common/http';
 import { GET_SYSTEM_INFO, GetSystemInfo, GetSystemSuccess, GetSystemFailed } from './../actions/system.actions';

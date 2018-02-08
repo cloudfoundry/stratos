@@ -1,4 +1,4 @@
-import { DISCONNECT_CNSIS_SUCCESS, CONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS } from './../../actions/cnsis.actions';
+import { DISCONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS } from '../../actions/endpoint.actions';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
@@ -142,9 +142,9 @@ function paginate(action, state, updatePagination) {
 
 function isEnDpointAction(action) {
   // ... that we care about.
-  return action.type === DISCONNECT_CNSIS_SUCCESS ||
-    action.type === CONNECT_CNSIS_SUCCESS ||
-    action.type === UNREGISTER_CNSIS;
+  return action.type === DISCONNECT_ENDPOINTS_SUCCESS ||
+    action.type === CONNECT_ENDPOINTS_SUCCESS ||
+    action.type === UNREGISTER_ENDPOINTS;
 }
 
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {

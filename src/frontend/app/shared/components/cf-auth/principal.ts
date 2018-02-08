@@ -17,11 +17,11 @@ export class CfAuthPrinciple {
 
 
   constructor(
-    private cnsiGuid: string,
+    private endpointGuid: string,
     private session: SessionData,
     public userSummary: CfAuthUserSummaryMapped,
     private featureFlags: CFFeatureFlags) {
-    this.isAdmin = session.endpoints.cf[cnsiGuid].user.admin;
+    this.isAdmin = session.endpoints.cf[endpointGuid].user.admin;
     this.isAdminReadOnly = false; // WIP: RC Calculate according to scope
     this.isGlobalAuditor = false; // WIP: RC Calculate according to scope
   }

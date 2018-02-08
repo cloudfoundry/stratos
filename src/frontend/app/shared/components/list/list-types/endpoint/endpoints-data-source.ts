@@ -1,21 +1,21 @@
 import { Store } from '@ngrx/store';
 
-import { EndpointSchema, GetAllCNSIS } from '../../../../../store/actions/cnsis.actions';
+import { EndpointSchema, GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
 import { AppState } from '../../../../../store/app-state';
-import { CNSISModel } from '../../../../../store/types/cnsis.types';
+import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 
 
-export class EndpointsDataSource extends ListDataSource<CNSISModel> {
+export class EndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<AppState>;
 
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<CNSISModel>
+    listConfig: IListConfig<EndpointModel>
   ) {
-    const action = new GetAllCNSIS();
-    const paginationKey = GetAllCNSIS.storeKey;
+    const action = new GetAllEndpoints();
+    const paginationKey = GetAllEndpoints.storeKey;
     super({
       store,
       action,
