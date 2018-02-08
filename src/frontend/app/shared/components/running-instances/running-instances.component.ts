@@ -5,8 +5,7 @@ import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
-import { getPaginationPages } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { AppStatSchema, AppStatsSchema } from '../../../store/types/app-metadata.types';
+import { AppStatSchema } from '../../../store/types/app-metadata.types';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 @Component({

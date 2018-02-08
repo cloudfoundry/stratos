@@ -13,15 +13,15 @@ export class PaginationMonitorFactory {
     [key: string]: PaginationMonitor
   } = {};
 
-  public create(
+  public create<T = any>(
     paginationKey: string,
     schema: schema.Entity,
   ) {
     const cacheKey = paginationKey + schema.key;
     if (this.monitorCache[cacheKey]) {
-      return this.monitorCache[cacheKey];
+      return this.monitorCache[cacheKey] as PaginationMonitor<T>;
     } else {
-      const monitor = new PaginationMonitor(
+      const monitor = new PaginationMonitor<T>(
         this.store,
         paginationKey,
         schema

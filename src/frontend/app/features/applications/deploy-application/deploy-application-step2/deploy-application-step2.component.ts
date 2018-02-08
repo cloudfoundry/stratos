@@ -8,6 +8,7 @@ import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { Subscription } from 'rxjs/Subscription';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
   FetchBranchesForProject,
   FetchCommit,
@@ -18,10 +19,7 @@ import {
   SetDeployBranch,
 } from '../../../../store/actions/deploy-applications.actions';
 import { AppState } from '../../../../store/app-state';
-import {
-  getPaginationObservables,
-  getPaginationPages,
-} from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
   selectPEProjectName,
@@ -30,17 +28,15 @@ import {
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource } from '../../../../store/types/api.types';
-import { BranchesSchema, GITHUB_BRANCHES_ENTITY_KEY, SourceType } from '../../../../store/types/deploy-application.types';
+import { BranchSchema, GITHUB_BRANCHES_ENTITY_KEY, SourceType } from '../../../../store/types/deploy-application.types';
 import {
   GitBranch,
-  GithubBranchesSchema,
+  GithubBranchSchema,
   GithubCommit,
   GithubCommitSchema,
   GithubRepo,
-  GithubBranchSchema,
 } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -152,22 +148,22 @@ export class DeployApplicationStep2Component
 
     const deployBranchName$ = this.store.select(selectDeployBranchName);
 
-    this.repositoryBranches$ = getPaginationPages(
-      this.store,
-      action,
-      BranchesSchema
-    ).pipe(
-      filter(d => !!d[0] && !!Object.keys(d[0]).length),
-      map(d => d[0].map(b => b.entity)),
+    const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
+      action.paginationKey,
+      BranchSchema
+    );
+
+    this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(
+      map(branches => branches.map(branch => branch.entity)),
       withLatestFrom(deployBranchName$),
-      filter(([p, q]) => !!q),
+      filter(([branches, branchName]) => !!branchName),
       tap(([branches, branchName]) => {
         this.repositoryBranch = branches.find(
           branch => branch.name === branchName
         );
       }),
       map(([p, q]) => p)
-      );
+    );
 
     const updateBranchAndCommit = Observable.combineLatest(
       this.repositoryBranches$,

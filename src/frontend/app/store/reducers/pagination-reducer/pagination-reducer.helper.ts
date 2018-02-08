@@ -86,33 +86,6 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-export const getPaginationPages = <T = any>(store: Store<AppState>, action: PaginatedAction, schema: Schema):
-  Observable<Array<Array<T>>> => {
-  const { entityKey, paginationKey } = action;
-
-  // One observable to emit when pagination changes
-  const paginationChanged$ = store.select(selectPaginationState(entityKey, paginationKey))
-    .filter(pag => !!pag)
-    .distinctUntilChanged((oldVals, newVals) => {
-      const oldVal = getPaginationCompareString(oldVals);
-      const newVal = getPaginationCompareString(newVals);
-      return oldVal === newVal;
-    }).shareReplay(1);
-
-  // One observable to emit when the store items changed (not as granular as it should be, ideally should only emit when entities from pag
-  // changes)
-  const entitySectionChanged$ = store.select(selectEntities<T>(entityKey)).shareReplay(1);
-
-  // Combine the two and emit with a list of pages containing the normalised entities
-  return Observable.combineLatest(paginationChanged$, entitySectionChanged$)
-    .withLatestFrom(store.select(getAPIRequestDataState))
-    .map(([[paginationState, entitiesOfType], entities]) => {
-      return Object.keys(paginationState.ids).map(page => {
-        return denormalize(paginationState.ids[page], schema, entities);
-      });
-    }).shareReplay(1);
-};
-
 export const getPaginationObservables = <T = any>(
   { store, action, paginationMonitor }: { store: Store<AppState>, action: PaginatedAction, paginationMonitor: PaginationMonitor },
   isLocal = false
