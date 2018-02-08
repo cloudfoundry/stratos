@@ -1,5 +1,5 @@
 <div class="add-route">
-  <mat-progress-bar *ngIf="submitted" [mode]="'indeterminate'">
+  <mat-progress-bar [hidden]="!submitted" [mode]="'indeterminate'">
   </mat-progress-bar>
 
   <div>Create a new route or map an existing one. </div>
@@ -23,7 +23,7 @@
       <div class="add-route__form__fields">
         <div>
           <mat-form-field>
-            <mat-select formControlName="domain" placeholder="domain" [(ngModel)]="selectedDomain" required>
+            <mat-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required>
               <mat-option *ngFor="let domain of getDomainValues()" [value]="domain">{{domain.entity.name}}</mat-option>
             </mat-select>
           </mat-form-field>
