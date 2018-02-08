@@ -12,6 +12,12 @@ import {
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
+import { map } from 'rxjs/operators';
+
+export interface VariableTabAllEnvVarType {
+  name: string;
+  value: string;
+}
 
 @Component({
   selector: 'app-variables-tab',
@@ -23,6 +29,8 @@ import { ApplicationService } from '../../../../application.service';
   }]
 })
 export class VariablesTabComponent implements OnInit {
+
+
 
   constructor(
     private store: Store<AppState>,
@@ -37,12 +45,37 @@ export class VariablesTabComponent implements OnInit {
     values: {}
   }>;
   envVarsDataSource: CfAppVariablesDataSource;
+  allEnvVars$: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {
     this.envVars$ = this.appService.waitForAppEntity$.map(app => ({
       names: app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [],
       values: app.entity.entity.environment_json || {}
     }));
+    this.allEnvVars$ = this.appService.appEnvVars$.entities$.pipe(
+      map(allEnvVars => {
+        if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {
+          return [];
+        }
+        const result = new Array<VariableTabAllEnvVarType>();
+        Object.keys(allEnvVars[0].entity)
+          .filter(envVarType => envVarType !== 'cfGuid')
+          .forEach(envVarType => {
+            const envVars = allEnvVars[0].entity[envVarType];
+            Object.keys(envVars).forEach(key => {
+              result.push({
+                name: key,
+                value: envVars[key]
+              });
+            });
+          });
+        return result;
+      })
+    );
+  }
+
+  isObject(test: any): boolean {
+    return typeof test === 'object';
   }
 
 }

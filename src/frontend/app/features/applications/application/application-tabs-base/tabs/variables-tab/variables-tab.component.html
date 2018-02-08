@@ -22,7 +22,14 @@
         <div>All Variables</div>
       </mat-card-header>
       <mat-card-content>
-        <app-code-block>{{ (envVars$ | async)?.values | json }}</app-code-block>
+        <app-code-block>
+          <ng-container *ngFor="let envVar of (allEnvVars$ | async)">
+            <div class="variables-tab__env-code-block--line">
+              <pre>{{envVar.name}}=<span *ngIf="!isObject(envVar.value)">{{envVar.value}}</span></pre>
+              <pre *ngIf="isObject(envVar.value)">{{ envVar.value | json }}</pre>
+            </div>
+          </ng-container>
+        </app-code-block>
       </mat-card-content>
     </mat-card>
   </div>
