@@ -37,6 +37,12 @@ $row-height: 62px;
       justify-content: flex-end;
       min-width: inherit;
     }
+    &--table-column-action {
+      app-table-cell {
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
   }
   &__row {
     min-height: $row-height;

@@ -15,24 +15,26 @@ describe('GithubTabComponent', () => {
   let fixture: ComponentFixture<GithubTabComponent>;
   const initialState = getInitialTestStoreState();
 
-  beforeEach(
-    async(() => {
-      TestBed.configureTestingModule({
-        declarations: [GithubTabComponent],
-        imports: [
-          CoreModule,
-          SharedModule,
-          RouterTestingModule,
-          StoreModule.forRoot(appReducers, {
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [GithubTabComponent],
+      imports: [
+        CoreModule,
+        SharedModule,
+        RouterTestingModule,
+        StoreModule.forRoot(
+          appReducers,
+          {
             initialState
-          })
-        ],
-        providers: [
-          { provide: ApplicationService, useClass: ApplicationServiceMock }
-        ]
-      }).compileComponents();
+          }
+        ),
+      ],
+      providers: [
+        { provide: ApplicationService, useClass: ApplicationServiceMock },
+      ]
     })
-  );
+      .compileComponents();
+  }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(GithubTabComponent);

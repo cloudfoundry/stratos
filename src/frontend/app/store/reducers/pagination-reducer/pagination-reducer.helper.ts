@@ -10,6 +10,7 @@ import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounce
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { ActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -213,13 +214,21 @@ export function isPageReady(pagination: PaginationEntityState) {
 export function hasValidOrGettingPage(pagination: PaginationEntityState) {
   if (pagination && Object.keys(pagination).length) {
     const hasPage = !!pagination.ids[pagination.currentPage];
-
-    return pagination.fetching || hasPage;
+    const currentPageRequest = getCurrentPageRequestInfo(pagination);
+    return hasPage || currentPageRequest.busy;
   } else {
     return false;
   }
 }
 
 export function hasError(pagination: PaginationEntityState) {
-  return pagination && pagination.error;
+  return pagination && getCurrentPageRequestInfo(pagination).error;
+}
+
+export function getCurrentPageRequestInfo(pagination: PaginationEntityState): ActionState {
+  return pagination.pageRequests[pagination.currentPage] || {
+    busy: false,
+    error: false,
+    message: ''
+  };
 }
