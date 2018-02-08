@@ -52,7 +52,7 @@ export class VariablesTabComponent implements OnInit {
       names: app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [],
       values: app.entity.entity.environment_json || {}
     }));
-    this.allEnvVars$ = this.appService.appEnvVars$.entities$.pipe(
+    this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
       map(allEnvVars => {
         if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {
           return [];

@@ -4,13 +4,12 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { MDAppModule } from '../../../../../../core/md.module';
+import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../shared/shared.module';
-import { appReducers } from '../../../../../../store/reducers.module';
 import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { getInitialTestStoreState, createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
-import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { VariablesTabComponent } from './variables-tab.component';
 
 describe('VariablesTabComponent', () => {

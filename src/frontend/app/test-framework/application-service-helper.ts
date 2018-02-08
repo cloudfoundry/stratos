@@ -31,7 +31,7 @@ export class ApplicationServiceMock {
   } as ApplicationData));
   appSummary$: Observable<EntityInfo<AppSummary>> = Observable.of(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
   appStats$: Observable<APIResource<AppStat>[]> = Observable.of(new Array<APIResource<AppStat>>());
-  applicationStratProject$: Observable<EnvVarStratosProject> = Observable.of({deploySource: {type: '', timestamp: 0, commit: ''}});
+  applicationStratProject$: Observable<EnvVarStratosProject> = Observable.of({ deploySource: { type: '', timestamp: 0, commit: '' } });
   isFetchingApp$: Observable<boolean> = Observable.of(false);
   isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
@@ -42,6 +42,9 @@ export class ApplicationServiceMock {
       }
     }
   } as EntityInfo);
+  appEnvVars = {
+    entities$: Observable.of(new Array<APIResource<any>>())
+  };
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {

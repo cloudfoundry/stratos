@@ -105,7 +105,7 @@ export class ApplicationService {
   appSummary$: Observable<EntityInfo<AppSummary>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
-  appEnvVars$: PaginationObservables<APIResource>;
+  appEnvVars: PaginationObservables<APIResource>;
   appOrg$: Observable<APIResource<any>>;
   appSpace$: Observable<APIResource<any>>;
 
@@ -170,7 +170,7 @@ export class ApplicationService {
 
     this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
 
-    this.appEnvVars$ = getPaginationObservables<APIResource>({
+    this.appEnvVars = getPaginationObservables<APIResource>({
       store: this.store,
       action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
       schema: AppEnvVarsSchema
@@ -231,7 +231,7 @@ export class ApplicationService {
         return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
       }).shareReplay(1);
 
-    this.applicationStratProject$ = this.appEnvVars$.entities$.map(applicationEnvVars => {
+    this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
     }).shareReplay(1);
   }
@@ -254,9 +254,9 @@ export class ApplicationService {
         return updatingSection.busy || false;
       });
 
-    this.isFetchingEnvVars$ = this.appEnvVars$.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).shareReplay(1);
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).shareReplay(1);
 
-    this.isUpdatingEnvVars$ = this.appEnvVars$.pagination$.map(
+    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(
       ev => getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]
     ).startWith(false).shareReplay(1);
 
