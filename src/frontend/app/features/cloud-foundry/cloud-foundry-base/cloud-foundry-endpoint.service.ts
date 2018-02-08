@@ -8,11 +8,13 @@ import { EntityService } from '../../../core/entity-service';
 import { CNSISModel } from '../../../store/types/cnsis.types';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo } from '../../../store/types/api.types';
+import { shareReplay, map } from 'rxjs/operators';
 
 @Injectable()
 export class CloudFoundryEndpointService {
   endpoint$: Observable<EntityInfo<CNSISModel>>;
   cfEndpointEntityService: EntityService<CNSISModel>;
+  connected$: Observable<boolean>;
   constructor(
     public cfGuid: string,
     private entityServiceFactory: EntityServiceFactory
@@ -28,6 +30,12 @@ export class CloudFoundryEndpointService {
   }
 
   constructCoreObservables() {
-    this.endpoint$ = this.cfEndpointEntityService.entityObs$.shareReplay(1);
+    this.endpoint$ = this.cfEndpointEntityService.entityObs$.pipe(
+      shareReplay(1)
+    );
+
+    this.connected$ = this.endpoint$.pipe(
+      map(p => p.entity.connectionStatus === 'connected')
+    );
   }
 }

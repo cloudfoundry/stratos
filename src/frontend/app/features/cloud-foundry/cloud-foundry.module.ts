@@ -16,6 +16,8 @@ import { CloudFoundrySecurityGroupsComponent } from './tabs/cloud-foundry-securi
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import { AddOrganisationComponent } from './add-organisation/add-organisation.component';
+import { ManageUsersComponent } from './manage-users/manage-users.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -30,7 +32,9 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
     CloudFoundryFeatureFlagsComponent,
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
-    CloudFoundrySecurityGroupsComponent
+    CloudFoundrySecurityGroupsComponent,
+    AddOrganisationComponent,
+    ManageUsersComponent
   ],
   providers: [CloudFoundryService]
 })

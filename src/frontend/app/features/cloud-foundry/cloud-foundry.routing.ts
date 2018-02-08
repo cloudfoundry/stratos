@@ -12,6 +12,8 @@ import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySecurityGroupsComponent } from './tabs/cloud-foundry-security-groups/cloud-foundry-security-groups.component';
+import { AddOrganisationComponent } from './add-organisation/add-organisation.component';
+import { ManageUsersComponent } from './manage-users/manage-users.component';
 
 const cloudFoundry: Routes = [
   { path: '', component: CloudFoundryComponent },
@@ -71,6 +73,14 @@ const cloudFoundry: Routes = [
             ]
           }
         ]
+      },
+      {
+        path: 'add-org',
+        component: AddOrganisationComponent
+      },
+      {
+        path: 'manage-users',
+        component: ManageUsersComponent
       }
     ]
   }
