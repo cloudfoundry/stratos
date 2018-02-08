@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CloudFoundryEndpointService } from '../../cloud-foundry-base/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cloud-foundry-summary-tab',
@@ -6,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./cloud-foundry-summary-tab.component.scss']
 })
 export class CloudFoundrySummaryTabComponent implements OnInit {
-  constructor() {}
+  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
 
   ngOnInit() {}
 }
