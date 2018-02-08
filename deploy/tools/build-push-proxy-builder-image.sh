@@ -81,7 +81,7 @@ docker run \
        bash  -c "cd /stratos-ui && npm install"
 
 # Patch bk-build-base
-sed -i "s@splatform/stratos-bk-build-base:opensuse@${BK_BUILD_BASE}@g" Dockerfile.bk.build
+sed -i.bak "s@splatform/stratos-bk-build-base:opensuse@${BK_BUILD_BASE}@g" Dockerfile.bk.build
 docker build --tag ${NAME} \
              --file Dockerfile.bk.build .
 
@@ -89,8 +89,11 @@ sudo rm -rf ./glide-cache
 sudo rm -rf ./npm-cache
 rm -rf ../run-glide.sh
 rm -rf ../vendor/
+
 # Unpatch BK Build Base
-sed -i "s@${BK_BUILD_BASE}@splatform/stratos-bk-build-base:opensuse@g" Dockerfile.bk.build
+rm Dockerfile.bk.build
+mv Dockerfile.bk.build.bak Dockerfile.bk.build
+
 popd
 
 echo "Tag ${SHARED_IMAGE_URL} and push the shared image"

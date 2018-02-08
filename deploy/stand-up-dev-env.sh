@@ -121,6 +121,8 @@ else
     DEV_DOCKER_COMPOSE=${DEV_DOCKER_COMPOSE_ALL}
 fi
 
+mkdir -p ${STRATOS_UI_PATH}/.dist/dist
+
 pushd "$PROG_DIR"
 env_vars
 if [ "$CLEAN" = true ] ; then

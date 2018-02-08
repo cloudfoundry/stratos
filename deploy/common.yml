@@ -62,7 +62,7 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ../dist:/usr/share/nginx/html:ro
+      - ../.dist/dist:/usr/share/nginx/html:ro
 
 
   ui:
@@ -75,11 +75,10 @@ services:
         - GROUP_ID
         - USER_NAME
     volumes:
-      - ../:/usr/src/app
+      - ../.dist:/usr/dist
 
   uaa:
     extends: imageCommon
     # NOTE: This is required so that the tests run against
     # a UAA instance that has all the correct roles
     image: splatform/stratos-uaa
-    
