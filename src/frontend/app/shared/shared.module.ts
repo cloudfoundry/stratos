@@ -6,9 +6,7 @@ import { RouterModule } from '@angular/router';
 import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
-import {
-  ApplicationStateIconComponent,
-} from './components/application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconComponent } from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
@@ -29,14 +27,11 @@ import { EndpointsMissingComponent } from './components/endpoints-missing/endpoi
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
 /* tslint:disable:max-line-length */
-import {
-  AppEventDetailDialogComponentComponent,
-} from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+import { AppEventDetailDialogComponentComponent } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 /* tslint:enable:max-line-length */
+
 import { listTableComponents } from './components/list/list-table/table.types';
-import {
-  EventTabActorIconPipe,
-} from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { EventTabActorIconPipe } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -63,7 +58,6 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 
-
 @NgModule({
   imports: [
     CommonModule,
@@ -73,7 +67,7 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule,
+    CdkTableModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -115,7 +109,7 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
     CardAppUptimeComponent,
     ListComponent,
     ...listCardComponents,
-    ...listTableComponents,
+    ...listTableComponents
   ],
   exports: [
     FormsModule,
@@ -154,11 +148,11 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
     CardAppUsageComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
-    ListComponent,
+    ListComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
-    DialogConfirmComponent,
+    DialogConfirmComponent
   ],
   providers: [
     ListConfig,

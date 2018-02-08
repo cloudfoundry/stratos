@@ -1,13 +1,13 @@
-import { EntityInfo } from './../../../store/types/api.types';
+import { APIResource, EntityInfo } from './../../../store/types/api.types';
 
-export const isTCPRoute = (route: EntityInfo) =>
+export const isTCPRoute = (route: APIResource) =>
   route.entity.port !== null && route.entity.port !== '';
 
 export interface Domain {
   name: string;
 }
 export const getRoute = (
-  route: EntityInfo,
+  route: APIResource,
   browsable: boolean = false,
   secure: boolean = false,
   domain: EntityInfo
@@ -29,4 +29,8 @@ export const getRoute = (
   } else {
     return `${protocol}${route.entity.host}.${domain.entity.name}`;
   }
+};
+
+export const getMappedApps = (route: APIResource): APIResource[] => {
+  return route.entity.apps || [];
 };

@@ -2,7 +2,6 @@ import { Action } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
-import { ListView } from '../../../../store/actions/list.actions';
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 
@@ -21,7 +20,10 @@ export interface AppEvent {
 }
 
 export class ListActionConfig<T> {
-  createAction: (dataSource: IListDataSource<T>, items: IRequestEntityTypeState<T>) => Action;
+  createAction: (
+    dataSource: IListDataSource<T>,
+    items: IRequestEntityTypeState<T>
+  ) => Action;
   icon: string;
   label: string;
   description: string;
@@ -38,8 +40,10 @@ export interface IListDataSource<T> {
   rowsState?: Observable<RowsState>;
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
-  localDataFunctions?: ((entities: T[], paginationState: PaginationEntityState) => T[])[];
-
+  localDataFunctions?: ((
+    entities: T[],
+    paginationState: PaginationEntityState
+  ) => T[])[];
   entityKey: string;
   paginationKey: string;
 
@@ -67,7 +71,6 @@ export interface IListDataSource<T> {
   setFilterParam(filter: string, pag: PaginationEntityState);
   connect(): Observable<T[]>;
   destroy();
-
 }
 
 export type getRowUniqueId<T> = (T) => string;
