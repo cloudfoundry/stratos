@@ -12,6 +12,8 @@ import { AppState } from '../store/app-state';
 import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { AppStat, AppSummary } from '../store/types/app-metadata.types';
+import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
@@ -31,7 +33,7 @@ export class ApplicationServiceMock {
   } as ApplicationData));
   appSummary$: Observable<EntityInfo<AppSummary>> = Observable.of(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
   appStats$: Observable<APIResource<AppStat>[]> = Observable.of(new Array<APIResource<AppStat>>());
-  applicationStratProject$: Observable<EnvVarStratosProject> = Observable.of({deploySource: {type: '', timestamp: 0, commit: ''}});
+  applicationStratProject$: Observable<EnvVarStratosProject> = Observable.of({ deploySource: { type: '', timestamp: 0, commit: '' } });
   isFetchingApp$: Observable<boolean> = Observable.of(false);
   isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
@@ -51,7 +53,8 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
       store: Store<AppState>,
       entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
-      applicationEnvVarsService: ApplicationEnvVarsService
+      applicationEnvVarsService: ApplicationEnvVarsService,
+      paginationMonitorFactory: PaginationMonitorFactory
     ) => {
       const appService = new ApplicationService(
         cfGuid,
@@ -59,7 +62,8 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
         store,
         entityServiceFactory,
         applicationStateService,
-        applicationEnvVarsService
+        applicationEnvVarsService,
+        paginationMonitorFactory
       );
       return appService;
     },
@@ -67,7 +71,8 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
       Store,
       EntityServiceFactory,
       ApplicationStateService,
-      ApplicationEnvVarsService
+      ApplicationEnvVarsService,
+      PaginationMonitorFactory
     ]
   };
 }

@@ -8,6 +8,7 @@ import { AppState } from '../../store/app-state';
 import { getPaginationObservables, getCurrentPageRequestInfo } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 export interface CfOrgSpaceItem {
   list$: Observable<EndpointModel[] | any[]>;
@@ -32,12 +33,18 @@ export class CfOrgSpaceDataService {
   private allOrgs$ = getPaginationObservables({
     store: this.store,
     action: this.paginationAction,
-    schema: [OrganizationSchema]
+    paginationMonitor: this.paginationMonitorFactory.create(
+      this.paginationAction.paginationKey,
+      OrganizationSchema
+    )
   });
 
   private getEndpointsAndOrgs$: Observable<any>;
 
-  constructor(private store: Store<AppState>) {
+  constructor(
+    private store: Store<AppState>,
+    public paginationMonitorFactory: PaginationMonitorFactory
+  ) {
     this.createCf();
     this.init();
     this.createOrg();

@@ -14,6 +14,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { APIResourceMetadata } from '../../../../../../store/types/api.types';
 import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 
 describe('CardAppComponent', () => {
   let component: CardAppComponent;
@@ -36,6 +37,7 @@ describe('CardAppComponent', () => {
       ],
       providers: [
         ApplicationStateService,
+        PaginationMonitorFactory
       ]
     })
       .compileComponents();

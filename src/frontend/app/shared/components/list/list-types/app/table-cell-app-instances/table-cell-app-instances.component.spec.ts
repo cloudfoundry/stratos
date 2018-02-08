@@ -4,6 +4,7 @@ import { TableCellAppInstancesComponent } from './table-cell-app-instances.compo
 import { CoreModule } from '../../../../../../core/core.module';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 
 describe('TableCellAppInstancesComponent', () => {
   let component: TableCellAppInstancesComponent<any>;
@@ -18,6 +19,9 @@ describe('TableCellAppInstancesComponent', () => {
       imports: [
         CoreModule,
         createBasicStoreModule(),
+      ],
+      providers: [
+        PaginationMonitorFactory
       ]
     })
       .compileComponents();

@@ -2,7 +2,7 @@ import { NormalizedResponse } from '../../types/api.types';
 import { IRequestAction, SingleEntityAction } from '../../types/request.types';
 import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
-import { defaultActionState, defaultDeletingActionState, defaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
+import { getDefaultActionState, defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { IRequestTypeState } from '../../app-state';
 
 
@@ -12,7 +12,7 @@ export function getEntityRequestState(state: IRequestTypeState, action: SingleEn
   if (requestState && typeof requestState === 'object' && Object.keys(requestState).length) {
     return requestState;
   }
-  return { ...defaultRequestState };
+  return getDefaultRequestState();
 }
 
 export function setEntityRequestState(state: IRequestTypeState, requestState, { entityKey, guid }: IRequestAction) {
@@ -106,7 +106,7 @@ export function generateDefaultState(keys: Array<string>, initialSections?: {
     defaultState[key] = {};
     if (initialSections && initialSections[key] && initialSections[key].length) {
       initialSections[key].forEach(sectionKey => {
-        defaultState[key][sectionKey] = { ...defaultActionState };
+        defaultState[key][sectionKey] = getDefaultActionState();
       });
     }
   });
