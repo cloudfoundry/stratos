@@ -23,11 +23,7 @@ import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
 
 @NgModule({
-  imports: [
-    CoreModule,
-    SharedModule,
-    ApplicationsRoutingModule
-  ],
+  imports: [CoreModule, SharedModule, ApplicationsRoutingModule],
   declarations: [
     ApplicationWallComponent,
     ApplicationBaseComponent,
@@ -43,7 +39,7 @@ import { GithubTabComponent } from './application/application-tabs-base/tabs/git
     EditApplicationComponent,
     InstancesTabComponent,
     AddRoutesComponent,
-    GithubTabComponent,
+    GithubTabComponent
   ],
   providers: [
     ApplicationService,
@@ -52,4 +48,4 @@ import { GithubTabComponent } from './application/application-tabs-base/tabs/git
     DatePipe
   ]
 })
-export class ApplicationsModule { }
+export class ApplicationsModule {}
