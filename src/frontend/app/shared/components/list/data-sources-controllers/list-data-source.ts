@@ -12,7 +12,10 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getCurrentPageRequestInfo,
+  getPaginationObservables,
+} from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
@@ -119,7 +122,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
-    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => pag.fetching);
+    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => {
+      return getCurrentPageRequestInfo(pag).busy && !pag.ids[pag.currentPage];
+    });
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -259,7 +264,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       + paginationEntity.params['order-direction']
       + paginationEntity.clientPagination.filter.string
       + Object.values(paginationEntity.clientPagination.filter.items)
-      + paginationEntity.fetching; // Some outlier cases actually fetch independently from this list (looking at you app variables)
+      + getCurrentPageRequestInfo(paginationEntity).busy;
+    // Some outlier cases actually fetch independently from this list (looking at you app variables)
   }
 
   splitClientPages(entites: T[], pageSize: number): T[][] {

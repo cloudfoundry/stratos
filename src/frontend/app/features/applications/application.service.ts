@@ -3,6 +3,7 @@ import {
   getPaginationObservables,
   PaginationObservables,
   getPaginationPages,
+  getCurrentPageRequestInfo,
 } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { EntityService } from '../../core/entity-service';
 import { cnsisEntitiesSelector } from '../../store/selectors/cnsis.selectors';
@@ -253,11 +254,15 @@ export class ApplicationService {
         return updatingSection.busy || false;
       });
 
-    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching).startWith(false).shareReplay(1);
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).shareReplay(1);
 
-    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(ev => ev.fetching && ev.ids[ev.currentPage]).startWith(false).shareReplay(1);
+    this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(
+      ev => getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]
+    ).startWith(false).shareReplay(1);
 
-    this.isFetchingStats$ = this.appStatsFetching$.map(appStats => appStats ? appStats.fetching : false).startWith(false).shareReplay(1);
+    this.isFetchingStats$ = this.appStatsFetching$.map(
+      appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
+    ).startWith(false).shareReplay(1);
   }
 
   getAppUrl(app: EntityInfo): string {
