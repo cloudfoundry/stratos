@@ -185,7 +185,7 @@ export class DeployApplicationStep2Component
           if (this.commitSubscription) {
             this.commitSubscription.unsubscribe();
           }
-          this.commitSubscription = commitEntityService.entityObs$
+          this.commitSubscription = commitEntityService.waitForEntity$
             .pipe(
             map(p => p.entity.entity),
             tap(p => {
