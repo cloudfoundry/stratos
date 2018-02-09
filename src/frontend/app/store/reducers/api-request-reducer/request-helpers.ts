@@ -85,10 +85,23 @@ export function modifyRequestWithRequestType(requestState: RequestInfoState, typ
   return requestState;
 }
 
-export function mergeInnerObject(key, state, newState) {
+/**
+ * Merge the content of a new object into another object
+ */
+export function mergeObject(coreObject, newObject) {
+  return {
+    ...coreObject,
+    ...newObject
+  };
+}
+
+/**
+ * Merge the content of a new object into a property of another's
+ */
+export function mergeInnerObject(key, state, newObject) {
   return {
     ...state,
-    ...{ [key]: newState }
+    [key]: mergeObject(state[key], newObject)
   };
 }
 
