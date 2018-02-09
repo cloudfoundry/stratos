@@ -7,7 +7,7 @@ import { ActionHistoryEffect } from './effects/action-history.effects';
 import { APIEffect } from './effects/api.effects';
 import { AppVariablesEffect } from './effects/app-variables.effects';
 import { AuthEffect } from './effects/auth.effects';
-import { CNSISEffect } from './effects/cnsis.effects';
+import { EndpointsEffect } from './effects/endpoint.effects';
 import { CreateAppPageEffects } from './effects/create-app-effects';
 import { DeployAppEffects } from './effects/deploy-app.effects';
 import { GithubEffects } from './effects/github.effects';
@@ -30,7 +30,7 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
       APIEffect,
       AuthEffect,
       UAASetupEffect,
-      CNSISEffect,
+      EndpointsEffect,
       CreateAppPageEffects,
       UpdateAppEffects,
       PaginationEffects,

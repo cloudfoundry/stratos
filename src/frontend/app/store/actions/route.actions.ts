@@ -1,32 +1,40 @@
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, IRequestAction, ICFAction } from '../types/request.types';
-
-import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { RequestOptions, Headers, URLSearchParams } from '@angular/http';
+import { RequestOptions, URLSearchParams } from '@angular/http';
+import { Action } from '@ngrx/store';
 import { schema } from 'normalizr';
 
-import { ApiActionTypes } from './request.actions';
+import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { EntityInfo } from '../types/api.types';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, ICFAction } from '../types/request.types';
 import { getPaginationKey } from './pagination.actions';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
 export const CREATE_ROUTE_ERROR = '[Route] Create error';
 
+export const MAP_ROUTE_SELECTED = '[Map Route] Selected route';
 export const RouteEvents = {
-  GET_ALL: '[Application Routes] Get all',
-  GET_ALL_SUCCESS: '[Application Routes] Get all success',
-  GET_ALL_FAILED: '[Application Routes] Get all failed',
+  GET_APP_ALL: '[Application Routes] Get all',
+  GET_APP_ALL_SUCCESS: '[Application Routes] Get all success',
+  GET_APP_ALL_FAILED: '[Application Routes] Get all failed',
+  GET_SPACE_ALL: '[Space Routes] Get all',
+  GET_SPACE_ALL_SUCCESS: '[Space Routes] Get all success',
+  GET_SPACE_ALL_FAILED: '[Space Routes] Get all failed',
   DELETE: '[Application Routes] Delete',
   DELETE_SUCCESS: '[Application Routes] Delete success',
   DELETE_FAILED: '[Application Routes] Delete failed',
   UNMAP_ROUTE: '[Application Routes] Unmap route',
   UNMAP_ROUTE_SUCCESS: '[Application Routes] Unmap route success',
-  UNMAP_ROUTE_FAILED: '[Application Routes] Unmap route failed',
+  UNMAP_ROUTE_FAILED: '[Application Routes] Unmap route failed'
 };
 
-export const RouteSchema = new schema.Entity('route', {}, {
-  idAttribute: getAPIResourceGuid
-});
+export const RouteSchema = new schema.Entity(
+  'route',
+  {},
+  {
+    idAttribute: getAPIResourceGuid
+  }
+);
 
 export interface NewRoute {
   domain_guid: string;
@@ -44,17 +52,13 @@ export class CreateRoute extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
-  actions = [
-    CREATE_ROUTE,
-    CREATE_ROUTE_SUCCESS,
-    CREATE_ROUTE_ERROR
-  ];
+  actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
 
 export class DeleteRoute extends CFStartAction implements ICFAction {
@@ -71,19 +75,18 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
     this.options.params = new URLSearchParams();
     this.options.params.append('recursive', recursive ? 'true' : 'false');
     this.options.params.append('async', async ? 'true' : 'false');
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
   actions = [
     RouteEvents.DELETE,
     RouteEvents.DELETE_SUCCESS,
-    RouteEvents.DELETE_FAILED,
+    RouteEvents.DELETE_FAILED
   ];
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
-
 
 export class UnmapRoute extends CFStartAction implements ICFAction {
   constructor(
@@ -96,17 +99,17 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
     this.options.url = `routes/${routeGuid}/apps/${appGuid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
   actions = [
     RouteEvents.UNMAP_ROUTE,
     RouteEvents.UNMAP_ROUTE_SUCCESS,
-    RouteEvents.UNMAP_ROUTE_FAILED,
+    RouteEvents.UNMAP_ROUTE_FAILED
   ];
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
 
 export class CheckRouteExists extends CFStartAction implements ICFAction {
@@ -119,38 +122,31 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
-  actions = [
-    CREATE_ROUTE,
-    CREATE_ROUTE_SUCCESS,
-    CREATE_ROUTE_ERROR
-  ];
+  actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  cnis: string;
+  endpointGuid: string;
 }
 
-export class GetRoutes extends CFStartAction implements PaginatedAction {
+// Refactor to satisfy CodeClimate
+export class ListRoutes extends CFStartAction implements PaginatedAction {
   constructor(
     public guid: string,
     public cfGuid: string,
+    private routeUrl: string,
+    public actions: string[]
   ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/routes`;
+    this.options.url = routeUrl;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-    this.options.params.append('', '');
     this.paginationKey = getPaginationKey(this.entityKey, cfGuid, guid);
-    this.cnis = cfGuid;
+    this.endpointGuid = cfGuid;
   }
-  actions = [
-    RouteEvents.GET_ALL,
-    RouteEvents.GET_ALL_SUCCESS,
-    RouteEvents.GET_ALL_FAILED,
-  ];
   paginationKey: string;
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
@@ -158,5 +154,34 @@ export class GetRoutes extends CFStartAction implements PaginatedAction {
   initialParams = {
     'inline-relations-depth': '2'
   };
-  cnis: string;
+  endpointGuid: string;
+}
+
+export class GetAppRoutes extends ListRoutes implements PaginatedAction {
+  constructor(public guid: string, public cfGuid: string) {
+    super(guid, cfGuid, `apps/${guid}/routes`, [
+      RouteEvents.GET_APP_ALL,
+      RouteEvents.GET_APP_ALL_SUCCESS,
+      RouteEvents.GET_APP_ALL_FAILED
+    ]);
+  }
+  initialParams = {
+    'results-per-page': 9, // Match that of the page size used by the matching list config
+    'inline-relations-depth': '1'
+  };
+}
+
+export class GetSpaceRoutes extends ListRoutes implements PaginatedAction {
+  constructor(public spaceGuid: string, public cfGuid: string) {
+    super(spaceGuid, cfGuid, `spaces/${spaceGuid}/routes`, [
+      RouteEvents.GET_SPACE_ALL,
+      RouteEvents.GET_SPACE_ALL_SUCCESS,
+      RouteEvents.GET_SPACE_ALL_FAILED
+    ]);
+  }
+}
+
+export class MapRouteSelected implements Action {
+  constructor(routeEntity: EntityInfo) { }
+  type = MAP_ROUTE_SELECTED;
 }

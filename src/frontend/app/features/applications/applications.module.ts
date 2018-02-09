@@ -21,9 +21,15 @@ import { ApplicationMonitorService } from './application-monitor.service';
 import { RoutesComponent } from './routes/routes.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
+import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
+import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 
 @NgModule({
-  imports: [CoreModule, SharedModule, ApplicationsRoutingModule],
+  imports: [
+    CoreModule,
+    SharedModule,
+    ApplicationsRoutingModule
+  ],
   declarations: [
     ApplicationWallComponent,
     ApplicationBaseComponent,
@@ -39,7 +45,9 @@ import { GithubTabComponent } from './application/application-tabs-base/tabs/git
     EditApplicationComponent,
     InstancesTabComponent,
     AddRoutesComponent,
-    GithubTabComponent
+    GithubTabComponent,
+    MapRoutesComponent,
+    AddRouteStepperComponent,
   ],
   providers: [
     ApplicationService,
@@ -48,4 +56,4 @@ import { GithubTabComponent } from './application/application-tabs-base/tabs/git
     DatePipe
   ]
 })
-export class ApplicationsModule {}
+export class ApplicationsModule { }

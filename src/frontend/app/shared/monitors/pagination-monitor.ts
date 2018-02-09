@@ -45,9 +45,9 @@ export class PaginationMonitor<T = any> {
    * Is the current page ready?
    * @param pagination
    */
-  private isPageReady(pagination: PaginationEntityState) {
-    const currentPageRequestInfo = this.getCurrentPageRequestInfo(pagination);
-    return !!pagination && !!pagination.ids[pagination.currentPage] && !currentPageRequestInfo.busy;
+  private hasPage(pagination: PaginationEntityState) {
+    const hasPage = pagination && pagination.ids[pagination.currentPage];
+    return hasPage;
   }
 
   /**
@@ -63,11 +63,15 @@ export class PaginationMonitor<T = any> {
    * @param pagination
    */
   private getCurrentPageRequestInfo(pagination: PaginationEntityState): ActionState {
-    return pagination.pageRequests[pagination.currentPage] || {
-      busy: false,
-      error: false,
-      message: ''
-    };
+    if (!pagination || !pagination.pageRequests || !pagination.pageRequests[pagination.currentPage]) {
+      return {
+        busy: false,
+        error: false,
+        message: ''
+      };
+    } else {
+      return pagination.pageRequests[pagination.currentPage];
+    }
   }
 
   // ### Initialization methods.
@@ -106,7 +110,7 @@ export class PaginationMonitor<T = any> {
       pagination$,
       this.store.select(selectEntities<T>(this.schema.key)),
     ).pipe(
-      filter(([pagination, entities]) => this.isPageReady(pagination)),
+      filter(([pagination, entities]) => this.hasPage(pagination)),
       withLatestFrom(this.store.select(getAPIRequestDataState)),
       map(([[pagination, entities], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];

@@ -66,6 +66,7 @@ describe('TableComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableComponent);
     component = fixture.componentInstance;
+
     const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
     component.columns = new Array<ITableColumn<any>>();
     component.paginationController = {

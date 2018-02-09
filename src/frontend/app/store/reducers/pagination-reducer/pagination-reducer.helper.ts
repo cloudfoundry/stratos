@@ -1,17 +1,16 @@
-import { RequestTypes } from './../../actions/request.actions';
-import { Action, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
-import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay, switchMap } from 'rxjs/operators';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
+import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -86,33 +85,6 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   const apiAction = getAction(action);
   return apiAction.paginationKey;
 }
-
-export const getPaginationPages = <T = any>(store: Store<AppState>, action: PaginatedAction, schema: Schema):
-  Observable<Array<Array<T>>> => {
-  const { entityKey, paginationKey } = action;
-
-  // One observable to emit when pagination changes
-  const paginationChanged$ = store.select(selectPaginationState(entityKey, paginationKey))
-    .filter(pag => !!pag)
-    .distinctUntilChanged((oldVals, newVals) => {
-      const oldVal = getPaginationCompareString(oldVals);
-      const newVal = getPaginationCompareString(newVals);
-      return oldVal === newVal;
-    }).shareReplay(1);
-
-  // One observable to emit when the store items changed (not as granular as it should be, ideally should only emit when entities from pag
-  // changes)
-  const entitySectionChanged$ = store.select(selectEntities<T>(entityKey)).shareReplay(1);
-
-  // Combine the two and emit with a list of pages containing the normalised entities
-  return Observable.combineLatest(paginationChanged$, entitySectionChanged$)
-    .withLatestFrom(store.select(getAPIRequestDataState))
-    .map(([[paginationState, entitiesOfType], entities]) => {
-      return Object.keys(paginationState.ids).map(page => {
-        return denormalize(paginationState.ids[page], schema, entities);
-      });
-    }).shareReplay(1);
-};
 
 export const getPaginationObservables = <T = any>(
   { store, action, paginationMonitor }: { store: Store<AppState>, action: PaginatedAction, paginationMonitor: PaginationMonitor },

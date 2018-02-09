@@ -1,12 +1,12 @@
 import { CoreModule } from '../../../../../../core/core.module';
-import { CNSISModel } from '../../../../../../store/types/cnsis.types';
+import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status.component';
 
 describe('TableCellEndpointStatusComponent', () => {
-  let component: TableCellEndpointStatusComponent<CNSISModel>;
-  let fixture: ComponentFixture<TableCellEndpointStatusComponent<CNSISModel>>;
+  let component: TableCellEndpointStatusComponent<EndpointModel>;
+  let fixture: ComponentFixture<TableCellEndpointStatusComponent<EndpointModel>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -21,7 +21,7 @@ describe('TableCellEndpointStatusComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellEndpointStatusComponent);
     component = fixture.componentInstance;
-    component.row = {} as CNSISModel;
+    component.row = {} as EndpointModel;
     fixture.detectChanges();
   });
 

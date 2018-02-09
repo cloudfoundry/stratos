@@ -29,6 +29,7 @@ import { listCardComponents } from './components/list/list-cards/card.types';
 /* tslint:disable:max-line-length */
 import { AppEventDetailDialogComponentComponent } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 /* tslint:enable:max-line-length */
+
 import { listTableComponents } from './components/list/list-table/table.types';
 import { EventTabActorIconPipe } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ListComponent } from './components/list/list.component';
@@ -171,4 +172,4 @@ import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/ca
     PaginationMonitorFactory
   ]
 })
-export class SharedModule {}
+export class SharedModule { }
