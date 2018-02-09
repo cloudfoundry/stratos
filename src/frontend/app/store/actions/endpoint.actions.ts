@@ -7,6 +7,7 @@ import { AppState } from '../app-state';
 import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
+export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
 export const GET_ENDPOINTS_LOGIN = '[Endpoints] Get all at login';
 export const GET_ENDPOINTS_SUCCESS = '[Endpoints] Get all success';
 export const GET_ENDPOINTS_FAILED = '[Endpoints] Get all failed';
@@ -37,6 +38,11 @@ export class GetAllEndpoints implements PaginatedAction {
   entityKey = EndpointSchema.key;
   paginationKey = GetAllEndpoints.storeKey;
   type = GET_ENDPOINTS;
+  actions = [
+    GET_ENDPOINTS_START,
+    GET_ENDPOINTS_SUCCESS,
+    GET_ENDPOINTS_SUCCESS
+  ];
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': 'name',

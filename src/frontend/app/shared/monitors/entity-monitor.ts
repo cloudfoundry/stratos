@@ -109,7 +109,8 @@ export class EntityMonitor<T = any> {
         [entity, entityRequestInfo],
         entities
       ]) => entity ? denormalize(entity, schema, entities) : null),
-      shareReplay(1)
+      shareReplay(1),
+      startWith(null)
       );
   }
 

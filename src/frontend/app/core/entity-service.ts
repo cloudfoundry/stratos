@@ -54,10 +54,15 @@ export class EntityService<T = any> {
     this.updatingSection$ = entityMonitor.updatingSection$;
     this.isDeletingEntity$ = entityMonitor.isDeletingEntity$;
     this.isFetchingEntity$ = entityMonitor.isFetchingEntity$;
+    this.entityObs$ = this.getEntityObservable(
+      entityMonitor,
+      this.actionDispatch
+    );
 
-    this.waitForEntity$ = entityMonitor.entityRequest$.pipe(
-      filter((entityRequestInfo) => {
-        const available = !!entityRequestInfo.response &&
+    this.waitForEntity$ = this.entityObs$.pipe(
+      filter((ent) => {
+        const { entityRequestInfo, entity } = ent;
+        const available = !!entity &&
           !entityRequestInfo.deleting.busy &&
           !entityRequestInfo.deleting.deleted &&
           !entityRequestInfo.error;
@@ -65,19 +70,8 @@ export class EntityService<T = any> {
           available
         );
       }),
-      withLatestFrom(entityMonitor.entity$),
-      map(([entityRequestInfo, entity]) => ({
-        entityRequestInfo,
-        entity
-      })),
       shareReplay(1)
     );
-
-    this.entityObs$ = this.getEntityObservable(
-      entityMonitor,
-      this.actionDispatch
-    );
-
   }
 
   refreshKey = 'updating';
@@ -100,17 +94,16 @@ export class EntityService<T = any> {
     entityMonitor: EntityMonitor<T>,
     actionDispatch: Function
   ): Observable<EntityInfo> => {
-    const apiRequestData$ = this.store.select(getAPIRequestDataState).shareReplay(1);
     return entityMonitor.entityRequest$
-      .do(entityRequestInfo => {
-        if (this.shouldCallAction(entityRequestInfo)) {
+      .withLatestFrom(entityMonitor.entity$)
+      .do(([entityRequestInfo, entity]) => {
+        if (this.shouldCallAction(entityRequestInfo, entity)) {
           actionDispatch();
         }
       })
       .filter((entityRequestInfo) => {
         return !!entityRequestInfo;
       })
-      .withLatestFrom(entityMonitor.entity$)
       .map(([entityRequestInfo, entity]) => {
         return {
           entityRequestInfo,
@@ -119,13 +112,14 @@ export class EntityService<T = any> {
       });
   }
 
-  private shouldCallAction(entityRequestInfo: RequestInfoState) {
+  private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
     return !entityRequestInfo ||
-      !entityRequestInfo.response &&
+      !entity &&
       !entityRequestInfo.fetching &&
       !entityRequestInfo.error &&
       !entityRequestInfo.deleting.busy &&
       !entityRequestInfo.deleting.deleted;
+
   }
 
   /**
