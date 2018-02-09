@@ -24,7 +24,10 @@ export class CloudFoundryComponent implements OnInit, OnDestroy {
   ngOnInit() {
     const cfRouting$ = this.cfService.cFEndpoints$.pipe(
       tap(cfEndpoints => {
-        if (cfEndpoints && cfEndpoints.length === 1) {
+        const connectedEndpoints = cfEndpoints.filter(
+          c => c.connectionStatus !== 'connected'
+        );
+        if (connectedEndpoints && connectedEndpoints.length === 1) {
           this.store.dispatch(
             new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] })
           );
