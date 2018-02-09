@@ -9,12 +9,14 @@ import {
   generateTestCfEndpointServiceProvider,
   getBaseTestModules
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import {
+  createBasicStoreModule,
+  testSCFGuid
+} from '../../../test-framework/store-test-helper';
 
 describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
   let fixture: ComponentFixture<CloudFoundryTabsBaseComponent>;
-  const cfId = '1';
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
@@ -22,7 +24,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
         imports: [...getBaseTestModules],
         providers: [
           CloudFoundryEndpointService,
-          generateTestCfEndpointServiceProvider(cfId)
+          generateTestCfEndpointServiceProvider()
         ]
       }).compileComponents();
     })

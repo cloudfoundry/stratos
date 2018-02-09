@@ -8,10 +8,10 @@ import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../core/core.module';
-import { createBasicStoreModule } from './store-test-helper';
+import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { SharedModule } from '../shared/shared.module';
 
-export function generateTestCfEndpointServiceProvider(cfGuid) {
+export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
   return {
     provide: CloudFoundryEndpointService,
     useFactory: (

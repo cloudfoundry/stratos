@@ -5,17 +5,17 @@ import {
   generateTestCfEndpointServiceProvider,
   getBaseTestModules
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { testSCFGuid } from '../../../../test-framework/store-test-helper';
 
 describe('CloudFoundrySummaryTabComponent', () => {
   let component: CloudFoundrySummaryTabComponent;
   let fixture: ComponentFixture<CloudFoundrySummaryTabComponent>;
-  const cfId = '1';
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundrySummaryTabComponent],
         imports: [...getBaseTestModules],
-        providers: [generateTestCfEndpointServiceProvider(cfId)]
+        providers: [generateTestCfEndpointServiceProvider()]
       }).compileComponents();
     })
   );

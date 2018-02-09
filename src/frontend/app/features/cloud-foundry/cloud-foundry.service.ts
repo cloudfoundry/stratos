@@ -3,18 +3,18 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../store/app-state';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { EntityService } from '../../core/entity-service';
-import { EndpointSchema, GetAllCNSIS } from '../../store/actions/cnsis.actions';
+import { EndpointSchema } from '../../store/actions/endpoint.actions';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo, APIResource } from '../../store/types/api.types';
 import { switchMap, shareReplay, tap, filter, map } from 'rxjs/operators';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
-import { CNSISModel } from '../../store/types/cnsis.types';
+import { EndpointModel } from '../../store/types/endpoint.types';
 
 @Injectable()
 export class CloudFoundryService {
-  cFEndpoints$: Observable<CNSISModel[]>;
-  cfEndpointsMonitor: PaginationMonitor<CNSISModel>;
+  cFEndpoints$: Observable<EndpointModel[]>;
+  cfEndpointsMonitor: PaginationMonitor<EndpointModel>;
   waitForAppEntity$: Observable<EntityInfo<APIResource>>;
 
   constructor(

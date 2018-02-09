@@ -9,14 +9,16 @@ import {
   getBaseTestModulesNoShared
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { StoreModule } from '@ngrx/store';
-import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import {
+  createBasicStoreModule,
+  testSCFGuid
+} from '../../../../test-framework/store-test-helper';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { getBootstrapListener } from '@angular/router/src/router_module';
 
 describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
   let fixture: ComponentFixture<CardCfUserInfoComponent>;
-  const cfId = '1';
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({
@@ -24,7 +26,7 @@ describe('CardCfUserInfoComponent', () => {
         imports: [...getBaseTestModulesNoShared],
         providers: [
           CloudFoundryEndpointService,
-          generateTestCfEndpointServiceProvider(cfId),
+          generateTestCfEndpointServiceProvider(),
           EntityMonitorFactory
         ]
       }).compileComponents();

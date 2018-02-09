@@ -7,7 +7,6 @@ import { generateTestCfEndpointServiceProvider } from '../../../test-framework/c
 describe('CloudFoundryBaseComponent', () => {
   let component: CloudFoundryBaseComponent;
   let fixture: ComponentFixture<CloudFoundryBaseComponent>;
-  const cfId = '1';
   beforeEach(
     async(() => {
       TestBed.configureTestingModule({

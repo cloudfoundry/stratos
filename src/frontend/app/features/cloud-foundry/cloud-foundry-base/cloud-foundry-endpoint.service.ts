@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import {
   EndpointSchema,
-  GetAllCNSIS
-} from '../../../store/actions/cnsis.actions';
+  GetAllEndpoints
+} from '../../../store/actions/endpoint.actions';
 import { EntityService } from '../../../core/entity-service';
-import { CNSISModel } from '../../../store/types/cnsis.types';
+import { EndpointModel } from '../../../store/types/endpoint.types';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo } from '../../../store/types/api.types';
-import { shareReplay, map, tap } from 'rxjs/operators';
+import { shareReplay, map, tap, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import {
@@ -21,8 +21,8 @@ import {
 export class CloudFoundryEndpointService {
   info$: Observable<EntityInfo<any>>;
   cfInfoEntityService: EntityService<any>;
-  endpoint$: Observable<EntityInfo<CNSISModel>>;
-  cfEndpointEntityService: EntityService<CNSISModel>;
+  endpoint$: Observable<EntityInfo<EndpointModel>>;
+  cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   constructor(
     public cfGuid: string,
@@ -33,7 +33,7 @@ export class CloudFoundryEndpointService {
       EndpointSchema.key,
       EndpointSchema,
       cfGuid,
-      new GetAllCNSIS()
+      new GetAllEndpoints()
     );
 
     this.cfInfoEntityService = this.entityServiceFactory.create(
@@ -46,7 +46,7 @@ export class CloudFoundryEndpointService {
   }
 
   constructCoreObservables() {
-    this.endpoint$ = this.cfEndpointEntityService.entityObs$.pipe(
+    this.endpoint$ = this.cfEndpointEntityService.waitForEntity$.pipe(
       shareReplay(1)
     );
 
@@ -54,6 +54,6 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.info$ = this.cfInfoEntityService.entityObs$.pipe(shareReplay(1));
+    this.info$ = this.cfInfoEntityService.waitForEntity$.pipe(shareReplay(1));
   }
 }
