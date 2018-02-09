@@ -40,6 +40,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { SystemInfo } from '../types/system.types';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { GetSystemInfo, GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
+import { ClearPaginationOfType, ClearPaginationOfEntity } from '../actions/pagination.actions';
 
 @Injectable()
 export class EndpointsEffect {
@@ -201,6 +202,9 @@ export class EndpointsEffect {
     }).map(endpoint => {
       if (actionStrings[0]) {
         this.store.dispatch({ type: actionStrings[0] });
+      }
+      if (apiActionType === 'delete') {
+        this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
       }
       return new WrapperRequestActionSuccess(null, apiAction, apiActionType);
     })
