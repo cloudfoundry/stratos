@@ -71,7 +71,8 @@
     flex: 1;
     text-align: right;
   }
-  form {
+  .stepper-form {
+    // Use a specific style instead of form element selected. This prevents these generic styles bleading into child components of a stepper
     display: flex;
     flex-direction: column;
     margin-top: 10px;
