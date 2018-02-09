@@ -58,17 +58,19 @@ export class VariablesTabComponent implements OnInit {
           return [];
         }
         const result = new Array<VariableTabAllEnvVarType>();
-        Object.keys(allEnvVars[0].entity)
-          .filter(envVarType => envVarType !== 'cfGuid')
-          .forEach(envVarType => {
-            const envVars = allEnvVars[0].entity[envVarType];
-            Object.keys(envVars).forEach(key => {
-              result.push({
-                name: key,
-                value: envVars[key]
-              });
+
+        Object.keys(allEnvVars[0].entity).forEach(envVarType => {
+          if (envVarType === 'cfGuid') {
+            return;
+          }
+          const envVars = allEnvVars[0].entity[envVarType];
+          Object.keys(envVars).forEach(key => {
+            result.push({
+              name: key,
+              value: envVars[key]
             });
           });
+        });
         return result;
       })
     );
