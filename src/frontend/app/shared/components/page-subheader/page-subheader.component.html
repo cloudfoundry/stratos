@@ -1,3 +1,8 @@
-<div class="page-subheader">
-  <ng-content></ng-content>
+<div class="page-subheader" [ngClass]="{'page-subheader__tabs': !!tabs}">
+  <nav *ngIf="tabs" backgroundColor="primary" mat-tab-nav-bar class="summary__nav">
+    <a mat-tab-link class="mat-tab-fit" *ngFor="let tab of tabs" [routerLink]="[tab.link]" routerLinkActive="active-link" #rla="routerLinkActive" [active]="rla.isActive">
+      {{tab.label}}
+    </a>
+  </nav>
+  <ng-content *ngIf="!tabs"></ng-content>
 </div>

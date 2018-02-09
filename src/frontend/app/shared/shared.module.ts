@@ -57,6 +57,9 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
+import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
+import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 
 @NgModule({
   imports: [
@@ -109,7 +112,10 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
     CardAppUptimeComponent,
     ListComponent,
     ...listCardComponents,
-    ...listTableComponents
+    ...listTableComponents,
+    CardCfUsageComponent,
+    CardCfInfoComponent,
+    CardCfUserInfoComponent
   ],
   exports: [
     FormsModule,
@@ -148,7 +154,10 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
     CardAppUsageComponent,
     DialogConfirmComponent,
     CardAppUptimeComponent,
-    ListComponent
+    ListComponent,
+    CardCfUsageComponent,
+    CardCfInfoComponent,
+    CardCfUserInfoComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
