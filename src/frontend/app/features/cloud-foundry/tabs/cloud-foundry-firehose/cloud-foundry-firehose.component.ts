@@ -24,6 +24,10 @@ export class CloudFoundryFirehoseComponent implements OnInit {
     const streamUrl = `wss://${host}/pp/${environment.proxyAPIVersion}/${
       this.cfEndpointService.cfGuid
     }/firehose`;
+    this.setupFirehoseStream(streamUrl);
+  }
+
+  private setupFirehoseStream(streamUrl: string) {
     this.messages = websocketConnect(
       streamUrl,
       new QueueingSubject<string>()
@@ -35,24 +39,22 @@ export class CloudFoundryFirehoseComponent implements OnInit {
       filter(l => !!l),
       map(log => {
         const fireHoseItem = JSON.parse(log) as FireHoseItem;
-        return {
-          log,
-          fireHoseItem
-        };
-      }),
-      map(({ log, fireHoseItem }) => {
         const timesString = moment(fireHoseItem.timestamp / 1000000).format(
           'hh:mm:ss A'
         );
-        const component = this.stylize(
-          `[${fireHoseItem.deployment}/
-            ${fireHoseItem.origin}/
-            ${fireHoseItem.job}]`,
-          fireHoseItem.eventType
-        );
+        const component = this.getComponent(fireHoseItem);
         const message = this.showMessage(fireHoseItem);
         return `${timesString}: ${component} ${message}`;
       })
+    );
+  }
+
+  private getComponent(fireHoseItem: FireHoseItem) {
+    return this.stylize(
+      `[${fireHoseItem.deployment}/
+            ${fireHoseItem.origin}/
+            ${fireHoseItem.job}]`,
+      fireHoseItem.eventType
     );
   }
 
@@ -86,10 +88,10 @@ export class CloudFoundryFirehoseComponent implements OnInit {
     const errorObj = fireHoseItem.error;
     return `ERROR: Source: ${this.stylize(
       errorObj.source,
-      102
-    )},  Code: ${this.stylize(errorObj.code, 102)},  Message: ${this.stylize(
+      8
+    )},  Code: ${this.stylize(errorObj.code, 8)},  Message: ${this.stylize(
       errorObj.message,
-      102
+      8
     )}`;
   }
 
@@ -97,7 +99,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
     const httpStartStop = fireHoseItem.httpStartStop;
     const method = HTTP_METHODS[httpStartStop.method - 1];
     const peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
-    return `${peerType} ${this.stylize(method, 101)} ${
+    return `${peerType} ${this.stylize(method, 4)} ${
       httpStartStop.uri
     }, Status-Code: ${this.stylize(
       httpStartStop.statusCode,
@@ -182,17 +184,11 @@ export class CloudFoundryFirehoseComponent implements OnInit {
         // Error
         return `color: ${LogViewerComponent.colors.red};${makeTextBold}`;
       case 9:
+      case 100:
         // Container Metric
         return `color: ${LogViewerComponent.colors.teal}$;${makeTextBold}`;
 
       // Custom Styles
-
-      case 100:
-        return `;color:  ${LogViewerComponent.colors.teal};${makeTextBold}`;
-      case 101:
-        return `;color:  ${LogViewerComponent.colors.magenta};${makeTextBold}`;
-      case 102:
-        return `;color:  ${LogViewerComponent.colors.red};${makeTextBold}`;
       case 107:
         return `;color:  ${LogViewerComponent.colors.yellow};${makeTextBold}`;
       default:
