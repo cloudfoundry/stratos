@@ -74,10 +74,10 @@
   form {
     display: flex;
     flex-direction: column;
+    margin-top: 10px;
     max-width: 60%;
-    mat-select,
     mat-form-field {
-      margin-top: 20px;
+      padding-top: 10px;
       width: 100%;
     }
   }
