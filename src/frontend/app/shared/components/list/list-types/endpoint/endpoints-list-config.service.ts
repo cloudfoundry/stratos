@@ -11,7 +11,7 @@ import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
-import { selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
+import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
@@ -29,9 +29,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
       this.store.dispatch(new UnregisterEndpoint(item.guid));
-      this.handleAction(item, EndpointsEffect.unregisteringKey, ([oldVal, newVal]) => {
+      this.handleDeleteAction(item, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
-        this.store.dispatch(new ResetPagination(this.dataSource.entityKey, this.dataSource.paginationKey));
       });
     },
     icon: 'delete',
@@ -55,7 +54,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
       this.store.dispatch(new DisconnectEndpoint(item.guid));
-      this.handleAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
+      this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
         this.store.dispatch(new GetSystemInfo());
       });
@@ -151,12 +150,23 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   enableTextFilter = true;
   tableFixedRowHeight = true;
 
-  private handleAction(item, effectKey, handleChange) {
-    const disSub = this.store.select(selectUpdateInfo(
+  private handleUpdateAction(item, effectKey, handleChange) {
+    this.handleAction(selectUpdateInfo(
       endpointStoreNames.type,
       item.guid,
       effectKey,
-    ))
+    ), handleChange);
+  }
+
+  private handleDeleteAction(item, handleChange) {
+    this.handleAction(selectDeletionInfo(
+      endpointStoreNames.type,
+      item.guid,
+    ), handleChange);
+  }
+
+  private handleAction(storeSelect, handleChange) {
+    const disSub = this.store.select(storeSelect)
       .pairwise()
       .subscribe(([oldVal, newVal]) => {
         // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')

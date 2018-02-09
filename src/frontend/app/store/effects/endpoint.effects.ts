@@ -47,7 +47,6 @@ export class EndpointsEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static registeringKey = 'registering';
-  static unregisteringKey = 'unregistering';
 
   constructor(
     private http: HttpClient,
@@ -91,7 +90,7 @@ export class EndpointsEffect {
   @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS)
     .flatMap(action => {
       const actionType = 'update';
-      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.connectingKey);
+      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid,
@@ -112,7 +111,7 @@ export class EndpointsEffect {
   @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
+      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid
@@ -131,7 +130,7 @@ export class EndpointsEffect {
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.unregisteringKey);
+      const apiAction = this.getEndpointDeleteAction(action.guid, action.type);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid
@@ -150,7 +149,7 @@ export class EndpointsEffect {
   @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid(), action.type, EndpointsEffect.registeringKey);
+      const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_name': action.name,
@@ -168,12 +167,21 @@ export class EndpointsEffect {
       );
     });
 
-  private getEndpointAction(guid, type, updatingKey) {
+
+  private getEndpointUpdateAction(guid, type, updatingKey) {
     return {
       entityKey: endpointStoreNames.type,
       guid,
       type,
       updatingKey,
+    } as IRequestAction;
+  }
+
+  private getEndpointDeleteAction(guid, type) {
+    return {
+      entityKey: endpointStoreNames.type,
+      guid,
+      type,
     } as IRequestAction;
   }
 
