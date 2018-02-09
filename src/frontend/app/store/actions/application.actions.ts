@@ -5,7 +5,6 @@ import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
-import { SpaceSchema } from './space.actions';
 import { StackSchema } from './stack.action';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
@@ -14,6 +13,7 @@ import { pick } from '../helpers/reducer.helper';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { AppStatSchema } from '../types/app-metadata.types';
 import { getPaginationKey } from './pagination.actions';
+import { SpaceWithOrganisationSchema } from './action-types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -50,7 +50,7 @@ export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
 const ApplicationEntitySchema = {
   entity: {
     stack: StackSchema,
-    space: SpaceSchema
+    space: SpaceWithOrganisationSchema
   }
 };
 
