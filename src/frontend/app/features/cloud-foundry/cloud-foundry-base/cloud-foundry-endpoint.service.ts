@@ -46,9 +46,7 @@ export class CloudFoundryEndpointService {
   }
 
   constructCoreObservables() {
-    this.endpoint$ = this.cfEndpointEntityService.waitForEntity$.pipe(
-      shareReplay(1)
-    );
+    this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
 
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')

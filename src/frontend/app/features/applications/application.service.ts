@@ -150,7 +150,7 @@ export class ApplicationService {
 
   private constructCoreObservables() {
     // First set up all the base observables
-    this.app$ = this.appEntityService.entityObs$.shareReplay(1);
+    this.app$ = this.appEntityService.waitForEntity$;
 
     // App org and space
     this.app$
