@@ -14,6 +14,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { CommonModule } from '@angular/common';
 import { ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 
 describe('CardAppInstancesComponent', () => {
   let component: CardAppInstancesComponent;
@@ -39,6 +40,7 @@ describe('CardAppInstancesComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
         ConfirmationDialogService,
+        PaginationMonitorFactory
       ]
     })
       .compileComponents();

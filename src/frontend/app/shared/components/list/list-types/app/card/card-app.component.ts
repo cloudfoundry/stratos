@@ -1,20 +1,14 @@
-import { PaginationEntityState } from '../../../../../../store/types/pagination.types';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/app-state';
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
-import { APIResource } from '../../../../../../store/types/api.types';
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 import { Subscription } from 'rxjs/Subscription';
-import {
-  ApplicationStateService,
-  ApplicationStateData,
-} from '../../../../application-state/application-state.service';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { AppStatsSchema, AppStatSchema } from '../../../../../../store/types/app-metadata.types';
-import { selectPaginationState } from '../../../../../../store/selectors/pagination.selectors';
-import { getPaginationPages } from '../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+
 import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { AppState } from '../../../../../../store/app-state';
+import { APIResource } from '../../../../../../store/types/api.types';
+import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
+import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 // import { AppMetadataProperties } from '../../../../../store/actions/app-metadata.actions';
 
 @Component({
@@ -30,7 +24,8 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
 
   constructor(
     private store: Store<AppState>,
-    private appStateService: ApplicationStateService) {
+    private appStateService: ApplicationStateService
+  ) {
     super();
   }
   ngOnInit() {
@@ -40,7 +35,8 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
       this.appStateService,
       this.row.entity,
       this.row.entity.guid,
-      this.row.entity.cfGuid)
+      this.row.entity.cfGuid
+    )
       .do(appSate => {
         this.applicationState = appSate;
       })

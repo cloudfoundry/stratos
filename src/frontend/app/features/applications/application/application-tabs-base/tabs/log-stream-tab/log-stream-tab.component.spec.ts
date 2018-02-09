@@ -15,6 +15,8 @@ import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.ser
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { EntityMonitorFactory } from '../../../../../../shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
 
 
 describe('LogStreamTabComponent', () => {
@@ -47,7 +49,9 @@ describe('LogStreamTabComponent', () => {
         generateTestApplicationServiceProvider(cfId, appId),
         AppStoreModule,
         ApplicationStateService,
-        ApplicationEnvVarsService
+        ApplicationEnvVarsService,
+        EntityMonitorFactory,
+        PaginationMonitorFactory
       ]
     })
       .compileComponents();

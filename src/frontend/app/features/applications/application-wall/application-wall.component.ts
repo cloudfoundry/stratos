@@ -2,7 +2,7 @@ import { animate, query, style, transition, trigger } from '@angular/animations'
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
-import { distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, tap, withLatestFrom, delay, debounceTime } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -53,6 +53,8 @@ export class ApplicationWallComponent implements OnDestroy {
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(dataSource)),
       withLatestFrom(dataSource.pagination$),
+      // Ensure we keep pagination smooth
+      debounceTime(250),
       tap(([page, pagination]) => {
         if (!page) {
           return;

@@ -60,6 +60,8 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 
 
 @NgModule({
@@ -163,6 +165,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     ApplicationStateService,
     CfOrgSpaceDataService,
     ConfirmationDialogService,
+    EntityMonitorFactory,
+    PaginationMonitorFactory
   ]
 })
 export class SharedModule { }
