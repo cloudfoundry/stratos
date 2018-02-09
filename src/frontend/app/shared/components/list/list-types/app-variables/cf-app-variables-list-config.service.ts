@@ -16,7 +16,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
     action: (items: ListAppEnvVar[]) => {
-      this.dispatchDeleteAction();
+      this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows.values()));
     },
     icon: 'delete',
     label: 'Delete',
@@ -27,7 +27,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private listActionDelete: IListAction<ListAppEnvVar> = {
     action: (item: ListAppEnvVar) => {
-      this.dispatchDeleteAction();
+      this.dispatchDeleteAction([item]);
     },
     icon: 'delete',
     label: 'Delete',
@@ -64,14 +64,13 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   };
   enableTextFilter = true;
 
-  private dispatchDeleteAction() {
+  private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     this.store.dispatch(
       new AppVariablesDelete(
         this.envVarsDataSource.cfGuid,
         this.envVarsDataSource.appGuid,
         this.envVarsDataSource.transformedEntities,
-        Array.from(this.envVarsDataSource.selectedRows.values()
-        ))
+        newValues)
     );
   }
 
