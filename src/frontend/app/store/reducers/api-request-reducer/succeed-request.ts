@@ -5,6 +5,7 @@ import {
   mergeInnerObject,
   mergeUpdatingState,
   setEntityRequestState,
+  mergeObject,
 } from './request-helpers';
 import { mergeState } from '../../helpers/reducer.helper';
 import { IRequestTypeState } from '../../app-state';
@@ -26,14 +27,10 @@ export function succeedRequest(state: IRequestTypeState, action: ISuccessRequest
         }
       );
     } else if (action.requestType === 'delete' && !action.apiAction.updatingKey) {
-      requestSuccessState.deleting = mergeInnerObject(
-        'deleting',
-        requestSuccessState.deleting,
-        {
-          busy: false,
-          deleted: true
-        }
-      );
+      requestSuccessState.deleting = mergeObject(requestSuccessState.deleting, {
+        busy: false,
+        deleted: true
+      });
     } else {
       requestSuccessState.fetching = false;
       requestSuccessState.error = false;
