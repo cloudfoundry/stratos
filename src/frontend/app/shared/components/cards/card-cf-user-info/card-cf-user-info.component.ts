@@ -12,6 +12,6 @@ export class CardCfUserInfoComponent implements OnInit {
   ngOnInit() {}
 
   isAdmin(user) {
-    return user.admin ? 'Yes' : 'No';
+    return user && user.admin ? 'Yes' : 'No';
   }
 }
