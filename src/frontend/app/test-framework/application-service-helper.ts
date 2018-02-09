@@ -44,6 +44,9 @@ export class ApplicationServiceMock {
       }
     }
   } as EntityInfo);
+  appEnvVars = {
+    entities$: Observable.of(new Array<APIResource<any>>())
+  };
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {

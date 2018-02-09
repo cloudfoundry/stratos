@@ -6,17 +6,17 @@ import { AppVariablesDelete } from '../../../../../store/actions/app-variables.a
 import { AppState } from '../../../../../store/app-state';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
-import { CfAppEvnVarsDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
+import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 
 @Injectable()
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
-  envVarsDataSource: CfAppEvnVarsDataSource;
+  envVarsDataSource: CfAppVariablesDataSource;
 
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
     action: (items: ListAppEnvVar[]) => {
-      this.dispatchDeleteAction();
+      this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows.values()));
     },
     icon: 'delete',
     label: 'Delete',
@@ -27,7 +27,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   private listActionDelete: IListAction<ListAppEnvVar> = {
     action: (item: ListAppEnvVar) => {
-      this.dispatchDeleteAction();
+      this.dispatchDeleteAction([item]);
     },
     icon: 'delete',
     label: 'Delete',
@@ -59,19 +59,18 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text: {
-    title: 'Environment Variables', filter: 'Filter Variables'
+  text = {
+    title: 'Environment Variables', filter: 'Search by name'
   };
-  enableTextFilter: true;
+  enableTextFilter = true;
 
-  private dispatchDeleteAction() {
+  private dispatchDeleteAction(newValues: ListAppEnvVar[]) {
     this.store.dispatch(
       new AppVariablesDelete(
         this.envVarsDataSource.cfGuid,
         this.envVarsDataSource.appGuid,
-        this.envVarsDataSource.entityLettabledRows,
-        Array.from(this.envVarsDataSource.selectedRows.values()
-        ))
+        this.envVarsDataSource.transformedEntities,
+        newValues)
     );
   }
 
@@ -86,7 +85,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     private store: Store<AppState>,
     private appService: ApplicationService
   ) {
-    this.envVarsDataSource = new CfAppEvnVarsDataSource(this.store, this.appService, this);
+    this.envVarsDataSource = new CfAppVariablesDataSource(this.store, this.appService, this);
   }
 
 }

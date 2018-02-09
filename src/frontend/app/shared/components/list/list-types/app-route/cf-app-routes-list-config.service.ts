@@ -130,8 +130,8 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text: {
-    title: 'Routes';
+  text = {
+    title: 'Routes'
   };
 
   dispatchDeleteAction(route) {
