@@ -76,3 +76,7 @@ deploy/stratos-ui-release/.blobs
 deploy/stratos-ui-release/dev_releases/
 output/fissile
 deploy/ci/travis/temp/
+deploy/glide-cache/
+
+.dist/
+deploy/uaa/tmp/
