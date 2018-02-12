@@ -29,6 +29,8 @@ import { PercentagePipe } from '../../pipes/percentage.pipe';
 import { TableRowComponent } from './list-table/table-row/table-row.component';
 import { RunningInstancesComponent } from '../running-instances/running-instances.component';
 import { ListConfig } from './list.component.types';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -38,7 +40,9 @@ describe('ListComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ListConfig, useClass: EndpointsListConfigService },
-        ApplicationStateService
+        ApplicationStateService,
+        PaginationMonitorFactory,
+        EntityMonitorFactory
       ],
       declarations: [
         ...listTableCells,

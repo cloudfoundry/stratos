@@ -7,6 +7,7 @@ import {
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { CloudFoundryService } from '../cloud-foundry.service';
 
 describe('CloudFoundryComponent', () => {
   let component: CloudFoundryComponent;
@@ -17,7 +18,7 @@ describe('CloudFoundryComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryComponent],
         imports: [...getBaseTestModules],
-        providers: [PaginationMonitorFactory]
+        providers: [PaginationMonitorFactory, CloudFoundryService]
       }).compileComponents();
     })
   );
