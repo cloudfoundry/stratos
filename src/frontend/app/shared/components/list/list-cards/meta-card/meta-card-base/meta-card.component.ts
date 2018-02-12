@@ -1,5 +1,5 @@
 import { Component, ContentChild, ContentChildren, OnInit, QueryList } from '@angular/core';
-import { Input } from '@angular/core/src/metadata/directives';
+import { Input } from '@angular/core';
 
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
@@ -19,6 +19,9 @@ export class MetaCardComponent implements OnInit {
 
   @Input('status')
   status: string;
+
+  @Input('showStatus')
+  showStatus: string;
 
   constructor() { }
 

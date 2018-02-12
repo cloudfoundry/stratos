@@ -1,5 +1,4 @@
-import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
-import { ChangeDetectionStrategy } from '@angular/compiler/src/core';
+import { ChangeDetectionStrategy, Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-meta-card-key',

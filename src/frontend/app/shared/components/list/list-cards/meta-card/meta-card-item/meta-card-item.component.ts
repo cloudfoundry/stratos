@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy } from '@angular/compiler/src/core';
-import { Component, ContentChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
 import { MetaCardKeyComponent } from '../meta-card-key/meta-card-key.component';
 import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.component';
@@ -11,13 +10,14 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardItemComponent implements OnInit {
-
-
   @ContentChild(MetaCardKeyComponent)
   key: MetaCardKeyComponent;
 
   @ContentChild(MetaCardValueComponent)
   value: MetaCardValueComponent;
+
+  @ViewChild(TemplateRef)
+  content: TemplateRef<any>;
 
   constructor() { }
 

@@ -1,7 +1,10 @@
-<div>
-  <ng-template [cdkPortalOutlet]="keyPortal"></ng-template>
-</div>
-
-<div>
-  <ng-template ngTemplateOutlet></ng-template>
-</div>
+<ng-template>
+  <div class="meta-card-item">
+    <div class="meta-card-item__key">
+      <span *ngTemplateOutlet="key.content"></span>:
+    </div>
+    <div class="meta-card-item__value">
+      <span *ngTemplateOutlet="value.content"></span>
+    </div>
+  </div>
+</ng-template>

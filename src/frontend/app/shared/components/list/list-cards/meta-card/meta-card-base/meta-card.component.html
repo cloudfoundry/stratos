@@ -1,3 +1,12 @@
-<p>
-  meta-card works!
-</p>
+<mat-card>
+  <app-card-status>
+  </app-card-status>
+  <mat-card-header>
+    <span *ngTemplateOutlet="title.content"></span>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngFor="let metaItem of metaItems">
+      <div *ngTemplateOutlet="metaItem.content"></div>
+    </div>
+  </mat-card-content>
+</mat-card>
