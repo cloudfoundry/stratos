@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { CardStatus } from '../application-state.service';
 
 @Component({
   selector: 'app-application-state-icon',
@@ -9,7 +10,7 @@ export class ApplicationStateIconComponent implements OnInit {
 
   constructor() { }
 
-  @Input() public state: {};
+  @Input() public status: CardStatus;
 
   ngOnInit() {
   }

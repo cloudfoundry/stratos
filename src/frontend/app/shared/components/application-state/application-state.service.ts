@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 
 export interface ApplicationStateData {
   label: string;
+  subLabel?: string;
   indicator: CardStatus;
   actions: {
     [key: string]: boolean

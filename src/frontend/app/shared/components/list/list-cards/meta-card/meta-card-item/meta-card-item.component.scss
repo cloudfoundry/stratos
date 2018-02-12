@@ -2,7 +2,12 @@
   display: flex;
   justify-content: space-between;
   padding: 2px 0;
-  &__key {
+  &__key,
+  &__value {
     flex: 1;
+  }
+  &__key {
+    flex-shrink: 0;
+    padding-right: 10px;
   }
 }

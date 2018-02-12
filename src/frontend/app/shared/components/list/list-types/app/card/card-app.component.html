@@ -2,13 +2,13 @@
   <app-card-status [status$]="appStatus$"></app-card-status>
   <mat-card-header>
     <div class="card-app__title">{{ row.entity.name }}</div>
-    <app-application-state-icon [state]="applicationState$ | async"></app-application-state-icon>
+    <app-application-state-icon [status]="appStatus$ | async"></app-application-state-icon>
   </mat-card-header>
   <mat-card-content>
     <div class="card-app__meta">
       <div class="card-app__label">State:</div>
       <div class="card-app__value">
-        <app-application-state [hideIcon]="true" [state]="applicationState$ | async"></app-application-state>
+        <app-application-state [hideIcon]="true" [state]="applicationState$"></app-application-state>
       </div>
     </div>
     <div class="card-app__meta">

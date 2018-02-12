@@ -1,13 +1,7 @@
-<app-meta-card>
-  <app-meta-card-title>Title</app-meta-card-title>
+<app-meta-card [status$]="status$">
+  <app-meta-card-title>{{ row.name }}</app-meta-card-title>
   <app-meta-card-item>
-    <app-meta-card-key>Key</app-meta-card-key>
-    <app-meta-card-value>Value</app-meta-card-value>
+    <app-meta-card-key>Address</app-meta-card-key>
+    <app-meta-card-value>{{ getEndpointUrl(row) }}</app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>
-<!-- <app-card-status [status$]="applicationState?.indicator"></app-card-status>
-  <mat-card-header>
-    <div class="card-app__title">{{ row.name }}</div>
-  </mat-card-header>
-  <mat-card-content>
-  </mat-card-content> -->
