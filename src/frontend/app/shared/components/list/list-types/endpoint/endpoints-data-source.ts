@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { EndpointSchema, GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { ListDataSource, DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
@@ -31,7 +31,23 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       entityMonitorFactory,
       GetAllEndpoints.storeKey
     );
-    super({
+    const config = EndpointsDataSource.getEndpointConfig(
+      store,
+      action,
+      listConfig,
+      rowStateManager.observable,
+      () => sub.unsubscribe()
+    );
+    super(config);
+  }
+  static getEndpointConfig(
+    store,
+    action,
+    listConfig,
+    rowsState,
+    destroy
+  ) {
+    return {
       store,
       action,
       schema: EndpointSchema,
@@ -46,11 +62,10 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
           type: 'filter',
           field: 'name'
         },
-      ],
+      ] as DataFunctionDefinition[],
       listConfig,
-      rowsState: rowStateManager.observable,
-      destroy: () => sub.unsubscribe()
-    });
+      rowsState,
+      destroy
+    };
   }
-
 }
