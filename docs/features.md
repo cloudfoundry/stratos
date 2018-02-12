@@ -1,5 +1,7 @@
 # Features
 
+> **NOTE** This branch is a work-in-progress Angular 2.x version of Stratos. For the current Angular 1 based version see [https://github.com/cloudfoundry-incubator/stratos/tree/master](https://github.com/cloudfoundry-incubator/stratos/tree/master). This version is at an early development stage and we welcome feedback, input and contributions. This version does not currently have feature parity with the Angular 1 version specified below - see the [Development Roadmap](docs/roadmap.md) for more information.
+
 Stratos provides the feature set outline below. Some of these are illustrated in the [Screenshots gallery](images/screenshots/README.md).
 
 * Authentication
