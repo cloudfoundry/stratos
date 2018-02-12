@@ -9,7 +9,6 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../table-cell/table-cell-custom';
 
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191/ */
 @Component({
   selector: 'app-table-cell-actions',
   templateUrl: './table-cell-actions.component.html',
