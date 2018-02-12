@@ -82,11 +82,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource = this.config.getDataSource();
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
-    // Set up an obervable containing the current view (card/table)
+    // Set up an observable containing the current view (card/table)
     const { view, } = getListStateObservables(this.store, this.dataSource.paginationKey);
     this.view$ = view;
 
-    // If this is the first time the user has used this lis then set the view to the default
+    // If this is the first time the user has used this list then set the view to the default
     this.view$.first().subscribe(listView => {
       if (!listView) {
         this.updateListView(this.config.defaultView || 'table');
@@ -96,6 +96,15 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
 
     this.paginator.pageSizeOptions = this.config.pageSizeOptions;
+
+    // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
+    // pageSize
+    this.paginationController.pagination$.first().subscribe(pagination => {
+      if (this.paginator.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
+        this.paginationController.pageSize(this.paginator.pageSizeOptions[0]);
+      }
+    });
+
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
       this.paginator.pageIndex = pagination.pageIndex - 1;

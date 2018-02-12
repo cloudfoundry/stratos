@@ -75,12 +75,12 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     }
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = [5, 15, 30];
   viewType = ListViewTypes.TABLE_ONLY;
-  text: {
-    title: 'Available Routes';
+  text = {
+    title: 'Available Routes'
   };
-  isLocal: true;
+  isLocal = true;
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
