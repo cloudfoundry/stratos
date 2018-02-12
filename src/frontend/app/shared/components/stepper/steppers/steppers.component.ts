@@ -27,7 +27,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   currentIndex = 0;
 
-   ngOnInit() {
+  ngOnInit() {
   }
 
   ngAfterContentInit() {
@@ -110,12 +110,12 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   getNextButtonText(currentIndex: number): string {
     return currentIndex + 1 < this.steps.length ?
-      this.steps[ currentIndex ].nextButtonText :
-      this.steps[ currentIndex ].finishButtonText;
+      this.steps[currentIndex].nextButtonText :
+      this.steps[currentIndex].finishButtonText;
   }
 
   getCancelButtonText(currentIndex: number): string {
-      return this.steps[ currentIndex ].cancelButtonText;
+    return this.steps[currentIndex].cancelButtonText;
   }
 
 }

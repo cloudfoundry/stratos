@@ -10,6 +10,7 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointsListConfigService } from '../endpoint/endpoints-list-config.service';
 import { CFEndpointsDataSource } from './cf-endpoints-data-source';
 import { TableCellEndpointStatusComponent } from '../endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { EndpointCardComponent } from '../../list-cards/custom-cards/endpoint-card/endpoint-card.component';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -18,71 +19,12 @@ function getEndpointTypeString(endpoint: EndpointModel): string {
 
 @Injectable()
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
-
-  // private listActionDelete: IListAction<EndpointModel> = {
-  //   action: (item) => {
-  //     this.store.dispatch(new UnregisterEndpoint(item.guid));
-  //     this.handleAction(item, EndpointsEffect.unregisteringKey, ([oldVal, newVal]) => {
-  //       this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
-  //       this.store.dispatch(new ResetPagination(this.dataSource.entityKey, this.dataSource.paginationKey));
-  //     });
-  //   },
-  //   icon: 'delete',
-  //   label: 'Unregister',
-  //   description: 'Remove the endpoint',
-  //   visible: row => true,
-  //   enabled: row => true,
-  // };
-
-  // private listActionDeleteMulti: IMultiListAction<EndpointModel> = {
-  //   action: (item) => {
-  //     return null;
-  //   },
-  //   icon: 'delete',
-  //   label: 'Unregister',
-  //   description: 'Remove the endpoint',
-  //   visible: row => true,
-  //   enabled: row => true,
-  // };
-
-  // private listActionDisconnect: IListAction<EndpointModel> = {
-  //   action: (item) => {
-  //     this.store.dispatch(new DisconnectEndpoint(item.guid));
-  //     this.handleAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-  //       this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
-  //       this.store.dispatch(new GetSystemInfo());
-  //     });
-  //   },
-  //   icon: 'remove_from_queue',
-  //   label: 'Disconnect',
-  //   description: ``, // Description depends on console user permission
-  //   visible: row => row.connectionStatus === 'connected',
-  //   enabled: row => true,
-  // };
-
-  // private listActionConnect: IListAction<EndpointModel> = {
-  //   action: (item) => {
-  //     const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
-  //       data: {
-  //         name: item.name,
-  //         guid: item.guid
-  //       },
-  //       disableClose: true
-  //     });
-  //   },
-  //   icon: 'add_to_queue',
-  //   label: 'Connect',
-  //   description: '',
-  //   visible: row => row.connectionStatus === 'disconnected',
-  //   enabled: row => true,
-  // };
-
-
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
   dataSource: CFEndpointsDataSource;
   pageSizeOptions = [9, 18, 27];
-  viewType = ListViewTypes.TABLE_ONLY;
+  viewType = ListViewTypes.CARD_ONLY;
+  cardComponent = EndpointCardComponent;
   text = {
     title: '',
     filter: 'Filter Endpoints'
@@ -119,8 +61,8 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   public getGlobalActions = () => [];
   public getMultiActions = () => [];
   public getSingleActions = () => [];
-  public getDataSource = () => this.dataSource;
   public getMultiFiltersConfigs = () => [];
+  public getDataSource = () => this.dataSource;
 
 
 }

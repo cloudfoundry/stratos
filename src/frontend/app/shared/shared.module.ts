@@ -60,6 +60,12 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
+import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
+import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 
 @NgModule({
   imports: [
@@ -115,7 +121,13 @@ import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/ca
     ...listTableComponents,
     CardCfUsageComponent,
     CardCfInfoComponent,
-    CardCfUserInfoComponent
+    CardCfUserInfoComponent,
+    EndpointCardComponent,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent
   ],
   exports: [
     FormsModule,
