@@ -13,6 +13,7 @@ import { getPaginationObservables } from '../../../store/reducers/pagination-red
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-routes',
@@ -30,17 +31,22 @@ export class RoutesComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
-    private listConfig: ListConfig<EntityInfo>
+    private listConfig: ListConfig<EntityInfo>,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
   }
 
   ngOnInit() {
     const { cfGuid } = this.appService;
+    const action = new FetchAllDomains(cfGuid);
     this.paginationSubscription = getPaginationObservables<APIResource>(
       {
         store: this.store,
-        action: new FetchAllDomains(cfGuid),
-        schema: [DomainSchema]
+        action,
+        paginationMonitor: this.paginationMonitorFactory.create(
+          action.paginationKey,
+          DomainSchema
+        )
       },
       true
     ).entities$.subscribe();

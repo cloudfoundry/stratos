@@ -19,6 +19,7 @@ import { SystemEffects } from './effects/system.effects';
 import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { AppReducersModule } from './reducers.module';
+import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 
 @NgModule({
   imports: [
@@ -40,8 +41,9 @@ import { AppReducersModule } from './reducers.module';
       SnackBarEffects,
       SetClientFilterEffect,
       DeployAppEffects,
-      GithubEffects
+      GithubEffects,
+      CloudFoundryEffects
     ])
   ]
 })
-export class AppStoreModule { }
+export class AppStoreModule {}

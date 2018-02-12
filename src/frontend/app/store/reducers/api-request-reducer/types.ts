@@ -16,11 +16,11 @@ export interface DeleteActionState extends ActionState {
   deleted: boolean;
 }
 
-export const defaultActionState = {
+export const getDefaultActionState = () => ({
   busy: false,
   error: false,
   message: ''
-};
+});
 
 export const defaultDeletingActionState = {
   busy: false,
@@ -43,10 +43,10 @@ export interface RequestInfoState {
   message: string;
 }
 
-export const defaultRequestState = {
+const defaultRequestState = {
   fetching: false,
   updating: {
-    _root_: { ...defaultActionState }
+    _root_: getDefaultActionState()
   },
   creating: false,
   error: false,
@@ -55,4 +55,13 @@ export const defaultRequestState = {
   message: ''
 };
 
-export type IRequestArray = [string, string, string];
+export function getDefaultRequestState() {
+  return { ...defaultRequestState };
+}
+
+export type IRequestArray = [
+  string,
+  string,
+  string
+];
+

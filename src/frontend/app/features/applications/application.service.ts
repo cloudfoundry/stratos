@@ -1,54 +1,51 @@
-import { OrganizationSchema } from '../../store/actions/organization.actions';
-import {
-  getPaginationObservables,
-  PaginationObservables,
-  getPaginationPages,
-  getCurrentPageRequestInfo,
-} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { EntityService } from '../../core/entity-service';
-import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
 
-import { ApplicationSchema } from '../../store/actions/application.actions';
-import {
-  GetApplication,
-  UpdateApplication,
-  UpdateExistingApplication,
-} from '../../store/actions/application.actions';
-import { AppState } from '../../store/app-state';
-import {
-  ApplicationEnvVarsService,
-  EnvVarStratosProject
-} from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { EntityService } from '../../core/entity-service';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
-import { EntityInfo, APIResource } from '../../store/types/api.types';
-import { combineLatest } from 'rxjs/operators/combineLatest';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import {
+  AppMetadataTypes,
+  GetAppEnvVarsAction,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from '../../store/actions/app-metadata.actions';
+import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
+import { ApplicationSchema } from '../../store/actions/application.actions';
+import { SpaceSchema } from '../../store/actions/space.action';
+import { AppState } from '../../store/app-state';
+import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { selectEntity } from '../../store/selectors/api.selectors';
+import { selectUpdateInfo } from '../../store/selectors/api.selectors';
+import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
+import { APIResource, EntityInfo } from '../../store/types/api.types';
 import {
   AppEnvVarSchema,
-  AppEnvVarsState,
   AppStat,
+  AppStatSchema,
   AppStatsSchema,
-  AppSummarySchema,
   AppSummary,
-  AppEnvVarsSchema,
+  AppSummarySchema,
 } from '../../store/types/app-metadata.types';
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { GetAppSummaryAction, GetAppStatsAction, GetAppEnvVarsAction, AppMetadataTypes } from '../../store/actions/app-metadata.actions';
-import { PaginationEntityState, PaginationState } from '../../store/types/pagination.types';
+import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
-  defaultPaginationState,
-} from '../../store/reducers/pagination-reducer/pagination.reducer';
-import { tap, map, withLatestFrom, switchMap } from 'rxjs/operators';
-import { isTCPRoute, getRoute } from './routes/routes.helper';
-import { selectEntity } from '../../store/selectors/api.selectors';
-import { SpaceSchema } from '../../store/actions/space.action';
-import { selectUpdateInfo } from '../../store/selectors/api.selectors';
-import { ActionState } from '../../store/reducers/api-request-reducer/types';
+  getCurrentPageRequestInfo,
+  getPaginationObservables,
+
+  PaginationObservables,
+} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  ApplicationEnvVarsService,
+  EnvVarStratosProject,
+} from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -71,7 +68,9 @@ export class ApplicationService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private appStateService: ApplicationStateService,
-    private appEnvVarsService: ApplicationEnvVarsService) {
+    private appEnvVarsService: ApplicationEnvVarsService,
+    private paginationMonitorFactory: PaginationMonitorFactory
+  ) {
 
     this.appEntityService = this.entityServiceFactory.create(
       ApplicationSchema.key,
@@ -131,8 +130,13 @@ export class ApplicationService {
     app,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
-    return getPaginationPages(store, new GetAppStatsAction(appGuid, cfGuid), AppStatsSchema)
-      .pipe(
+    const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
+    const paginationMonitor = new PaginationMonitor(
+      store,
+      dummyAction.paginationKey,
+      AppStatSchema
+    );
+    return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
         const appInstances = [].concat.apply([], Object.values(appInstancesPages))
           .filter(apiResource => !!apiResource)
@@ -141,21 +145,17 @@ export class ApplicationService {
           });
         return appStateService.get(app, appInstances);
       })
-      ).shareReplay(1);
+    ).shareReplay(1);
   }
 
   private constructCoreObservables() {
     // First set up all the base observables
-    this.app$ = this.appEntityService.entityObs$.shareReplay(1);
+    this.app$ = this.appEntityService.waitForEntity$;
 
     // App org and space
     this.app$
-      .filter(entityInfo => {
-        return entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid;
-      })
-      .map(entityInfo => {
-        return entityInfo.entity.entity;
-      })
+      .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
+      .map(entityInfo => entityInfo.entity.entity)
       .do(app => {
         this.appSpace$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid));
         // See https://github.com/SUSE/stratos/issues/158 (Failing to populate entity store with a space's org)
@@ -169,21 +169,27 @@ export class ApplicationService {
     this.waitForAppEntity$ = this.appEntityService.waitForEntity$.shareReplay(1);
 
     this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
-
+    const action = new GetAppEnvVarsAction(this.appGuid, this.cfGuid);
     this.appEnvVars = getPaginationObservables<APIResource>({
       store: this.store,
-      action: new GetAppEnvVarsAction(this.appGuid, this.cfGuid),
-      schema: AppEnvVarsSchema
+      action,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        action.paginationKey,
+        AppEnvVarSchema
+      )
     }, true);
   }
 
   private constructAmalgamatedObservables() {
     // Assign/Amalgamate them to public properties (with mangling if required)
-
+    const action = new GetAppStatsAction(this.appGuid, this.cfGuid);
     const appStats = getPaginationObservables<APIResource<AppStat>>({
       store: this.store,
-      action: new GetAppStatsAction(this.appGuid, this.cfGuid),
-      schema: AppStatsSchema
+      action,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        action.paginationKey,
+        AppStatSchema
+      )
     }, true);
 
     this.appStats$ = this.waitForAppEntity$

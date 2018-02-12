@@ -26,7 +26,7 @@ export class DeployAppEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
-  ) {}
+  ) { }
 
   @Effect()
   checkAppExists$ = this.actions$

@@ -4,11 +4,12 @@ import { take, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
-import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { DeleteRoute, GetAppRoutes, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
-import { EntityInfo } from '../../../../../store/types/api.types';
+import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
@@ -17,11 +18,11 @@ import { TableCellRouteComponent } from './table-cell-route/table-cell-route.com
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 
 @Injectable()
-export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
+export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   routesDataSource: CfAppRoutesDataSource;
 
-  private multiListActionDelete: IMultiListAction<EntityInfo> = {
-    action: (items: EntityInfo[]) => {
+  private multiListActionDelete: IMultiListAction<APIResource> = {
+    action: (items: APIResource[]) => {
       if (items.length === 1) {
         this.deleteSingleRoute(items[0]);
       } else {
@@ -38,12 +39,12 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private multiListActionUnmap: IMultiListAction<EntityInfo> = {
-    action: (items: EntityInfo[]) => {
+  private multiListActionUnmap: IMultiListAction<APIResource> = {
+    action: (items: APIResource[]) => {
       if (items.length === 1) {
         this.unmapSingleRoute(items[0]);
       } else {
@@ -60,49 +61,59 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private listActionDelete: IListAction<EntityInfo> = {
-    action: (item: EntityInfo) => this.deleteSingleRoute(item),
+  private listActionDelete: IListAction<APIResource> = {
+    action: (item: APIResource) => this.deleteSingleRoute(item),
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private listActionUnmap: IListAction<EntityInfo> = {
-    action: (item: EntityInfo) => this.unmapSingleRoute(item),
+  private listActionUnmap: IListAction<APIResource> = {
+    action: (item: APIResource) => this.unmapSingleRoute(item),
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private listActionAdd: IGlobalListAction<EntityInfo> = {
+  private listActionAdd: IGlobalListAction<APIResource> = {
     action: () => {
-      this.store.dispatch(
-        new RouterNav({
-          path: [
-            'applications',
-            this.appService.cfGuid,
-            this.appService.appGuid,
-            'add-route'
-          ]
-        })
-      );
+      this.appService.application$
+        .pipe(
+          take(1),
+          tap(app => {
+            this.store.dispatch(
+              new RouterNav({
+                path: [
+                  'applications',
+                  this.appService.cfGuid,
+                  this.appService.appGuid,
+                  'add-route'
+                ],
+                query: {
+                  spaceGuid: app.app.entity.space_guid
+                }
+              })
+            );
+          })
+        )
+        .subscribe();
     },
     icon: 'add',
     label: 'Add',
     description: 'Add new route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
       columnId: 'route',
       headerCell: () => 'Route',
@@ -119,31 +130,34 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text: {
-    title: 'Routes';
+  text = {
+    title: 'Routes'
   };
 
-  dispatchDeleteAction = route =>
-    this.store.dispatch(
+  dispatchDeleteAction(route) {
+    return this.store.dispatch(
       new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
-    )
-  dispatchUnmapAction = route =>
-    this.store.dispatch(
+    );
+  }
+
+  dispatchUnmapAction(route) {
+    return this.store.dispatch(
       new UnmapRoute(
         route.entity.guid,
         this.routesDataSource.appGuid,
         this.routesDataSource.cfGuid
       )
-    )
+    );
+  }
+
   getGlobalActions = () => [this.listActionAdd];
-  getMultiActions = () => [
-    this.multiListActionUnmap,
-    this.multiListActionDelete
-  ]
+  getMultiActions() {
+    return [this.multiListActionUnmap, this.multiListActionDelete];
+  }
+
   getSingleActions = () => [this.listActionDelete, this.listActionUnmap];
   getColumns = () => this.columns;
   getDataSource = () => this.routesDataSource;
-  getFiltersConfigs = () => [];
   getMultiFiltersConfigs = () => [];
 
   constructor(
@@ -153,11 +167,13 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
   ) {
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
-      this.appService
+      this.appService,
+      new GetAppRoutes(appService.appGuid, appService.cfGuid),
+      getPaginationKey('route', appService.cfGuid, appService.appGuid)
     );
   }
 
-  private deleteSingleRoute(item: EntityInfo) {
+  private deleteSingleRoute(item: APIResource) {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
@@ -177,7 +193,7 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
       .subscribe();
   }
 
-  private unmapSingleRoute(item: EntityInfo) {
+  private unmapSingleRoute(item: APIResource) {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(

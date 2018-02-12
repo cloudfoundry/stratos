@@ -20,6 +20,7 @@ import { PaginatedAction, PaginationEntityState } from '../../../../store/types/
 import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
+import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -67,7 +68,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   // Cached collections
   public filteredRows: Array<T>;
-  public entityLettabledRows: Array<T>;
+  public transformedEntities: Array<T>;
 
   // Misc
   public isLoadingPage$: Observable<boolean> = Observable.of(false);
@@ -95,11 +96,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   ) {
     super();
     this.init(config);
-
+    const paginationMonitor = new PaginationMonitor(
+      this.store,
+      this.paginationKey,
+      this.sourceScheme
+    );
     const { pagination$, entities$ } = getPaginationObservables({
       store: this.store,
       action: this.action,
-      schema: [this.sourceScheme]
+      paginationMonitor
     },
       this.isLocal
     );
@@ -115,7 +120,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     const dataFunctions = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
-    this.transformedEntitiesSubscription = transformedEntities$.do(items => this.entityLettabledRows = items).subscribe();
+    this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
     this.page$ = this.isLocal ?
       this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions)
       : transformedEntities$.pipe(shareReplay(1));

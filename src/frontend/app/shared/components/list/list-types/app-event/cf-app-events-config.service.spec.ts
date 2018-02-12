@@ -10,6 +10,7 @@ import { generateTestEntityServiceProvider } from '../../../../../test-framework
 import { createBasicStoreModule, getInitialTestStoreState } from '../../../../../test-framework/store-test-helper';
 import { SharedModule } from '../../../../shared.module';
 import { CfAppEventsConfigService } from './cf-app-events-config.service';
+import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 
 
 
@@ -22,6 +23,7 @@ describe('CfAppEventsConfigService', () => {
     TestBed.configureTestingModule({
       providers: [
         CfAppEventsConfigService,
+        EntityServiceFactory,
         generateTestEntityServiceProvider(
           appGuid,
           ApplicationSchema,

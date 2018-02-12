@@ -473,6 +473,7 @@ const testInitialStoreState: AppState = {
     request: {
       domain:{},
       githubBranches:{},
+      cloudFoundryInfo: {},
       githubCommits:{},
         endpoint: {
           '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
@@ -3649,6 +3650,7 @@ const testInitialStoreState: AppState = {
     },
     requestData: {
       domain:{},
+      cloudFoundryInfo:{},
       githubBranches:{},
       githubCommits:{},
         application: {
@@ -21028,7 +21030,30 @@ const testInitialStoreState: AppState = {
         endpoint: {
           '01ccda9d-8f40-4dd0-bc39-08eea68e364f': {
             guid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f',
-            name: 'SCF-2.2.0-beta'
+            name: 'SCF',
+            cnsi_type: 'cf',
+            api_endpoint: {
+              Scheme: 'https',
+              Opaque: '',
+              User: null,
+              Host: 'api.127.0.0.1.xip.io:8443',
+              Path: '',
+              RawPath: '',
+              ForceQuery: false,
+              RawQuery: '',
+              Fragment: ''
+            },
+            authorization_endpoint: 'https://cf.uaa.127.0.0.1.xip.io:2793',
+            token_endpoint: 'https://cf.uaa.127.0.0.1.xip.io:2793',
+            doppler_logging_endpoint: 'wss://doppler.127.0.0.1.xip.io:4443',
+            skip_ssl_validation: true,
+            user: {
+              guid: 'bbb78136-6225-aaaa-bf8e-a32243deea0c',
+              name: 'admin',
+              admin: true
+            },
+            connectionStatus: 'connected',
+            registered: true
           }
         },
         system: {}
@@ -21039,7 +21064,7 @@ const testInitialStoreState: AppState = {
   /* tslint:enable */
 
 export function getInitialTestStoreState() {
-    return testInitialStoreState;
+    return {...testInitialStoreState};
 }
 
 export function createBasicStoreModule(): ModuleWithProviders {
@@ -21051,3 +21076,5 @@ export function createBasicStoreModule(): ModuleWithProviders {
     }
   );
 }
+
+export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';

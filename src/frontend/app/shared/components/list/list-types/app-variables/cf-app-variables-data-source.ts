@@ -16,7 +16,7 @@ export interface ListAppEnvVar {
   value: string;
 }
 
-export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIResource<AppEnvVarsState>> {
+export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIResource<AppEnvVarsState>> {
 
   public cfGuid: string;
   public appGuid: string;
@@ -51,7 +51,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
   }
 
   saveAdd() {
-    this.store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.entityLettabledRows, this.addItem));
+    this.store.dispatch(new AppVariablesAdd(this.cfGuid, this.appGuid, this.transformedEntities, this.addItem));
     super.saveAdd();
   }
 
@@ -60,7 +60,7 @@ export class CfAppEvnVarsDataSource extends ListDataSource<ListAppEnvVar, APIRes
   }
 
   saveEdit() {
-    this.store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.entityLettabledRows, this.editRow));
+    this.store.dispatch(new AppVariablesEdit(this.cfGuid, this.appGuid, this.transformedEntities, this.editRow));
     super.saveEdit();
   }
 
