@@ -24,10 +24,9 @@ COPY . /usr/src/app
 RUN chown ${USER_ID}:${GROUP_ID} /usr/src/app
 
 RUN chown ${USER_ID}:${GROUP_ID} /usr/src/app/.angular-cli.json
-RUN sed -i.bak "s@\"dist\"@\"/usr/dist/dist\"@g" /usr/src/app/.angular-cli.json
 
 USER ${USER_ID}
 
 WORKDIR /usr/src/app
 
-CMD bash deploy/provision.sh
+CMD bash deploy/provision.sh -u
