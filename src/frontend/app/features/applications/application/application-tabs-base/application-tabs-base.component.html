@@ -1,28 +1,17 @@
 <app-page-header>
   <h1>{{ (applicationService.application$ | async)?.app.entity.name }} </h1>
   <div class="page-header-right">
-    <span *ngIf="isEditSummary">
-      <button mat-icon-button mat-button (click)="saveEdits()" [disabled]="!summaryForm.valid">
-        <mat-icon>done</mat-icon>
-      </button>
-      <button mat-icon-button name="cancel" mat-button (click)="endEdit()">
-        <mat-icon>clear</mat-icon>
-      </button>
-    </span>
-    <span *ngIf="!isEditSummary">
-      <a  mat-icon-button *ngIf="(applicationService.application$ | async)?.appUrl != null
-      && (applicationService.application$ | async)?.app.entity.state === 'STARTED' "
-       href="{{(applicationService.application$ | async)?.appUrl}}" target="_blank">
-          <mat-icon>launch</mat-icon>
-      </a>
-      <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async"
-        routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit">
+    <a mat-icon-button *ngIf="(applicationService.application$ | async)?.appUrl != null
+      && (applicationService.application$ | async)?.app.entity.state === 'STARTED' " href="{{(applicationService.application$ | async)?.appUrl}}" target="_blank">
+      <mat-icon>launch</mat-icon>
+    </a>
+    <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit">
         <mat-icon>edit</mat-icon>
       </button>
-      <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
+    <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
         <mat-icon>delete</mat-icon>
       </button>
-      <span>
+    <span>
         <button mat-icon-button name="stop" *ngIf="(applicationService.application$ | async)?.app.entity.state === 'STARTED'" [disabled]="summaryDataChanging$ | async"
           (click)="stopApplication()">
           <mat-icon>stop</mat-icon>
@@ -32,7 +21,6 @@
           <mat-icon>play_arrow</mat-icon>
         </button>
       </span>
-    </span>
   </div>
 </app-page-header>
 <app-page-subheader [tabs]="tabLinks">

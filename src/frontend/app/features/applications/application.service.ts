@@ -231,13 +231,13 @@ export class ApplicationService {
       }).shareReplay(1);
 
     this.applicationState$ = this.waitForAppEntity$
-      .withLatestFrom(this.appStats$)
+      .combineLatest(this.appStats$)
       .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
       }).shareReplay(1);
 
     this.applicationInstanceState$ = this.waitForAppEntity$
-      .withLatestFrom(this.appStats$)
+      .combineLatest(this.appStats$)
       .switchMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
       }).shareReplay(1);
@@ -251,11 +251,8 @@ export class ApplicationService {
     /**
      * An observable based on the core application entity
     */
-    this.isFetchingApp$ = Observable.combineLatest(
-      this.app$.map(ei => ei.entityRequestInfo.fetching),
-      this.appSummary$.map(as => as.entityRequestInfo.fetching)
-    )
-      .map((fetching) => fetching[0] || fetching[1]).shareReplay(1);
+    this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
+
 
     this.isUpdatingApp$ =
       this.app$.map(a => {
