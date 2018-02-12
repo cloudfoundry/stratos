@@ -12,6 +12,8 @@ import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factor
 import { tap } from 'rxjs/operators/tap';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
+import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
+import { EndpointDataSourceHelper } from './endpoint-data-source.helpers';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -23,9 +25,14 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory
   ) {
-    const rowStateManager = new TableRowStateManager();
     const action = new GetAllEndpoints();
     const paginationKey = GetAllEndpoints.storeKey;
+    const { rowStateManager, sub } = EndpointDataSourceHelper.getRowStateManager(
+      paginationMonitorFactory,
+      entityMonitorFactory,
+      paginationKey
+    );
+
     super({
       store,
       action,
@@ -43,35 +50,10 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
         },
       ],
       listConfig,
-      rowsState: rowStateManager.observable
+      rowsState: rowStateManager.observable,
+      destroy: () => sub.unsubscribe()
     });
-    const paginationMonitor = paginationMonitorFactory.create<EndpointModel>(
-      paginationKey,
-      EndpointSchema
-    );
-    // This pattern might be worth pulling out into a helper if we use it again.
-    const endpointBusySub = paginationMonitor.currentPage$.pipe(
-      map(endpoints => endpoints
-        .map(endpoint => {
-          const entityMonitor = entityMonitorFactory
-            .create(endpoint.guid, EndpointSchema.key, EndpointSchema);
-          const request$ = entityMonitor.entityRequest$.pipe(
-            tap(request => {
-              const disconnect = request.updating[EndpointsEffect.disconnectingKey] || { busy: false };
-              const unregister = request.updating[EndpointsEffect.unregisteringKey] || { busy: false };
-              const busy = disconnect.busy || unregister.busy;
-              const blocked = unregister.busy;
-              rowStateManager.setRowState(endpoint.guid, {
-                blocked,
-                busy
-              });
-            })
-          );
-          return request$;
-        })
-      ),
-      mergeMap(endpointObs => combineLatest(endpointObs))
-    ).subscribe();
     this.store = store;
   }
+
 }
