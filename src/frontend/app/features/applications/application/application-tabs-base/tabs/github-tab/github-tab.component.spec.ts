@@ -17,7 +17,7 @@ describe('GithubTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ GithubTabComponent ],
+      declarations: [GithubTabComponent],
       imports: [
         CoreModule,
         SharedModule,
@@ -33,7 +33,7 @@ describe('GithubTabComponent', () => {
         { provide: ApplicationService, useClass: ApplicationServiceMock },
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

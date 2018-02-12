@@ -28,7 +28,7 @@ const tableColumnAction = {
   columnId: 'actions',
   headerCell: () => 'Actions',
   cellComponent: TableCellActionsComponent,
-  class: 'app-table__cell--table-column-edit',
+  class: 'app-table__cell--table-column-action',
   cellFlex: '1'
 };
 

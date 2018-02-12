@@ -33,12 +33,12 @@ export class LoginFailed implements Action {
 }
 
 export class VerifySession implements Action {
-  constructor(public login = true, public updateCNSIs = true) { }
+  constructor(public login = true, public updateEndpoints = true) { }
   type = VERIFY_SESSION;
 }
 
 export class VerifiedSession implements Action {
-  constructor(private sessionData: SessionData, public updateCNSIs = true) { }
+  constructor(private sessionData: SessionData, public updateEndpoints = true) { }
   type = SESSION_VERIFIED;
 }
 

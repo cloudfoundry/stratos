@@ -1,20 +1,12 @@
-import { tap } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/app-state';
-import { ActivatedRoute } from '@angular/router';
-import { EntityService } from '../../../../../../core/entity-service';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { ApplicationSchema, GetApplication } from '../../../../../../store/actions/application.actions';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import {
-  ApplicationStateService,
-  ApplicationStateData,
-} from '../../../../application-state/application-state.service';
+import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { AppStatsSchema, AppStatSchema } from '../../../../../../store/types/app-metadata.types';
-import { getPaginationPages } from '../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+
+import { ApplicationService } from '../../../../../../features/applications/application.service';
+import { AppState } from '../../../../../../store/app-state';
+import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
+import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-table-cell-app-status',
@@ -30,6 +22,7 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     super();
   }

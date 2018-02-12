@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { take, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
-import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { DeleteRoute, GetAppRoutes, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
-import { EntityInfo } from '../../../../../store/types/api.types';
+import { selectEntity } from '../../../../../store/selectors/api.selectors';
+import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
@@ -15,107 +18,146 @@ import { TableCellRouteComponent } from './table-cell-route/table-cell-route.com
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 
 @Injectable()
-export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
+export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   routesDataSource: CfAppRoutesDataSource;
 
-  private multiListActionDelete: IMultiListAction<EntityInfo> = {
-    action: (items: EntityInfo[]) => {
+  private multiListActionDelete: IMultiListAction<APIResource> = {
+    action: (items: APIResource[]) => {
       if (items.length === 1) {
         this.deleteSingleRoute(items[0]);
       } else {
         const confirmation = new ConfirmationDialog(
           'Delete Routes from Application',
           `Are you sure you want to delete ${items.length} routes?`,
-          'Delete All');
-        this.confirmDialog.open(confirmation, () => items.forEach(item => this.dispatchDeleteAction(item)));
+          'Delete All'
+        );
+        this.confirmDialog.open(confirmation, () =>
+          items.forEach(item => this.dispatchDeleteAction(item))
+        );
       }
     },
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true,
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private multiListActionUnmap: IMultiListAction<EntityInfo> = {
-    action: (items: EntityInfo[]) => {
+  private multiListActionUnmap: IMultiListAction<APIResource> = {
+    action: (items: APIResource[]) => {
       if (items.length === 1) {
         this.unmapSingleRoute(items[0]);
       } else {
         const confirmation = new ConfirmationDialog(
           'Unmap Routes from Application',
           `Are you sure you want to unmap ${items.length} routes?`,
-          'Unmap All');
-        this.confirmDialog.open(confirmation, () => items.forEach(item => this.dispatchUnmapAction(item)));
+          'Unmap All'
+        );
+        this.confirmDialog.open(confirmation, () =>
+          items.forEach(item => this.dispatchUnmapAction(item))
+        );
       }
     },
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true,
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private listActionDelete: IListAction<EntityInfo> = {
-    action: (item: EntityInfo) => this.deleteSingleRoute(item),
+  private listActionDelete: IListAction<APIResource> = {
+    action: (item: APIResource) => this.deleteSingleRoute(item),
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true,
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private listActionUnmap: IListAction<EntityInfo> = {
-    action: (item: EntityInfo) => this.unmapSingleRoute(item),
+  private listActionUnmap: IListAction<APIResource> = {
+    action: (item: APIResource) => this.unmapSingleRoute(item),
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true,
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-  private listActionAdd: IGlobalListAction<EntityInfo> = {
+  private listActionAdd: IGlobalListAction<APIResource> = {
     action: () => {
-      this.store.dispatch(new RouterNav({ path: ['applications', this.appService.cfGuid, this.appService.appGuid, 'add-route'] }));
+      this.appService.application$
+        .pipe(
+          take(1),
+          tap(app => {
+            this.store.dispatch(
+              new RouterNav({
+                path: [
+                  'applications',
+                  this.appService.cfGuid,
+                  this.appService.appGuid,
+                  'add-route'
+                ],
+                query: {
+                  spaceGuid: app.app.entity.space_guid
+                }
+              })
+            );
+          })
+        )
+        .subscribe();
     },
     icon: 'add',
     label: 'Add',
     description: 'Add new route',
-    visible: (row: EntityInfo) => true,
-    enabled: (row: EntityInfo) => true,
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
   };
 
-
-  columns: Array<ITableColumn<EntityInfo>> = [
+  columns: Array<ITableColumn<APIResource>> = [
     {
-      columnId: 'route', headerCell: () => 'Route',
-      cellComponent: TableCellRouteComponent, sort: true, cellFlex: '3'
+      columnId: 'route',
+      headerCell: () => 'Route',
+      cellComponent: TableCellRouteComponent,
+      cellFlex: '4'
     },
     {
-      columnId: 'tcproute', headerCell: () => 'TCP Route',
+      columnId: 'tcproute',
+      headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
-      cellFlex: '3'
-    },
+      cellFlex: '4'
+    }
   ];
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
-  text: {
+  text = {
     title: 'Routes'
   };
 
-  dispatchDeleteAction = route => this.store.dispatch(
-    new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
-  )
-  dispatchUnmapAction = route => this.store.dispatch(
-    new UnmapRoute(route.entity.guid, this.routesDataSource.appGuid, this.routesDataSource.cfGuid)
-  )
+  dispatchDeleteAction(route) {
+    return this.store.dispatch(
+      new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
+    );
+  }
+
+  dispatchUnmapAction(route) {
+    return this.store.dispatch(
+      new UnmapRoute(
+        route.entity.guid,
+        this.routesDataSource.appGuid,
+        this.routesDataSource.cfGuid
+      )
+    );
+  }
+
   getGlobalActions = () => [this.listActionAdd];
-  getMultiActions = () => [this.multiListActionUnmap, this.multiListActionDelete];
+  getMultiActions() {
+    return [this.multiListActionUnmap, this.multiListActionDelete];
+  }
+
   getSingleActions = () => [this.listActionDelete, this.listActionUnmap];
   getColumns = () => this.columns;
   getDataSource = () => this.routesDataSource;
-  getFiltersConfigs = () => [];
   getMultiFiltersConfigs = () => [];
 
   constructor(
@@ -123,24 +165,51 @@ export class CfAppRoutesListConfigService implements IListConfig<EntityInfo> {
     private appService: ApplicationService,
     private confirmDialog: ConfirmationDialogService
   ) {
-    this.routesDataSource = new CfAppRoutesDataSource(this.store, this.appService);
+    this.routesDataSource = new CfAppRoutesDataSource(
+      this.store,
+      this.appService,
+      new GetAppRoutes(appService.appGuid, appService.cfGuid),
+      getPaginationKey('route', appService.cfGuid, appService.appGuid)
+    );
   }
 
-  private deleteSingleRoute(item: EntityInfo) {
-    const routeUrl = getRoute(item);
-    const confirmation = new ConfirmationDialog(
-      'Delete Route',
-      `Are you sure you want to delete the route \'${routeUrl}\'?`,
-      'Delete');
-    this.confirmDialog.open(confirmation, () => this.dispatchDeleteAction(item));
+  private deleteSingleRoute(item: APIResource) {
+    this.store
+      .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
+      .pipe(
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialog(
+          'Delete Route',
+          `Are you sure you want to delete the route \'${routeUrl}\'?`,
+          'Delete'
+        );
+        this.confirmDialog.open(confirmation, () =>
+          this.dispatchDeleteAction(item)
+        );
+      })
+      )
+      .subscribe();
   }
 
-  private unmapSingleRoute(item: EntityInfo) {
-    const routeUrl = getRoute(item);
-    const confirmation = new ConfirmationDialog(
-      'Unmap Route from Application',
-      `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-      'Unmap');
-    this.confirmDialog.open(confirmation, () => this.dispatchUnmapAction(item));
+  private unmapSingleRoute(item: APIResource) {
+    this.store
+      .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
+      .pipe(
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialog(
+          'Unmap Route from Application',
+          `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+          'Unmap'
+        );
+        this.confirmDialog.open(confirmation, () =>
+          this.dispatchUnmapAction(item)
+        );
+      })
+      )
+      .subscribe();
   }
 }

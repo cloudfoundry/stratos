@@ -7,5 +7,5 @@
   </div>
 </app-page-header>
 
-<app-endpoints-missing [showSnackForNoneConnected]="true"></app-endpoints-missing>
+<app-endpoints-missing [showToolbarHint]="true" [showSnackForNoneConnected]="true"></app-endpoints-missing>
 <app-list [hidden]="!(endpointsService.haveRegistered$ | async)"></app-list>

@@ -13,7 +13,7 @@ export const StackSchema = new schema.Entity('stack', {}, {
 });
 
 export class GetStack extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cnis: string) {
+  constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `stacks/${guid}`;

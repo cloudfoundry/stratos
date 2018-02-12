@@ -2,7 +2,7 @@ import { RequestTypes } from './../actions/request.actions';
 import { ApiActionTypes } from '../actions/request.actions';
 import { RequestSectionKeys, IRequestArray } from './api-request-reducer/types';
 import { OtherEntityStateNames } from '../types/other-entity.types';
-import { cnsisStoreNames } from '../types/cnsis.types';
+import { endpointStoreNames } from '../types/endpoint.types';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { Action, ActionReducerMap, combineReducers } from '@ngrx/store';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
@@ -10,6 +10,7 @@ import { requestReducerFactory } from './api-request-reducer/request-reducer.fac
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
 import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
 import { GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../types/deploy-application.types';
+import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -50,11 +51,13 @@ const entities = [
   'organization',
   'route',
   'event',
-  cnsisStoreNames.type,
+  endpointStoreNames.type,
+  'domain',
   'system',
   'routerReducer',
   'createApplication',
   'uaaSetup',
+  CF_INFO_ENTITY_KEY,
   GITHUB_REPO_ENTITY_KEY,
   GITHUB_BRANCHES_ENTITY_KEY,
   GITHUB_COMMIT_ENTITY_KEY,
@@ -72,7 +75,7 @@ export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
-    [cnsisStoreNames.type]: [
+    [endpointStoreNames.type]: [
       systemEndpointsReducer
     ],
     'application': [

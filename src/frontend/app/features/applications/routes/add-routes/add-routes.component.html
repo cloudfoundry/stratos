@@ -1,75 +1,71 @@
 <div class="add-route">
-  <app-page-header>
-    Create Route
-  </app-page-header>
+  <mat-progress-bar [hidden]="!submitted" [mode]="'indeterminate'">
+  </mat-progress-bar>
 
-  <mat-progress-bar *ngIf="submitted" [mode]="'indeterminate'">
-    </mat-progress-bar>
+  <div>Create a new route or map an existing one. </div>
+  <div>
+    <mat-radio-group [(ngModel)]="addRouteMode" class="add-route__radios">
+      <mat-radio-button *ngFor="let mode of addRouteModes" [value]="mode" class="add-route__radios__btn">
+        {{ mode.label }}
+      </mat-radio-button>
+    </mat-radio-group>
+  </div>
 
-  <mat-card>
-    <div class="add-route--form">
-      <div class="add-route--form-message">
-        Please specify details for the new route.
-      </div>
-      <div class="add-route--form-toggle">
-        Create TCP Route
-        <mat-checkbox name="createTcp" [(ngModel)]="createTCPRoute" ></mat-checkbox>
-      </div>
-      <form  [formGroup]="addHTTPRoute"  *ngIf="!createTCPRoute">
-      <div class="form-fields">
-          <div>
-            <mat-form-field>
-              <mat-select  formControlName="domain" placeholder="domain" [(ngModel)]="selectedDomain" required>
-                <mat-option *ngFor="let domain of getDomainValues()" [value]="domain" >{{domain.entity.name}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field>
-              <input matInput formControlName="host"  placeholder="Host" required>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field>
-              <input matInput formControlName="path" placeholder="Path">
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="add-route--form-buttons">
-          <button mat-button name="submit" color="primary" (click)="onSubmit('http')"  [disabled]="!addHTTPRoute.valid">
-              Submit
-          </button>
-          <button type="button" mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
-            Cancel
-          </button>
-        </div>
-    </form>
-
-      <form  [formGroup]="addTCPRoute" *ngIf="createTCPRoute">
-      <div class="form-fields">
-          <div>
-            <mat-form-field>
-              <mat-select  formControlName="domain" placeholder="domain" [(ngModel)]="selectedDomain" required>
-                <mat-option *ngFor="let domain of getDomainValues()" [value]="domain" >{{domain.entity.name}}</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div>
-            <mat-form-field>
-              <input matInput formControlName="port" placeholder="Port" required>
-              <mat-error *ngIf="addTCPRoute.controls['port'].errors?.pattern">Invalid Port</mat-error>
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="add-route--form-buttons">
-          <button  mat-button name="submit" color="primary" (click)="onSubmit('tcp')"  [disabled]="!addTCPRoute.valid">
-              Submit
-          </button>
-          <button type="button" mat-button name="cancel" color="warn" [routerLink]="['/applications', cfGuid, appGuid]">
-            Cancel
-          </button>
-        </div>
-    </form>
+  <div class="add-route__form" *ngIf="addRouteMode?.id === 'create'">
+    <div>
+      Please specify details for the new route.
     </div>
-  </mat-card>
+    <div class="add-route__form__toggle">
+      Create TCP Route
+      <mat-checkbox name="createTcp" [(ngModel)]="createTCPRoute"></mat-checkbox>
+    </div>
+    <form [formGroup]="addHTTPRoute" *ngIf="!createTCPRoute">
+      <div class="add-route__form__fields">
+        <div>
+          <mat-form-field>
+            <mat-select formControlName="domain" placeholder="Domain" [(ngModel)]="selectedDomain" required>
+              <mat-option *ngFor="let domain of getDomainValues()" [value]="domain">{{domain.entity.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <input matInput formControlName="host" placeholder="Host" required>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <input matInput formControlName="path" placeholder="Path">
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+
+    <form [formGroup]="addTCPRoute" *ngIf="createTCPRoute">
+      <div class="add-route__form__fields">
+        <div>
+          <mat-form-field>
+            <mat-select formControlName="domain" placeholder="domain" [(ngModel)]="selectedDomain" required>
+              <mat-option *ngFor="let domain of getDomainValues()" [value]="domain">{{domain.entity.name}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field>
+            <input matInput formControlName="port" placeholder="Port" required>
+            <mat-error *ngIf="addTCPRoute.controls['port'].errors?.pattern">Invalid Port</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="add-route__form" *ngIf="addRouteMode?.id === 'map'">
+    <div class="add-route__form__message">
+      Please select the route you wish to map
+    </div>
+    <form class="add-route__form__maptable">
+      <app-map-routes [selectedRoute$]="selectedRoute$"></app-map-routes>
+    </form>
+  </div>
 </div>

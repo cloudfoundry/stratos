@@ -5,31 +5,31 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { DisconnectCnis, UnregisterCnis } from '../../../../../store/actions/cnsis.actions';
+import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ResetPagination } from '../../../../../store/actions/pagination.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
-import { CNSISEffect } from '../../../../../store/effects/cnsis.effects';
+import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
-import { CNSISModel, cnsisStoreNames } from '../../../../../store/types/cnsis.types';
+import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 
-function getEndpointTypeString(endpoint: CNSISModel): string {
+function getEndpointTypeString(endpoint: EndpointModel): string {
   return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
 }
 
 @Injectable()
-export class EndpointsListConfigService implements IListConfig<CNSISModel> {
+export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
-  private listActionDelete: IListAction<CNSISModel> = {
+  private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new UnregisterCnis(item.guid));
-      this.handleAction(item, CNSISEffect.unregisteringKey, ([oldVal, newVal]) => {
+      this.store.dispatch(new UnregisterEndpoint(item.guid));
+      this.handleAction(item, EndpointsEffect.unregisteringKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
         this.store.dispatch(new ResetPagination(this.dataSource.entityKey, this.dataSource.paginationKey));
       });
@@ -41,7 +41,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     enabled: row => true,
   };
 
-  private listActionDeleteMulti: IMultiListAction<CNSISModel> = {
+  private listActionDeleteMulti: IMultiListAction<EndpointModel> = {
     action: (item) => {
       return null;
     },
@@ -52,10 +52,10 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     enabled: row => true,
   };
 
-  private listActionDisconnect: IListAction<CNSISModel> = {
+  private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new DisconnectCnis(item.guid));
-      this.handleAction(item, CNSISEffect.disconnectingKey, ([oldVal, newVal]) => {
+      this.store.dispatch(new DisconnectEndpoint(item.guid));
+      this.handleAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
         this.store.dispatch(new GetSystemInfo());
       });
@@ -67,7 +67,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
     enabled: row => true,
   };
 
-  private listActionConnect: IListAction<CNSISModel> = {
+  private listActionConnect: IListAction<EndpointModel> = {
     action: (item) => {
       console.log(item);
       const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
@@ -96,7 +96,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
   private multiActions = [this.listActionDeleteMulti];
   private globalActions = [];
 
-  columns: ITableColumn<CNSISModel>[] = [
+  columns: ITableColumn<EndpointModel>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Name',
@@ -155,7 +155,7 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private handleAction(item, effectKey, handleChange) {
     const disSub = this.store.select(selectUpdateInfo(
-      cnsisStoreNames.type,
+      endpointStoreNames.type,
       item.guid,
       effectKey,
     ))

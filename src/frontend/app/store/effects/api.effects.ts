@@ -1,4 +1,4 @@
-import { cnsisEntitiesSelector } from '../selectors/cnsis.selectors';
+import { endpointEntitiesSelector } from '../selectors/endpoint.selectors';
 import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
@@ -26,7 +26,7 @@ import { APIResource, NormalizedResponse } from './../types/api.types';
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { selectPaginationState } from '../selectors/pagination.selectors';
-import { CNSISModel, cnsisStoreNames } from '../types/cnsis.types';
+import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
 import { map, mergeMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 
@@ -44,95 +44,102 @@ export class APIEffect {
   @Effect() apiRequest$ = this.actions$.ofType<ICFAction | PaginatedAction>(ApiActionTypes.API_REQUEST_START)
     .withLatestFrom(this.store)
     .mergeMap(([action, state]) => {
-      const paramsObject = {};
-      const apiAction = action as ICFAction;
-      const paginatedAction = action as PaginatedAction;
-      const options = { ...apiAction.options };
-      const requestType = getRequestTypeFromMethod(apiAction.options.method);
-
-      this.store.dispatch(new StartRequestAction(action, requestType));
-      this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
-      // Apply the params from the store
-      if (paginatedAction.paginationKey) {
-        options.params = new URLSearchParams();
-        const paginationParams = this.getPaginationParams(selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state));
-        if (paginationParams.hasOwnProperty('q')) {
-          // Convert q into a cf q string
-          paginationParams.qString = qParamsToString(paginationParams.q);
-          for (const q of paginationParams.qString) {
-            options.params.append('q', q);
-          }
-          delete paginationParams.qString;
-          delete paginationParams.q;
-        }
-        for (const key in paginationParams) {
-          if (paginationParams.hasOwnProperty(key)) {
-            if (key === 'page' || !options.params.has(key)) { // Don't override params from actions except page.
-              options.params.set(key, paginationParams[key] as string);
-            }
-          }
-        }
-        if (!options.params.has(resultPerPageParam)) {
-          options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
-        }
-      }
-
-      options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
-      options.headers = this.addBaseHeaders(
-        apiAction.cnis ||
-        state.requestData.endpoint, options.headers
-      );
-
-      if (paginatedAction.flattenPagination) {
-        options.params.set('page', '1');
-      }
-
-      let request = this.makeRequest(options);
-
-      // Should we flatten all pages into the first, thus fetching all entities?
-      if (paginatedAction.flattenPagination) {
-        request = this.flattenPagination(request, options);
-      }
-
-      return request
-        .map(resData => this.handleMultiEndpoints(resData, apiAction)) // Check for errors and fetch entities
-        .mergeMap(response => {
-          const { entities, totalResults, totalPages } = response;
-          const actions = [];
-          actions.push({ type: apiAction.actions[1], apiAction });
-          actions.push(new WrapperRequestActionSuccess(
-            entities,
-            apiAction,
-            requestType,
-            totalResults,
-            totalPages
-          ));
-
-          if (
-            !apiAction.updatingKey &&
-            apiAction.options.method === 'post' || apiAction.options.method === RequestMethod.Post ||
-            apiAction.options.method === 'delete' || apiAction.options.method === RequestMethod.Delete
-          ) {
-            if (apiAction.removeEntityOnDelete) {
-              actions.unshift(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
-            } else {
-              actions.unshift(new ClearPaginationOfType(apiAction.entityKey));
-            }
-          }
-
-          return actions;
-        })
-        .catch(err => {
-          return [
-            { type: apiAction.actions[2], apiAction },
-            new WrapperRequestActionFailed(
-              err.message,
-              apiAction,
-              requestType
-            )
-          ];
-        });
+      return this.doApiRequest(action, state);
     });
+
+  private doApiRequest(action, state) {
+    const actionClone = { ...action };
+    const paramsObject = {};
+    const apiAction = actionClone as ICFAction;
+    const paginatedAction = actionClone as PaginatedAction;
+    const options = { ...apiAction.options };
+    const requestType = getRequestTypeFromMethod(apiAction.options.method);
+
+    this.store.dispatch(new StartRequestAction(actionClone, requestType));
+    this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+    // Apply the params from the store
+    if (paginatedAction.paginationKey) {
+      options.params = new URLSearchParams();
+      const paginationState = selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state);
+      const paginationParams = this.getPaginationParams(paginationState);
+      paginatedAction.pageNumber = paginationState ? paginationState.currentPage : 1;
+      if (paginationParams.hasOwnProperty('q')) {
+        // Convert q into a cf q string
+        paginationParams.qString = qParamsToString(paginationParams.q);
+        for (const q of paginationParams.qString) {
+          options.params.append('q', q);
+        }
+        delete paginationParams.qString;
+        delete paginationParams.q;
+      }
+      for (const key in paginationParams) {
+        if (paginationParams.hasOwnProperty(key)) {
+          if (key === 'page' || !options.params.has(key)) { // Don't override params from actions except page.
+            options.params.set(key, paginationParams[key] as string);
+          }
+        }
+      }
+      if (!options.params.has(resultPerPageParam)) {
+        options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
+      }
+    }
+
+    options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/${options.url}`;
+    options.headers = this.addBaseHeaders(
+      apiAction.endpointGuid ||
+      state.requestData.endpoint, options.headers
+    );
+
+    if (paginatedAction.flattenPagination) {
+      options.params.set('page', '1');
+    }
+
+    let request = this.makeRequest(options);
+
+    // Should we flatten all pages into the first, thus fetching all entities?
+    if (paginatedAction.flattenPagination) {
+      request = this.flattenPagination(request, options);
+    }
+
+    return request
+      .mergeMap(response => {
+        response = this.handleMultiEndpoints(response, paginatedAction);
+        const { entities, totalResults, totalPages } = response;
+        const actions = [];
+        actions.push({ type: paginatedAction.actions[1], apiAction: paginatedAction });
+        actions.push(new WrapperRequestActionSuccess(
+          entities,
+          paginatedAction,
+          requestType,
+          totalResults,
+          totalPages
+        ));
+
+        if (
+          !paginatedAction.updatingKey &&
+          paginatedAction.options.method === 'post' || paginatedAction.options.method === RequestMethod.Post ||
+          paginatedAction.options.method === 'delete' || paginatedAction.options.method === RequestMethod.Delete
+        ) {
+          if (paginatedAction.removeEntityOnDelete) {
+            actions.unshift(new ClearPaginationOfEntity(paginatedAction.entityKey, paginatedAction.guid));
+          } else {
+            actions.unshift(new ClearPaginationOfType(paginatedAction.entityKey));
+          }
+        }
+
+        return actions;
+      })
+      .catch(err => {
+        return [
+          { type: paginatedAction.actions[2], apiAction: paginatedAction },
+          new WrapperRequestActionFailed(
+            err.message,
+            paginatedAction,
+            requestType
+          )
+        ];
+      });
+  }
 
   private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
     if (!resource) {
@@ -165,13 +172,13 @@ export class APIEffect {
       .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
-        const cnsis = resData[cfGuid];
-        return cnsis.error ? {
-          error: cnsis.error,
+        const endpoints = resData[cfGuid];
+        return endpoints.error ? {
+          error: endpoints.error,
           guid: cfGuid
         } : null;
       })
-      .filter(cnsisError => !!cnsisError);
+      .filter(endpointErrors => !!endpointErrors);
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -226,20 +233,20 @@ export class APIEffect {
     return { ...entity, ...metadata, cfGuid };
   }
 
-  addBaseHeaders(cnsis: IRequestEntityTypeState<CNSISModel> | string, header: Headers): Headers {
-    const cnsiHeader = 'x-cap-cnsi-list';
+  addBaseHeaders(endpoints: IRequestEntityTypeState<EndpointModel> | string, header: Headers): Headers {
+    const endpointHeader = 'x-cap-cnsi-list';
     const headers = header || new Headers();
-    if (typeof cnsis === 'string') {
-      headers.set(cnsiHeader, cnsis);
+    if (typeof endpoints === 'string') {
+      headers.set(endpointHeader, endpoints);
     } else {
-      const registeredCNSIGuids = [];
-      Object.keys(cnsis).forEach(cnsiGuid => {
-        const cnsi = cnsis[cnsiGuid];
-        if (cnsi.registered) {
-          registeredCNSIGuids.push(cnsi.guid);
+      const registeredEndpointGuids = [];
+      Object.keys(endpoints).forEach(endpointGuid => {
+        const endpoint = endpoints[endpointGuid];
+        if (endpoint.registered) {
+          registeredEndpointGuids.push(endpoint.guid);
         }
       });
-      headers.set(cnsiHeader, registeredCNSIGuids);
+      headers.set(endpointHeader, registeredEndpointGuids);
     }
     return headers;
   }
@@ -274,10 +281,10 @@ export class APIEffect {
     totalPages
   } {
     if (resData) {
-      const cnsisErrors = this.getErrors(resData);
-      if (cnsisErrors.length) {
-        // We should consider not completely failing the whole if some cnsis return.
-        throw Observable.throw(`Error from cnsis: ${cnsisErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+      const endpointsErrors = this.getErrors(resData);
+      if (endpointsErrors.length) {
+        // We should consider not completely failing the whole if some endpoints return.
+        throw Observable.throw(`Error from endpoints: ${endpointsErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
       }
     }
     let entities;

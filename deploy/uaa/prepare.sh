@@ -10,12 +10,15 @@ echo "Cacheing UAA resources to: ${DOWNLOAD_FOLDER}"
 
 mkdir -p ${DOWNLOAD_FOLDER}
 
-if [ ! -f ${DOWNLOAD_FOLDER}/apache-tomcat-8.0.28.tar.gz ]; then
+TOMCAT_FILE=${DOWNLOAD_FOLDER}/apache-tomcat-8.0.28.tar.gz
+UAA_FILE=${DOWNLOAD_FOLDER}/cloudfoundry-identity-uaa-3.9.3.war
+
+if [ ! -f ${TOMCAT_FILE} ]; then
   echo "Dowloading Apache Tomcat package"
-  wget -P ${DOWNLOAD_FOLDER} https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.0.28.tar.gz
+  curl -L -o ${TOMCAT_FILE} https://archive.apache.org/dist/tomcat/tomcat-8/v8.0.28/bin/apache-tomcat-8.0.28.tar.gz
 fi
 
-if [ ! -f ${DOWNLOAD_FOLDER}/cloudfoundry-identity-uaa-3.9.3.war ]; then
+if [ ! -f ${UAA_FILE} ]; then
   echo "Dowloading Cloud Foundry UAA package"
-  wget -P ${DOWNLOAD_FOLDER} https://github.com/sequenceiq/uaa/releases/download/3.9.3/cloudfoundry-identity-uaa-3.9.3.war
+  curl -L -o ${UAA_FILE} https://github.com/sequenceiq/uaa/releases/download/3.9.3/cloudfoundry-identity-uaa-3.9.3.war
 fi
