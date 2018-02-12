@@ -17,18 +17,18 @@ import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
   messages: Observable<string>;
-  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
+  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
 
   ngOnInit() {
     const host = window.location.host;
     const streamUrl = `wss://${host}/pp/${environment.proxyAPIVersion}/${
       this.cfEndpointService.cfGuid
-    }/firehose`;
-    this.setupFirehoseStream(streamUrl);
+      }/firehose`;
+    this.messages = this.setupFirehoseStream(streamUrl);
   }
 
   private setupFirehoseStream(streamUrl: string) {
-    this.messages = websocketConnect(
+    return websocketConnect(
       streamUrl,
       new QueueingSubject<string>()
     ).messages.pipe(
@@ -46,7 +46,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
         const message = this.showMessage(fireHoseItem);
         return `${timesString}: ${component} ${message}`;
       })
-    );
+      );
   }
 
   private getComponent(fireHoseItem: FireHoseItem) {
@@ -59,7 +59,6 @@ export class CloudFoundryFirehoseComponent implements OnInit {
   }
 
   private stylize(text: any, eventType: number, emphasise = false) {
-    console.log(eventType);
     const str = `${text}`;
     const styles = this.getLogTypeStyles(eventType, emphasise);
     return `<span style="${styles}">${str}</span>`;
@@ -101,16 +100,16 @@ export class CloudFoundryFirehoseComponent implements OnInit {
     const peerType = httpStartStop.peerType === 1 ? 'Client' : 'Server';
     return `${peerType} ${this.stylize(method, 4)} ${
       httpStartStop.uri
-    }, Status-Code: ${this.stylize(
-      httpStartStop.statusCode,
-      5
-    )} Content-Length: ${this.stylize(
-      httpStartStop.contentLength,
-      5
-    )} User-Agent:  ${this.stylize(
-      httpStartStop.userAgent,
-      5
-    )} Remote-Address:  ${this.stylize(httpStartStop.remoteAddress, 5)}`;
+      }, Status-Code: ${this.stylize(
+        httpStartStop.statusCode,
+        5
+      )} Content-Length: ${this.stylize(
+        httpStartStop.contentLength,
+        5
+      )} User-Agent:  ${this.stylize(
+        httpStartStop.userAgent,
+        5
+      )} Remote-Address:  ${this.stylize(httpStartStop.remoteAddress, 5)}`;
   }
 
   private handleMetric(fireHoseItem: FireHoseItem) {
@@ -127,7 +126,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
     const cpuPercentage = `${Math.round(containerMetric.cpuPercentage * 100)}%`;
     return `App: ${containerMetric.applicationId} /${
       containerMetric.instanceIndex
-    }
+      }
         ${this.stylize('[', 100)}
         ${this.stylize('CPU:', 100, true)}
         ${this.stylize(cpuPercentage, 5, true)},
