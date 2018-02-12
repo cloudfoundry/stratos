@@ -87,22 +87,22 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     action: () => {
       this.appService.application$
         .pipe(
-          take(1),
-          tap(app => {
-            this.store.dispatch(
-              new RouterNav({
-                path: [
-                  'applications',
-                  this.appService.cfGuid,
-                  this.appService.appGuid,
-                  'add-route'
-                ],
-                query: {
-                  spaceGuid: app.app.entity.space_guid
-                }
-              })
-            );
-          })
+        take(1),
+        tap(app => {
+          this.store.dispatch(
+            new RouterNav({
+              path: [
+                'applications',
+                this.appService.cfGuid,
+                this.appService.appGuid,
+                'add-route'
+              ],
+              query: {
+                spaceGuid: app.app.entity.space_guid
+              }
+            })
+          );
+        })
         )
         .subscribe();
     },
@@ -118,13 +118,23 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
       columnId: 'route',
       headerCell: () => 'Route',
       cellComponent: TableCellRouteComponent,
-      cellFlex: '4'
+      cellFlex: '4',
+      sort: {
+        type: 'sort',
+        orderKey: 'route',
+        field: 'entity.host'
+      }
     },
     {
       columnId: 'tcproute',
       headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
-      cellFlex: '4'
+      cellFlex: '4',
+      sort: {
+        type: 'sort',
+        orderKey: 'tcproute',
+        field: 'entity.isTCPRoute'
+      },
     }
   ];
 
@@ -133,6 +143,7 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   text = {
     title: 'Routes'
   };
+  isLocal = true;
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
@@ -169,7 +180,9 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
       this.store,
       this.appService,
       new GetAppRoutes(appService.appGuid, appService.cfGuid),
-      getPaginationKey('route', appService.cfGuid, appService.appGuid)
+      getPaginationKey('route', appService.cfGuid, appService.appGuid),
+      false,
+      this
     );
   }
 

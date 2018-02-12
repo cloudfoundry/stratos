@@ -113,8 +113,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     // Add any additional functions via an optional listConfig, such as sorting from the column definition
     const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
     listColumns.forEach(column => {
+      if (!column.sort) {
+        return;
+      }
       if (DataFunctionDefinition.is(column.sort)) {
         transformEntities.push(column.sort as DataFunctionDefinition);
+      } else if (typeof column.sort !== 'boolean') {
+        transformEntities.push(column.sort as DataFunction<T>);
       }
     });
 

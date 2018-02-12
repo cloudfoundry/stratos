@@ -131,7 +131,6 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   endpointGuid: string;
 }
 
-// Refactor to satisfy CodeClimate
 export class ListRoutes extends CFStartAction implements PaginatedAction {
   constructor(
     public guid: string,
@@ -151,10 +150,8 @@ export class ListRoutes extends CFStartAction implements PaginatedAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  initialParams = {
-    'inline-relations-depth': '2'
-  };
   endpointGuid: string;
+  flattenPagination = true;
 }
 
 export class GetAppRoutes extends ListRoutes implements PaginatedAction {
@@ -166,8 +163,11 @@ export class GetAppRoutes extends ListRoutes implements PaginatedAction {
     ]);
   }
   initialParams = {
-    'results-per-page': 9, // Match that of the page size used by the matching list config
-    'inline-relations-depth': '1'
+    'results-per-page': 100,
+    'inline-relations-depth': '1',
+    page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'route',
   };
 }
 
@@ -179,6 +179,13 @@ export class GetSpaceRoutes extends ListRoutes implements PaginatedAction {
       RouteEvents.GET_SPACE_ALL_FAILED
     ]);
   }
+  initialParams = {
+    'results-per-page': 100,
+    'inline-relations-depth': '1',
+    page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'attachedApps',
+  };
 }
 
 export class MapRouteSelected implements Action {

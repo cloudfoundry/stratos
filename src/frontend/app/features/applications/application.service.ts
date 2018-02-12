@@ -157,7 +157,6 @@ export class ApplicationService {
       .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
       .map(entityInfo => entityInfo.entity.entity)
       .do(app => {
-
         this.appSpace$ = this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
         this.appOrg$ = this.appSpace$.pipe(
           map(space => space.entity.organization_guid),
