@@ -1,18 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { tap, first } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { first, tap } from 'rxjs/operators';
 
-import { RouterNav } from '../../../store/actions/router.actions';
+import {
+  CFEndpointsListConfigService,
+} from '../../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
+import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { AppState } from '../../../store/app-state';
 import { CloudFoundryService } from '../cloud-foundry.service';
-import { tag } from 'rxjs-spy/operators/tag';
 
 @Component({
   selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
-  styleUrls: ['./cloud-foundry.component.scss']
+  styleUrls: ['./cloud-foundry.component.scss'],
+  providers: [{
+    provide: ListConfig,
+    useClass: CFEndpointsListConfigService,
+  }]
 })
 export class CloudFoundryComponent {
   constructor(
@@ -25,12 +29,13 @@ export class CloudFoundryComponent {
           c => c.connectionStatus === 'connected'
         );
         if (connectedEndpoints.length === 1) {
-          this.store.dispatch(
-            new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] })
-          );
+          // this.store.dispatch(
+          //   new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] })
+          // );
         }
       }),
       first()
     ).subscribe();
+
   }
 }
