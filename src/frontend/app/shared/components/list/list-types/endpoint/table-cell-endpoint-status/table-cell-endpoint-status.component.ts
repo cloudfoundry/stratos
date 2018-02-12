@@ -8,4 +8,4 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
   templateUrl: './table-cell-endpoint-status.component.html',
   styleUrls: ['./table-cell-endpoint-status.component.scss']
 })
-export class TableCellEndpointStatusComponent<T> extends TableCellCustom<T>{ }
+export class TableCellEndpointStatusComponent<T> extends TableCellCustom<T> { }

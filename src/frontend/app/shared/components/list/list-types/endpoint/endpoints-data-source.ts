@@ -26,13 +26,11 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     entityMonitorFactory: EntityMonitorFactory
   ) {
     const action = new GetAllEndpoints();
-    const paginationKey = GetAllEndpoints.storeKey;
     const { rowStateManager, sub } = EndpointDataSourceHelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
-      paginationKey
+      GetAllEndpoints.storeKey
     );
-
     super({
       store,
       action,
@@ -41,7 +39,7 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       getEmptyType: () => ({
         name: ''
       }),
-      paginationKey,
+      paginationKey: GetAllEndpoints.storeKey,
       isLocal: true,
       transformEntities: [
         {
@@ -53,7 +51,6 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       rowsState: rowStateManager.observable,
       destroy: () => sub.unsubscribe()
     });
-    this.store = store;
   }
 
 }
