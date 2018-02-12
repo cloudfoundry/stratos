@@ -1,6 +1,6 @@
 <div class="login">
   <mat-card class="login__card">
-    <mat-progress-bar class="login-loading-bar" [color]="error ? 'warn' : 'primary'" [mode]="loggingIn ? 'query' : 'solid'">
+    <mat-progress-bar class="login__loading-bar" [ngClass]="{'login__loading-bar__logging-in': loggingIn }" [color]="error ? 'warn' : 'primary'" [mode]="loggingIn ? 'query' : 'solid'">
     </mat-progress-bar>
     <div class="login__title">
       <img class="login__logo" src="/assets/cff-logo_rgb.png" />

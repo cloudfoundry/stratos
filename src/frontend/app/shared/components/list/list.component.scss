@@ -1,9 +1,20 @@
-.listComponent {
+.list-component {
   *[hidden],
   .sort[hidden],
   .filter[hidden],
   .add-container[hidden] {
     display: none;
+  }
+  &__blocker {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: 999;
+  }
+  &__body-inner {
+    position: relative;
   }
   &__header {
     &__left[hidden],
@@ -68,6 +79,12 @@
     }
     mat-card[hidden] {
       display: none;
+    }
+  }
+  &__paginator {
+    padding: 4px;
+    mat-paginator-container {
+      padding: 0;
     }
   }
 }

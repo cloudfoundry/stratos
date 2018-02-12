@@ -9,6 +9,7 @@ export function paginationSetClientFilter(state: PaginationEntityState, action: 
       ...state.clientPagination,
       filter: {
         ...state.clientPagination.filter,
+        ...action.filter,
         items: {
           ...state.clientPagination.filter.items,
           ...action.filter.items

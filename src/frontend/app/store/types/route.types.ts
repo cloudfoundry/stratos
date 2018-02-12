@@ -1,5 +1,4 @@
 export class Route {
-
   constructor(
     public domain_guid: string,
     public space_guid: string,
@@ -8,4 +7,9 @@ export class Route {
     public port?: number,
     public isTCP: boolean = false
   ) {}
+}
+
+export interface RouteMode {
+  id: string;
+  label: string;
 }

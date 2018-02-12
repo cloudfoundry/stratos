@@ -1,11 +1,6 @@
-import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { schema } from 'normalizr';
-
-import { ApiActionTypes } from './request.actions';
-import { PaginatedAction, QParam } from '../types/pagination.types';
-import { RequestOptions, URLSearchParams } from '@angular/http';
 import { Action } from '@ngrx/store';
-import { ListAppEnvVar, CfAppEvnVarsDataSource } from '../../shared/data-sources/cf-app-variables-data-source';
+
+import { ListAppEnvVar } from '../../shared/components/list/list-types/app-variables/cf-app-variables-data-source';
 import { UpdateApplication } from './application.actions';
 
 export const AppVariables = {

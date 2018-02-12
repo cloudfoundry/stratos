@@ -1,17 +1,19 @@
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
+import { ApplicationData, ApplicationService } from '../features/applications/application.service';
 import {
   ApplicationEnvVarsService,
+  EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
-import { EntityService } from '../core/entity-service';
-import { cnsisStoreNames } from '../store/types/cnsis.types';
-import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
-import { ApplicationService, ApplicationData } from '../features/applications/application.service';
-import { Observable } from 'rxjs/Observable';
-import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ApplicationStateService } from '../shared/components/application-state/application-state.service';
-import { AppSummary, AppStat } from '../store/types/app-metadata.types';
+import { AppState } from '../store/app-state';
+import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
+import { APIResource, EntityInfo } from '../store/types/api.types';
+import { AppStat, AppSummary } from '../store/types/app-metadata.types';
+import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
@@ -31,6 +33,7 @@ export class ApplicationServiceMock {
   } as ApplicationData));
   appSummary$: Observable<EntityInfo<AppSummary>> = Observable.of(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
   appStats$: Observable<APIResource<AppStat>[]> = Observable.of(new Array<APIResource<AppStat>>());
+  applicationStratProject$: Observable<EnvVarStratosProject> = Observable.of({ deploySource: { type: '', timestamp: 0, commit: '' } });
   isFetchingApp$: Observable<boolean> = Observable.of(false);
   isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
@@ -41,6 +44,9 @@ export class ApplicationServiceMock {
       }
     }
   } as EntityInfo);
+  appEnvVars = {
+    entities$: Observable.of(new Array<APIResource<any>>())
+  };
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
@@ -50,7 +56,8 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
       store: Store<AppState>,
       entityServiceFactory: EntityServiceFactory,
       applicationStateService: ApplicationStateService,
-      applicationEnvVarsService: ApplicationEnvVarsService
+      applicationEnvVarsService: ApplicationEnvVarsService,
+      paginationMonitorFactory: PaginationMonitorFactory
     ) => {
       const appService = new ApplicationService(
         cfGuid,
@@ -58,7 +65,8 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
         store,
         entityServiceFactory,
         applicationStateService,
-        applicationEnvVarsService
+        applicationEnvVarsService,
+        paginationMonitorFactory
       );
       return appService;
     },
@@ -66,7 +74,8 @@ export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
       Store,
       EntityServiceFactory,
       ApplicationStateService,
-      ApplicationEnvVarsService
+      ApplicationEnvVarsService,
+      PaginationMonitorFactory
     ]
   };
 }

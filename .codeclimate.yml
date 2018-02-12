@@ -27,3 +27,5 @@ exclude_patterns:
 - "**/tests/"
 - "**/vendor/"
 - "**/*.d.ts"
+- "**/__vendor/"
+- "**/*_test.go"

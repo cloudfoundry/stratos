@@ -14,7 +14,7 @@ export interface SingleEntityAction {
 }
 
 export interface RequestAction extends Action, SingleEntityAction {
-  cnis?: string;
+  endpointGuid?: string;
   updatingKey?: string;
 }
 
@@ -32,7 +32,7 @@ export enum RequestEntityLocation {
 export interface IRequestAction extends RequestAction {
   entity?: Schema;
   entityKey: string;
-  cnis?: string;
+  endpointGuid?: string;
   updatingKey?: string;
   // For single entity requests
   guid?: string;

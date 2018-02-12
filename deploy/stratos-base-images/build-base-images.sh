@@ -50,6 +50,11 @@ while getopts "b:r:o:t:psh" opt ; do
     esac
 done
 
+if [ -z ${PUSH_IMAGES} ]; then
+    echo "========================================"
+    echo "Images will NOT be pushed"
+    echo "========================================"
+fi
 
 __DIRNAME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_PATH=${__DIRNAME}/..
@@ -64,7 +69,6 @@ GO_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-go-build-base:${TAG}
 for i in ${DOCKERFILES}; do
   BASE_IMAGE=${BASE_IMAGE} GO_BUILD_BASE=${GO_BUILD_BASE} IS_SLE=${IS_SLE} ./mo ${__DIRNAME}/$i > ${i/.tmpl} 
 done
-
 
 pwd
 build_and_push_image() {
@@ -98,9 +102,12 @@ build_bk_build_base(){
 }
 
 build_portal_proxy_builder(){
+    if [ -z ${PUSH_IMAGES} ]; then
+        BUILDER_PUSH_FLAG="-n"
+    fi
     pushd  ${DEPLOY_PATH}/
     BK_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-bk-build-base:${TAG}
-    BK_BUILD_BASE=${BK_BUILD_BASE} TAG=${TAG} DOCKER_REGISTRY=${REGISTRY} DOCKER_ORG=${ORGANIZATION} tools/build-push-proxy-builder-image.sh
+    BK_BUILD_BASE=${BK_BUILD_BASE} TAG=${TAG} DOCKER_REGISTRY=${REGISTRY} DOCKER_ORG=${ORGANIZATION} tools/build-push-proxy-builder-image.sh ${BUILDER_PUSH_FLAG}
     popd
 }
 

@@ -24,3 +24,9 @@ if [ ! -z "${CREATE_USER}" ]; then
   chown -R ${USER_ID}:${GROUP_ID} node_modules
   chown -R ${USER_ID}:${GROUP_ID} dist
 fi
+
+# Copy dist folder to the /usr/dist folder when running in docker compose
+if [ "$1" == "-u" ]; then
+  rm -rf /usr/dist/*
+  cp -R dist/* /usr/dist
+fi

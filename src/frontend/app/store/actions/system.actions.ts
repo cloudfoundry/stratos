@@ -5,11 +5,12 @@ export const GET_SYSTEM_INFO_SUCCESS = '[System] Get info success';
 export const GET_SYSTEM_INFO_FAILED = '[System] Get info failed';
 
 export class GetSystemInfo implements Action {
+    constructor(public login = false) {}
     type = GET_SYSTEM_INFO;
 }
 
 export class GetSystemSuccess implements Action {
-    constructor(public payload: SystemInfo) { }
+    constructor(public payload: SystemInfo, public login = false) { }
     type = GET_SYSTEM_INFO_SUCCESS;
 }
 

@@ -1,15 +1,16 @@
-import { RequestTypes } from './../../actions/request.actions';
-import { Action, Store } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
-import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounceTime, shareReplay } from 'rxjs/operators';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
+import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
+import { ActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -85,35 +86,8 @@ export function getPaginationKeyFromAction(action: PaginatedAction) {
   return apiAction.paginationKey;
 }
 
-export const getPaginationPages = <T = any>(store: Store<AppState>, action: PaginatedAction, schema: Schema):
-  Observable<Array<Array<T>>> => {
-  const { entityKey, paginationKey } = action;
-
-  // One observable to emit when pagination changes
-  const paginationChanged$ = store.select(selectPaginationState(entityKey, paginationKey))
-    .filter(pag => !!pag)
-    .distinctUntilChanged((oldVals, newVals) => {
-      const oldVal = getPaginationCompareString(oldVals);
-      const newVal = getPaginationCompareString(newVals);
-      return oldVal === newVal;
-    });
-
-  // One observable to emit when the store items changed (not as granular as it should be, ideally should only emit when entities from pag
-  // changes)
-  const entitySectionChanged$ = store.select(selectEntities<T>(entityKey));
-
-  // Combine the two and emit with a list of pages containing the normalised entities
-  return Observable.combineLatest(paginationChanged$, entitySectionChanged$)
-    .withLatestFrom(store.select(getAPIRequestDataState))
-    .map(([[paginationState, entitiesOfType], entities]) => {
-      return Object.keys(paginationState.ids).map(page => {
-        return denormalize(paginationState.ids[page], schema, entities);
-      });
-    });
-};
-
 export const getPaginationObservables = <T = any>(
-  { store, action, schema }: { store: Store<AppState>, action: PaginatedAction, schema: Schema },
+  { store, action, paginationMonitor }: { store: Store<AppState>, action: PaginatedAction, paginationMonitor: PaginationMonitor },
   isLocal = false
 ): PaginationObservables<T> => {
   const { entityKey, paginationKey } = action;
@@ -129,7 +103,7 @@ export const getPaginationObservables = <T = any>(
     entityKey,
     paginationKey,
     action,
-    schema,
+    paginationMonitor,
     isLocal
   );
 
@@ -141,24 +115,17 @@ function getObservables<T = any>(
   entityKey: string,
   paginationKey: string,
   action: PaginatedAction,
-  schema: Schema,
-  isLocal = false)
+  paginationMonitor: PaginationMonitor,
+  isLocal = false
+)
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    distinctUntilChanged()
-  );
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
-    distinctUntilChanged((oldVals, newVals) => {
-      const oldVal = getPaginationCompareString(oldVals);
-      const newVal = getPaginationCompareString(newVals);
-      return oldVal === newVal;
-    }),
-    debounceTime(1),
     tap(pagination => {
       if (
         (!pagination && !hasDispatchedOnce) ||
@@ -168,32 +135,20 @@ function getObservables<T = any>(
         store.dispatch(action);
       }
     }),
-    share()
+    shareReplay(1)
   );
-  fetchPagination$.subscribe();
 
   const entities$: Observable<T[]> =
     combineLatest(
       store.select(selectEntities(entityKey)),
-      paginationSelect$
+      fetchPagination$
     )
       .pipe(
       filter(([ent, pagination]) => {
         return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
       }),
-      map(([ent, pagination]) => pagination),
-      withLatestFrom(store.select(getAPIRequestDataState)),
-      map(([pagination, entities]) => {
-        let page;
-        if (isLocal) {
-          const pages = Object.values(pagination.ids);
-          page = [].concat.apply([], pages);
-        } else {
-          page = pagination.ids[pagination.currentPage];
-        }
-
-        return page ? denormalize(page, schema, entities).filter(ent => !!ent) : null;
-      })
+      switchMap(() => paginationMonitor.currentPage$),
+      shareReplay(1)
       );
 
   return {
@@ -221,13 +176,21 @@ export function isPageReady(pagination: PaginationEntityState) {
 export function hasValidOrGettingPage(pagination: PaginationEntityState) {
   if (pagination && Object.keys(pagination).length) {
     const hasPage = !!pagination.ids[pagination.currentPage];
-
-    return pagination.fetching || hasPage;
+    const currentPageRequest = getCurrentPageRequestInfo(pagination);
+    return hasPage || currentPageRequest.busy;
   } else {
     return false;
   }
 }
 
 export function hasError(pagination: PaginationEntityState) {
-  return pagination && pagination.error;
+  return pagination && getCurrentPageRequestInfo(pagination).error;
+}
+
+export function getCurrentPageRequestInfo(pagination: PaginationEntityState): ActionState {
+  return pagination.pageRequests[pagination.currentPage] || {
+    busy: false,
+    error: false,
+    message: ''
+  };
 }

@@ -1,13 +1,13 @@
 import { SessionData } from '../../../store/types/auth.types';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { CNSISModel, CNSISState, cnsisStoreNames } from '../../../store/types/cnsis.types';
+import { EndpointModel, EndpointState, endpointStoreNames } from '../../../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
 import { AppState, IRequestEntityTypeState } from '../../../store/app-state';
 import { AuthUser, selectSessionData } from '../../../store/reducers/auth.reducer';
 import { CfAuthPrinciple } from './principal';
 import { CFAuthAction, CFAuthResource, CfAuthUserSummary, CfAuthUserSummaryMapped, CFFeatureFlags } from './cf-auth.types';
-import { cnsisEntitiesSelector } from '../../../store/selectors/cnsis.selectors';
+import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
 
 /**
  * NOTE - WIP
@@ -22,7 +22,7 @@ import { cnsisEntitiesSelector } from '../../../store/selectors/cnsis.selectors'
 export class CfAuthService {
 
 
-  endpoints$: Observable<IRequestEntityTypeState<CNSISModel>>;
+  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   sessionData$: Observable<SessionData>;
   // WIP: RC Initialise previously released promise when all init requests finished. For the time being use this, then make selector
   initialised$: Observable<boolean>;
@@ -36,7 +36,7 @@ export class CfAuthService {
   };
   // WIP: RC This should come from the store and populated using standard entity/non entity methods
   userSummaries$: {
-    [cnsiGuid: string]: {
+    [endpointGuid: string]: {
       [userGuid: string]: Observable<CfAuthUserSummary>;
     };
   };
@@ -46,7 +46,7 @@ export class CfAuthService {
   session: SessionData;
 
   constructor(private store: Store<AppState>) {
-    this.endpoints$ = store.select(cnsisEntitiesSelector);
+    this.endpoints$ = store.select(endpointEntitiesSelector);
     this.sessionData$ = store.select<SessionData>(selectSessionData());
   }
 
@@ -54,17 +54,17 @@ export class CfAuthService {
     Observable.combineLatest(
       this.endpoints$.take(1),
       this.sessionData$,
-    ).subscribe(([cnsis, session]: [IRequestEntityTypeState<CNSISModel>, SessionData]) => {
+    ).subscribe(([endpoints, session]: [IRequestEntityTypeState<EndpointModel>, SessionData]) => {
       this.session = session;
-      Object.values(cnsis).forEach(cnsi => {
-        if (cnsi.registered) {
+      Object.values(endpoints).forEach(endpoint => {
+        if (endpoint.registered) {
           // User hasn't connected to this endpoint
           return;
-        } else if (this.isInitialized(cnsi.guid)) {
+        } else if (this.isInitialized(endpoint.guid)) {
           // We have already initialised for this endpoint + user
           return;
         }
-        this.initializeForEndpoint(cnsi.guid, session);
+        this.initializeForEndpoint(endpoint.guid, session);
       });
     });
   }
@@ -73,15 +73,15 @@ export class CfAuthService {
    * @name isAllowed
    * @description is user allowed the certain action
    */
-  isAllowed(cnsiGuid: string, resourceType: CFAuthResource, action: CFAuthAction, ...args: any[]): boolean {
-    if (!this.isInitialized(cnsiGuid)) {
+  isAllowed(endpointGuid: string, resourceType: CFAuthResource, action: CFAuthAction, ...args: any[]): boolean {
+    if (!this.isInitialized(endpointGuid)) {
       return false;
     }
-    return this.principals[cnsiGuid].isAllowed.apply(this.principals[cnsiGuid], args);
+    return this.principals[endpointGuid].isAllowed.apply(this.principals[endpointGuid], args);
   }
 
-  remove(cnsiGuid) {
-    delete this.principals[cnsiGuid];
+  remove(endpointGuid) {
+    delete this.principals[endpointGuid];
   }
 
   /**
@@ -89,14 +89,14 @@ export class CfAuthService {
    * @description convenience method to determine if the user has rights to execute the action against the resource
    * in the organization or any of the organization's spaces
   */
-  isOrgOrSpaceActionableByResource(cnsiGuid: string, orgGuid: string, spaceGuids: string[], action: CFAuthAction): boolean {
+  isOrgOrSpaceActionableByResource(endpointGuid: string, orgGuid: string, spaceGuids: string[], action: CFAuthAction): boolean {
     // Is the organization valid?
-    if (this.isAllowed(cnsiGuid, CFAuthResource.organization, action, orgGuid)) {
+    if (this.isAllowed(endpointGuid, CFAuthResource.organization, action, orgGuid)) {
       return true;
     } else {
       // Is any of the organization's spaces valid?
       for (const spaceGuid in spaceGuids) {
-        if (this.isAllowed(cnsiGuid, CFAuthResource.space, action, spaceGuid, orgGuid)) {
+        if (this.isAllowed(endpointGuid, CFAuthResource.space, action, spaceGuid, orgGuid)) {
           return true;
         }
       }
@@ -108,40 +108,40 @@ export class CfAuthService {
    * @name isAdmin
    * @description Is User Admin in endpoint
    */
-  isAdmin(cnsiGuid: string): boolean {
-    if (!this.isInitialized(cnsiGuid)) {
+  isAdmin(endpointGuid: string): boolean {
+    if (!this.isInitialized(endpointGuid)) {
       return false;
     }
-    return this.principals[cnsiGuid].isAdmin;
+    return this.principals[endpointGuid].isAdmin;
   }
 
-  private isInitialized(cnsiGuid: string): boolean {
-    let initialised = !!this.principals[cnsiGuid];
+  private isInitialized(endpointGuid: string): boolean {
+    let initialised = !!this.principals[endpointGuid];
 
     if (this.session.user && initialised) {
-      initialised = this.session.endpoints.cf[cnsiGuid].user.guid === this.session.user.guid;
+      initialised = this.session.endpoints.cf[endpointGuid].user.guid === this.session.user.guid;
     }
     return !!initialised;
   }
 
-  private initializeForEndpoint(cnsiGuid: string, sessionData: SessionData) {
-    this.principals[cnsiGuid] = null;
-    const cfUserGuid = sessionData.endpoints.cf[cnsiGuid].user.guid;
-    const isAdmin = sessionData.endpoints.cf[cnsiGuid].user.admin;
+  private initializeForEndpoint(endpointGuid: string, sessionData: SessionData) {
+    this.principals[endpointGuid] = null;
+    const cfUserGuid = sessionData.endpoints.cf[endpointGuid].user.guid;
+    const isAdmin = sessionData.endpoints.cf[endpointGuid].user.admin;
 
     if (isAdmin) {
       // WIP: RC Fetch user role data using the user summary endpoint
       // User is an admin, therefore, we will use the more efficient userSummary request
     } else {
       // WIP: RC Fetch user role data using seperate org/space requests
-      // promises = promises.concat(_addOrganisationRolePromisesForUser(cnsiGuid, userId));
-      // promises = promises.concat(_addSpaceRolePromisesForUser(cnsiGuid, userId));
+      // promises = promises.concat(_addOrganisationRolePromisesForUser(endpointGuid, userId));
+      // promises = promises.concat(_addSpaceRolePromisesForUser(endpointGuid, userId));
     }
 
     Observable.combineLatest(
       this.sessionData$,
-      this.featureFlags$[cnsiGuid],
-      this.userSummaries$[cnsiGuid][cfUserGuid],
+      this.featureFlags$[endpointGuid],
+      this.userSummaries$[endpointGuid][cfUserGuid],
     ).take(1).subscribe(([session, featureFlags, userSummary]: [SessionData, CFFeatureFlags, CfAuthUserSummary]) => {
       const mappedSummary: CfAuthUserSummaryMapped = {
         organizations: {
@@ -158,7 +158,7 @@ export class CfAuthService {
           all: userSummary.spaces
         }
       };
-      this.principals[cnsiGuid] = new CfAuthPrinciple(cfUserGuid, session, mappedSummary, featureFlags);
+      this.principals[endpointGuid] = new CfAuthPrinciple(cfUserGuid, session, mappedSummary, featureFlags);
     });
   }
 

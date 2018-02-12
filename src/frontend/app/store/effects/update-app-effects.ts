@@ -31,14 +31,14 @@ export class UpdateAppEffects {
         switch (updateEntity) {
           case AppMetadataTypes.ENV_VARS:
             // This is done so the app metadata env vars environment_json matches that of the app
-            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.cnis));
+            actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
           case AppMetadataTypes.STATS:
             // Should only fire this if app is running
-            actions.push(new GetAppStatsAction(action.apiAction.guid, action.apiAction.cnis));
+            actions.push(new GetAppStatsAction(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
           case AppMetadataTypes.SUMMARY:
-            actions.push(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.cnis));
+            actions.push(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
         }
       });
