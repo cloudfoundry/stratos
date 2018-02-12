@@ -23,7 +23,7 @@ export const EventSchema = new schema.Entity('event', {
 export class GetAllAppEvents extends CFStartAction implements PaginatedAction {
   private static sortField = 'timestamp'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-  constructor(public paginationKey: string, public appGuid: string, public cnis) {
+  constructor(public paginationKey: string, public appGuid: string, public endpointGuid) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'events';

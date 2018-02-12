@@ -10,6 +10,7 @@ import { distinctUntilChanged, tap, filter, withLatestFrom, map, share, debounce
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getAPIRequestDataState, getRequestEntityType, selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
+import { ActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -96,11 +97,11 @@ export const getPaginationPages = <T = any>(store: Store<AppState>, action: Pagi
       const oldVal = getPaginationCompareString(oldVals);
       const newVal = getPaginationCompareString(newVals);
       return oldVal === newVal;
-    });
+    }).shareReplay(1);
 
   // One observable to emit when the store items changed (not as granular as it should be, ideally should only emit when entities from pag
   // changes)
-  const entitySectionChanged$ = store.select(selectEntities<T>(entityKey));
+  const entitySectionChanged$ = store.select(selectEntities<T>(entityKey)).shareReplay(1);
 
   // Combine the two and emit with a list of pages containing the normalised entities
   return Observable.combineLatest(paginationChanged$, entitySectionChanged$)
@@ -109,7 +110,7 @@ export const getPaginationPages = <T = any>(store: Store<AppState>, action: Pagi
       return Object.keys(paginationState.ids).map(page => {
         return denormalize(paginationState.ids[page], schema, entities);
       });
-    });
+    }).shareReplay(1);
 };
 
 export const getPaginationObservables = <T = any>(
@@ -146,19 +147,11 @@ function getObservables<T = any>(
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    distinctUntilChanged()
-  );
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
-    distinctUntilChanged((oldVals, newVals) => {
-      const oldVal = getPaginationCompareString(oldVals);
-      const newVal = getPaginationCompareString(newVals);
-      return oldVal === newVal;
-    }),
-    debounceTime(1),
     tap(pagination => {
       if (
         (!pagination && !hasDispatchedOnce) ||
@@ -168,14 +161,13 @@ function getObservables<T = any>(
         store.dispatch(action);
       }
     }),
-    share()
+    shareReplay(1)
   );
-  fetchPagination$.subscribe();
 
   const entities$: Observable<T[]> =
     combineLatest(
       store.select(selectEntities(entityKey)),
-      paginationSelect$
+      fetchPagination$
     )
       .pipe(
       filter(([ent, pagination]) => {
@@ -193,7 +185,8 @@ function getObservables<T = any>(
         }
 
         return page ? denormalize(page, schema, entities).filter(ent => !!ent) : null;
-      })
+      }),
+      shareReplay(1)
       );
 
   return {
@@ -221,13 +214,21 @@ export function isPageReady(pagination: PaginationEntityState) {
 export function hasValidOrGettingPage(pagination: PaginationEntityState) {
   if (pagination && Object.keys(pagination).length) {
     const hasPage = !!pagination.ids[pagination.currentPage];
-
-    return pagination.fetching || hasPage;
+    const currentPageRequest = getCurrentPageRequestInfo(pagination);
+    return hasPage || currentPageRequest.busy;
   } else {
     return false;
   }
 }
 
 export function hasError(pagination: PaginationEntityState) {
-  return pagination && pagination.error;
+  return pagination && getCurrentPageRequestInfo(pagination).error;
+}
+
+export function getCurrentPageRequestInfo(pagination: PaginationEntityState): ActionState {
+  return pagination.pageRequests[pagination.currentPage] || {
+    busy: false,
+    error: false,
+    message: ''
+  };
 }

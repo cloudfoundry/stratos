@@ -1,10 +1,10 @@
 import {
-  GET_CNSIS_FAILED,
-  GET_CNSIS_SUCCESS,
-  GetAllCNSIS,
-  GetAllCNSISFailed,
-  GetAllCNSISSuccess,
-} from './../actions/cnsis.actions';
+  GET_ENDPOINTS_FAILED,
+  GET_ENDPOINTS_SUCCESS,
+  GetAllEndpoints,
+  GetAllEndpointsFailed,
+  GetAllEndpointsSuccess,
+} from '../actions/endpoint.actions';
 import { AppState } from './../app-state';
 import {
   InvalidSession,
@@ -32,6 +32,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material';
 import { SessionData } from '../types/auth.types';
+import { GetSystemInfo } from '../actions/system.actions';
 
 
 @Injectable()
@@ -77,35 +78,19 @@ export class AuthEffect {
         .mergeMap(data => {
           const sessionData: SessionData = data.json();
           sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
-          return [new VerifiedSession(sessionData, action.updateCNSIs)];
+          return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
         })
         .catch((err, caught) => {
           return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
         });
     });
 
-  @Effect() verifiedAuth$ = this.actions$.ofType<VerifiedSession>(SESSION_VERIFIED)
-    .mergeMap(action => {
-      if (action.updateCNSIs) {
-        return [new GetAllCNSIS(true)];
-      }
-      return [];
-    });
-
-
-  @Effect() CnsisSuccess$ = this.actions$.ofType<GetAllCNSISSuccess>(GET_CNSIS_SUCCESS)
+  @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS)
     .mergeMap(action => {
       if (action.login) {
         return [new LoginSuccess()];
       }
       return [];
-    });
-
-  @Effect() CnsisFailed$ = this.actions$.ofType<GetAllCNSISFailed>(GET_CNSIS_FAILED)
-    .map(action => {
-      if (action.login) {
-        return new LoginFailed(`Couldn't fetch cnsis.`);
-      }
     });
 
   @Effect() invalidSessionAuth$ = this.actions$.ofType<VerifySession>(SESSION_INVALID)

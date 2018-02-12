@@ -1,7 +1,7 @@
-import { cnsisEntitiesSelector, cnsisStatusSelector } from '../store/selectors/cnsis.selectors';
+import { endpointEntitiesSelector, endpointStatusSelector } from '../store/selectors/endpoint.selectors';
 import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
-import { CNSISState, CNSISModel, cnsisStoreNames } from '../store/types/cnsis.types';
+import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
@@ -21,27 +21,28 @@ export class EndpointsService implements CanActivate {
     private store: Store<AppState>,
     private userService: UserService
   ) {
-    this.endpoints$ = store.select(cnsisEntitiesSelector);
-    this.haveRegistered$ = this.endpoints$.map(cnsis => !!Object.keys(cnsis).length);
-    this.haveConnected$ = this.endpoints$.map(cnsis => Object.values(cnsis).find(cnsi => cnsi.connectionStatus === 'connected'));
+    this.endpoints$ = store.select(endpointEntitiesSelector);
+    this.haveRegistered$ = this.endpoints$.map(endpoints => !!Object.keys(endpoints).length);
+    this.haveConnected$ = this.endpoints$.map(endpoints =>
+      Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected'));
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
     // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints
     return Observable.combineLatest(
       this.store.select('auth'),
-      this.store.select(cnsisStatusSelector)
+      this.store.select(endpointStatusSelector)
     )
-      .skipWhile(([state, cnsiState]: [AuthState, CNSISState]) => {
-        return !state.loggedIn || cnsiState.loading;
+      .skipWhile(([state, endpointState]: [AuthState, EndpointState]) => {
+        return !state.loggedIn || endpointState.loading;
       })
       .withLatestFrom(
       this.haveRegistered$,
       this.haveConnected$,
       this.userService.isAdmin$,
     )
-      .map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, CNSISState], boolean, boolean, boolean]) => {
-        const [authState, cnsisState] = state;
+      .map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
+        const [authState] = state;
         if (authState.sessionData.valid) {
           // Redirect to endpoints if there's no connected endpoints
           let redirect: string;

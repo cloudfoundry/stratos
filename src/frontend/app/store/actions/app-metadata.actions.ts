@@ -17,14 +17,14 @@ export class GetAppStatsAction extends CFStartAction implements PaginatedAction,
   paginationKey: string;
   constructor(
     public guid: string,
-    public cnis: string
+    public endpointGuid: string
   ) {
     super();
     this.options = new RequestOptions({
       url: `apps/${guid}/stats`,
       method: 'get'
     });
-    this.paginationKey = getPaginationKey(this.entityKey, cnis, guid);
+    this.paginationKey = getPaginationKey(this.entityKey, endpointGuid, guid);
   }
   entity = [AppStatSchema];
   entityKey = AppStatSchema.key;
@@ -46,14 +46,14 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
   paginationKey: string;
   constructor(
     public guid: string,
-    public cnis: string,
+    public endpointGuid: string,
   ) {
     super();
     this.options = new RequestOptions({
       url: `apps/${guid}/env`,
       method: 'get'
     });
-    this.paginationKey = getPaginationKey(this.entityKey, cnis, guid);
+    this.paginationKey = getPaginationKey(this.entityKey, endpointGuid, guid);
   }
   entity = [AppEnvVarSchema];
   entityKey = AppEnvVarSchema.key;
@@ -73,7 +73,7 @@ export class GetAppSummaryAction extends CFStartAction implements ICFAction {
   options: RequestOptions;
   constructor(
     public guid: string,
-    public cnis: string,
+    public endpointGuid: string,
   ) {
     super();
     this.options = new RequestOptions({

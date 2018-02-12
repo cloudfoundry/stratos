@@ -7,6 +7,5 @@
   </div>
 </app-page-header>
 
-<app-endpoints-missing [showSnackForNoneConnected]="true"></app-endpoints-missing>
-<app-list [text]="{ filter: 'Filter Endpoints'}" [enableFilter]="true" [tableFixedRowHeight]="true" [hidden]="!(endpointsService.haveRegistered$ | async)">
-</app-list>
+<app-endpoints-missing [showToolbarHint]="true" [showSnackForNoneConnected]="true"></app-endpoints-missing>
+<app-list [hidden]="!(endpointsService.haveRegistered$ | async)"></app-list>

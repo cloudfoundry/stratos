@@ -17,7 +17,7 @@ import { ApplicationServiceMock } from '../../../../../../test-framework/applica
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { cnsisStoreNames } from '../../../../../../store/types/cnsis.types';
+import { endpointStoreNames } from '../../../../../../store/types/endpoint.types';
 import { RoutesComponent } from '../../../../routes/routes.component';
 
 describe('BuildTabComponent', () => {
@@ -55,7 +55,7 @@ describe('BuildTabComponent', () => {
   }));
 
   beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
-    const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.type])[0];
+    const cfGuid = Object.keys(initialState.requestData[endpointStoreNames.type])[0];
     const appGuid = Object.keys(initialState.requestData.application)[0];
     fixture = TestBed.createComponent(BuildTabComponent);
     component = fixture.componentInstance;

@@ -1,22 +1,18 @@
-import { CfAppsDataSource } from '../data-sources/cf-apps-data-source';
-import { EntityInfo } from '../../store/types/api.types';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { cnsisRegisteredEntitiesSelector } from '../../store/selectors/cnsis.selectors';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetAllOrganizations, OrganizationSchema } from '../../store/actions/organization.actions';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { CNSISModel } from '../../store/types/cnsis.types';
-import { selectPaginationState } from '../../store/selectors/pagination.selectors';
-import { PaginationEntityState } from '../../store/types/pagination.types';
-import { ApplicationSchema } from '../../store/actions/application.actions';
+import { Observable } from 'rxjs/Observable';
+
+import { GetAllOrganizations, OrganizationSchema } from '../../store/actions/organization.actions';
+import { AppState } from '../../store/app-state';
+import { getPaginationObservables, getCurrentPageRequestInfo } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
+import { EndpointModel } from '../../store/types/endpoint.types';
 
 export interface CfOrgSpaceItem {
-  list$: Observable<CNSISModel[] | any[]>;
+  list$: Observable<EndpointModel[] | any[]>;
   loading$: Observable<boolean>;
-  select: BehaviorSubject<CNSISModel | any>;
+  select: BehaviorSubject<EndpointModel | any>;
 }
 
 @Injectable()
@@ -69,7 +65,7 @@ export class CfOrgSpaceDataService {
   private init() {
     this.getEndpointsAndOrgs$ = Observable.combineLatest(
       this.allOrgs$.pagination$.filter(paginationEntity => {
-        return !paginationEntity.fetching;
+        return !getCurrentPageRequestInfo(paginationEntity).busy;
       }).first(),
       this.cf.list$
     );
@@ -77,7 +73,7 @@ export class CfOrgSpaceDataService {
 
   private createCf() {
     this.cf = {
-      list$: this.store.select(cnsisRegisteredEntitiesSelector).first().map(cnsis => Object.values(cnsis)),
+      list$: this.store.select(endpointsRegisteredEntitiesSelector).first().map(endpoints => Object.values(endpoints)),
       loading$: Observable.of(false),
       select: new BehaviorSubject(undefined),
     };
@@ -89,7 +85,7 @@ export class CfOrgSpaceDataService {
       this.getEndpointsAndOrgs$,
       this.allOrgs$.entities$
     )
-      .map(([selectedCF, endpointsAndOrgs, entities]: [CNSISModel, any, any]) => {
+      .map(([selectedCF, endpointsAndOrgs, entities]: [EndpointModel, any, any]) => {
         const [pag, cfList] = endpointsAndOrgs;
         if (selectedCF && entities) {
           return entities.map(org => org.entity).filter(org => org.cfGuid === selectedCF);
@@ -99,7 +95,7 @@ export class CfOrgSpaceDataService {
 
     this.org = {
       list$: orgList$,
-      loading$: this.allOrgs$.pagination$.map(pag => pag.fetching),
+      loading$: this.allOrgs$.pagination$.map(pag => getCurrentPageRequestInfo(pag).busy),
       select: new BehaviorSubject(undefined),
     };
   }

@@ -1,13 +1,13 @@
 import { GetSystemInfo } from '../../../store/actions/system.actions';
 import { SystemEffects } from '../../../store/effects/system.effects';
 import { systemStoreNames } from '../../../store/types/system.types';
-import { cnsisStoreNames, CNSISModel } from '../../../store/types/cnsis.types';
+import { endpointStoreNames, EndpointModel } from '../../../store/types/endpoint.types';
 import { ActionState, RequestSectionKeys } from '../../../store/reducers/api-request-reducer/types';
-import { CNSISEffect } from '../../../store/effects/cnsis.effects';
+import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { Observable } from 'rxjs/Rx';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ConnectCnis, EndpointSchema } from '../../../store/actions/cnsis.actions';
+import { ConnectEndpoint, EndpointSchema } from '../../../store/actions/endpoint.actions';
 import { Store } from '@ngrx/store';
 import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
@@ -87,7 +87,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
     )
-      .map(request => !!(request && request.info && request.info.user));
+      .map(request => !!(request && request.api_endpoint && request.user));
 
     this.connecting$ =
       this.update$
@@ -117,29 +117,29 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private getUpdateSelector() {
     return selectUpdateInfo(
-      cnsisStoreNames.type,
+      endpointStoreNames.type,
       this.data.guid,
-      CNSISEffect.connectingKey
+      EndpointsEffect.connectingKey
     );
   }
 
   private getRequestSelector() {
     return selectRequestInfo(
-      cnsisStoreNames.type,
+      endpointStoreNames.type,
       SystemEffects.guid
     );
   }
 
   private getEntitySelector() {
-    return selectEntity<CNSISModel>(
-      cnsisStoreNames.type,
+    return selectEntity<EndpointModel>(
+      endpointStoreNames.type,
       this.data.guid,
     );
   }
 
   submit(event) {
     const { guid, username, password } = this.endpointForm.value;
-    this.store.dispatch(new ConnectCnis(
+    this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
       username,
       password

@@ -5,7 +5,7 @@ Last Updated: 31 January 2018
 The current high-level features are:
 
 * Angular 2 - move to Angular 2 for the front-end UI
-* Services - make Services a first-class citizen in the UI
+* Services - make Services a first-class citizen in the UI - See [here](planning/services.md)
 * Metrics - add metrics to Stratos. See [here](planning/metrics.md) for some initial thoughts
 
 
@@ -23,7 +23,7 @@ The focus for the first part of 2018 is to complete the move from AngularJS to A
 
 Note:
 - Back-end stays the same (folder structure will most likely be moved around)
-- Deployment and other scrpts, artiefcts remaint the sames (tweaks as neccessary to build the V2 code)
+- Deployment and other scrpts, artefacts remaint the sames (tweaks as neccessary to build the V2 code)
 
 Stack:
 

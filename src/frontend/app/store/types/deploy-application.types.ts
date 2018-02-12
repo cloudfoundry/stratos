@@ -1,22 +1,12 @@
 import { NewAppCFDetails } from './create-application.types';
 import { schema } from 'normalizr';
+import { GithubCommit, GitBranch } from './github.types';
 
 
 export interface SourceType {
   name: string;
   id: string;
   subType?: string;
-}
-
-export interface ProjectBranches {
-  fetching: boolean;
-  success: boolean;
-  data: any;
-}
-
-export interface GitBranch {
-  name: string;
-  commit: Commit;
 }
 
 export enum DeployState {
@@ -59,8 +49,8 @@ export interface DeployApplicationSource {
   type: SourceType;
   projectName?: string;
   branch?: GitBranch;
-  branches?: ProjectBranches;
-  commit?: any;
+  commit?: GithubCommit;
+  branchName?: string;
 }
 
 export interface GitAppDetails {
@@ -68,21 +58,16 @@ export interface GitAppDetails {
   branch: GitBranch;
 }
 
-export interface Commit {
-  sha: string;
-  url: string;
+export interface ProjectExists {
+  checking: boolean;
+  exists: boolean;
+  name: string;
+  data?: any;
 }
-
-
 export interface DeployApplicationState {
   cloudFoundryDetails: NewAppCFDetails;
   applicationSource?: DeployApplicationSource;
-  projectExists?: {
-    checking: boolean,
-    exists: boolean,
-    name: string,
-    data: any
-  };
+  projectExists?: ProjectExists;
 }
 
 export interface AppData {
@@ -95,5 +80,5 @@ export interface AppData {
 export const GITHUB_BRANCHES_ENTITY_KEY = 'githubBranches';
 export const GITHUB_COMMIT_ENTITY_KEY = 'githubCommits';
 
-export const BranchSchema = new schema.Entity(GITHUB_BRANCHES_ENTITY_KEY, {}, { idAttribute: 'name' });
+export const BranchSchema = new schema.Entity(GITHUB_BRANCHES_ENTITY_KEY, {}, { idAttribute: 'entityId' });
 export const BranchesSchema = new schema.Array(BranchSchema);
