@@ -69,10 +69,12 @@ export class EndpointsListConfigService implements IListConfig<CNSISModel> {
 
   private listActionConnect: IListAction<CNSISModel> = {
     action: (item) => {
+      console.log(item);
       const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
           name: item.name,
-          guid: item.guid
+          guid: item.guid,
+          type: item.cnsi_type,
         },
         disableClose: true
       });

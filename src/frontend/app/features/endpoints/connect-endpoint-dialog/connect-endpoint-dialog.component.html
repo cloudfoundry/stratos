@@ -9,12 +9,25 @@
   </h2>
   <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
     <mat-dialog-content class="connection-dialog__content">
-      <mat-form-field>
-        <input matInput placeholder="Username" formControlName="username">
+      <mat-form-field *ngIf="authTypesForEndpoint.length > 1">
+        <mat-select (change)="authChanged($event)" id="authType" name="authType" formControlName="authType" placeholder="Auth Type">
+          <mat-option *ngFor="let auth of authTypesForEndpoint" [value]="auth">{{ auth.name }}</mat-option>
+        </mat-select>
       </mat-form-field>
-      <mat-form-field>
-        <input matInput placeholder="Password" type="password" formControlName="password">
-      </mat-form-field>
+      <input type="hidden" *ngIf="authTypesForEndpoint.length === 1" name="authType" formControlName="authType">
+      <div *ngIf="endpointForm.value.authType === 'oauth2'" formGroupName="authValues" class="connection-dialog__auth">
+        <mat-form-field>
+          <input matInput placeholder="Username" formControlName="username">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Password" type="password" formControlName="password">
+        </mat-form-field>
+      </div>
+      <div *ngIf="endpointForm.value.authType === 'bearer'" formGroupName="authValues" class="connection-dialog__auth">
+        <mat-form-field>
+          <input matInput placeholder="Token" formControlName="token">
+        </mat-form-field>
+      </div>
     </mat-dialog-content>
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>
     <mat-dialog-actions class="connection-dialog__actions">

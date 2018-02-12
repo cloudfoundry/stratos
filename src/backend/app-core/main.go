@@ -65,6 +65,11 @@ func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 	log.SetOutput(os.Stdout)
+
+	log.Info("========================================")
+	log.Info("=== Stratos Jetstream Backend Server ===")
+	log.Info("========================================")
+	log.Info("")
 	log.Info("Initialization started.")
 
 	// Register time.Time in gob

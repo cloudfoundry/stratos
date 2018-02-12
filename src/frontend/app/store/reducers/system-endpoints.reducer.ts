@@ -36,12 +36,14 @@ function fetchingEndpointInfo(state) {
 function succeedEndpointInfo(state, action) {
   const newState = { ...state };
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
-  getAllEnpointIds(newState, payload.endpoints.cf).forEach(guid => {
-    const endpointInfo = payload.endpoints.cf[guid];
-    newState[guid] = {
-      ...newState[guid],
-      ...endpointInfo
-    };
+  Object.keys(payload.endpoints).forEach(type => {
+    getAllEnpointIds(newState, payload.endpoints[type]).forEach(guid => {
+      const endpointInfo = payload.endpoints[type][guid];
+      newState[guid] = {
+        ...newState[guid],
+        ...endpointInfo
+      };
+    });
   });
   return newState;
 }

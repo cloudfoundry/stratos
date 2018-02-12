@@ -34,9 +34,21 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   validate: Observable<boolean>;
 
   @ViewChild('form') form: NgForm;
+  @ViewChild('typeField') typeField: NgModel;
   @ViewChild('nameField') nameField: NgModel;
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
+
+  endpointTypes = [
+    {
+      value: 'cf',
+      label: 'Cloud Foundry'
+    },
+    {
+      value: 'k8s',
+      label: 'Kubernetes'
+    },
+  ];
 
   constructor(private store: Store<AppState>, public utilsService: UtilsService) {
 
@@ -59,10 +71,13 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
   onNext: StepOnNextFunction = () => {
     const action = new RegisterCnis(
+      this.typeField.value,
       this.nameField.value,
       this.urlField.value,
       !!this.skipSllField.value
     );
+
+    console.log(this.typeField.value);
 
     this.store.dispatch(action);
 

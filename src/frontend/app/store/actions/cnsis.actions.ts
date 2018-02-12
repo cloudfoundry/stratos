@@ -31,6 +31,20 @@ export const EndpointSchema = new schema.Entity('endpoint', {}, {
   idAttribute: 'guid'
 });
 
+// Different Auth Type support for connecting to Endpoints
+export type AuthParamsUsernamePassword = {
+  username: string,
+  password: string,
+}
+
+export type AuthParamsToken = {
+  token: string,
+}
+
+// All supported auth params types
+export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
+
+
 export class GetAllCNSIS implements PaginatedAction {
   public static storeKey = 'endpoint-list';
   constructor(public login = false) { }
@@ -58,8 +72,8 @@ export class GetAllCNSISFailed implements Action {
 export class ConnectCnis implements Action {
   constructor(
     public guid: string,
-    public username: string,
-    public password: string,
+    public authType: string,
+    public authValues: AuthParams,
   ) { }
   type = CONNECT_CNSIS;
 }
@@ -80,6 +94,7 @@ export class UnregisterCnis implements Action {
 
 export class RegisterCnis implements Action {
   constructor(
+    public endpointType: string,
     public name: string,
     public endpoint: string,
     public skipSslValidation: boolean,

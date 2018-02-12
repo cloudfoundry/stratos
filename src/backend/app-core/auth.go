@@ -211,13 +211,21 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 			"No CNSI registered with GUID %s: %s", cnsiGUID, err)
 	}
 
-	authTypeStr := c.FormValue("auth")
-	authType := interfaces.OAuth2
+	// Look for auth type
+	authTypeStr := c.FormValue("auth_type")
+	if len(authTypeStr) == 0 {
+		authTypeStr = "oauth2"
+	}
+	var authType interfaces.AuthType
 	switch authTypeStr {
+	case "oauth2":
+		authType = interfaces.OAuth2
 	case "http":
 		authType = interfaces.HttpBasic
+	case "bearer":
+		authType = interfaces.HttpBearer
 	default:
-		authType = interfaces.OAuth2
+		authType = ""
 	}
 
 	if authType == interfaces.OAuth2 {
@@ -226,6 +234,10 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 
 	if authType == interfaces.HttpBasic {
 		return p.fetchHttpBasicToken(cnsiRecord, c)
+	}
+
+	if authType == interfaces.HttpBearer {
+		return p.fetchHttpBearerToken(cnsiRecord, c)
 	}
 
 	return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -237,6 +249,20 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
 
 	uaaRes, u, err := p.loginHttpBasic(c)
+
+	if err != nil {
+		return nil, nil, nil, interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"Login failed",
+			"Login failed: %v", err)
+	}
+	return uaaRes, u, &cnsiRecord, nil
+}
+
+func (p *portalProxy) fetchHttpBearerToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+
+	log.Info("Fetching HTTP Bearer")
+	uaaRes, u, err := p.loginHttpBearer(cnsiRecord, c)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -379,6 +405,69 @@ func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *UAAResponse, u *us
 	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
 	uaaRes.AccessToken = fmt.Sprintf("Basic %s", base64EncodedAuthString)
+	return uaaRes, u, nil
+}
+
+func (p *portalProxy) loginHttpBearer(cnsiRecord interfaces.CNSIRecord, c echo.Context) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+	log.Debug("login")
+
+	log.Info("Login HTTP Bearer")
+
+	token := c.FormValue("token")
+
+	if len(token) == 0 {
+		return uaaRes, u, errors.New("Needs token")
+	}
+
+	log.Info("Login HTTP Bearer 1")
+	// authString := fmt.Sprintf("%s:%s", username, password)
+	token = "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRlOTI4M2M0NTE4Y2U5NjZjZjk2MjZjNmNiZjJlYzU2NDA2NTIzZjIifQ.eyJpc3MiOiJodHRwczovL2t1YmUtYXBpLmRldmVudi5jYXBicmlzdG9sLmNvbTozMjAwMCIsInN1YiI6IkNpMTFhV1E5ZEdWemRDeHZkVDFRWlc5d2JHVXNaR005YVc1bWNtRXNaR005WTJGaGMzQXNaR005Ykc5allXd1NCR3hrWVhBIiwiYXVkIjoiY2Fhc3AtY2xpIiwiZXhwIjoxNTE4MDkzOTM5LCJpYXQiOjE1MTgwMDc1MzksIm5vbmNlIjoiMzA3M2NmZmQ1YzJjZTVjODkwZjdhODM5Zjc5YTQ1NDciLCJhdF9oYXNoIjoiQ1pULUtUQ1hwbjZzZmxrNFZEM3E2QSIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJncm91cHMiOlsiQWRtaW5pc3RyYXRvcnMiXSwibmFtZSI6IkEgVXNlciJ9.XTRtlsE1wOvitOIb9rTUDD-MxCYTJlfE-aVan6ztFiK2pO42NzrsuzRRVIqA9Toc4EzJIMzP5-yVMZXFHfiQWtDbm4IeYWSxHaZYKFxs_-2Pu5M_ScqCiLWsma4A-kW9_nwPEEsDtnKYTnvEPvl3MC89rEiT-WlT13h5KyfQ1ZDulgM3h9DwGvOrI2C9c3J2VeMGZh2bglZIasLrfNmdFMbmGRaEf4Gxvp4J0bhIij3J-ZN_rwWQfxwePZXxC4hE10FHqtGjLWax8Px654g0rClqfySTfr2wAJngN5xDEYxv2vaBMvtUHHu6uEyj8H5jy6GKQKhIvnJjhyZOYDs6Cw"
+	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(token))
+
+	uaaRes = &UAAResponse{}
+	uaaRes.AccessToken = fmt.Sprintf("Bearer %s", base64EncodedAuthString)
+	log.Info("Login HTTP Bearer 1")
+
+	// Make a request to the auth endpoint - to check that the auth is working
+	log.Info(uaaRes.AccessToken)
+
+	//authEndpoint := cnsiRecord.AuthorizationEndpoint
+	authEndpoint := "http://149.44.104.40:8001/v1/api"
+	req, err := http.NewRequest("GET", authEndpoint, strings.NewReader(""))
+	req.Header.Set("Authorization", uaaRes.AccessToken)
+
+	//, strings.NewReader(body.Encode()))
+	if err != nil {
+		msg := "Failed to create request for Http Endpoint: %v"
+		log.Errorf(msg, err)
+		return nil, u, fmt.Errorf(msg, err)
+	}
+
+	var h http.Client
+	if cnsiRecord.SkipSSLValidation {
+		h = httpClientSkipSSL
+	} else {
+		h = httpClient
+	}
+
+	res, err := h.Do(req)
+	if err != nil || res.StatusCode != http.StatusOK {
+		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		return nil, u, interfaces.LogHTTPError(res, err)
+	}
+
+	defer res.Body.Close()
+
+	log.Info(res.Body)
+
+	// dec := json.NewDecoder(res.Body)
+	// if err = dec.Decode(&response); err != nil {
+	// 	log.Errorf("Error decoding response: %v", err)
+	// 	return nil, fmt.Errorf("getUAAToken Decode: %s", err)
+	// }
+
+	// return &response, nil
+
 	return uaaRes, u, nil
 }
 

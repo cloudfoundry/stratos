@@ -61,7 +61,7 @@ export class CNSISEffect {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(paginationAction, actionType));
 
-      const endpoints = action.payload.endpoints.cf;
+      const endpoints = action.payload.endpoints;
 
       // Data is an aarray of endpoints
       const mappedData = {
@@ -71,13 +71,16 @@ export class CNSISEffect {
         result: []
       } as NormalizedResponse;
 
-      const data = Object.values(endpoints).forEach(endpointInfo => {
-        mappedData.entities[cnsisStoreNames.type][endpointInfo.guid] = {
-          ...endpointInfo,
-          connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
-          registered: !!endpointInfo.user,
-        };
-        mappedData.result.push(endpointInfo.guid);
+      Object.keys(endpoints).forEach((type: string) => {
+        const endpointsForType = endpoints[type];
+        Object.values(endpointsForType).forEach(endpointInfo => {
+          mappedData.entities[cnsisStoreNames.type][endpointInfo.guid] = {
+            ...endpointInfo,
+            connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
+            registered: !!endpointInfo.user,
+          };
+          mappedData.result.push(endpointInfo.guid);
+        });
       });
 
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
@@ -94,9 +97,9 @@ export class CNSISEffect {
       const apiAction = this.getEndpointAction(action.guid, action.type, CNSISEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
+          ...<any>action.authValues,
           'cnsi_guid': action.guid,
-          'username': action.username,
-          'password': action.password,
+          'auth_type': action.authType,
         }
       });
 
@@ -161,7 +164,7 @@ export class CNSISEffect {
 
       return this.doCnisAction(
         apiAction,
-        '/pp/v1/register/cf',
+        '/pp/v1/register/' + action.endpointType,
         params,
         'create',
         [REGISTER_CNSIS_SUCCESS, REGISTER_CNSIS_FAILED]

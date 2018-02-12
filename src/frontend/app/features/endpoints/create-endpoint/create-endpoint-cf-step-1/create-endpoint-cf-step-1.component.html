@@ -9,6 +9,13 @@
   Supply the API Url for your Cloud Foundry endpoint
 </p>
 <form #form="ngForm">
+<mat-form-field>
+    <mat-select placeholder="Endpoint Type" id="ep-type" name="ep-type" [(ngModel)]="typeValue" #typeField="ngModel"  required>
+      <mat-option *ngFor="let type of endpointTypes" [value]="type.value">
+        {{ type.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>  
   <mat-form-field>
     <input matInput id="name" name="name" [(ngModel)]="nameValue" #nameField="ngModel" required placeholder="Name" [appUnique]="(existingEndpoints | async)?.names">
     <mat-error *ngIf="nameField.errors && nameField.errors.required">Name is required</mat-error>
