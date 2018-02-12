@@ -63,14 +63,14 @@ export class CreateRoute extends CFStartAction implements ICFAction {
 
 export class DeleteRoute extends CFStartAction implements ICFAction {
   constructor(
-    public routeGuid: string,
+    public guid: string,
     public cfGuid: string,
     public async: boolean = false,
     public recursive: boolean = true
   ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `routes/${routeGuid}`;
+    this.options.url = `routes/${guid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
     this.options.params.append('recursive', recursive ? 'true' : 'false');
@@ -86,6 +86,7 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
   entityKey = RouteSchema.key;
   options: RequestOptions;
   endpointGuid: string;
+  removeEntityOnDelete = true;
 }
 
 export class UnmapRoute extends CFStartAction implements ICFAction {
