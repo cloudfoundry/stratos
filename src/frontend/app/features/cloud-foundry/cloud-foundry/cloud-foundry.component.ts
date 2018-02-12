@@ -1,45 +1,36 @@
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
-import { tap } from 'rxjs/operators';
+import { tap, first } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { CloudFoundryService } from '../cloud-foundry.service';
+import { tag } from 'rxjs-spy/operators/tag';
 
 @Component({
   selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
-  styleUrls: ['./cloud-foundry.component.scss'],
-  providers: [CloudFoundryService]
+  styleUrls: ['./cloud-foundry.component.scss']
 })
-export class CloudFoundryComponent implements OnInit, OnDestroy {
-  subscriptions: Subscription[] = [];
+export class CloudFoundryComponent {
   constructor(
     private store: Store<AppState>,
     private cfService: CloudFoundryService
-  ) {}
-
-  ngOnInit() {
-    const cfRouting$ = this.cfService.cFEndpoints$.pipe(
+  ) {
+    cfService.cFEndpoints$.pipe(
       tap(cfEndpoints => {
         const connectedEndpoints = cfEndpoints.filter(
-          c => c.connectionStatus !== 'connected'
+          c => c.connectionStatus === 'connected'
         );
-        if (connectedEndpoints && connectedEndpoints.length === 1) {
+        if (connectedEndpoints.length === 1) {
           this.store.dispatch(
             new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] })
           );
-        } else {
-          // Take to wall
         }
-      })
-    );
-    this.subscriptions.push(cfRouting$.subscribe());
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.forEach(s => s.unsubscribe());
+      }),
+      first()
+    ).subscribe();
   }
 }
