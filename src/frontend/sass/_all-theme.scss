@@ -47,25 +47,15 @@ $side-nav-light-active: #484848;
   }
   html {
     background-color: $app-background-color;
-  }
-
-  // App Theme defines a set of colors used by stratos components
-  $app-theme: (
-    app-background-color: $app-background-color,
-    app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
-    side-nav: app-generate-nav-theme($theme, $nav-theme),
-    status: app-generate-status-theme($theme, $status-theme),
-    subdued-color: $subdued
-  );
-
-  // Pass the Material theme and the App Theme to components that need to be themed
+  } // App Theme defines a set of colors used by stratos components
+  $app-theme: ( app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65), side-nav: app-generate-nav-theme($theme, $nav-theme), status: app-generate-status-theme($theme, $status-theme), subdued-color: $subdued); // Pass the Material theme and the App Theme to components that need to be themed
   @include dialog-error-theme($theme, $app-theme);
   @include login-page-theme($theme, $app-theme);
   @include side-nav-theme($theme, $app-theme);
   @include dashboard-page-theme($theme, $app-theme);
   @include display-value-theme($theme, $app-theme);
   @include steppers-theme($theme, $app-theme);
-  @include variables-tab-theme($theme, $app-theme);
+  @include list-theme($theme, $app-theme);
   @include app-base-page-theme($theme, $app-theme);
   @include app-page-subheader-theme($theme, $app-theme);
   @include app-mat-tabs-theme($theme, $app-theme);

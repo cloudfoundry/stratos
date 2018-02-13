@@ -28,7 +28,6 @@
     }
     mat-card {
       display: flex;
-      flex-direction: row;
     }
     &__left,
     &__right {
@@ -53,9 +52,6 @@
           padding-right: $title-content-padding;
         }
       }
-    }
-    &__right {
-      justify-content: flex-end;
     }
     & > mat-card {
       min-height: 74px;
