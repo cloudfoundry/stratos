@@ -19,7 +19,7 @@ import (
 	"github.com/SUSE/stratos-ui/repository/crypto"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 
-	"github.com/SUSE/stratos-ui/plugin_cloudfoundry"
+	"github.com/SUSE/stratos-ui/plugins/cloudfoundry"
 )
 
 type mockServer struct {
@@ -112,7 +112,7 @@ func setupMockPGStore(db *sql.DB) *mockPGStore {
 }
 
 func initCFPlugin(pp *portalProxy) interfaces.StratosPlugin {
-	plugin, _ := plugin_cloudfoundry.Init(pp)
+	plugin, _ := cloudfoundry.Init(pp)
 
 	return plugin
 }
