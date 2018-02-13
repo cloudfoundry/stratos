@@ -1,7 +1,7 @@
 <div class="list-component">
-  <div class="list-component__header" [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async) }">
+  <div class="list-component__header">
     <mat-progress-bar color="primary" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
-    <mat-card>
+    <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async) }">
       <div class="list-component__header__left">
         <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>
         <div class="list-component__header__left--text" *ngIf="(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>

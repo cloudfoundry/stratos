@@ -48,7 +48,7 @@
     &__left {
       flex-grow: 99;
       &--text {
-        padding: 24px 0; // Valid when window shrunk
+        padding: 12px 0; // Valid when window shrunk
       }
       &--multi-filters {
         mat-form-field {
