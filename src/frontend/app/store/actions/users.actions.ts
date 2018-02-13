@@ -4,7 +4,6 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
-import { SpaceSchema } from './space.actions';
 import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_ALL = '[Users] Get all';

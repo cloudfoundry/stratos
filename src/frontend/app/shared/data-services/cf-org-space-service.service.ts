@@ -4,12 +4,19 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
 import { AppState } from '../../store/app-state';
-import { getPaginationObservables, getCurrentPageRequestInfo } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getPaginationObservables,
+  getCurrentPageRequestInfo,
+  PaginationObservables
+} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { GetAllOrganisations } from '../../store/actions/organisation.actions';
 import { OrganisationWithSpaceSchema } from '../../store/actions/action-types';
+import { map } from 'rxjs/operators';
+import { APIResource } from '../../store/types/api.types';
+import { CfOrg } from '../../store/types/org-and-space.types';
 
 export interface CfOrgSpaceItem {
   list$: Observable<EndpointModel[] | any[]>;
@@ -19,14 +26,16 @@ export interface CfOrgSpaceItem {
 
 @Injectable()
 export class CfOrgSpaceDataService {
-
+  allApps$: PaginationObservables<APIResource<any>>;
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
   public cf: CfOrgSpaceItem;
   public org: CfOrgSpaceItem;
   public space: CfOrgSpaceItem;
 
-  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey);
+  public paginationAction = new GetAllOrganisations(
+    CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey
+  );
 
   // TODO: We should optimise this to only fetch the orgs for the current endpoint
   // (if we inline depth the get orgs request it could be hefty... or we could use a different action to only fetch required data..
@@ -51,39 +60,51 @@ export class CfOrgSpaceDataService {
     this.createOrg();
     this.createSpace();
 
-    const orgResetSub = this.cf.select.asObservable().distinctUntilChanged().do(() => {
-      // When this service is refactored we need to update these at the same time as the cf select change occurs
-      this.org.select.next(undefined);
-      this.space.select.next(undefined);
-    }).subscribe();
+    const orgResetSub = this.cf.select
+      .asObservable()
+      .distinctUntilChanged()
+      .do(() => {
+        // When this service is refactored we need to update these at the same time as the cf select change occurs
+        this.org.select.next(undefined);
+        this.space.select.next(undefined);
+      })
+      .subscribe();
     this.cf.select.asObservable().finally(() => {
       orgResetSub.unsubscribe();
     });
 
-    const spaceResetSub = this.org.select.asObservable().distinctUntilChanged().do(() => {
-      // When this service is refactored we need to update these at the same time as the cf select change occurs
-      this.space.select.next(undefined);
-    }).subscribe();
+    const spaceResetSub = this.org.select
+      .asObservable()
+      .distinctUntilChanged()
+      .do(() => {
+        // When this service is refactored we need to update these at the same time as the cf select change occurs
+        this.space.select.next(undefined);
+      })
+      .subscribe();
     this.org.select.asObservable().finally(() => {
       spaceResetSub.unsubscribe();
     });
-
   }
 
   private init() {
     this.getEndpointsAndOrgs$ = Observable.combineLatest(
-      this.allOrgs$.pagination$.filter(paginationEntity => {
-        return !getCurrentPageRequestInfo(paginationEntity).busy;
-      }).first(),
+      this.allOrgs$.pagination$
+        .filter(paginationEntity => {
+          return !getCurrentPageRequestInfo(paginationEntity).busy;
+        })
+        .first(),
       this.cf.list$
     );
   }
 
   private createCf() {
     this.cf = {
-      list$: this.store.select(endpointsRegisteredEntitiesSelector).first().map(endpoints => Object.values(endpoints)),
+      list$: this.store
+        .select(endpointsRegisteredEntitiesSelector)
+        .first()
+        .map(endpoints => Object.values(endpoints)),
       loading$: Observable.of(false),
-      select: new BehaviorSubject(undefined),
+      select: new BehaviorSubject(undefined)
     };
   }
 
@@ -92,19 +113,24 @@ export class CfOrgSpaceDataService {
       this.cf.select.asObservable(),
       this.getEndpointsAndOrgs$,
       this.allOrgs$.entities$
-    )
-      .map(([selectedCF, endpointsAndOrgs, entities]: [EndpointModel, any, any]) => {
+    ).map(
+      ([selectedCF, endpointsAndOrgs, entities]: [EndpointModel, any, any]) => {
         const [pag, cfList] = endpointsAndOrgs;
         if (selectedCF && entities) {
-          return entities.map(org => org.entity).filter(org => org.cfGuid === selectedCF);
+          return entities
+            .map(org => org.entity)
+            .filter(org => org.cfGuid === selectedCF);
         }
         return [];
-      });
+      }
+    );
 
     this.org = {
       list$: orgList$,
-      loading$: this.allOrgs$.pagination$.map(pag => getCurrentPageRequestInfo(pag).busy),
-      select: new BehaviorSubject(undefined),
+      loading$: this.allOrgs$.pagination$.map(
+        pag => getCurrentPageRequestInfo(pag).busy
+      ),
+      select: new BehaviorSubject(undefined)
     };
   }
 
@@ -113,26 +139,25 @@ export class CfOrgSpaceDataService {
       this.org.select.asObservable(),
       this.getEndpointsAndOrgs$,
       this.allOrgs$.entities$
-    )
-      .map(([selectedOrgGuid, data, orgs]) => {
-        const [orgList, cfList] = data;
-        const selectedOrg = orgs.find(org => {
-          return org.entity.guid === selectedOrgGuid;
-        });
-        if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
-          return selectedOrg.entity.spaces.map(space => {
-            const entity = { ...space.entity };
-            entity.guid = space.metadata.guid;
-            return entity;
-          });
-        }
-        return [];
+    ).map(([selectedOrgGuid, data, orgs]) => {
+      const [orgList, cfList] = data;
+      const selectedOrg = orgs.find(org => {
+        return org.entity.guid === selectedOrgGuid;
       });
+      if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
+        return selectedOrg.entity.spaces.map(space => {
+          const entity = { ...space.entity };
+          entity.guid = space.metadata.guid;
+          return entity;
+        });
+      }
+      return [];
+    });
 
     this.space = {
       list$: spaceList$,
       loading$: this.org.loading$,
-      select: new BehaviorSubject(undefined),
+      select: new BehaviorSubject(undefined)
     };
   }
 

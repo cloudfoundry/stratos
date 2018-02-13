@@ -4,10 +4,13 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { UserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, reduce } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { AppStatSchema } from '../../../../../../store/types/app-metadata.types';
+import { GetAppStatsAction } from '../../../../../../store/actions/app-metadata.actions';
 @Component({
   selector: 'app-cf-org-card',
   templateUrl: './cf-org-card.component.html',
@@ -15,19 +18,23 @@ import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.h
 })
 export class CfOrgCardComponent extends TableCellCustom<APIResource>
   implements OnInit, OnDestroy {
+  memoryTotal$: Observable<number>;
+  instancesCount$: Observable<number>;
+  orgApps$: Observable<APIResource<any>[]>;
+  appsCount$: Observable<number>;
   userRolesInOrg$: Observable<string>;
   currentUser$: Observable<EndpointUser>;
   @Input('row') row;
 
   constructor(
     private cfUserService: CfUserService,
-    private cfEndpointService: CloudFoundryEndpointService
+    private cfEndpointService: CloudFoundryEndpointService,
+    private entityServiceFactory: EntityServiceFactory
   ) {
     super();
   }
 
   ngOnInit() {
-    console.log(this.row);
     this.currentUser$ = this.cfEndpointService.endpoint$.pipe(
       map(e => e.entity.user)
     );
@@ -43,7 +50,25 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
       map(u => getOrgRolesString(u))
     );
 
-    // this.appsCount = this.
+    this.orgApps$ = this.cfEndpointService.getAppsOrg(this.row);
+
+    this.appsCount$ = this.orgApps$.pipe(map(a => a.length));
+
+    this.instancesCount$ = this.orgApps$.pipe(
+      switchMap(apps => {
+        let count = 0;
+        apps.forEach(a => {
+          count += a.entity.instances;
+        });
+
+        return Observable.of(count);
+      })
+    );
+
+    this.memoryTotal$ = this.cfEndpointService.getAggregateStat(
+      this.row,
+      'memory'
+    );
   }
 
   ngOnDestroy(): void {}

@@ -4,26 +4,16 @@
   </mat-card-header>
   <mat-card-content class="org-card__content">
     <div class="org-card__content__meta">
-      <div class="org-card__content__label">Role:</div>
-      <div class="org-card__content__value">
-        {{ userRolesInOrg$ | async }}
-      </div>
+      <app-metadata-item label="Role">{{ userRolesInOrg$ | async }}</app-metadata-item>
     </div>
     <div class="org-card__content__meta">
-      <div class="org-card__content__label">Applications:</div>
-      <div class="org-card__content__value">
-        TODO
-      </div>
+      <app-metadata-item label="Applications">{{ appsCount$ | async}}</app-metadata-item>
     </div>
     <div class="org-card__content__meta">
-      <div class="org-card__content__label">Instances:</div>
-      <div class="org-card__content__value">
-        TODO
-      </div>
+      <app-metadata-item label="Instances">{{ instancesCount$ | async }}</app-metadata-item>
     </div>
     <div class="org-card__content__meta">
-      <div class="org-card__content__label">Memory Info:</div>
-      TODO
+      <app-metadata-item label="Memory Info"> {{ this.memoryTotal$ | async }}</app-metadata-item>
     </div>
   </mat-card-content>
 </mat-card>

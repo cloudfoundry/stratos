@@ -8,7 +8,17 @@ import { EntityService } from '../../../core/entity-service';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo, APIResource } from '../../../store/types/api.types';
-import { shareReplay, map, tap, filter } from 'rxjs/operators';
+import {
+  shareReplay,
+  map,
+  tap,
+  filter,
+  zip,
+  switchMap,
+  merge,
+  reduce,
+  scan
+} from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import {
@@ -28,7 +38,19 @@ import {
   PaginationObservables
 } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-
+import { selectEntity } from '../../../store/selectors/api.selectors';
+import {
+  OrganisationSchema,
+  organisationSchemaKey
+} from '../../../store/actions/action-types';
+import { CfOrg } from '../../../store/types/org-and-space.types';
+import { AppStatSchema } from '../../../store/types/app-metadata.types';
+import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
+import { combineLatest } from 'rxjs/operators/combineLatest';
+import {
+  CfApplication,
+  CfApplicationState
+} from '../../../store/types/application.types';
 @Injectable()
 export class CloudFoundryEndpointService {
   allApps$: PaginationObservables<APIResource<any>>;
@@ -79,7 +101,7 @@ export class CloudFoundryEndpointService {
 
     this.info$ = this.cfInfoEntityService.waitForEntity$.pipe(shareReplay(1));
 
-    this.allApps$ = getPaginationObservables<APIResource>({
+    this.allApps$ = getPaginationObservables<APIResource<CfApplication>>({
       store: this.store,
       action: this.allAppsAction,
       paginationMonitor: this.paginationMonitorFactory.create(
@@ -89,8 +111,27 @@ export class CloudFoundryEndpointService {
     });
   }
 
-  getAppsCountInOrg = (org: APIResource<any>): number => {
-    // this.allApps$.entities$.pipe(filter(apps => apps.filter(a => a.entity)));
-    return 0;
+  spaceInOrg = (app: APIResource<any>, org: APIResource<CfOrg>): any =>
+    org.entity.spaces.indexOf(app.entity.space_guid) !== -1
+
+  getAppsOrg = (
+    org: APIResource<CfOrg>
+  ): Observable<APIResource<CfApplication>[]> =>
+    this.allApps$.entities$.pipe(
+      map(apps => apps.filter(a => this.spaceInOrg(a, org)))
+    )
+
+  getAggregateStat(
+    org: APIResource<CfOrg>,
+    statMetric: string
+  ): Observable<number> {
+    return this.getAppsOrg(org).pipe(
+      map(apps =>
+        apps
+          .filter(a => a.entity.state !== CfApplicationState.STOPPED)
+          .map(a => a.entity[statMetric])
+      ),
+      map(p => p.reduce((a, t) => a + t, 0))
+    );
   }
 }

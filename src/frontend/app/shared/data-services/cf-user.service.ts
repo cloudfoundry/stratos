@@ -3,10 +3,6 @@ import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
-import {
-  GetAllOrganizations,
-  OrganizationSchema
-} from '../../store/actions/organization.actions';
 import { AppState } from '../../store/app-state';
 import {
   getPaginationObservables,
