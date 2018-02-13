@@ -1,5 +1,0 @@
-package: github.com/SUSE/stratos-dbmigrator
-import:
-- package: bitbucket.org/liamstask/goose/lib/goose
-- package: github.com/lib/pq
-- package: github.com/mattn/go-sqlite3

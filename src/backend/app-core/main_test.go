@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/SUSE/stratos-ui/app-core/datastore"
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/datastore"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 )
 
 // DO NOT DELETE - this is necessary for thr HTTP Client used during unit tests
