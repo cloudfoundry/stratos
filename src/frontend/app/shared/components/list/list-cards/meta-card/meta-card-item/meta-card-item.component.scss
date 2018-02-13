@@ -2,12 +2,14 @@
   display: flex;
   justify-content: space-between;
   padding: 2px 0;
-  &__key,
   &__value {
-    flex: 1;
+    flex: none;
+    text-align: end;
   }
   &__key {
-    flex-shrink: 0;
+    color: rgba(0, 0, 0, 0.60);
+    font-weight: 300;
+    flex: none;
     padding-right: 10px;
   }
 }

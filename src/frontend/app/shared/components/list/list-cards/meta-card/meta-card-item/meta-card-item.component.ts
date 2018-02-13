@@ -16,8 +16,7 @@ export class MetaCardItemComponent implements OnInit {
   @ContentChild(MetaCardValueComponent)
   value: MetaCardValueComponent;
 
-  @ViewChild(TemplateRef)
-  content: TemplateRef<any>;
+  @ViewChild('content') content: TemplateRef<any>;
 
   constructor() { }
 

@@ -1,10 +1,12 @@
-<ng-template>
+<ng-template #content>
   <div class="meta-card-item">
     <div class="meta-card-item__key">
-      <span *ngTemplateOutlet="key.content"></span>:
+      <span>
+        <ng-content *ngTemplateOutlet="key.content"></ng-content>:
+      </span>
     </div>
     <div class="meta-card-item__value">
-      <span *ngTemplateOutlet="value.content"></span>
+      <ng-content *ngTemplateOutlet="value.content"></ng-content>
     </div>
   </div>
 </ng-template>
