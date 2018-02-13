@@ -11,7 +11,7 @@
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
-![Stratos Application view](docs/images/screenshots/app-wall.png)
+<!-- ![Stratos Application view](docs/images/screenshots/app-wall.png) -->
 
 ## Deploying Stratos
 
@@ -35,8 +35,8 @@ You can access the UI on `https://localhost:4443`
 
 ## Project Planning
 We use [ZenHub](https://zenhub.com) for project planning. Feel free to head over to the [Boards](https://github.com/SUSE/stratos#boards)
-tab and have a look through our pipelines and milestones. Please note in order to view the ZenHub Boards tab you will need the [ZenHub
-browser extension](https://www.zenhub.com/extension).
+tab and have a look through our pipelines and milestones. Please note in order to view the Github ZenHub Boards tab you will need the [ZenHub
+browser extension](https://www.zenhub.com/extension). Alternatively, to view the planning board without the extension visit our [ZenHub Project Page](https://app.zenhub.com/workspace/o/cloudfoundry-incubator/stratos/boards)
 
 ## Further Reading
  

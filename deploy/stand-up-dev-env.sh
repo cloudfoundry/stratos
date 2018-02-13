@@ -121,6 +121,10 @@ else
     DEV_DOCKER_COMPOSE=${DEV_DOCKER_COMPOSE_ALL}
 fi
 
+mkdir -p ${STRATOS_UI_PATH}/.dist
+# Copy in the page to tell the user that the UI is being built
+cp ./docker-compose/index.html ${STRATOS_UI_PATH}/.dist
+
 pushd "$PROG_DIR"
 env_vars
 if [ "$CLEAN" = true ] ; then
