@@ -32,12 +32,7 @@
     return done();
   });
 
-  gulp.task('init-build', gulp.series('create-temp', 'copy-portal-proxy', 'copy-dbmigrator', 'create-outputs', function (done) {
-    buildUtils.init();
-    done();
-  }));
-
-  gulp.task('init-build-migrator', gulp.series('create-temp', 'copy-dbmigrator', 'create-outputs', function (done) {
+  gulp.task('init-build', gulp.series('create-temp', 'copy-portal-proxy', 'create-outputs', function (done) {
     buildUtils.init();
     done();
   }));
@@ -57,14 +52,6 @@
           });
       }
     });
-
-    // DB Migrator dependencies
-    if (fs.existsSync(prepareBuild.getDbMigratorSourcePath())) {
-      promise = promise
-        .then(function() {
-          return buildUtils.runGlideInstall(prepareBuild.getDbMigratorSourcePath());
-        });
-    }
 
     var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core');
 
@@ -122,23 +109,6 @@
       promises.push(promise);
     });
 
-    // DB Migrator
-    promise
-      .then(function() {
-        var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
-        var dbMigratorVendorPath = path.join(prepareBuild.getDbMigratorSourcePath(), 'vendor');
-        var dbMigratorCheckedInVendorPath = path.join(prepareBuild.getDbMigratorSourcePath(), '__vendor');
-        mergeDirs.default(dbMigratorVendorPath, goSrc);
-        if (fs.existsSync(dbMigratorCheckedInVendorPath)) {
-          mergeDirs.default(dbMigratorCheckedInVendorPath, goSrc);
-        }
-        fs.removeSync(dbMigratorVendorPath);
-        return Q.resolve();
-      })
-      .catch(function(err) {
-        done(err);
-      });
-
     // App Core
     var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'vendor');
     if (fs.existsSync(coreVendorPath)) {
@@ -191,18 +161,6 @@
       });
   });
 
-  gulp.task('build-dbmigrator', function (done) {
-    buildUtils.init();
-    var dbMigratorPath = prepareBuild.getDbMigratorSourcePath();
-    buildUtils.build(dbMigratorPath, conf.dbMigratorName, true)
-      .then(function() {
-        done();
-      })
-      .catch(function(err) {
-        done(err);
-      });
-  });
-
   gulp.task('run-tests', gulp.series('build-all', function (done) {
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     buildUtils.test(corePath)
@@ -214,7 +172,7 @@
       });
     }));
 
-  gulp.task('copy-artefacts', gulp.series('build-all', 'build-dbmigrator', function (done) {
+  gulp.task('copy-artefacts', gulp.series('build-all', function (done) {
     var outputPath = conf.outputPath + path.sep;
     var promise = fsEnsureDirQ(outputPath);
     _.each(enabledPlugins, function(pluginInfo) {
@@ -225,15 +183,6 @@
           return fsMoveQ(compiledPluginPath, outputsPluginPath);
         });
     });
-
-    // copy db migrator artefact
-    var dbMigratorPath = path.join(prepareBuild.getDbMigratorSourcePath(), conf.dbMigratorName);
-    var outputDbMigratorPath = path.join(outputPath, conf.dbMigratorName);
-
-    promise
-      .then(function() {
-        return fsMoveQ(dbMigratorPath, outputDbMigratorPath);
-      });
 
     // copy core artefact
     var corePath = path.join(conf.getCorePath(prepareBuild.getSourcePath(), conf.coreName));
@@ -262,7 +211,6 @@
       // Copy SQLite script and prepared config to the outputs folder
       var scriptOutFolder = path.join(conf.outputPath, 'deploy/db');
       fs.ensureDirSync(scriptOutFolder);
-      fs.copySync(path.resolve(__dirname, '../deploy/db/sqlite_schema.sql'), path.join(scriptOutFolder, 'sqlite_schema.sql'));
       // Copy config.properties if there is not one already
       fs.copySync(path.resolve(__dirname, '../deploy/cloud-foundry/config.properties'), path.join(conf.outputPath, 'config.properties'), {
         overwrite: false
@@ -276,9 +224,9 @@
       } else {
         if (!fs.existsSync(outDevCerts)) {
           fs.mkdir(outDevCerts);
-          var browserSyncCerts = path.resolve(__dirname, '../node_modules/browser-sync/lib/server/certs');
-          fs.copySync(path.join(browserSyncCerts, 'server.crt'), path.join(outDevCerts, 'pproxy.crt'));
-          fs.copySync(path.join(browserSyncCerts, 'server.key'), path.join(outDevCerts, 'pproxy.key'));
+          var devCerts = path.resolve(__dirname, '../dev-ssl');
+          fs.copySync(path.join(devCerts, 'server.crt'), path.join(outDevCerts, 'pproxy.crt'));
+          fs.copySync(path.join(devCerts, 'server.key'), path.join(outDevCerts, 'pproxy.key'));
         }
       }
 
@@ -288,14 +236,6 @@
 
   gulp.task('build-backend', gulp.series(
     'init-build',
-    'dedup-vendor',
-    'copy-artefacts',
-    'delete-temp',
-    'local-dev-build'
-  ));
-
-  gulp.task('build-migrator', gulp.series(
-    'init-build-migrator',
     'dedup-vendor',
     'copy-artefacts',
     'delete-temp',

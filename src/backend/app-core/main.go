@@ -70,6 +70,12 @@ func main() {
 	// Register time.Time in gob
 	gob.Register(time.Time{})
 
+	// Check to see if we are running as the database migrator
+	if migrateDatabase() {
+		// End execution
+		return
+	}
+
 	// Load the portal configuration from env vars
 	var portalConfig interfaces.PortalConfig
 	portalConfig, err := loadPortalConfig(portalConfig)
