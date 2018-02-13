@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -18,7 +18,6 @@ import {
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { ApplicationSchema } from '../../store/actions/application.actions';
-import { SpaceSchema } from '../../store/actions/space.action';
 import { AppState } from '../../store/app-state';
 import { ActionState } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity } from '../../store/selectors/api.selectors';
@@ -46,6 +45,7 @@ import {
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
+import { spaceSchemaKey, organisationSchemaKey } from '../../store/actions/action-types';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -157,9 +157,14 @@ export class ApplicationService {
       .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
       .map(entityInfo => entityInfo.entity.entity)
       .do(app => {
-        this.appSpace$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid));
-        // See https://github.com/SUSE/stratos/issues/158 (Failing to populate entity store with a space's org)
-        this.appOrg$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid)).map(space => space.entity.organization);
+
+        this.appSpace$ = this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
+        this.appOrg$ = this.appSpace$.pipe(
+          map(space => space.entity.organization_guid),
+          mergeMap(orgGuid => {
+            return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
+          })
+        );
       })
       .take(1)
       .subscribe();
