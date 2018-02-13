@@ -1,30 +1,37 @@
 <mat-card class="org-card">
-  <mat-card-header class="org-card__header">
-    <mat-card-title class="org-card__title">{{ row.entity.name }}</mat-card-title>
-    <button mat-button class="org-card__heder__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
-  </mat-card-header>
-  <mat-card-content class="org-card__content">
-    <div class="org-card__content__meta">
-      <app-metadata-item label="Role">{{ userRolesInOrg$ | async }}</app-metadata-item>
-    </div>
-    <div class="org-card__content__meta">
-      <app-metadata-item label="Applications">{{ appCount }}</app-metadata-item>
-    </div>
-    <div class="org-card__content__meta">
-      <app-metadata-item label="Instances">{{ instancesCount }}</app-metadata-item>
-    </div>
-    <div class="org-card__content__meta">
-      <app-metadata-item label="Memory Info"> {{ this.memoryTotal$ | async }} MB</app-metadata-item>
-    </div>
-  </mat-card-content>
-  <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="edit()">
+  <div *ngIf="hasLoaded$ | async">
+    <mat-card-header class="org-card__header">
+      <mat-card-title class="org-card__title">{{ row.entity.name }}</mat-card-title>
+      <button mat-button class="org-card__heder__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
+    </mat-card-header>
+    <mat-card-content class="org-card__content">
+      <div class="org-card__content__meta">
+        <app-metadata-item label="Role">{{ userRolesInOrg }}</app-metadata-item>
+      </div>
+      <div class="org-card__content__meta">
+        <app-metadata-item label="Applications">{{ appCount }}</app-metadata-item>
+      </div>
+      <div class="org-card__content__meta">
+        <app-metadata-item label="Instances">{{ instancesCount }} / {{ instancesLimit | infinityPipe }}</app-metadata-item>
+      </div>
+      <div class="org-card__content__meta">
+        <app-metadata-item label="Memory Info"> {{ this.memoryTotal | MbToHumanSize }} / {{ this.memoryLimit | MbToHumanSize }}</app-metadata-item>
+      </div>
+    </mat-card-content>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="edit()">
         <mat-icon>mode_edit</mat-icon>
         <span>Edit</span>
       </button>
-    <button mat-menu-item (click)="delete()">
+      <button mat-menu-item (click)="delete()">
         <mat-icon>delete</mat-icon>
         <span>Delete</span>
       </button>
-  </mat-menu>
+    </mat-menu>
+  </div>
+  <div *ngIf="!(hasLoaded$ | async)">
+    Loading...
+    <mat-progress-bar class="loading-page__indicator-bar" [color]="'primary'" [mode]="'query'">
+    </mat-progress-bar>
+  </div>
 </mat-card>

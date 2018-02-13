@@ -16,6 +16,8 @@ import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CfQuotaDefinition, CfOrg } from '../../../../../../store/types/org-and-space.types';
 
 @Component({
   selector: 'app-cf-org-card',
@@ -24,14 +26,17 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
 })
 export class CfOrgCardComponent extends TableCellCustom<APIResource>
   implements OnInit, OnDestroy {
+  memoryLimit: number;
+  instancesLimit: number;
   subscriptions: Subscription[] = [];
-  memoryTotal$: Observable<number>;
+  memoryTotal: number;
   instancesCount: number;
   orgApps$: Observable<APIResource<any>[]>;
   appCount: number;
-  userRolesInOrg$: Observable<string>;
+  userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
-  @Input('row') row;
+  hasLoaded$ =  new BehaviorSubject<boolean>(false);
+  @Input('row') row: APIResource<CfOrg>;
 
   constructor(
     private cfUserService: CfUserService,
@@ -44,7 +49,8 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
   }
 
   ngOnInit() {
-    this.userRolesInOrg$ = this.cfEndpointService.currentUser$.pipe(
+
+    const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         return this.cfUserService.getUserRoleInOrg(
           u.guid,
@@ -55,24 +61,41 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
       map(u => getOrgRolesString(u))
     );
 
-    this.orgApps$ = this.cfEndpointService.getAppsOrg(this.row);
+   const fetchData$ = Observable.combineLatest(
+      userRole$,
+      this.cfEndpointService.getAppsOrg(this.row),
+      this.cfEndpointService.getAggregateStat(
+        this.row,
+        'memory'
+      )
+    ).pipe(
+      tap(([role, apps, memory]) => {
+        this.userRolesInOrg = role;
+        this.setCounts(apps);
+        this.memoryTotal = memory;
 
-    const fetchCounts = this.orgApps$.pipe(
-      tap(apps => {
-        this.appCount = apps.length;
-        let count = 0;
-        apps.forEach(a => {
-          count += a.entity.instances;
-        });
-        this.instancesCount = count;
+        // get Quota data
+        const quotaDefinition = this.row.entity.quota_definition;
+        this.instancesLimit = quotaDefinition.entity.app_instance_limit;
+        this.memoryLimit = quotaDefinition.entity.memory_limit;
+
+
+        this.hasLoaded$.next(true);
       })
     );
-    this.subscriptions.push(fetchCounts.subscribe());
 
-    this.memoryTotal$ = this.cfEndpointService.getAggregateStat(
-      this.row,
-      'memory'
-    );
+    this.subscriptions.push(fetchData$.subscribe());
+
+  }
+
+
+  setCounts =  (apps: APIResource<any>[]) => {
+      this.appCount = apps.length;
+      let count = 0;
+      apps.forEach(a => {
+        count += a.entity.instances;
+      });
+      this.instancesCount = count;
   }
 
   ngOnDestroy(): void {
