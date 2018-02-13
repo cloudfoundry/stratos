@@ -21,6 +21,18 @@ const cloudFoundry: Routes = [
     path: ':cfId',
     children: [
       {
+        path: 'add-org',
+        component: AddOrganisationComponent
+      },
+      {
+        path: 'edit-org',
+        component: AddOrganisationComponent
+      },
+      {
+        path: 'manage-users',
+        component: ManageUsersComponent
+      },
+      {
         path: '',
         // Root for attaching CF wide actions (i.e assignments, tabs)
         component: CloudFoundryBaseComponent,
@@ -73,14 +85,6 @@ const cloudFoundry: Routes = [
             ]
           }
         ]
-      },
-      {
-        path: 'add-org',
-        component: AddOrganisationComponent
-      },
-      {
-        path: 'manage-users',
-        component: ManageUsersComponent
       }
     ]
   }

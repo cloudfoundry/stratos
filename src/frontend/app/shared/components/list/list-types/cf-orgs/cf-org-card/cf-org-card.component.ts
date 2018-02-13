@@ -4,13 +4,18 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { UserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
-import { map, switchMap, reduce } from 'rxjs/operators';
+import { map, switchMap, reduce, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { AppStatSchema } from '../../../../../../store/types/app-metadata.types';
 import { GetAppStatsAction } from '../../../../../../store/actions/app-metadata.actions';
+import { Subscription } from 'rxjs/Subscription';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../../../store/app-state';
+import { RouterNav } from '../../../../../../store/actions/router.actions';
+import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 @Component({
   selector: 'app-cf-org-card',
   templateUrl: './cf-org-card.component.html',
@@ -18,10 +23,11 @@ import { GetAppStatsAction } from '../../../../../../store/actions/app-metadata.
 })
 export class CfOrgCardComponent extends TableCellCustom<APIResource>
   implements OnInit, OnDestroy {
+  subscriptions: Subscription[] = [];
   memoryTotal$: Observable<number>;
-  instancesCount$: Observable<number>;
+  instancesCount: number;
   orgApps$: Observable<APIResource<any>[]>;
-  appsCount$: Observable<number>;
+  appCount: number;
   userRolesInOrg$: Observable<string>;
   currentUser$: Observable<EndpointUser>;
   @Input('row') row;
@@ -29,17 +35,15 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
   constructor(
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
+    private store: Store<AppState>,
+    private cfOrgSpaceDataService: CfOrgSpaceDataService
   ) {
     super();
   }
 
   ngOnInit() {
-    this.currentUser$ = this.cfEndpointService.endpoint$.pipe(
-      map(e => e.entity.user)
-    );
-
-    this.userRolesInOrg$ = this.currentUser$.pipe(
+    this.userRolesInOrg$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         return this.cfUserService.getUserRoleInOrg(
           u.guid,
@@ -52,18 +56,17 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
 
     this.orgApps$ = this.cfEndpointService.getAppsOrg(this.row);
 
-    this.appsCount$ = this.orgApps$.pipe(map(a => a.length));
-
-    this.instancesCount$ = this.orgApps$.pipe(
-      switchMap(apps => {
+    const fetchCounts = this.orgApps$.pipe(
+      tap(apps => {
+        this.appCount = apps.length;
         let count = 0;
         apps.forEach(a => {
           count += a.entity.instances;
         });
-
-        return Observable.of(count);
+        this.instancesCount = count;
       })
     );
+    this.subscriptions.push(fetchCounts.subscribe());
 
     this.memoryTotal$ = this.cfEndpointService.getAggregateStat(
       this.row,
@@ -71,5 +74,22 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
     );
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(p => p.unsubscribe());
+  }
+
+  edit = () => {
+    this.store.dispatch(
+      new RouterNav({
+        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'edit-org']
+      })
+    );
+  };
+
+  delete = () => {
+    this.cfOrgSpaceDataService.deleteOrg(
+      this.row.entity.guid,
+      this.cfEndpointService.cfGuid
+    );
+  };
 }

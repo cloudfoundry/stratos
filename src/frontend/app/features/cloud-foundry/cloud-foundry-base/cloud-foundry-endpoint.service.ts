@@ -5,7 +5,10 @@ import {
   GetAllEndpoints
 } from '../../../store/actions/endpoint.actions';
 import { EntityService } from '../../../core/entity-service';
-import { EndpointModel } from '../../../store/types/endpoint.types';
+import {
+  EndpointModel,
+  EndpointUser
+} from '../../../store/types/endpoint.types';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo, APIResource } from '../../../store/types/api.types';
 import {
@@ -61,6 +64,7 @@ export class CloudFoundryEndpointService {
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
+  currentUser$: Observable<EndpointUser>;
 
   public allAppsAction = new GetAllApplications('applicationWall');
 
@@ -99,6 +103,8 @@ export class CloudFoundryEndpointService {
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user));
+
     this.info$ = this.cfInfoEntityService.waitForEntity$.pipe(shareReplay(1));
 
     this.allApps$ = getPaginationObservables<APIResource<CfApplication>>({
@@ -112,14 +118,14 @@ export class CloudFoundryEndpointService {
   }
 
   spaceInOrg = (app: APIResource<any>, org: APIResource<CfOrg>): any =>
-    org.entity.spaces.indexOf(app.entity.space_guid) !== -1
+    org.entity.spaces.indexOf(app.entity.space_guid) !== -1;
 
   getAppsOrg = (
     org: APIResource<CfOrg>
   ): Observable<APIResource<CfApplication>[]> =>
     this.allApps$.entities$.pipe(
       map(apps => apps.filter(a => this.spaceInOrg(a, org)))
-    )
+    );
 
   getAggregateStat(
     org: APIResource<CfOrg>,

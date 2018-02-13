@@ -1,0 +1,18 @@
+.org-card {
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    flex-direction: row;
+    justify-content: space-between;
+    &__button {
+      justify-content: flex-end;
+      position: absolute;
+      top: 0px;
+      right: 0px;
+      button {
+        min-width: 5px;
+      }
+    }
+  }
+}

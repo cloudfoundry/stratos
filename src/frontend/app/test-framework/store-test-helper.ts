@@ -471,6 +471,7 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      user:{},
       domain:{},
       githubBranches:{},
       cloudFoundryInfo: {},
@@ -3649,6 +3650,7 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      user:{},
       domain:{},
       cloudFoundryInfo:{},
       githubBranches:{},

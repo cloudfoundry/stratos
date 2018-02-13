@@ -12,7 +12,10 @@ import {
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { GetAllOrganisations } from '../../store/actions/organisation.actions';
+import {
+  GetAllOrganisations,
+  DeleteOrganisation
+} from '../../store/actions/organisation.actions';
 import { OrganisationWithSpaceSchema } from '../../store/actions/action-types';
 import { map } from 'rxjs/operators';
 import { APIResource } from '../../store/types/api.types';
@@ -167,4 +170,7 @@ export class CfOrgSpaceDataService {
         return orgs.filter(o => o.entity.cfGuid === endpointGuid);
       })
     );
+
+  deleteOrg = (orgGuid: string, endpointGuid: string) =>
+    this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
 }

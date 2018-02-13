@@ -28,7 +28,7 @@ export class CfOrgsListConfigService implements IListConfig<APIResource> {
     action: (item: APIResource) => this.editOrg(item),
     icon: 'mode_edit',
     label: 'Edit',
-    description: 'Edit Organization',
+    description: 'Edit Organisation',
     visible: (row: APIResource) => true,
     enabled: (row: APIResource) => true
   };
@@ -38,7 +38,7 @@ export class CfOrgsListConfigService implements IListConfig<APIResource> {
     action: (item: APIResource) => this.deleteOrg(item),
     icon: 'delete',
     label: 'Delete',
-    description: 'Delete Organization',
+    description: 'Delete Organisation',
     visible: (row: APIResource) => true,
     enabled: (row: APIResource) => true
   };
@@ -53,11 +53,11 @@ export class CfOrgsListConfigService implements IListConfig<APIResource> {
 
   editOrg = (org: APIResource) => {
     // TODO
-  };
+  }
 
   deleteOrg = (org: APIResource) => {
     // TODO
-  };
+  }
 
   getGlobalActions = () => [];
   getMultiActions = () => [];

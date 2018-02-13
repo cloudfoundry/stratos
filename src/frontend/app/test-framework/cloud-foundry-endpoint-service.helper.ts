@@ -20,18 +20,26 @@ export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
       store: Store<AppState>,
       entityServiceFactory: EntityServiceFactory,
       cfOrgSpaceDataService: CfOrgSpaceDataService,
-      cfUserService: CfUserService
+      cfUserService: CfUserService,
+      paginationMonitorFactory: PaginationMonitorFactory
     ) => {
       const appService = new CloudFoundryEndpointService(
         cfGuid,
         store,
         entityServiceFactory,
         cfOrgSpaceDataService,
-        cfUserService
+        cfUserService,
+        paginationMonitorFactory
       );
       return appService;
     },
-    deps: [Store, EntityServiceFactory, CfOrgSpaceDataService, CfUserService]
+    deps: [
+      Store,
+      EntityServiceFactory,
+      CfOrgSpaceDataService,
+      CfUserService,
+      PaginationMonitorFactory
+    ]
   };
 }
 
