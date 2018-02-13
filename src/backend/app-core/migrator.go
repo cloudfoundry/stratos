@@ -53,6 +53,27 @@ func migrateDatabase() bool {
 		return true
 	}
 
+	if !parseCloudFoundry() {
+		return false
+	}
+
+	switch args[0] {
+	case "up":
+		upRun(args[1:])
+	case "status":
+		statusRun()
+	case "dbversion":
+		dbVersionRun()
+	default:
+		log.Fatal("Command not supported")
+	}
+
+	// This function returns true if the migrator was called, false otherwise
+	return true
+}
+
+func parseCloudFoundry() bool {
+
 	if *flagCloudFoundry {
 		dbEnv, err := parseCloudFoundryEnv()
 		if err != nil {
@@ -67,20 +88,6 @@ func migrateDatabase() bool {
 		}
 	}
 
-	switch args[0] {
-	case "up":
-		upRun(args[1:])
-	case "status":
-		statusRun()
-	case "dbversion":
-		dbVersionRun()
-	case "":
-		return false
-	default:
-		log.Fatal("Command not supported")
-	}
-
-	// This function returns true if the migrator was called, false otherwise
 	return true
 }
 

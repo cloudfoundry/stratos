@@ -76,34 +76,14 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) {
 	log.Println("========================")
 	log.Printf("Current %d", current)
 
-	sMigrationMethods := &StratosMigrations{}
-	sMigrationMethodsType := reflect.TypeOf(sMigrationMethods)
-
-	stratosMigrations := make([]StratosMigrationMehod, sMigrationMethodsType.NumMethod())
-	for i := 0; i < sMigrationMethodsType.NumMethod(); i++ {
-		method := sMigrationMethodsType.Method(i)
-		methodVersion, err := strconv.ParseInt(method.Name[3:], 10, 64)
-		if err == nil {
-			stratosMigrations[i] = StratosMigrationMehod{
-				Name:    method.Name,
-				Version: methodVersion,
-				Method:  method,
-			}
-		}
-	}
-
-	// Filter the migrations, so we only get those that need to be run
-	sortMethods := func(p1, p2 *StratosMigrationMehod) bool {
-		return p1.Version < p2.Version
-	}
-	By(sortMethods).Sort(stratosMigrations)
+	stratosMigrations := findMigrartions()
 
 	if len(stratosMigrations) == 0 {
 		log.Fatal("No Database Migrations found")
 	}
 
 	// Target is always the last migration
-	target := stratosMigrations[sMigrationMethodsType.NumMethod()-1].Version
+	target := stratosMigrations[len(stratosMigrations)-1].Version
 	log.Printf("Target: %d", target)
 
 	log.Println("Running migrations ....")
@@ -138,4 +118,30 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) {
 	if !didRun {
 		log.Println("No migrations to run.")
 	}
+}
+
+func findMigrartions() []StratosMigrationMehod {
+	sMigrationMethods := &StratosMigrations{}
+	sMigrationMethodsType := reflect.TypeOf(sMigrationMethods)
+
+	stratosMigrations := make([]StratosMigrationMehod, sMigrationMethodsType.NumMethod())
+	for i := 0; i < sMigrationMethodsType.NumMethod(); i++ {
+		method := sMigrationMethodsType.Method(i)
+		methodVersion, err := strconv.ParseInt(method.Name[3:], 10, 64)
+		if err == nil {
+			stratosMigrations[i] = StratosMigrationMehod{
+				Name:    method.Name,
+				Version: methodVersion,
+				Method:  method,
+			}
+		}
+	}
+
+	// Filter the migrations, so we only get those that need to be run
+	sortMethods := func(p1, p2 *StratosMigrationMehod) bool {
+		return p1.Version < p2.Version
+	}
+	By(sortMethods).Sort(stratosMigrations)
+
+	return stratosMigrations
 }
