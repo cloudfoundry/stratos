@@ -181,7 +181,7 @@ export class UpdateExistingApplication extends CFStartAction
       ...keepFromOld
     };
     return newEntities;
-  };
+  }
 }
 
 export class DeleteApplication extends CFStartAction implements ICFAction {

@@ -1,59 +1,27 @@
 import { Injectable } from '@angular/core';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import {
-  EndpointSchema,
-  GetAllEndpoints
-} from '../../../store/actions/endpoint.actions';
-import { EntityService } from '../../../core/entity-service';
-import {
-  EndpointModel,
-  EndpointUser
-} from '../../../store/types/endpoint.types';
-import { Observable } from 'rxjs/Observable';
-import { EntityInfo, APIResource } from '../../../store/types/api.types';
-import {
-  shareReplay,
-  map,
-  tap,
-  filter,
-  zip,
-  switchMap,
-  merge,
-  reduce,
-  scan
-} from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import {
-  GetEndpointInfo,
-  CFInfoSchema,
-  CF_INFO_ENTITY_KEY
-} from '../../../store/actions/cloud-foundry.actions';
+import { Observable } from 'rxjs/Observable';
+import { map, shareReplay } from 'rxjs/operators';
+
+import { EntityService } from '../../../core/entity-service';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import { CfUser, UserRoleInOrg } from '../../../store/types/user.types';
-import {
-  GetAllApplications,
-  ApplicationSchema
-} from '../../../store/actions/application.actions';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { ApplicationSchema, GetAllApplications } from '../../../store/actions/application.actions';
+import { CF_INFO_ENTITY_KEY, CFInfoSchema, GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
+import { EndpointSchema, GetAllEndpoints } from '../../../store/actions/endpoint.actions';
+import { AppState } from '../../../store/app-state';
 import {
   getPaginationObservables,
-  PaginationObservables
+  PaginationObservables,
 } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { selectEntity } from '../../../store/selectors/api.selectors';
-import {
-  OrganisationSchema,
-  organisationSchemaKey
-} from '../../../store/actions/action-types';
+import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { CfApplication, CfApplicationState } from '../../../store/types/application.types';
+import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfOrg } from '../../../store/types/org-and-space.types';
-import { AppStatSchema } from '../../../store/types/app-metadata.types';
-import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
-import { combineLatest } from 'rxjs/operators/combineLatest';
-import {
-  CfApplication,
-  CfApplicationState
-} from '../../../store/types/application.types';
+import { CfUser } from '../../../store/types/user.types';
+
 @Injectable()
 export class CloudFoundryEndpointService {
   allApps$: PaginationObservables<APIResource<any>>;
@@ -118,14 +86,14 @@ export class CloudFoundryEndpointService {
   }
 
   spaceInOrg = (app: APIResource<any>, org: APIResource<CfOrg>): any =>
-    org.entity.spaces.indexOf(app.entity.space_guid) !== -1;
+    org.entity.spaces.indexOf(app.entity.space_guid) !== -1
 
   getAppsOrg = (
     org: APIResource<CfOrg>
   ): Observable<APIResource<CfApplication>[]> =>
     this.allApps$.entities$.pipe(
       map(apps => apps.filter(a => this.spaceInOrg(a, org)))
-    );
+    )
 
   getAggregateStat(
     org: APIResource<CfOrg>,

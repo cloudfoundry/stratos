@@ -8860,6 +8860,40 @@ const testInitialStoreState: AppState = {
               console: false,
               debug: null,
               staging_task_id: null,
+              package_state: 'PENDING'
+              events_url: '/v2/apps/885f1a87-e465-4826-abdc-fd8beb6564da/events',
+              service_bindings_url: '/v2/apps/885f1a87-e465-4826-abdc-fd8beb6564da/service_bindings',
+              service_bindings: [],
+              route_mappings_url: '/v2/apps/885f1a87-e465-4826-abdc-fd8beb6564da/route_mappings',
+              guid: '885f1a87-e465-4826-abdc-fd8beb6564da',
+              cfGuid: '663a363e-1faf-4359-ac96-b8c24ec1a4ab'
+            },
+            metadata: {
+              guid: '885f1a87-e465-4826-abdc-fd8beb6564da',
+              url: '/v2/apps/885f1a87-e465-4826-abdc-fd8beb6564da',
+              created_at: '2017-10-03T08:26:20Z',
+              updated_at: '2017-10-03T08:26:20Z'
+            }
+          },
+          '994591c8-4f2a-4775-ad23-79ed33b99f62': {
+            entity: {
+              name: 'Test1234sefsdf',
+              production: false,
+              space_guid: 'a01435cd-3468-44de-9f0c-242afdd4ef36',
+              stack_guid: '97a1b1e4-c307-48fd-b6a5-97cc621a9bda',
+              buildpack: null,
+              detected_buildpack: null,
+              detected_buildpack_guid: null,
+              environment_json: {},
+              memory: 1024,
+              instances: 1,
+              disk_quota: 1024,
+              state: 'STOPPED',
+              version: 'd410bfc0-90f8-41f8-b106-bf30c35d4753',
+              command: null,
+              console: false,
+              debug: null,
+              staging_task_id: null,
               package_state: 'PENDING',
               health_check_type: 'port',
               health_check_timeout: null,

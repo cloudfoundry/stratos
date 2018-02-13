@@ -1,21 +1,22 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { UserRoleInOrg } from '../../../../../../store/types/user.types';
-import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
-import { map, switchMap, reduce, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { EndpointUser } from '../../../../../../store/types/endpoint.types';
-import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { AppStatSchema } from '../../../../../../store/types/app-metadata.types';
-import { GetAppStatsAction } from '../../../../../../store/actions/app-metadata.actions';
-import { Subscription } from 'rxjs/Subscription';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/app-state';
+import { Observable } from 'rxjs/Observable';
+import { map, switchMap, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
+import {
+  CloudFoundryEndpointService,
+} from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
+import { AppState } from '../../../../../../store/app-state';
+import { APIResource } from '../../../../../../store/types/api.types';
+import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
+import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+
 @Component({
   selector: 'app-cf-org-card',
   templateUrl: './cf-org-card.component.html',
@@ -84,12 +85,12 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
         path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'edit-org']
       })
     );
-  };
+  }
 
   delete = () => {
     this.cfOrgSpaceDataService.deleteOrg(
       this.row.entity.guid,
       this.cfEndpointService.cfGuid
     );
-  };
+  }
 }

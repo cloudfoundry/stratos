@@ -29,8 +29,9 @@ export interface CfOrgSpaceItem {
 
 @Injectable()
 export class CfOrgSpaceDataService {
-  allApps$: PaginationObservables<APIResource<any>>;
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
+
+  allApps$: PaginationObservables<APIResource<any>>;
 
   public cf: CfOrgSpaceItem;
   public org: CfOrgSpaceItem;
@@ -169,8 +170,8 @@ export class CfOrgSpaceDataService {
       map(orgs => {
         return orgs.filter(o => o.entity.cfGuid === endpointGuid);
       })
-    );
+    )
 
   deleteOrg = (orgGuid: string, endpointGuid: string) =>
-    this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
+    this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid))
 }
