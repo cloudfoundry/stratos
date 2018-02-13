@@ -97,6 +97,7 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) {
 				log.Fatal("db.Begin:", err)
 			}
 
+			sMigrationMethods := &StratosMigrations{}
 			method := reflect.ValueOf(sMigrationMethods).MethodByName(element.Name)
 			in := make([]reflect.Value, 1)
 			in[0] = reflect.ValueOf(txn)

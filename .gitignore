@@ -80,3 +80,7 @@ deploy/glide-cache/
 
 .dist/
 deploy/uaa/tmp/
+
+src/backend/app-core/load_plugins.go
+src/backend/app-core/debug
+src/backend/app-core/plugins/

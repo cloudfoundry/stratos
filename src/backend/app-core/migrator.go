@@ -12,7 +12,7 @@ import (
 	"bitbucket.org/liamstask/goose/lib/goose"
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/app-core/datastore"
+	"github.com/SUSE/stratos-ui/datastore"
 )
 
 const (
