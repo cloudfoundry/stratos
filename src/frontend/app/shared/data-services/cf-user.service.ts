@@ -29,7 +29,6 @@ import {
 export class CfUserService {
   public static EndpointUserService = 'endpointUsersService';
 
-  // TODO
   public allUsersAction = new GetAllUsers(CfUserService.EndpointUserService);
 
   public allUsers$ = getPaginationObservables<APIResource>({

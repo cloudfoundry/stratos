@@ -10,10 +10,10 @@ export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
     roles = 'Manager';
   }
   if (userRolesInOrg.billingManager) {
-    roles = roles ? `${roles}, Billing Manager` : null;
+    roles = roles ? `${roles}, Billing Manager` : 'Billing Manager';
   }
   if (userRolesInOrg.auditor) {
-    roles = roles ? `${roles}, Auditor` : null;
+    roles = roles ? `${roles}, Auditor` : 'Auditor';
   }
   if (userRolesInOrg.user) {
     roles = roles ? roles : 'User';

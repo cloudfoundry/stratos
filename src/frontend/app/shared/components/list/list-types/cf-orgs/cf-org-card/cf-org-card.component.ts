@@ -85,7 +85,6 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
     );
 
     this.subscriptions.push(fetchData$.subscribe());
-
   }
 
 

@@ -23,40 +23,12 @@ export class CfOrgsListConfigService implements IListConfig<APIResource> {
   tableFixedRowHeight?: boolean;
   dataSource: CfOrgsDataSourceService;
 
-  private editOrgAction: IListAction<APIResource> = {
-    // Take user to form
-    action: (item: APIResource) => this.editOrg(item),
-    icon: 'mode_edit',
-    label: 'Edit',
-    description: 'Edit Organisation',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
-  };
-
-  private deleteOrgAction: IListAction<APIResource> = {
-    // Take user to form
-    action: (item: APIResource) => this.deleteOrg(item),
-    icon: 'delete',
-    label: 'Delete',
-    description: 'Delete Organisation',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
-  };
-
   cardComponent = CfOrgCardComponent;
   defaultView = 'cards' as ListView;
   getColumns = () => [];
 
   constructor(private store: Store<AppState>) {
     this.dataSource = new CfOrgsDataSourceService(this.store, this);
-  }
-
-  editOrg = (org: APIResource) => {
-    // TODO
-  }
-
-  deleteOrg = (org: APIResource) => {
-    // TODO
   }
 
   getGlobalActions = () => [];
