@@ -15,6 +15,7 @@
   var fsEnsureDirQ = Q.denodeify(fs.ensureDir);
   var fsRemoveQ = Q.denodeify(fs.remove);
   var fsCopyQ = Q.denodeify(fs.copy);
+  var fsSymLinkQ = Q.denodeify(fs.symlink);
 
   module.exports.getGOPATH = function () {
     return tempPath;
@@ -115,16 +116,31 @@
   gulp.task('copy-portal-proxy', function (done) {
 
     var plugins = getPlugins();
-    fs.ensureDir(tempSrcPath, function (err) {
+    var symLinkFolder = path.dirname(tempSrcPath);
+    fs.ensureDirSync(symLinkFolder);
+    removeSymLinks(symLinkFolder);
+
+    var appCore = '../src/backend/app-core';
+    appCore = path.resolve(__dirname, appCore);
+    var symLinkPath = path.join(symLinkFolder, 'stratos-ui')
+
+    // Create the plugins folder if it does not exist
+    var pluginsFolder = path.join(appCore, 'plugins');
+    fs.ensureDirSync(pluginsFolder);
+    removeSymLinks(pluginsFolder);
+
+    // Create the symlink for the main source code
+    fs.symlink(appCore, symLinkPath, function (err) {
       if (err) {
         throw err;
       }
 
       var promises = [];
       _.each(plugins, function (plugin) {
-        promises.push(fsCopyQ('./src/backend/' + plugin, tempSrcPath + '/' + plugin));
+        var pluginSource = path.resolve(appCore, '..', plugin);
+        var pluginDest = path.join(pluginsFolder, plugin);
+        promises.push(fsSymLinkQ(pluginSource, pluginDest));
       });
-      promises.push(fsCopyQ('./src/backend/app-core', tempSrcPath + '/app-core'));
 
       Q.all(promises)
         .then(function () {
@@ -136,6 +152,13 @@
 
     });
   });
+
+  function removeSymLinks(folder) {
+    _.each(fs.readdirSync(folder), function (name) {
+      var p = path.join(folder, name);
+      fs.unlinkSync(p);
+    });
+  }
 
   gulp.task('create-outputs', gulp.series('clean-backend'), function (done) {
     var outputPath = conf.outputPath;

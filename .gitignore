@@ -56,8 +56,6 @@ lib
 tools/test-backend/config/mock.config.json
 tools/.coverage-karma/
 dev-certs/*
-vendor/
-**/vendor
 **/*.so
 .glide
 tools/ssl
@@ -80,3 +78,5 @@ deploy/glide-cache/
 
 .dist/
 deploy/uaa/tmp/
+src/backend/app-core/plugins
+src/backend/app-core/debug

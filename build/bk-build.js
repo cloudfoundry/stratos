@@ -44,7 +44,7 @@
 
     var promise = Q.resolve();
     _.each(enabledPlugins, function(pluginInfo) {
-      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath);
+      var fullPluginPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.pluginPath);
       if (fs.existsSync(fullPluginPath)) {
         promise = promise
           .then(function() {
@@ -53,7 +53,7 @@
       }
     });
 
-    var fullCorePath = path.join(prepareBuild.getSourcePath(), 'app-core');
+    var fullCorePath = path.join(prepareBuild.getSourcePath());
 
     if (fs.existsSync(fullCorePath)) {
       promise = promise.then(function() {
@@ -84,8 +84,8 @@
     var promise = Q.resolve();
     var promises = [];
     _.each(enabledPlugins, function(pluginInfo) {
-      var pluginVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, 'vendor');
-      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, '__vendor');
+      var pluginVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.pluginPath, 'vendor');
+      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.pluginPath, '__vendor');
       // sequentially chain promise
       promise
         .then(function() {
@@ -110,12 +110,12 @@
     });
 
     // App Core
-    var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'vendor');
+    var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'vendor');
     if (fs.existsSync(coreVendorPath)) {
       promise = promise.then(function() {
         var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
-        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', 'vendor');
-        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'app-core', '__vendor');
+        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'vendor');
+        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), '__vendor');
         mergeDirs.default(coreVendorPath, goSrc);
         if (fs.existsSync(coreCheckedInVendorPath)) {
           mergeDirs.default(coreCheckedInVendorPath, goSrc);
@@ -137,14 +137,14 @@
   gulp.task('build-all', function (done) {
     buildUtils.init();
     var promise = Q.resolve();
-    // Build all plugins
+    // Include all plugins
     _.each(enabledPlugins, function(pluginInfo) {
       var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath);
       promise = promise.then(function() {
         return buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
       });
-
     });
+
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
     if (fs.existsSync(corePath)) {
       promise = promise.then(function() {
