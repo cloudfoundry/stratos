@@ -6,19 +6,13 @@
   $background-colors: map-get($theme, background);
   .list-component {
     &__header {
-      &.selected {
-        .mat-card {
-          background-color: mat-color($primary, 50);
-        }
+      &--selected {
+        background-color: mat-color($primary, 50);
       }
       mat-card {
         flex-direction: column;
         @include breakpoint(desktop) {
           flex-direction: row;
-        }
-        @include breakpoint(tablet) {
-          // background-color: yellow;
-          // flex-direction: row;
         }
       }
       &__right {
