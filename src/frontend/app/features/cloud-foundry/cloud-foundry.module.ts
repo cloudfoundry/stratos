@@ -6,7 +6,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
-import { CloudFoundryService } from './cloud-foundry.service';
+import { CloudFoundryService } from './services/cloud-foundry.service';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';

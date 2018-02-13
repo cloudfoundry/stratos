@@ -60,6 +60,8 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
+import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import { CfUserService } from './data-services/cf-user.service';
 
 @NgModule({
   imports: [
@@ -115,7 +117,8 @@ import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/ca
     ...listTableComponents,
     CardCfUsageComponent,
     CardCfInfoComponent,
-    CardCfUserInfoComponent
+    CardCfUserInfoComponent,
+    CfOrgCardComponent
   ],
   exports: [
     FormsModule,
@@ -167,9 +170,10 @@ import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/ca
     ListConfig,
     ApplicationStateService,
     CfOrgSpaceDataService,
+    CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,
     PaginationMonitorFactory
   ]
 })
-export class SharedModule { }
+export class SharedModule {}

@@ -6,13 +6,15 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
-import { CloudFoundryService } from '../cloud-foundry.service';
+import { CloudFoundryService } from '../services/cloud-foundry.service';
+import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfUserService } from '../../../shared/data-services/cf-user.service';
 
 @Component({
   selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
   styleUrls: ['./cloud-foundry.component.scss'],
-  providers: [CloudFoundryService]
+  providers: [CloudFoundryService, CfOrgSpaceDataService, CfUserService]
 })
 export class CloudFoundryComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];

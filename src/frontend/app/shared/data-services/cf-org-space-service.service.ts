@@ -135,4 +135,11 @@ export class CfOrgSpaceDataService {
       select: new BehaviorSubject(undefined),
     };
   }
+
+  getEndpointOrgs = (endpointGuid: string) =>
+    this.allOrgs$.entities$.pipe(
+      map(orgs => {
+        return orgs.filter(o => o.entity.cfGuid === endpointGuid);
+      })
+    );
 }

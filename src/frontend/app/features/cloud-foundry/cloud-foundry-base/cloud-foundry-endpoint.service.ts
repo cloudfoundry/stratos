@@ -7,7 +7,7 @@ import {
 import { EntityService } from '../../../core/entity-service';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 import { Observable } from 'rxjs/Observable';
-import { EntityInfo } from '../../../store/types/api.types';
+import { EntityInfo, APIResource } from '../../../store/types/api.types';
 import { shareReplay, map, tap, filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
@@ -16,18 +16,39 @@ import {
   CFInfoSchema,
   CF_INFO_ENTITY_KEY
 } from '../../../store/actions/cloud-foundry.actions';
+import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { CfUser, UserRoleInOrg } from '../../../store/types/user.types';
+import {
+  GetAllApplications,
+  ApplicationSchema
+} from '../../../store/actions/application.actions';
+import {
+  getPaginationObservables,
+  PaginationObservables
+} from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 @Injectable()
 export class CloudFoundryEndpointService {
+  allApps$: PaginationObservables<APIResource<any>>;
+  users$: Observable<APIResource<CfUser>[]>;
+  orgs$: Observable<APIResource[]>;
   info$: Observable<EntityInfo<any>>;
   cfInfoEntityService: EntityService<any>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
+
+  public allAppsAction = new GetAllApplications('applicationWall');
+
   constructor(
     public cfGuid: string,
     private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
+    private cfOrgSpaceDataService: CfOrgSpaceDataService,
+    private cfUserService: CfUserService,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       EndpointSchema.key,
@@ -52,6 +73,24 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
+    this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.cfGuid);
+
+    this.users$ = this.cfUserService.getUsers(this.cfGuid);
+
     this.info$ = this.cfInfoEntityService.waitForEntity$.pipe(shareReplay(1));
+
+    this.allApps$ = getPaginationObservables<APIResource>({
+      store: this.store,
+      action: this.allAppsAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.allAppsAction.paginationKey,
+        ApplicationSchema
+      )
+    });
+  }
+
+  getAppsCountInOrg = (org: APIResource<any>): number => {
+    // this.allApps$.entities$.pipe(filter(apps => apps.filter(a => a.entity)));
+    return 0;
   }
 }

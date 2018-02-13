@@ -1,0 +1,29 @@
+<mat-card class="org-card">
+  <mat-card-header>
+    <div class="org-card__title">{{ row.entity.name }}</div>
+  </mat-card-header>
+  <mat-card-content class="org-card__content">
+    <div class="org-card__content__meta">
+      <div class="org-card__content__label">Role:</div>
+      <div class="org-card__content__value">
+        {{ userRolesInOrg$ | async }}
+      </div>
+    </div>
+    <div class="org-card__content__meta">
+      <div class="org-card__content__label">Applications:</div>
+      <div class="org-card__content__value">
+        TODO
+      </div>
+    </div>
+    <div class="org-card__content__meta">
+      <div class="org-card__content__label">Instances:</div>
+      <div class="org-card__content__value">
+        TODO
+      </div>
+    </div>
+    <div class="org-card__content__meta">
+      <div class="org-card__content__label">Memory Info:</div>
+      TODO
+    </div>
+  </mat-card-content>
+</mat-card>
