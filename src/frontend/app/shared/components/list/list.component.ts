@@ -27,6 +27,8 @@ import {
   IMultiListAction,
   ListConfig,
 } from './list.component.types';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { map } from 'rxjs/operators';
 
 
 @Component({
@@ -62,6 +64,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
 
+  isAddingOrSelecting$: Observable<boolean>;
+  hasRows$: Observable<boolean>;
+
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
@@ -81,6 +86,15 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
+
+    // Create convenience observables that make the html clearer
+    this.isAddingOrSelecting$ = combineLatest(
+      this.dataSource.isAdding$,
+      this.dataSource.isSelecting$
+    ).pipe(
+      map(([isAdding, isSelecting]) => isAdding || isSelecting)
+    );
+    this.hasRows$ = this.dataSource.pagination$.map(pag => pag.totalResults > 0);
 
     // Set up an observable containing the current view (card/table)
     const { view, } = getListStateObservables(this.store, this.dataSource.paginationKey);
