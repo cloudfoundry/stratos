@@ -1,4 +1,4 @@
-package main
+package datastore
 
 import (
 	"database/sql"
@@ -7,7 +7,7 @@ import (
 )
 
 // Up is executed when this migration is applied
-func Up_20170818120003(txn *sql.Tx) {
+func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
 
 	databaseProvider := os.Getenv("DATABASE_PROVIDER")
 	fmt.Printf("ENV is: %s, %s", databaseProvider, os.Getenv("MYSQL_ROOT_PASSWORD"))

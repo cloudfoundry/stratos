@@ -1,6 +1,6 @@
 package tokens
 
-import "github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+import "github.com/SUSE/stratos-ui/repository/interfaces"
 
 // Token -
 type Token struct {

@@ -1,14 +1,13 @@
 package datastore
 
 import (
-	"bufio"
 	"database/sql"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
 
-	"github.com/SUSE/stratos-ui/app-core/config"
+	"github.com/SUSE/stratos-ui/config"
 
 	log "github.com/Sirupsen/logrus"
 	// Mysql driver
@@ -16,6 +15,8 @@ import (
 	"github.com/kat-co/vala"
 	// Sqlite driver
 	_ "github.com/mattn/go-sqlite3"
+
+	"bitbucket.org/liamstask/goose/lib/goose"
 )
 
 const (
@@ -152,41 +153,19 @@ func GetSQLLiteConnection() (*sql.DB, error) {
 		return db, err
 	}
 
-	// Need to initialize the schema of the SQLite Database
-	file, err := os.Open(SQLiteSchemaFile)
-	if err != nil {
-		log.Warn("Can not find the schema file for database initialization")
-		return db, err
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	var statement = ""
-	var counter = 1
-	for scanner.Scan() {
-		line := scanner.Text()
-		line = strings.TrimSpace(line)
-
-		if strings.Index(line, "--") != 0 && len(line) > 0 {
-			// not a comment or an empty line
-			statement += line
-			if strings.HasSuffix(line, ";") {
-				// This is the end of the statement
-				_, err = db.Exec(statement)
-				if err != nil {
-					log.Errorf("Failed to execute statement #%d: %s", counter, err)
-					return db, err
-				}
-				statement = ""
-				counter++
-			}
-		}
+	// Create fake goose db conf object for SQLite
+	d := goose.DBDriver{
+		Name:    "sqlite3",
+		Import:  "github.com/mattn/go-sqlite3",
+		Dialect: &goose.Sqlite3Dialect{},
 	}
 
-	err = scanner.Err()
-	if err == nil {
-		log.Info("Created database schema for SQLite database")
+	conf := &goose.DBConf{
+		Driver: d,
 	}
+
+	ApplyMigrations(conf, db)
+
 	return db, err
 }
 

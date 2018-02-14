@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/labstack/echo"
 )
 
