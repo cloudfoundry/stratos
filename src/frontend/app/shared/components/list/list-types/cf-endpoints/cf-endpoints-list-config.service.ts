@@ -7,7 +7,7 @@ import { selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
-import { EndpointsListConfigService } from '../endpoint/endpoints-list-config.service';
+import { EndpointsListConfigService, endpointColumns } from '../endpoint/endpoints-list-config.service';
 import { CFEndpointsDataSource } from './cf-endpoints-data-source';
 import { TableCellEndpointStatusComponent } from '../endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { EndpointCardComponent } from '../../list-cards/custom-cards/endpoint-card/endpoint-card.component';
@@ -49,10 +49,9 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
 
   constructor(
     private store: Store<AppState>,
-    private dialog: MatDialog,
-    private endpointsListConfigService: EndpointsListConfigService
+    private dialog: MatDialog
   ) {
-    this.columns = endpointsListConfigService.getColumns().filter(column => {
+    this.columns = endpointColumns.filter(column => {
       return column.columnId !== 'type';
     });
     this.dataSource = new CFEndpointsDataSource(this.store, this);

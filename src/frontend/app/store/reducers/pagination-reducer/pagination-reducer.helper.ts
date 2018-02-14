@@ -1,5 +1,4 @@
 import { Store } from '@ngrx/store';
-import { denormalize, Schema } from 'normalizr';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
@@ -7,7 +6,7 @@ import { Observable } from 'rxjs/Rx';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { AppState } from '../../app-state';
-import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
+import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
@@ -90,7 +89,8 @@ export const getPaginationObservables = <T = any>(
   { store, action, paginationMonitor }: { store: Store<AppState>, action: PaginatedAction, paginationMonitor: PaginationMonitor },
   isLocal = false
 ): PaginationObservables<T> => {
-  const { entityKey, paginationKey } = action;
+  const paginationKey = paginationMonitor.paginationKey;
+  const entityKey = paginationMonitor.schema.key;
 
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
