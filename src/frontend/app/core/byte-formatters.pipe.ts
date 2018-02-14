@@ -7,25 +7,32 @@ export class BytesToHumanSize implements PipeTransform {
   transform(value: string): string {
 
     const bytes = parseInt(value, 10);
+
+    let retBytes = '';
     if (!bytes && bytes !== 0) {
-      return '';
+      retBytes = '';
     }
     if (bytes === -1) {
-      return '∞';
+      retBytes = '∞';
     }
     if (bytes >= 1099511627776) {
-      return precisionIfUseful(bytes / 1099511627776) + ' TB';
+      retBytes = precisionIfUseful(bytes / 1099511627776) + ' TB';
     }
     if (bytes >= 1073741824) {
-      return precisionIfUseful(bytes / 1073741824) + ' GB';
+      retBytes = precisionIfUseful(bytes / 1073741824) + ' GB';
     }
     if (bytes >= 1048576) {
-      return precisionIfUseful(bytes / 1048576) + ' MB';
+      retBytes = precisionIfUseful(bytes / 1048576) + ' MB';
     }
     if (bytes >= 1024) {
-      return precisionIfUseful(bytes / 1024) + ' kB';
+      retBytes = precisionIfUseful(bytes / 1024) + ' kB';
     }
-    return precisionIfUseful(bytes) + ' B';
+
+    if (retBytes !== ''){
+      return retBytes;
+    } else {
+      return precisionIfUseful(bytes) + ' B';
+    }
   }
 }
 

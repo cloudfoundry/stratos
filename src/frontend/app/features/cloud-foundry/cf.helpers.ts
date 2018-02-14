@@ -10,16 +10,22 @@ export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
     roles = 'Manager';
   }
   if (userRolesInOrg.billingManager) {
-    roles = roles ? `${roles}, Billing Manager` : 'Billing Manager';
+    roles = assignRole(roles, 'Billing Manager');
   }
   if (userRolesInOrg.auditor) {
-    roles = roles ? `${roles}, Auditor` : 'Auditor';
+    roles = assignRole(roles, 'Auditor');
+
   }
   if (userRolesInOrg.user) {
-    roles = roles ? roles : 'User';
+    roles = assignRole(roles, 'User');
   }
 
   return roles ? roles : 'None';
+}
+
+function assignRole(currentRoles: string, role: string) {
+  const newRoles = currentRoles ? `${currentRoles}, ${role}` : role;
+  return newRoles;
 }
 
 export function isManager(user: CfUser, orgGuid: string): boolean {
@@ -41,3 +47,4 @@ export function isUser(user: CfUser, orgGuid: string): boolean {
 function hasRole(user: CfUser, orgGuid: string, type: string) {
   return user[type].find(o => o.metadata.guid === orgGuid) != null;
 }
+
