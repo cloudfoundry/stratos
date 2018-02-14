@@ -116,5 +116,53 @@ Run `npm run e2e` to execute the end-to-end tests via [Protractor](http://www.pr
 ## Backend Development
 
 The backend (more informally called the portal-proxy or 'pp' for short) is still to be ported over from V1 of
-[Stratos](https://github.com/SUSE/stratos-ui). Once that's completed come back and check out this section for instructions on how to
+[Stratos](https://github.com/cloudfoundry-incubator/stratos). Once that's completed come back and check out this section for instructions on how to
 make changes to it.
+
+WIP
+
+### Getting started
+
+The portal-proxy is the back-end for the Console UI. It is written in Go.
+
+### Automatically register and connect to an existing endpoint
+To automatically register a Cloud Foundry add the environment variable below
+
+> **Note** On log in the console will also attempt to auto-connect to the cloud foundry using 
+           the username/password provided.
+
+```
+AUTO_REG_CF_URL=<api url of cf>
+```
+
+This env var can be set in `outputs/config.properties` if running the backend locally in the host machine, `./deploy/proxy.env` if running in docker-compose or `./manifest` if in cf push.
+
+> **NOTE** WIP Instructions!
+
+#### Introduction
+* Golang
+* Dependency Management (Glide)
+
+#### Dependencies
+* go
+  * GOPATH, GOBIN env vars set
+* glide
+* UAA instance
+
+#### Running portal-proxy in a container
+* Follow instructions in the deploy/docker-compose docs
+* To apply changes (build and update docker image) simply run `deploy/tools/restart_proxy.sh`  
+
+#### Running "like a dev"
+
+1. Set up developer certs
+    - Execute `deploy/tools/generate_cert.sh`
+    - Copy `portal-proxy-output/dev-certs` to `./`
+1. Update `build/dev_config.json` with `"localDevBuild": true`
+1. Run `gulp local-dev-build`
+1. cd ./outputs
+1. Run `gulp build-backend`
+1. Update `config.propeties` and ensure that..
+    - the UAA points to a valid instance
+    - the `CONSOLE_CLIENT` and `CONSOLE_ADMIN_SCOPE` are valid in the UAA instance
+1. Run `portal-proxy`
