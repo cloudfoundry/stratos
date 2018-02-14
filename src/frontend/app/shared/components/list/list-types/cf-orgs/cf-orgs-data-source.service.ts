@@ -6,7 +6,7 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { IListConfig } from '../../list.component.types';
 import { AppReducersModule } from '../../../../../store/reducers.module';
 import { GetAllOrganisations } from '../../../../../store/actions/organisation.actions';
-import { OrganisationSchema } from '../../../../../store/actions/action-types';
+import { OrganisationSchema, OrganisationWithSpaceSchema } from '../../../../../store/actions/action-types';
 
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
   public static paginationKey = 'cf-organizations';
@@ -17,7 +17,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: OrganisationSchema,
+      schema: OrganisationWithSpaceSchema,
       getRowUniqueId: (entity: APIResource) => {
         return entity.metadata ? entity.metadata.guid : null;
       },

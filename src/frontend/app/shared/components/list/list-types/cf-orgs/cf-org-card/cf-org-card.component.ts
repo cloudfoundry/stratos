@@ -63,16 +63,12 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
 
    const fetchData$ = Observable.combineLatest(
       userRole$,
-      this.cfEndpointService.getAppsOrg(this.row),
-      this.cfEndpointService.getAggregateStat(
-        this.row,
-        'memory'
-      )
+      this.cfEndpointService.getAppsInOrg(this.row),
     ).pipe(
-      tap(([role, apps, memory]) => {
+      tap(([role, apps]) => {
         this.userRolesInOrg = role;
         this.setCounts(apps);
-        this.memoryTotal = memory;
+        this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
 
         // get Quota data
         const quotaDefinition = this.row.entity.quota_definition;

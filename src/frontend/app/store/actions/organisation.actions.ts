@@ -53,7 +53,7 @@ export class GetAllOrganisations extends CFStartAction
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'inline-relations-depth': 1
+    'inline-relations-depth': 2
   };
 }
 

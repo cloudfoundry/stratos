@@ -8841,7 +8841,7 @@ const testInitialStoreState: AppState = {
               updated_at: '2017-10-03T08:26:20Z'
             }
           },
-          '994591c8-4f2a-4775-ad23-79ed33b99f62': {
+          '994591c8-4f2a-4775-ad23-79ed3g3b99f62': {
             entity: {
               name: 'Test1234sefsdf',
               production: false,
@@ -8860,7 +8860,7 @@ const testInitialStoreState: AppState = {
               console: false,
               debug: null,
               staging_task_id: null,
-              package_state: 'PENDING'
+              package_state: 'PENDING',
               events_url: '/v2/apps/885f1a87-e465-4826-abdc-fd8beb6564da/events',
               service_bindings_url: '/v2/apps/885f1a87-e465-4826-abdc-fd8beb6564da/service_bindings',
               service_bindings: [],

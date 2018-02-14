@@ -21,10 +21,6 @@ import {
   isAuditor,
   isUser
 } from '../../features/cloud-foundry/cf.helpers';
-import {
-  GetAllApplications,
-  ApplicationSchema
-} from '../../store/actions/application.actions';
 @Injectable()
 export class CfUserService {
   public static EndpointUserService = 'endpointUsersService';
