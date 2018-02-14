@@ -63,7 +63,7 @@ const defaultPaginationEntityState: PaginationEntityState = {
   }
 };
 
-function getDefaultPaginationEntityState(): PaginationEntityState {
+export function getDefaultPaginationEntityState(): PaginationEntityState {
   return {
     ...defaultPaginationEntityState
   };

@@ -13,6 +13,23 @@ export function createNewPaginationSection(state: PaginationState, action: Creat
   if (state[action.entityKey][action.paginationKey] && !action.seed) {
     return state;
   }
+  if (!state[action.entityKey][action.paginationKey] && !action.seed) {
+    return createNew(state, action, defaultState);
+  }
+  return mergeWithSeed(state, action, defaultState);
+}
+
+function createNew(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState) {
+  return {
+    ...state,
+    [action.entityKey]: {
+      ...state[action.entityKey],
+      [action.paginationKey]: defaultState
+    }
+  };
+}
+
+function mergeWithSeed(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState) {
   const newState = { ...state };
   const currentPagination = state[action.entityKey][action.paginationKey] || defaultState;
   const seeded = action.seed && state[action.entityKey] && state[action.entityKey][action.seed];
@@ -24,7 +41,7 @@ export function createNewPaginationSection(state: PaginationState, action: Creat
       // If we already have a pagination section, retain these values.
       pageCount: currentPagination.pageCount,
       currentPage: currentPagination.currentPage,
-      clientPagination: mergePaginationSections(currentPagination, seedPagination),
+      clientPagination: mergePaginationSections(currentPagination, seedPagination, defaultState),
       seed: seeded ? action.seed : null
     }
   };
@@ -34,7 +51,11 @@ export function createNewPaginationSection(state: PaginationState, action: Creat
   };
 }
 
-function mergePaginationSections(currentPagination: PaginationEntityState, seedPagination: PaginationEntityState) {
+function mergePaginationSections(
+  currentPagination: PaginationEntityState,
+  seedPagination: PaginationEntityState,
+  defaultState: PaginationEntityState
+) {
   const currentClientPagination = currentPagination.clientPagination;
   const seedClientPagination = seedPagination.clientPagination;
   return {
@@ -44,11 +65,17 @@ function mergePaginationSections(currentPagination: PaginationEntityState, seedP
   };
 }
 
+function hasResultCountChanged(currentPagination: PaginationEntityState, seedPagination: PaginationEntityState) {
+  const seededTotalResults = seedPagination.clientPagination.totalResults;
+  const totalResults = currentPagination.clientPagination.totalResults;
+  return seededTotalResults !== totalResults;
+}
+
 function getCurrentPage(currentPagination: PaginationEntityState, seedPagination: PaginationEntityState) {
   const currentPage = currentPagination.clientPagination.currentPage;
   const seededTotalResults = seedPagination.clientPagination.totalResults;
   const totalResults = currentPagination.clientPagination.totalResults;
-  if (seededTotalResults !== totalResults) {
+  if (hasResultCountChanged(currentPagination, seedPagination)) {
     return 1;
   } else {
     return currentPage;
