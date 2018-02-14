@@ -18,7 +18,7 @@ export const SpaceSchema = new schema.Entity('space', {
   });
 
 export class GetSpace extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cnis: string) {
+  constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `space/${guid}`;

@@ -1,4 +1,4 @@
-import { DISCONNECT_CNSIS_SUCCESS, CONNECT_CNSIS_SUCCESS, UNREGISTER_CNSIS } from './../../actions/cnsis.actions';
+import { DISCONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS } from '../../actions/endpoint.actions';
 import { paginationSetClientFilter } from './pagination-reducer-set-client-filter';
 import { paginationSetClientPage } from './pagination-reducer-set-client-page';
 import { paginationSetClientPageSize } from './pagination-reducer-set-client-page-size';
@@ -38,16 +38,15 @@ import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-o
 
 export const defaultClientPaginationPageSize = 9;
 
-const defaultPaginationEntityState = {
-  fetching: false,
+const defaultPaginationEntityState: PaginationEntityState = {
   pageCount: 0,
   currentPage: 1,
   totalResults: 0,
   ids: {},
+  pageRequests: {
+  },
   params: {
   },
-  error: false,
-  message: '',
   clientPagination: {
     pageSize: defaultClientPaginationPageSize,
     currentPage: 1,
@@ -69,10 +68,10 @@ export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
+  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actsionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
-        return paginationStart(state);
+        return paginationStart(state, action);
       case successType:
         return paginationSuccess(state, action);
       case failureType:
@@ -143,9 +142,9 @@ function paginate(action, state, updatePagination) {
 
 function isEnDpointAction(action) {
   // ... that we care about.
-  return action.type === DISCONNECT_CNSIS_SUCCESS ||
-    action.type === CONNECT_CNSIS_SUCCESS ||
-    action.type === UNREGISTER_CNSIS;
+  return action.type === DISCONNECT_ENDPOINTS_SUCCESS ||
+    action.type === CONNECT_ENDPOINTS_SUCCESS ||
+    action.type === UNREGISTER_ENDPOINTS;
 }
 
 function enterPaginationReducer(state: PaginationState, action, updatePagination) {

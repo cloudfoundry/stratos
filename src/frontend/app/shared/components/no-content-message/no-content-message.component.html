@@ -1,4 +1,8 @@
-<div class="container">
+<div class="app-no-content-container">
+  <div *ngIf="toolbarLink?.text" class="app-no-content-container__link">
+    <div class="app-no-content-container__link-text">{{toolbarLink.text}}</div>
+    <mat-icon #toolbarRef class="app-no-content-container__link-icon">reply</mat-icon>
+  </div>
   <mat-icon>{{icon}}</mat-icon>
   <div class="first-line">{{firstLine}}</div>
   <div class="second-line">

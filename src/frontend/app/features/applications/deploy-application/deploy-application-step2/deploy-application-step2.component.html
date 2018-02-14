@@ -35,7 +35,7 @@
                 <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
               </div>
               <div class="centered">
-                <a>{{projectInfo.description}}</a>
+                {{projectInfo.description}}
               </div>
             </div>
           </div>
@@ -57,14 +57,14 @@
               <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
             </div>
             <div>
-              <a>{{commitInfo.commit.message}}</a>
+              {{commitInfo.commit.message}}
             </div>
             <div class="author-info">
               <div>
-                <a>{{commitInfo.commit.author.name}}</a>
+                {{commitInfo.commit.author.name}}
               </div>
               <div>
-                <a>{{commitInfo.commit.author.date | date: 'medium'}}</a>
+                {{commitInfo.commit.author.date | date: 'medium'}}
               </div>
             </div>
           </div>

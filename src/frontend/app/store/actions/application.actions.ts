@@ -87,7 +87,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
 }
 
 export class GetApplication extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cnis: string) {
+  constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
@@ -106,7 +106,7 @@ export class GetApplication extends CFStartAction implements ICFAction {
 }
 
 export class CreateNewApplication extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cnis: string, application: NewApplication) {
+  constructor(public guid: string, public endpointGuid: string, application: NewApplication) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps`;
@@ -127,7 +127,7 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
 }
 
 export class AssociateRouteWithAppApplication extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public routeGuid: string, public cnis: string) {
+  constructor(public guid: string, public routeGuid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}/routes/${routeGuid}`;
@@ -159,7 +159,7 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
 
   constructor(
     public guid: string,
-    public cnis: string,
+    public endpointGuid: string,
     private application: UpdateApplication,
     public updateEntities?: AppMetadataTypes[]) {
     super();
@@ -187,14 +187,14 @@ export class UpdateExistingApplication extends CFStartAction implements ICFActio
 export class DeleteApplication extends CFStartAction implements ICFAction {
   static updateKey = 'Deleting-Existing-Application';
 
-  constructor(public guid: string, public cnis: string) {
+  constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'delete';
     this.options.headers = new Headers();
-    const cnsiPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(cnsiPassthroughHeader, 'true');
+    const endpointPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(endpointPassthroughHeader, 'true');
   }
   actions = [
     DELETE,
@@ -208,14 +208,14 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
 
 export class DeleteApplicationInstance extends CFStartAction implements ICFAction {
   guid: string;
-  constructor(public appGuid: string, private index: number, public cnis: string) {
+  constructor(public appGuid: string, private index: number, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${appGuid}/instances/${index}`;
     this.options.method = 'delete';
     this.options.headers = new Headers();
-    const cnsiPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(cnsiPassthroughHeader, 'true');
+    const endpointPassthroughHeader = 'x-cap-passthrough';
+    this.options.headers.set(endpointPassthroughHeader, 'true');
     this.guid = `${appGuid}-${index}`;
   }
   actions = [

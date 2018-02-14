@@ -1,9 +1,15 @@
 import { PaginationEntityState } from '../../types/pagination.types';
 export function paginationFailure(state: PaginationEntityState, action) {
+  const page = action.apiAction.pageNumber || state.currentPage;
   return {
     ...state,
-    fetching: false,
-    error: true,
-    message: action.message
+    pageRequests: {
+      ...state.pageRequests,
+      [page]: {
+        busy: false,
+        error: true,
+        message: action.message
+      }
+    }
   };
 }

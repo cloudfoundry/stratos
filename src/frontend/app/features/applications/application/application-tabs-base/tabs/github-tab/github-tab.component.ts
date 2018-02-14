@@ -44,6 +44,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   gitHubRepo$: Observable<GithubRepo>;
   commit$: Observable<GithubCommit>;
   isHead$: Observable<boolean>;
+  initialised$: Observable<boolean>;
   private githubProjectEntityService: EntityService;
 
   ngOnDestroy(): void {
@@ -56,7 +57,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.stratosProject$ = this.applicationService.applicationStratProject$.pipe(
@@ -87,20 +88,21 @@ export class GithubTabComponent implements OnInit, OnDestroy {
           new FetchBranchesForProject(projectName)
         );
 
-        this.gitHubRepo$ = this.gitHubRepoEntityService.entityObs$.pipe(
+        this.gitHubRepo$ = this.gitHubRepoEntityService.waitForEntity$.pipe(
           map(p => p.entity && p.entity.entity)
         );
 
-        this.commit$ = this.gitCommitEntityService.entityObs$.pipe(
+        this.commit$ = this.gitCommitEntityService.waitForEntity$.pipe(
           map(p => p.entity && p.entity.entity)
         );
-        this.isHead$ = this.gitBranchEntityService.entityObs$.pipe(
+        this.isHead$ = this.gitBranchEntityService.waitForEntity$.pipe(
           map(p => {
             return (
               p.entity.entity.commit.sha ===
               stProject.deploySource.commit.trim()
             );
-          })
+          }),
+          tap(p => (this.initialised$ = Observable.of(true)))
         );
       })
     );
@@ -113,40 +115,40 @@ export class GithubTabComponent implements OnInit, OnDestroy {
       this.gitBranchEntityService.entityObs$
     )
       .pipe(
-        take(1),
-        tap(([app, spaces, branch]) => {
-          // set CF data
-          const spaceGuid = app.app.entity.space_guid;
-          this.store.dispatch(
-            new StoreCFSettings({
-              cloudFoundry: app.app.entity.cfGuid,
-              org: spaces[spaceGuid].entity.organization_guid,
-              space: spaceGuid
-            })
-          );
+      take(1),
+      tap(([app, spaces, branch]) => {
+        // set CF data
+        const spaceGuid = app.app.entity.space_guid;
+        this.store.dispatch(
+          new StoreCFSettings({
+            cloudFoundry: app.app.entity.cfGuid,
+            org: spaces[spaceGuid].entity.organization_guid,
+            space: spaceGuid
+          })
+        );
 
-          // set Project data
-          this.store.dispatch(
-            new CheckProjectExists(stratosProject.deploySource.project)
-          );
-          // Set Source type
-          this.store.dispatch(
-            new SetAppSourceDetails({
-              name: 'Git',
-              id: 'git',
-              subType: 'github'
-            })
-          );
-          // Set branch
-          this.store.dispatch(new SetDeployBranch(branch.entity.entity.name));
+        // set Project data
+        this.store.dispatch(
+          new CheckProjectExists(stratosProject.deploySource.project)
+        );
+        // Set Source type
+        this.store.dispatch(
+          new SetAppSourceDetails({
+            name: 'Git',
+            id: 'git',
+            subType: 'github'
+          })
+        );
+        // Set branch
+        this.store.dispatch(new SetDeployBranch(branch.entity.entity.name));
 
-          this.store.dispatch(
-            new RouterNav({
-              path: ['/applications/deploy'],
-              query: { redeploy: true }
-            })
-          );
-        })
+        this.store.dispatch(
+          new RouterNav({
+            path: ['/applications/deploy'],
+            query: { redeploy: true }
+          })
+        );
+      })
       )
       .subscribe();
   }

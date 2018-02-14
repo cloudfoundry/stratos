@@ -27,7 +27,6 @@ describe('EventsTabComponent', () => {
   initialState.pagination = {
     event: {
       ['app-events:mockCfGuidmockAppGuid']: {
-        fetching: false,
         pageCount: 1,
         currentPage: 1,
         totalResults: 0,
@@ -35,8 +34,8 @@ describe('EventsTabComponent', () => {
         },
         ids: {
         },
-        error: false,
-        message: '',
+        pageRequests: {
+        },
         clientPagination: {
           pageSize: 5,
           currentPage: 1,

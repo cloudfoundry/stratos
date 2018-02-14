@@ -1,5 +1,7 @@
 import { IRequestAction, RequestAction } from './request.types';
 import { Action } from '@ngrx/store';
+import { RequestMethod } from '@angular/http';
+import { ActionState } from '../reducers/api-request-reducer/types';
 
 export class QParam {
   constructor(
@@ -27,9 +29,9 @@ export class PaginationEntityState {
   pageCount = 0;
   ids = {};
   params: PaginationParam;
-  fetching: boolean;
-  error: boolean;
-  message: string;
+  pageRequests: {
+    [pageNumber: string]: ActionState
+  };
   clientPagination?: {
     pageSize: number,
     currentPage: number,
@@ -44,12 +46,15 @@ export interface PaginationAction extends Action {
 }
 
 export interface PaginatedAction extends PaginationAction, IRequestAction {
+  actions: string[];
   flattenPagination?: boolean;
   initialParams?: PaginationParam;
+  pageNumber?: number;
   options?: {
     params?: {
       paramsMap: any;
-    }
+    },
+    method?: RequestMethod | string | null
   };
 }
 

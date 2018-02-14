@@ -1,26 +1,31 @@
-import { RouterNav } from '../../../../store/actions/router.actions';
+import { Component, OnInit } from '@angular/core';
+import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { filter, map, take, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
 import { AssociateRouteWithAppApplication } from '../../../../store/actions/application.actions';
-import { CreateRoute, NewRoute, RouteSchema } from '../../../../store/actions/route.actions';
+import {
+  CreateRoute,
+  GetAppRoutes,
+  RouteSchema
+} from '../../../../store/actions/route.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import {
-    selectEntity,
-    selectNestedEntity,
-    selectRequestInfo,
+  selectEntity,
+  selectNestedEntity,
+  selectRequestInfo
 } from '../../../../store/selectors/api.selectors';
-import { ApplicationService } from '../../application.service';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { FormGroup, Validators, FormControl } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { tap, map, filter, delay, mergeMap, distinct, catchError } from 'rxjs/operators';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
-import { Subscription } from 'rxjs/Subscription';
-import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { Route } from '../../../../store/types/route.types';
+import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
-import { MatSnackBar } from '@angular/material';
-import { isDebuggerStatement } from 'typescript';
+import { Route, RouteMode } from '../../../../store/types/route.types';
+import { ApplicationService } from '../../application.service';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-add-routes',
@@ -28,21 +33,29 @@ import { isDebuggerStatement } from 'typescript';
   styleUrls: ['./add-routes.component.scss']
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
-
+  subscriptions: Subscription[] = [];
   submitted: boolean;
   model: Route;
   domains: APIResource<Domain>[] = [];
   addTCPRoute: FormGroup;
   addHTTPRoute: FormGroup;
   domains$: Subscription;
-  space$: Subscription;
-  associateRoute$: Subscription;
   appGuid: string;
   cfGuid: string;
   spaceGuid: string;
   createTCPRoute = false;
   selectedDomain: APIResource<any>;
-
+  selectedRoute$ = new BehaviorSubject<any>({
+    entity: {},
+    metadata: {}
+  });
+  appUrl: string;
+  isRouteSelected$ = new BehaviorSubject<boolean>(false);
+  addRouteModes: RouteMode[] = [
+    { id: 'create', label: 'Create and map new route' },
+    { id: 'map', label: 'Map existing route' }
+  ];
+  addRouteMode: RouteMode;
   constructor(
     private route: ActivatedRoute,
     private applicationService: ApplicationService,
@@ -51,7 +64,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
-   }
+    this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/summary`;
+  }
 
   appService = this.applicationService;
 
@@ -61,33 +75,50 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       domain: new FormControl('', [<any>Validators.required]),
       path: new FormControl('')
     });
+    this.addRouteMode = this.addRouteModes[0];
 
     this.addTCPRoute = new FormGroup({
       domain: new FormControl('', [<any>Validators.required]),
-      port: new FormControl('', [Validators.required, Validators.pattern('[0-9]*')])
+      port: new FormControl('', [
+        Validators.required,
+        Validators.pattern('[0-9]*')
+      ])
     });
 
-    this.space$ = this.store.select(selectEntity('application', this.appGuid))
-    .pipe(
-      filter(p => !!p),
-      tap(p => {
-        this.spaceGuid = p.entity.space_guid;
-        if (this.domains$) {
-          this.domains$.unsubscribe();
-        }
-        this.domains$ = this.store.select(selectNestedEntity('space', this.spaceGuid, ['entity', 'domains']))
-        .pipe(
-          filter(d => !!d),
-          tap(d => {
-            d.forEach(domain => {
-              this.domains[domain.metadata.guid] = domain;
-            });
-            this.selectedDomain = Object.values(this.domains)[0];
-          })
-        ).subscribe();
-      })
-    ).subscribe();
+    const space$ = this.store
+      .select(selectEntity('application', this.appGuid))
+      .pipe(
+        filter(p => !!p),
+        tap(p => {
+          this.spaceGuid = p.entity.space_guid;
+          if (this.domains$) {
+            this.domains$.unsubscribe();
+          }
+          this.domains$ = this.store
+            .select(
+              selectNestedEntity('space', this.spaceGuid, ['entity', 'domains'])
+            )
+            .pipe(
+              filter(d => !!d),
+              tap(d => {
+                d.forEach(domain => {
+                  this.domains[domain.metadata.guid] = domain;
+                });
+                this.selectedDomain = Object.values(this.domains)[0];
+              })
+            )
+            .subscribe();
+        })
+      );
 
+    this.subscriptions.push(space$.subscribe());
+
+    const selRoute$ = this.selectedRoute$.subscribe(x => {
+      if (x.metadata.guid) {
+        this.isRouteSelected$.next(true);
+      }
+    });
+    this.subscriptions.push(selRoute$);
   }
 
   getDomainValues() {
@@ -101,48 +132,133 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     return form.value[key] !== '' ? form.value[key] : null;
   }
 
+  validate(): boolean {
+    if (this.addRouteMode && this.addRouteMode.id === 'create') {
+      return this.createTCPRoute
+        ? this.addTCPRoute.valid
+        : this.addHTTPRoute.valid;
+    } else {
+      try {
+        return this.isRouteSelected$.getValue();
+      } catch (e) {}
+
+      return false;
+    }
+  }
+
+  submit = () => {
+    if (this.addRouteMode && this.addRouteMode.id === 'create') {
+      // Creating new route
+      return this.createTCPRoute ? this.onSubmit('tcp') : this.onSubmit('http');
+    } else {
+      return this.mapRouteSubmit();
+    }
+  }
+
   onSubmit(routeType) {
     this.submitted = true;
-    const formGroup = routeType === 'tcp' ? this.addTCPRoute : this.addHTTPRoute;
+    const formGroup =
+      routeType === 'tcp' ? this.addTCPRoute : this.addHTTPRoute;
 
-    const newRouteGuid =  this._getValueForKey('host', formGroup) +  this._getValueForKey('port', formGroup) +
-    this._getValueForKey('path', formGroup) + formGroup.value.domain.metadata.guid;
+    const newRouteGuid =
+      this._getValueForKey('host', formGroup) +
+      this._getValueForKey('port', formGroup) +
+      this._getValueForKey('path', formGroup) +
+      formGroup.value.domain.metadata.guid;
 
-    this.store.dispatch(new CreateRoute(
-      newRouteGuid,
-      this.cfGuid,
-      new Route(
-        formGroup.value.domain.metadata.guid,
-        this.spaceGuid,
-        this._getValue('host', formGroup),
-        this._getValue('path', formGroup),
-        this._getValue('port', formGroup)
+    this.store.dispatch(
+      new CreateRoute(
+        newRouteGuid,
+        this.cfGuid,
+        new Route(
+          formGroup.value.domain.metadata.guid,
+          this.spaceGuid,
+          this._getValue('host', formGroup),
+          this._getValue('path', formGroup),
+          this._getValue('port', formGroup)
+        )
       )
-    ));
-    this.associateRoute$ = this.store.select(selectRequestInfo(RouteSchema.key, newRouteGuid))
-    .pipe(
-      filter(route => !route.creating),
-      map(route => {
-        if (route.error) {
-          this.submitted = false;
-          if (this.createTCPRoute) {
-            this.snackBar.open('Failed to create route! Please ensure the domain has a TCP routing group associated', 'Dismiss');
+    );
+    const associateRoute$ = this.store
+      .select(selectRequestInfo(RouteSchema.key, newRouteGuid))
+      .pipe(
+        filter(route => !route.creating),
+        map(route => {
+          if (route.error) {
+            this.submitted = false;
+            this.displaySnackBar();
           } else {
-            this.snackBar
-            .open('Failed to create route! The hostname may have been taken, please try again with a different name', 'Dismiss');
+            const routeAssignAction = new AssociateRouteWithAppApplication(
+              this.appGuid,
+              route.response.result[0],
+              this.cfGuid
+            );
+            this.store.dispatch(routeAssignAction);
+            this.submitted = false;
+            this.store.dispatch(
+              new RouterNav({
+                path: ['/applications', this.cfGuid, this.appGuid]
+              })
+            );
           }
-        } else {
-          const routeAssignAction = new AssociateRouteWithAppApplication(
-            this.appGuid,
-            route.response.result[0],
-            this.cfGuid
-          );
-          this.store.dispatch(routeAssignAction);
-          this.submitted = false;
-          this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid] }));
-         }
-      })
-    ).subscribe();
+        })
+      );
+
+    this.subscriptions.push(associateRoute$.subscribe());
+    return Observable.of({ success: true });
+  }
+
+  private displaySnackBar() {
+    if (this.createTCPRoute) {
+      this.snackBar.open(
+        'Failed to create route! Please ensure the domain has a TCP routing group associated',
+        'Dismiss'
+      );
+    } else {
+      this.snackBar.open(
+        'Failed to create route! The hostname may have been taken, please try again with a different name',
+        'Dismiss'
+      );
+    }
+  }
+
+  mapRouteSubmit() {
+    this.selectedRoute$.subscribe(route => {
+      this.associateRoute(route);
+      const appServiceSub$ = this.appService.app$.pipe(
+        map(p => p.entityRequestInfo.updating['Assigning-Route']),
+        filter(p => !p.busy),
+        take(1),
+        tap(p => {
+          if (p.error) {
+            this.snackBar.open(
+              'Failed to associate route with the app!',
+              'Dismiss'
+            );
+          } else {
+            this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
+            this.store.dispatch(
+              new RouterNav({
+                path: ['applications', this.cfGuid, this.appGuid]
+              })
+            );
+          }
+        })
+      );
+
+      this.subscriptions.push(appServiceSub$.subscribe());
+    });
+    return Observable.of({ success: true });
+  }
+
+  private associateRoute(route: any) {
+    this.store.dispatch(
+      new AssociateRouteWithAppApplication(
+        this.appGuid,
+        route.metadata.guid,
+        this.cfGuid
+      )
+    );
   }
 
   toggleCreateTCPRoute() {
@@ -152,9 +268,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     if (this.domains$) {
       this.domains$.unsubscribe();
     }
-    this.space$.unsubscribe();
-    if (this.associateRoute$) {
-      this.associateRoute$.unsubscribe();
-    }
+
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 }

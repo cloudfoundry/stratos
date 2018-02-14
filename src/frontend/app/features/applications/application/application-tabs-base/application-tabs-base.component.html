@@ -35,13 +35,7 @@
     </span>
   </div>
 </app-page-header>
-<app-page-subheader class="summary__subheader">
-  <nav backgroundColor="primary" mat-tab-nav-bar class="summary__nav">
-      <a mat-tab-link class="mat-tab-fit" *ngFor="let tabLink of tabLinks" [routerLink]="[tabLink.link]" routerLinkActive="active-link" #rla="routerLinkActive"
-        [active]="rla.isActive">
-        {{tabLink.label}}
-      </a>
-    </nav>
+<app-page-subheader [tabs]="tabLinks">
 </app-page-subheader>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving application'">
   <router-outlet></router-outlet>

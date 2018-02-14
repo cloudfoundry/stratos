@@ -13,7 +13,7 @@ import { ApplicationStateService } from '../../../../../../shared/components/app
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
-import { cnsisStoreNames } from '../../../../../../store/types/cnsis.types';
+import { endpointStoreNames } from '../../../../../../store/types/endpoint.types';
 
 describe('InstancesTabComponent', () => {
   let component: InstancesTabComponent;
@@ -22,7 +22,7 @@ describe('InstancesTabComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ InstancesTabComponent ],
+      declarations: [InstancesTabComponent],
       imports: [
         CoreModule,
         SharedModule,
@@ -42,11 +42,11 @@ describe('InstancesTabComponent', () => {
         ApplicationEnvVarsService
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(inject([ApplicationService], (applicationService: ApplicationService) => {
-    const cfGuid = Object.keys(initialState.requestData[cnsisStoreNames.type])[0];
+    const cfGuid = Object.keys(initialState.requestData[endpointStoreNames.type])[0];
     const appGuid = Object.keys(initialState.requestData.application)[0];
     fixture = TestBed.createComponent(InstancesTabComponent);
     component = fixture.componentInstance;

@@ -68,12 +68,10 @@ describe('PaginationReducer', () => {
         ...defaultPaginationState,
         [ApplicationSchema.key]: {
           [paginationKey]: {
-            fetching: false,
             pageCount: 0,
             currentPage: 1,
             ids: {},
-            error: true,
-            message: 'aasdasdasd',
+            pageRequests: {},
             clientPagination: {
               ...defaultClientPagination
             }
@@ -84,12 +82,10 @@ describe('PaginationReducer', () => {
       ...defaultPaginationState,
       [ApplicationSchema.key]: {
         [paginationKey]: {
-          fetching: true,
           pageCount: 0,
           currentPage: 1,
           ids: {},
-          error: false,
-          message: '',
+          pageRequests: { 1: { busy: true, error: false, message: '' } },
           clientPagination: {
             ...defaultClientPagination
           }
@@ -134,13 +130,11 @@ describe('PaginationReducer', () => {
       ...defaultPaginationState,
       [entityKey]: {
         [paginationKey]: {
-          fetching: true,
           pageCount: 0,
           totalResults: 0,
           currentPage: 1,
           ids: {},
-          error: true,
-          message: 'asdasdasdasd',
+          pageRequests: {},
           clientPagination: {
             ...defaultClientPagination
           }
@@ -150,15 +144,13 @@ describe('PaginationReducer', () => {
     const expectedNewState = {
       [entityKey]: {
         [paginationKey]: {
-          fetching: false,
           pageCount: 1,
           totalResults: 2,
           currentPage: 1,
           ids: {
             1: [1, 2]
           },
-          error: false,
-          message: '',
+          pageRequests: { 1: { busy: false, error: false, message: '' } },
           clientPagination: {
             ...defaultClientPagination,
             totalResults: 2
@@ -197,13 +189,11 @@ describe('PaginationReducer', () => {
       ...defaultPaginationState,
       [entityKey]: {
         [paginationKey]: {
-          fetching: true,
           pageCount: 0,
           currentPage: 1,
           totalResults: 0,
           ids: {},
-          error: false,
-          message: 'asdasdasdasd',
+          pageRequests: {},
           clientPagination: {
             ...defaultClientPagination
           }
@@ -213,13 +203,11 @@ describe('PaginationReducer', () => {
     const expectedNewState = {
       [entityKey]: {
         [paginationKey]: {
-          fetching: false,
           pageCount: 0,
           currentPage: 1,
           totalResults: 0,
           ids: {},
-          error: true,
-          message: message,
+          pageRequests: { 1: { busy: false, error: true, message: message } },
           clientPagination: {
             ...defaultClientPagination
           }

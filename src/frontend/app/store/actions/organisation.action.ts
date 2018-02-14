@@ -13,7 +13,7 @@ export const OrganisationSchema = new schema.Entity('organization', {}, {
 });
 
 export class GetOrganisation extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cnis: string) {
+  constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organization/${guid}`;

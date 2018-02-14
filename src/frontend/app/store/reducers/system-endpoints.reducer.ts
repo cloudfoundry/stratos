@@ -1,10 +1,10 @@
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
-import { CNSISModel } from '../types/cnsis.types';
+import { EndpointModel } from '../types/endpoint.types';
 import { GetSystemSuccess, GET_SYSTEM_INFO_SUCCESS, GET_SYSTEM_INFO } from './../actions/system.actions';
 import { VERIFY_SESSION, SESSION_VERIFIED } from '../actions/auth.actions';
 
-export function systemEndpointsReducer(state: IRequestEntityTypeState<CNSISModel>, action) {
+export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
   switch (action.type) {
     case VERIFY_SESSION:
     case GET_SYSTEM_INFO:
@@ -40,8 +40,7 @@ function succeedEndpointInfo(state, action) {
     const endpointInfo = payload.endpoints.cf[guid];
     newState[guid] = {
       ...newState[guid],
-      info: payload.endpoints.cf[guid],
-      connectionStatus: endpointInfo ? endpointInfo.user ? 'connected' : 'disconnected' : 'unknown'
+      ...endpointInfo
     };
   });
   return newState;

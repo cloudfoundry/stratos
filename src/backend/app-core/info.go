@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/labstack/echo"
 )
 
@@ -19,11 +19,17 @@ type Endpoint struct {
 
 // Info - this represents user specific info
 type Info struct {
-	Versions     *Versions                       `json:"version"`
-	User         *interfaces.ConnectedUser       `json:"user"`
-	Endpoints    map[string]map[string]*Endpoint `json:"endpoints"`
-	CloudFoundry *interfaces.CFInfo              `json:"cloud-foundry,omitempty"`
-	PluginConfig map[string]string               `json:"plugin-config,omitempty"`
+	Versions     *Versions                             `json:"version"`
+	User         *interfaces.ConnectedUser             `json:"user"`
+	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
+	CloudFoundry *interfaces.CFInfo                    `json:"cloud-foundry,omitempty"`
+	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
+}
+
+// Extends CNSI Record and adds the user
+type EndpointDetail struct {
+	*interfaces.CNSIRecord
+	User *interfaces.ConnectedUser `json:"user"`
 }
 
 func (p *portalProxy) info(c echo.Context) error {
@@ -58,7 +64,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 	s := &Info{
 		Versions:     versions,
 		User:         uaaUser,
-		Endpoints:    make(map[string]map[string]*Endpoint),
+		Endpoints:    make(map[string]map[string]*EndpointDetail),
 		CloudFoundry: p.Config.CloudFoundryInfo,
 		PluginConfig: p.Config.PluginConfig,
 	}
@@ -69,15 +75,14 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 			// Plugin doesn't implement an Endpoint Plugin interface, skip
 			continue
 		}
-		s.Endpoints[endpointPlugin.GetType()] = make(map[string]*Endpoint)
+		s.Endpoints[endpointPlugin.GetType()] = make(map[string]*EndpointDetail)
 	}
+
 	// get the CNSI Endpoints
 	cnsiList, _ := p.buildCNSIList(c)
 	for _, cnsi := range cnsiList {
-		endpoint := &Endpoint{
-			GUID: cnsi.GUID,
-			Name: cnsi.Name,
-		}
+		// Extend the CNSI record
+		endpoint := &EndpointDetail{CNSIRecord: cnsi}
 		// try to get the user info for this cnsi for the user
 		cnsiUser, ok := p.GetCNSIUser(cnsi.GUID, userGUID)
 		if ok {
