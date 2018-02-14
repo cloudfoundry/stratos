@@ -3,7 +3,7 @@ import { createNewPaginationSection } from './pagination-reducer-create-paginati
 import { getDefaultPaginationEntityState } from './pagination.reducer';
 import { PaginationState } from '../../types/pagination.types';
 
-fdescribe('CreatePaginationActionReducer', () => {
+describe('CreatePaginationActionReducer', () => {
   const entityKey = 'entityKey';
   it('should return exact state', () => {
     const paginationState: PaginationState = {

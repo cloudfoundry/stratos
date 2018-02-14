@@ -29,6 +29,7 @@ import { PercentagePipe } from '../../pipes/percentage.pipe';
 import { TableRowComponent } from './list-table/table-row/table-row.component';
 import { RunningInstancesComponent } from '../running-instances/running-instances.component';
 import { ListConfig } from './list.component.types';
+import { MetaCardModule } from './list-cards/meta-card/meta-card.module';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -57,12 +58,13 @@ describe('ListComponent', () => {
         UsageGaugeComponent,
         PercentagePipe,
         TableRowComponent,
-        RunningInstancesComponent,
+        RunningInstancesComponent
       ],
       imports: [
         CoreModule,
         createBasicStoreModule(),
-        NoopAnimationsModule
+        NoopAnimationsModule,
+        MetaCardModule
       ],
     })
       .compileComponents();

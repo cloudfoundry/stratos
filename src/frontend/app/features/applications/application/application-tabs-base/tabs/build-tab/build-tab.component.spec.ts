@@ -19,6 +19,7 @@ import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { endpointStoreNames } from '../../../../../../store/types/endpoint.types';
 import { RoutesComponent } from '../../../../routes/routes.component';
+import { MetaCardModule } from '../../../../../../shared/components/list/list-cards/meta-card/meta-card.module';
 
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
@@ -42,7 +43,7 @@ describe('BuildTabComponent', () => {
           {
             initialState
           }
-        ),
+        )
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

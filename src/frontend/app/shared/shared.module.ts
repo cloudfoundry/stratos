@@ -6,7 +6,9 @@ import { RouterModule } from '@angular/router';
 import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
-import { ApplicationStateIconComponent } from './components/application-state/application-state-icon/application-state-icon.component';
+import {
+  ApplicationStateIconComponent,
+} from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
@@ -14,6 +16,9 @@ import { CardAppInstancesComponent } from './components/cards/card-app-instances
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
+import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
+import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
+import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
@@ -27,11 +32,16 @@ import { EndpointsMissingComponent } from './components/endpoints-missing/endpoi
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
 /* tslint:disable:max-line-length */
-import { AppEventDetailDialogComponentComponent } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+import {
+  AppEventDetailDialogComponentComponent,
+} from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 /* tslint:enable:max-line-length */
-
+import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
+import { MetaCardModule } from './components/list/list-cards/meta-card/meta-card.module';
 import { listTableComponents } from './components/list/list-table/table.types';
-import { EventTabActorIconPipe } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import {
+  EventTabActorIconPipe,
+} from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -50,22 +60,13 @@ import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
+import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
-import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
-import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
-import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
-import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
-import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
-import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 
 @NgModule({
   imports: [
@@ -76,7 +77,8 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule
+    CdkTableModule,
+    MetaCardModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -122,12 +124,7 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    EndpointCardComponent,
-    MetaCardComponent,
-    MetaCardTitleComponent,
-    MetaCardItemComponent,
-    MetaCardKeyComponent,
-    MetaCardValueComponent
+    EndpointCardComponent
   ],
   exports: [
     FormsModule,
@@ -169,7 +166,8 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
     ListComponent,
     CardCfUsageComponent,
     CardCfInfoComponent,
-    CardCfUserInfoComponent
+    CardCfUserInfoComponent,
+    MetaCardModule
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
