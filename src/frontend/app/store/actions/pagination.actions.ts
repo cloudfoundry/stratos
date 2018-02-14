@@ -1,14 +1,6 @@
-import { AppState } from '../app-state';
-import { Action, compose } from '@ngrx/store';
-import {
-  PaginationAction,
-  // PaginationEntityState,
-  PaginationEntityTypeState,
-  PaginationParam,
-  PaginationState,
-  PaginationClientFilter,
-} from '../types/pagination.types';
-import { ListFilter } from './list.actions';
+import { Action } from '@ngrx/store';
+
+import { PaginationAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';

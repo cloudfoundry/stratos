@@ -22,7 +22,7 @@ import {
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
 import { defaultCfEntitiesState } from '../../types/entity.types';
-import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import { PaginationEntityState, PaginationState, PaginationEntityTypeState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';

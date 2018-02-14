@@ -1,11 +1,12 @@
 import { CreatePagination } from '../../actions/pagination.actions';
 import { createNewPaginationSection } from './pagination-reducer-create-pagination';
 import { getDefaultPaginationEntityState } from './pagination.reducer';
+import { PaginationState } from '../../types/pagination.types';
 
 fdescribe('CreatePaginationActionReducer', () => {
   const entityKey = 'entityKey';
   it('should return exact state', () => {
-    const paginationState = {
+    const paginationState: PaginationState = {
       [entityKey]: {
         paginationKey: getDefaultPaginationEntityState()
       }
@@ -15,7 +16,7 @@ fdescribe('CreatePaginationActionReducer', () => {
       'paginationKey'
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
-    expect(paginationState).toBe(state);
+    expect(paginationState).toEqual(state);
   });
 
   it('should return newly created state', () => {
@@ -50,7 +51,7 @@ fdescribe('CreatePaginationActionReducer', () => {
         message: 'OK'
       }
     };
-    const paginationState = {
+    const paginationState: PaginationState = {
       [entityKey]: {
         paginationKey: {
           ...getDefaultPaginationEntityState(),
@@ -61,11 +62,10 @@ fdescribe('CreatePaginationActionReducer', () => {
     };
     const action = new CreatePagination(
       entityKey,
-      'newPaginationKey'
+      paginationKey,
+      'paginationKey'
     );
     const state = createNewPaginationSection(paginationState, action, getDefaultPaginationEntityState());
-    console.log(state[entityKey][paginationKey].ids);
-    console.log(paginationState[entityKey]['paginationKey'].ids);
     expect(paginationState[entityKey]['paginationKey'].ids).toEqual(state[entityKey][paginationKey].ids);
     expect(paginationState[entityKey]['paginationKey'].pageRequests).toEqual(state[entityKey][paginationKey].pageRequests);
   });

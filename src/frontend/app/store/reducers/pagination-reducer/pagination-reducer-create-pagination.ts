@@ -9,7 +9,8 @@ import { PaginationEntityState, PaginationState } from '../../types/pagination.t
  * @param action
  * @param defaultState The default state to create the pagination section with.
  */
-export function createNewPaginationSection(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState) {
+export function createNewPaginationSection(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState)
+  : PaginationState {
   if (state[action.entityKey][action.paginationKey] && !action.seed) {
     return state;
   }
@@ -19,7 +20,7 @@ export function createNewPaginationSection(state: PaginationState, action: Creat
   return mergeWithSeed(state, action, defaultState);
 }
 
-function createNew(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState) {
+function createNew(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState): PaginationState {
   return {
     ...state,
     [action.entityKey]: {
@@ -29,7 +30,7 @@ function createNew(state: PaginationState, action: CreatePagination, defaultStat
   };
 }
 
-function mergeWithSeed(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState) {
+function mergeWithSeed(state: PaginationState, action: CreatePagination, defaultState: PaginationEntityState): PaginationState {
   const newState = { ...state };
   const currentPagination = state[action.entityKey][action.paginationKey] || defaultState;
   const seeded = action.seed && state[action.entityKey] && state[action.entityKey][action.seed];

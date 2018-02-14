@@ -144,11 +144,11 @@ function getObservables<T = any>(
       fetchPagination$
     )
       .pipe(
-      filter(([ent, pagination]) => {
-        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
-      }),
-      switchMap(() => paginationMonitor.currentPage$),
-      shareReplay(1)
+        filter(([ent, pagination]) => {
+          return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+        }),
+        switchMap(() => paginationMonitor.currentPage$),
+        shareReplay(1)
       );
 
   return {
