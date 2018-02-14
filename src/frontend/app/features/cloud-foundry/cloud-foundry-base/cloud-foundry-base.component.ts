@@ -6,6 +6,7 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { AppState } from '../../../store/app-state';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { tap } from 'rxjs/operators';
+import { CloudFoundryService } from '../cloud-foundry.service';
 
 const cfEndpointServiceFactory = (
   store: Store<AppState>,
@@ -29,7 +30,7 @@ const cfEndpointServiceFactory = (
   ]
 })
 export class CloudFoundryBaseComponent implements OnInit {
-  constructor() {}
+  constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 }
