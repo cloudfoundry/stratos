@@ -2,8 +2,8 @@ import { IRequestArray } from '../reducers/api-request-reducer/types';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { Schema } from 'normalizr';
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
-import { PaginatedAction } from './pagination.types';
-import { NormalizedResponse } from './api.types';
+import { PaginatedAction, PaginationAction } from './pagination.types';
+import { NormalizedResponse, APIResource } from './api.types';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
 
@@ -29,6 +29,11 @@ export enum RequestEntityLocation {
   OBJECT, // The response is the entity
 }
 
+export class IValidateParam {
+  path: string;
+  createAction: (entity: APIResource) => PaginatedAction;
+}
+
 export interface IRequestAction extends RequestAction {
   entity?: Schema;
   entityKey: string;
@@ -40,6 +45,8 @@ export interface IRequestAction extends RequestAction {
   // For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
   // like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
   removeEntityOnDelete?: boolean;
+  // A collection of params that must exist in the response. If missing dispatch the associated paginated action to fetch
+  validateResponse?: IValidateParam[];
 }
 
 export interface IStartRequestAction {

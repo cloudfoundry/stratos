@@ -12,41 +12,41 @@ export class UtilsService {
      *
      */
   public urlValidationExpression =
-  '^' +
-  // protocol identifier
-  'http(s)?://' +
-  // user:pass authentication
-  '(?:\\S+(?::\\S*)?@)?' +
-  '(?:' +
-  // IP address exclusion
-  // private & local networks
-  '(?!(?:10|127)(?:\\.\\d{1,3}){3})' +
-  '(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})' +
-  '(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})' +
-  // IP address dotted notation octets
-  // excludes loopback network 0.0.0.0
-  // excludes reserved space >= 224.0.0.0
-  // excludes network & broadcast addresses
-  // (first & last IP address of each class)
-  '(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])' +
-  '(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}' +
-  '(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))' +
-  '|' +
-  // host name
-  '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
-  // domain name
-  '(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*' +
-  // TLD identifier
-  '(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))' +
-  // TLD may end with dot
-  '\\.?' +
-  ')' +
-  // port number
-  '(?::\\d{2,5})?' +
-  // resource path
-  '(?:[/?#]\\S*)?' +
-  '$'
-  ;
+    '^' +
+    // protocol identifier
+    'http(s)?://' +
+    // user:pass authentication
+    '(?:\\S+(?::\\S*)?@)?' +
+    '(?:' +
+    // IP address exclusion
+    // private & local networks
+    '(?!(?:10|127)(?:\\.\\d{1,3}){3})' +
+    '(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})' +
+    '(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})' +
+    // IP address dotted notation octets
+    // excludes loopback network 0.0.0.0
+    // excludes reserved space >= 224.0.0.0
+    // excludes network & broadcast addresses
+    // (first & last IP address of each class)
+    '(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])' +
+    '(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}' +
+    '(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))' +
+    '|' +
+    // host name
+    '(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)' +
+    // domain name
+    '(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*' +
+    // TLD identifier
+    '(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))' +
+    // TLD may end with dot
+    '\\.?' +
+    ')' +
+    // port number
+    '(?::\\d{2,5})?' +
+    // resource path
+    '(?:[/?#]\\S*)?' +
+    '$'
+    ;
 
   constructor() { }
 
@@ -146,14 +146,14 @@ export class UtilsService {
     const hours = Math.floor(uptime / 3600);
     uptime = uptime % 3600;
     const minutes = Math.floor(uptime / 60);
-    const  seconds = uptime % 60;
+    const seconds = uptime % 60;
 
     return (
       this.formatPart(days, 'd', 'd') +
       this.formatPart(hours, 'h', 'h') +
       this.formatPart(minutes, 'm', 'm') +
       this.formatPart(seconds, 's', 's')
-      .trim()
+        .trim()
     );
   }
 
@@ -180,6 +180,21 @@ export class UtilsService {
     }
     const val = (value * 100).toFixed(decimals);
     return val + '%';
+  }
+
+  /**
+   * Return the value in the object for the given dot separated param path
+   */
+  path(path: string, object: any): any {
+    const params = path.split('.');
+
+    let index = 0;
+    const length = params.length;
+
+    while (object !== null && object !== undefined && index < length) {
+      object = object[params[index++]];
+    }
+    return (index && index === length) ? object : undefined;
   }
 
 }

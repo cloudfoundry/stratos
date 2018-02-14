@@ -68,7 +68,7 @@ export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actsionType): PaginationEntityState {
+  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
         return paginationStart(state, action);

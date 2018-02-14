@@ -103,27 +103,27 @@ export class APIEffect {
 
     return request
       .mergeMap(response => {
-        response = this.handleMultiEndpoints(response, paginatedAction);
+        response = this.handleMultiEndpoints(response, actionClone);
         const { entities, totalResults, totalPages } = response;
         const actions = [];
-        actions.push({ type: paginatedAction.actions[1], apiAction: paginatedAction });
+        actions.push({ type: actionClone.actions[1], apiAction: actionClone });
         actions.push(new WrapperRequestActionSuccess(
           entities,
-          paginatedAction,
+          actionClone,
           requestType,
           totalResults,
           totalPages
         ));
 
         if (
-          !paginatedAction.updatingKey &&
-          paginatedAction.options.method === 'post' || paginatedAction.options.method === RequestMethod.Post ||
-          paginatedAction.options.method === 'delete' || paginatedAction.options.method === RequestMethod.Delete
+          !actionClone.updatingKey &&
+          actionClone.options.method === 'post' || actionClone.options.method === RequestMethod.Post ||
+          actionClone.options.method === 'delete' || actionClone.options.method === RequestMethod.Delete
         ) {
-          if (paginatedAction.removeEntityOnDelete) {
-            actions.unshift(new ClearPaginationOfEntity(paginatedAction.entityKey, paginatedAction.guid));
+          if (actionClone.removeEntityOnDelete) {
+            actions.unshift(new ClearPaginationOfEntity(actionClone.entityKey, actionClone.guid));
           } else {
-            actions.unshift(new ClearPaginationOfType(paginatedAction.entityKey));
+            actions.unshift(new ClearPaginationOfType(actionClone.entityKey));
           }
         }
 
@@ -131,10 +131,10 @@ export class APIEffect {
       })
       .catch(err => {
         return [
-          { type: paginatedAction.actions[2], apiAction: paginatedAction },
+          { type: actionClone.actions[2], apiAction: actionClone },
           new WrapperRequestActionFailed(
             err.message,
-            paginatedAction,
+            actionClone,
             requestType
           )
         ];

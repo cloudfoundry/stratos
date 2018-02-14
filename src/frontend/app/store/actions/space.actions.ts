@@ -2,6 +2,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { SpaceSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './action-types';
+import { PaginatedAction } from '../types/pagination.types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -28,19 +29,20 @@ export class GetSpace extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
-export class GetAllSpaces extends CFStartAction implements ICFAction {
-  constructor(public paginationKey?: string) {
+export class GetAllSpaces extends CFStartAction implements PaginatedAction {
+  constructor(public paginationKey: string, public cnsi?: string) {
     super();
     this.options = new RequestOptions();
-    this.options.url = 'space';
+    this.options.url = 'spaces';
     this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.options.params.set('page', '1');
-    this.options.params.set('results-per-page', '100');
-    this.options.params.set('inline-relations-depth', '1');
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
   entity = [SpaceWithOrganisationSchema];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
+  flattenPagination = true;
+  initialParams = {
+    'results-per-page': 100,
+    'inline-relations-depth': '1'
+  };
 }
