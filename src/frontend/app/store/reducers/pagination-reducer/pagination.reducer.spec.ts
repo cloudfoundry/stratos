@@ -111,8 +111,8 @@ describe('PaginationReducer', () => {
       {
         entities: {},
         result: [
-          1,
-          2
+          '1',
+          '2'
         ]
       },
       {
@@ -148,7 +148,7 @@ describe('PaginationReducer', () => {
           totalResults: 2,
           currentPage: 1,
           ids: {
-            1: [1, 2]
+            1: ['1', '2']
           },
           pageRequests: { 1: { busy: false, error: false, message: '' } },
           clientPagination: {

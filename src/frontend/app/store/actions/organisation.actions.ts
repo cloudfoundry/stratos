@@ -39,6 +39,24 @@ export class GetOrganisation extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
+export class GetAllOrganisationSpaces extends CFStartAction implements PaginatedAction {
+  constructor(public paginationKey: string, public orgGuid: string, public cnsi: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `organizations/${orgGuid}/spaces`;
+    this.options.method = 'get';
+  }
+  actions = [GET_ORGANISATION_SPACES, GET_ORGANISATION_SPACES_SUCCESS, GET_ORGANISATION_SPACES_FAILED];
+  entity = [SpaceWithOrganisationSchema];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+  flattenPagination = true;
+  initialParams = {
+    'results-per-page': 100,
+    'inline-relations-depth': '1'
+  };
+}
+
 export class GetAllOrganisations extends CFStartAction implements PaginatedAction {
   constructor(public paginationKey: string) {
     super();
@@ -68,22 +86,4 @@ export class GetAllOrganisations extends CFStartAction implements PaginatedActio
       }
     }
   ];
-}
-
-export class GetAllOrganisationSpaces extends CFStartAction implements PaginatedAction {
-  constructor(public paginationKey: string, public orgGuid: string, public cnsi: string) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${orgGuid}/spaces`;
-    this.options.method = 'get';
-  }
-  actions = [GET_ORGANISATION_SPACES, GET_ORGANISATIONS_SUCCESS, GET_ORGANISATIONS_FAILED];
-  entity = [SpaceWithOrganisationSchema];
-  entityKey = spaceSchemaKey;
-  options: RequestOptions;
-  flattenPagination = true;
-  initialParams = {
-    'results-per-page': 100,
-    'inline-relations-depth': '1'
-  };
 }
