@@ -8,8 +8,9 @@ import { getPaginationObservables, getCurrentPageRequestInfo } from '../../store
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { GetAllOrganisations } from '../../store/actions/organisation.actions';
-import { OrganisationWithSpaceSchema } from '../../store/actions/action-types';
+import { GetAllOrganisations, GetAllOrganisationSpaces } from '../../store/actions/organisation.actions';
+import { OrganisationWithSpaceSchema, SpaceSchema } from '../../store/actions/action-types';
+import { withLatestFrom, mergeMap, map } from 'rxjs/operators';
 
 export interface CfOrgSpaceItem {
   list$: Observable<EndpointModel[] | any[]>;
@@ -130,7 +131,23 @@ export class CfOrgSpaceDataService {
       });
 
     this.space = {
-      list$: spaceList$,
+      list$: this.org.select.asObservable().pipe(
+        withLatestFrom(this.cf.select.asObservable()),
+        mergeMap(([selectedOrgGuid, selectedCfGuid]) => {
+          const paginationKey = `org-${selectedOrgGuid}`;
+          const action = new GetAllOrganisationSpaces(paginationKey, selectedOrgGuid, selectedCfGuid);
+          return getPaginationObservables({
+            store: this.store,
+            action: action,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              paginationKey,
+              SpaceSchema
+            )
+          },
+            true
+          ).entities$.map(resources => resources.map(resource => resource.entity));
+        })
+      ),
       loading$: this.org.loading$,
       select: new BehaviorSubject(undefined),
     };
