@@ -254,7 +254,6 @@ function buildPostflightJob {
              -e USER_NAME=$(id -nu) \
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
-             -e BUILD_DB_MIGRATOR="true" \
              --name stratos-proxy-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
              ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}

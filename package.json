@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "build-backend": "gulp build-backend",
-    "build-migrator": "gulp build-migrator",
     "cf-get-backend-deps": "gulp cf-get-backend-deps",
     "cf-build-backend": "gulp cf-build-backend",
     "bosh-build-backend": "gulp bosh-build-backend",
