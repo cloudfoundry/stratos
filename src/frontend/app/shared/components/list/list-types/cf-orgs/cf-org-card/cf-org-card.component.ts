@@ -6,9 +6,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
-import {
-  CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
@@ -17,7 +15,10 @@ import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { CfQuotaDefinition, CfOrg } from '../../../../../../store/types/org-and-space.types';
+import {
+  CfQuotaDefinition,
+  CfOrg
+} from '../../../../../../store/types/org-and-space.types';
 
 @Component({
   selector: 'app-cf-org-card',
@@ -26,6 +27,7 @@ import { CfQuotaDefinition, CfOrg } from '../../../../../../store/types/org-and-
 })
 export class CfOrgCardComponent extends TableCellCustom<APIResource>
   implements OnInit, OnDestroy {
+  normalisedMemoryUsage: number;
   memoryLimit: number;
   instancesLimit: number;
   subscriptions: Subscription[] = [];
@@ -35,7 +37,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
   appCount: number;
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
-  hasLoaded$ =  new BehaviorSubject<boolean>(false);
+  hasLoaded$ = new BehaviorSubject<boolean>(false);
   @Input('row') row: APIResource<CfOrg>;
 
   constructor(
@@ -49,7 +51,6 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
   }
 
   ngOnInit() {
-
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         return this.cfUserService.getUserRoleInOrg(
@@ -61,20 +62,23 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
       map(u => getOrgRolesString(u))
     );
 
-   const fetchData$ = Observable.combineLatest(
+    const fetchData$ = Observable.combineLatest(
       userRole$,
-      this.cfEndpointService.getAppsInOrg(this.row),
+      this.cfEndpointService.getAppsInOrg(this.row)
     ).pipe(
       tap(([role, apps]) => {
         this.userRolesInOrg = role;
         this.setCounts(apps);
-        this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
+        this.memoryTotal = this.cfEndpointService.getMetricFromApps(
+          apps,
+          'memory'
+        );
 
         // get Quota data
         const quotaDefinition = this.row.entity.quota_definition;
         this.instancesLimit = quotaDefinition.entity.app_instance_limit;
         this.memoryLimit = quotaDefinition.entity.memory_limit;
-
+        this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
 
         this.hasLoaded$.next(true);
       })

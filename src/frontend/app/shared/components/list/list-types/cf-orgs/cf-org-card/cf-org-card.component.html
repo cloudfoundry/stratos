@@ -16,6 +16,7 @@
       </div>
       <div class="org-card__content__meta">
         <app-metadata-item label="Memory Info"> {{ this.memoryTotal | MbToHumanSize }} / {{ this.memoryLimit | MbToHumanSize }}</app-metadata-item>
+        <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
       </div>
     </mat-card-content>
     <mat-menu #menu="matMenu">
