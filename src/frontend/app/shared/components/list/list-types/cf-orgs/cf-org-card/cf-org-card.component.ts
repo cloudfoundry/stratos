@@ -19,6 +19,7 @@ import {
   CfQuotaDefinition,
   CfOrg
 } from '../../../../../../store/types/org-and-space.types';
+import { CfApplication } from '../../../../../../store/types/application.types';
 
 @Component({
   selector: 'app-cf-org-card',
@@ -67,19 +68,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
       this.cfEndpointService.getAppsInOrg(this.row)
     ).pipe(
       tap(([role, apps]) => {
-        this.userRolesInOrg = role;
-        this.setCounts(apps);
-        this.memoryTotal = this.cfEndpointService.getMetricFromApps(
-          apps,
-          'memory'
-        );
-
-        // get Quota data
-        const quotaDefinition = this.row.entity.quota_definition;
-        this.instancesLimit = quotaDefinition.entity.app_instance_limit;
-        this.memoryLimit = quotaDefinition.entity.memory_limit;
-        this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
-
+        this.setValues(role, apps);
         this.hasLoaded$.next(true);
       })
     );
@@ -87,14 +76,23 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource>
     this.subscriptions.push(fetchData$.subscribe());
   }
 
+  setCounts = (apps: APIResource<any>[]) => {
+    this.appCount = apps.length;
+    let count = 0;
+    apps.forEach(a => {
+      count += a.entity.instances;
+    });
+    this.instancesCount = count;
+  }
 
-  setCounts =  (apps: APIResource<any>[]) => {
-      this.appCount = apps.length;
-      let count = 0;
-      apps.forEach(a => {
-        count += a.entity.instances;
-      });
-      this.instancesCount = count;
+  setValues = (role: string, apps: APIResource<CfApplication>[]) => {
+    this.userRolesInOrg = role;
+    this.setCounts(apps);
+    this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
+    const quotaDefinition = this.row.entity.quota_definition;
+    this.instancesLimit = quotaDefinition.entity.app_instance_limit;
+    this.memoryLimit = quotaDefinition.entity.memory_limit;
+    this.normalisedMemoryUsage = this.memoryTotal / this.memoryLimit * 100;
   }
 
   ngOnDestroy(): void {
