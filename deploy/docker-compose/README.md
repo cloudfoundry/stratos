@@ -1,6 +1,6 @@
 # Deploying with Docker Compose
 
-The following guide details how to deploy the Stratos UI Console in a local docker environment using Docker Compose.
+The following guide details how to deploy Stratos in a local docker environment using Docker Compose.
 
 ## Requirements:
 
