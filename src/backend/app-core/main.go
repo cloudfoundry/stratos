@@ -25,13 +25,13 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
 
-	"github.com/SUSE/stratos-ui/app-core/config"
-	"github.com/SUSE/stratos-ui/app-core/datastore"
-	"github.com/SUSE/stratos-ui/app-core/repository/cnsis"
-	"github.com/SUSE/stratos-ui/app-core/repository/console_config"
-	"github.com/SUSE/stratos-ui/app-core/repository/crypto"
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
-	"github.com/SUSE/stratos-ui/app-core/repository/tokens"
+	"github.com/SUSE/stratos-ui/config"
+	"github.com/SUSE/stratos-ui/datastore"
+	"github.com/SUSE/stratos-ui/repository/cnsis"
+	"github.com/SUSE/stratos-ui/repository/console_config"
+	"github.com/SUSE/stratos-ui/repository/crypto"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/tokens"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -69,6 +69,12 @@ func main() {
 
 	// Register time.Time in gob
 	gob.Register(time.Time{})
+
+	// Check to see if we are running as the database migrator
+	if migrateDatabase() {
+		// End execution
+		return
+	}
 
 	// Load the portal configuration from env vars
 	var portalConfig interfaces.PortalConfig

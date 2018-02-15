@@ -95,24 +95,17 @@
   }
 
   function buildPlugin(pluginPath, pluginName) {
-    var goFiles = _.filter(fs.readdirSync(pluginPath), function (file) {
-      return path.extname(file) === '.go';
-    });
-
     pluginsToInclude.push({
       name: pluginName,
-      path: pluginPath,
-      files: goFiles
+      path: pluginPath
     });
     return Q.resolve();
   }
 
-  function build(srcPath, exeName, skipPlugins) {
+  function build(srcPath, exeName) {
     var args = ['build', '-i', '-o', exeName];
 
-    if (!skipPlugins) {
-      prepareBuildWithoutPluginSupport(srcPath);
-    }
+    prepareBuildWithoutPluginSupport(srcPath);
 
     // Set the console version from that of the package.json and the git commit
     return getVersion().then(function (version) {
@@ -154,32 +147,18 @@
     var inits = '';
 
     _.each(pluginsToInclude, function (plugin) {
-      var pkgName = 'plugin_' + plugin.name;
-      pkgName = replaceAll(pkgName, '-', '');
-
+      var pkgName = replaceAll(plugin.name, '-', '');
       var destPath = path.join(srcPath, pkgName);
 
-      _.each(plugin.files, function (name) {
-        var src = path.join(plugin.path, name);
-        var dest = path.join(destPath, name);
-        fs.mkdirpSync(destPath);
-
-        var data = fs.readFileSync(src);
-        // Re-write the package for the plugin's files
-        if (data.indexOf('package main') === 0) {
-          data = 'package ' + pkgName + data.toString().substring(12);
-        }
-        fs.writeFileSync(dest, data);
-      });
-
-      imports += '\t"github.com/SUSE/stratos-ui/app-core/' + pkgName + '"\n';
+      imports += '\t"github.com/SUSE/stratos-ui/plugins/' + pkgName + '"\n';
       inits += '\tplugin, _ = ' + pkgName + '.Init(pp)\n\tpp.Plugins["' + pkgName + '"] = plugin\n';
       inits += '\tlog.Info("Loaded plugin: ' + plugin.name + '")\n';
     });
 
     // Patch the static plugin loader
+    var pluginLoaderTemplate = path.join(srcPath, 'load_plugins.go.tmpl');
     var pluginLoader = path.join(srcPath, 'load_plugins.go');
-    var loader = fs.readFileSync(pluginLoader).toString();
+    var loader = fs.readFileSync(pluginLoaderTemplate).toString();
     loader = loader.replace('//@@IMPORTS@@', imports);
     loader = loader.replace('//@@INITS@@', inits);
     fs.writeFileSync(pluginLoader, loader);

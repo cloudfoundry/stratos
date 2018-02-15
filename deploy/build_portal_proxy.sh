@@ -6,17 +6,12 @@
 set -x
 
 pushd $(git rev-parse --show-toplevel)
-BUILD_ARGS=""
-if [ ! -z "${BUILD_MIGRATOR}" ]; then
-          BUILD_ARGS='-e BUILD_DB_MIGRATOR="true"'
-fi
 
 docker run -it \
            --rm \
            -e USER_NAME=$(id -nu) \
            -e USER_ID=$(id -u)  \
            -e GROUP_ID=$(id -g) \
-            ${BUILD_ARGS} \
            --name stratos-jetstream-builder \
            --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
            splatform/stratos-jetstream-builder:opensuse $*

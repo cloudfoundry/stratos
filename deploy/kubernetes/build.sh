@@ -254,7 +254,6 @@ function buildPostflightJob {
              -e USER_NAME=$(id -nu) \
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
-             -e BUILD_DB_MIGRATOR="true" \
              --name stratos-jetstream-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
              ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:${BASE_IMAGE_TAG}

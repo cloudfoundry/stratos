@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/SUSE/stratos-ui/app-core/config"
+	"github.com/SUSE/stratos-ui/config"
 	log "github.com/Sirupsen/logrus"
 )
 
