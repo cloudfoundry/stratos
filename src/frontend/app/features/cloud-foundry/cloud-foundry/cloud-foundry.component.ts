@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { first, tap } from 'rxjs/operators';
+import { first, tap, map, filter } from 'rxjs/operators';
 
 import {
   CFEndpointsListConfigService,
@@ -9,6 +9,7 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 import { AppState } from '../../../store/app-state';
 import { CloudFoundryService } from '../cloud-foundry.service';
 import { RouterNav } from '../../../store/actions/router.actions';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-cloud-foundry',
@@ -20,23 +21,25 @@ import { RouterNav } from '../../../store/actions/router.actions';
   }]
 })
 export class CloudFoundryComponent {
+  hasOneCf$: Observable<boolean>;
   constructor(
     private store: Store<AppState>,
     private cfService: CloudFoundryService
   ) {
-    cfService.cFEndpoints$.pipe(
-      tap(cfEndpoints => {
+    this.hasOneCf$ = cfService.cFEndpoints$.pipe(
+      map(cfEndpoints => {
         const connectedEndpoints = cfEndpoints.filter(
           c => c.connectionStatus === 'connected'
         );
-        if (connectedEndpoints.length === 1) {
-          this.store.dispatch(
-            new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] })
-          );
+        const hasOne = connectedEndpoints.length === 1;
+        if (hasOne) {
+          this.store.dispatch(new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] }));
         }
+        return connectedEndpoints.length === 1;
       }),
+      filter(hasOne => !hasOne),
       first()
-    ).subscribe();
+    );
 
   }
 }
