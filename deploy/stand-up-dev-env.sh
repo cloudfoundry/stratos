@@ -71,6 +71,13 @@ function uaa_downloads {
     ./uaa/prepare.sh
 }
 
+function dev_certs {
+    CERTS_PATH="${PROG_DIR}/../dev-certs"
+    if [ ! -d "${CERTS_PATH}" ]; then
+        CERTS_PATH=${CERTS_PATH} ./tools/generate_cert.sh
+    fi
+}
+
 function build {
     echo "===== Building the portal proxy"
     export USER_ID=$(id -u)
@@ -131,6 +138,7 @@ if [ "$CLEAN" = true ] ; then
     clean
 fi
 uaa_downloads
+dev_certs
 build
 docker ps
 popd
