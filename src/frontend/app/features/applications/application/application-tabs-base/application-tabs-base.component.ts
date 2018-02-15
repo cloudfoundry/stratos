@@ -115,8 +115,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.entityServiceAppRefresh$ = this.entityService
       .poll(10000, this.autoRefreshString)
       .do(({ resource }) => {
+        this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
         if (resource && resource.entity && resource.entity.state === 'STARTED') {
-          this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
           this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
         }
       })
