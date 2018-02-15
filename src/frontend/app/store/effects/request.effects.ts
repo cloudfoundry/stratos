@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Effect, Actions } from '@ngrx/effects';
-import { RequestSuccessAction, IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
-import { RequestTypes } from '../actions/request.actions';
+import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
+
 import { UtilsService } from '../../core/utils.service';
+import { SchemaEntityWithInline } from '../actions/action-types';
 import { SetInitialParams } from '../actions/pagination.actions';
+import { RequestTypes } from '../actions/request.actions';
+import { AppState } from '../app-state';
 import { pick } from '../helpers/reducer.helper';
+import { WrapperRequestActionSuccess } from '../types/request.types';
 
 @Injectable()
 export class RequestEffect {
@@ -18,13 +20,18 @@ export class RequestEffect {
 
   @Effect() requestSuccess$ = this.actions$.ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS)
     .mergeMap(action => {
-      const validateResponse = action.apiAction.validateResponse;
-      const response = action.response;
-      let entities;
-      if (validateResponse) {
-        entities = this.utils.path(`entities.${action.apiAction.entityKey}`, response) || {};
-        entities = Object.values(entities);
+      if (!action.apiAction || !action.apiAction.entity) {
+        return [];
       }
+      const entityWithInline = action.apiAction.entity as SchemaEntityWithInline;
+      if (!entityWithInline.validateInline || entityWithInline.validateInline.length) {
+        return [];
+      }
+
+      const validateInlineEntities = entityWithInline.validateInline;
+      const response = action.response;
+      let entities = this.utils.path(`entities.${action.apiAction.entityKey}`, response) || {};
+      entities = Object.values(entities);
 
       if (!entities || !entities.length) {
         return [];
@@ -32,7 +39,7 @@ export class RequestEffect {
 
       let actions = [];
       entities.forEach(entity => {
-        validateResponse.forEach(validateParam => {
+        validateInlineEntities.forEach(validateParam => {
           const paramAction = validateParam.createAction(entity);
           const paramValue = this.utils.path(validateParam.path, entity);
           if (paramValue) {

@@ -1,11 +1,13 @@
 import { RequestOptions } from '@angular/http';
 
+import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import {
+  SchemaEntityWithInline,
   OrganisationSchema,
   organisationSchemaKey,
-  OrganisationWithSpaceSchema,
+  SpaceSchema,
   spaceSchemaKey,
   SpaceWithOrganisationSchema,
 } from './action-types';
@@ -78,12 +80,19 @@ export class GetAllOrganisations extends CFStartAction implements PaginatedActio
     'inline-relations-depth': 1
   };
   flattenPagination = true;
-  validateResponse = [
-    {
-      path: 'entity.spaces',
-      createAction: (organisation) => {
-        return new GetAllOrganisationSpaces(`org-${organisation.metadata.guid}`, organisation.metadata.guid, organisation.entity.cfGuid);
-      }
-    }
-  ];
 }
+
+export const OrganisationWithSpaceSchema = new SchemaEntityWithInline([
+  {
+    path: 'entity.spaces',
+    createAction: (organisation) => {
+      return new GetAllOrganisationSpaces(`org-${organisation.metadata.guid}`, organisation.metadata.guid, organisation.entity.cfGuid);
+    }
+  }
+], organisationSchemaKey, {
+    entity: {
+      spaces: [SpaceSchema]
+    }
+  }, {
+    idAttribute: getAPIResourceGuid
+  });

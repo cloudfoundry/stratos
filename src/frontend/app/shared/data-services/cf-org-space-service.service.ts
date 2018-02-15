@@ -2,15 +2,22 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
+import { mergeMap, withLatestFrom } from 'rxjs/operators';
 
+import { SpaceSchema } from '../../store/actions/action-types';
+import {
+  GetAllOrganisations,
+  GetAllOrganisationSpaces,
+  OrganisationWithSpaceSchema,
+} from '../../store/actions/organisation.actions';
 import { AppState } from '../../store/app-state';
-import { getPaginationObservables, getCurrentPageRequestInfo } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getCurrentPageRequestInfo,
+  getPaginationObservables,
+} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { GetAllOrganisations, GetAllOrganisationSpaces } from '../../store/actions/organisation.actions';
-import { OrganisationWithSpaceSchema, SpaceSchema } from '../../store/actions/action-types';
-import { withLatestFrom, mergeMap, map } from 'rxjs/operators';
 
 export interface CfOrgSpaceItem {
   list$: Observable<EndpointModel[] | any[]>;
