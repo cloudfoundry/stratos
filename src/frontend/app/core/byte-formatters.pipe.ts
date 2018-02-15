@@ -5,7 +5,6 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class BytesToHumanSize implements PipeTransform {
   transform(value: string): string {
-
     const bytes = parseInt(value, 10);
 
     let retBytes = '';
@@ -17,22 +16,16 @@ export class BytesToHumanSize implements PipeTransform {
     }
     if (bytes >= 1099511627776) {
       retBytes = precisionIfUseful(bytes / 1099511627776) + ' TB';
-    }
-    if (bytes >= 1073741824) {
+    } else if (bytes >= 1073741824) {
       retBytes = precisionIfUseful(bytes / 1073741824) + ' GB';
-    }
-    if (bytes >= 1048576) {
+    } else if (bytes >= 1048576) {
       retBytes = precisionIfUseful(bytes / 1048576) + ' MB';
-    }
-    if (bytes >= 1024) {
+    } else if (bytes >= 1024) {
       retBytes = precisionIfUseful(bytes / 1024) + ' kB';
+    } else if (bytes >= 0) {
+      retBytes = precisionIfUseful(bytes) + ' B';
     }
-
-    if (retBytes !== '') {
-      return retBytes;
-    } else {
-      return precisionIfUseful(bytes) + ' B';
-    }
+    return retBytes;
   }
 }
 
@@ -45,13 +38,11 @@ function precisionIfUseful(size, precision = 1) {
   return fixed;
 }
 
-
 @Pipe({
   name: 'MbToHumanSize'
 })
 export class MegaBytesToHumanSize implements PipeTransform {
   transform(value: string): string {
-
     const mbs = parseInt(value, 10);
     if (!mbs && mbs !== 0) {
       return '';

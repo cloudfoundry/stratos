@@ -1,8 +1,13 @@
-import { RequestOptions } from '@angular/http';
+import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { OrganisationSchema, organisationSchemaKey, OrganisationWithSpaceSchema } from './action-types';
+import {
+  OrganisationSchema,
+  organisationSchemaKey,
+  OrganisationWithSpaceSchema
+} from './action-types';
+import { getActions } from './action.helper';
 
 export const GET_ORGANISATION = '[Organisation] Get one';
 export const GET_ORGANISATION_SUCCESS = '[Organisation] Get one success';
@@ -29,7 +34,8 @@ export class GetOrganisation extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
-export class GetAllOrganisations extends CFStartAction implements PaginatedAction {
+export class GetAllOrganisations extends CFStartAction
+  implements PaginatedAction {
   constructor(public paginationKey: string) {
     super();
     this.options = new RequestOptions();

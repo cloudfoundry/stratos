@@ -22,7 +22,7 @@ import { PercentagePipe } from '../../../pipes/percentage.pipe';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
 
-fdescribe('CardsComponent', () => {
+describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;
   let fixture: ComponentFixture<CardsComponent<EntityInfo>>;
 

@@ -15,6 +15,14 @@ import { CfUserService } from '../shared/data-services/cf-user.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 
+const cfEndpointServiceProviderDeps = [
+  EntityServiceFactory,
+  CfOrgSpaceDataService,
+  CfUserService,
+  PaginationMonitorFactory,
+  EntityMonitorFactory
+];
+
 export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
   return {
     provide: CloudFoundryEndpointService,
@@ -35,22 +43,13 @@ export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
       );
       return appService;
     },
-    deps: [
-      Store,
-      EntityServiceFactory,
-      CfOrgSpaceDataService,
-      CfUserService,
-      PaginationMonitorFactory
-    ]
+    deps: [Store, ...cfEndpointServiceProviderDeps]
   };
 }
 
 export function generateTestCfEndpointService() {
   return [
-    CfOrgSpaceDataService,
-    EntityMonitorFactory,
-    PaginationMonitorFactory,
-    CfUserService,
+    ...cfEndpointServiceProviderDeps,
     generateTestCfEndpointServiceProvider()
   ];
 }
