@@ -22,13 +22,7 @@
   buildUtils.localDevSetup();
 
   gulp.task('get-plugins-data', function (done) {
-    var plugins = prepareBuild.getPlugins();
-    _.each(plugins, function(plugin) {
-      var pluginInfo = {};
-      pluginInfo.pluginPath = plugin;
-      pluginInfo.pluginName = plugin;
-      enabledPlugins.push(pluginInfo);
-    });
+    enabledPlugins = prepareBuild.getPlugins();
     return done();
   });
 
@@ -44,8 +38,9 @@
 
     var promise = Q.resolve();
     _.each(enabledPlugins, function(pluginInfo) {
-      var fullPluginPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.pluginPath);
-      if (fs.existsSync(fullPluginPath)) {
+      var fullPluginPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.name);
+      var glidePluginPath = path.join(fullPluginPath, 'glide.yaml');
+      if (fs.existsSync(glidePluginPath)) {
         promise = promise
           .then(function() {
             return buildUtils.runGlideInstall(fullPluginPath);
@@ -53,16 +48,10 @@
       }
     });
 
-    var fullCorePath = path.join(prepareBuild.getSourcePath());
-
-    if (fs.existsSync(fullCorePath)) {
-      promise = promise.then(function() {
-        return buildUtils.runGlideInstall(fullCorePath);
-      });
-    } else {
-      // Not building core, so ignore plugins as well
-      enabledPlugins = [];
-    }
+    // Run glide install for the main source code
+    promise = promise.then(function() {
+      return buildUtils.runGlideInstall(prepareBuild.getSourcePath());
+    });
 
     promise.then(function () {
       done();
@@ -84,8 +73,9 @@
     var promise = Q.resolve();
     var promises = [];
     _.each(enabledPlugins, function(pluginInfo) {
-      var pluginVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.pluginPath, 'vendor');
-      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.pluginPath, '__vendor');
+      var pluginVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.name, 'vendor');
+      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.name, '__vendor');
+
       // sequentially chain promise
       promise
         .then(function() {
@@ -94,7 +84,9 @@
         })
         .then(function() {
           var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
-          mergeDirs.default(pluginVendorPath, goSrc);
+          if (fs.existsSync(pluginVendorPath)) {
+            mergeDirs.default(pluginVendorPath, goSrc);
+          }
           // If checked in vendors exist, merge does in as well
           if (fs.existsSync(pluginCheckedInVendorPath)) {
             mergeDirs.default(pluginCheckedInVendorPath, goSrc);
@@ -108,22 +100,6 @@
         });
       promises.push(promise);
     });
-
-    // App Core
-    var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'vendor');
-    if (fs.existsSync(coreVendorPath)) {
-      promise = promise.then(function() {
-        var goSrc = path.join(prepareBuild.getGOPATH(), 'src');
-        var coreVendorPath = path.join(prepareBuild.getSourcePath(), 'vendor');
-        var coreCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), '__vendor');
-        mergeDirs.default(coreVendorPath, goSrc);
-        if (fs.existsSync(coreCheckedInVendorPath)) {
-          mergeDirs.default(coreCheckedInVendorPath, goSrc);
-        }
-        fs.removeSync(coreVendorPath);
-        return Q.resolve();
-      });
-    }
 
     Q.all(promises)
       .then(function() {
@@ -139,10 +115,12 @@
     var promise = Q.resolve();
     // Include all plugins
     _.each(enabledPlugins, function(pluginInfo) {
-      var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath);
-      promise = promise.then(function() {
-        return buildUtils.buildPlugin(fullPluginPath, pluginInfo.pluginName);
-      });
+      if (!pluginInfo.isMain) {
+        var fullPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.name);
+        promise = promise.then(function() {
+          return buildUtils.buildPlugin(fullPluginPath, pluginInfo.name);
+        });
+      }
     });
 
     var corePath = conf.getCorePath(prepareBuild.getSourcePath());
@@ -175,16 +153,8 @@
   gulp.task('copy-artefacts', gulp.series('build-all', function (done) {
     var outputPath = conf.outputPath + path.sep;
     var promise = fsEnsureDirQ(outputPath);
-    _.each(enabledPlugins, function(pluginInfo) {
-      var compiledPluginPath = path.join(prepareBuild.getSourcePath(), pluginInfo.pluginPath, pluginInfo.pluginName + '.so');
-      var outputsPluginPath = path.join(outputPath, pluginInfo.pluginName + '.so');
-      promise
-        .then(function() {
-          return fsMoveQ(compiledPluginPath, outputsPluginPath);
-        });
-    });
 
-    // copy core artefact
+    // copy Jetstream executable
     var corePath = path.join(conf.getCorePath(prepareBuild.getSourcePath(), conf.coreName));
     var outputCorePath = path.join(outputPath, conf.coreName);
 

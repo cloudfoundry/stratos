@@ -43,17 +43,28 @@
 
   function getPlugins() {
     var plugins = [];
-    // Enumerate all folders in the src/backend folder
-    var folders = fs.readdirSync(conf.pluginFolder);
-    _.each(folders, function (plugin) {
-      var fPath = path.join(conf.pluginFolder, plugin);
-      var stat = fs.lstatSync(fPath);
-      if (stat.isDirectory() && plugin !== 'app-core') {
-        plugins.push(plugin);
-      }
-    });
+    findPlugins(plugins, conf.pluginFolder);
+    findPlugins(plugins, conf.pluginExtFolder);
     return plugins;
   }
+
+  function findPlugins(plugins, folder) {
+    if (fs.existsSync(folder)) {
+      // Enumerate all folders in the src/backend folder
+      var folders = fs.readdirSync(folder);
+      _.each(folders, function (plugin) {
+        var fPath = path.join(folder, plugin);
+        var stat = fs.lstatSync(fPath);
+        if (stat.isDirectory()) {
+          plugins.push({
+            name: plugin, 
+            path: fPath,
+            isMain: plugin === 'app-core'
+          });
+        }
+      });
+    }
+  }  
 
   module.exports.getPlugins = getPlugins;
 
@@ -137,8 +148,8 @@
 
       var promises = [];
       _.each(plugins, function (plugin) {
-        var pluginSource = path.resolve(appCore, '..', plugin);
-        var pluginDest = path.join(pluginsFolder, plugin);
+        var pluginSource = plugin.path;
+        var pluginDest = path.join(pluginsFolder, plugin.name);
         promises.push(fsSymLinkQ(pluginSource, pluginDest));
       });
 
