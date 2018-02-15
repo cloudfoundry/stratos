@@ -96,10 +96,9 @@ export class CloudFoundryEndpointService {
       })
     );
   }
-
-  getAppsInOrg = (
+  getAppsInOrg(
     org: APIResource<CfOrg>
-  ): Observable<APIResource<CfApplication>[]> => {
+  ): Observable<APIResource<CfApplication>[]> {
     // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
     if (!org.entity.spaces) {
       return Observable.of([]);
@@ -110,7 +109,7 @@ export class CloudFoundryEndpointService {
         return apps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
       })
     );
-  };
+  }
 
   getAggregateStat(
     org: APIResource<CfOrg>,
