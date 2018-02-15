@@ -8,7 +8,17 @@ import { IListConfig } from '../../list.component.types';
 import { PaginationState } from '../../../../../store/types/pagination.types';
 import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 
-
+function syncPaginationSection(
+  store: Store<AppState>,
+  action: GetAllEndpoints,
+  paginationKey: string
+) {
+  store.dispatch(new CreatePagination(
+    action.entityKey,
+    paginationKey,
+    action.paginationKey
+  ));
+}
 export class CFEndpointsDataSource extends ListDataSource<EndpointModel> {
   store: Store<AppState>;
 
@@ -19,11 +29,7 @@ export class CFEndpointsDataSource extends ListDataSource<EndpointModel> {
     const action = new GetAllEndpoints();
     const paginationKey = 'cf-endpoints';
     // We do this here to ensure we sync up with main endpoint table data.
-    store.dispatch(new CreatePagination(
-      action.entityKey,
-      paginationKey,
-      action.paginationKey
-    ));
+    syncPaginationSection(store, action, paginationKey);
     action.paginationKey = paginationKey;
     super({
       store,

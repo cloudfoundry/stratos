@@ -1,4 +1,5 @@
 .meta-card-item {
+  $text-color: rgba(0, 0, 0, .60);
   display: flex;
   justify-content: space-between;
   padding: 2px 0;
@@ -7,9 +8,9 @@
     text-align: end;
   }
   &__key {
-    color: rgba(0, 0, 0, 0.60);
-    font-weight: 300;
+    color: $text-color;
     flex: none;
+    font-weight: 300;
     padding-right: 10px;
   }
 }
