@@ -44,18 +44,18 @@ function precisionIfUseful(size, precision = 1) {
 export class MegaBytesToHumanSize implements PipeTransform {
   transform(value: string): string {
     const mbs = parseInt(value, 10);
+    let mbsStr = '';
     if (!mbs && mbs !== 0) {
-      return '';
+      mbsStr = '';
+    } else if (mbs === -1) {
+      mbsStr = '∞';
+    } else if (mbs >= 1048576) {
+      mbsStr = precisionIfUseful(mbs / 1048576) + ' TB';
+    } else if (mbs >= 1024) {
+      mbsStr = precisionIfUseful(mbs / 1024) + ' GB';
+    } else {
+      mbsStr = precisionIfUseful(mbs) + ' MB';
     }
-    if (mbs === -1) {
-      return '∞';
-    }
-    if (mbs >= 1048576) {
-      return precisionIfUseful(mbs / 1048576) + ' TB';
-    }
-    if (mbs >= 1024) {
-      return precisionIfUseful(mbs / 1024) + ' GB';
-    }
-    return precisionIfUseful(mbs) + ' MB';
+    return mbsStr;
   }
 }
