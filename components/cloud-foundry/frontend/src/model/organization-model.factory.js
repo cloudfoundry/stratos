@@ -377,7 +377,7 @@
             _.forEach(space.entity.apps, function (app) {
               // Only count running apps, like the CF API would do
               if (app.entity.state === 'STARTED') {
-                total += parseInt(app.entity.memory, 10);
+                total += app.entity.instances * parseInt(app.entity.memory, 10);
               }
             });
           } else {

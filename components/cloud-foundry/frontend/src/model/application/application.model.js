@@ -295,10 +295,14 @@
     function _sortFilteredApplications() {
       var path = model.currentSortOption;
       var sortOrder = model.sortAscending ? 'asc' : 'desc';
+      var multipleByInstances = path === 'entity.memory' || path === 'entity.disk_quota';
       model.filteredApplications = _.orderBy(model.filteredApplications, function (app) {
         var value = _.get(app, path);
         if (_.isString(value)) {
           return value.toLowerCase();
+        }
+        if (_.isNumber(value) && multipleByInstances) {
+          return value * app.entity.instances;
         }
         return value;
       }, sortOrder);

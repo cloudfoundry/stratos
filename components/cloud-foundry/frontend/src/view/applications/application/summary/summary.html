@@ -129,12 +129,12 @@
       <dl class="dl-horizontal">
         <dt translate>app.app-info.app-tabs.summary.summary-panel.memory-label</dt>
         <dd id="app-memory-value" class="pull-right">
-          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.memory)}}
+          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.instances * appCtrl.model.application.summary.memory)}}
         </dd>
 
         <dt translate>app.app-info.app-tabs.summary.summary-panel.disk-quota-label</dt>
         <dd class="pull-right">
-          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.disk_quota)}}
+          {{ applicationSummaryCtrl.appUtilsService.mbToHumanSize(appCtrl.model.application.summary.instances * appCtrl.model.application.summary.disk_quota)}}
         </dd>
 
         <dt translate>app.app-info.app-tabs.summary.summary-panel.buildpack-label</dt>
