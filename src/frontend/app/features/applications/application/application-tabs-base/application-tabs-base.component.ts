@@ -12,6 +12,7 @@ import { DeleteApplication } from '../../../../store/actions/application.actions
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
+import { APIResource } from '../../../../store/types/api.types';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialog(
@@ -42,7 +43,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private applicationService: ApplicationService,
-    private entityService: EntityService,
+    private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService
   ) { }
@@ -113,9 +114,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // Auto refresh
     this.entityServiceAppRefresh$ = this.entityService
       .poll(10000, this.autoRefreshString)
-      .do(() => {
-        this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-        this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+      .do(({ resource }) => {
+        if (resource && resource.entity && resource.entity.state === 'STARTED') {
+          this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+          this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+        }
       })
       .subscribe();
 

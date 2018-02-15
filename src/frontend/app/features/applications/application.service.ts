@@ -195,22 +195,11 @@ export class ApplicationService {
         AppStatSchema
       )
     }, true);
+    // This will fail to fetch the app stats if the current app is not running but we're
+    // willing to do this to speed up the initial fetch for a running application.
+    this.appStats$ = appStats.entities$;
 
-    this.appStats$ = this.waitForAppEntity$
-      .filter(ai => ai && ai.entity && ai.entity.entity)
-      .switchMap(ai => {
-        if (ai.entity.entity.state === 'STARTED') {
-          return appStats.entities$;
-        } else {
-          return Observable.of(new Array<APIResource<AppStat>>());
-        }
-      });
-
-    this.appStatsFetching$ = this.waitForAppEntity$
-      .filter(ai => ai && ai.entity && ai.entity.entity && ai.entity.entity.state === 'STARTED')
-      .switchMap(ai => {
-        return appStats.pagination$;
-      }).shareReplay(1);
+    this.appStatsFetching$ = appStats.pagination$.shareReplay(1);
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
