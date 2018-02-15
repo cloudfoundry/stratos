@@ -127,7 +127,7 @@ build_ui_base;
 build_bk_base;
 # Used for hosting nginx
 build_nginx_base;
-# Used for stratos-proxy-builder base
+# Used for stratos-jetstream-builder base
 build_bk_build_base;
 # Used for building the backend
 build_portal_proxy_builder;
