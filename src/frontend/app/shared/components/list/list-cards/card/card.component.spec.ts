@@ -26,21 +26,6 @@ describe('CardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      // declarations: [
-      //   CardComponent,
-      //   CardStatusComponent,
-      //   ...listCards,
-      //   TableCellComponent,
-      //   ...listTableCells,
-      //   EventTabActorIconPipe,
-      //   ValuesPipe,
-      //   ApplicationStateComponent,
-      //   ApplicationStateIconComponent,
-      //   ApplicationStateIconPipe,
-      //   UsageGaugeComponent,
-      //   PercentagePipe,
-      //   RunningInstancesComponent
-      // ],
       imports: [
         CoreModule,
         SharedModule

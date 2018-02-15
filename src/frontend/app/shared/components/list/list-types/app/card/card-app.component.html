@@ -1,30 +1,3 @@
-<!-- <mat-card [routerLink]="['/applications', row.entity.cfGuid , row.entity.guid]" [ngClass]="'card-app__card-' + row.entity.state.toLowerCase()">
-  <app-card-status [status$]="appStatus$"></app-card-status>
-  <mat-card-header>
-    <div class="card-app__title">{{ row.entity.name }}</div>
-    <app-application-state-icon [status]="appStatus$ | async"></app-application-state-icon>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="card-app__meta">
-      <div class="card-app__label">State:</div>
-      <div class="card-app__value">
-        <app-application-state [hideIcon]="true" [state]="applicationState$"></app-application-state>
-      </div>
-    </div>
-    <div class="card-app__meta">
-      <div class="card-app__label">Instances:</div>
-      <div class="card-app__value">
-        <app-running-instances [instances]="row.entity.instances" [cfGuid]="row.entity.cfGuid" [appGuid]="row.entity.guid">
-        </app-running-instances>
-      </div>
-    </div>
-    <div class="card-app__meta">
-      <div class="card-app__label">Created:</div>
-      <div class="card-app__value">{{ row.metadata.created_at | date:'medium' }}</div>
-    </div>
-  </mat-card-content>
-</mat-card> -->
-
 <app-meta-card [status$]="appStatus$">
   <app-meta-card-title>{{ row.entity.name }}</app-meta-card-title>
   <app-meta-card-item>

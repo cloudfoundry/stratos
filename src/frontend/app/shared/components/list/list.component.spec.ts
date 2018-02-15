@@ -34,25 +34,6 @@ describe('ListComponent', () => {
         { provide: ListConfig, useClass: EndpointsListConfigService },
         ApplicationStateService
       ],
-      declarations: [
-        // ...listTableCells,
-        // ...listCards,
-        // ListComponent,
-        // CardsComponent,
-        // CardComponent,
-        // CardStatusComponent,
-        // TableCellComponent,
-        // EventTabActorIconPipe,
-        // ValuesPipe,
-        // TableComponent,
-        // ApplicationStateComponent,
-        // ApplicationStateIconComponent,
-        // ApplicationStateIconPipe,
-        // UsageGaugeComponent,
-        // PercentagePipe,
-        // TableRowComponent,
-        // RunningInstancesComponent
-      ],
       imports: [
         CoreModule,
         SharedModule,
