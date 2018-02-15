@@ -7,7 +7,7 @@ import { OperatorFunction } from 'rxjs/interfaces';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { distinctUntilChanged } from 'rxjs/operators';
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, publish, refCount, publishReplay, share, filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
@@ -247,25 +247,35 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       pagination$,
       page$
     ).pipe(
+      filter(([paginationEntity, entities]) => !getCurrentPageRequestInfo(paginationEntity).busy),
       map(([paginationEntity, entities]) => {
+        if (entities && !entities.length) {
+          return [];
+        }
+        const entitiesPreFilter = entities.length;
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
           }, entities);
         }
+        const entitiesPostFilter = entities.length;
+
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
         if (
-          paginationEntity.totalResults !== entities.length ||
-          paginationEntity.clientPagination.totalResults !== entities.length
+          entitiesPreFilter !== entitiesPostFilter &&
+          (paginationEntity.totalResults !== entities.length ||
+            paginationEntity.clientPagination.totalResults !== entities.length)
         ) {
           this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
+
         const pageIndex = paginationEntity.clientPagination.currentPage - 1;
         return pages[pageIndex];
       }),
-      shareReplay(1),
+      publishReplay(1),
+      refCount(),
       tag('local-list')
-      );
+    );
   }
 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {

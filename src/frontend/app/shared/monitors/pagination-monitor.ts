@@ -117,7 +117,7 @@ export class PaginationMonitor<T = any> {
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
       shareReplay(1)
-      );
+    );
   }
 
   private createErrorObservable(pagination$: Observable<PaginationEntityState>) {
