@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -18,7 +18,6 @@ import {
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { ApplicationSchema } from '../../store/actions/application.actions';
-import { SpaceSchema } from '../../store/actions/space.action';
 import { AppState } from '../../store/app-state';
 import { ActionState } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity } from '../../store/selectors/api.selectors';
@@ -46,6 +45,7 @@ import {
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
+import { spaceSchemaKey, organisationSchemaKey } from '../../store/actions/action-types';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -57,7 +57,6 @@ export interface ApplicationData {
 
 @Injectable()
 export class ApplicationService {
-  applicationInstanceState$: Observable<any>;
 
   private appEntityService: EntityService;
   private appSummaryEntityService: EntityService;
@@ -157,9 +156,13 @@ export class ApplicationService {
       .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
       .map(entityInfo => entityInfo.entity.entity)
       .do(app => {
-        this.appSpace$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid));
-        // See https://github.com/SUSE/stratos/issues/158 (Failing to populate entity store with a space's org)
-        this.appOrg$ = this.store.select(selectEntity(SpaceSchema.key, app.space_guid)).map(space => space.entity.organization);
+        this.appSpace$ = this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
+        this.appOrg$ = this.appSpace$.pipe(
+          map(space => space.entity.organization_guid),
+          mergeMap(orgGuid => {
+            return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
+          })
+        );
       })
       .take(1)
       .subscribe();
@@ -191,26 +194,15 @@ export class ApplicationService {
         AppStatSchema
       )
     }, true);
+    // This will fail to fetch the app stats if the current app is not running but we're
+    // willing to do this to speed up the initial fetch for a running application.
+    this.appStats$ = appStats.entities$;
 
-    this.appStats$ = this.waitForAppEntity$
-      .filter(ai => ai && ai.entity && ai.entity.entity)
-      .switchMap(ai => {
-        if (ai.entity.entity.state === 'STARTED') {
-          return appStats.entities$;
-        } else {
-          return Observable.of(new Array<APIResource<AppStat>>());
-        }
-      });
-
-    this.appStatsFetching$ = this.waitForAppEntity$
-      .filter(ai => ai && ai.entity && ai.entity.entity && ai.entity.entity.state === 'STARTED')
-      .switchMap(ai => {
-        return appStats.pagination$;
-      }).shareReplay(1);
+    this.appStatsFetching$ = appStats.pagination$.shareReplay(1);
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
-      this.store.select(endpointEntitiesSelector),
+        this.store.select(endpointEntitiesSelector),
     )
       .filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
@@ -226,15 +218,9 @@ export class ApplicationService {
       }).shareReplay(1);
 
     this.applicationState$ = this.waitForAppEntity$
-      .withLatestFrom(this.appStats$)
+      .combineLatest(this.appStats$.startWith(null))
       .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
-      }).shareReplay(1);
-
-    this.applicationInstanceState$ = this.waitForAppEntity$
-      .withLatestFrom(this.appStats$)
-      .switchMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
+        return this.appStateService.get(appInfo.entity.entity, appStatsArray ? appStatsArray.map(apiResource => apiResource.entity) : null);
       }).shareReplay(1);
 
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
@@ -246,11 +232,8 @@ export class ApplicationService {
     /**
      * An observable based on the core application entity
     */
-    this.isFetchingApp$ = Observable.combineLatest(
-      this.app$.map(ei => ei.entityRequestInfo.fetching),
-      this.appSummary$.map(as => as.entityRequestInfo.fetching)
-    )
-      .map((fetching) => fetching[0] || fetching[1]).shareReplay(1);
+    this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
+
 
     this.isUpdatingApp$ =
       this.app$.map(a => {
