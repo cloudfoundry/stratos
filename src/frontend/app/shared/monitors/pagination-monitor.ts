@@ -114,10 +114,10 @@ export class PaginationMonitor<T = any> {
       withLatestFrom(this.store.select(getAPIRequestDataState)),
       map(([[pagination, entities], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
-        return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : null;
+        return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
       shareReplay(1)
-      );
+    );
   }
 
   private createErrorObservable(pagination$: Observable<PaginationEntityState>) {

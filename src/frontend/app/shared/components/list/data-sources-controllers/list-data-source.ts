@@ -244,7 +244,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     ).pipe(
       filter(([paginationEntity, entities]) => !getCurrentPageRequestInfo(paginationEntity).busy),
       map(([paginationEntity, entities]) => {
-
+        if (entities && !entities.length) {
+          return [];
+        }
         const entitiesPreFilter = entities.length;
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
@@ -268,7 +270,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       publishReplay(1),
       refCount(),
       tag('local-list')
-      );
+    );
   }
 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {
