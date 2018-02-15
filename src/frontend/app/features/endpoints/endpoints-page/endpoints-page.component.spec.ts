@@ -8,7 +8,6 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { appReducers } from '../../../store/reducers.module';
 import { EndpointsPageComponent } from './endpoints-page.component';
-import { MetaCardModule } from '../../../shared/components/list/list-cards/meta-card/meta-card.module';
 
 describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;
@@ -23,7 +22,6 @@ describe('EndpointsPageComponent', () => {
         SharedModule,
         RouterTestingModule,
         BrowserAnimationsModule,
-        MetaCardModule,
         StoreModule.forRoot(
           appReducers
         )

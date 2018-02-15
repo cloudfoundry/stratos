@@ -26,17 +26,18 @@ export class ApplicationStateComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.status$ = this.state.pipe(
-      map(state => state.indicator)
-    );
-    this.subLabel$ = this.state.pipe(
-      map(state => state.subLabel),
-      startWith(null)
-    );
-    this.label$ = this.state.pipe(
-      map(state => state.label),
-      startWith(null)
-    );
+    if (this.state) {
+      this.status$ = this.state.pipe(
+        map(state => state.indicator)
+      );
+      this.subLabel$ = this.state.pipe(
+        map(state => state.subLabel),
+        startWith(null)
+      );
+      this.label$ = this.state.pipe(
+        map(state => state.label),
+        startWith(null)
+      );
+    }
   }
-
 }

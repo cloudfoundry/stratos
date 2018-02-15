@@ -1,7 +1,7 @@
 <mat-card>
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
-  <mat-card-header>
+  <mat-card-header *ngIf="title">
     <ng-container *ngTemplateOutlet="title.content"></ng-container>
     <app-application-state-icon *ngIf="status$" [status]="status$ | async"></app-application-state-icon>
   </mat-card-header>

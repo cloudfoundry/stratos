@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MetaCardValueComponent } from './meta-card-value.component';
+import { SharedModule } from '../../../../../shared.module';
 
 describe('MetaCardValueComponent', () => {
   let component: MetaCardValueComponent;
@@ -8,9 +9,11 @@ describe('MetaCardValueComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MetaCardValueComponent ]
+      imports: [
+        SharedModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

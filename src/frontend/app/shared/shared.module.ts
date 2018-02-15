@@ -37,7 +37,11 @@ import {
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
 /* tslint:enable:max-line-length */
 import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
-import { MetaCardModule } from './components/list/list-cards/meta-card/meta-card.module';
+import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -68,6 +72,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 
+
 @NgModule({
   imports: [
     CommonModule,
@@ -77,8 +82,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule,
-    MetaCardModule
+    CdkTableModule
   ],
   declarations: [
     LoadingPageComponent,
@@ -124,7 +128,12 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    EndpointCardComponent
+    EndpointCardComponent,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent
   ],
   exports: [
     FormsModule,
@@ -167,7 +176,11 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    MetaCardModule
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

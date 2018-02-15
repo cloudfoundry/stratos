@@ -8,6 +8,7 @@ import {
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { AppState } from '../../../store/app-state';
 import { CloudFoundryService } from '../cloud-foundry.service';
+import { RouterNav } from '../../../store/actions/router.actions';
 
 @Component({
   selector: 'app-cloud-foundry',
@@ -29,9 +30,9 @@ export class CloudFoundryComponent {
           c => c.connectionStatus === 'connected'
         );
         if (connectedEndpoints.length === 1) {
-          // this.store.dispatch(
-          //   new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] })
-          // );
+          this.store.dispatch(
+            new RouterNav({ path: ['cloud-foundry', cfEndpoints[0].guid] })
+          );
         }
       }),
       first()

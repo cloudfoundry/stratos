@@ -110,7 +110,7 @@ export class ApplicationStateService {
       'STAGED(0,N,0)': {
         label: 'Deployed',
         subLabel: 'Crashed',
-        indicator: CardStatus.BUSY,
+        indicator: CardStatus.ERROR,
         actions: 'stop,restart,cli'
       },
       'STAGED(0,0,N)': {

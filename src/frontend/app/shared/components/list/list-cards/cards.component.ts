@@ -19,6 +19,6 @@ export class CardsComponent<T> implements OnInit {
   private cardSize = CardSize;
 
   ngOnInit() {
-    this.size = this.component.size || null;
+    this.size = this.component ? this.component.size : null;
   }
 }

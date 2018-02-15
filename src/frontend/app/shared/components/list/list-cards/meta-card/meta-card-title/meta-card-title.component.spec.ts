@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MetaCardTitleComponent } from './meta-card-title.component';
+import { SharedModule } from '../../../../../shared.module';
 
 describe('MetaCardTitleComponent', () => {
   let component: MetaCardTitleComponent;
@@ -8,9 +9,11 @@ describe('MetaCardTitleComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MetaCardTitleComponent ]
+      imports: [
+        SharedModule
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
