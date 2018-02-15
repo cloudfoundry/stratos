@@ -1,4 +1,4 @@
-<mat-card class="org-card">
+<mat-card class="org-card" (click)="goToSummary()">
   <div *ngIf="hasLoaded$ | async">
     <mat-card-header class="org-card__header">
       <mat-card-title class="org-card__title">{{ row.entity.name }}</mat-card-title>
