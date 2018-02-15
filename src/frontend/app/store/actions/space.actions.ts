@@ -1,11 +1,7 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { CFStartAction, ICFAction } from '../types/request.types';
-import {
-  SpaceSchema,
-  spaceSchemaKey,
-  SpaceWithOrganisationSchema
-} from './action-types';
+import { SpaceSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './action-types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -22,7 +18,11 @@ export class GetSpace extends CFStartAction implements ICFAction {
     this.options.url = `space/${guid}`;
     this.options.method = 'get';
   }
-  actions = [GET_SPACE, GET_SPACE_SUCCESS, GET_SPACE_FAILED];
+  actions = [
+    GET_SPACE,
+    GET_SPACE_SUCCESS,
+    GET_SPACE_FAILED
+  ];
   entity = [SpaceSchema];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
