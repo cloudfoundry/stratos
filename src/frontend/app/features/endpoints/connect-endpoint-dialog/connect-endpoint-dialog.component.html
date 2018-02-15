@@ -15,7 +15,7 @@
         </mat-select>
       </mat-form-field>
       <input type="hidden" *ngIf="authTypesForEndpoint.length === 1" name="authType" formControlName="authType">
-      <div *ngIf="endpointForm.value.authType === 'oauth2'" formGroupName="authValues" class="connection-dialog__auth">
+      <div *ngIf="endpointForm.value.authType === 'creds'" formGroupName="authValues" class="connection-dialog__auth">
         <mat-form-field>
           <input matInput placeholder="Username" formControlName="username">
         </mat-form-field>
@@ -23,10 +23,11 @@
           <input matInput placeholder="Password" type="password" formControlName="password">
         </mat-form-field>
       </div>
-      <div *ngIf="endpointForm.value.authType === 'bearer'" formGroupName="authValues" class="connection-dialog__auth">
+      <div *ngIf="endpointForm.value.authType === 'kube-config'" formGroupName="authValues" class="connection-dialog__auth">
         <mat-form-field>
-          <input matInput placeholder="Token" formControlName="token">
+          <input matInput placeholder="config" formControlName="config">
         </mat-form-field>
+        <app-file-input (onFileSelect)="onFileSelect($event)"></app-file-input>
       </div>
     </mat-dialog-content>
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>

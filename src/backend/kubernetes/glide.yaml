@@ -1,6 +1,0 @@
-package: github.com/SUSE/stratos-ui/kubernetes
-import:
-- package: github.com/labstack/echo
-  version: ~2.2.0
-  subpackages:
-  - engine/standard

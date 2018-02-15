@@ -79,6 +79,7 @@ export class ConnectEndpoint implements Action {
     public guid: string,
     public authType: string,
     public authValues: AuthParams,
+    public body: string,
   ) { }
   type = CONNECT_ENDPOINTS;
 }
@@ -99,8 +100,8 @@ export class UnregisterEndpoint implements Action {
 
 export class RegisterEndpoint implements Action {
   constructor(
-    public name: string,
     public endpointType: string,
+    public name: string,
     public endpoint: string,
     public skipSslValidation: boolean,
   ) { }

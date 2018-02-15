@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/SUSE/stratos-ui/config"
+	"reflect"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -11,11 +13,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"io/ioutil"
 
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/SUSE/stratos-ui/repository/tokens"
@@ -222,8 +227,8 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 		authType = interfaces.OAuth2
 	case "http":
 		authType = interfaces.HttpBasic
-	case "bearer":
-		authType = interfaces.HttpBearer
+	case "kube-config":
+		authType = interfaces.KubeConfig
 	default:
 		authType = ""
 	}
@@ -236,8 +241,8 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 		return p.fetchHttpBasicToken(cnsiRecord, c)
 	}
 
-	if authType == interfaces.HttpBearer {
-		return p.fetchHttpBearerToken(cnsiRecord, c)
+	if authType == interfaces.KubeConfig {
+		return p.fetcKubeConfigToken(cnsiRecord, c)
 	}
 
 	return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -259,18 +264,198 @@ func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 	return uaaRes, u, &cnsiRecord, nil
 }
 
-func (p *portalProxy) fetchHttpBearerToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+type KubeConfigClusterDetail struct {
+	Server string	`yaml:"server"`
+}
 
-	log.Info("Fetching HTTP Bearer")
-	uaaRes, u, err := p.loginHttpBearer(cnsiRecord, c)
-
-	if err != nil {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"Login failed",
-			"Login failed: %v", err)
+type KubeConfigCluster struct {
+	Name string	`yaml:"name"`
+	Cluster struct {
+		Server string
 	}
-	return uaaRes, u, &cnsiRecord, nil
+}
+
+type KubeConfigUser struct {
+	Name string	`yaml:"name"`
+	User struct {
+		AuthProvider struct {
+			Name string	`yaml:"name"`
+			Config interface{} `yaml:"config"`
+		} `yaml:"auth-provider"`
+	}
+}
+
+type KubeConfigAuthProviderOIDC struct {
+	ClientID string `yaml:"client-id"`
+	ClientSecret string `yaml:"client-secret"`
+	IDToken string `yaml:"id-token"`
+	IdpIssuerURL string `yaml:"idp-issuer-url"`
+	RefreshToken string `yaml:"refresh-token"`
+}
+
+	//ExtraScopes string `yaml:"extra-scopes"`
+
+
+type KubeConfigContexts struct {
+	Context struct {
+		Cluster string
+		User string
+	}	`yaml:"context"`
+}
+
+type KubeConfigFile struct {
+	ApiVersion string `yaml:"apiVersion"`
+	Kind string `yaml:"kind"`
+	Clusters []KubeConfigCluster `yaml:"clusters"`
+	Users []KubeConfigUser `yaml:"users"`
+	Contexts []KubeConfigContexts `yaml:"contexts"`
+}
+
+func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+
+	log.Info("Fetching Kube Config Token")
+
+	req := c.Request().(*standard.Request).Request
+
+	// Need to extract the parameters from the request body
+	defer req.Body.Close()
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	log.Info("== BODY ===")
+	log.Info(body)
+
+	kubeConfig := KubeConfigFile{}
+	err = yaml.Unmarshal(body, &kubeConfig)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	log.Info("OK")
+	log.Info(err)
+	log.Info(string(body))
+
+	log.Info(len(kubeConfig.Clusters))
+	log.Info(kubeConfig.ApiVersion)
+	log.Info(kubeConfig.Kind)
+	log.Info(kubeConfig.Clusters[0].Name)
+
+	// Verify that this is a Kube Config file
+	if kubeConfig.ApiVersion != "v1" || kubeConfig.Kind != "Config" {
+		return nil, nil, nil, errors.New("Not a valid Kubernetes Config file")
+	}
+
+	// Find the config corresponding to our API Endpoint
+	log.Info(cnsiRecord.APIEndpoint.String())
+
+	var name string
+
+	for _, cluster := range kubeConfig.Clusters {
+		if cluster.Cluster.Server == cnsiRecord.APIEndpoint.String() {
+			name = cluster.Name
+			break
+		}
+	}
+
+	var userName string
+	var user *KubeConfigUser
+
+	log.Info(name)
+	if len(name) > 0 {
+		log.Info("Found config")
+
+		// Now find context to determine which user to use
+		for _, context := range kubeConfig.Contexts {
+			if context.Context.Cluster == name {
+				userName = context.Context.User
+				break
+			}
+		}
+
+		if len(userName) > 0 {
+			log.Info("Found user")
+			log.Info(userName)
+
+			for _, u := range kubeConfig.Users {
+				if u.Name == userName {
+					user = &u
+					break
+				}
+			}
+		}
+	}
+
+	if user == nil {
+		return nil, nil, nil, errors.New("Can not find config for Kubernetes cluster")
+	}
+
+	log.Info(user.User.AuthProvider.Name)
+
+	// We onlt support OIDC auth provider at the moment
+	if user.User.AuthProvider.Name != "oidc" {
+		return nil, nil, nil, errors.New("Unsupported authentication provider")
+	}
+	log.Info(user.User.AuthProvider.Config)
+
+	oidcConfig := KubeConfigAuthProviderOIDC{}
+
+	err = unMarshalHelper(user.User.AuthProvider.Config, &oidcConfig)
+	if err == nil {
+		return nil, nil, nil, errors.New("Can not unmarshal OIDC Auth Provider configuration")
+	}
+
+	log.Info(err)
+	log.Info(oidcConfig.ClientID)
+
+	// uaaRes, u, err := p.loginHttpBearer(cnsiRecord, c)
+
+	// if err != nil {
+	// 	return nil, nil, nil, interfaces.NewHTTPShadowError(
+	// 		http.StatusUnauthorized,
+	// 		"Login failed",
+	// 		"Login failed: %v", err)
+	// }
+	// return uaaRes, u, &cnsiRecord, nil
+
+	return nil, nil, nil, errors.New("Not implemented")
+}
+
+func unMarshalHelper(values interface{}, intf interface{}) error {
+
+	m := values.(map[interface{}]interface{})
+
+	value := reflect.ValueOf(intf)
+
+	if value.Kind() != reflect.Ptr {
+		return errors.New("config: must provide pointer to struct value")
+	}
+
+	value = value.Elem()
+	if value.Kind() != reflect.Struct {
+		return errors.New("config: must provide pointer to struct value")
+	}
+
+	nFields := value.NumField()
+	typ := value.Type()
+
+	for i := 0; i < nFields; i++ {
+		field := value.Field(i)
+		strField := typ.Field(i)
+		tag := strField.Tag.Get("yaml")
+		if tag == "" {
+			continue
+		}
+
+		if tagValue, ok := m[tag].(string); ok {
+			if err := config.SetStructFieldValue(value, field, tagValue); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (p *portalProxy) fetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {

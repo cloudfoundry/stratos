@@ -36,7 +36,7 @@ type AuthType string
 const (
 	OAuth2     AuthType = "OAuth2"
 	HttpBasic  AuthType = "HttpBasic"
-	HttpBearer AuthType = "HttpBearer"
+	KubeConfig AuthType = "KubeConfig"
 )
 
 //TODO this could be moved back to tokens subpackage, and extensions could import it?

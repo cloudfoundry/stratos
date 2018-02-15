@@ -108,7 +108,8 @@ export class EndpointsEffect {
         '/pp/v1/auth/login/cnsi',
         params,
         null,
-        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED]
+        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
+        action.body,
       );
     });
 
@@ -185,12 +186,13 @@ export class EndpointsEffect {
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
-    actionStrings: [string, string] = [null, null]
+    actionStrings: [string, string] = [null, null],
+    body?: string,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
-    return this.http.post(url, {}, {
+    return this.http.post(url, body || {}, {
       headers,
       params
     }).map(endpoint => {

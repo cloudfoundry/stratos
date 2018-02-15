@@ -60,6 +60,7 @@ import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service'
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
+import { FileInputComponent } from './components/file-input/file-input.component';
 
 @NgModule({
   imports: [
@@ -115,7 +116,8 @@ import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/ca
     ...listTableComponents,
     CardCfUsageComponent,
     CardCfInfoComponent,
-    CardCfUserInfoComponent
+    CardCfUserInfoComponent,
+    FileInputComponent
   ],
   exports: [
     FormsModule,
@@ -157,7 +159,8 @@ import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/ca
     ListComponent,
     CardCfUsageComponent,
     CardCfInfoComponent,
-    CardCfUserInfoComponent
+    CardCfUserInfoComponent,
+    FileInputComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

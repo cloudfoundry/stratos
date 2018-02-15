@@ -36,11 +36,13 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   connectingSub: Subscription;
   fetchSub: Subscription;
   public endpointForm;
+
+  private bodyContent = '';
    
   private authTypes = [
     {
       name: "Username and Password",
-      value: "oauth2",
+      value: "creds",
       form: {
         username: ['', Validators.required],
         password: ['', Validators.required],
@@ -48,12 +50,13 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       types: [ 'cf' ]
     },
     {
-      name: "Token",
-      value: "bearer",
+      name: "Kube Config",
+      value: "kube-config",
       form: {
-        token: ['', Validators.required],
+        config: ['', Validators.required],
       },
-      types: [ 'k8s' ]
+      types: [ 'k8s' ],
+      body: 'config',
     }
   ];
 
@@ -88,10 +91,25 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.setupSubscriptions();
   }
 
+  onFileSelect(event) {
+    const file = event[0];
+    var reader = new FileReader();
+    reader.onload = (e) => {
+      var text = reader.result;
+      this.bodyContent = text;
+      this.endpointForm.controls.authValues.patchValue({
+        config: file.name;
+      });
+    }
+
+    reader.readAsText(file);
+  }
+
   authChanged(e) {
     const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
     this.endpointForm.removeControl('authValues');
     this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+    this.bodyContent = '';
   }
 
   setupSubscriptions() {
@@ -182,6 +200,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.data.guid,
       authType,
       authValues,
+      this.bodyContent,
     ));
   }
 
