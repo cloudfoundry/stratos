@@ -1,8 +1,9 @@
-import { RequestOptions, URLSearchParams } from '@angular/http';
+import { RequestOptions } from '@angular/http';
 
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { SpaceSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './action-types';
 import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, ICFAction } from '../types/request.types';
+import { SpaceSchema, spaceSchemaKey } from './action-types';
+import { SpaceWithOrganisationSchema } from './organisation.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';

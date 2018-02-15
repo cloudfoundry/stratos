@@ -37,7 +37,7 @@ export const deepMergeState = (state, newState) => {
   return baseState;
 };
 
-function mergeEntity(baseEntity, newEntity) {
+export function mergeEntity(baseEntity, newEntity) {
   if (baseEntity && baseEntity.entity && baseEntity.metadata) {
     return {
       entity: merge(baseEntity.entity, newEntity.entity),
