@@ -10,7 +10,7 @@ export class BytesToHumanSize implements PipeTransform {
 
     let retBytes = '';
     if (!bytes && bytes !== 0) {
-      retBytes = '';
+      return '';
     }
     if (bytes === -1) {
       retBytes = '∞';
@@ -28,7 +28,7 @@ export class BytesToHumanSize implements PipeTransform {
       retBytes = precisionIfUseful(bytes / 1024) + ' kB';
     }
 
-    if (retBytes !== ''){
+    if (retBytes !== '') {
       return retBytes;
     } else {
       return precisionIfUseful(bytes) + ' B';

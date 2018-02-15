@@ -12,6 +12,8 @@ import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
 import { SharedModule } from '../shared/shared.module';
 import { CfOrgSpaceDataService } from '../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../shared/data-services/cf-user.service';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 
 export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
   return {
@@ -43,6 +45,30 @@ export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
   };
 }
 
+export function generateTestCfEndpointService() {
+  return [
+    CfOrgSpaceDataService,
+    EntityMonitorFactory,
+    PaginationMonitorFactory,
+    CfUserService,
+    generateTestCfEndpointServiceProvider()
+  ];
+}
+
+export function generateTestCfUserServiceProvider(cfGuid = testSCFGuid) {
+  return {
+    provide: CfUserService,
+    useFactory: (
+      store: Store<AppState>,
+      paginationMonitorFactory: PaginationMonitorFactory
+    ) => {
+      const cfUserService = new CfUserService(store, paginationMonitorFactory);
+      return cfUserService;
+    },
+    deps: [Store, PaginationMonitorFactory]
+  };
+}
+
 export function generateTestCfServiceProvider() {
   return {
     provide: CloudFoundryService,
@@ -63,7 +89,8 @@ export function generateTestCfServiceProvider() {
 export const getBaseTestModulesNoShared = [
   RouterTestingModule,
   CoreModule,
-  createBasicStoreModule()
+  createBasicStoreModule(),
+  NoopAnimationsModule
 ];
 export const getBaseTestModules = [...getBaseTestModulesNoShared, SharedModule];
 

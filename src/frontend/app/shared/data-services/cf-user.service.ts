@@ -13,7 +13,7 @@ import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { UserSchema, GetAllUsers } from '../../store/actions/users.actions';
 import { APIResource } from '../../store/types/api.types';
-import { map, filter } from 'rxjs/operators';
+import { map, filter, tap } from 'rxjs/operators';
 import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
 import {
   isManager,
@@ -43,7 +43,10 @@ export class CfUserService {
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
     this.allUsers$.entities$.pipe(
-      map(users => users.filter(p => p.entity.cfGuid === endpointGuid))
+      filter(p => !!p),
+      map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
+      filter(p => p.length > 0)
+
     )
 
   getUserRoleInOrg = (
@@ -52,7 +55,7 @@ export class CfUserService {
     cfGuid: string
   ): Observable<UserRoleInOrg> => {
     return this.getUsers(cfGuid).pipe(
-      filter(p => !!p),
+      tap(o => console.log(o)),
       map(users => {
         return users.filter(o => o.entity.guid === userGuid)[0];
       }),

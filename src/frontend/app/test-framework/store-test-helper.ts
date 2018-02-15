@@ -1,9 +1,9 @@
-import { environment } from '../../environments/environment.prod';
-import { AppState } from '../store/app-state';
-import { ListState } from '../store/reducers/list.reducer';
 import { ModuleWithProviders } from '@angular/core';
-import { appReducers } from '../store/reducers.module';
 import { StoreModule } from '@ngrx/store';
+
+import { AppState } from '../store/app-state';
+import { appReducers } from '../store/reducers.module';
+
 /* tslint:disable */
 const testInitialStoreState: AppState = {
     auth: {
@@ -264,7 +264,78 @@ const testInitialStoreState: AppState = {
       },
       stack: {},
       space: {},
-      organization: {},
+      organization: {
+        endpointOrgSpaceService: {
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 4,
+          ids: {
+            '1': [
+              '1ddbd64b-59a3-411f-a2b9-66e128b08be1',
+              '815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+              'bd46bccd-6a1e-441a-b107-8969785054e0',
+              '4e229771-2d4d-4765-aed4-419cd937d1f8'
+            ]
+          },
+          pageRequests: {
+            '1': {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          params: {
+            'results-per-page': 100,
+            page: 1,
+            'inline-relations-depth': 2,
+            q: []
+          },
+          clientPagination: {
+            pageSize: 9,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 4
+          }
+        },
+        'cf-organizations': {
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 4,
+          ids: {
+            '1': [
+              '1ddbd64b-59a3-411f-a2b9-66e128b08be1',
+              '815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+              'bd46bccd-6a1e-441a-b107-8969785054e0',
+              '4e229771-2d4d-4765-aed4-419cd937d1f8'
+            ]
+          },
+          pageRequests: {
+            '1': {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          params: {
+            'results-per-page': 100,
+            page: 1,
+            'inline-relations-depth': 2,
+            q: []
+          },
+          clientPagination: {
+            pageSize: 9,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 4
+          },
+        }
+      },
       route: {},
       event: {
         'app-events:01ccda9d-8f40-4dd0-bc39-08eea68e364f4e4858c4-24ab-4caf-87a8-7703d1da58a0': {
@@ -452,7 +523,43 @@ const testInitialStoreState: AppState = {
       },
       environmentVars: {},
       stats: {},
-      summary: {}
+      summary: {},
+      user: {
+        endpointUsersService: {
+          pageCount: 1,
+          currentPage: 1,
+          totalResults: 3,
+          ids: {
+            '1': [
+              'bcf78136-6225-4515-bf8e-a32243deea0c',
+              'hcf_auto_config',
+              'b950b10c-c360-4bec-83c9-333c76cbbbe1'
+            ]
+          },
+          pageRequests: {
+            '1': {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          params: {
+            'results-per-page': 100,
+            page: 1,
+            'inline-relations-depth': 1,
+            q: []
+          },
+          clientPagination: {
+            pageSize: 9,
+            currentPage: 1,
+            filter: {
+              string: '',
+              items: {}
+            },
+            totalResults: 3
+          }
+        }
+      },
     },
     dashboard: {
       sidenavOpen: true,
@@ -471,7 +578,68 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
-      user:{},
+      user: {
+        'bcf78136-6225-4515-bf8e-a32243deea0c': {
+          fetching: false,
+          updating: {
+            _root_: {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          creating: false,
+          error: false,
+          deleting: {
+            busy: false,
+            error: false,
+            message: '',
+            deleted: false
+          },
+          response: null,
+          message: ''
+        },
+        hcf_auto_config: {
+          fetching: false,
+          updating: {
+            _root_: {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          creating: false,
+          error: false,
+          deleting: {
+            busy: false,
+            error: false,
+            message: '',
+            deleted: false
+          },
+          response: null,
+          message: ''
+        },
+        'b950b10c-c360-4bec-83c9-333c76cbbbe1': {
+          fetching: false,
+          updating: {
+            _root_: {
+              busy: false,
+              error: false,
+              message: ''
+            }
+          },
+          creating: false,
+          error: false,
+          deleting: {
+            busy: false,
+            error: false,
+            message: '',
+            deleted: false
+          },
+          response: null,
+          message: ''
+        }
+      },
       domain:{},
       githubBranches:{},
       cloudFoundryInfo: {},
@@ -3650,7 +3818,301 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
-      user:{},
+      user: {
+        'bcf78136-6225-4515-bf8e-a32243deea0c': {
+          entity: {
+            admin: false,
+            active: true,
+            default_space_guid: null,
+            username: 'admin',
+            spaces_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/spaces',
+            organizations_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/organizations',
+            organizations: [
+              {
+                metadata: {
+                  guid: '815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  created_at: '2018-01-03T15:22:10Z',
+                  updated_at: '2018-01-03T15:22:10Z'
+                },
+                entity: {
+                  name: 'e2e',
+                  billing_enabled: false,
+                  quota_definition_guid: 'e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  status: 'active',
+                  default_isolation_segment_guid: null,
+                  quota_definition_url: '/v2/quota_definitions/e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  spaces_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/spaces',
+                  domains_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/domains',
+                  private_domains_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/private_domains',
+                  users_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/users',
+                  managers_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/managers',
+                  billing_managers_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/billing_managers',
+                  auditors_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/auditors',
+                  app_events_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/app_events',
+                  space_quota_definitions_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/space_quota_definitions'
+                }
+              },
+              {
+                metadata: {
+                  guid: 'bd46bccd-6a1e-441a-b107-8969785054e0',
+                  url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0',
+                  created_at: '2018-01-03T15:22:21Z',
+                  updated_at: '2018-01-03T15:22:21Z'
+                },
+                entity: {
+                  name: 'SUSE',
+                  billing_enabled: false,
+                  quota_definition_guid: 'e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  status: 'active',
+                  default_isolation_segment_guid: null,
+                  quota_definition_url: '/v2/quota_definitions/e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  spaces_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/spaces',
+                  domains_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/domains',
+                  private_domains_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/private_domains',
+                  users_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/users',
+                  managers_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/managers',
+                  billing_managers_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/billing_managers',
+                  auditors_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/auditors',
+                  app_events_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/app_events',
+                  space_quota_definitions_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/space_quota_definitions'
+                }
+              },
+              {
+                metadata: {
+                  guid: '4e229771-2d4d-4765-aed4-419cd937d1f8',
+                  url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8',
+                  created_at: '2018-02-14T10:25:42Z',
+                  updated_at: '2018-02-14T10:25:42Z'
+                },
+                entity: {
+                  name: 'TestCases',
+                  billing_enabled: false,
+                  quota_definition_guid: 'e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  status: 'active',
+                  default_isolation_segment_guid: null,
+                  quota_definition_url: '/v2/quota_definitions/e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  spaces_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/spaces',
+                  domains_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/domains',
+                  private_domains_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/private_domains',
+                  users_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/users',
+                  managers_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/managers',
+                  billing_managers_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/billing_managers',
+                  auditors_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/auditors',
+                  app_events_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/app_events',
+                  space_quota_definitions_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/space_quota_definitions'
+                }
+              }
+            ],
+            managed_organizations_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/managed_organizations',
+            managed_organizations: [
+              {
+                metadata: {
+                  guid: '815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  created_at: '2018-01-03T15:22:10Z',
+                  updated_at: '2018-01-03T15:22:10Z'
+                },
+                entity: {
+                  name: 'e2e',
+                  billing_enabled: false,
+                  quota_definition_guid: 'e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  status: 'active',
+                  default_isolation_segment_guid: null,
+                  quota_definition_url: '/v2/quota_definitions/e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  spaces_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/spaces',
+                  domains_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/domains',
+                  private_domains_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/private_domains',
+                  users_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/users',
+                  managers_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/managers',
+                  billing_managers_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/billing_managers',
+                  auditors_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/auditors',
+                  app_events_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/app_events',
+                  space_quota_definitions_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/space_quota_definitions'
+                }
+              },
+              {
+                metadata: {
+                  guid: 'bd46bccd-6a1e-441a-b107-8969785054e0',
+                  url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0',
+                  created_at: '2018-01-03T15:22:21Z',
+                  updated_at: '2018-01-03T15:22:21Z'
+                },
+                entity: {
+                  name: 'SUSE',
+                  billing_enabled: false,
+                  quota_definition_guid: 'e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  status: 'active',
+                  default_isolation_segment_guid: null,
+                  quota_definition_url: '/v2/quota_definitions/e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  spaces_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/spaces',
+                  domains_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/domains',
+                  private_domains_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/private_domains',
+                  users_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/users',
+                  managers_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/managers',
+                  billing_managers_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/billing_managers',
+                  auditors_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/auditors',
+                  app_events_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/app_events',
+                  space_quota_definitions_url: '/v2/organizations/bd46bccd-6a1e-441a-b107-8969785054e0/space_quota_definitions'
+                }
+              },
+              {
+                metadata: {
+                  guid: '4e229771-2d4d-4765-aed4-419cd937d1f8',
+                  url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8',
+                  created_at: '2018-02-14T10:25:42Z',
+                  updated_at: '2018-02-14T10:25:42Z'
+                },
+                entity: {
+                  name: 'TestCases',
+                  billing_enabled: false,
+                  quota_definition_guid: 'e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  status: 'active',
+                  default_isolation_segment_guid: null,
+                  quota_definition_url: '/v2/quota_definitions/e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  spaces_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/spaces',
+                  domains_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/domains',
+                  private_domains_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/private_domains',
+                  users_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/users',
+                  managers_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/managers',
+                  billing_managers_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/billing_managers',
+                  auditors_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/auditors',
+                  app_events_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/app_events',
+                  space_quota_definitions_url: '/v2/organizations/4e229771-2d4d-4765-aed4-419cd937d1f8/space_quota_definitions'
+                }
+              }
+            ],
+            billing_managed_organizations_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/billing_managed_organizations',
+            billing_managed_organizations: [],
+            audited_organizations_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/audited_organizations',
+            audited_organizations: [],
+            managed_spaces_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/managed_spaces',
+            audited_spaces_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/audited_spaces',
+            audited_spaces: [],
+            guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
+            cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          },
+          metadata: {
+            guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
+            url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c',
+            created_at: '2018-01-03T15:22:09Z',
+            updated_at: '2018-01-03T15:22:09Z'
+          }
+        },
+        hcf_auto_config: {
+          entity: {
+            admin: false,
+            active: true,
+            default_space_guid: null,
+            spaces_url: '/v2/users/hcf_auto_config/spaces',
+            spaces: [],
+            organizations_url: '/v2/users/hcf_auto_config/organizations',
+            organizations: [],
+            managed_organizations_url: '/v2/users/hcf_auto_config/managed_organizations',
+            managed_organizations: [],
+            billing_managed_organizations_url: '/v2/users/hcf_auto_config/billing_managed_organizations',
+            billing_managed_organizations: [],
+            audited_organizations_url: '/v2/users/hcf_auto_config/audited_organizations',
+            audited_organizations: [],
+            managed_spaces_url: '/v2/users/hcf_auto_config/managed_spaces',
+            managed_spaces: [],
+            audited_spaces_url: '/v2/users/hcf_auto_config/audited_spaces',
+            audited_spaces: [],
+            guid: 'hcf_auto_config',
+            cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          },
+          metadata: {
+            guid: 'hcf_auto_config',
+            url: '/v2/users/hcf_auto_config',
+            created_at: '2018-01-03T15:22:13Z',
+            updated_at: '2018-01-03T15:22:13Z'
+          }
+        },
+        'b950b10c-c360-4bec-83c9-333c76cbbbe1': {
+          entity: {
+            admin: false,
+            active: false,
+            default_space_guid: null,
+            username: 'e2e',
+            spaces_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/spaces',
+            spaces: [
+              {
+                metadata: {
+                  guid: 'd612962c-ce25-4c4f-87f6-2821e466eb4e',
+                  url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e',
+                  created_at: '2018-01-03T15:22:13Z',
+                  updated_at: '2018-01-03T15:22:13Z'
+                },
+                entity: {
+                  name: 'e2e',
+                  organization_guid: '815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  space_quota_definition_guid: null,
+                  isolation_segment_guid: null,
+                  allow_ssh: true,
+                  organization_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  developers_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/developers',
+                  managers_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/managers',
+                  auditors_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/auditors',
+                  apps_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/apps',
+                  routes_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/routes',
+                  domains_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/domains',
+                  service_instances_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/service_instances',
+                  app_events_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/app_events',
+                  events_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/events',
+                  security_groups_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/security_groups',
+                  staging_security_groups_url: '/v2/spaces/d612962c-ce25-4c4f-87f6-2821e466eb4e/staging_security_groups'
+                }
+              }
+            ],
+            organizations_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/organizations',
+            organizations: [
+              {
+                metadata: {
+                  guid: '815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77',
+                  created_at: '2018-01-03T15:22:10Z',
+                  updated_at: '2018-01-03T15:22:10Z'
+                },
+                entity: {
+                  name: 'e2e',
+                  billing_enabled: false,
+                  quota_definition_guid: 'e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  status: 'active',
+                  default_isolation_segment_guid: null,
+                  quota_definition_url: '/v2/quota_definitions/e1480546-27e0-45a2-9bf1-e445e1b06b28',
+                  spaces_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/spaces',
+                  domains_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/domains',
+                  private_domains_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/private_domains',
+                  users_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/users',
+                  managers_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/managers',
+                  billing_managers_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/billing_managers',
+                  auditors_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/auditors',
+                  app_events_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/app_events',
+                  space_quota_definitions_url: '/v2/organizations/815a79fa-58dc-433f-b4a6-b3e06c4dda77/space_quota_definitions'
+                }
+              }
+            ],
+            managed_organizations_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/managed_organizations',
+            managed_organizations: [],
+            billing_managed_organizations_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/billing_managed_organizations',
+            billing_managed_organizations: [],
+            audited_organizations_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/audited_organizations',
+            audited_organizations: [],
+            managed_spaces_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/managed_spaces',
+            managed_spaces: [],
+            audited_spaces_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/audited_spaces',
+            audited_spaces: [],
+            guid: 'b950b10c-c360-4bec-83c9-333c76cbbbe1',
+            cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          },
+          metadata: {
+            guid: 'b950b10c-c360-4bec-83c9-333c76cbbbe1',
+            url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1',
+            created_at: '2018-01-03T15:22:18Z',
+            updated_at: '2018-01-03T15:22:18Z'
+          }
+        }
+      },
       domain:{},
       cloudFoundryInfo:{},
       githubBranches:{},
@@ -21084,7 +21546,7 @@ const testInitialStoreState: AppState = {
             doppler_logging_endpoint: 'wss://doppler.127.0.0.1.xip.io:4443',
             skip_ssl_validation: true,
             user: {
-              guid: 'bbb78136-6225-aaaa-bf8e-a32243deea0c',
+              guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
               name: 'admin',
               admin: true
             },

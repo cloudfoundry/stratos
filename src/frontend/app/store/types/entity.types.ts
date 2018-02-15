@@ -35,8 +35,8 @@ export interface IRequestState extends IRequestTypeState {
   system: IRequestEntityTypeState<RequestInfoState>;
   githubBranches: IRequestEntityTypeState<RequestInfoState>;
   githubCommits: IRequestEntityTypeState<APIResource>;
-  domain: IRequestEntityTypeState<APIResource>;
-  user: IRequestEntityTypeState<APIResource>;
+  domain: IRequestEntityTypeState<RequestInfoState>;
+  user: IRequestEntityTypeState<RequestInfoState>;
 }
 
 export const defaultCfEntitiesState = {

@@ -1,14 +1,16 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CardCfInfoComponent } from './card-cf-info.component';
 import {
-  getBaseTestModules,
   generateTestCfEndpointServiceProvider,
-  getBaseTestModulesNoShared
+  getBaseTestModulesNoShared,
+  generateTestCfEndpointService
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
-import { testSCFGuid } from '../../../../test-framework/store-test-helper';
+import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { CardCfInfoComponent } from './card-cf-info.component';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { CfUserService } from '../../../data-services/cf-user.service';
 
 describe('CardCfInfoComponent', () => {
   let component: CardCfInfoComponent;
@@ -18,10 +20,7 @@ describe('CardCfInfoComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CardCfInfoComponent, MetadataItemComponent],
         imports: [...getBaseTestModulesNoShared],
-        providers: [
-          generateTestCfEndpointServiceProvider(),
-          EntityMonitorFactory
-        ]
+        providers: [generateTestCfEndpointService()]
       }).compileComponents();
     })
   );
