@@ -57,7 +57,6 @@ export interface ApplicationData {
 
 @Injectable()
 export class ApplicationService {
-  applicationInstanceState$: Observable<any>;
 
   private appEntityService: EntityService;
   private appSummaryEntityService: EntityService;
@@ -215,7 +214,7 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
-      this.store.select(endpointEntitiesSelector),
+        this.store.select(endpointEntitiesSelector),
     )
       .filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
@@ -231,15 +230,9 @@ export class ApplicationService {
       }).shareReplay(1);
 
     this.applicationState$ = this.waitForAppEntity$
-      .combineLatest(this.appStats$)
+      .combineLatest(this.appStats$.startWith(null))
       .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return this.appStateService.get(appInfo.entity.entity, appStatsArray.map(apiResource => apiResource.entity));
-      }).shareReplay(1);
-
-    this.applicationInstanceState$ = this.waitForAppEntity$
-      .combineLatest(this.appStats$)
-      .switchMap(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
-        return ApplicationService.getApplicationState(this.store, this.appStateService, appInfo.entity.entity, this.appGuid, this.cfGuid);
+        return this.appStateService.get(appInfo.entity.entity, appStatsArray ? appStatsArray.map(apiResource => apiResource.entity) : null);
       }).shareReplay(1);
 
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
