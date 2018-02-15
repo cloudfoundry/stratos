@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func Up_20171108102900(txn *sql.Tx) {
+func (s *StratosMigrations) Up_20171108102900(txn *sql.Tx) {
 
 	createTokens := "ALTER TABLE  tokens "
 	createTokens += "ADD auth_type VARCHAR(255) DEFAULT \"OAuth2\", "
