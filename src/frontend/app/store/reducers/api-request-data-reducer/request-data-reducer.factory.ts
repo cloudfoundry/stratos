@@ -20,43 +20,12 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
           // Does the entity associated with the action have a parent property that requires the result to be stored with it?
-          // For example we have fetched a list of spaces that need to be stored in an organisation entity?
-
-          // Check for parent guid. If this is missing there is no consistent way to assign these entities to their parent
-          const parentEntityGuid = success && success.apiAction ? success.apiAction['parentGuid'] : null;
-          if (!parentEntityGuid) {
-            return deepMergeState(state, success.response.entities);
+          // For example we have fetched a list of spaces that need to be stored in an organisation's entity?
+          const parentParams = canPopulateParentEntity(success);
+          if (parentParams) {
+            // We have the required parameters to populate a parent's property with this response
+            return populateParentEntity(state, success, parentParams);
           }
-
-          // Check for relations
-          const entity = pathGet('apiAction.entity', success) || [];
-          const entityWithInline = entity as EntityInlineChild;
-          const parentRelations = entityWithInline.parentRelations;
-          if (!parentRelations || !parentRelations.length) {
-            return deepMergeState(state, success.response.entities);
-          }
-
-          // Do we actually have any entities to store in a parent?
-          const response = success.response;
-          let entities = pathGet(`entities.${success.apiAction.entityKey}`, response) || {};
-          entities = Object.values(entities);
-          if (!entities) {
-            return deepMergeState(state, success.response.entities);
-          }
-
-          // For each parent-child relationship
-          parentRelations.forEach(relation => {
-            // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
-            const { parentGuid, newParentEntity } = relation.mergeResult(state, parentEntityGuid, success.response);
-            if (!newParentEntity) {
-              return;
-            }
-            // Apply the new entity to the response
-            success.response.entities[relation.parentEntityKey] = {
-              ...success.response.entities[relation.parentEntityKey],
-              [parentGuid]: newParentEntity
-            };
-          });
           return deepMergeState(state, success.response.entities);
         }
         return state;
@@ -81,4 +50,58 @@ function deleteEntity(state, entityKey, guid) {
     }
   }
   return newState;
+}
+
+function canPopulateParentEntity(successAction): {
+  parentEntityGuid: string;
+  parentRelations: EntityRelationParent[]
+} {
+  // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent
+  const parentEntityGuid = successAction && successAction.apiAction ? successAction.apiAction['parentGuid'] : null;
+  if (!parentEntityGuid) {
+    return;
+  }
+
+  // Check for relations
+  const entity = pathGet('apiAction.entity', successAction) || [];
+  const entityWithInline = entity as EntityInlineChild;
+  const parentRelations = entityWithInline.parentRelations;
+  if (!parentRelations || !parentRelations.length) {
+    return;
+  }
+
+  // Do we actually have any entities to store in a parent?
+  const response = successAction.response;
+  let entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
+  entities = Object.values(entities);
+  if (!entities) {
+    return;
+  }
+
+  return {
+    parentEntityGuid,
+    parentRelations
+  };
+}
+
+function populateParentEntity(state, successAction, params: {
+  parentEntityGuid: string;
+  parentRelations: EntityRelationParent[]
+}) {
+  const { parentEntityGuid, parentRelations } = params;
+
+  // For each parent-child relationship
+  parentRelations.forEach(relation => {
+    // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
+    const { parentGuid, newParentEntity } = relation.mergeResult(state, parentEntityGuid, successAction.response);
+    if (!newParentEntity) {
+      return;
+    }
+    // Apply the new entity to the response
+    successAction.response.entities[relation.parentEntityKey] = {
+      ...successAction.response.entities[relation.parentEntityKey],
+      [parentGuid]: newParentEntity
+    };
+  });
+  return deepMergeState(state, successAction.response.entities);
 }
