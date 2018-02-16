@@ -14,7 +14,8 @@ module.exports = function (config) {
       require('@angular/cli/plugins/karma')
     ],
     client: {
-      clearContext: false // leave Jasmine Spec Runner output visible in browser
+      clearContext: false, // leave Jasmine Spec Runner output visible in browser
+      captureConsole: true,
     },
     coverageIstanbulReporter: {
       reports: ['html', 'lcovonly', 'json'],
@@ -26,7 +27,7 @@ module.exports = function (config) {
     reporters: ['spec', 'kjhtml'],
     port: 9876,
     colors: true,
-    logLevel: config.LOG_INFO,
+    logLevel: config.DEBUG,
     autoWatch: true,
     browsers: process.env.CI_ENV ? ['ChromeHeadless'] : ['Chrome'],
     singleRun: process.env.CI_ENV ? true : false,

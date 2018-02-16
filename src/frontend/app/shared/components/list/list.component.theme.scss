@@ -9,16 +9,10 @@
       &--selected {
         background-color: mat-color($primary, 50);
       }
-      mat-card {
-        flex-direction: column;
-        @include breakpoint(desktop) {
-          flex-direction: row;
-        }
-      }
-      &__right {
-        justify-content: flex-start;
-        @include breakpoint(desktop) {
-          justify-content: flex-end;
+      &__right,
+      &__left--multi-filters {
+        @include breakpoint(mobileonly) {
+          flex-wrap: wrap;
         }
       }
     }

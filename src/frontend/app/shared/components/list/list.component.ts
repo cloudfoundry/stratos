@@ -26,6 +26,8 @@ import {
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
+  IListConfig,
+  ListViewTypes,
 } from './list.component.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { map } from 'rxjs/operators';
@@ -103,7 +105,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     // If this is the first time the user has used this list then set the view to the default
     this.view$.first().subscribe(listView => {
       if (!listView) {
-        this.updateListView(this.config.defaultView || 'table');
+        this.updateListView(this.getDefaultListView(this.config));
       }
     });
 
@@ -184,6 +186,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.multiFilterWidgetObservables.forEach(sub => sub.unsubscribe());
     this.uberSub.unsubscribe();
     this.dataSource.destroy();
+  }
+
+  private getDefaultListView(config: IListConfig<T>) {
+    switch (config.viewType) {
+      case ListViewTypes.TABLE_ONLY:
+        return 'table';
+      case ListViewTypes.CARD_ONLY:
+        return 'cards';
+      default:
+        return this.config.defaultView || 'table';
+    }
   }
 
   updateListView(listView: ListView) {
