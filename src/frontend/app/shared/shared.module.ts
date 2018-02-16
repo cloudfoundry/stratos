@@ -17,6 +17,10 @@ import { CardAppStatusComponent } from './components/cards/card-app-status/card-
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
 import { CardAppUsageComponent } from './components/cards/card-app-usage/card-app-usage.component';
 import { CardCfInfoComponent } from './components/cards/card-cf-info/card-cf-info.component';
+import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/card-cf-org-usage.component';
+import {
+  CardCfOrgUserDetailsComponent,
+} from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -126,7 +130,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfInfoComponent,
     CardCfUserInfoComponent,
     CfOrgCardComponent,
-    NestedTabsComponent
+    NestedTabsComponent,
+    CardCfOrgUsageComponent,
+    CardCfOrgUserDetailsComponent
   ],
   exports: [
     FormsModule,
@@ -169,7 +175,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    NestedTabsComponent
+    NestedTabsComponent,
+    CardCfOrgUsageComponent,
+    CardCfOrgUserDetailsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
