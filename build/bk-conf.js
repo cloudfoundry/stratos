@@ -14,6 +14,7 @@
     coreName: 'portal-proxy',
     outputPath: path.join(__dirname, '..', 'outputs'),
     srcPath: path.join(__dirname, 'src', 'backend'),
-    pluginFolder: path.join(__dirname, '..', 'src', 'backend')
+    pluginFolder: path.join(__dirname, '..', 'src', 'backend'),
+    pluginExtFolder: path.join(__dirname, '..', 'extsrc', 'backend'),
   };
 })();
