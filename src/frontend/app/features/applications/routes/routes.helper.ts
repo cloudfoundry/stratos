@@ -22,12 +22,9 @@ export const getRoute = (
   if (route.entity.port) {
     // Note: Hostname and path are not supported for TCP routes
     return `${protocol}${domain.entity.name}:${route.entity.port}`;
-  } else if (route.entity.path) {
-    const pathPrefix = route.entity.path && route.entity.path.length && route.entity.path[0] !== '/' ? '/' : '';
-    return `${protocol}${route.entity.host}.${domain.entity.name}${pathPrefix}${route.entity.path}`;
-  } else {
-    return `${protocol}${route.entity.host}.${domain.entity.name}`;
   }
+  const path = route.entity.path && route.entity.path.length && route.entity.path[0] !== `/` ? `/${route.entity.path}` : route.entity.path;
+  return `${protocol}${route.entity.host}.${domain.entity.name}${path}`;
 };
 
 export const getMappedApps = (route: APIResource): APIResource[] => {
