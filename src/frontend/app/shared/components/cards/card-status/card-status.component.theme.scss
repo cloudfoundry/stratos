@@ -2,19 +2,19 @@
   $status-colors: map-get($app-theme, status);
   .app-card-status {
     background-color: transparent;
-    &__ok {
+    &--ok {
       background-color: map-get($status-colors, success);
     }
-    &__warning {
+    &--warning {
       background-color: map-get($status-colors, warning);
     }
-    &__error {
+    &--error {
       background-color: map-get($status-colors, danger);
     }
-    &__tentative {
+    &--tentative {
       background-color: map-get($status-colors, tentative);
     }
-    &__incomplete {
+    &--incomplete {
       background-color: map-get($status-colors, tentative);
     }
   }

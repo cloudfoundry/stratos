@@ -9,6 +9,7 @@ import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 
 import { Store } from '@ngrx/store';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
+import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 
 @Component({
   selector: 'app-build-tab',
@@ -26,6 +27,8 @@ export class BuildTabComponent implements OnInit {
   cardTwoFetching$: Observable<boolean>;
 
   public async: any;
+
+  getFullApiUrl = getFullEndpointApiUrl;
 
   ngOnInit() {
     this.cardTwoFetching$ = this.appService.application$

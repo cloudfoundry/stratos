@@ -31,8 +31,8 @@ export class PaginationMonitor<T = any> {
 
   constructor(
     private store: Store<AppState>,
-    private paginationKey: string,
-    private schema: schema.Entity
+    public paginationKey: string,
+    public schema: schema.Entity
   ) {
     this.init(
       store,
