@@ -1,7 +1,7 @@
-<div class="list-component">
+<div class="list-component" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
   <div class="list-component__header">
     <mat-progress-bar color="primary" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
-    <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async) }">
+    <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
       <div class="list-component__header__left">
         <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>
         <div class="list-component__header__left--text" *ngIf="(dataSource.isSelecting$ | async)">{{dataSource.selectedRows.size}} Selected</div>
@@ -26,20 +26,20 @@
           </mat-form-field>
         </div>
         <!-- Sort Button & Drop down -->
-        <div class="sort" [hidden]="sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async))">
-          <button mat-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='asc'">
-            <mat-icon>sort</mat-icon>
-          </button>
-          <button mat-icon-button (click)="updateListSort(headerSortField.value, 'asc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='desc'">
-            <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
-          </button>
-          <mat-form-field [hidden]="config.viewType === 'tableOnly'">
+        <div class="sort" [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async))">
+          <mat-form-field>
             <mat-select matInput #headerSortField shouldPlaceholderFloat="false" [disabled]="(dataSource?.isLoadingPage$ | async)" (change)="updateListSort($event.value, headerSortDirection)">
               <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
                 {{column.headerCell()}}
               </mat-option>
             </mat-select>
           </mat-form-field>
+          <button mat-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='asc'">
+            <mat-icon>sort</mat-icon>
+          </button>
+          <button mat-icon-button (click)="updateListSort(headerSortField.value, 'asc')" [disabled]="(dataSource.isLoadingPage$ | async)" *ngIf="headerSortDirection==='desc'">
+            <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
+          </button>
         </div>
         <!-- Multi actions (those applied to selection) -->
         <div *ngIf="(dataSource.isSelecting$ | async)">
@@ -87,7 +87,6 @@
     </mat-card>
   </div>
   <div class="list-component__body">
-
     <div class="list-component__body-inner">
       <div *ngIf="dataSource.isLoadingPage$ | async" class="list-component__blocker"></div>
       <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)"></app-cards>
@@ -98,7 +97,7 @@
       <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
       </mat-paginator>
     </mat-card>
-    <mat-card [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
+    <mat-card class="list-component__empty" [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
       <mat-card-content>
         <div class="no-rows">There are no entries.</div>
       </mat-card-content>

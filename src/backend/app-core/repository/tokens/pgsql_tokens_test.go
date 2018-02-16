@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -51,25 +51,25 @@ func TestSaveUAATokens(t *testing.T) {
 
 			Convey("should fail to save token with an invalid user GUID", func() {
 				var userGuid string = ""
-				err := repository.SaveUAAToken(userGuid, tokenRecord, mockEncryptionKey)
+				err := repository.SaveAuthToken(userGuid, tokenRecord, mockEncryptionKey)
 				So(err, ShouldNotBeNil)
 
 			})
 
 			Convey("should fail to save token with an invalid AuthToken", func() {
 				tokenRecord.AuthToken = ""
-				err := repository.SaveUAAToken(mockUserGuid, tokenRecord, mockEncryptionKey)
+				err := repository.SaveAuthToken(mockUserGuid, tokenRecord, mockEncryptionKey)
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("should fail to save token with an invalid RefreshToken", func() {
 				tokenRecord.RefreshToken = ""
-				err := repository.SaveUAAToken(mockUserGuid, tokenRecord, mockEncryptionKey)
+				err := repository.SaveAuthToken(mockUserGuid, tokenRecord, mockEncryptionKey)
 				So(err, ShouldNotBeNil)
 			})
 
 			Convey("should fail to encrypt with an invalid encryptionKey", func() {
-				err := repository.SaveUAAToken(mockUserGuid, tokenRecord, nil)
+				err := repository.SaveAuthToken(mockUserGuid, tokenRecord, nil)
 				So(err, ShouldNotBeNil)
 			})
 
@@ -95,7 +95,7 @@ func TestSaveUAATokens(t *testing.T) {
 					mock.ExpectQuery(countTokensSql).
 						WillReturnError(errors.New("random error"))
 
-					err := repository.SaveUAAToken(mockUserGuid, tokenRecord, mockEncryptionKey)
+					err := repository.SaveAuthToken(mockUserGuid, tokenRecord, mockEncryptionKey)
 					So(err, ShouldNotBeNil)
 					So(mock.ExpectationsWereMet(), ShouldBeNil)
 				})
@@ -109,7 +109,7 @@ func TestSaveUAATokens(t *testing.T) {
 						WithArgs(mockUserGuid, "uaa", sqlmock.AnyArg(), sqlmock.AnyArg(), tokenRecord.TokenExpiry).
 						WillReturnResult(sqlmock.NewResult(1, 1))
 
-					err := repository.SaveUAAToken(mockUserGuid, tokenRecord, mockEncryptionKey)
+					err := repository.SaveAuthToken(mockUserGuid, tokenRecord, mockEncryptionKey)
 					So(err, ShouldBeNil)
 					So(mock.ExpectationsWereMet(), ShouldBeNil)
 				})
@@ -129,7 +129,7 @@ func TestSaveUAATokens(t *testing.T) {
 					mock.ExpectQuery(countTokensSql).
 						WillReturnError(errors.New("random error"))
 
-					err := repository.SaveUAAToken(mockUserGuid, tokenRecord, mockEncryptionKey)
+					err := repository.SaveAuthToken(mockUserGuid, tokenRecord, mockEncryptionKey)
 					So(err, ShouldNotBeNil)
 					So(mock.ExpectationsWereMet(), ShouldBeNil)
 				})
@@ -258,20 +258,20 @@ func TestSaveCNSITokens(t *testing.T) {
 
 func TestFindUAATokens(t *testing.T) {
 
-	Convey("FindUAAToken Tests", t, func() {
+	Convey("FindAuthToken Tests", t, func() {
 
 		db, mock, repository := initialiseRepo(t)
 
 		Convey("should fail to find token with an invalid user GUID", func() {
 
-			_, err := repository.FindUAAToken("", mockEncryptionKey)
+			_, err := repository.FindAuthToken("", mockEncryptionKey)
 			So(err, ShouldNotBeNil)
 		})
 
 		Convey("should throw exception when finding a non-existent token", func() {
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnError(errors.New("doesnt exist"))
-			_, err := repository.FindUAAToken(mockUserGuid, mockEncryptionKey)
+			_, err := repository.FindAuthToken(mockUserGuid, mockEncryptionKey)
 
 			So(err, ShouldNotBeNil)
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
@@ -283,7 +283,7 @@ func TestFindUAATokens(t *testing.T) {
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
-			_, err := repository.FindUAAToken(mockUserGuid, nil)
+			_, err := repository.FindAuthToken(mockUserGuid, nil)
 
 			So(err, ShouldNotBeNil)
 			So(mock.ExpectationsWereMet(), ShouldBeNil)
@@ -296,7 +296,7 @@ func TestFindUAATokens(t *testing.T) {
 
 			mock.ExpectQuery(findUAATokenSql).
 				WillReturnRows(rs)
-			tr, err := repository.FindUAAToken(mockUserGuid, mockEncryptionKey)
+			tr, err := repository.FindAuthToken(mockUserGuid, mockEncryptionKey)
 
 			So(err, ShouldBeNil)
 			So(tr.AuthToken, ShouldNotBeNil)
@@ -313,7 +313,7 @@ func TestFindUAATokens(t *testing.T) {
 }
 func TestFindCNSITokens(t *testing.T) {
 
-	Convey("FindUAAToken Tests", t, func() {
+	Convey("FindAuthToken Tests", t, func() {
 
 		db, mock, repository := initialiseRepo(t)
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -16,8 +17,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
-	"github.com/SUSE/stratos-ui/app-core/repository/tokens"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/tokens"
 )
 
 // UAAResponse - Response returned by Cloud Foundry UAA Service
@@ -103,7 +104,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	_, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
 		return err
 	}
@@ -201,7 +202,6 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 			"Need CNSI GUID passed as form param")
 	}
 
-	endpoint := ""
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 
 	if err != nil {
@@ -211,7 +211,44 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 			"No CNSI registered with GUID %s: %s", cnsiGUID, err)
 	}
 
-	endpoint = cnsiRecord.AuthorizationEndpoint
+	authTypeStr := c.FormValue("auth")
+	authType := interfaces.AuthTypeOAuth2
+	switch authTypeStr {
+	case "http":
+		authType = interfaces.AuthTypeHttpBasic
+	default:
+		authType = interfaces.AuthTypeOAuth2
+	}
+
+	if authType == interfaces.AuthTypeOAuth2 {
+		return p.fetchOAuth2Token(cnsiRecord, c)
+	}
+
+	if authType == interfaces.AuthTypeHttpBasic {
+		return p.fetchHttpBasicToken(cnsiRecord, c)
+	}
+
+	return nil, nil, nil, interfaces.NewHTTPShadowError(
+		http.StatusBadRequest,
+		"Unknown Auth Type",
+		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, authTypeStr)
+}
+
+func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+
+	uaaRes, u, err := p.loginHttpBasic(c)
+
+	if err != nil {
+		return nil, nil, nil, interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"Login failed",
+			"Login failed: %v", err)
+	}
+	return uaaRes, u, &cnsiRecord, nil
+}
+
+func (p *portalProxy) fetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+	endpoint := cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
@@ -232,7 +269,6 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 			"Login failed: %v", err)
 	}
 	return uaaRes, u, &cnsiRecord, nil
-
 }
 
 func (p *portalProxy) GetClientId(cnsiType string) (string, error) {
@@ -299,7 +335,7 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 	}
 
 	if store {
-		_, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+		_, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 		if err != nil {
 			return err
 		}
@@ -327,6 +363,22 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 		return uaaRes, u, err
 	}
 
+	return uaaRes, u, nil
+}
+
+func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+	log.Debug("login")
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+
+	if len(username) == 0 || len(password) == 0 {
+		return uaaRes, u, errors.New("Needs username and password")
+	}
+
+	authString := fmt.Sprintf("%s:%s", username, password)
+	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
+
+	uaaRes.AccessToken = fmt.Sprintf("Basic %s", base64EncodedAuthString)
 	return uaaRes, u, nil
 }
 
@@ -404,8 +456,8 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	return &response, nil
 }
 
-func (p *portalProxy) saveUAAToken(u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
-	log.Debug("saveUAAToken")
+func (p *portalProxy) saveAuthToken(u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
+	log.Debug("saveAuthToken")
 
 	key := u.UserGUID
 	tokenRecord := interfaces.TokenRecord{
@@ -462,7 +514,7 @@ func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord
 		return interfaces.TokenRecord{}, err
 	}
 
-	tr, err := tokenRepo.FindUAAToken(userGUID, p.Config.EncryptionKeyInBytes)
+	tr, err := tokenRepo.FindAuthToken(userGUID, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		log.Errorf("Database error finding UAA token: %v", err)
 		return interfaces.TokenRecord{}, err
@@ -479,7 +531,7 @@ func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) er
 		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
 	}
 
-	err = tokenRepo.SaveUAAToken(key, t, p.Config.EncryptionKeyInBytes)
+	err = tokenRepo.SaveAuthToken(key, t, p.Config.EncryptionKeyInBytes)
 	if err != nil {
 		return fmt.Errorf("Database error saving UAA token: %v", err)
 	}
@@ -527,7 +579,7 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 			return userTokenErr
 		}
 
-		if _, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {
+		if _, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken); err != nil {
 			return err
 		}
 		sessionValues := make(map[string]interface{})
@@ -685,7 +737,7 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord
 
 	u.UserGUID = userGUID
 
-	t, err = p.saveUAAToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
+	t, err = p.saveAuthToken(*u, uaaRes.AccessToken, uaaRes.RefreshToken)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new UAA token: %v", err)
 	}

@@ -214,10 +214,10 @@ function buildProxy {
   # Use the existing build container to compile the proxy executable, and leave
   # it on the local filesystem.
   echo
-  echo "-- Building the Console Proxy"
+  echo "-- Building the Stratos Backend"
 
   echo
-  echo "-- Run the build container to build the Console backend"
+  echo "-- Run the build container to build the Stratos backend"
 
   pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   pushd $(git rev-parse --show-toplevel) > /dev/null 2>&1
@@ -229,9 +229,9 @@ function buildProxy {
              -e USER_NAME=$(id -nu) \
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
-             --name stratos-proxy-builder \
+             --name stratos-jetstream-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:${BASE_IMAGE_TAG}
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
@@ -254,10 +254,9 @@ function buildPostflightJob {
              -e USER_NAME=$(id -nu) \
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
-             -e BUILD_DB_MIGRATOR="true" \
-             --name stratos-proxy-builder \
+             --name stratos-jetstream-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:${BASE_IMAGE_TAG}
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:${BASE_IMAGE_TAG}
   buildAndPublishImage stratos-postflight-job deploy/db/Dockerfile.k8s.postflight-job ${STRATOS_UI_PATH}
   popd > /dev/null 2>&1
 
