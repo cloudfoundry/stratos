@@ -1,59 +1,77 @@
 import { Schema, schema } from 'normalizr';
 
+import { pathGet } from '../../core/utils.service';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { AppState } from '../app-state';
-import { pathGet } from '../../core/utils.service';
 
-export class EntityValidateParent {
+/**
+ * Provides a way for a child entity to populate a parent entity with itself
+ *
+ * @export
+ * @class EntityRelationParent
+ */
+export class EntityRelationParent {
   parentEntityKey: string;
   childEntityKey: string;
-  mergeResult: (state, response: NormalizedResponse) => {
+  mergeResult: (state, parentGuid: string, response: NormalizedResponse) => {
     parentGuid: string;
     newParentEntity: APIResource;
   };
 }
-
-export class EntityValidateInline {
+/**
+ * Provides a way for a parent entity to populate a child parameter
+ *
+ * @export
+ * @class EntityRelationChild
+ */
+export class EntityRelationChild {
   path: string;
   createAction: (resource: APIResource) => PaginatedAction;
 }
 
-export class EntityInlineParent extends schema.Array {
-  // TODO: RC
-  /**
-   *
-   */
+/**
+ * Defines an entity array which should exist in as a parameter in a parent entity. For example a space array in an parent organisation.
+ * Provides a framework to populate a parent entity's parameter with itself
+ *
+ * @export
+ * @class EntityInlineChild
+ * @extends {schema.Array}
+ */
+export class EntityInlineChild extends schema.Array {
   constructor(
-    public parentValidation: EntityValidateParent[],
+    public parentRelations: EntityRelationParent[],
     definition: Schema,
     schemaAttribute?: string | schema.SchemaFunction) {
     super(definition, schemaAttribute);
   }
-
 }
 
-export class EntityInline extends schema.Entity {
-
-  /**
-   * Creates an instance of EntityWithInline.
-   * @param {EntityValidateInline | EntityValidateParent[]} inlineValidation A collection defining the inline relationship of this entity.
-   * Parent entities have parameters that must exist in the response (if missing dispatch the associated paginated action to fetch).
-   * Child entities must populate a parent entity with their content at the associated param.//TODO:
-   * @param {string} key
-   * @param {Schema} [definition]
-   * @param {schema.EntityOptions} [options]
-   * @memberof EntityWithInline
-   */
+/**
+ * Defines an entity which should contain inline children. Provides a framework to fetch those if missing
+ *
+ * @export
+ * @class EntityInlineParent
+ * @extends {schema.Entity}
+ */
+export class EntityInlineParent extends schema.Entity {
   constructor(
-    public inlineValidation: EntityValidateInline[],
+    public childRelations: EntityRelationChild[],
     key: string,
     definition?: Schema,
     options?: schema.EntityOptions) {
     super(key, definition, options);
   }
+}
 
+/**
+ * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
+ *
+ * @export
+ * @interface EntityInlineChildAction
+ */
+export interface EntityInlineChildAction {
+  parentGuid: string;
 }
 
 export const organisationSchemaKey = 'organization';
@@ -62,25 +80,16 @@ export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {}, {
 });
 
 export const spaceSchemaKey = 'space';
-
 export const SpaceSchema = new schema.Entity(spaceSchemaKey, {}, {
   idAttribute: getAPIResourceGuid
 });
-export const SpacesSchema = new EntityInlineParent([
+
+export const SpacesSchema = new EntityInlineChild([
   {
     parentEntityKey: organisationSchemaKey,
     childEntityKey: spaceSchemaKey,
-    mergeResult: (state, response) => {
-      // TODO: RC
-      const spacesGuids = response.result;
-      const space = spacesGuids && spacesGuids.length > 0 ? response.entities[spaceSchemaKey][spacesGuids[0]] : null;
-      if (!space) {
-        return null;
-      }
-      const orgUrl = space.entity.organization_url;
-      const parentGuid = orgUrl.substring(orgUrl.lastIndexOf('/') + 1, orgUrl.length);
-      const parentPath = `${organisationSchemaKey}.${parentGuid}`;
-      const parentEntity = pathGet(parentPath, state);
+    mergeResult: (state, parentGuid, response) => {
+      const parentEntity = pathGet(`${organisationSchemaKey}.${parentGuid}`, state);
       const newParentEntity = {
         ...parentEntity,
         entity: {

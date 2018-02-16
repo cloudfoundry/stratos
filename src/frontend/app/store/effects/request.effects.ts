@@ -3,7 +3,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
 import { UtilsService, pathGet } from '../../core/utils.service';
-import { EntityInline, EntityValidateInline } from '../actions/action-types';
+import { EntityInlineParent, EntityRelationChild } from '../actions/action-types';
 import { SetInitialParams } from '../actions/pagination.actions';
 import { RequestTypes } from '../actions/request.actions';
 import { AppState } from '../app-state';
@@ -19,23 +19,25 @@ export class RequestEffect {
   ) { }
 
   /**
-   * Ensure all require parameters specified in the entity exist, or if not dispatch an action to fetch them and store in a pagination
-   * sections. For they exist ensure there is a pagination section for them
-   * We also guarentee the parameter will be populated once the action is returned. See ???????????TODO:
+   * Ensure all required inline parameters specified by the entity associated with the request exist.
+   * If the inline parameter/s are..
+   * - missing - dispatch an action to fetch them and ultimately store in a pagination. This will also populate the parent entities inline
+   * parameter (see the generic request data reducer).
+   * - exist - dispatch an action to store them in pagination.
    *
    * @memberof RequestEffect
    */
   @Effect() requestSuccess$ = this.actions$.ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS)
     .mergeMap(action => {
       // Does the entity associated with the action have inline params that need to be validated?
-      const entity = pathGet('apiAction.entity', action) || {};
-      const entityWithInline = (entity.length > 0 ? entity[0] : entity) as EntityInline;
-      const validateInlineEntities = entityWithInline.inlineValidation;
-      if (!validateInlineEntities || !validateInlineEntities.length) {
+      const entitySchema = pathGet('apiAction.entity', action) || {};
+      const entityParent = (entitySchema.length > 0 ? entitySchema[0] : entitySchema) as EntityInlineParent;
+      const childRelations = entityParent.childRelations;
+      if (!childRelations || !childRelations.length) {
         return [];
       }
 
-      // Do we have entities in the response?
+      // Do we have entities in the response to validate?
       const response = action.response;
       let entities = pathGet(`entities.${action.apiAction.entityKey}`, response) || {};
       entities = Object.values(entities);
@@ -46,10 +48,12 @@ export class RequestEffect {
       // Confirm that all the required parameters exist in the response
       let actions = [];
       entities.forEach(entity => {
-        validateInlineEntities.forEach(validateParam => {
-          const validateParent = validateParam as EntityValidateInline;
-          const paramAction = validateParent.createAction(entity);
-          const paramValue = pathGet(validateParent.path, entity);
+        // For each inline parameter required...
+        childRelations.forEach(relation => {
+          // Check to see if the inline parameter exists
+          const childRelation = relation as EntityRelationChild;
+          const paramAction = childRelation.createAction(entity);
+          const paramValue = pathGet(childRelation.path, entity);
           if (paramValue) {
             // We've got the value already, ensure we create a pagination section for them
             const paramEntities = pick(response.entities[paramAction.entityKey], paramValue);
