@@ -7,7 +7,7 @@ import {
   ApplicationEnvVarsService,
   EnvVarStratosProject,
 } from '../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { ApplicationStateService } from '../shared/components/application-state/application-state.service';
+import { ApplicationStateService, ApplicationStateData } from '../shared/components/application-state/application-state.service';
 import { AppState } from '../store/app-state';
 import { RequestInfoState } from '../store/reducers/api-request-reducer/types';
 import { APIResource, EntityInfo } from '../store/types/api.types';
@@ -47,6 +47,11 @@ export class ApplicationServiceMock {
   appEnvVars = {
     entities$: Observable.of(new Array<APIResource<any>>())
   };
+  applicationState$: Observable<ApplicationStateData> = Observable.of({
+    label: '',
+    indicator: null,
+    actions: {}
+  });
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
