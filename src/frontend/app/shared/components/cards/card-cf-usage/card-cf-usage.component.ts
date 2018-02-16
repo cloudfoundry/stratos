@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-card-cf-usage',
@@ -6,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./card-cf-usage.component.scss']
 })
 export class CardCfUsageComponent implements OnInit {
-  constructor() {}
+  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
 
   ngOnInit() {}
 }

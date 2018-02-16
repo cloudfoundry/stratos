@@ -6,7 +6,8 @@ import { MetadataItemComponent } from '../../metadata-item/metadata-item.compone
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModulesNoShared
+  getBaseTestModulesNoShared,
+  generateTestCfEndpointService
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { StoreModule } from '@ngrx/store';
 import {
@@ -24,11 +25,7 @@ describe('CardCfUserInfoComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CardCfUserInfoComponent, MetadataItemComponent],
         imports: [...getBaseTestModulesNoShared],
-        providers: [
-          CloudFoundryEndpointService,
-          generateTestCfEndpointServiceProvider(),
-          EntityMonitorFactory
-        ]
+        providers: [generateTestCfEndpointService()]
       }).compileComponents();
     })
   );
