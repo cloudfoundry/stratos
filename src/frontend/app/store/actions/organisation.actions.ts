@@ -6,7 +6,7 @@ import { CFStartAction, ICFAction } from '../types/request.types';
 import {
   OrganisationSchema,
   organisationSchemaKey,
-  EntityWithInline,
+  EntityInline,
   SpaceSchema,
   spaceSchemaKey,
   SpacesSchema,
@@ -83,7 +83,7 @@ export class GetAllOrganisations extends CFStartAction implements PaginatedActio
   flattenPagination = true;
 }
 
-export const OrganisationWithSpaceSchema = new EntityWithInline([
+export const OrganisationWithSpaceSchema = new EntityInline([
   {
     path: 'entity.spaces',
     createAction: (organisation) => {

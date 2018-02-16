@@ -1,14 +1,17 @@
 import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { APIResource } from '../types/api.types';
+import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
+import { AppState } from '../app-state';
+import { pathGet } from '../../core/utils.service';
 
 export class EntityValidateParent {
   parentEntityKey: string;
-  createPath: (resources: APIResource[]) => {
-    parentPath: any
-    childPropertyName: string
+  childEntityKey: string;
+  mergeResult: (state, response: NormalizedResponse) => {
+    parentGuid: string;
+    newParentEntity: APIResource;
   };
 }
 
@@ -17,7 +20,8 @@ export class EntityValidateInline {
   createAction: (resource: APIResource) => PaginatedAction;
 }
 
-export class EntityWithParent extends schema.Array {
+export class EntityInlineParent extends schema.Array {
+  // TODO: RC
   /**
    *
    */
@@ -30,7 +34,7 @@ export class EntityWithParent extends schema.Array {
 
 }
 
-export class EntityWithInline extends schema.Entity {
+export class EntityInline extends schema.Entity {
 
   /**
    * Creates an instance of EntityWithInline.
@@ -62,19 +66,31 @@ export const spaceSchemaKey = 'space';
 export const SpaceSchema = new schema.Entity(spaceSchemaKey, {}, {
   idAttribute: getAPIResourceGuid
 });
-export const SpacesSchema = new EntityWithParent([
+export const SpacesSchema = new EntityInlineParent([
   {
     parentEntityKey: organisationSchemaKey,
-    createPath: (spaces: APIResource[]) => {
-      const space = spaces && spaces.length > 0 ? spaces[0] : null;
+    childEntityKey: spaceSchemaKey,
+    mergeResult: (state, response) => {
+      // TODO: RC
+      const spacesGuids = response.result;
+      const space = spacesGuids && spacesGuids.length > 0 ? response.entities[spaceSchemaKey][spacesGuids[0]] : null;
       if (!space) {
         return null;
       }
       const orgUrl = space.entity.organization_url;
-      const guid = orgUrl.substring(orgUrl.lastIndexOf('/') + 1, orgUrl.length);
+      const parentGuid = orgUrl.substring(orgUrl.lastIndexOf('/') + 1, orgUrl.length);
+      const parentPath = `${organisationSchemaKey}.${parentGuid}`;
+      const parentEntity = pathGet(parentPath, state);
+      const newParentEntity = {
+        ...parentEntity,
+        entity: {
+          ...parentEntity.entity,
+          spaces: response.result
+        }
+      };
       return {
-        parentPath: `${organisationSchemaKey}.${guid}.entity`,
-        childPropertyName: 'spaces'
+        parentGuid,
+        newParentEntity
       };
     }
   }

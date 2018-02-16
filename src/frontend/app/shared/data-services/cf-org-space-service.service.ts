@@ -138,23 +138,7 @@ export class CfOrgSpaceDataService {
       });
 
     this.space = {
-      list$: this.org.select.asObservable().pipe(
-        withLatestFrom(this.cf.select.asObservable()),
-        mergeMap(([selectedOrgGuid, selectedCfGuid]) => {
-          const paginationKey = `org-${selectedOrgGuid}`;
-          const action = new GetAllOrganisationSpaces(paginationKey, selectedOrgGuid, selectedCfGuid);
-          return getPaginationObservables({
-            store: this.store,
-            action: action,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              paginationKey,
-              SpaceSchema
-            )
-          },
-            true
-          ).entities$.map(resources => resources.map(resource => resource.entity));
-        })
-      ),
+      list$: spaceList$,
       loading$: this.org.loading$,
       select: new BehaviorSubject(undefined),
     };

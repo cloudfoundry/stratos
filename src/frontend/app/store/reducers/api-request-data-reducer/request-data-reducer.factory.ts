@@ -7,7 +7,7 @@ import { ISuccessRequestAction } from '../../types/request.types';
 import { deepMergeState, mergeEntity } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
 import { pathGet, pathSet } from '../../../core/utils.service';
-import { EntityWithInline, EntityValidateParent, EntityWithParent } from '../../actions/action-types';
+import { EntityInline, EntityValidateParent, EntityInlineParent } from '../../actions/action-types';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -19,38 +19,36 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
-          const newState = deepMergeState(state, success.response.entities);
+
           // // Does the entity associated with the action have inline params that need to be validated?
           const entity = pathGet('apiAction.entity', success) || [];
-          const entityWithInline = entity as EntityWithParent;
+          const entityWithInline = entity as EntityInlineParent;
           const validateInlineEntities = entityWithInline.parentValidation;
 
           if (!validateInlineEntities || !validateInlineEntities.length) {
-            return newState;
+            return deepMergeState(state, success.response.entities);
           }
           // Do we have entities in the response?
           const response = success.response;
           let entities = pathGet(`entities.${success.apiAction.entityKey}`, response) || {};
           entities = Object.values(entities);
           if (!entities) {
-            return newState;
+            return deepMergeState(state, success.response.entities);
           }
 
           validateInlineEntities.forEach(validateParam => {
-            // TODO: RC
-            // Find the location of the parent in the state
-            const { parentPath, childPropertyName } = validateParam.createPath(entities);
-            const parentEntity = pathGet(parentPath, newState);
-            const newParentEntity = {
-              ...parentEntity,
-              [childPropertyName]: success.response.result
+            // Create a new entity with the inline result
+            const { parentGuid, newParentEntity } = validateParam.mergeResult(state, success.response);
+            if (!newParentEntity) {
+              return;
+            }
+            // Apply the new entity to the response
+            success.response.entities[validateParam.parentEntityKey] = {
+              ...success.response.entities[validateParam.parentEntityKey],
+              [parentGuid]: newParentEntity
             };
-
-            mergeEntity(parentEntity, newParentEntity);
-            // pathSet(parentPath, newState, newParentEntity);
           });
-
-          return newState;
+          return deepMergeState(state, success.response.entities);
         }
         return state;
       default:

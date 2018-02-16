@@ -3,7 +3,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
 import { UtilsService, pathGet } from '../../core/utils.service';
-import { EntityWithInline, EntityValidateInline } from '../actions/action-types';
+import { EntityInline, EntityValidateInline } from '../actions/action-types';
 import { SetInitialParams } from '../actions/pagination.actions';
 import { RequestTypes } from '../actions/request.actions';
 import { AppState } from '../app-state';
@@ -28,10 +28,10 @@ export class RequestEffect {
   @Effect() requestSuccess$ = this.actions$.ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS)
     .mergeMap(action => {
       // Does the entity associated with the action have inline params that need to be validated?
-      const entity = pathGet('action.apiAction.entity', action) || {};
-      const entityWithInline = entity as EntityWithInline;
+      const entity = pathGet('apiAction.entity', action) || {};
+      const entityWithInline = (entity.length > 0 ? entity[0] : entity) as EntityInline;
       const validateInlineEntities = entityWithInline.inlineValidation;
-      if (!validateInlineEntities || validateInlineEntities.length) {
+      if (!validateInlineEntities || !validateInlineEntities.length) {
         return [];
       }
 
@@ -46,7 +46,7 @@ export class RequestEffect {
       // Confirm that all the required parameters exist in the response
       let actions = [];
       entities.forEach(entity => {
-        validateInlineEntities.filter(validateParam => validateParam instanceof EntityValidateInline).forEach(validateParam => {
+        validateInlineEntities.forEach(validateParam => {
           const validateParent = validateParam as EntityValidateInline;
           const paramAction = validateParent.createAction(entity);
           const paramValue = pathGet(validateParent.path, entity);
