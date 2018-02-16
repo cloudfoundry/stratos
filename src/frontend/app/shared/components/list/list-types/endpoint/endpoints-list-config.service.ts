@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
+import { DisconnectEndpoint, UnregisterEndpoint, EndpointSchema } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -17,6 +17,9 @@ import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../..
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
+import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -181,9 +184,16 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   constructor(
     private store: Store<AppState>,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private paginationMonitorFactory: PaginationMonitorFactory,
+    private entityMonitorFactory: EntityMonitorFactory
   ) {
-    this.dataSource = new EndpointsDataSource(this.store, this);
+    this.dataSource = new EndpointsDataSource(
+      this.store,
+      this,
+      paginationMonitorFactory,
+      entityMonitorFactory
+    );
   }
 
   public getGlobalActions = () => this.globalActions;

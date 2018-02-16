@@ -24,7 +24,7 @@ export class EndpointsService implements CanActivate {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.map(endpoints => !!Object.keys(endpoints).length);
     this.haveConnected$ = this.endpoints$.map(endpoints =>
-      Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected'));
+      Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking'));
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {

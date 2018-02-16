@@ -1,7 +1,8 @@
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
   selector: 'app-table-cell-endpoint-status',
   templateUrl: './table-cell-endpoint-status.component.html',

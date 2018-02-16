@@ -76,6 +76,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // ------------- Private
   private entities$: Observable<T>;
   private paginationToStringFn: (PaginationEntityState) => string;
+  private externalDestroy: () => void;
 
   protected store: Store<AppState>;
   protected action: PaginatedAction;
@@ -151,7 +152,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.rowsState = config.rowsState ? config.rowsState.pipe(
       shareReplay(1)
     ) : Observable.of({}).first();
-
+    this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
   }
@@ -174,6 +175,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.pageSubscription.unsubscribe();
     this.transformedEntitiesSubscription.unsubscribe();
     if (this.seedSyncSub) { this.seedSyncSub.unsubscribe(); }
+    this.externalDestroy();
   }
 
   destroy() {
