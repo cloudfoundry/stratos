@@ -1,23 +1,24 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
+import { startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { AppState } from '../../../../../../store/app-state';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-table-cell-app-status',
   templateUrl: './table-cell-app-status.component.html',
   styleUrls: ['./table-cell-app-status.component.scss'],
 })
-export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implements OnInit, OnDestroy {
+export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implements OnInit {
 
   @Input('row') row;
   applicationState: ApplicationStateData;
-  fetchAppState$: Subscription;
+  fetchAppState$: Observable<ApplicationStateData>;
 
   constructor(
     private store: Store<AppState>,
@@ -28,19 +29,16 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
   }
 
   ngOnInit() {
-    this.applicationState = this.appStateService.get(this.row.entity, null);
+    const applicationState = this.appStateService.get(this.row.entity, null);
     this.fetchAppState$ = ApplicationService.getApplicationState(
       this.store,
       this.appStateService,
       this.row.entity,
       this.row.entity.guid,
       this.row.entity.cfGuid)
-      .do(appSate => this.applicationState = appSate)
-      .subscribe();
-  }
-
-  ngOnDestroy() {
-    this.fetchAppState$.unsubscribe();
+      .pipe(
+      startWith(applicationState)
+      );
   }
 
 }

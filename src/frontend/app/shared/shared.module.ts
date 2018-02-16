@@ -35,9 +35,17 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
+/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+/* tslint:enable:max-line-length */
+import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
+import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -71,8 +79,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 
-/* tslint:disable:max-line-length */
-/* tslint:enable:max-line-length */
 
 @NgModule({
   imports: [
@@ -129,6 +135,12 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
+    EndpointCardComponent,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
     CfOrgCardComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
@@ -175,6 +187,11 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
+    MetaCardComponent,
+    MetaCardTitleComponent,
+    MetaCardItemComponent,
+    MetaCardKeyComponent,
+    MetaCardValueComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent
@@ -193,4 +210,4 @@ import { ValuesPipe } from './pipes/values.pipe';
     PaginationMonitorFactory
   ]
 })
-export class SharedModule {}
+export class SharedModule { }

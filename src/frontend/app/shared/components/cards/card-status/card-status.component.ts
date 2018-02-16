@@ -1,31 +1,19 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Subscription';
+import { CardStatus } from '../../application-state/application-state.service';
+
 
 @Component({
   selector: 'app-card-status',
   templateUrl: './card-status.component.html',
-  styleUrls: ['./card-status.component.scss']
+  styleUrls: ['./card-status.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CardStatusComponent implements OnInit, OnDestroy {
-  sub: Subscription;
-  @Input('statusProvider') statusProvider: Observable<any>;
+export class CardStatusComponent {
+  @Input('status$') status$: Observable<CardStatus>;
 
-  @Input('status') status: string;
+  private cardStatus = CardStatus;
 
   constructor() { }
-
-  ngOnInit() {
-    if (this.statusProvider) {
-      this.sub = this.statusProvider.subscribe(status => {
-        this.status = status.indicator ? status.indicator : status;
-      });
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
-  }
 }

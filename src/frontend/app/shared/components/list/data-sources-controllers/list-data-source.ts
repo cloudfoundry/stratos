@@ -6,21 +6,21 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { OperatorFunction } from 'rxjs/interfaces';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged } from 'rxjs/operators';
-import { map, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, shareReplay, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { SetResultCount } from '../../../../store/actions/pagination.actions';
+import { CreatePagination, SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
 } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
+import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
-import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -90,6 +90,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
+  private seedSyncSub: Subscription;
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -113,8 +114,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     // Add any additional functions via an optional listConfig, such as sorting from the column definition
     const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
     listColumns.forEach(column => {
+      if (!column.sort) {
+        return;
+      }
       if (DataFunctionDefinition.is(column.sort)) {
         transformEntities.push(column.sort as DataFunctionDefinition);
+      } else if (typeof column.sort !== 'boolean') {
+        transformEntities.push(column.sort as DataFunction<T>);
       }
     });
 
@@ -167,6 +173,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   disconnect() {
     this.pageSubscription.unsubscribe();
     this.transformedEntitiesSubscription.unsubscribe();
+    if (this.seedSyncSub) { this.seedSyncSub.unsubscribe(); }
   }
 
   destroy() {
@@ -242,25 +249,56 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       pagination$,
       page$
     ).pipe(
+      tap(([paginationEntity]) => {
+        // If the list pagination is seeded, keep it synced with it's seed.
+        if (paginationEntity.seed && !this.seedSyncSub) {
+          this.seedSyncSub = this.store.select(selectPaginationState(this.entityKey, paginationEntity.seed))
+            .pipe(
+              pairwise(),
+              filter(([oldPag, newPag]) => {
+                return oldPag.ids !== newPag.ids ||
+                  oldPag.pageRequests !== newPag.pageRequests;
+              })
+            )
+            .map(pag => pag[1])
+            .subscribe(pag => {
+              this.store.dispatch(new CreatePagination(
+                this.entityKey,
+                this.paginationKey,
+                paginationEntity.seed
+              ));
+            });
+        }
+      }),
+      filter(([paginationEntity, entities]) => !getCurrentPageRequestInfo(paginationEntity).busy),
       map(([paginationEntity, entities]) => {
+        if (entities && !entities.length) {
+          return [];
+        }
+        const entitiesPreFilter = entities.length;
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
           }, entities);
         }
+        const entitiesPostFilter = entities.length;
+
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
         if (
-          paginationEntity.totalResults !== entities.length ||
-          paginationEntity.clientPagination.totalResults !== entities.length
+          entitiesPreFilter !== entitiesPostFilter &&
+          (paginationEntity.totalResults !== entities.length ||
+            paginationEntity.clientPagination.totalResults !== entities.length)
         ) {
           this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
+
         const pageIndex = paginationEntity.clientPagination.currentPage - 1;
         return pages[pageIndex];
       }),
-      shareReplay(1),
+      publishReplay(1),
+      refCount(),
       tag('local-list')
-      );
+    );
   }
 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {

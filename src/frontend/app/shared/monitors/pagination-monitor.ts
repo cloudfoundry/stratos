@@ -31,8 +31,8 @@ export class PaginationMonitor<T = any> {
 
   constructor(
     private store: Store<AppState>,
-    private paginationKey: string,
-    private schema: schema.Entity
+    public paginationKey: string,
+    public schema: schema.Entity
   ) {
     this.init(
       store,
@@ -117,7 +117,7 @@ export class PaginationMonitor<T = any> {
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
       shareReplay(1)
-      );
+    );
   }
 
   private createErrorObservable(pagination$: Observable<PaginationEntityState>) {

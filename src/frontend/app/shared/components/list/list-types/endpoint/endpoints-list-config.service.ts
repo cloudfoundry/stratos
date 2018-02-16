@@ -6,12 +6,11 @@ import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
-import { ResetPagination } from '../../../../../store/actions/pagination.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
-import { selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
+import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
@@ -23,15 +22,61 @@ function getEndpointTypeString(endpoint: EndpointModel): string {
   return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
 }
 
+export const endpointColumns: ITableColumn<EndpointModel>[] = [
+  {
+    columnId: 'name',
+    headerCell: () => 'Name',
+    cell: row => row.name,
+    sort: {
+      type: 'sort',
+      orderKey: 'name',
+      field: 'name'
+    },
+    cellFlex: '2'
+  },
+  {
+    columnId: 'connection',
+    headerCell: () => 'Status',
+    cellComponent: TableCellEndpointStatusComponent,
+    sort: {
+      type: 'sort',
+      orderKey: 'connection',
+      field: 'info.user'
+    },
+    cellFlex: '1'
+  },
+  {
+    columnId: 'type',
+    headerCell: () => 'Type',
+    cell: getEndpointTypeString,
+    sort: {
+      type: 'sort',
+      orderKey: 'type',
+      field: 'cnsi_type'
+    },
+    cellFlex: '2'
+  },
+  {
+    columnId: 'address',
+    headerCell: () => 'Address',
+    cell: row => row.api_endpoint ? `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}` : 'Unknown',
+    sort: {
+      type: 'sort',
+      orderKey: 'address',
+      field: 'api_endpoint.Host'
+    },
+    cellFlex: '5'
+  },
+];
+
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
       this.store.dispatch(new UnregisterEndpoint(item.guid));
-      this.handleAction(item, EndpointsEffect.unregisteringKey, ([oldVal, newVal]) => {
+      this.handleDeleteAction(item, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
-        this.store.dispatch(new ResetPagination(this.dataSource.entityKey, this.dataSource.paginationKey));
       });
     },
     icon: 'delete',
@@ -55,7 +100,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
       this.store.dispatch(new DisconnectEndpoint(item.guid));
-      this.handleAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
+      this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
         this.store.dispatch(new GetSystemInfo());
       });
@@ -94,52 +139,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   private multiActions = [this.listActionDeleteMulti];
   private globalActions = [];
 
-  columns: ITableColumn<EndpointModel>[] = [
-    {
-      columnId: 'name',
-      headerCell: () => 'Name',
-      cell: row => row.name,
-      sort: {
-        type: 'sort',
-        orderKey: 'name',
-        field: 'name'
-      },
-      cellFlex: '2'
-    },
-    {
-      columnId: 'connection',
-      headerCell: () => 'Status',
-      cellComponent: TableCellEndpointStatusComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'connection',
-        field: 'info.user'
-      },
-      cellFlex: '1'
-    },
-    {
-      columnId: 'type',
-      headerCell: () => 'Type',
-      cell: getEndpointTypeString,
-      sort: {
-        type: 'sort',
-        orderKey: 'type',
-        field: 'cnsi_type'
-      },
-      cellFlex: '2'
-    },
-    {
-      columnId: 'address',
-      headerCell: () => 'Address',
-      cell: row => row.api_endpoint ? `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}` : 'Unknown',
-      sort: {
-        type: 'sort',
-        orderKey: 'address',
-        field: 'api_endpoint.Host'
-      },
-      cellFlex: '5'
-    },
-  ];
+  columns = endpointColumns;
   isLocal = true;
   dataSource: EndpointsDataSource;
   pageSizeOptions = [9, 45, 90];
@@ -151,12 +151,23 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   enableTextFilter = true;
   tableFixedRowHeight = true;
 
-  private handleAction(item, effectKey, handleChange) {
-    const disSub = this.store.select(selectUpdateInfo(
+  private handleUpdateAction(item, effectKey, handleChange) {
+    this.handleAction(selectUpdateInfo(
       endpointStoreNames.type,
       item.guid,
       effectKey,
-    ))
+    ), handleChange);
+  }
+
+  private handleDeleteAction(item, handleChange) {
+    this.handleAction(selectDeletionInfo(
+      endpointStoreNames.type,
+      item.guid,
+    ), handleChange);
+  }
+
+  private handleAction(storeSelect, handleChange) {
+    const disSub = this.store.select(storeSelect)
       .pairwise()
       .subscribe(([oldVal, newVal]) => {
         // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')

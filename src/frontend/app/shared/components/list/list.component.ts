@@ -26,7 +26,11 @@ import {
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
+  IListConfig,
+  ListViewTypes,
 } from './list.component.types';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { map } from 'rxjs/operators';
 
 
 @Component({
@@ -62,6 +66,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
 
+  isAddingOrSelecting$: Observable<boolean>;
+  hasRows$: Observable<boolean>;
+
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
@@ -82,20 +89,38 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource = this.config.getDataSource();
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
-    // Set up an obervable containing the current view (card/table)
+    // Create convenience observables that make the html clearer
+    this.isAddingOrSelecting$ = combineLatest(
+      this.dataSource.isAdding$,
+      this.dataSource.isSelecting$
+    ).pipe(
+      map(([isAdding, isSelecting]) => isAdding || isSelecting)
+    );
+    this.hasRows$ = this.dataSource.pagination$.map(pag => pag.totalResults > 0);
+
+    // Set up an observable containing the current view (card/table)
     const { view, } = getListStateObservables(this.store, this.dataSource.paginationKey);
     this.view$ = view;
 
-    // If this is the first time the user has used this lis then set the view to the default
+    // If this is the first time the user has used this list then set the view to the default
     this.view$.first().subscribe(listView => {
       if (!listView) {
-        this.updateListView(this.config.defaultView || 'table');
+        this.updateListView(this.getDefaultListView(this.config));
       }
     });
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
 
     this.paginator.pageSizeOptions = this.config.pageSizeOptions;
+
+    // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
+    // pageSize
+    this.paginationController.pagination$.first().subscribe(pagination => {
+      if (this.paginator.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
+        this.paginationController.pageSize(this.paginator.pageSizeOptions[0]);
+      }
+    });
+
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
       this.paginator.length = pagination.totalResults;
       this.paginator.pageIndex = pagination.pageIndex - 1;
@@ -161,6 +186,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.multiFilterWidgetObservables.forEach(sub => sub.unsubscribe());
     this.uberSub.unsubscribe();
     this.dataSource.destroy();
+  }
+
+  private getDefaultListView(config: IListConfig<T>) {
+    switch (config.viewType) {
+      case ListViewTypes.TABLE_ONLY:
+        return 'table';
+      case ListViewTypes.CARD_ONLY:
+        return 'cards';
+      default:
+        return this.config.defaultView || 'table';
+    }
   }
 
   updateListView(listView: ListView) {
