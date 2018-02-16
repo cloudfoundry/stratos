@@ -1,5 +1,6 @@
 # compiled output
 /dist
+.dist
 /tmp
 /out-tsc
 /out
@@ -56,6 +57,8 @@ lib
 tools/test-backend/config/mock.config.json
 tools/.coverage-karma/
 dev-certs/*
+vendor/
+**/vendor
 **/*.so
 .glide
 tools/ssl

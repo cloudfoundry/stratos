@@ -212,19 +212,19 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 	}
 
 	authTypeStr := c.FormValue("auth")
-	authType := interfaces.OAuth2
+	authType := interfaces.AuthTypeOAuth2
 	switch authTypeStr {
 	case "http":
-		authType = interfaces.HttpBasic
+		authType = interfaces.AuthTypeHttpBasic
 	default:
-		authType = interfaces.OAuth2
+		authType = interfaces.AuthTypeOAuth2
 	}
 
-	if authType == interfaces.OAuth2 {
+	if authType == interfaces.AuthTypeOAuth2 {
 		return p.fetchOAuth2Token(cnsiRecord, c)
 	}
 
-	if authType == interfaces.HttpBasic {
+	if authType == interfaces.AuthTypeHttpBasic {
 		return p.fetchHttpBasicToken(cnsiRecord, c)
 	}
 

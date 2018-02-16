@@ -1,18 +1,20 @@
-package main
+package datastore
 
 import (
 	"database/sql"
 	"fmt"
 )
 
-func Up_20171108102900(txn *sql.Tx) {
+func (s *StratosMigrations) Up_20171108102900(txn *sql.Tx) {
 
-	createTokens := "ALTER TABLE  tokens "
-	createTokens += "ADD auth_type VARCHAR(255) DEFAULT \"OAuth2\", "
-	createTokens += "ADD meta_data     TEXT "
-	createTokens += ";"
-
+	createTokens := "ALTER TABLE tokens ADD auth_type VARCHAR(255) DEFAULT \"OAuth2\""
 	_, err := txn.Exec(createTokens)
+	if err != nil {
+		fmt.Printf("Failed to migrate due to: %v", err)
+	}
+
+	createTokens = "ALTER TABLE tokens ADD meta_data TEXT"
+	_, err = txn.Exec(createTokens)
 	if err != nil {
 		fmt.Printf("Failed to migrate due to: %v", err)
 	}

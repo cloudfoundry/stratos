@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { map, startWith } from 'rxjs/operators';
+
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-card-app-uptime',
@@ -12,13 +14,27 @@ export class CardAppUptimeComponent implements OnInit {
 
   constructor(private appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
 
-  appData$: Observable<any>;
+  appData$: Observable<{
+    maxUptime: number,
+    minUptime: number,
+    averageUptime: number,
+    runningCount: number
+  }>;
 
   ngOnInit() {
-    this.appData$ = Observable.combineLatest(
-      this.appMonitor.appMonitor$,
-      this.appService.application$.map(data => data.app.entity.state === 'STARTED'),
-      (monitor, isRunning) => ({ monitor: monitor, isRunning: isRunning, status: !isRunning ? 'tentative' : monitor.status.usage })
+    this.appData$ = this.appMonitor.appMonitor$.pipe(
+      map(monitor => ({
+        maxUptime: monitor.max.uptime,
+        minUptime: monitor.min.uptime,
+        averageUptime: monitor.avg.uptime,
+        runningCount: monitor.running
+      })),
+      startWith({
+        maxUptime: 0,
+        minUptime: 0,
+        averageUptime: 0,
+        runningCount: 0
+      })
     );
   }
 }

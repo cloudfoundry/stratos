@@ -46,8 +46,8 @@ var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, aut
 										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
 var updateCNSIToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4
-										WHERE cnsi_guid = $5 AND user_guid = $6 AND token_type = $7 AND auth_type = $7 AND meta_data = $8`
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5,
+										WHERE cnsi_guid = $6 AND user_guid = $7 AND token_type = $8 AND auth_type = $9`
 
 var deleteCNSIToken = `DELETE FROM tokens
 											WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
@@ -238,7 +238,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 	case 0:
 
 		if _, insertErr := p.db.Exec(insertCNSIToken, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
-			ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected, tr.AuthType, tr.AuthType, tr.Metadata); insertErr != nil {
+			ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected, tr.AuthType, tr.Metadata); insertErr != nil {
 
 			msg := "Unable to INSERT CNSI token: %v"
 			log.Printf(msg, insertErr)
@@ -251,7 +251,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 		log.Println("Existing CNSI token found - attempting update.")
 		result, err := p.db.Exec(updateCNSIToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry,
-			tr.Disconnected, cnsiGUID, userGUID, "cnsi", tr.AuthType, tr.Metadata)
+			tr.Disconnected, tr.Metadata, cnsiGUID, userGUID, "cnsi", tr.AuthType)
 		if err != nil {
 			msg := "Unable to UPDATE CNSI token: %v"
 			log.Printf(msg, err)

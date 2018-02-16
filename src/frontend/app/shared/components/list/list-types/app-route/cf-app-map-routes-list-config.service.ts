@@ -1,3 +1,4 @@
+import { isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
@@ -25,10 +26,10 @@ import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-ap
 import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
+import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 
 @Injectable()
-export class CfAppMapRoutesListConfigService
-  implements IListConfig<APIResource> {
+export class CfAppMapRoutesListConfigService implements IListConfig<APIResource> {
   routesDataSource: CfAppRoutesDataSource;
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -43,30 +44,43 @@ export class CfAppMapRoutesListConfigService
       columnId: 'route',
       headerCell: () => 'Route',
       cellComponent: TableCellRouteComponent,
-      sort: true,
+      sort: {
+        type: 'sort',
+        orderKey: 'route',
+        field: 'entity.host'
+      },
       cellFlex: '3'
     },
     {
       columnId: 'tcproute',
       headerCell: () => 'TCP Route',
       cellComponent: TableCellTCPRouteComponent,
-      sort: true,
+      sort: {
+        type: 'sort',
+        orderKey: 'tcproute',
+        field: 'entity.isTCPRoute'
+      },
       cellFlex: '3'
     },
     {
       columnId: 'attachedApps',
       headerCell: () => 'Apps Attached',
       cellComponent: TableCellAppRouteComponent,
-      sort: true,
+      sort: {
+        type: 'sort',
+        orderKey: 'attachedApps',
+        field: 'entity.mappedAppsCount'
+      },
       cellFlex: '3'
     }
   ];
 
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = [5, 15, 30];
   viewType = ListViewTypes.TABLE_ONLY;
-  text: {
-    title: 'Available Routes';
+  text = {
+    title: 'Available Routes'
   };
+  isLocal = true;
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
@@ -104,7 +118,8 @@ export class CfAppMapRoutesListConfigService
       this.appService,
       new GetSpaceRoutes(spaceGuid, appService.cfGuid),
       getPaginationKey('route', appService.cfGuid, spaceGuid),
-      true
+      true,
+      this
     );
   }
 }
