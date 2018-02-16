@@ -90,7 +90,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
   private cellComponent: TableCellCustom<T>;
 
-  constructor(private componentFactoryResolver: ComponentFactoryResolver) {}
+  constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
     if (this.component) {
@@ -103,6 +103,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
+      this.cellComponent.rowState = this.dataSource.getRowState(this.row);
     }
   }
 

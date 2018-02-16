@@ -23,6 +23,8 @@ import { EndpointsListConfigService } from './list-types/endpoint/endpoints-list
 import { ListComponent } from './list.component';
 import { ListConfig } from './list.component.types';
 import { SharedModule } from '../../shared.module';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
 
 describe('ListComponent', () => {
   let component: ListComponent<EntityInfo>;
@@ -32,7 +34,9 @@ describe('ListComponent', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: ListConfig, useClass: EndpointsListConfigService },
-        ApplicationStateService
+        ApplicationStateService,
+        PaginationMonitorFactory,
+        EntityMonitorFactory
       ],
       imports: [
         CoreModule,
