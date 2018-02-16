@@ -193,14 +193,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isAdding$.next(false);
   }
 
-  selectedRowToggle(row: T) {
+  selectedRowToggle(row: T, multiMode: boolean = true) {
     const exists = this.selectedRows.has(this.getRowUniqueId(row));
     if (exists) {
       this.selectedRows.delete(this.getRowUniqueId(row));
+      this.selectAllChecked = false;
     } else {
+      if (!multiMode) {
+        this.selectedRows.clear();
+      }
       this.selectedRows.set(this.getRowUniqueId(row), row);
+      this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
     }
-    this.isSelecting$.next(this.selectedRows.size > 0);
+    this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
   }
 
   selectAllFilteredRows() {
@@ -286,8 +291,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         const entitiesPostFilter = entities.length;
 
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
+        const validPagesCountChange = entitiesPreFilter !== entitiesPostFilter || this.transformEntity;
         if (
-          entitiesPreFilter !== entitiesPostFilter &&
+          validPagesCountChange &&
           (paginationEntity.totalResults !== entities.length ||
             paginationEntity.clientPagination.totalResults !== entities.length)
         ) {

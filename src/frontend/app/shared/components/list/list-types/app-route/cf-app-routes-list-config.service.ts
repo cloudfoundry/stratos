@@ -87,22 +87,22 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     action: () => {
       this.appService.application$
         .pipe(
-        take(1),
-        tap(app => {
-          this.store.dispatch(
-            new RouterNav({
-              path: [
-                'applications',
-                this.appService.cfGuid,
-                this.appService.appGuid,
-                'add-route'
-              ],
-              query: {
-                spaceGuid: app.app.entity.space_guid
-              }
-            })
-          );
-        })
+          take(1),
+          tap(app => {
+            this.store.dispatch(
+              new RouterNav({
+                path: [
+                  'applications',
+                  this.appService.cfGuid,
+                  this.appService.appGuid,
+                  'add-route'
+                ],
+                query: {
+                  spaceGuid: app.app.entity.space_guid
+                }
+              })
+            );
+          })
         )
         .subscribe();
     },
@@ -181,7 +181,6 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
       this.appService,
       new GetAppRoutes(appService.appGuid, appService.cfGuid),
       getPaginationKey('route', appService.cfGuid, appService.appGuid),
-      false,
       this
     );
   }
@@ -190,18 +189,18 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-      take(1),
-      tap(domain => {
-        const routeUrl = getRoute(item, false, false, domain);
-        const confirmation = new ConfirmationDialog(
-          'Delete Route',
-          `Are you sure you want to delete the route \'${routeUrl}\'?`,
-          'Delete'
-        );
-        this.confirmDialog.open(confirmation, () =>
-          this.dispatchDeleteAction(item)
-        );
-      })
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialog(
+            'Delete Route',
+            `Are you sure you want to delete the route \'${routeUrl}\'?`,
+            'Delete'
+          );
+          this.confirmDialog.open(confirmation, () =>
+            this.dispatchDeleteAction(item)
+          );
+        })
       )
       .subscribe();
   }
@@ -210,18 +209,18 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-      take(1),
-      tap(domain => {
-        const routeUrl = getRoute(item, false, false, domain);
-        const confirmation = new ConfirmationDialog(
-          'Unmap Route from Application',
-          `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-          'Unmap'
-        );
-        this.confirmDialog.open(confirmation, () =>
-          this.dispatchUnmapAction(item)
-        );
-      })
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialog(
+            'Unmap Route from Application',
+            `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+            'Unmap'
+          );
+          this.confirmDialog.open(confirmation, () =>
+            this.dispatchUnmapAction(item)
+          );
+        })
       )
       .subscribe();
   }

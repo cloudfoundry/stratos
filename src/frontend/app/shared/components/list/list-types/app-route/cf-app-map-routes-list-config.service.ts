@@ -118,7 +118,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
       this.appService,
       new GetSpaceRoutes(spaceGuid, appService.cfGuid),
       getPaginationKey('route', appService.cfGuid, spaceGuid),
-      true,
       this
     );
   }
