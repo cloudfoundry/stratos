@@ -44,7 +44,7 @@ export class EndpointDataSourceHelper {
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const disconnect = request.updating[EndpointsEffect.disconnectingKey] || { busy: false };
-              const unregister = request.updating[EndpointsEffect.unregisteringKey] || { busy: false };
+              const unregister = request.deleting || { busy: false };
               const busy = disconnect.busy || unregister.busy;
               const blocked = unregister.busy;
               rowStateManager.setRowState(endpoint.guid, {
