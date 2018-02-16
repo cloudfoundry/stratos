@@ -5,10 +5,10 @@ import { IListDataSource, RowState } from '../../data-sources-controllers/list-d
 export enum CardSize {
   LARGE = 'large'
 }
-export abstract class TableCellCustom < T > {
-  dataSource: IListDataSource < T > ;
+export abstract class TableCellCustom<T> {
+  dataSource: IListDataSource<T>;
   row: T;
   config: any;
-  rowState: Observable < RowState > ;
-  size ? : CardSize;
+  rowState: Observable<RowState>;
+  size?: CardSize;
 }

@@ -6,11 +6,20 @@ import {
   generateTestCfUserServiceProvider,
   getBaseTestModulesNoShared,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { MetadataItemComponent } from '../../../../metadata-item/metadata-item.component';
-import { CfOrgCardComponent } from './cf-org-card.component';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
-import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
+import {
+  ApplicationStateIconComponent,
+} from '../../../../application-state/application-state-icon/application-state-icon.component';
+import { ApplicationStateIconPipe } from '../../../../application-state/application-state-icon/application-state-icon.pipe';
+import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
+import { MetaCardComponent } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from '../../../list-cards/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { CfOrgCardComponent } from './cf-org-card.component';
 
 describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;
@@ -18,12 +27,14 @@ describe('CfOrgCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CfOrgCardComponent, MetadataItemComponent],
+      declarations: [CfOrgCardComponent, MetaCardComponent, MetaCardItemComponent,
+        MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
+        MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent],
       imports: [...getBaseTestModulesNoShared],
       providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
         CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

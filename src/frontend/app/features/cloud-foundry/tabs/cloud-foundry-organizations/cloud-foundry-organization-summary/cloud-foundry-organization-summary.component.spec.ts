@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { getBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganizationSummaryComponent } from './cloud-foundry-organization-summary.component';
 
 describe('CloudFoundryOrganizationSummaryComponent', () => {
@@ -8,9 +9,10 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CloudFoundryOrganizationSummaryComponent ]
+      declarations: [CloudFoundryOrganizationSummaryComponent],
+      imports: [...getBaseTestModules]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

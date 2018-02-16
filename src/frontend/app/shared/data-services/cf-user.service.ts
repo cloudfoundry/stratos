@@ -17,7 +17,7 @@ export class CfUserService {
 
   public allUsersAction = new GetAllUsers(CfUserService.EndpointUserService);
 
-  public allUsers$ = getPaginationObservables < APIResource < CfUser > > ({
+  public allUsers$ = getPaginationObservables<APIResource<CfUser>>({
     store: this.store,
     action: this.allUsersAction,
     paginationMonitor: this.paginationMonitorFactory.create(
@@ -27,11 +27,11 @@ export class CfUserService {
   });
 
   constructor(
-    private store: Store < AppState > ,
+    private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory
-  ) {}
+  ) { }
 
-  getUsers = (endpointGuid: string): Observable < APIResource < CfUser > [] > =>
+  getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
     this.allUsers$.entities$.pipe(
       filter(p => !!p),
       map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
@@ -43,7 +43,7 @@ export class CfUserService {
     userGuid: string,
     orgGuid: string,
     cfGuid: string
-  ): Observable < UserRoleInOrg > => {
+  ): Observable<UserRoleInOrg> => {
     return this.getUsers(cfGuid).pipe(
       map(users => {
         return users.filter(o => o.entity.guid === userGuid)[0];

@@ -21,9 +21,9 @@ import { CloudFoundryService } from '../services/cloud-foundry.service';
   }]
 })
 export class CloudFoundryComponent {
-  hasOneCf$: Observable < boolean > ;
+  hasOneCf$: Observable<boolean>;
   constructor(
-    private store: Store < AppState > ,
+    private store: Store<AppState>,
     private cfService: CloudFoundryService
   ) {
     this.hasOneCf$ = cfService.cFEndpoints$.pipe(
