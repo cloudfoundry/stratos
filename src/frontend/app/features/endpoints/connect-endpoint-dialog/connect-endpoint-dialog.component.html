@@ -23,7 +23,7 @@
           <input matInput placeholder="Password" type="password" formControlName="password">
         </mat-form-field>
       </div>
-      <div *ngIf="endpointForm.value.authType === 'kube-config'" formGroupName="authValues" class="connection-dialog__auth">
+      <div *ngIf="endpointForm.value.authType === 'KubeConfig'" formGroupName="authValues" class="connection-dialog__auth">
         <mat-form-field>
           <input matInput placeholder="config" formControlName="config">
         </mat-form-field>

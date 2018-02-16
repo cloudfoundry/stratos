@@ -51,7 +51,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     },
     {
       name: "Kube Config",
-      value: "kube-config",
+      value: "KubeConfig",
       form: {
         config: ['', Validators.required],
       },
@@ -98,7 +98,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       var text = reader.result;
       this.bodyContent = text;
       this.endpointForm.controls.authValues.patchValue({
-        config: file.name;
+        config: file.name,
       });
     }
 

@@ -1,0 +1,4 @@
+package: .
+import:
+- package: github.com/SermoDigital/jose/jwt
+  version: ^1.1

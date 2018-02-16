@@ -37,6 +37,12 @@ const (
 	AuthTypeKubeConfig = "KubeConfig"
 )
 
+const (
+	AuthConnectTypeCreds    = "creds"
+	AuthConnectTypeKubeConfig = "kube-config"
+)
+
+
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
 type TokenRecord struct {
 	AuthToken    string
@@ -51,6 +57,13 @@ type CFInfo struct {
 	EndpointGUID string
 	SpaceGUID    string
 	AppGUID      string
+}
+
+// Structure for optional metadata for an OAuth2 Token
+type OAuth2Metadata struct {
+	ClientID	   string
+	ClientSecret string
+	IssuerURL	   string
 }
 
 type VCapApplicationData struct {

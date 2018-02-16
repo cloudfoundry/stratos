@@ -74,6 +74,7 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) {
 	log.Println("========================")
 	log.Println("= Stratos DB Migration =")
 	log.Println("========================")
+	log.Printf("Database provider: %s", conf.Driver.Name)
 	log.Printf("Current %d", current)
 
 	stratosMigrations := findMigrartions()
@@ -81,8 +82,6 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) {
 	if len(stratosMigrations) == 0 {
 		log.Fatal("No Database Migrations found")
 	}
-
-	log.Infof("Database provider: %s", conf.Driver.Name)
 
 	// Target is always the last migration
 	target := stratosMigrations[len(stratosMigrations)-1].Version

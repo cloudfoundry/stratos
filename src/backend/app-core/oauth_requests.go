@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"encoding/json"
 
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
@@ -21,6 +22,12 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 
 	got401 := false
 	expTime := time.Unix(tokenRec.TokenExpiry, 0)
+
+	// Force expiry
+	if cnsi.CNSIType == "k8s" {
+		expTime = time.Unix(0, 0)
+	}
+
 	for {
 		clientID, err := p.GetClientId(cnsi.CNSIType)
 		if err != nil {
@@ -79,11 +86,34 @@ func (p *portalProxy) getCNSIRequestRecords(r *CNSIRequest) (t interfaces.TokenR
 
 func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
 	log.Debug("refreshToken")
-	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
-
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)
+	}
+
+	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
+
+	// Parse out token metadata is there is some, and override some of theser parameters
+
+	log.Info(userToken.Metadata)
+	if len(userToken.Metadata) > 0 {
+		metadata := &interfaces.OAuth2Metadata{}
+		if err := json.Unmarshal([]byte(userToken.Metadata), metadata); err == nil {
+			log.Info(metadata)
+			log.Info(metadata.ClientID)
+			log.Info(metadata.ClientSecret)
+
+			if len(metadata.ClientID) > 0 {
+				client = metadata.ClientID
+			}
+			if len(metadata.ClientSecret) > 0 {
+				clientSecret = metadata.ClientSecret
+			}
+			if len(metadata.IssuerURL) > 0 {
+				tokenEndpoint = metadata.IssuerURL
+				tokenEndpointWithPath = fmt.Sprintf("%s/token", tokenEndpoint)
+			}
+		}
 	}
 
 	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath)
@@ -98,7 +128,8 @@ func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, c
 
 	u.UserGUID = userGUID
 
-	t, err = p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	tokenRecord := p.initEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	err = p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)
 	}

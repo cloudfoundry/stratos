@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/SUSE/stratos-ui/config"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -22,6 +21,9 @@ import (
 
 	"gopkg.in/yaml.v2"
 
+	"github.com/SermoDigital/jose/jws"
+
+	"github.com/SUSE/stratos-ui/config"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/SUSE/stratos-ui/repository/tokens"
 )
@@ -160,8 +162,9 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 }
 
 func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interfaces.LoginRes, error) {
-	uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
-
+	
+	//uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
+	tokenRecord, cnsiRecord, err := p.getTokenForEndpoint(cnsiGUID, c)
 	if err != nil {
 		return nil, err
 	}
@@ -171,15 +174,30 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
-	u.UserGUID = userID
 
-	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, false)
+	err = p.setCNSITokenRecord(cnsiGUID, userID, *tokenRecord)
+	if err != nil {
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Failed to save Token for endpoint",
+			"Error occurred: %s", err)
+	}
 
-	cfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)
+	//cfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)
+	var cfAdmin = false
+
+	// TODO should be an extension point
+	if cnsiRecord.CNSIType == "cf" {
+		// get the scope out of the JWT token data
+		userTokenInfo, err := getUserTokenInfo(tokenRecord.AuthToken)
+		if err == nil {
+			cfAdmin = strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.CFAdminIdentifier)
+		}
+	}
 
 	resp := &interfaces.LoginRes{
-		Account:     u.UserGUID,
-		TokenExpiry: u.TokenExpiry,
+		Account:     userID,
+		TokenExpiry: tokenRecord.TokenExpiry,
 		APIEndpoint: cnsiRecord.APIEndpoint,
 		Admin:       cfAdmin,
 	}
@@ -191,53 +209,60 @@ func (p *portalProxy) verifyLoginToCNSI(c echo.Context) error {
 	log.Debug("verifyLoginToCNSI")
 
 	cnsiGUID := c.FormValue("cnsi_guid")
-	_, _, _, err := p.fetchToken(cnsiGUID, c)
+	_, _, err := p.getTokenForEndpoint(cnsiGUID, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
 	}
 	return c.NoContent(http.StatusOK)
 }
 
-func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+func (p *portalProxy) getTokenForEndpoint(cnsiGUID string, c echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
 
 	if len(cnsiGUID) == 0 {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
+		return nil, nil, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Missing target endpoint",
-			"Need CNSI GUID passed as form param")
+			"Need Endpoint GUID passed as form param")
 	}
 
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 
 	if err != nil {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
+		return nil, nil, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
 			"Requested endpoint not registered",
-			"No CNSI registered with GUID %s: %s", cnsiGUID, err)
+			"No Endpoint registered with GUID %s: %s", cnsiGUID, err)
 	}
 
 	// Look for auth type
-	authType := c.FormValue("auth_type")
-	if len(authType) == 0 {
-		authType = interfaces.AuthTypeOAuth2
+	//authType := interfaces.AuthConnectTypeCreds
+
+	connectType := c.FormValue("connect_type")
+	if len(connectType) == 0 {
+		connectType = interfaces.AuthConnectTypeCreds
 	}
 
-	if authType == interfaces.AuthTypeOAuth2 {
-		return p.fetchOAuth2Token(cnsiRecord, c)
+	if connectType == interfaces.AuthConnectTypeCreds {
+		uaaRes, u, cnsiRecord, err := p.fetchOAuth2Token(cnsiRecord, c)
+		if err != nil {
+			return nil, nil, err
+		}
+		tokenRecord := p.initEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, false)
+		return &tokenRecord, cnsiRecord, nil
 	}
 
-	if authType == interfaces.AuthTypeHttpBasic {
-		return p.fetchHttpBasicToken(cnsiRecord, c)
-	}
+	// if connectType == interfaces.AuthTypeHttpBasic {
+	// 	return p.fetchHttpBasicToken(cnsiRecord, c)
+	// }
 
-	if authType == interfaces.AuthTypeKubeConfig {
+	if connectType == interfaces.AuthTypeKubeConfig {
 		return p.fetcKubeConfigToken(cnsiRecord, c)
 	}
 
-	return nil, nil, nil, interfaces.NewHTTPShadowError(
+	return nil, nil, interfaces.NewHTTPShadowError(
 		http.StatusBadRequest,
-		"Unknown Auth Type",
-		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, authType)
+		"Unknown Auth Connecttion Type",
+		"Unkown Auth Connecttion Type for Endpoint %s: %s", cnsiGUID, connectType)
 }
 
 func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
@@ -269,7 +294,7 @@ type KubeConfigUser struct {
 	User struct {
 		AuthProvider struct {
 			Name   string      `yaml:"name"`
-			Config interface{} `yaml:"config"`
+			Config map[string]interface{} `yaml:"config"`
 		} `yaml:"auth-provider"`
 	}
 }
@@ -299,9 +324,7 @@ type KubeConfigFile struct {
 	Contexts   []KubeConfigContexts `yaml:"contexts"`
 }
 
-func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
-
-	log.Info("Fetching Kube Config Token")
+func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*interfaces.TokenRecord, *interfaces.CNSIRecord, error) {
 
 	req := c.Request().(*standard.Request).Request
 
@@ -309,37 +332,22 @@ func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c ec
 	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
-
-	log.Info("== BODY ===")
-	log.Info(body)
 
 	kubeConfig := KubeConfigFile{}
 	err = yaml.Unmarshal(body, &kubeConfig)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
-
-	log.Info("OK")
-	log.Info(err)
-	log.Info(string(body))
-
-	log.Info(len(kubeConfig.Clusters))
-	log.Info(kubeConfig.ApiVersion)
-	log.Info(kubeConfig.Kind)
-	log.Info(kubeConfig.Clusters[0].Name)
 
 	// Verify that this is a Kube Config file
 	if kubeConfig.ApiVersion != "v1" || kubeConfig.Kind != "Config" {
-		return nil, nil, nil, errors.New("Not a valid Kubernetes Config file")
+		return nil, nil, errors.New("Not a valid Kubernetes Config file")
 	}
 
 	// Find the config corresponding to our API Endpoint
-	log.Info(cnsiRecord.APIEndpoint.String())
-
 	var name string
-
 	for _, cluster := range kubeConfig.Clusters {
 		if cluster.Cluster.Server == cnsiRecord.APIEndpoint.String() {
 			name = cluster.Name
@@ -352,7 +360,6 @@ func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c ec
 
 	log.Info(name)
 	if len(name) > 0 {
-		log.Info("Found config")
 
 		// Now find context to determine which user to use
 		for _, context := range kubeConfig.Contexts {
@@ -363,9 +370,6 @@ func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c ec
 		}
 
 		if len(userName) > 0 {
-			log.Info("Found user")
-			log.Info(userName)
-
 			for _, u := range kubeConfig.Users {
 				if u.Name == userName {
 					user = &u
@@ -376,43 +380,56 @@ func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c ec
 	}
 
 	if user == nil {
-		return nil, nil, nil, errors.New("Can not find config for Kubernetes cluster")
+		return nil, nil, errors.New("Can not find config for Kubernetes cluster")
 	}
-
-	log.Info(user.User.AuthProvider.Name)
 
 	// We onlt support OIDC auth provider at the moment
 	if user.User.AuthProvider.Name != "oidc" {
-		return nil, nil, nil, errors.New("Unsupported authentication provider")
+		return nil, nil, errors.New("Unsupported authentication provider")
 	}
-	log.Info(user.User.AuthProvider.Config)
 
 	oidcConfig := KubeConfigAuthProviderOIDC{}
-
 	err = unMarshalHelper(user.User.AuthProvider.Config, &oidcConfig)
-	if err == nil {
-		return nil, nil, nil, errors.New("Can not unmarshal OIDC Auth Provider configuration")
+	if err != nil {
+		log.Info(err)
+		return nil, nil, errors.New("Can not unmarshal OIDC Auth Provider configuration")
 	}
 
-	log.Info(err)
-	log.Info(oidcConfig.ClientID)
+	// Decode the token and get the expiry time
+	token, err := jws.ParseJWT([]byte(oidcConfig.IDToken))
+	if err != nil {
+		log.Info(err)
+		return nil, nil, errors.New("Can not parse JWT Access token")
+	}
+	log.Info(token)
 
-	// uaaRes, u, err := p.loginHttpBearer(cnsiRecord, c)
+	expiry, ok := token.Claims().Expiration()
+	if !ok {
+		return nil, nil, errors.New("Can not get Acces Token expiry time")
+	}
+	
+	tokenRecord := p.initEndpointTokenRecord(expiry.Unix(), oidcConfig.IDToken, oidcConfig.RefreshToken, false)
+	tokenRecord.AuthType = interfaces.AuthTypeOAuth2
 
-	// if err != nil {
-	// 	return nil, nil, nil, interfaces.NewHTTPShadowError(
-	// 		http.StatusUnauthorized,
-	// 		"Login failed",
-	// 		"Login failed: %v", err)
-	// }
-	// return uaaRes, u, &cnsiRecord, nil
+	oauthMetadata := &interfaces.OAuth2Metadata{}
+	oauthMetadata.ClientID = oidcConfig.ClientID
+	oauthMetadata.ClientSecret = oidcConfig.ClientSecret
+	oauthMetadata.IssuerURL = oidcConfig.IdpIssuerURL
+	
+	jsonString, err := json.Marshal(oauthMetadata)
+	if err == nil {
+		tokenRecord.Metadata = string(jsonString)
+	}
 
-	return nil, nil, nil, errors.New("Not implemented")
+	// Could try and make a K8S Api call to validate the token
+	// Or, maybe we can verify the access token with the auth URL ?
+	
+	return &tokenRecord, &cnsiRecord, nil
 }
 
-func unMarshalHelper(values interface{}, intf interface{}) error {
+func unMarshalHelper(values map[string]interface{}, intf interface{}) error {
 
-	m := values.(map[interface{}]interface{})
+	log.Info(values)
 
 	value := reflect.ValueOf(intf)
 
@@ -425,6 +442,9 @@ func unMarshalHelper(values interface{}, intf interface{}) error {
 		return errors.New("config: must provide pointer to struct value")
 	}
 
+	// params := reflect.ValueOf(values).Elem()
+	// log.Info(params)
+
 	nFields := value.NumField()
 	typ := value.Type()
 
@@ -436,7 +456,20 @@ func unMarshalHelper(values interface{}, intf interface{}) error {
 			continue
 		}
 
-		if tagValue, ok := m[tag].(string); ok {
+		log.Info(field)
+		log.Info(tag)
+
+		log.Info(values[tag])
+
+		// paramValue:= params.FieldByName(tag)
+		// log.Info(paramValue)
+		// if paramValue != nil {
+		// 	if err := config.SetStructFieldValue(value, field, paramValue.(string)); err != nil {
+		// 		return err
+		// 	}
+		//}
+
+		if tagValue, ok := values[tag].(string); ok {
 			if err := config.SetStructFieldValue(value, field, tagValue); err != nil {
 				return err
 			}
@@ -504,11 +537,8 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
 		log.Debug("Setting token record as disconnected")
 
-		userTokenInfo := userTokenInfo{
-			UserGUID: userGUID,
-		}
-
-		if _, err := p.saveCNSIToken(cnsiGUID, userTokenInfo, "cleared_token", "cleared_token", true); err != nil {
+		tokenRecord := p.initEndpointTokenRecord(0, "cleared_token", "cleared_token", true)
+		if err := p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord); err != nil {
 			return fmt.Errorf("Unable to clear token: %s", err)
 		}
 	} else {
@@ -726,6 +756,7 @@ func (p *portalProxy) saveAuthToken(u userTokenInfo, authTok string, refreshTok 
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
+		AuthType: interfaces.AuthTypeOAuth2,
 	}
 
 	err := p.setUAATokenRecord(key, tokenRecord)
@@ -736,7 +767,21 @@ func (p *portalProxy) saveAuthToken(u userTokenInfo, authTok string, refreshTok 
 	return tokenRecord, nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
+// Helper to initialzie a token record using the specified parameters
+func (p *portalProxy) initEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord) {
+	tokenRecord := interfaces.TokenRecord{
+		AuthToken:    authTok,
+		RefreshToken: refreshTok,
+		TokenExpiry:  expiry,
+		Disconnected: disconnect,
+		AuthType: interfaces.AuthTypeOAuth2,
+	}
+
+	return tokenRecord
+}
+
+
+func (p *portalProxy) removed_saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
 	log.Debug("saveCNSIToken")
 
 	tokenRecord := interfaces.TokenRecord{
@@ -744,6 +789,7 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
 		Disconnected: disconnect,
+		AuthType: interfaces.AuthTypeOAuth2,
 	}
 
 	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)

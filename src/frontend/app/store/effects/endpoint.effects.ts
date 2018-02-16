@@ -99,7 +99,7 @@ export class EndpointsEffect {
         fromObject: {
           ...<any>action.authValues,
           'cnsi_guid': action.guid,
-          'auth_type': action.authType,
+          'connect_type': action.authType,
         }
       });
 
