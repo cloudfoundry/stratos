@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/SUSE/stratos-ui/config"
-	"reflect"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/SUSE/stratos-ui/config"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"io/ioutil"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -217,20 +217,9 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 	}
 
 	// Look for auth type
-	authTypeStr := c.FormValue("auth_type")
-	if len(authTypeStr) == 0 {
-		authTypeStr = "oauth2"
-	}
-	var authType interfaces.AuthType
-	switch authTypeStr {
-	case "oauth2":
-		authType = interfaces.OAuth2
-	case "http":
-		authType = interfaces.AuthTypeHttpBasic
-	case "kube-config":
-		authType = interfaces.KubeConfig
-	default:
-		authType = ""
+	authType := c.FormValue("auth_type")
+	if len(authType) == 0 {
+		authType = interfaces.AuthTypeOAuth2
 	}
 
 	if authType == interfaces.AuthTypeOAuth2 {
@@ -241,14 +230,14 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 		return p.fetchHttpBasicToken(cnsiRecord, c)
 	}
 
-	if authType == interfaces.KubeConfig {
+	if authType == interfaces.AuthTypeKubeConfig {
 		return p.fetcKubeConfigToken(cnsiRecord, c)
 	}
 
 	return nil, nil, nil, interfaces.NewHTTPShadowError(
 		http.StatusBadRequest,
 		"Unknown Auth Type",
-		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, authTypeStr)
+		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, authType)
 }
 
 func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
@@ -265,50 +254,49 @@ func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 }
 
 type KubeConfigClusterDetail struct {
-	Server string	`yaml:"server"`
+	Server string `yaml:"server"`
 }
 
 type KubeConfigCluster struct {
-	Name string	`yaml:"name"`
+	Name    string `yaml:"name"`
 	Cluster struct {
 		Server string
 	}
 }
 
 type KubeConfigUser struct {
-	Name string	`yaml:"name"`
+	Name string `yaml:"name"`
 	User struct {
 		AuthProvider struct {
-			Name string	`yaml:"name"`
+			Name   string      `yaml:"name"`
 			Config interface{} `yaml:"config"`
 		} `yaml:"auth-provider"`
 	}
 }
 
 type KubeConfigAuthProviderOIDC struct {
-	ClientID string `yaml:"client-id"`
+	ClientID     string `yaml:"client-id"`
 	ClientSecret string `yaml:"client-secret"`
-	IDToken string `yaml:"id-token"`
+	IDToken      string `yaml:"id-token"`
 	IdpIssuerURL string `yaml:"idp-issuer-url"`
 	RefreshToken string `yaml:"refresh-token"`
 }
 
-	//ExtraScopes string `yaml:"extra-scopes"`
-
+//ExtraScopes string `yaml:"extra-scopes"`
 
 type KubeConfigContexts struct {
 	Context struct {
 		Cluster string
-		User string
-	}	`yaml:"context"`
+		User    string
+	} `yaml:"context"`
 }
 
 type KubeConfigFile struct {
-	ApiVersion string `yaml:"apiVersion"`
-	Kind string `yaml:"kind"`
-	Clusters []KubeConfigCluster `yaml:"clusters"`
-	Users []KubeConfigUser `yaml:"users"`
-	Contexts []KubeConfigContexts `yaml:"contexts"`
+	ApiVersion string               `yaml:"apiVersion"`
+	Kind       string               `yaml:"kind"`
+	Clusters   []KubeConfigCluster  `yaml:"clusters"`
+	Users      []KubeConfigUser     `yaml:"users"`
+	Contexts   []KubeConfigContexts `yaml:"contexts"`
 }
 
 func (p *portalProxy) fetcKubeConfigToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
