@@ -16,6 +16,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -59,7 +60,7 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'address',
     headerCell: () => 'Address',
-    cell: row => row.api_endpoint ? `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}` : 'Unknown',
+    cell: row => getFullEndpointApiUrl(row),
     sort: {
       type: 'sort',
       orderKey: 'address',

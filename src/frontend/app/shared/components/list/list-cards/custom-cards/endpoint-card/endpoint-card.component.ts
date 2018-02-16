@@ -4,6 +4,7 @@ import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
 import { TableCellCustom, CardSize } from '../../../list-table/table-cell/table-cell-custom';
+import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 
 @Component({
   selector: 'app-endpoint-card',
@@ -32,7 +33,7 @@ export class EndpointCardComponent extends TableCellCustom<EndpointModel> implem
   }
 
   private getEndpointUrl(row: EndpointModel) {
-    return row.api_endpoint ? `${row.api_endpoint.Scheme}://${row.api_endpoint.Host}` : 'Unknown';
+    return getFullEndpointApiUrl(row);
   }
 
 

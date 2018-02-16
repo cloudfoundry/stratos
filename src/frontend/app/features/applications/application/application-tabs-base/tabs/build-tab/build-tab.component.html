@@ -43,7 +43,7 @@
             <mat-card-title>Cloud Foundry</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-metadata-item icon="title" label="Name" tooltip="{{ appSvc.cf?.api_endpoint.Scheme + '://' + appSvc.cf?.api_endpoint.Host}}">{{ appSvc.cf?.name}}</app-metadata-item>
+            <app-metadata-item icon="title" label="Name" tooltip="{{ getFullEndpointApiUrl(cf) }}">{{ appSvc.cf?.name}}</app-metadata-item>
             <app-metadata-item icon="location_city" label="Organization">{{ (applicationService.appOrg$ | async)?.entity.name }}</app-metadata-item>
             <app-metadata-item icon="language" label="Space">{{ (applicationService.appSpace$ | async)?.entity.name }}</app-metadata-item>
           </mat-card-content>
