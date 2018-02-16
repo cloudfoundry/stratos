@@ -1,4 +1,4 @@
-package main
+package cloudfoundryhosting
 
 import (
 	"encoding/json"
@@ -15,8 +15,8 @@ import (
 	"github.com/labstack/echo/engine/standard"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/SUSE/stratos-ui/app-core/config"
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/config"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 )
 
 const (

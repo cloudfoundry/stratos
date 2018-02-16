@@ -1,4 +1,4 @@
-package main
+package cloudfoundry
 
 import (
 	"crypto/tls"

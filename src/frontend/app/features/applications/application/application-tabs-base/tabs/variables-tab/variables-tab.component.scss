@@ -11,4 +11,13 @@
       }
     }
   }
+  &__env-table--add-form {
+    form {
+      display: flex;
+      flex-direction: row;
+    }
+    mat-form-field {
+      padding-right: 10px;
+    }
+  }
 }

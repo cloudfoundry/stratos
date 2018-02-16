@@ -18,7 +18,7 @@ while getopts ":ho:r:t:lu:n" opt; do
       echo
       echo " ./build.sh -t 1.0.13"
       echo
-      echo "--- To build images locally of Stratos UI: "
+      echo "--- To build images locally of Stratos: "
       echo
       echo " ./build.sh -l -n"
       echo
@@ -187,13 +187,13 @@ function pushGitTag {
 }
 
 function buildProxy {
-  # Use the existing build container to compile the proxy executable, and leave
+  # Use the existing build container to compile the backend executable, and leave
   # it on the local filesystem.
   echo
-  echo "-- Building the Console Proxy"
+  echo "-- Building the Stratos backend"
 
   echo
-  echo "-- Run the build container to build the Console backend"
+  echo "-- Run the build container to build the Stratos backend"
 
   pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
   pushd $(git rev-parse --show-toplevel) > /dev/null 2>&1
@@ -205,14 +205,14 @@ function buildProxy {
              -e USER_NAME=$(id -nu) \
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
-             --name stratos-proxy-builder \
+             --name stratos-jetstream-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:opensuse
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:opensuse
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 
   # Copy the previously compiled executable into the container and
-  # publish the container image for the portal proxy
+  # publish the container image for the Stratos backend
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
   buildAndPublishImage stratos-dc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}

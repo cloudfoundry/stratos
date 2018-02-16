@@ -13,9 +13,9 @@ import (
 	"github.com/labstack/echo"
 	uuid "github.com/satori/go.uuid"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/cnsis"
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
-	"github.com/SUSE/stratos-ui/app-core/repository/tokens"
+	"github.com/SUSE/stratos-ui/repository/cnsis"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/tokens"
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
