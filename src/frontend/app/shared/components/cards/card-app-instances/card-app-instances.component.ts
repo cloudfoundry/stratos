@@ -1,3 +1,4 @@
+import { CardStatus } from './../../application-state/application-state.service';
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -7,6 +8,7 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../../store/app-state';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { map } from 'rxjs/operators';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialog('Set Instance count to 0',
   'Are you sure you want to set the instance count to 0?', 'Confirm');
@@ -25,11 +27,17 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @ViewChild('instanceField') instanceField: ElementRef;
 
+  status$: Observable<CardStatus>;
+
   constructor(
     private store: Store<AppState>,
     public applicationService: ApplicationService,
     private renderer: Renderer,
-    private confirmDialog: ConfirmationDialogService) { }
+    private confirmDialog: ConfirmationDialogService) {
+    this.status$ = this.applicationService.applicationState$.pipe(
+      map(state => state.indicator)
+    );
+  }
 
   private currentCount: 0;
   private editCount: 0;

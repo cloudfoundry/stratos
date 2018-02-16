@@ -17,6 +17,7 @@ export class ApplicationStateIconPipe implements PipeTransform {
   }
 
   transform(value: string, args?: string): string {
+    console.log(value)
     if (!value) {
       return '';
     }
