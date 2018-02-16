@@ -3,7 +3,7 @@ import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
-import { TableCellCustom, CardSize } from '../../../list-table/table-cell/table-cell-custom';
+import { CardSize, TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 
 @Component({
   selector: 'app-endpoint-card',

@@ -1,8 +1,4 @@
-import { UserRoleInOrg, CfUser } from '../../store/types/user.types';
-import { containerStart } from '@angular/core/src/render3/instructions';
-import { Observable } from 'rxjs/Observable';
-import { tap, map } from 'rxjs/operators';
-import { CfUserService } from '../../shared/data-services/cf-user.service';
+import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
 
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   let roles = null;
@@ -16,7 +12,7 @@ export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
     roles = assignRole(roles, 'Auditor');
 
   }
-  if (userRolesInOrg.user) {
+  if (userRolesInOrg.user && !userRolesInOrg.orgManager) {
     roles = assignRole(roles, 'User');
   }
 

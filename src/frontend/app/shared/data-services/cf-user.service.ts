@@ -1,33 +1,23 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
+import { filter, map } from 'rxjs/operators';
 
+import { isAuditor, isBillingManager, isManager, isUser } from '../../features/cloud-foundry/cf.helpers';
+import { GetAllUsers, UserSchema } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import {
-  getPaginationObservables,
-  getCurrentPageRequestInfo
-} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
-import { EndpointModel } from '../../store/types/endpoint.types';
-import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { UserSchema, GetAllUsers } from '../../store/actions/users.actions';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { map, filter, tap } from 'rxjs/operators';
 import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
-import {
-  isManager,
-  isBillingManager,
-  isAuditor,
-  isUser
-} from '../../features/cloud-foundry/cf.helpers';
+import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+
 @Injectable()
 export class CfUserService {
   public static EndpointUserService = 'endpointUsersService';
 
   public allUsersAction = new GetAllUsers(CfUserService.EndpointUserService);
 
-  public allUsers$ = getPaginationObservables<APIResource>({
+  public allUsers$ = getPaginationObservables < APIResource < CfUser > > ({
     store: this.store,
     action: this.allUsersAction,
     paginationMonitor: this.paginationMonitorFactory.create(
@@ -37,11 +27,11 @@ export class CfUserService {
   });
 
   constructor(
-    private store: Store<AppState>,
+    private store: Store < AppState > ,
     public paginationMonitorFactory: PaginationMonitorFactory
   ) {}
 
-  getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
+  getUsers = (endpointGuid: string): Observable < APIResource < CfUser > [] > =>
     this.allUsers$.entities$.pipe(
       filter(p => !!p),
       map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
@@ -53,9 +43,8 @@ export class CfUserService {
     userGuid: string,
     orgGuid: string,
     cfGuid: string
-  ): Observable<UserRoleInOrg> => {
+  ): Observable < UserRoleInOrg > => {
     return this.getUsers(cfGuid).pipe(
-      tap(o => console.log(o)),
       map(users => {
         return users.filter(o => o.entity.guid === userGuid)[0];
       }),

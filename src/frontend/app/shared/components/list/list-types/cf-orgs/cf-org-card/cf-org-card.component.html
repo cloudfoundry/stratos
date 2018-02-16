@@ -1,38 +1,33 @@
-<mat-card class="org-card" (click)="goToSummary()">
-  <div *ngIf="hasLoaded$ | async">
-    <mat-card-header class="org-card__header">
-      <mat-card-title class="org-card__title">{{ row.entity.name }}</mat-card-title>
-      <button mat-button class="org-card__heder__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
-    </mat-card-header>
-    <mat-card-content class="org-card__content">
-      <div class="org-card__content__meta">
-        <app-metadata-item label="Role">{{ userRolesInOrg }}</app-metadata-item>
-      </div>
-      <div class="org-card__content__meta">
-        <app-metadata-item label="Applications">{{ appCount }}</app-metadata-item>
-      </div>
-      <div class="org-card__content__meta">
-        <app-metadata-item label="Instances">{{ instancesCount }} / {{ instancesLimit | infinityPipe }}</app-metadata-item>
-      </div>
-      <div class="org-card__content__meta">
-        <app-metadata-item label="Memory Info"> {{ this.memoryTotal | MbToHumanSize }} / {{ this.memoryLimit | MbToHumanSize }}</app-metadata-item>
-        <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
-      </div>
-    </mat-card-content>
-    <mat-menu #menu="matMenu">
-      <button mat-menu-item (click)="edit()">
-        <mat-icon>mode_edit</mat-icon>
-        <span>Edit</span>
-      </button>
-      <button mat-menu-item (click)="delete()">
-        <mat-icon>delete</mat-icon>
-        <span>Delete</span>
-      </button>
-    </mat-menu>
-  </div>
-  <div *ngIf="!(hasLoaded$ | async)">
-    Loading...
-    <mat-progress-bar class="loading-page__indicator-bar" [color]="'primary'" [mode]="'query'">
-    </mat-progress-bar>
-  </div>
-</mat-card>
+<app-meta-card class="org-card" (click)="goToSummary()">
+  <app-meta-card-title class="org-card__title">{{ row.entity.name }}
+    <button mat-button class="org-card__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Role</app-meta-card-key>
+    <app-meta-card-value>{{ userRolesInOrg }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Applications</app-meta-card-key>
+    <app-meta-card-value>{{ appCount }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Instances</app-meta-card-key>
+    <app-meta-card-value>{{instancesCount }} / {{ instancesLimit | infinityPipe }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Memory Info</app-meta-card-key>
+    <app-meta-card-value>{{ this.memoryTotal | MbToHumanSize }} / {{ this.memoryLimit | MbToHumanSize }}
+    </app-meta-card-value>
+    <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
+  </app-meta-card-item>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="edit()">
+            <mat-icon>mode_edit</mat-icon>
+            <span>Edit</span>
+          </button>
+    <button mat-menu-item (click)="delete()">
+            <mat-icon>delete</mat-icon>
+            <span>Delete</span>
+          </button>
+  </mat-menu>
+</app-meta-card>
