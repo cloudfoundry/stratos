@@ -19,7 +19,8 @@ import { ITableColumn } from '../../list-table/table.types';
 import {
   IMultiListAction,
   ListViewTypes,
-  IListConfig
+  IListConfig,
+  defaultPaginationPageSizeOptionsTable
 } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-app-route.component';
@@ -75,7 +76,7 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     }
   ];
 
-  pageSizeOptions = [5, 15, 30];
+  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: 'Available Routes'

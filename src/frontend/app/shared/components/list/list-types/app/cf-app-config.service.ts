@@ -9,7 +9,13 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { CfOrgSpaceDataService, CfOrgSpaceItem } from '../../../../data-services/cf-org-space-service.service';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import {
+  defaultPaginationPageSizeOptionsCards,
+  IListConfig,
+  IListMultiFilterConfig,
+  ListConfig,
+  ListViewTypes,
+} from '../../list.component.types';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
@@ -83,7 +89,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       cellFlex: '2'
     },
   ];
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
   text = {
     title: '',

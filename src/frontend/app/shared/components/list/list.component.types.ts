@@ -5,6 +5,7 @@ import { IListDataSource } from './data-sources-controllers/list-data-source-typ
 import { ITableColumn, ITableText } from './list-table/table.types';
 import { Type } from '@angular/core';
 import { ListView } from '../../../store/actions/list.actions';
+import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -89,9 +90,12 @@ export interface IListMultiFilterConfigItem {
   value: string;
 }
 
+export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
+export const defaultPaginationPageSizeOptionsTable = [5, 20, 80];
+
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
   text = null;
   enableTextFilter = false;
