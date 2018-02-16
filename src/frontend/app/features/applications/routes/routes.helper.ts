@@ -23,9 +23,8 @@ export const getRoute = (
     // Note: Hostname and path are not supported for TCP routes
     return `${protocol}${domain.entity.name}:${route.entity.port}`;
   } else if (route.entity.path) {
-    return `${protocol}${route.entity.host}.${domain.entity.name}/${
-      route.entity.path
-    }`;
+    const pathPrefix = route.entity.path && route.entity.path.length && route.entity.path[0] !== '/' ? '/' : '';
+    return `${protocol}${route.entity.host}.${domain.entity.name}${pathPrefix}${route.entity.path}`;
   } else {
     return `${protocol}${route.entity.host}.${domain.entity.name}`;
   }
