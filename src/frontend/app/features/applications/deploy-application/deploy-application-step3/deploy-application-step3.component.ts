@@ -4,9 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError } from 'rxjs/operators';
 import { getEntityById, selectEntity, selectEntities } from '../../../../store/selectors/api.selectors';
-import { OrganizationSchema } from '../../../../store/actions/organization.actions';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
-import { SpaceSchema } from '../../../../store/actions/space.actions';
 import websocketConnect from 'rxjs-websockets';
 import { QueueingSubject } from 'queueing-subject/lib';
 import { Subscription } from 'rxjs/Subscription';
@@ -20,6 +18,7 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetAllApplications } from '../../../../store/actions/application.actions';
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/actions/action-types';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -58,9 +57,9 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         && !!appDetail.applicationSource
         && !!appDetail.applicationSource.projectName),
       mergeMap(p => {
-          const orgSubscription = this.store.select(selectEntity(OrganizationSchema.key, p.cloudFoundryDetails.org));
-          const spaceSubscription = this.store.select(selectEntity(SpaceSchema.key, p.cloudFoundryDetails.space));
-          return  Observable.of(p).combineLatest(orgSubscription, spaceSubscription );
+        const orgSubscription = this.store.select(selectEntity(organisationSchemaKey, p.cloudFoundryDetails.org));
+        const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, p.cloudFoundryDetails.space));
+        return Observable.of(p).combineLatest(orgSubscription, spaceSubscription);
       }),
       tap(p => {
         const host = window.location.host;
@@ -70,10 +69,10 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
           `?org=${p[1].entity.name}&space=${p[2].entity.name}`
         );
 
-        const inputStream =  new QueueingSubject<string>();
+        const inputStream = new QueueingSubject<string>();
         this.messages = websocketConnect(streamUrl, inputStream)
-        .messages.pipe(
-          catchError(e =>  {
+          .messages.pipe(
+          catchError(e => {
             return [];
           }),
           share(),
@@ -88,21 +87,21 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
               this.updateTitle(log);
             }
           }),
-          filter((log ) => log.type === SocketEventTypes.DATA),
+          filter((log) => log.type === SocketEventTypes.DATA),
           map((log) => {
             const timesString = moment(log.timestamp * 1000).format('DD/MM/YYYY hh:mm:ss A');
             return (
               `${timesString}: ${log.message}`
             );
           })
-        );
+          );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
 
       })
     ).subscribe();
   }
 
-  sendProjectInfo = (appSource: DeployApplicationSource)  => {
+  sendProjectInfo = (appSource: DeployApplicationSource) => {
     if (appSource.type.id === 'git') {
       if (appSource.type.subType === 'github') {
         return this.sendGitHubSourceMetadata(appSource);
@@ -114,7 +113,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     return '';
   }
 
-  sendGitHubSourceMetadata = (appSource: DeployApplicationSource) =>  {
+  sendGitHubSourceMetadata = (appSource: DeployApplicationSource) => {
     const github = {
       project: appSource.projectName,
       branch: appSource.branch.name,
@@ -129,7 +128,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     return JSON.stringify(msg);
   }
 
-  sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) =>  {
+  sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
     const giturl = {
       url: appSource.projectName,
       branch: appSource.branch.name,
@@ -155,53 +154,53 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         this.appData.org = this.cfOrgSpaceService.org.select.getValue();
         this.appData.space = this.cfOrgSpaceService.space.select.getValue();
         break;
-      case SocketEventTypes.EVENT_PUSH_STARTED :
-          this.streamTitle = 'Deploying...';
-          this.store.dispatch(new GetAllApplications('applicationWall'));
-          break;
-      case SocketEventTypes.EVENT_PUSH_COMPLETED :
-          this.streamTitle = 'Deployed';
-          this.apps$ = this.store.select(selectEntities('application')).pipe(
-            tap(apps => {
-              Object.values(apps).forEach(app => {
-                if (
-                    app.entity.space_guid === this.appData.space &&
-                    app.entity.cfGuid === this.appData.cloudFoundry &&
-                    app.entity.name === this.appData.Name
-                  ) {
-                    this.appGuid = app.entity.guid;
-                    this.validate = Observable.of(true);
-                   }
-              });
-            })
-          ).subscribe();
-          break;
-      case SocketEventTypes.CLOSE_SUCCESS :
-      this.close(log, null, null, true);
-          break;
+      case SocketEventTypes.EVENT_PUSH_STARTED:
+        this.streamTitle = 'Deploying...';
+        this.store.dispatch(new GetAllApplications('applicationWall'));
+        break;
+      case SocketEventTypes.EVENT_PUSH_COMPLETED:
+        this.streamTitle = 'Deployed';
+        this.apps$ = this.store.select(selectEntities('application')).pipe(
+          tap(apps => {
+            Object.values(apps).forEach(app => {
+              if (
+                app.entity.space_guid === this.appData.space &&
+                app.entity.cfGuid === this.appData.cloudFoundry &&
+                app.entity.name === this.appData.Name
+              ) {
+                this.appGuid = app.entity.guid;
+                this.validate = Observable.of(true);
+              }
+            });
+          })
+        ).subscribe();
+        break;
+      case SocketEventTypes.CLOSE_SUCCESS:
+        this.close(log, null, null, true);
+        break;
       case SocketEventTypes.CLOSE_INVALID_MANIFEST:
         this.close(log, 'Deploy Failed - Invalid manifest!',
-        'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!', true);
+          'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!', true);
         break;
       case SocketEventTypes.CLOSE_NO_MANIFEST:
-      this.close(log, 'Deploy Failed - No manifest present!',
-      'Failed to deploy app! Please make sure that a valid manifest.yaml is present!', true);
+        this.close(log, 'Deploy Failed - No manifest present!',
+          'Failed to deploy app! Please make sure that a valid manifest.yaml is present!', true);
         break;
       case SocketEventTypes.CLOSE_FAILED_CLONE:
-      this.close(log,  'Deploy Failed - Failed to clone repository!',
-      'Failed to deploy app! Please make sure the repository is public!', true);
+        this.close(log, 'Deploy Failed - Failed to clone repository!',
+          'Failed to deploy app! Please make sure the repository is public!', true);
         break;
       case SocketEventTypes.CLOSE_FAILED_NO_BRANCH:
-      this.close(log, 'Deploy Failed - Failed to located branch!',
-      'Failed to deploy app! Please make sure that branch exists!', true);
+        this.close(log, 'Deploy Failed - Failed to located branch!',
+          'Failed to deploy app! Please make sure that branch exists!', true);
         break;
       case SocketEventTypes.CLOSE_FAILURE:
       case SocketEventTypes.CLOSE_PUSH_ERROR:
       case SocketEventTypes.CLOSE_NO_SESSION:
       case SocketEventTypes.CLOSE_NO_CNSI:
       case SocketEventTypes.CLOSE_NO_CNSI_USERTOKEN:
-      this.close(log, 'Deploy Failed!',
-      'Failed to deploy app!', true);
+        this.close(log, 'Deploy Failed!',
+          'Failed to deploy app!', true);
         break;
       case SocketEventTypes.SOURCE_REQUIRED:
       case SocketEventTypes.EVENT_CLONED:
@@ -209,8 +208,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       case SocketEventTypes.MANIFEST:
         break;
       default:
-        // noop
-      }
+      // noop
+    }
   }
 
   close(log, title, error, deleteAppSection) {

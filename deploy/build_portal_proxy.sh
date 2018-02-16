@@ -12,9 +12,9 @@ docker run -it \
            -e USER_NAME=$(id -nu) \
            -e USER_ID=$(id -u)  \
            -e GROUP_ID=$(id -g) \
-           --name console-proxy-builder \
+           --name stratos-jetstream-builder \
            --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-           splatform/stratos-proxy-builder:opensuse $*
+           splatform/stratos-jetstream-builder:opensuse $*
 
 ret=$?
 popd

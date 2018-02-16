@@ -63,14 +63,14 @@ export class CreateRoute extends CFStartAction implements ICFAction {
 
 export class DeleteRoute extends CFStartAction implements ICFAction {
   constructor(
-    public routeGuid: string,
+    public guid: string,
     public cfGuid: string,
     public async: boolean = false,
     public recursive: boolean = true
   ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `routes/${routeGuid}`;
+    this.options.url = `routes/${guid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
     this.options.params.append('recursive', recursive ? 'true' : 'false');
@@ -86,6 +86,7 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
   entityKey = RouteSchema.key;
   options: RequestOptions;
   endpointGuid: string;
+  removeEntityOnDelete = true;
 }
 
 export class UnmapRoute extends CFStartAction implements ICFAction {
@@ -131,7 +132,6 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   endpointGuid: string;
 }
 
-// Refactor to satisfy CodeClimate
 export class ListRoutes extends CFStartAction implements PaginatedAction {
   constructor(
     public guid: string,
@@ -151,10 +151,8 @@ export class ListRoutes extends CFStartAction implements PaginatedAction {
   entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
-  initialParams = {
-    'inline-relations-depth': '2'
-  };
   endpointGuid: string;
+  flattenPagination = true;
 }
 
 export class GetAppRoutes extends ListRoutes implements PaginatedAction {
@@ -166,8 +164,11 @@ export class GetAppRoutes extends ListRoutes implements PaginatedAction {
     ]);
   }
   initialParams = {
-    'results-per-page': 9, // Match that of the page size used by the matching list config
-    'inline-relations-depth': '1'
+    'results-per-page': 100,
+    'inline-relations-depth': '1',
+    page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'route',
   };
 }
 
@@ -179,6 +180,13 @@ export class GetSpaceRoutes extends ListRoutes implements PaginatedAction {
       RouteEvents.GET_SPACE_ALL_FAILED
     ]);
   }
+  initialParams = {
+    'results-per-page': 100,
+    'inline-relations-depth': '1',
+    page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'attachedApps',
+  };
 }
 
 export class MapRouteSelected implements Action {

@@ -226,18 +226,18 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 	case "oauth2":
 		authType = interfaces.OAuth2
 	case "http":
-		authType = interfaces.HttpBasic
+		authType = interfaces.AuthTypeHttpBasic
 	case "kube-config":
 		authType = interfaces.KubeConfig
 	default:
 		authType = ""
 	}
 
-	if authType == interfaces.OAuth2 {
+	if authType == interfaces.AuthTypeOAuth2 {
 		return p.fetchOAuth2Token(cnsiRecord, c)
 	}
 
-	if authType == interfaces.HttpBasic {
+	if authType == interfaces.AuthTypeHttpBasic {
 		return p.fetchHttpBasicToken(cnsiRecord, c)
 	}
 

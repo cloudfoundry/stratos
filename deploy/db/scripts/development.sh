@@ -20,7 +20,7 @@ echo "Checking database status."
 
 # Run migrations
 echo "Attempting database migrations."
-./portal-proxy--env=mariadb-development up
+./portal-proxy --env=mariadb-development up
 
 # CHeck the status
 echo "Checking database status."

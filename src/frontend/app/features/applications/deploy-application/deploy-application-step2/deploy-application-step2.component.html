@@ -1,5 +1,5 @@
 <b>Please specify the source</b>
-<form novalidate #sourceSelectionForm="ngForm">
+<form novalidate #sourceSelectionForm="ngForm" class="stepper-form">
   <div class="deploy-step2-form">
     <mat-form-field>
       <mat-select class="reset-margin" [disabled]="isReDeploy" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>

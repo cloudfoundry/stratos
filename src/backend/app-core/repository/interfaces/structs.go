@@ -31,12 +31,10 @@ type CNSIRecord struct {
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 }
 
-type AuthType string
-
 const (
-	OAuth2     AuthType = "OAuth2"
-	HttpBasic  AuthType = "HttpBasic"
-	KubeConfig AuthType = "KubeConfig"
+	AuthTypeOAuth2    = "OAuth2"
+	AuthTypeHttpBasic = "HttpBasic"
+	AuthTypeKubeConfig = "KubeConfig"
 )
 
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
@@ -45,7 +43,7 @@ type TokenRecord struct {
 	RefreshToken string
 	TokenExpiry  int64
 	Disconnected bool
-	AuthType     AuthType
+	AuthType     string
 	Metadata     string
 }
 

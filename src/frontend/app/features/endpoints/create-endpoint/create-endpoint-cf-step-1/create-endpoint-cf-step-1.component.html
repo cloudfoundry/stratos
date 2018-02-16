@@ -2,13 +2,12 @@
   Register an existing Cloud Foundry endpoint to allow your development team to create and manage their applications.
 </p>
 <p>
-  When registering, choose a unique, recognizable name so that your developers can easily know which Cloud Foundry endpoint
-  they are working with.
+  When registering, choose a unique, recognizable name so that your developers can easily know which Cloud Foundry endpoint they are working with.
 </p>
 <p>
   Supply the API Url for your Cloud Foundry endpoint
 </p>
-<form #form="ngForm">
+<form #form="ngForm" class="stepper-form">
 <mat-form-field>
     <mat-select placeholder="Endpoint Type" id="ep-type" name="ep-type" [(ngModel)]="typeValue" #typeField="ngModel"  required>
       <mat-option *ngFor="let type of endpointTypes" [value]="type.value">
@@ -22,8 +21,7 @@
     <mat-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</mat-error>
   </mat-form-field>
   <mat-form-field novalidate>
-    <input matInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Cloud Foundry API Endpoint"
-      pattern="{{utilsService.urlValidationExpression}}" [appUnique]="(existingEndpoints | async)?.urls">
+    <input matInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Cloud Foundry API Endpoint" pattern="{{utilsService.urlValidationExpression}}" [appUnique]="(existingEndpoints | async)?.urls">
     <mat-error *ngIf="urlField.errors && urlField.errors.required">URL is required</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>
