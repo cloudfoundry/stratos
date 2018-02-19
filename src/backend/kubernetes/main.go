@@ -21,8 +21,9 @@ type KubernetesSpecification struct {
 }
 
 const (
-	EndpointType  = "k8s"
-	CLIENT_ID_KEY = "K8S_CLIENT"
+	EndpointType              = "k8s"
+	CLIENT_ID_KEY             = "K8S_CLIENT"
+	AuthConnectTypeKubeConfig = "kube-config"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -56,6 +57,23 @@ func (c *KubernetesSpecification) GetClientId() string {
 func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 	log.Info("Kubernetes Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
+}
+
+func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord) (*interfaces.TokenRecord, bool, error) {
+	log.Info("Kubernetes Connect...")
+
+	connectType := ec.FormValue("connect_type")
+
+	if connectType != AuthConnectTypeKubeConfig {
+		return nil, false, errors.New("Only Kubernetes config is accepted for Kubernetes endpoints")
+	}
+
+	tokenRecord, _, err := c.FetchKubeConfigToken(cnsiRecord, ec)
+	if err != nil {
+		return nil, false, err
+	}
+
+	return tokenRecord, false, nil
 }
 
 func (c *KubernetesSpecification) Init() error {

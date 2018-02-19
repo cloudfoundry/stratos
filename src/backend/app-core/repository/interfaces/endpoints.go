@@ -9,6 +9,7 @@ type EndpointPlugin interface {
 	GetType() string
 	GetClientId() string
 	Register(echoContext echo.Context) error
+	Connect(echoContext echo.Context, cnsiRecord CNSIRecord, userId string) (*TokenRecord, bool, error)
 }
 
 type RoutePlugin interface {

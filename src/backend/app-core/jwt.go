@@ -9,14 +9,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type userTokenInfo struct {
-	UserGUID    string   `json:"user_id"`
-	UserName    string   `json:"user_name"`
-	TokenExpiry int64    `json:"exp"`
-	Scope       []string `json:"scope"`
-}
-
-func getUserTokenInfo(tok string) (u *userTokenInfo, err error) {
+func (p *portalProxy) GetUserTokenInfo(tok string) (u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("getUserTokenInfo")
 	accessToken := strings.TrimPrefix(tok, "bearer ")
 	splits := strings.Split(accessToken, ".")

@@ -15,6 +15,10 @@ type PortalProxy interface {
 
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
+	// Auth
+	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
+	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
+
 	// Session
 	GetSession(c echo.Context) (*sessions.Session, error)
 	GetSessionValue(c echo.Context, key string) (interface{}, error)
@@ -42,4 +46,5 @@ type PortalProxy interface {
 
 	GetUsername(userid string) (string, error)
 	RefreshUAALogin(username, password string, store bool) error
+	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strings"
 
 	"errors"
 
@@ -56,6 +57,31 @@ func (c *CloudFoundrySpecification) GetClientId() string {
 func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
 	log.Info("CloudFoundry Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
+}
+
+func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord) (*interfaces.TokenRecord, bool, error) {
+	log.Info("CloudFoundry Connect...")
+
+	connectType := ec.FormValue("connect_type")
+	if len(connectType) == 0 {
+		connectType = interfaces.AuthConnectTypeCreds
+	}
+
+	if connectType != interfaces.AuthConnectTypeCreds {
+		return nil, false, errors.New("Only username/password accepted for Cloud Foundry endpoints")
+	}
+	cfAdmin := false
+	tokenRecord, err := c.portalProxy.ConnectOAuth2(ec, cnsiRecord)
+	if err != nil {
+		return nil, false, err
+	}
+
+	userTokenInfo, err := c.portalProxy.GetUserTokenInfo(tokenRecord.AuthToken)
+	if err == nil {
+		cfAdmin = strings.Contains(strings.Join(userTokenInfo.Scope, ""), c.portalProxy.GetConfig().CFAdminIdentifier)
+	}
+
+	return tokenRecord, cfAdmin, nil
 }
 
 func (c *CloudFoundrySpecification) Init() error {

@@ -32,16 +32,14 @@ type CNSIRecord struct {
 }
 
 const (
-	AuthTypeOAuth2    = "OAuth2"
-	AuthTypeHttpBasic = "HttpBasic"
+	AuthTypeOAuth2     = "OAuth2"
+	AuthTypeHttpBasic  = "HttpBasic"
 	AuthTypeKubeConfig = "KubeConfig"
 )
 
 const (
-	AuthConnectTypeCreds    = "creds"
-	AuthConnectTypeKubeConfig = "kube-config"
+	AuthConnectTypeCreds = "creds"
 )
-
 
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
 type TokenRecord struct {
@@ -61,9 +59,9 @@ type CFInfo struct {
 
 // Structure for optional metadata for an OAuth2 Token
 type OAuth2Metadata struct {
-	ClientID	   string
+	ClientID     string
 	ClientSecret string
-	IssuerURL	   string
+	IssuerURL    string
 }
 
 type VCapApplicationData struct {
@@ -91,6 +89,13 @@ type ConnectedUser struct {
 	GUID  string `json:"guid"`
 	Name  string `json:"name"`
 	Admin bool   `json:"admin"`
+}
+
+type JWTUserTokenInfo struct {
+	UserGUID    string   `json:"user_id"`
+	UserName    string   `json:"user_name"`
+	TokenExpiry int64    `json:"exp"`
+	Scope       []string `json:"scope"`
 }
 
 type ConsoleConfig struct {

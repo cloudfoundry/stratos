@@ -573,9 +573,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// Connect to CF cluster
 	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
 
-	// Verify credentials for CF cluster
-	sessionGroup.POST("/auth/login/cnsi/verify", p.verifyLoginToCNSI)
-
 	// Disconnect CF cluster
 	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
