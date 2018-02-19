@@ -1,3 +1,4 @@
 <div class="app-state-icon">
-  <mat-icon [ngClass]="status | applicationStateIcon:'class'">{{status | applicationStateIcon:'icon'}}</mat-icon>
+  <mat-icon *ngIf="status !== statuses.TENTATIVE" [ngClass]="status | applicationStateIcon:'class'">{{status | applicationStateIcon:'icon'}}</mat-icon>
+  <mat-spinner *ngIf="status === statuses.TENTATIVE" diameter="22"></mat-spinner>
 </div>

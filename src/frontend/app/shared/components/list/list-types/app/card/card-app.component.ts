@@ -43,7 +43,7 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
       this.row.entity.cfGuid
     ).pipe(
       startWith(initState)
-      );
+    );
     this.appStatus$ = this.applicationState$.pipe(
       map(state => state.indicator),
     );

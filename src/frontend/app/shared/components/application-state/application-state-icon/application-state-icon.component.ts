@@ -12,6 +12,8 @@ export class ApplicationStateIconComponent implements OnInit {
 
   @Input() public status: CardStatus;
 
+  statuses = CardStatus;
+
   ngOnInit() {
   }
 
