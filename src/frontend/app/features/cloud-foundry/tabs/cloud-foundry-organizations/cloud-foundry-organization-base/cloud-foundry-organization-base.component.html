@@ -1,0 +1,6 @@
+<app-page-header>
+  <h1> {{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
+</app-page-header>
+<app-page-subheader [tabs]="tabLinks">
+</app-page-subheader>
+<router-outlet></router-outlet>

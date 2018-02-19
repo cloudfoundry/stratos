@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map } from 'rxjs/operators';
 
-import { isAuditor, isBillingManager, isManager, isUser } from '../../features/cloud-foundry/cf.helpers';
+import { isOrgAuditor, isOrgBillingManager, isOrgManager, isOrgUser } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllUsers, UserSchema } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -45,17 +45,39 @@ export class CfUserService {
     cfGuid: string
   ): Observable<UserRoleInOrg> => {
     return this.getUsers(cfGuid).pipe(
-      map(users => {
-        return users.filter(o => o.entity.guid === userGuid)[0];
-      }),
+      this.getUser(userGuid),
       map(user => {
         return {
-          orgManager: isManager(user.entity, orgGuid),
-          billingManager: isBillingManager(user.entity, orgGuid),
-          auditor: isAuditor(user.entity, orgGuid),
-          user: isUser(user.entity, orgGuid)
+          orgManager: isOrgManager(user.entity, orgGuid),
+          billingManager: isOrgBillingManager(user.entity, orgGuid),
+          auditor: isOrgAuditor(user.entity, orgGuid),
+          user: isOrgUser(user.entity, orgGuid)
         };
       })
     );
+  }
+
+  getUserRoleInSpace = (
+    userGuid: string,
+    spaceGuid: string,
+    cfGuid: string
+  ): Observable<UserRoleInOrg> => {
+    return this.getUsers(cfGuid).pipe(
+      this.getUser(userGuid),
+      map(user => {
+        return {
+          orgManager: isOrgManager(user.entity, spaceGuid),
+          billingManager: isOrgBillingManager(user.entity, spaceGuid),
+          auditor: isOrgAuditor(user.entity, spaceGuid),
+          user: isOrgUser(user.entity, spaceGuid)
+        };
+      })
+    );
+  }
+
+  private getUser(userGuid: string): (source: Observable<APIResource<CfUser>[]>) => Observable<APIResource<CfUser>> {
+    return map(users => {
+      return users.filter(o => o.entity.guid === userGuid)[0];
+    });
   }
 }

@@ -18,6 +18,9 @@ import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-pack
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
 import {
+  CloudFoundryOrganizationBaseComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
+import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
 import {
@@ -54,7 +57,8 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
     ManageUsersComponent,
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,
-    CloudFoundryOrganizationUsersComponent
+    CloudFoundryOrganizationUsersComponent,
+    CloudFoundryOrganizationBaseComponent
   ],
   providers: [
     CloudFoundryService,
@@ -62,4 +66,4 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
     EndpointsListConfigService
   ]
 })
-export class CloudFoundryModule {}
+export class CloudFoundryModule { }

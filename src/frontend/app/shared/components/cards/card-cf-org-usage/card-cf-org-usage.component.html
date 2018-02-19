@@ -1,3 +1,27 @@
-<p>
-  card-cf-org-usage works!
-</p>
+<app-meta-card class="cf-org-usage">
+  <app-meta-card-title>Summary</app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Applications</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrganizationService.apps$ | async)?.length }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Application Instances</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrganizationService.appInstances$ | async) }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Instances</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrganizationService.serivceInstances$ | async)?.length }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Routes</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrganizationService.routes$ | async)?.length }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Private Domains</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrganizationService.privateDomains$ | async)?.length }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Memory Usage</app-meta-card-key>
+    <app-meta-card-value>{{ cfOrganizationService.totalMem$ | async }}</app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

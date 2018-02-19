@@ -1,4 +1,4 @@
-import { CloudFoundryEndpointService } from '../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { Store, StoreModule } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';

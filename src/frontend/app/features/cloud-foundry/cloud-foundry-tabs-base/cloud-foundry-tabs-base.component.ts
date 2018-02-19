@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
-import { CloudFoundryEndpointService } from '../cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { tap } from 'rxjs/operators';
 
 @Component({

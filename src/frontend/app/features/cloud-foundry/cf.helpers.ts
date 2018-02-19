@@ -24,23 +24,23 @@ function assignRole(currentRoles: string, role: string) {
   return newRoles;
 }
 
-export function isManager(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'managed_organizations');
+export function isOrgManager(user: CfUser, orgGuid: string): boolean {
+  return hasOrgRole(user, orgGuid, 'managed_organizations');
 }
 
-export function isBillingManager(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'billing_managed_organizations');
+export function isOrgBillingManager(user: CfUser, orgGuid: string): boolean {
+  return hasOrgRole(user, orgGuid, 'billing_managed_organizations');
 }
 
-export function isAuditor(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'audited_organizations');
+export function isOrgAuditor(user: CfUser, orgGuid: string): boolean {
+  return hasOrgRole(user, orgGuid, 'audited_organizations');
 }
 
-export function isUser(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'organizations');
+export function isOrgUser(user: CfUser, orgGuid: string): boolean {
+  return hasOrgRole(user, orgGuid, 'organizations');
 }
 
-function hasRole(user: CfUser, orgGuid: string, type: string) {
+function hasOrgRole(user: CfUser, orgGuid: string, type: string) {
   return user[type].find(o => o.metadata.guid === orgGuid) != null;
 }
 
