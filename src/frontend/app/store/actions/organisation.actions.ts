@@ -12,6 +12,7 @@ import {
   spaceSchemaKey,
   SpacesSchema,
 } from './action-types';
+import { getActions } from './action.helper';
 
 export const GET_ORGANISATION = '[Organisation] Get one';
 export const GET_ORGANISATION_SUCCESS = '[Organisation] Get one success';
