@@ -7,7 +7,7 @@ import { ISuccessRequestAction } from '../../types/request.types';
 import { deepMergeState, mergeEntity } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
 import { pathGet, pathSet } from '../../../core/utils.service';
-import { EntityInlineParent, EntityRelationParent, EntityInlineChild, EntityInlineChildAction } from '../../actions/action-types';
+import { EntityRelationParent, EntityInlineChild, EntityInlineChildAction } from '../../actions/action-types';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;

@@ -10,9 +10,11 @@ import {
   OrganisationSchema,
   organisationSchemaKey,
   spaceSchemaKey,
-  SpacesSchema,
+  EntityInlineChild,
+  SpaceSchema,
 } from './action-types';
 import { getActions } from './action.helper';
+import { pathGet } from '../../core/utils.service';
 
 export const GET_ORGANISATION = '[Organisation] Get one';
 export const GET_ORGANISATION_SUCCESS = '[Organisation] Get one success';
@@ -43,6 +45,33 @@ export class GetOrganisation extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
+export const SpacesSchema = new EntityInlineChild([
+  {
+    parentEntityKey: organisationSchemaKey,
+    childEntityKey: spaceSchemaKey,
+    mergeResult: (state, parentGuid, response) => {
+      const parentEntity = pathGet(`${organisationSchemaKey}.${parentGuid}`, state);
+      const newParentEntity = {
+        ...parentEntity,
+        entity: {
+          ...parentEntity.entity,
+          spaces: response.result
+        }
+      };
+      return {
+        parentGuid,
+        newParentEntity
+      };
+    },
+    createAction: (organisation) => {
+      return new GetAllOrganisationSpaces(
+        `${organisationSchemaKey}-${organisation.metadata.guid}`,
+        organisation.metadata.guid,
+        organisation.entity.cfGuid);
+    }
+  },
+], SpaceSchema);
+
 export class GetAllOrganisationSpaces extends CFStartAction implements PaginatedAction, EntityInlineChildAction {
   constructor(public paginationKey: string, public orgGuid: string, public cnsi: string) {
     super();
@@ -63,21 +92,11 @@ export class GetAllOrganisationSpaces extends CFStartAction implements Paginated
   parentGuid: string;
 }
 
-export const OrganisationWithSpaceSchema = new EntityInlineParent([
-  {
-    path: 'entity.spaces',
-    createAction: (organisation) => {
-      return new GetAllOrganisationSpaces(
-        `${organisationSchemaKey}-${organisation.metadata.guid}`,
-        organisation.metadata.guid,
-        organisation.entity.cfGuid);
-    }
+export const OrganisationWithSpaceSchema = new schema.Entity(organisationSchemaKey, {
+  entity: {
+    spaces: SpacesSchema
   }
-], organisationSchemaKey, {
-    entity: {
-      spaces: SpacesSchema
-    }
-  }, {
+}, {
     idAttribute: getAPIResourceGuid
   });
 

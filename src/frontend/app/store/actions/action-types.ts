@@ -18,17 +18,18 @@ export class EntityRelationParent {
     parentGuid: string;
     newParentEntity: APIResource;
   };
+  createAction: (resource: APIResource) => PaginatedAction; // TODO: RC Comment
 }
-/**
- * Provides a way for a parent entity to populate a child parameter
- *
- * @export
- * @class EntityRelationChild
- */
-export class EntityRelationChild {
-  path: string;
-  createAction: (resource: APIResource) => PaginatedAction;
-}
+// /**
+//  * Provides a way for a parent entity to populate a child parameter
+//  *
+//  * @export
+//  * @class EntityRelationChild
+//  */
+// export class EntityRelationChild {
+//   path: string;
+//   createAction: (resource: APIResource) => PaginatedAction;
+// }
 
 /**
  * Defines an entity array which should exist in as a parameter in a parent entity. For example a space array in an parent organisation.
@@ -47,22 +48,22 @@ export class EntityInlineChild extends schema.Array {
   }
 }
 
-/**
- * Defines an entity which should contain inline children. Provides a framework to fetch those if missing
- *
- * @export
- * @class EntityInlineParent
- * @extends {schema.Entity}
- */
-export class EntityInlineParent extends schema.Entity {
-  constructor(
-    public childRelations: EntityRelationChild[],
-    key: string,
-    definition?: Schema,
-    options?: schema.EntityOptions) {
-    super(key, definition, options);
-  }
-}
+// /**
+//  * Defines an entity which should contain inline children. Provides a framework to fetch those if missing
+//  * //TODO: RE
+//  * @export
+//  * @class EntityInlineParent
+//  * @extends {schema.Entity}
+//  */
+// export class EntityInlineParent extends schema.Entity {
+//   constructor(
+//     // public childRelations: EntityRelationChild[],
+//     key: string,
+//     public definition: Schema,
+//     options?: schema.EntityOptions) {
+//     super(key, definition, options);
+//   }
+// }
 
 /**
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
@@ -84,23 +85,3 @@ export const SpaceSchema = new schema.Entity(spaceSchemaKey, {}, {
   idAttribute: getAPIResourceGuid
 });
 
-export const SpacesSchema = new EntityInlineChild([
-  {
-    parentEntityKey: organisationSchemaKey,
-    childEntityKey: spaceSchemaKey,
-    mergeResult: (state, parentGuid, response) => {
-      const parentEntity = pathGet(`${organisationSchemaKey}.${parentGuid}`, state);
-      const newParentEntity = {
-        ...parentEntity,
-        entity: {
-          ...parentEntity.entity,
-          spaces: response.result
-        }
-      };
-      return {
-        parentGuid,
-        newParentEntity
-      };
-    }
-  }
-], SpaceSchema);
