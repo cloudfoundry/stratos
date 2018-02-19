@@ -47,9 +47,9 @@ export interface IListConfig<T> {
    */
   isLocal?: boolean;
   /**
-   * A collection of numbers used to define how many entries per page should be shown
+   * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
-  pageSizeOptions: Number[];
+  pageSizeOptions?: Number[];
   /**
    * What different views the user can select (table/cards)
    */

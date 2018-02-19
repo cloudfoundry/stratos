@@ -22,7 +22,6 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   columns: ITableColumn<EndpointModel>[];
   isLocal = true;
   dataSource: CFEndpointsDataSource;
-  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   viewType = ListViewTypes.CARD_ONLY;
   cardComponent = EndpointCardComponent;
   text = {

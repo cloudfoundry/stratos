@@ -29,6 +29,7 @@ import {
   IListConfig,
   ListViewTypes,
   defaultPaginationPageSizeOptionsCards,
+  defaultPaginationPageSizeOptionsTable,
 } from './list.component.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { map } from 'rxjs/operators';
@@ -112,7 +113,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
 
-    this.paginator.pageSizeOptions = this.config.pageSizeOptions || defaultPaginationPageSizeOptionsCards;
+    this.paginator.pageSizeOptions = this.config.pageSizeOptions ||
+      (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
 
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize

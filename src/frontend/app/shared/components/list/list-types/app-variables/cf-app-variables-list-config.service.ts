@@ -63,7 +63,6 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     },
   ];
 
-  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: 'Environment Variables', filter: 'Search by name'

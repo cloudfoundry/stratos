@@ -83,7 +83,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         }, cellFlex: '5'
     }
   ];
-  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   viewType = ListViewTypes.TABLE_ONLY;
 
   private listActionTerminate: IListAction<any> = {

@@ -89,7 +89,6 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       cellFlex: '2'
     },
   ];
-  pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
   text = {
     title: '',

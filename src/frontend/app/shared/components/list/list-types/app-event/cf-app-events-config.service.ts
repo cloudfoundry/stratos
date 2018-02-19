@@ -30,7 +30,6 @@ export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements 
       columnId: 'detail', headerCell: () => 'Detail', cellComponent: TableCellEventDetailComponent, cellFlex: '6'
     },
   ];
-  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: 'Events',

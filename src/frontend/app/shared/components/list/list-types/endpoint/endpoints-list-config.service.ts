@@ -150,7 +150,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   columns = endpointColumns;
   isLocal = true;
   dataSource: EndpointsDataSource;
-  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: '',

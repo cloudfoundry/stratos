@@ -76,7 +76,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     }
   ];
 
-  pageSizeOptions = defaultPaginationPageSizeOptionsTable;
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: 'Available Routes'
