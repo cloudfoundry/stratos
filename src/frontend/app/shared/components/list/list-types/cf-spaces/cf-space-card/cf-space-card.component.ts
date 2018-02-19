@@ -5,7 +5,7 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -57,7 +57,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
   }
 
   ngOnInit() {
-    // TODO
+
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         return this.cfUserService.getUserRoleInSpace(
@@ -66,7 +66,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
           this.row.entity.cfGuid
         );
       }),
-      map(u => getOrgRolesString(u))
+      map(u => getSpaceRolesString(u))
     );
 
 
@@ -142,6 +142,6 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({
-    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, this.row.entity.guid]
+    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.row.entity.guid]
   }))
 }
