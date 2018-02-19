@@ -1,5 +1,5 @@
 <mat-card class="card-app-instances">
-  <app-card-status [statusProvider]="applicationService.applicationState$"></app-card-status>
+  <app-card-status [status$]="status$"></app-card-status>
   <mat-card-header>
     <mat-card-title>Instances</mat-card-title>
   </mat-card-header>
@@ -27,8 +27,8 @@
   </mat-card-actions>
   <mat-card-actions *ngIf="showActions && isEditing" class="card-app-instances__actions">
     <button (click)="finishEdit(false)" mat-icon-button [disabled]="applicationService.isUpdatingApp$ | async">
-            <mat-icon>clear</mat-icon>
-        </button>
+          <mat-icon>clear</mat-icon>
+      </button>
     <button (click)="finishEdit(true)" mat-icon-button [disabled]="applicationService.isUpdatingApp$ | async">
             <mat-icon>done</mat-icon>
         </button>

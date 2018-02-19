@@ -1,0 +1,18 @@
+.meta-card-item {
+  $text-color: rgba(0, 0, 0, .60);
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+  &__value {
+    overflow: hidden;
+    text-align: end;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__key {
+    color: $text-color;
+    flex: none;
+    font-weight: 300;
+    padding-right: 10px;
+  }
+}

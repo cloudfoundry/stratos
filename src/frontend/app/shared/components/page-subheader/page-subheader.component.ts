@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { Input, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+
 import { ISubHeaderTabs } from './page-subheader.types';
 
 @Component({
@@ -9,12 +9,25 @@ import { ISubHeaderTabs } from './page-subheader.types';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageSubheaderComponent implements OnInit {
+  cssClass: string;
   @Input('tabs')
   tabs: ISubHeaderTabs[];
 
-  constructor() { }
+  @Input('nested')
+  nested: boolean;
+
+  className: string;
+  constructor() {
+    this.className = this.nested ? 'nested-tab' : 'page-subheader';
+    if (!!this.tabs) {
+      this.cssClass = this.nested ? 'nested-tab__tabs' : 'page-subheader__tabs';
+    }
+  }
 
   ngOnInit() {
+
+
+
   }
 
 }

@@ -201,7 +201,7 @@ export class EndpointsEffect {
       params
     }).map(endpoint => {
       if (actionStrings[0]) {
-        this.store.dispatch({ type: actionStrings[0] });
+        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
       }
       if (apiActionType === 'delete') {
         this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
@@ -210,7 +210,7 @@ export class EndpointsEffect {
     })
       .catch(e => {
         if (actionStrings[1]) {
-          this.store.dispatch({ type: actionStrings[1] });
+          this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
         }
         return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
       });

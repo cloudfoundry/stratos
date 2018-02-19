@@ -1,7 +1,8 @@
-import { IRequestAction, RequestAction } from './request.types';
-import { Action } from '@ngrx/store';
 import { RequestMethod } from '@angular/http';
+import { Action } from '@ngrx/store';
+
 import { ActionState } from '../reducers/api-request-reducer/types';
+import { IRequestAction } from './request.types';
 
 export class QParam {
   constructor(
@@ -38,6 +39,10 @@ export class PaginationEntityState {
     filter: PaginationClientFilter,
     totalResults: number
   };
+  /**
+   * The pagination key from where we share our values.
+   */
+  seed?: string;
 }
 
 export interface PaginationAction extends Action {

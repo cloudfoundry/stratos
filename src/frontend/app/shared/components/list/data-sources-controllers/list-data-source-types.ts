@@ -71,6 +71,7 @@ export interface IListDataSource<T> {
   setFilterParam(filter: string, pag: PaginationEntityState);
   connect(): Observable<T[]>;
   destroy();
+  getRowState(row: T);
 }
 
 export type getRowUniqueId<T> = (T) => string;

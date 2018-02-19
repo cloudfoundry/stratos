@@ -211,8 +211,8 @@ export class APIEffect {
               // Treat the response as RequestEntityLocation.OBJECT
               return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
             }
-            totalResults = cfData['total_results'];
-            totalPages = cfData['total_pages'];
+            totalResults += cfData['total_results'];
+            totalPages += cfData['total_pages'];
             if (!cfData.resources.length) {
               return null;
             }

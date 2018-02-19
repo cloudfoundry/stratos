@@ -1,5 +1,5 @@
 <mat-card *ngIf="appData$ | async as appData">
-  <app-card-status [status]="appData.status"></app-card-status>
+  <app-card-status [status$]="status$"></app-card-status>
   <mat-card-content *ngIf="appData.isRunning">
     <table class="instances__detail">
       <tr>
@@ -28,4 +28,3 @@
     </mat-card-header>
   </mat-card-content>
 </mat-card>
-

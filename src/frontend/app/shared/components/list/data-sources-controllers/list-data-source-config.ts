@@ -54,4 +54,9 @@ export interface IListDataSourceConfig<A, T> {
    * Optional list configuration
    */
   listConfig?: IListConfig<T>;
+
+  /**
+   * A function that will be called when the list is destroyed.
+   */
+  destroy?: () => void;
 }

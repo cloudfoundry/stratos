@@ -1,4 +1,4 @@
-import { RequestOptions } from '@angular/http';
+import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
@@ -17,9 +17,9 @@ export const GET_ORGANISATION = '[Organisation] Get one';
 export const GET_ORGANISATION_SUCCESS = '[Organisation] Get one success';
 export const GET_ORGANISATION_FAILED = '[Organisation] Get one failed';
 
-export const GET_ORGANISATIONS = '[Organization] Get all';
-export const GET_ORGANISATIONS_SUCCESS = '[Organization] Get all success';
-export const GET_ORGANISATIONS_FAILED = '[Organization] Get all failed';
+export const GET_ORGANISATIONS = '[Organisation] Get all';
+export const GET_ORGANISATIONS_SUCCESS = '[Organisation] Get all success';
+export const GET_ORGANISATIONS_FAILED = '[Organisation] Get all failed';
 
 export const GET_ORGANISATION_SPACES = '[Space] Get all org spaces';
 export const GET_ORGANISATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
@@ -106,7 +106,23 @@ export class GetAllOrganisations extends CFStartAction implements PaginatedActio
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'inline-relations-depth': 1
+    'inline-relations-depth': 2
   };
   flattenPagination = true;
+}
+
+export class DeleteOrganisation extends CFStartAction implements ICFAction {
+  constructor(public guid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `organizations/${guid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+    this.options.params.append('recursive', 'true');
+    this.options.params.append('async', 'false');
+  }
+  actions = getActions('Organisations', 'Delete Org');
+  entity = [OrganisationSchema];
+  entityKey = organisationSchemaKey;
+  options: RequestOptions;
 }
