@@ -13,21 +13,19 @@ import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplication } from '../../../store/types/application.types';
-import { CfOrg, CfPrivateDomain, CfServiceInstance, CfSpace } from '../../../store/types/org-and-space.types';
+import {
+  CfOrg,
+  CfPrivateDomain,
+  CfQuotaDefinition,
+  CfServiceInstance,
+  CfSpace,
+} from '../../../store/types/org-and-space.types';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-
-
-
-
-
-
-
-
-
 
 @Injectable()
 export class CloudFoundryOrganisationService {
 
+  quotaDefinition$: Observable<CfQuotaDefinition>;
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<CfPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
@@ -88,6 +86,10 @@ export class CloudFoundryOrganisationService {
 
     this.totalMem$ = this.apps$.pipe(
       map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
+    );
+
+    this.quotaDefinition$ = this.org$.pipe(
+      map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity)
     );
 
   }
