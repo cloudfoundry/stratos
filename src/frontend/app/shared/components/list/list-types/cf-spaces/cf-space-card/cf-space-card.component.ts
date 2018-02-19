@@ -129,13 +129,13 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
   edit = () => {
     this.store.dispatch(
       new RouterNav({
-        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'edit-org']
+        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'edit-space']
       })
     );
   }
 
   delete = () => {
-    this.cfOrgSpaceDataService.deleteOrg(
+    this.cfOrgSpaceDataService.deleteSpace(
       this.row.entity.guid,
       this.cfEndpointService.cfGuid
     );

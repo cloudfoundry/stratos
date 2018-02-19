@@ -68,7 +68,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       label: 'Users'
     }];
 
-  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
+  constructor(private cfEndpointService: CloudFoundryEndpointService, private cfOrgService: CloudFoundryOrganisationService) { }
 
   ngOnInit() {
   }

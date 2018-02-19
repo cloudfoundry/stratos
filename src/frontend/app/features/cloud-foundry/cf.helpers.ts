@@ -1,4 +1,4 @@
-import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/roleTypes/user.roleTypes';
+import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   let roles = null;

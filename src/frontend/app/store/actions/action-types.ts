@@ -1,4 +1,5 @@
 import { schema } from 'normalizr';
+
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 
 export const organisationSchemaKey = 'organization';
