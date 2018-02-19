@@ -24,9 +24,9 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 	expTime := time.Unix(tokenRec.TokenExpiry, 0)
 
 	// Force expiry
-	if cnsi.CNSIType == "k8s" {
-		expTime = time.Unix(0, 0)
-	}
+	// if cnsi.CNSIType == "k8s" {
+	// 	expTime = time.Unix(0, 0)
+	// }
 
 	for {
 		clientID, err := p.GetClientId(cnsi.CNSIType)
@@ -40,6 +40,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 		if got401 || expTime.Before(time.Now()) {
 			refreshedTokenRec, err := p.RefreshToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
 			if err != nil {
+				log.Info(err)
 				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
 			}
 			tokenRec = refreshedTokenRec

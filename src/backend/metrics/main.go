@@ -1,4 +1,4 @@
-package kubernetes
+package metrics
 
 import (
 	// "bytes"
@@ -15,38 +15,37 @@ import (
 	"github.com/labstack/echo"
 )
 
-type KubernetesSpecification struct {
+type MetricsSpecification struct {
 	portalProxy  interfaces.PortalProxy
 	endpointType string
 }
 
 const (
-	EndpointType              = "k8s"
-	CLIENT_ID_KEY             = "K8S_CLIENT"
-	AuthConnectTypeKubeConfig = "KubeConfig"
+	EndpointType              = "metrics"
+	CLIENT_ID_KEY             = "METRICS_CLIENT"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
-	return &KubernetesSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
+	return &MetricsSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
-func (c *KubernetesSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+func (c *MetricsSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
 	return c, nil
 }
 
-func (c *KubernetesSpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+func (c *MetricsSpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
 	return c, nil
 }
 
-func (c *KubernetesSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (c *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
-func (c *KubernetesSpecification) GetType() string {
+func (c *MetricsSpecification) GetType() string {
 	return EndpointType
 }
 
-func (c *KubernetesSpecification) GetClientId() string {
+func (c *MetricsSpecification) GetClientId() string {
 	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
 		return clientId
 	}
@@ -54,40 +53,44 @@ func (c *KubernetesSpecification) GetClientId() string {
 	return "k8s"
 }
 
-func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
-	log.Info("Kubernetes Register...")
+func (c *MetricsSpecification) Register(echoContext echo.Context) error {
+	log.Info("Metrics Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
-func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
-	log.Info("Kubernetes Connect...")
+func (c *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
+	log.Info("Metrics Connect...")
 
-	connectType := ec.FormValue("connect_type")
-	if connectType != AuthConnectTypeKubeConfig {
-		return nil, false, errors.New("Only Kubernetes config is accepted for Kubernetes endpoints")
-	}
+	// connectType := ec.FormValue("connect_type")
+	// if connectType != Auth {
+	// 	return nil, false, errors.New("Only Kubernetes config is accepted for Kubernetes endpoints")
+	// }
 
-	tokenRecord, _, err := c.FetchKubeConfigToken(cnsiRecord, ec)
-	if err != nil {
-		return nil, false, err
-	}
+	// tokenRecord, _, err := c.FetchKubeConfigToken(cnsiRecord, ec)
+	// if err != nil {
+	// 	return nil, false, err
+	// }
 
-	return tokenRecord, false, nil
+	// return tokenRecord, false, nil
+	return nil, false, errors.New("Not implemented")
 }
 
-func (c *KubernetesSpecification) Init() error {
+func (c *MetricsSpecification) Init() error {
+
+	c.portalProxy.GetConfig().PluginConfig["neil"] = "Hey hey hey!"
+	
 	return nil
 }
 
-func (c *KubernetesSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
+func (c *MetricsSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
 	// no-op
 }
 
-func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
+func (c *MetricsSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// no-op
 }
 
-func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (c *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
 	log.Debug("Kubernetes Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
