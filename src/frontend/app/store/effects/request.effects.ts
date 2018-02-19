@@ -3,7 +3,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
 import { UtilsService, pathGet } from '../../core/utils.service';
-import { EntityInlineParent, EntityInlineChild } from '../actions/action-types';
+import { EntityInlineChild } from '../actions/action-types';
 import { SetInitialParams } from '../actions/pagination.actions';
 import { RequestTypes } from '../actions/request.actions';
 import { AppState } from '../app-state';
@@ -31,7 +31,7 @@ export class RequestEffect {
     .mergeMap(action => {
       // Does the entity associated with the action have inline params that need to be validated?
       const entitySchema = pathGet('apiAction.entity', action) || {};
-      const entityParent = (entitySchema.length > 0 ? entitySchema[0] : entitySchema) as EntityInlineParent;
+      const entityParent = (entitySchema.length > 0 ? entitySchema[0] : entitySchema);
       if (!entityParent.definition) {
         return [];
       }

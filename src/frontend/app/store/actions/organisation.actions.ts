@@ -6,7 +6,6 @@ import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import {
   EntityInlineChildAction,
-  EntityInlineParent,
   OrganisationSchema,
   organisationSchemaKey,
   spaceSchemaKey,
