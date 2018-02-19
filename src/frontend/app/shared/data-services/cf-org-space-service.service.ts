@@ -2,12 +2,11 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { mergeMap, withLatestFrom } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
-import { SpaceSchema } from '../../store/actions/action-types';
 import {
+  DeleteOrganisation,
   GetAllOrganisations,
-  GetAllOrganisationSpaces,
   OrganisationWithSpaceSchema,
 } from '../../store/actions/organisation.actions';
 import { AppState } from '../../store/app-state';
