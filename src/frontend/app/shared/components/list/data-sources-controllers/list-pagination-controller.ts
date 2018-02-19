@@ -133,6 +133,9 @@ export class ListPaginationController<T> implements IListPaginationController<T>
           pageIndex
         };
       })
+      .distinctUntilChanged((x, y) => {
+        return x.pageIndex === y.pageIndex && x.pageSize === y.pageSize && x.totalResults === y.totalResults;
+      })
       .tag('list-pagination');
   }
 

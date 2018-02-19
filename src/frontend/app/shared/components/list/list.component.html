@@ -94,7 +94,7 @@
       </app-table>
     </div>
     <mat-card class="list-component__paginator" [hidden]="!(hasRows$ | async) || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
-      <mat-paginator #paginator showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)">
+      <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSize" [pageIndex]="paginator.pageIndex" showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)">
       </mat-paginator>
     </mat-card>
     <mat-card class="list-component__empty" [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">

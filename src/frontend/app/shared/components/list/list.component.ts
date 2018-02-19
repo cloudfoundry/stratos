@@ -9,7 +9,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, MatSelect, SortDirection } from '@angular/material';
+import { MatPaginator, MatSelect, SortDirection, PageEvent } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -30,7 +30,7 @@ import {
   ListViewTypes,
 } from './list.component.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map } from 'rxjs/operators';
+import { map, pairwise, tap, distinctUntilChanged } from 'rxjs/operators';
 
 
 @Component({
@@ -113,9 +113,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.paginator.pageSizeOptions = this.config.pageSizeOptions;
 
+    let initialPageEvent: PageEvent;
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize
     this.paginationController.pagination$.first().subscribe(pagination => {
+      initialPageEvent = new PageEvent;
+      initialPageEvent.pageIndex = pagination.pageIndex - 1;
+      initialPageEvent.pageSize = pagination.pageSize;
       if (this.paginator.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
         this.paginationController.pageSize(this.paginator.pageSizeOptions[0]);
       }
@@ -127,15 +131,24 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.paginator.pageSize = pagination.pageSize;
     });
 
-    const paginationWidgetToStorePage = this.paginator.page
-      .map(page => page.pageIndex)
-      .do(pageIndex => this.paginationController.page(pageIndex));
-
-
-    const paginationWidgetToStorePageSize = this.paginator.page
-      .map(page => page.pageSize)
-      .distinctUntilChanged()
-      .do(pageSize => this.paginationController.pageSize(pageSize));
+    // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
+    // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
+    // event which handles either page or pageSize changes.
+    const paginationWidgetToStore = this.paginator.page.startWith(initialPageEvent).pipe(
+      pairwise(),
+      tap(([oldV, newV]) => {
+        const pageSizeChanged = oldV.pageSize !== newV.pageSize;
+        const pageChanged = oldV.pageIndex !== newV.pageIndex;
+        if (pageSizeChanged) {
+          this.paginationController.pageSize(newV.pageSize);
+          if (this.dataSource.isLocal) {
+            this.paginationController.page(0);
+          }
+        } else if (pageChanged) {
+          this.paginationController.page(newV.pageIndex);
+        }
+      })
+    );
 
     const filterWidgetToStore = this.filter.valueChanges
       .debounceTime(this.dataSource.isLocal ? 150 : 250)
@@ -169,8 +182,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,
-      paginationWidgetToStorePage,
-      paginationWidgetToStorePageSize,
+      paginationWidgetToStore,
       filterStoreToWidget,
       filterWidgetToStore,
       sortStoreToWidget

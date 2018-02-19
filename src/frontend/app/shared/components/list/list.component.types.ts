@@ -41,11 +41,6 @@ export interface IListConfig<T> {
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   /**
-   * Local lists expect ALL entries to be fetched by the data sources action. This allows custom sorting and filtering. Non-local lists
-   * must sort and filter via their supporting api requests.
-   */
-  isLocal?: boolean;
-  /**
    * A collection of numbers used to define how many entries per page should be shown
    */
   pageSizeOptions: Number[];
