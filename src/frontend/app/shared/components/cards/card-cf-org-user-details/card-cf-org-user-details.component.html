@@ -1,3 +1,20 @@
-<p>
-  card-cf-org-user-details works!
-</p>
+<app-meta-card class="cf-org-usage">
+  <app-meta-card-title>Details</app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>User Org Role</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrgService.userOrgRole$ | async) }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Quota Definition Name</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrgService.quotaDefinition$ | async)?.name }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Instances</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrgService.serivceInstances$ | async)?.length }} / {{ (cfOrgService.quotaDefinition$ | async)?.total_services | infinityPipe }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Org Status</app-meta-card-key>
+    <app-meta-card-value>{{ (cfOrgService.org$ | async)?.entity?.entity?.status }}</app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

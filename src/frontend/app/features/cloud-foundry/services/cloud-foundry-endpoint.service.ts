@@ -64,9 +64,9 @@ export class CloudFoundryEndpointService {
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user));
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
 
-    this.info$ = this.cfInfoEntityService.waitForEntity$.pipe(shareReplay(1));
+    this.info$ = this.cfInfoEntityService.waitForEntity$;
 
     this.allApps$ = this.orgs$.pipe(
       // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed

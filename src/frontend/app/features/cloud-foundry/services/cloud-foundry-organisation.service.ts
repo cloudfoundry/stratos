@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
@@ -20,11 +20,13 @@ import {
   CfServiceInstance,
   CfSpace,
 } from '../../../store/types/org-and-space.types';
+import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
 
+  userOrgRole$: Observable<string>;
   quotaDefinition$: Observable<CfQuotaDefinition>;
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<CfPrivateDomain>[]>;
@@ -45,6 +47,7 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
+
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       OrganisationWithSpaceSchema,
@@ -61,6 +64,7 @@ export class CloudFoundryOrganisationService {
     this.org$ = this.organisationEntityService.entityObs$.pipe(
       filter(o => !!o && !!o.entity)
     );
+
     this.spaces$ = this.org$.pipe(
       map(o => o.entity.entity.spaces)
     );
@@ -90,6 +94,11 @@ export class CloudFoundryOrganisationService {
 
     this.quotaDefinition$ = this.org$.pipe(
       map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity)
+    );
+
+    this.userOrgRole$ = this.cfEndpointService.currentUser$.pipe(
+      switchMap(u => this.cfUserService.getUserRoleInOrg(u.guid, this.orgGuid, this.cfGuid)),
+      map(u => getOrgRolesString(u))
     );
 
   }

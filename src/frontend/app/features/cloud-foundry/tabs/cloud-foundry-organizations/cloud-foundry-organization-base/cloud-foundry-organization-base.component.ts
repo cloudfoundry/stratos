@@ -20,9 +20,10 @@ const cfOrganisationServiceFactory = (
   paginationMonitorFactory: PaginationMonitorFactory,
   cfEndpointService: CloudFoundryEndpointService
 ) => {
-  const { cfId, orgId } = activatedRoute.snapshot.params;
+  const { orgId } = activatedRoute.snapshot.params;
+  const { cfGuid } = cfEndpointService;
   return new CloudFoundryOrganisationService(
-    cfId,
+    cfGuid,
     orgId,
     store,
     entityServiceFactory,

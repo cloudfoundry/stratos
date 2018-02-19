@@ -13,7 +13,7 @@ export interface CfOrg {
 
 export interface CfPrivateDomain {
   guid: string;
-  cfGuid: string
+  cfGuid: string;
 }
 
 export interface CfServiceInstance {
@@ -41,4 +41,5 @@ export interface CfQuotaDefinition {
   organization_guid?: string;
   total_services?: number;
   total_routes?: number;
+  total_private_domains?: number;
 }

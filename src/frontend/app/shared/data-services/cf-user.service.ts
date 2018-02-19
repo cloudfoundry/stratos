@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, shareReplay } from 'rxjs/operators';
 
 import { isOrgAuditor, isOrgBillingManager, isOrgManager, isOrgUser } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllUsers, UserSchema } from '../../store/actions/users.actions';
@@ -12,6 +12,7 @@ import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 @Injectable()
+
 export class CfUserService {
   public static EndpointUserService = 'endpointUsersService';
 
@@ -29,14 +30,16 @@ export class CfUserService {
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory
-  ) { }
+  ) {
+
+  }
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
     this.allUsers$.entities$.pipe(
       filter(p => !!p),
       map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
-      filter(p => p.length > 0)
-
+      filter(p => p.length > 0),
+      shareReplay(1),
     )
 
   getUserRoleInOrg = (
