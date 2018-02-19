@@ -121,14 +121,14 @@ func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, c
 		return t, fmt.Errorf("Token refresh request failed: %v", err)
 	}
 
-	u, err := getUserTokenInfo(uaaRes.AccessToken)
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
 		return t, fmt.Errorf("Could not get user token info from access token")
 	}
 
 	u.UserGUID = userGUID
 
-	tokenRecord := p.initEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
 	err = p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)

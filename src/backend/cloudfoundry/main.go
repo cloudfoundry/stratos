@@ -59,7 +59,7 @@ func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
-func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord) (*interfaces.TokenRecord, bool, error) {
+func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Info("CloudFoundry Connect...")
 
 	connectType := ec.FormValue("connect_type")

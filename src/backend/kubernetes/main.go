@@ -59,7 +59,7 @@ func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
-func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord) (*interfaces.TokenRecord, bool, error) {
+func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Info("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
