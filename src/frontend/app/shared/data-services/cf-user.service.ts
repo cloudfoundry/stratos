@@ -4,11 +4,11 @@ import { Observable } from 'rxjs/Observable';
 import { filter, map } from 'rxjs/operators';
 
 import { isOrgAuditor, isOrgBillingManager, isOrgManager, isOrgUser } from '../../features/cloud-foundry/cf.helpers';
-import { GetAllUsers, UserSchema } from '../../store/actions/users.actions';
+import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
+import { CfUser, UserRoleInOrg, UserSchema } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 
 @Injectable()
@@ -80,4 +80,8 @@ export class CfUserService {
       return users.filter(o => o.entity.guid === userGuid)[0];
     });
   }
+}
+
+export class EndpointUserController {
+
 }

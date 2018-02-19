@@ -10,46 +10,13 @@ import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-spac
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
-const cfEndpointServiceFactory = (
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory
-) => {
-  const { cfId } = activatedRoute.snapshot.params;
-  return new CloudFoundryEndpointService(
-    cfId,
-    store,
-    entityServiceFactory,
-    cfOrgSpaceDataService,
-    cfUserService,
-    paginationMonitorFactory
-  );
-};
-
 @Component({
   selector: 'app-cloud-foundry-base',
   templateUrl: './cloud-foundry-base.component.html',
-  styleUrls: ['./cloud-foundry-base.component.scss'],
-  providers: [
-    {
-      provide: CloudFoundryEndpointService,
-      useFactory: cfEndpointServiceFactory,
-      deps: [
-        Store,
-        ActivatedRoute,
-        EntityServiceFactory,
-        CfOrgSpaceDataService,
-        CfUserService,
-        PaginationMonitorFactory
-      ]
-    }
-  ]
+  styleUrls: ['./cloud-foundry-base.component.scss']
 })
 export class CloudFoundryBaseComponent implements OnInit {
-  constructor() {}
+  constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 }

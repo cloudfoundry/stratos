@@ -16,6 +16,7 @@ import { CfApplication, CfApplicationState } from '../../../store/types/applicat
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfOrg, CfSpace } from '../../../store/types/org-and-space.types';
 import { CfUser } from '../../../store/types/user.types';
+import { BaseCF } from '../cf-page.types';
 
 @Injectable()
 export class CloudFoundryEndpointService {
@@ -28,27 +29,29 @@ export class CloudFoundryEndpointService {
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
+  CF_GUID: string;
 
   constructor(
-    public cfGuid: string,
+    public baseCf: BaseCF,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
+    this.CF_GUID = baseCf.guid;
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       EndpointSchema.key,
       EndpointSchema,
-      cfGuid,
+      this.CF_GUID,
       new GetAllEndpoints()
     );
 
     this.cfInfoEntityService = this.entityServiceFactory.create(
       CF_INFO_ENTITY_KEY,
       CFInfoSchema,
-      this.cfGuid,
-      new GetEndpointInfo(this.cfGuid)
+      this.CF_GUID,
+      new GetEndpointInfo(this.CF_GUID)
     );
     this.constructCoreObservables();
   }
@@ -60,9 +63,9 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.cfGuid);
+    this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.CF_GUID);
 
-    this.users$ = this.cfUserService.getUsers(this.cfGuid);
+    this.users$ = this.cfUserService.getUsers(this.CF_GUID);
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user));
 

@@ -1,4 +1,10 @@
 import { APIResource } from './api.types';
+import { schema } from 'normalizr';
+import { getAPIResourceGuid } from '../selectors/api.selectors';
+
+export const UserSchema = new schema.Entity('user', {}, {
+  idAttribute: getAPIResourceGuid
+});
 
 export interface CfUser {
   organizations: APIResource<any>[];

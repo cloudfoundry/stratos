@@ -3,12 +3,30 @@ import { Observable } from 'rxjs/Observable';
 
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { tap } from 'rxjs/operators';
+import { BaseCF } from '../cf-page.types';
+import { ActivatedRoute } from '@angular/router';
+
+function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
+  return {
+    guid: activatedRoute.snapshot.params.cfId
+  };
+}
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
-  styleUrls: ['./cloud-foundry-tabs-base.component.scss']
+  styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
+  providers: [
+    {
+      provide: BaseCF,
+      useFactory: getCfIdFromUrl,
+      deps: [
+        ActivatedRoute
+      ]
+    }
+  ]
 })
+
 export class CloudFoundryTabsBaseComponent implements OnInit {
   tabLinks = [
     { link: 'summary', label: 'Summary' },
@@ -22,7 +40,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   ];
 
   isFetching$: Observable<boolean>;
-  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
+  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
 
   ngOnInit() {
     this.isFetching$ = Observable.of(false);

@@ -5,18 +5,11 @@ import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
 import { PaginatedAction } from '../types/pagination.types';
+import { UserSchema } from '../types/user.types';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
 export const GET_ALL_FAILED = '[Users] Get all failed';
-
-export const UserSchema = new schema.Entity(
-  'user',
-  {},
-  {
-    idAttribute: getAPIResourceGuid
-  }
-);
 
 export class GetAllUsers extends CFStartAction implements PaginatedAction {
   constructor(public paginationKey: string) {
