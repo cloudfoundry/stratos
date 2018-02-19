@@ -1,6 +1,7 @@
-<app-meta-card class="org-card" (click)="goToSummary()">
-  <app-meta-card-title class="org-card__title">{{ row.entity.name }}
-    <button mat-button class="org-card__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
+<app-meta-card class="org-card">
+  <app-meta-card-title class="org-card__title">
+    <div class="org-card__title-link" (click)="goToSummary()">{{ row.entity.name }}</div>
+    <button mat-icon-button class="org-card__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Role</app-meta-card-key>
