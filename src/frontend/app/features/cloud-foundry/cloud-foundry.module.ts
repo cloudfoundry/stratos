@@ -1,3 +1,4 @@
+import { BaseCF } from './cf-page.types';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
@@ -64,8 +65,7 @@ import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.s
   providers: [
     CloudFoundryService,
     CFEndpointsListConfigService,
-    EndpointsListConfigService,
-    CloudFoundryEndpointService
+    EndpointsListConfigService
   ]
 })
 export class CloudFoundryModule { }

@@ -1,19 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { AppState } from '../../../store/app-state';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { tap } from 'rxjs/operators';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { BaseCF } from './../cf-page.types';
 
+function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
+  return {
+    guid: activatedRoute.snapshot.params.cfId
+  };
+}
 @Component({
   selector: 'app-cloud-foundry-base',
   templateUrl: './cloud-foundry-base.component.html',
-  styleUrls: ['./cloud-foundry-base.component.scss']
+  styleUrls: ['./cloud-foundry-base.component.scss'],
+  providers: [
+    {
+      provide: BaseCF,
+      useFactory: getCfIdFromUrl,
+      deps: [
+        ActivatedRoute
+      ]
+    },
+    CloudFoundryEndpointService
+  ]
 })
 export class CloudFoundryBaseComponent implements OnInit {
   constructor() { }

@@ -29,7 +29,7 @@ export class CloudFoundryEndpointService {
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
-  CF_GUID: string;
+  cfGuid: string;
 
   constructor(
     public baseCf: BaseCF,
@@ -39,19 +39,20 @@ export class CloudFoundryEndpointService {
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-    this.CF_GUID = baseCf.guid;
+    this.cfGuid = baseCf.guid;
+    debugger;
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       EndpointSchema.key,
       EndpointSchema,
-      this.CF_GUID,
+      this.cfGuid,
       new GetAllEndpoints()
     );
 
     this.cfInfoEntityService = this.entityServiceFactory.create(
       CF_INFO_ENTITY_KEY,
       CFInfoSchema,
-      this.CF_GUID,
-      new GetEndpointInfo(this.CF_GUID)
+      this.cfGuid,
+      new GetEndpointInfo(this.cfGuid)
     );
     this.constructCoreObservables();
   }
@@ -63,9 +64,9 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.CF_GUID);
+    this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.cfGuid);
 
-    this.users$ = this.cfUserService.getUsers(this.CF_GUID);
+    this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
     this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user));
 

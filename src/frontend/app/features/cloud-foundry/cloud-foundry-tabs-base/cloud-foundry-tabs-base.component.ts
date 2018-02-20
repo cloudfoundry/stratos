@@ -6,25 +6,12 @@ import { tap } from 'rxjs/operators';
 import { BaseCF } from '../cf-page.types';
 import { ActivatedRoute } from '@angular/router';
 
-function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
-  return {
-    guid: activatedRoute.snapshot.params.cfId
-  };
-}
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
   styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
-  providers: [
-    {
-      provide: BaseCF,
-      useFactory: getCfIdFromUrl,
-      deps: [
-        ActivatedRoute
-      ]
-    }
-  ]
+
 })
 
 export class CloudFoundryTabsBaseComponent implements OnInit {

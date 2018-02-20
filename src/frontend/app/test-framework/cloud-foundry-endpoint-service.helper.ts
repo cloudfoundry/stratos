@@ -23,7 +23,7 @@ const cfEndpointServiceProviderDeps = [
   EntityMonitorFactory
 ];
 
-export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
+export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
   return {
     provide: CloudFoundryEndpointService,
     useFactory: (
@@ -34,7 +34,9 @@ export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
       paginationMonitorFactory: PaginationMonitorFactory
     ) => {
       const appService = new CloudFoundryEndpointService(
-        cfGuid,
+        {
+          guid
+        },
         store,
         entityServiceFactory,
         cfOrgSpaceDataService,
