@@ -1,0 +1,16 @@
+<div *ngIf="!isLink">
+  <span *ngTemplateOutlet="valueTemplate"></span>
+</div>
+<span *ngIf="isLink">
+    <a [href]="linkValue" *ngIf="isExternalLink">
+        <span *ngTemplateOutlet="valueTemplate"></span>
+</a>
+<a [href]="linkValue" *ngIf="!isExternalLink">
+        <span *ngTemplateOutlet="valueTemplate"></span>
+    </a>
+</span>
+
+<ng-template #valueTemplate *ngIf="value; else defaultValue">
+  {{ value }}
+</ng-template>
+<ng-template #defaultValue>-</ng-template>

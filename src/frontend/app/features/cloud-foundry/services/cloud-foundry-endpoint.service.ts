@@ -40,7 +40,6 @@ export class CloudFoundryEndpointService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.cfGuid = baseCf.guid;
-    debugger;
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       EndpointSchema.key,
       EndpointSchema,

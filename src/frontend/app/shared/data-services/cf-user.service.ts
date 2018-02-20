@@ -1,3 +1,5 @@
+import { PaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { BaseCF } from './../../features/cloud-foundry/cf-page.types';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -13,30 +15,30 @@ import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory
 
 @Injectable()
 export class CfUserService {
-  public static EndpointUserService = 'endpointUsersService';
-
-  public allUsersAction = new GetAllUsers(CfUserService.EndpointUserService);
-
-  public allUsers$ = getPaginationObservables<APIResource<CfUser>>({
-    store: this.store,
-    action: this.allUsersAction,
-    paginationMonitor: this.paginationMonitorFactory.create(
-      this.allUsersAction.paginationKey,
-      UserSchema
-    )
-  });
+  public allUsersAction: GetAllUsers;
+  public allUsers$: PaginationObservables<APIResource<CfUser>>;
 
   constructor(
     private store: Store<AppState>,
-    public paginationMonitorFactory: PaginationMonitorFactory
-  ) { }
+    public paginationMonitorFactory: PaginationMonitorFactory,
+    public baseCF: BaseCF
+  ) {
+    this.allUsersAction = new GetAllUsers(baseCF.guid);
+    this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
+      store: this.store,
+      action: this.allUsersAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.allUsersAction.paginationKey,
+        UserSchema
+      )
+    });
+  }
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
     this.allUsers$.entities$.pipe(
       filter(p => !!p),
       map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
       filter(p => p.length > 0)
-
     )
 
   getUserRoleInOrg = (

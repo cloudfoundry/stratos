@@ -1,3 +1,4 @@
+import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import {
   Component,
   ComponentFactoryResolver,
@@ -46,8 +47,11 @@ import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.compo
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellCustom } from './table-cell-custom';
+import { ICellDefinition } from '../table.types';
+import { ElementRef } from '@angular/core/src/linker/element_ref';
 
 export const listTableCells = [
+  TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
   TableCellEditComponent,
@@ -67,7 +71,6 @@ export const listTableCells = [
   TableCellAppRouteComponent,
   TableCellRadioComponent
 ];
-
 @Component({
   selector: 'app-table-cell',
   templateUrl: './table-cell.component.html',
@@ -79,11 +82,12 @@ export const listTableCells = [
 })
 export class TableCellComponent<T> implements OnInit, OnChanges {
   @ViewChild('target', { read: ViewContainerRef })
-  target;
+  target: ViewContainerRef;
 
   @Input('dataSource') dataSource = null as IListDataSource<T>;
 
   @Input('component') component: Type<{}>;
+  @Input('cellDefinition') cellDefinition: ICellDefinition<T>;
   @Input('func') func: () => string;
   @Input('row') row: T;
   @Input('config') config: any;
@@ -92,14 +96,33 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  ngOnInit() {
-    if (this.component) {
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(
+  private getComponent() {
+    if (this.cellDefinition) {
+      return this.componentFactoryResolver.resolveComponentFactory(
+        TableCellDefaultComponent
+      );
+    } else if (this.component) {
+      return this.componentFactoryResolver.resolveComponentFactory(
         this.component
       );
+    }
+    return null;
+  }
+
+  private createComponent() {
+    const component = this.getComponent();
+    return !!component ? this.target.createComponent(component) : null;
+  }
+
+  ngOnInit() {
+    const component = this.createComponent();
+    if (component) {
+
       // Add to target to ensure ngcontent is correct in new component
-      const componentRef = this.target.createComponent(componentFactory);
-      this.cellComponent = <TableCellCustom<T>>componentRef.instance;
+      this.cellComponent = <TableCellCustom<T>>component.instance;
+      if (this.cellDefinition) {
+        (this.cellComponent as TableCellDefaultComponent<T>).cellDefinition = this.cellDefinition;
+      }
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;

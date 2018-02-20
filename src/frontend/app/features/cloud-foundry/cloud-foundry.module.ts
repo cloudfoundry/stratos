@@ -65,7 +65,8 @@ import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.s
   providers: [
     CloudFoundryService,
     CFEndpointsListConfigService,
-    EndpointsListConfigService
+    EndpointsListConfigService,
+    BaseCF
   ]
 })
 export class CloudFoundryModule { }

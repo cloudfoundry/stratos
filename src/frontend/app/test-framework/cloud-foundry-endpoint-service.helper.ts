@@ -56,14 +56,14 @@ export function generateTestCfEndpointService() {
   ];
 }
 
-export function generateTestCfUserServiceProvider(cfGuid = testSCFGuid) {
+export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
   return {
     provide: CfUserService,
     useFactory: (
       store: Store<AppState>,
       paginationMonitorFactory: PaginationMonitorFactory
     ) => {
-      const cfUserService = new CfUserService(store, paginationMonitorFactory);
+      const cfUserService = new CfUserService(store, paginationMonitorFactory, { guid });
       return cfUserService;
     },
     deps: [Store, PaginationMonitorFactory]
