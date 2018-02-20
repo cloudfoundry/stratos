@@ -32,7 +32,7 @@ export class RequestEffect {
       // Does the entity associated with the action have inline params that need to be validated?
       const entitySchema = pathGet('apiAction.entity', action) || {};
       const entityParent = (entitySchema.length > 0 ? entitySchema[0] : entitySchema);
-      if (!entityParent.definition) {
+      if (!entityParent.schema) {
         return [];
       }
 
@@ -46,7 +46,7 @@ export class RequestEffect {
 
       // Look through the parent entity's definition and find any inline children that need to be validated
       const allPaths: { path: string, child: EntityInlineChild }[] = [];
-      this.extractChildren(allPaths, '', entityParent.definition);
+      this.extractChildrenPaths(allPaths, '', entityParent.schema);
       if (!allPaths.length) {
         return [];
       }
@@ -59,7 +59,7 @@ export class RequestEffect {
           const childAction = child.parentRelations.find(parentRelation => {
             return parentRelation.parentEntityKey === entityParent.key;
           });
-          const paramAction = childAction.createAction(entity);
+          const paramAction = childAction.fetchChildrenAction(entity);
           const paramValue = pathGet(relation.path, entity);
           if (paramValue) {
             // We've got the value already, ensure we create a pagination section for them
@@ -85,47 +85,16 @@ export class RequestEffect {
             ]);
           }
         });
-
-
-
-        // // For each inline parameter required...
-        // childRelations.forEach(relation => {
-        //   // Check to see if the inline parameter exists
-        //   const childRelation = relation as EntityRelationChild;
-        //   const paramAction = childRelation.createAction(entity);
-        //   const paramValue = pathGet(childRelation.path, entity);
-        //   if (paramValue) {
-        //     // We've got the value already, ensure we create a pagination section for them
-        //     const paramEntities = pick(response.entities[paramAction.entityKey], paramValue);
-        //     const paginationSuccess = new WrapperRequestActionSuccess(
-        //       {
-        //         entities: {
-        //           [paramAction.entityKey]: paramEntities
-        //         },
-        //         result: paramValue
-        //       },
-        //       paramAction,
-        //       'fetch',
-        //       paramValue.length,
-        //       1
-        //     );
-        //     actions.push(paginationSuccess);
-        //   } else {
-        //     // The values are missing, go fetch
-        //     actions = [].concat(actions, [
-        //       new SetInitialParams(paramAction.entityKey, paramAction.paginationKey, paramAction.initialParams, true),
-        //       paramAction
-        //     ]);
-        //   }
-        // });
       });
 
       return actions;
     });
 
-  private extractChildren = (paths, parentPath, obj) => {
+  /*
+   * Iterate through an object and it's params and extract the path to any EntityInlineChild objects
+   */
+  private extractChildrenPaths = (paths, parentPath, obj) => {
     Object.keys(obj).forEach(key => {
-      console.log(key);
       const value = obj[key];
       const path = parentPath.length ? parentPath + '.' + key : key;
       if (value instanceof EntityInlineChild) {
@@ -134,7 +103,7 @@ export class RequestEffect {
           child: value
         });
       } else if (value instanceof Object) {
-        this.extractChildren(paths, path, value);
+        this.extractChildrenPaths(paths, path, value);
       }
     });
   }

@@ -6,34 +6,33 @@ import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 
 /**
- * Provides a way for a child entity to populate a parent entity with itself
+ * Provides a way for a collection of child entities to populate a parent entity with itself,.. or request child entities if missing
  *
  * @export
  * @class EntityRelationParent
  */
 export class EntityRelationParent {
+  /*
+   * The entity key of the parent that should contain the child entities
+   */
   parentEntityKey: string;
+  /*
+   * The entity key of the child that should be in the parent entity
+   */
   childEntityKey: string;
-  mergeResult: (state, parentGuid: string, response: NormalizedResponse) => {
-    parentGuid: string;
-    newParentEntity: APIResource;
-  };
-  createAction: (resource: APIResource) => PaginatedAction; // TODO: RC Comment
+  /*
+   * Create a new parent entity that contains the child entities
+   */
+  createParentEntity: (state, parentGuid: string, response: NormalizedResponse) => APIResource;
+  /*
+   * An actiont that will fetch missing child entities
+   */
+  fetchChildrenAction: (resource: APIResource) => PaginatedAction;
 }
-// /**
-//  * Provides a way for a parent entity to populate a child parameter
-//  *
-//  * @export
-//  * @class EntityRelationChild
-//  */
-// export class EntityRelationChild {
-//   path: string;
-//   createAction: (resource: APIResource) => PaginatedAction;
-// }
 
 /**
- * Defines an entity array which should exist in as a parameter in a parent entity. For example a space array in an parent organisation.
- * Provides a framework to populate a parent entity's parameter with itself
+ * Defines an schema entity array which should exist as a parameter in a parent entity. For example a space array in a parent organisation.
+ * Also provides a framework to populate a parent entity's parameter with itself
  *
  * @export
  * @class EntityInlineChild
@@ -47,23 +46,6 @@ export class EntityInlineChild extends schema.Array {
     super(definition, schemaAttribute);
   }
 }
-
-// /**
-//  * Defines an entity which should contain inline children. Provides a framework to fetch those if missing
-//  * //TODO: RE
-//  * @export
-//  * @class EntityInlineParent
-//  * @extends {schema.Entity}
-//  */
-// export class EntityInlineParent extends schema.Entity {
-//   constructor(
-//     // public childRelations: EntityRelationChild[],
-//     key: string,
-//     public definition: Schema,
-//     options?: schema.EntityOptions) {
-//     super(key, definition, options);
-//   }
-// }
 
 /**
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.

@@ -56,7 +56,7 @@ function canPopulateParentEntity(successAction): {
   parentEntityGuid: string;
   parentRelations: EntityRelationParent[]
 } {
-  // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent
+  // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent (empty lists)
   const parentEntityGuid = successAction && successAction.apiAction ? successAction.apiAction['parentGuid'] : null;
   if (!parentEntityGuid) {
     return;
@@ -93,14 +93,14 @@ function populateParentEntity(state, successAction, params: {
   // For each parent-child relationship
   parentRelations.forEach(relation => {
     // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
-    const { parentGuid, newParentEntity } = relation.mergeResult(state, parentEntityGuid, successAction.response);
+    const newParentEntity = relation.createParentEntity(state, parentEntityGuid, successAction.response);
     if (!newParentEntity) {
       return;
     }
-    // Apply the new entity to the response
+    // Apply the new entity to the response which will me merged into the store's state
     successAction.response.entities[relation.parentEntityKey] = {
       ...successAction.response.entities[relation.parentEntityKey],
-      [parentGuid]: newParentEntity
+      [parentEntityGuid]: newParentEntity
     };
   });
   return deepMergeState(state, successAction.response.entities);

@@ -48,7 +48,7 @@ export const SpacesSchema = new EntityInlineChild([
   {
     parentEntityKey: organisationSchemaKey,
     childEntityKey: spaceSchemaKey,
-    mergeResult: (state, parentGuid, response) => {
+    createParentEntity: (state, parentGuid, response) => {
       const parentEntity = pathGet(`${organisationSchemaKey}.${parentGuid}`, state);
       const newParentEntity = {
         ...parentEntity,
@@ -57,12 +57,11 @@ export const SpacesSchema = new EntityInlineChild([
           spaces: response.result
         }
       };
-      return {
-        parentGuid,
-        newParentEntity
-      };
+      return newParentEntity;
     },
-    createAction: (organisation) => {
+    fetchChildrenAction: (organisation) => {
+      // GetAll uses SpacesSchema. SpacesSchema uses GetAll.
+      // tslint:disable-next-line:no-use-before-declare
       return new GetAllOrganisationSpaces(
         `${organisationSchemaKey}-${organisation.metadata.guid}`,
         organisation.metadata.guid,
