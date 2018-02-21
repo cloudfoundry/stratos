@@ -1,9 +1,9 @@
 .space-card {
   &__title {
+    width: 100%;
     &-link {
       cursor: pointer;
     }
-    width: 100%;
   }
   &__button {
     justify-content: flex-end;
