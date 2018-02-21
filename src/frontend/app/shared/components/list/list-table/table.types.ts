@@ -17,7 +17,6 @@ export interface ICellDefinition<T> {
 }
 export interface ITableColumn<T> {
   columnId: string;
-  cell?: (row: T) => string; // Either cell OR cellComponent should be defined
   cellComponent?: any;
   cellDefinition?: ICellDefinition<T>; // This takes president over cellComponent
   cellConfig?: any;   // Config for a custom cell component

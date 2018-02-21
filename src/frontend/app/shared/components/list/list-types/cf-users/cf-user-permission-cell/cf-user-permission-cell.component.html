@@ -1,0 +1,6 @@
+<span *ngIf="!permissions.length">None</span>
+<mat-chip-list *ngIf="permissions.length">
+  <mat-chip *ngFor="let perms of permissions">{{perms.orgName}}: {{perms.permissionString}}
+    <mat-icon class="permission-chip__close">close</mat-icon>
+  </mat-chip>
+</mat-chip-list>

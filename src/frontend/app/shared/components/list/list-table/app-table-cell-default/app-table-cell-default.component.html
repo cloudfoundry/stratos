@@ -1,16 +1,16 @@
-<div *ngIf="!isLink">
-  <span *ngTemplateOutlet="valueTemplate"></span>
-</div>
+<span *ngIf="!isLink">
+  <ng-container *ngTemplateOutlet="valueTemplate; context: valueContext"></ng-container>
+</span>
 <span *ngIf="isLink">
-    <a [href]="linkValue" *ngIf="isExternalLink">
-        <span *ngTemplateOutlet="valueTemplate; context: valueContext"></span>
-</a>
-<a [href]="linkValue" *ngIf="!isExternalLink">
-        <span *ngTemplateOutlet="valueTemplate; context: valueContext"></span>
-    </a>
+  <a [href]="linkValue" *ngIf="isExternalLink">
+      <ng-container *ngTemplateOutlet="valueTemplate; context: valueContext"></ng-container>
+  </a>
+  <a [routerLink]="linkValue" *ngIf="!isExternalLink">
+      <ng-container *ngTemplateOutlet="valueTemplate; context: valueContext"></ng-container>
+  </a>
 </span>
 
-<ng-template #valueTemplate *ngIf="valueContext.value; else defaultValue">
-  <span>{{ value }}</span>
+<ng-template let-value="value" #valueTemplate>
+  <span *ngIf="value">{{ value }}</span>
+  <span class="default-cell__no-value" *ngIf="!value">-</span>
 </ng-template>
-<ng-template #defaultValue>-</ng-template>

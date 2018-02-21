@@ -41,6 +41,22 @@ export class CfUserService {
       filter(p => p.length > 0)
     )
 
+  getRolesFromUser(user: CfUser) {
+    return user.organizations.map(org => {
+      const orgGuid = org.metadata.guid;
+      return {
+        orgName: org.entity.name,
+        orgGuid: org.metadata.guid,
+        permissions: {
+          orgManager: isOrgManager(user, orgGuid),
+          billingManager: isOrgBillingManager(user, orgGuid),
+          auditor: isOrgAuditor(user, orgGuid),
+          user: isOrgUser(user, orgGuid)
+        }
+      };
+    });
+  }
+
   getUserRoleInOrg = (
     userGuid: string,
     orgGuid: string,

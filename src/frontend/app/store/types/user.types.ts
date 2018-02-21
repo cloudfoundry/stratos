@@ -17,6 +17,7 @@ export interface CfUser {
   audited_spaces: APIResource<any>;
   cfGuid?: string;
   guid: string;
+  username: string;
 }
 
 export interface UserRoleInOrg {

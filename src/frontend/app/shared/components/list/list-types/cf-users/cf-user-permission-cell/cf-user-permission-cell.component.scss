@@ -1,0 +1,10 @@
+.permission-chip {
+  $size: 15px;
+  &__close {
+    cursor: pointer;
+    font-size: $size;
+    height: $size;
+    margin-left: 5px;
+    width: $size;
+  }
+}

@@ -145,7 +145,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     CfOrgCardComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
-    CardCfOrgUserDetailsComponent
+    CardCfOrgUserDetailsComponent,
   ],
   exports: [
     FormsModule,

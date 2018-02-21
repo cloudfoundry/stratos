@@ -49,6 +49,7 @@ import { TableHeaderSelectComponent } from '../table-header-select/table-header-
 import { TableCellCustom } from './table-cell-custom';
 import { ICellDefinition } from '../table.types';
 import { ElementRef } from '@angular/core/src/linker/element_ref';
+import { TableCellCfUserPermissionComponent } from '../../list-types/cf-users/cf-user-permission-cell/cf-user-permission-cell.component';
 
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -69,7 +70,8 @@ export const listTableCells = [
   TableCellTCPRouteComponent,
   TableCellAppInstancesComponent,
   TableCellAppRouteComponent,
-  TableCellRadioComponent
+  TableCellRadioComponent,
+  TableCellCfUserPermissionComponent
 ];
 @Component({
   selector: 'app-table-cell',

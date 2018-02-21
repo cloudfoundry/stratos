@@ -7,6 +7,8 @@ import { CfUserDataSourceService } from './cf-user-data-source.service';
 import { ListViewTypes, ListConfig } from './../../list.component.types';
 import { Injectable } from '@angular/core';
 import { CfUser } from '../../../../../store/types/user.types';
+import { getOrgRolesString } from '../../../../../features/cloud-foundry/cf.helpers';
+import { TableCellCfUserPermissionComponent } from './cf-user-permission-cell/cf-user-permission-cell.component';
 
 @Injectable()
 export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
@@ -16,20 +18,27 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   dataSource: CfUserDataSourceService;
   pageSizeOptions = [9, 45, 90];
 
-  columns: ITableColumn<APIResource<CfUser>>[] = [
-    {
-      columnId: 'username',
-      headerCell: () => 'Username',
-      cellDefinition: {
-        valuePath: 'entity.username'
-      }
-    }
-  ];
+  columns: ITableColumn<APIResource<CfUser>>[];
 
   getColumns = () => this.columns;
 
   constructor(private store: Store<AppState>, cfUserService: CfUserService) {
     super();
+    this.columns = [
+      {
+        columnId: 'username',
+        headerCell: () => 'Username',
+        cellDefinition: {
+          getValue: row => row.entity.username || row.metadata.guid
+        }
+      },
+      {
+        columnId: 'roles',
+        headerCell: () => 'Organization Roles',
+        cellFlex: '2',
+        cellComponent: TableCellCfUserPermissionComponent
+      }
+    ];
     this.dataSource = new CfUserDataSourceService(store, cfUserService, this);
   }
 
