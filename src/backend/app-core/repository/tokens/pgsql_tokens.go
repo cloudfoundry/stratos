@@ -34,8 +34,9 @@ var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, di
 										FROM tokens
 										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = '0'`
 
-var listCNSITokensForUser = `SELECT auth_token, refresh_token, token_expiry, disconnected
-														FROM tokens
+var listCNSITokensForUser = `SELECT cnsi_guid, E.cnsi_type, auth_token, refresh_token, token_expiry, disconnected
+														FROM tokens T
+														JOIN cnsis E ON E.guid=T.cnsi_guid
 														WHERE token_type = 'cnsi' AND user_guid = $1 AND disconnected = '0'`
 
 var countCNSITokens = `SELECT COUNT(*)
@@ -307,8 +308,8 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		ciphertextRefreshToken []byte
 		tokenExpiry            int64
 		disconnected           bool
-		authType							 string
-		metadata							 string
+		authType               string
+		metadata               string
 	)
 
 	var err error
@@ -349,7 +350,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 }
 
 // ListCNSITokensForUser - <TBD>
-func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*interfaces.TokenRecord, error) {
+func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*interfaces.EndpointTokenRecord, error) {
 	log.Println("ListCNSITokensForUser")
 
 	if userGUID == "" {
@@ -372,18 +373,20 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 		return nil, fmt.Errorf(msg, err)
 	}
 
-	var tokenRecordList []*interfaces.TokenRecord
-	tokenRecordList = make([]*interfaces.TokenRecord, 0)
+	var tokenRecordList []*interfaces.EndpointTokenRecord
+	tokenRecordList = make([]*interfaces.EndpointTokenRecord, 0)
 
 	for rows.Next() {
 		var (
+			cnsiGUID               string
+			cnsiType               string
 			ciphertextAuthToken    []byte
 			ciphertextRefreshToken []byte
 			tokenExpiry            int64
 			disconnected           bool
 		)
 
-		err := rows.Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
+		err := rows.Scan(&cnsiGUID, &cnsiType, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
 		if err != nil {
 			msg := "Unable to scan token records: %v"
 			log.Printf(msg, err)
@@ -402,7 +405,9 @@ func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryption
 			return nil, err
 		}
 
-		tr := new(interfaces.TokenRecord)
+		tr := new(interfaces.EndpointTokenRecord)
+		tr.EndpointGUID = cnsiGUID
+		tr.EndpointType = cnsiType
 		tr.AuthToken = plaintextAuthToken
 		tr.RefreshToken = plaintextRefreshToken
 		tr.TokenExpiry = tokenExpiry

@@ -32,14 +32,20 @@ type CNSIRecord struct {
 }
 
 const (
-	AuthTypeOAuth2     = "OAuth2"
-	AuthTypeHttpBasic  = "HttpBasic"
-	AuthTypeKubeConfig = "KubeConfig"
+	AuthTypeOAuth2    = "OAuth2"
+	AuthTypeHttpBasic = "HttpBasic"
 )
 
 const (
 	AuthConnectTypeCreds = "creds"
 )
+
+// Token record for an endpoint (includes the Endpoint GUID)
+type EndpointTokenRecord struct {
+	*TokenRecord
+	EndpointGUID string
+	EndpointType string
+}
 
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
 type TokenRecord struct {
@@ -98,6 +104,28 @@ type JWTUserTokenInfo struct {
 	Scope       []string `json:"scope"`
 }
 
+// Info - this represents user specific info
+type Info struct {
+	Versions     *Versions                             `json:"version"`
+	User         *ConnectedUser                        `json:"user"`
+	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
+	CloudFoundry *CFInfo                               `json:"cloud-foundry,omitempty"`
+	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
+}
+
+// Extends CNSI Record and adds the user
+type EndpointDetail struct {
+	*CNSIRecord
+	User     *ConnectedUser    `json:"user"`
+	Metadata map[string]string `json:"metadata,omitempty"`
+}
+
+// Versions - response returned to caller from a getVersions action
+type Versions struct {
+	ProxyVersion    string `json:"proxy_version"`
+	DatabaseVersion int64  `json:"database_version"`
+}
+
 type ConsoleConfig struct {
 	UAAEndpoint         *url.URL `json:"uaa_endpoint"`
 	ConsoleAdminScope   string   `json:"console_admin_scope"`
@@ -105,6 +133,22 @@ type ConsoleConfig struct {
 	ConsoleClientSecret string   `json:"console_client_secret"`
 	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
 	IsSetupComplete     bool     `json:"is_setup_complete"`
+}
+
+// CNSIRequest
+type CNSIRequest struct {
+	GUID     string
+	UserGUID string
+
+	Method      string
+	Body        []byte
+	Header      http.Header
+	URL         *url.URL
+	StatusCode  int
+	PassThrough bool
+
+	Response []byte
+	Error    error
 }
 
 type PortalConfig struct {

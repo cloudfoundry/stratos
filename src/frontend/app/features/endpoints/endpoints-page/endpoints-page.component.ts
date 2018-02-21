@@ -45,10 +45,12 @@ export class EndpointsPageComponent {
           const requestArgs = {
             headers: headers
           };
-          this.http.get(`/pp/v1//proxy/api/v1/nodes`, requestArgs).subscribe();
+          this.http.get(`/pp/v1/proxy/api/v1/nodes`, requestArgs).subscribe();
         }
       })
 
     }).subscribe();
   }
+
+
 }

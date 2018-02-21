@@ -55,12 +55,12 @@ func (c *KubernetesSpecification) GetClientId() string {
 }
 
 func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
-	log.Info("Kubernetes Register...")
+	log.Debug("Kubernetes Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
 func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
-	log.Info("Kubernetes Connect...")
+	log.Debug("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
 	if connectType != AuthConnectTypeKubeConfig {
@@ -127,4 +127,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 	newCNSI.AuthorizationEndpoint = apiEndpoint
 
 	return newCNSI, v2InfoResponse, nil
+}
+
+func (c *KubernetesSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
 }

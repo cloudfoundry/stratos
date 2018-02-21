@@ -202,3 +202,6 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 
 	return newCNSI, v2InfoResponse, nil
 }
+
+func (c *CloudFoundrySpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+}

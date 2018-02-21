@@ -595,7 +595,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		routePlugin.AddSessionGroupRoutes(sessionGroup)
 	}
 
-	// This is used for passthru of CF/HCE requests
+	// This is used for passthru of requests
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
 

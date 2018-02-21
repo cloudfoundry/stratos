@@ -48,6 +48,10 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       value: 'k8s',
       label: 'Kubernetes'
     },
+    {
+      value: 'metrics',
+      label: 'Metrics'
+    },
   ];
 
   constructor(private store: Store<AppState>, public utilsService: UtilsService) {

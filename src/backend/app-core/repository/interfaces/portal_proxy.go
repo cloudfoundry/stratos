@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
@@ -37,6 +38,7 @@ type PortalProxy interface {
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
+	ListCNSITokenRecordsForUser(userGUID string) ([]*EndpointTokenRecord, error)
 
 	GetClientId(cnsiType string) (string, error)
 
@@ -47,4 +49,8 @@ type PortalProxy interface {
 	GetUsername(userid string) (string, error)
 	RefreshUAALogin(username, password string, store bool) error
 	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
+
+	// Proxy API requests
+	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
+	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 }

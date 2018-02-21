@@ -355,9 +355,9 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 	return tr, true
 }
 
-//TODO: remove this? It is unusable in this form as we won't know for which CNSI each token is
-func (p *portalProxy) listCNSITokenRecordsForUser(userGUID string) ([]*interfaces.TokenRecord, error) {
-	log.Debug("listCNSITokenRecordsForUser")
+//TODO: TokenRecord should include the GUID of the service
+func (p *portalProxy) ListCNSITokenRecordsForUser(userGUID string) ([]*interfaces.EndpointTokenRecord, error) {
+	log.Debug("ListCNSITokenRecordsForUser")
 	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
 	if err != nil {
 		return nil, err

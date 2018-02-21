@@ -59,6 +59,7 @@
             <mat-card-title>Build Info</mat-card-title>
           </mat-card-header>
           <mat-card-content>
+            <button mat-button (click)="testMetrics()">Test Metrics</button>
             <app-metadata-item icon="build" label="Buildpack">
               <app-view-buildpack [buildPack]="appSvc.app.entity.buildpack || appSvc.app.entity.detected_buildpack"></app-view-buildpack>
             </app-metadata-item>

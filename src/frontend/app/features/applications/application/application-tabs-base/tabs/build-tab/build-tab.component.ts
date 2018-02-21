@@ -9,6 +9,7 @@ import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 
 import { Store } from '@ngrx/store';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
+import { Http, Headers } from '@angular/http';
 
 @Component({
   selector: 'app-build-tab',
@@ -19,7 +20,7 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
   ]
 })
 export class BuildTabComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
+  constructor(private http: Http, private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
 
   appService = this.applicationService;
 
@@ -36,4 +37,16 @@ export class BuildTabComponent implements OnInit {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }).distinct();
   }
+
+  testMetrics() {
+    console.log('TESTING METRICS.....');
+
+    const headers = new Headers({ 'x-cap-cnsi-list': this.appService.cfGuid });
+    const requestArgs = {
+      headers: headers
+    };
+    
+    const metrics = this.http.get('/pp/v1/metrics/cf/app/' + this.appService.appGuid, requestArgs).subscribe();
+
+  }  
 }

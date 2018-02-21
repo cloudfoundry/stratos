@@ -1,13 +1,10 @@
 package metrics
 
 import (
-	// "bytes"
-	// "encoding/json"
-	// "fmt"
-	// "io"
-	"net/url"
-
+	"encoding/base64"
 	"errors"
+	"fmt"
+	"net/url"
 
 	"github.com/SUSE/stratos-ui/config"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
@@ -21,8 +18,8 @@ type MetricsSpecification struct {
 }
 
 const (
-	EndpointType              = "metrics"
-	CLIENT_ID_KEY             = "METRICS_CLIENT"
+	EndpointType  = "metrics"
+	CLIENT_ID_KEY = "METRICS_CLIENT"
 )
 
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
@@ -41,6 +38,19 @@ func (c *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugi
 	return nil, errors.New("Not implemented!")
 }
 
+// Metrics endpoints - admin
+func (c *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
+	echoContext.GET("/metrics/cf", c.getCloudFoundryMetrics)
+
+	// TODOO: Kubernetes
+	//echoContext.GET("metrics/k8s", p.getKubernetesMetrics)
+}
+
+// Metrics API endpoints - non-admin
+func (c *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
+	echoContext.GET("/metrics/cf/app/:appId", c.getCloudFoundryAppMetrics)
+}
+
 func (c *MetricsSpecification) GetType() string {
 	return EndpointType
 }
@@ -50,48 +60,49 @@ func (c *MetricsSpecification) GetClientId() string {
 		return clientId
 	}
 
-	return "k8s"
+	return "metrics"
 }
 
 func (c *MetricsSpecification) Register(echoContext echo.Context) error {
-	log.Info("Metrics Register...")
+	log.Debug("Metrics Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
 func (c *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
-	log.Info("Metrics Connect...")
+	log.Debug("Metrics Connect...")
 
-	// connectType := ec.FormValue("connect_type")
-	// if connectType != Auth {
-	// 	return nil, false, errors.New("Only Kubernetes config is accepted for Kubernetes endpoints")
-	// }
+	connectType := ec.FormValue("connect_type")
+	if connectType != interfaces.AuthConnectTypeCreds {
+		return nil, false, errors.New("Only username/password is accepted for Metrics endpoints")
+	}
 
-	// tokenRecord, _, err := c.FetchKubeConfigToken(cnsiRecord, ec)
-	// if err != nil {
-	// 	return nil, false, err
-	// }
+	username := ec.FormValue("username")
+	password := ec.FormValue("password")
 
-	// return tokenRecord, false, nil
-	return nil, false, errors.New("Not implemented")
+	if len(username) == 0 || len(password) == 0 {
+		return nil, false, errors.New("Need username and password")
+	}
+
+	authString := fmt.Sprintf("%s:%s", username, password)
+	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
+
+	tr := &interfaces.TokenRecord{
+		AuthType:  interfaces.AuthTypeHttpBasic,
+		AuthToken: base64EncodedAuthString,
+	}
+
+	// Metadata indicates which Cloud Foundry/Kubernetes endpoints the metrics endpoint can supply data for
+
+	// Attempt to fetch info for metrics endpoint to validate credentials are valid
+	return tr, false, nil
 }
 
 func (c *MetricsSpecification) Init() error {
-
-	c.portalProxy.GetConfig().PluginConfig["neil"] = "Hey hey hey!"
-	
 	return nil
 }
 
-func (c *MetricsSpecification) AddAdminGroupRoutes(echoGroup *echo.Group) {
-	// no-op
-}
-
-func (c *MetricsSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
-	// no-op
-}
-
 func (c *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
-	log.Debug("Kubernetes Info")
+	log.Debug("Metrics Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
 
@@ -102,7 +113,7 @@ func (c *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 		return newCNSI, nil, err
 	}
 
-	// No info endpoint that we can fetch to check if the Endpoint is K8S
+	// No info endpoint that we can fetch to check if the Endpoint is a metrics endpoint
 	// We'll discover that when we try and connect
 
 	// uri.Path = "v2/info"
@@ -130,4 +141,54 @@ func (c *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 	newCNSI.AuthorizationEndpoint = apiEndpoint
 
 	return newCNSI, v2InfoResponse, nil
+}
+
+func (c *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+
+	// Record of which endpoints have metrics
+	haveMetrics := make(map[string]string)
+
+	// Go through the metrics endpoints and get the corresponding services from the token metadata
+	if metrics, ok := info.Endpoints[EndpointType]; ok {
+		for guid, ep := range metrics {
+			// Metric endpoints
+			log.Info(guid)
+			log.Info(ep)
+		}
+
+		haveMetrics["4e154430-17b9-4e38-adb6-45be571960bb"] = "true"
+	}
+
+	// Map of endpoint types
+	for k, eps := range info.Endpoints {
+		log.Info(k)
+		log.Info(eps)
+
+		// Map of guids to endpoints
+		for guid, ep := range eps {
+			log.Info(guid)
+			log.Info(ep)
+			if _, ok := haveMetrics[guid]; ok {
+				ep.Metadata["metrics"] = "true"
+			}
+		}
+	}
+}
+
+func (m *MetricsSpecification) getMetricsEndpoints(userGUID string) error {
+
+	userEndpoints, err := m.portalProxy.ListCNSITokenRecordsForUser(userGUID)
+	if err != nil {
+		return err
+	}
+
+	for _, endpointToken := range userEndpoints {
+		log.Info(endpointToken)
+		if endpointToken.EndpointType == "metrics" {
+			// Get the endpoints that this metrics endpoint supports from its metadata
+			log.Info("Got metrics endpoint: " + endpointToken.EndpointGUID)
+		}
+	}
+
+	return nil
 }

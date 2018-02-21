@@ -1,17 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"time"
-	"encoding/json"
 
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 )
 
-func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error) {
+func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOauthFlowRequest")
 
 	// get a cnsi token record and a cnsi record
@@ -69,7 +69,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 	}
 }
 
-func (p *portalProxy) getCNSIRequestRecords(r *CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
+func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
 	log.Debug("getCNSIRequestRecords")
 	// look up token
 	t, ok := p.GetCNSITokenRecord(r.GUID, r.UserGUID)
