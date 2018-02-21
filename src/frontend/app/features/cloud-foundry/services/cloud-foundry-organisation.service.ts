@@ -65,36 +65,11 @@ export class CloudFoundryOrganisationService {
       filter(o => !!o && !!o.entity)
     );
 
-    this.spaces$ = this.org$.pipe(
-      map(o => o.entity.entity.spaces)
-    );
-    this.apps$ = this.spaces$.pipe(
-      this.getFlattenedList('apps')
-    );
+    this.initialiseOrgObservables();
 
+    this.initialiseAppObservables();
 
-    this.appInstances$ = this.apps$.pipe(map(a => a.map(app => app.entity.instances)
-      .reduce((x, sum) => x + sum, 0)));
-
-    this.serivceInstances$ = this.spaces$.pipe(
-      this.getFlattenedList('service_instances')
-    );
-
-    this.routes$ = this.spaces$.pipe(
-      this.getFlattenedList('routes')
-    );
-
-    this.privateDomains$ = this.org$.pipe(
-      map(o => o.entity.entity.private_domains)
-    );
-
-    this.totalMem$ = this.apps$.pipe(
-      map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
-    );
-
-    this.quotaDefinition$ = this.org$.pipe(
-      map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity)
-    );
+    this.initialiseSpaceObservables();
 
     this.userOrgRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => this.cfUserService.getUserRoleInOrg(u.guid, this.orgGuid, this.cfGuid)),
@@ -103,9 +78,27 @@ export class CloudFoundryOrganisationService {
 
   }
 
+  private initialiseSpaceObservables() {
+    this.serivceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
+    this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
+  }
+
+  private initialiseAppObservables() {
+    this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
+    this.appInstances$ = this.apps$.pipe(map(a => a.map(app => app.entity.instances)
+      .reduce((x, sum) => x + sum, 0)));
+    this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
+  }
+
+  private initialiseOrgObservables() {
+    this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
+    this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
+    this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
+  }
+
   private getFlattenedList(property: string): (source: Observable<APIResource<CfSpace>[]>) => Observable<any> {
-    return map(spaces => {
-      const allInstances = spaces.map(s => s.entity[property]);
+    return map(entities => {
+      const allInstances = entities.map(s => s.entity[property]);
       return [].concat.apply([], allInstances);
     });
   }

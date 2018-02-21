@@ -1,6 +1,8 @@
 .space-card {
-  cursor: pointer;
   &__title {
+    &-link {
+      cursor: pointer;
+    }
     width: 100%;
   }
   &__button {
