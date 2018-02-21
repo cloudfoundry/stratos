@@ -1,11 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { APIResource } from '../../../../../../store/types/api.types';
+import { CfSpace } from '../../../../../../store/types/org-and-space.types';
 import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
   getBaseTestModulesNoShared,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
@@ -42,9 +45,17 @@ describe('CfOrgCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        spaces: [],
+        spaces: Object.values(getInitialTestStoreState().requestData.space) as APIResource<CfSpace>[],
         guid: '',
         cfGuid: '',
+        name: 'test0',
+        private_domains: [{
+          entity: {
+            guid: 'test',
+            cfGuid: 'test'
+          },
+          metadata: null
+        }],
         quota_definition: {
           entity: {
             memory_limit: 1000,
