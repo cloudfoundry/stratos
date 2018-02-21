@@ -120,13 +120,16 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
       // Add to target to ensure ngcontent is correct in new component
       this.cellComponent = <TableCellCustom<T>>component.instance;
-      if (this.cellDefinition) {
-        (this.cellComponent as TableCellDefaultComponent<T>).cellDefinition = this.cellDefinition;
-      }
+
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
       this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+      if (this.cellDefinition) {
+        const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;
+        defaultTableCell.cellDefinition = this.cellDefinition;
+        defaultTableCell.init();
+      }
     }
   }
 

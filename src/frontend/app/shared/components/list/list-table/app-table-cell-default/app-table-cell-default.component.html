@@ -3,14 +3,14 @@
 </div>
 <span *ngIf="isLink">
     <a [href]="linkValue" *ngIf="isExternalLink">
-        <span *ngTemplateOutlet="valueTemplate"></span>
+        <span *ngTemplateOutlet="valueTemplate; context: valueContext"></span>
 </a>
 <a [href]="linkValue" *ngIf="!isExternalLink">
-        <span *ngTemplateOutlet="valueTemplate"></span>
+        <span *ngTemplateOutlet="valueTemplate; context: valueContext"></span>
     </a>
 </span>
 
-<ng-template #valueTemplate *ngIf="value; else defaultValue">
-  {{ value }}
+<ng-template #valueTemplate *ngIf="valueContext.value; else defaultValue">
+  <span>{{ value }}</span>
 </ng-template>
 <ng-template #defaultValue>-</ng-template>

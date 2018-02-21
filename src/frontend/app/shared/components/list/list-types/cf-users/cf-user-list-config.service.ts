@@ -18,10 +18,10 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
   columns: ITableColumn<APIResource<CfUser>>[] = [
     {
-      columnId: 'type',
-      headerCell: () => 'Type',
+      columnId: 'username',
+      headerCell: () => 'Username',
       cellDefinition: {
-        valuePath: 'entity.type'
+        valuePath: 'entity.username'
       }
     }
   ];
