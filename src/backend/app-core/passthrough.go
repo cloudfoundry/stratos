@@ -298,6 +298,8 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	switch tokenRec.AuthType {
 	case interfaces.AuthTypeHttpBasic:
 		res, err = p.doHttpBasicFlowRequest(cnsiRequest, req)
+	case interfaces.AuthTypeOIDC:
+		res, err = p.doOidcFlowRequest(cnsiRequest, req)
 	default:
 		res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	}

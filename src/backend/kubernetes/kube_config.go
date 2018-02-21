@@ -152,7 +152,7 @@ func (p *KubernetesSpecification) FetchKubeConfigToken(cnsiRecord interfaces.CNS
 	}
 
 	tokenRecord := p.portalProxy.InitEndpointTokenRecord(expiry.Unix(), oidcConfig.IDToken, oidcConfig.RefreshToken, false)
-	tokenRecord.AuthType = interfaces.AuthTypeOAuth2
+	tokenRecord.AuthType = interfaces.AuthTypeOIDC
 
 	oauthMetadata := &interfaces.OAuth2Metadata{}
 	oauthMetadata.ClientID = oidcConfig.ClientID

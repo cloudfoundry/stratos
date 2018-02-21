@@ -29,7 +29,7 @@ type PortalProxy interface {
 
 	SaveConsoleConfig(consoleConfig *ConsoleConfig, consoleRepoInterface interface{}) error
 
-	RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
+	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 	DoLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes, error)
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)

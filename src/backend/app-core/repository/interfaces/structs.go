@@ -33,6 +33,7 @@ type CNSIRecord struct {
 
 const (
 	AuthTypeOAuth2    = "OAuth2"
+	AuthTypeOIDC   	  = "OIDC"
 	AuthTypeHttpBasic = "HttpBasic"
 )
 
