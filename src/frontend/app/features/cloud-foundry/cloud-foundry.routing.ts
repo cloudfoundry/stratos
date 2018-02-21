@@ -18,6 +18,24 @@ import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
 import {
+  CloudFoundrySpaceBaseComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component';
+import {
+  CloudFoundrySpaceAppsComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
+import {
+  CloudFoundrySpaceRoutesComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-routes/cloud-foundry-space-routes.component';
+import {
+  CloudFoundrySpaceServiceInstancesComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-service-instances/cloud-foundry-space-service-instances.component';
+import {
+  CloudFoundrySpaceSummaryComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-summary/cloud-foundry-space-summary.component';
+import {
+  CloudFoundrySpaceUsersComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-users/cloud-foundry-space-users.component';
+import {
   CloudFoundryOrganizationSummaryComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-summary/cloud-foundry-organization-summary.component';
 import {
@@ -98,12 +116,43 @@ const cloudFoundry: Routes = [{
           },
           {
             path: 'spaces',
-            component: CloudFoundryOrganizationSpacesComponent
+            component: CloudFoundryOrganizationSpacesComponent,
           },
           {
             path: 'users',
             component: CloudFoundryOrganizationUsersComponent
           }]
+      },
+      {
+        path: 'organizations/:orgId/spaces/:spaceId',
+        component: CloudFoundrySpaceBaseComponent,
+        children: [
+          {
+            path: '',
+            redirectTo: 'summary',
+            pathMatch: 'full'
+          },
+          {
+            path: 'summary',
+            component: CloudFoundrySpaceSummaryComponent
+          },
+          {
+            path: 'apps',
+            component: CloudFoundrySpaceAppsComponent
+          },
+          {
+            path: 'service-instances',
+            component: CloudFoundrySpaceServiceInstancesComponent
+          },
+          {
+            path: 'routes',
+            component: CloudFoundrySpaceRoutesComponent
+          },
+          {
+            path: 'users',
+            component: CloudFoundrySpaceUsersComponent
+          }
+        ]
       },
       {
         path: 'users',

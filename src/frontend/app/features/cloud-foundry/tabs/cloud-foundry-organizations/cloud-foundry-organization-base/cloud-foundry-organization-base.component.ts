@@ -66,7 +66,8 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
     }, {
       link: 'users',
       label: 'Users'
-    }];
+    }
+  ];
 
   constructor(private cfEndpointService: CloudFoundryEndpointService, private cfOrgService: CloudFoundryOrganisationService) { }
 
