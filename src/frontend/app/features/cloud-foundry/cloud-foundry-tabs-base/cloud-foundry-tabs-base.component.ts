@@ -2,18 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { tap } from 'rxjs/operators';
-import { BaseCF } from '../cf-page.types';
-import { ActivatedRoute } from '@angular/router';
-
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
-  styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
-
+  styleUrls: ['./cloud-foundry-tabs-base.component.scss']
 })
-
 export class CloudFoundryTabsBaseComponent implements OnInit {
   tabLinks = [
     { link: 'summary', label: 'Summary' },

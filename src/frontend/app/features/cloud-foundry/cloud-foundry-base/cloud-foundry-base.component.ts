@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { BaseCF } from './../cf-page.types';
 
@@ -21,6 +22,7 @@ function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
         ActivatedRoute
       ]
     },
+    CfUserService,
     CloudFoundryEndpointService
   ]
 })

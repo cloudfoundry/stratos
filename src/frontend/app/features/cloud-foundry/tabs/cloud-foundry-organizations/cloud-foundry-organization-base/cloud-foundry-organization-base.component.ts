@@ -30,7 +30,7 @@ function cfOrganisationServiceFactory(
     paginationMonitorFactory,
     cfEndpointService
   );
-};
+}
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
