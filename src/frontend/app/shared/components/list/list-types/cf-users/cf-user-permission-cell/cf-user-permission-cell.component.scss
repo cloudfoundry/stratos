@@ -1,5 +1,8 @@
 .permission-chip {
   $size: 15px;
+  & + & {
+    margin: 10px 5px 0;
+  }
   &__close {
     cursor: pointer;
     font-size: $size;

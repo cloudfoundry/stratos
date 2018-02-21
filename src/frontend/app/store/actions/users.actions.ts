@@ -1,4 +1,4 @@
-import { CFStartAction } from '../types/request.types';
+import { CFStartAction, IRequestAction } from '../types/request.types';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
@@ -10,6 +10,10 @@ import { UserSchema } from '../types/user.types';
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
 export const GET_ALL_FAILED = '[Users] Get all failed';
+
+export const REMOVE_PERMISSION = '[Users] Remove Permission';
+export const REMOVE_PERMISSION_SUCCESS = '[Users]  Remove Permission success';
+export const REMOVE_PERMISSION_FAILED = '[Users]  Remove Permission failed';
 
 export class GetAllUsers extends CFStartAction implements PaginatedAction {
   constructor(public paginationKey: string) {
@@ -27,4 +31,23 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction {
     'results-per-page': 100,
     'inline-relations-depth': 1
   };
+}
+
+export class RemoveUserPermission extends CFStartAction implements IRequestAction {
+  constructor(
+    public guid: string,
+    orgGuid: string,
+    permissionType: string
+  ) {
+    super();
+    this.updatingKey = `${orgGuid}/${permissionType}/${guid}`;
+    this.options = new RequestOptions();
+    this.options.url = `organizations/${this.updatingKey}`;
+    this.options.method = 'delete';
+  }
+  actions = [REMOVE_PERMISSION, REMOVE_PERMISSION_SUCCESS, REMOVE_PERMISSION_FAILED];
+  entity = UserSchema;
+  entityKey = UserSchema.key;
+  options: RequestOptions;
+  updatingKey: string;
 }

@@ -1,7 +1,13 @@
 import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
 
+export interface IOrgUserRole {
+  string: string;
+  key: string;
+}
+
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   let roles = null;
+  debugger;
   if (userRolesInOrg.orgManager) {
     roles = 'Manager';
   }
@@ -17,6 +23,35 @@ export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   }
 
   return roles ? roles : 'None';
+}
+
+export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IOrgUserRole[] {
+  const roles = [];
+  if (userRolesInOrg.orgManager) {
+    roles.push({
+      string: 'Manager',
+      key: 'managers'
+    });
+  }
+  if (userRolesInOrg.billingManager) {
+    roles.push({
+      string: 'Billing Manager',
+      key: 'billing_managers'
+    });
+  }
+  if (userRolesInOrg.auditor) {
+    roles.push({
+      string: 'Auditor',
+      key: 'auditors'
+    });
+  }
+  if (userRolesInOrg.user) {
+    roles.push({
+      string: 'User',
+      key: 'users'
+    });
+  }
+  return roles;
 }
 
 function assignRole(currentRoles: string, role: string) {

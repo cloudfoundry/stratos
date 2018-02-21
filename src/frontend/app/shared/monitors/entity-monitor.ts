@@ -111,7 +111,7 @@ export class EntityMonitor<T = any> {
       ]) => entity ? denormalize(entity, schema, entities) : null),
       shareReplay(1),
       startWith(null)
-      );
+    );
   }
 
 }
