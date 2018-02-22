@@ -20,6 +20,7 @@ import {
 import {
   CloudFoundrySpaceBaseComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-space-base/cloud-foundry-space-base.component';
+/* tslint:disable:max-line-length */
 import {
   CloudFoundrySpaceAppsComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/tabs/cloud-foundry-space-apps/cloud-foundry-space-apps.component';
@@ -47,6 +48,7 @@ import {
 import {
   CloudFoundrySecurityGroupsComponent,
 } from './tabs/cloud-foundry-security-groups/cloud-foundry-security-groups.component';
+/* tslint:enable:max-line-length */
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
@@ -66,7 +68,7 @@ const cloudFoundry: Routes = [{
     component: AddOrganisationComponent
   },
   {
-    path: 'organizations/:orgId/edit-space',
+    path: 'organizations/:orgId/spaces/:spaceId/edit-space',
     component: EditSpaceComponent
   },
   {

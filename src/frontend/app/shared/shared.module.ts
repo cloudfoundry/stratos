@@ -37,6 +37,7 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
+/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
@@ -79,7 +80,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 
-/* tslint:disable:max-line-length */
 /* tslint:enable:max-line-length */
 
 @NgModule({

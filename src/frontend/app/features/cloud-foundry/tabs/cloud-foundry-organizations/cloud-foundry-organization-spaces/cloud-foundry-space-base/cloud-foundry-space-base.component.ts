@@ -9,6 +9,8 @@ import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagi
 import { AppState } from '../../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
+import { CfOrg } from '../../../../../../store/types/org-and-space.types';
+import { RouterNav } from '../../../../../../store/actions/router.actions';
 
 const cfSpaceServiceFactory = (
   store: Store<AppState>,
@@ -77,9 +79,31 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       label: 'Users',
     }
   ];
-  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
 
-  ngOnInit() {
+  constructor(
+    private cfEndpointService: CloudFoundryEndpointService,
+    private cfSpaceService: CloudFoundrySpaceService,
+    private cfOrgSpaceService: CfOrgSpaceDataService,
+    private store: Store<AppState>
+  ) { }
+
+  ngOnInit() { }
+
+  deleteSpace = () => {
+    this.cfOrgSpaceService.deleteSpace(
+      this.cfSpaceService.spaceGuid,
+      this.cfSpaceService.cfGuid
+    );
+
+    this.store.dispatch(new RouterNav({
+      path: [
+        'cloud-foundry',
+        this.cfSpaceService.cfGuid,
+        'organizations',
+        this.cfSpaceService.orgGuid,
+        'spaces']
+    }
+    ));
   }
 
 }
