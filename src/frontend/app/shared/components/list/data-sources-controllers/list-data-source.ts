@@ -331,7 +331,6 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   connect(): Observable<T[]> {
     return this.page$
-      .do((p) => console.log(p))
       .tag('actual-page-obs');
   }
 

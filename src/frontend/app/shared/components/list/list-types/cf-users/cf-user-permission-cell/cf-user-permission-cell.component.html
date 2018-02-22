@@ -1,11 +1,13 @@
 <span *ngIf="!userOrgPermInfo.length">None</span>
 <mat-chip-list class="permission-chips" *ngIf="userOrgPermInfo.length">
-  <ng-container *ngFor="let orgPermission of userOrgPermInfo">
-    <mat-chip class="permission-chip" *ngFor="let perm of orgPermission.permissions">{{orgPermission.orgName}}: {{perm.string}}
-      <ng-container *ngIf="perm.key !== 'users'">
-        <mat-icon *ngIf="!(perm.busy | async)" (click)="removePermission(orgPermission, perm)" class="permission-chip__close">close</mat-icon>
-        <mat-spinner *ngIf="perm.busy | async" diameter="15" class="permission-chip__busy-spinner"></mat-spinner>
-      </ng-container>
-    </mat-chip>
-  </ng-container>
+  <mat-chip class="permission-chip" *ngFor="let orgPermission of userOrgPermInfo | slice:0:limit">{{orgPermission.orgName}}: {{orgPermission.string}}
+    <ng-container *ngIf="orgPermission.length === 1 || orgPermission.key !== 'users'">
+      <mat-icon *ngIf="!(orgPermission.busy | async)" (click)="removePermission(orgPermission)" class="permission-chip__close">close</mat-icon>
+      <mat-spinner *ngIf="orgPermission.busy | async" diameter="15" class="permission-chip__busy-spinner"></mat-spinner>
+    </ng-container>
+  </mat-chip>
+  <a class="permission-chips__limit" *ngIf="userOrgPermInfo.length > lowerLimit" (click)="toggleLimit()">
+    <span *ngIf="atLowerLimit">+{{ userOrgPermInfo.length - limit }}</span>
+    <span *ngIf="!atLowerLimit">Show less</span>
+  </a>
 </mat-chip-list>

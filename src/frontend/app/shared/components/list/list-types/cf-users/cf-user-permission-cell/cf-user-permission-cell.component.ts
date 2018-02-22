@@ -1,24 +1,21 @@
-import { Component, OnInit, OnChanges, SimpleChanges, Input } from '@angular/core';
-import { CfUserService } from '../../../../../data-services/cf-user.service';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUser, UserSchema, IUserPermissionInOrg } from '../../../../../../store/types/user.types';
-import { getOrgRolesString, getOrgRoles, IOrgUserRole } from '../../../../../../features/cloud-foundry/cf.helpers';
-import { Observable } from 'rxjs/Observable';
-import { EntityMonitor } from '../../../../../monitors/entity-monitor';
-import { AppState } from '../../../../../../store/app-state';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
-import { ActionState } from '../../../../../../store/reducers/api-request-reducer/types';
+import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
+
+import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
+import { getOrgRoles, IOrgUserRole } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
+import { AppState } from '../../../../../../store/app-state';
+import { APIResource } from '../../../../../../store/types/api.types';
+import { CfUser, IUserPermissionInOrg, UserSchema } from '../../../../../../store/types/user.types';
+import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 
 interface ICellPermissionList extends IOrgUserRole {
   busy: Observable<boolean>;
-}
-
-interface ICellPermission {
-  orgId: string;
   orgName: string;
-  permissions: ICellPermissionList[];
+  orgId: string;
 }
 
 interface ICellPermissionUpdates {
@@ -28,7 +25,8 @@ interface ICellPermissionUpdates {
 @Component({
   selector: 'app-cf-user-permission-cell',
   templateUrl: './cf-user-permission-cell.component.html',
-  styleUrls: ['./cf-user-permission-cell.component.scss']
+  styleUrls: ['./cf-user-permission-cell.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableCellCfUserPermissionComponent {
   @Input('row')
@@ -36,8 +34,12 @@ export class TableCellCfUserPermissionComponent {
     this.setPermissions(row);
     this.guid = row.metadata.guid;
   }
+  public atLowerLimit = true;
+  private lowerLimit = 3;
+  private upperLimit = 1000;
+  public limit = this.lowerLimit;
   private guid: string;
-  public userOrgPermInfo: ICellPermission[] = [];
+  public userOrgPermInfo: ICellPermissionList[] = [];
   constructor(
     private store: Store<AppState>,
     private cfUserService: CfUserService
@@ -45,12 +47,9 @@ export class TableCellCfUserPermissionComponent {
 
   private setPermissions(row: APIResource<CfUser>) {
     const userRoles = this.cfUserService.getRolesFromUser(row.entity);
-    this.userOrgPermInfo = userRoles
-      .map(orgPerms => ({
-        orgName: orgPerms.orgName,
-        orgId: orgPerms.orgGuid,
-        permissions: this.getOrgPermissions(orgPerms, row)
-      }));
+    this.userOrgPermInfo = arrayHelper.flatten(
+      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
+    );
   }
 
   getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>) {
@@ -62,6 +61,8 @@ export class TableCellCfUserPermissionComponent {
       );
       return {
         ...perm,
+        orgName: orgPerms.orgName,
+        orgId: orgPerms.orgGuid,
         busy: new EntityMonitor(
           this.store,
           row.metadata.guid,
@@ -74,11 +75,21 @@ export class TableCellCfUserPermissionComponent {
     });
   }
 
-  public removePermission(cellPermission: ICellPermission, permission: IOrgUserRole) {
+  public removePermission(cellPermission: ICellPermissionList) {
     this.store.dispatch(new RemoveUserPermission(
       this.guid,
       cellPermission.orgId,
-      permission.key
+      cellPermission.key
     ));
+  }
+
+  public toggleLimit() {
+    if (this.limit === this.lowerLimit) {
+      this.limit = this.upperLimit;
+      this.atLowerLimit = false;
+    } else {
+      this.limit = this.lowerLimit;
+      this.atLowerLimit = true;
+    }
   }
 }

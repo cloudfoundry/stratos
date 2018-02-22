@@ -42,6 +42,11 @@ function removeUserPermission(user: CfUser, orgId: string, permissionType: OrgUs
         ...user,
         audited_organizations: user.audited_organizations.filter(org => org.metadata.guid !== orgId);
       };
+    case OrgUserRoles.USER:
+      return {
+        ...user,
+        organizations: user.organizations.filter(org => org.metadata.guid !== orgId);
+      };
     default:
       return user;
   }
