@@ -46,7 +46,9 @@ import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.compo
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellCustom } from './table-cell-custom';
+/* tslint:disable:max-line-length */
 import { TableCellRouteAppsAttachedComponent } from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+/* tslint:enable:max-line-length */
 
 export const listTableCells = [
   TableHeaderSelectComponent,

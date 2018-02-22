@@ -1,5 +1,5 @@
-import { APIResource } from "./api.types";
-import { CfApplication } from "./application.types";
+import { APIResource } from './api.types';
+import { CfApplication } from './application.types';
 
 export class Route {
   constructor(
@@ -9,7 +9,7 @@ export class Route {
     public path?: string,
     public port?: number,
     public isTCP: boolean = false
-  ) {}
+  ) { }
 }
 
 export interface RouteMode {

@@ -27,4 +27,3 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
     });
   }
 }
-;
