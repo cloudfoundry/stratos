@@ -11,6 +11,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, UserSchema } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
+import { IAppChip, AppChip } from '../../../../chips/chips.component';
 
 interface ICellPermissionList extends IOrgUserRole {
   busy: Observable<boolean>;
@@ -31,28 +32,40 @@ interface ICellPermissionUpdates {
 export class TableCellCfUserPermissionComponent {
   @Input('row')
   set row(row: APIResource<CfUser>) {
-    this.setPermissions(row);
+    this.setChipConfig(row);
     this.guid = row.metadata.guid;
   }
-  public atLowerLimit = true;
-  private lowerLimit = 3;
-  private upperLimit = 1000;
-  public limit = this.lowerLimit;
+  public chipsConfig: AppChip<ICellPermissionList>[];
   private guid: string;
-  public userOrgPermInfo: ICellPermissionList[] = [];
   constructor(
     private store: Store<AppState>,
     private cfUserService: CfUserService
   ) { }
 
-  private setPermissions(row: APIResource<CfUser>) {
+  private setChipConfig(row: APIResource<CfUser>) {
     const userRoles = this.cfUserService.getRolesFromUser(row.entity);
-    this.userOrgPermInfo = arrayHelper.flatten(
+    const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList>(
       userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
     );
+    this.chipsConfig = this.getChipConfig(userOrgPermInfo);
   }
 
-  getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>) {
+  private getChipConfig(cellPermissionList: ICellPermissionList[]) {
+    return cellPermissionList.map(perm => {
+      const chipConfig = new AppChip<ICellPermissionList>();
+      chipConfig.key = perm;
+      chipConfig.value = `${perm.orgName}: ${perm.key}`;
+      chipConfig.busy = perm.busy;
+      chipConfig.clearAction = chip => {
+        const permission = chip.key;
+        this.removePermission(permission);
+      };
+      chipConfig.hideClearButton = perm.key === 'users';
+      return chipConfig;
+    });
+  }
+
+  private getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>) {
     return getOrgRoles(orgPerms.permissions).map(perm => {
       const updatingKey = RemoveUserPermission.generateUpdatingKey(
         orgPerms.orgGuid,
@@ -81,15 +94,5 @@ export class TableCellCfUserPermissionComponent {
       cellPermission.orgId,
       cellPermission.key
     ));
-  }
-
-  public toggleLimit() {
-    if (this.limit === this.lowerLimit) {
-      this.limit = this.upperLimit;
-      this.atLowerLimit = false;
-    } else {
-      this.limit = this.lowerLimit;
-      this.atLowerLimit = true;
-    }
   }
 }
