@@ -22,6 +22,14 @@ describe('TableCellRouteAppsAttachedComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRouteAppsAttachedComponent);
     component = fixture.componentInstance;
+    component.row = {
+      entity: {
+        apps: [],
+        domain_guid: 'test',
+        space_guid: 'test'
+      },
+      metadata: null
+    };
     fixture.detectChanges();
   });
 
