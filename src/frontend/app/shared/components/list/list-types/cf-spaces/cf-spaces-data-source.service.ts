@@ -11,7 +11,7 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   public static paginationKey = 'cf-org-space';
 
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
-    const { paginationKey } = CfSpacesDataSourceService;
+    const paginationKey = `${CfSpacesDataSourceService.paginationKey}-${orgGuid}`;
     const action = new GetAllSpacesInOrg(cfGuid, orgGuid, paginationKey);
     super({
       store,
@@ -27,3 +27,4 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
     });
   }
 }
+;
