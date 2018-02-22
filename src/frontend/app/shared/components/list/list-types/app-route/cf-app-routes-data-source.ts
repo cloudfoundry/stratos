@@ -10,8 +10,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { map } from 'rxjs/operators';
 import { isTCPRoute, getMappedApps } from '../../../../../features/applications/routes/routes.helper';
-
-export const RouteSchema = new schema.Entity('route');
+import { RouteSchema } from '../../../../../store/actions/action-types';
 
 export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
   public cfGuid: string;

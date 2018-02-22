@@ -53,6 +53,15 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
   ngOnInit() {
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
+        // FIX ME: This is null if the endpoint is disconnected. Not sure we should init it if we're headed directly to org level?
+        if (!u) {
+          return Observable.of({
+            orgManager: false,
+            billingManager: false,
+            auditor: false,
+            user: false
+          });
+        }
         return this.cfUserService.getUserRoleInOrg(
           u.guid,
           this.row.entity.guid,

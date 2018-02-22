@@ -7,7 +7,7 @@ import { ISuccessRequestAction } from '../../types/request.types';
 import { deepMergeState, mergeEntity } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
 import { pathGet, pathSet } from '../../../core/utils.service';
-import { EntityRelationParent, EntityInlineChild, EntityInlineChildAction } from '../../actions/action-types';
+import { EntityRelation, EntityInlineChild } from '../../helpers/entity-relations.helpers';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -54,7 +54,7 @@ function deleteEntity(state, entityKey, guid) {
 
 function canPopulateParentEntity(successAction): {
   parentEntityGuid: string;
-  parentRelations: EntityRelationParent[]
+  parentRelations: EntityRelation[]
 } {
   // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent (empty lists)
   const parentEntityGuid = successAction && successAction.apiAction ? successAction.apiAction['parentGuid'] : null;
@@ -86,14 +86,14 @@ function canPopulateParentEntity(successAction): {
 
 function populateParentEntity(state, successAction, params: {
   parentEntityGuid: string;
-  parentRelations: EntityRelationParent[]
+  parentRelations: EntityRelation[]
 }) {
   const { parentEntityGuid, parentRelations } = params;
 
   // For each parent-child relationship
   parentRelations.forEach(relation => {
     // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
-    const newParentEntity = relation.createParentEntity(state, parentEntityGuid, successAction.response);
+    const newParentEntity = relation.createParentWithChildren(state, parentEntityGuid, successAction.response);
     if (!newParentEntity) {
       return;
     }

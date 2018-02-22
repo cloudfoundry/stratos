@@ -1,19 +1,20 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
+import { pathGet } from '../../core/utils.service';
+import {
+  EntityInlineChild,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+  EntityRelation,
+} from '../helpers/entity-relations.helpers';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { APIResource } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import {
-  EntityInlineChildAction,
-  OrganisationSchema,
-  organisationSchemaKey,
-  spaceSchemaKey,
-  EntityInlineChild,
-  SpaceSchema,
-} from './action-types';
+import { OrganisationSchema, organisationSchemaKey, spaceSchemaKey } from './action-types';
 import { getActions } from './action.helper';
-import { pathGet } from '../../core/utils.service';
+import { SpaceSchema } from './space.actions';
 
 export const GET_ORGANISATION = '[Organisation] Get one';
 export const GET_ORGANISATION_SUCCESS = '[Organisation] Get one success';
@@ -44,34 +45,43 @@ export class GetOrganisation extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
-export const SpacesSchema = new EntityInlineChild([
-  {
-    parentEntityKey: organisationSchemaKey,
-    childEntityKey: spaceSchemaKey,
-    createParentEntity: (state, parentGuid, response) => {
-      const parentEntity = pathGet(`${organisationSchemaKey}.${parentGuid}`, state);
-      const newParentEntity = {
-        ...parentEntity,
-        entity: {
-          ...parentEntity.entity,
-          spaces: response.result
-        }
-      };
-      return newParentEntity;
-    },
-    fetchChildrenAction: (organisation) => {
-      // GetAll uses SpacesSchema. SpacesSchema uses GetAll.
-      // tslint:disable-next-line:no-use-before-declare
-      return new GetAllOrganisationSpaces(
-        `${organisationSchemaKey}-${organisation.metadata.guid}`,
-        organisation.metadata.guid,
-        organisation.entity.cfGuid);
-    }
+export const OrgSpaceRelation: EntityRelation = {
+  key: 'org-space-relation',
+  parentEntityKey: organisationSchemaKey,
+  childEntity: SpaceSchema,
+  createParentWithChildren: (state, parentGuid, response) => {
+    const parentEntity = pathGet(`${organisationSchemaKey}.${parentGuid}`, state);
+    const newParentEntity = {
+      ...parentEntity,
+      entity: {
+        ...parentEntity.entity,
+        spaces: response.result
+      }
+    };
+    return newParentEntity;
   },
-], SpaceSchema);
+  fetchChildrenAction: (organisation, includeRelations, populateMissing) => {
+    // GetAllOrganisationSpaces uses SpacesSchema. SpacesSchema uses GetAllOrganisationSpaces.
+    // tslint:disable-next-line:no-use-before-declare
+    return new GetAllOrganisationSpaces(
+      EntityRelation.createPaginationKey(organisationSchemaKey, organisation.metadata.guid),
+      organisation.metadata.guid,
+      organisation.entity.cfGuid,
+      includeRelations,
+      populateMissing);
+  },
+};
 
-export class GetAllOrganisationSpaces extends CFStartAction implements PaginatedAction, EntityInlineChildAction {
-  constructor(public paginationKey: string, public orgGuid: string, public cnsi: string) {
+export const SpacesSchema = new EntityInlineChild([OrgSpaceRelation], SpaceSchema);
+
+export class GetAllOrganisationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
+  constructor(
+    public paginationKey: string,
+    public orgGuid: string,
+    public cnsi: string,
+    public includeRelations = [],
+    public populateMissing = false
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organizations/${orgGuid}/spaces`;
@@ -98,16 +108,8 @@ export const OrganisationWithSpaceSchema = new schema.Entity(organisationSchemaK
     idAttribute: getAPIResourceGuid
   });
 
-export const SpaceWithOrganisationSchema = new schema.Entity(spaceSchemaKey, {
-  entity: {
-    organization: OrganisationSchema
-  }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
-
-export class GetAllOrganisations extends CFStartAction implements PaginatedAction {
-  constructor(public paginationKey: string) {
+export class GetAllOrganisations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  constructor(public paginationKey: string, public includeRelations: string[] = [], public populateMissing = false) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'organizations';

@@ -11,7 +11,7 @@ import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { StackSchema } from './stack.action';
-import { SpaceWithOrganisationSchema } from './organisation.actions';
+import { SpaceWithOrganisationSchema } from './action-types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';

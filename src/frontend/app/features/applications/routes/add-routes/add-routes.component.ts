@@ -12,7 +12,6 @@ import { AssociateRouteWithAppApplication } from '../../../../store/actions/appl
 import {
   CreateRoute,
   GetAppRoutes,
-  RouteSchema
 } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
@@ -26,6 +25,7 @@ import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
 import { Observable } from 'rxjs/Observable';
+import { RouteSchema } from '../../../../store/actions/action-types';
 
 @Component({
   selector: 'app-add-routes',
@@ -140,7 +140,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     } else {
       try {
         return this.isRouteSelected$.getValue();
-      } catch (e) {}
+      } catch (e) { }
 
       return false;
     }
