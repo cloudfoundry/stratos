@@ -1,5 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { getBaseTestModules } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-space.service.mock';
+import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { CloudFoundrySpaceSummaryComponent } from './cloud-foundry-space-summary.component';
 
 describe('CloudFoundrySpaceSummaryComponent', () => {
@@ -8,9 +11,13 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CloudFoundrySpaceSummaryComponent ]
+      declarations: [CloudFoundrySpaceSummaryComponent],
+      imports: [...getBaseTestModules],
+      providers: [
+        { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock }
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
