@@ -9,7 +9,7 @@ export class Route {
     public path?: string,
     public port?: number,
     public isTCP: boolean = false
-  ) { }
+  ) {}
 }
 
 export interface RouteMode {
