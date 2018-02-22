@@ -138,7 +138,7 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges) {
     const row: SimpleChange = changes.row;
     if (row && this.cellComponent && row.previousValue !== row.currentValue) {
-      this.cellComponent.row = row.currentValue;
+      this.cellComponent.row = { ...row.currentValue };
     }
   }
 }

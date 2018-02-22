@@ -1,8 +1,6 @@
 .permission-chip {
   $size: 15px;
-  & + & {
-    margin: 10px 5px 0;
-  }
+  margin: 5px 5px 5px 0 !important;
   &__busy-spinner,
   &__close {
     margin-left: 5px;
@@ -13,4 +11,9 @@
     height: $size;
     width: $size;
   }
+}
+
+.permission-chips {
+  display: block;
+  margin: 5px 0;
 }

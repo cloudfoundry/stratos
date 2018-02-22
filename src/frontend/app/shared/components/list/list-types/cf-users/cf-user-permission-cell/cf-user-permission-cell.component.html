@@ -1,5 +1,5 @@
 <span *ngIf="!userOrgPermInfo.length">None</span>
-<mat-chip-list *ngIf="userOrgPermInfo.length">
+<mat-chip-list class="permission-chips" *ngIf="userOrgPermInfo.length">
   <ng-container *ngFor="let orgPermission of userOrgPermInfo">
     <mat-chip class="permission-chip" *ngFor="let perm of orgPermission.permissions">{{orgPermission.orgName}}: {{perm.string}}
       <ng-container *ngIf="perm.key !== 'users'">

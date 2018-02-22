@@ -256,11 +256,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         if (paginationEntity.seed && !this.seedSyncSub) {
           this.seedSyncSub = this.store.select(selectPaginationState(this.entityKey, paginationEntity.seed))
             .pipe(
-            pairwise(),
-            filter(([oldPag, newPag]) => {
-              return oldPag.ids !== newPag.ids ||
-                oldPag.pageRequests !== newPag.pageRequests;
-            })
+              pairwise(),
+              filter(([oldPag, newPag]) => {
+                return oldPag.ids !== newPag.ids ||
+                  oldPag.pageRequests !== newPag.pageRequests;
+              })
             )
             .map(pag => pag[1])
             .subscribe(pag => {
@@ -300,7 +300,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       publishReplay(1),
       refCount(),
       tag('local-list')
-      );
+    );
   }
 
   getPaginationCompareString(paginationEntity: PaginationEntityState) {
@@ -330,7 +330,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   connect(): Observable<T[]> {
-    return this.page$.tag('actual-page-obs');
+    return this.page$
+      .do((p) => console.log(p))
+      .tag('actual-page-obs');
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {

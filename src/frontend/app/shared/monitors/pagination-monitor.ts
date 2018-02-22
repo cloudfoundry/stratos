@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, map, shareReplay } from 'rxjs/operators';
+import { filter, map, shareReplay, tap } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
@@ -110,10 +110,12 @@ export class PaginationMonitor<T = any> {
       pagination$,
       this.store.select(selectEntities<T>(this.schema.key)),
     ).pipe(
+      tap(() => console.log('less deep')),
       filter(([pagination, entities]) => this.hasPage(pagination)),
       withLatestFrom(this.store.select(getAPIRequestDataState)),
       map(([[pagination, entities], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
+        console.log('Deep change')
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
       shareReplay(1)

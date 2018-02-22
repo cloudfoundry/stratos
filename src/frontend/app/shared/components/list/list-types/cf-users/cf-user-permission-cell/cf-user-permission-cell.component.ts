@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input } from '@angular/core';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUser, UserSchema } from '../../../../../../store/types/user.types';
+import { CfUser, UserSchema, IUserPermissionInOrg } from '../../../../../../store/types/user.types';
 import { getOrgRolesString, getOrgRoles, IOrgUserRole } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { Observable } from 'rxjs/Observable';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
@@ -30,36 +30,41 @@ interface ICellPermissionUpdates {
   templateUrl: './cf-user-permission-cell.component.html',
   styleUrls: ['./cf-user-permission-cell.component.scss']
 })
-export class TableCellCfUserPermissionComponent implements OnInit {
+export class TableCellCfUserPermissionComponent {
+  @Input('row')
+  set row(row: APIResource<CfUser>) {
+    this.setPermissions(row);
+    this.guid = row.metadata.guid;
+  }
+  private guid: string;
   public userOrgPermInfo: ICellPermission[] = [];
-  public row: APIResource<CfUser>;
   constructor(
     private store: Store<AppState>,
     private cfUserService: CfUserService
   ) { }
 
-  ngOnInit() {
-    const userRoles = this.cfUserService.getRolesFromUser(this.row.entity);
+  private setPermissions(row: APIResource<CfUser>) {
+    const userRoles = this.cfUserService.getRolesFromUser(row.entity);
     this.userOrgPermInfo = userRoles
       .map(orgPerms => ({
         orgName: orgPerms.orgName,
         orgId: orgPerms.orgGuid,
-        permissions: this.getOrgPermissions(orgPerms)
+        permissions: this.getOrgPermissions(orgPerms, row)
       }));
   }
 
-  getOrgPermissions(orgPerms) {
+  getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>) {
     return getOrgRoles(orgPerms.permissions).map(perm => {
       const updatingKey = RemoveUserPermission.generateUpdatingKey(
         orgPerms.orgGuid,
         perm.key,
-        this.row.metadata.guid
+        row.metadata.guid
       );
       return {
         ...perm,
         busy: new EntityMonitor(
           this.store,
-          this.row.metadata.guid,
+          row.metadata.guid,
           UserSchema.key,
           UserSchema
         ).getUpdatingSection(updatingKey).pipe(
@@ -71,7 +76,7 @@ export class TableCellCfUserPermissionComponent implements OnInit {
 
   public removePermission(cellPermission: ICellPermission, permission: IOrgUserRole) {
     this.store.dispatch(new RemoveUserPermission(
-      this.row.metadata.guid,
+      this.guid,
       cellPermission.orgId,
       permission.key
     ));
