@@ -43,8 +43,9 @@ export class CfUserService {
       filter(p => p.length > 0)
     )
 
-  getRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
-    return user.organizations.map(org => {
+  getRolesFromUser(user: CfUser, type: 'organizations' | 'spaces' = 'organizations'): IUserPermissionInOrg[] {
+    debugger;
+    return user[type].map(org => {
       const orgGuid = org.metadata.guid;
       return {
         orgName: org.entity.name as string,

@@ -12,7 +12,7 @@ export interface CfUser {
   billing_managed_organizations: APIResource<any>[];
   audited_organizations: APIResource<any>[];
 
-  spaces: APIResource<any>;
+  spaces: APIResource<any>[];
   managed_spaces: APIResource<any>;
   audited_spaces: APIResource<any>;
   cfGuid?: string;

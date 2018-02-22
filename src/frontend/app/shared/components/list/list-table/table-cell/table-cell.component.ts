@@ -1,4 +1,3 @@
-import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import {
   Component,
   ComponentFactoryResolver,
@@ -40,16 +39,21 @@ import {
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
 import {
+  CfSpacePermissionCellComponent,
+} from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+import {
+  TableCellCfUserPermissionComponent,
+} from '../../list-types/cf-users/cf-user-permission-cell/cf-user-permission-cell.component';
+import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
-import { TableCellCustom } from './table-cell-custom';
 import { ICellDefinition } from '../table.types';
-import { ElementRef } from '@angular/core/src/linker/element_ref';
-import { TableCellCfUserPermissionComponent } from '../../list-types/cf-users/cf-user-permission-cell/cf-user-permission-cell.component';
+import { TableCellCustom } from './table-cell-custom';
 
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -71,7 +75,8 @@ export const listTableCells = [
   TableCellAppInstancesComponent,
   TableCellAppRouteComponent,
   TableCellRadioComponent,
-  TableCellCfUserPermissionComponent
+  TableCellCfUserPermissionComponent,
+  CfSpacePermissionCellComponent
 ];
 @Component({
   selector: 'app-table-cell',

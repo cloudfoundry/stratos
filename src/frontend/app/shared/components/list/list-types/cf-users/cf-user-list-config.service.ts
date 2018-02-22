@@ -9,6 +9,7 @@ import { Injectable } from '@angular/core';
 import { CfUser } from '../../../../../store/types/user.types';
 import { getOrgRolesString } from '../../../../../features/cloud-foundry/cf.helpers';
 import { TableCellCfUserPermissionComponent } from './cf-user-permission-cell/cf-user-permission-cell.component';
+import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 
 @Injectable()
 export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
@@ -37,7 +38,14 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         headerCell: () => 'Organization Roles',
         cellFlex: '2',
         cellComponent: TableCellCfUserPermissionComponent
-      }
+      },
+      {
+        columnId: 'space-roles',
+        headerCell: () => 'Space Roles',
+        cellFlex: '2',
+        cellComponent: CfSpacePermissionCellComponent
+      },
+
     ];
     this.dataSource = new CfUserDataSourceService(store, cfUserService, this);
   }
