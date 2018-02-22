@@ -1,6 +1,12 @@
 <app-page-header>
   <h1> {{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
+    <button mat-icon-button name="rename" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/manage-users">
+        <mat-icon>edit</mat-icon>
+      </button>
+    <button mat-icon-button name="delete" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/manage-users">
+        <mat-icon>delete</mat-icon>
+      </button>
     <button mat-icon-button name="user-management" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/manage-users">
         <mat-icon>people</mat-icon>
       </button>

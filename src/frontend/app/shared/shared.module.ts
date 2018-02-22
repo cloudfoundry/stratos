@@ -21,6 +21,8 @@ import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/ca
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
+import { CardCfSpaceUsageComponent } from './components/cards/card-cf-space-usage/card-cf-space-usage.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -35,11 +37,9 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
-/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-/* tslint:enable:max-line-length */
 import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -79,6 +79,8 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 
+/* tslint:disable:max-line-length */
+/* tslint:enable:max-line-length */
 
 @NgModule({
   imports: [
@@ -144,7 +146,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     CfOrgCardComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
-    CardCfOrgUserDetailsComponent
+    CardCfOrgUserDetailsComponent,
+    CardCfSpaceUsageComponent,
+    CardCfSpaceDetailsComponent,
   ],
   exports: [
     FormsModule,
@@ -194,7 +198,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     MetaCardValueComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
-    CardCfOrgUserDetailsComponent
+    CardCfOrgUserDetailsComponent,
+    CardCfSpaceUsageComponent,
+    CardCfSpaceDetailsComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

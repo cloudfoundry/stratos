@@ -107,7 +107,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
           memory_limit: -1,
           app_instance_limit: -1,
           instance_memory_limit: -1,
-          name: 'default',
+          name: 'None assigned',
           organization_guid: this.orgGuid,
           total_services: -1,
           total_routes: -1
