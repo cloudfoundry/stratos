@@ -16,9 +16,12 @@ import { CfApplication, CfApplicationState } from '../../../store/types/applicat
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfOrg, CfSpace } from '../../../store/types/org-and-space.types';
 import { CfUser } from '../../../store/types/user.types';
+import { FetchAllDomains, DomainSchema } from '../../../store/actions/domains.actions';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Injectable()
 export class CloudFoundryEndpointService {
+  paginationSubscription: any;
   allApps$: Observable<APIResource<CfApplication>[]>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<CfOrg>[]>;
@@ -82,6 +85,8 @@ export class CloudFoundryEndpointService {
         return flatArray;
       })
     );
+
+    this.fetchDomains();
   }
 
   getAppsInOrg(
@@ -126,5 +131,20 @@ export class CloudFoundryEndpointService {
       .filter(a => a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
+  }
+
+  fetchDomains = () => {
+    const action = new FetchAllDomains(this.cfGuid);
+    this.paginationSubscription = getPaginationObservables<APIResource>(
+      {
+        store: this.store,
+        action,
+        paginationMonitor: this.paginationMonitorFactory.create(
+          action.paginationKey,
+          DomainSchema
+        )
+      },
+      true
+    ).entities$.subscribe();
   }
 }

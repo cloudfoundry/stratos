@@ -79,6 +79,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { TableCellRouteAppsAttachedComponent } from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 
 /* tslint:enable:max-line-length */
 
@@ -149,6 +150,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
+    TableCellRouteAppsAttachedComponent,
   ],
   exports: [
     FormsModule,
@@ -201,6 +203,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
+
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

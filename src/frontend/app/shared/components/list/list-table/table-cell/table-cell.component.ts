@@ -46,6 +46,7 @@ import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.compo
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { TableCellCustom } from './table-cell-custom';
+import { TableCellRouteAppsAttachedComponent } from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 
 export const listTableCells = [
   TableHeaderSelectComponent,
@@ -65,7 +66,8 @@ export const listTableCells = [
   TableCellTCPRouteComponent,
   TableCellAppInstancesComponent,
   TableCellAppRouteComponent,
-  TableCellRadioComponent
+  TableCellRadioComponent,
+  TableCellRouteAppsAttachedComponent
 ];
 
 @Component({
