@@ -1,11 +1,13 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { CfSpaceRoutesListConfigService } from './cf-space-routes-list-config.service';
+import { getBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('CfSpaceRoutesListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfSpaceRoutesListConfigService]
+      providers: [CfSpaceRoutesListConfigService],
+      imports: [...getBaseTestModules]
     });
   });
 

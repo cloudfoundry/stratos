@@ -13,7 +13,6 @@ import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
-import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 import { TableCellRouteComponent } from '../app-route/table-cell-route/table-cell-route.component';
 import { TableCellRouteAppsAttachedComponent } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
