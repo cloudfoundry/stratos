@@ -26,3 +26,13 @@ export interface UserRoleInOrg {
   auditor: boolean;
   user: boolean;
 }
+export interface IUserPermissionInOrg {
+  orgName: string;
+  orgGuid: string;
+  permissions: {
+    orgManager: boolean,
+    billingManager: boolean,
+    auditor: boolean,
+    user: boolean
+  };
+}

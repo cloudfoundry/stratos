@@ -52,7 +52,7 @@ export class EntityMonitor<T = any> {
   }
   private updatingSectionObservableCache: {
     [key: string]: Observable<ActionState>
-  };
+  } = {};
   private apiRequestData$: Observable<IRequestDataState>;
   public updatingSection$: Observable<UpdatingSection>;
   /**

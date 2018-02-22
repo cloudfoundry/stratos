@@ -1,13 +1,19 @@
 import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
 
+export enum OrgUserRoles {
+  MANAGER = 'managers',
+  BILLING_MANAGERS = 'billing_managers',
+  AUDITOR = 'auditors',
+  USER = 'users'
+}
+
 export interface IOrgUserRole {
   string: string;
-  key: string;
+  key: OrgUserRoles;
 }
 
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   let roles = null;
-  debugger;
   if (userRolesInOrg.orgManager) {
     roles = 'Manager';
   }
@@ -30,25 +36,25 @@ export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IOrgUserRole[] {
   if (userRolesInOrg.orgManager) {
     roles.push({
       string: 'Manager',
-      key: 'managers'
+      key: OrgUserRoles.MANAGER
     });
   }
   if (userRolesInOrg.billingManager) {
     roles.push({
       string: 'Billing Manager',
-      key: 'billing_managers'
+      key: OrgUserRoles.BILLING_MANAGERS
     });
   }
   if (userRolesInOrg.auditor) {
     roles.push({
       string: 'Auditor',
-      key: 'auditors'
+      key: OrgUserRoles.AUDITOR
     });
   }
   if (userRolesInOrg.user) {
     roles.push({
       string: 'User',
-      key: 'users'
+      key: OrgUserRoles.USER
     });
   }
   return roles;

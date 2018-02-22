@@ -1,8 +1,11 @@
-<span *ngIf="!userPermInfo.length">None</span>
-<mat-chip-list *ngIf="userPermInfo.length">
-  <ng-container *ngFor="let user of userPermInfo">
-    <mat-chip class="permission-chip" *ngFor="let perm of user.permissions">{{user.orgName}}: {{perm.string}}
-      <mat-icon *ngIf="perm.key !== 'users'" (click)="removePermission(user, perm)" class="permission-chip__close">close</mat-icon>
+<span *ngIf="!userOrgPermInfo.length">None</span>
+<mat-chip-list *ngIf="userOrgPermInfo.length">
+  <ng-container *ngFor="let orgPermission of userOrgPermInfo">
+    <mat-chip class="permission-chip" *ngFor="let perm of orgPermission.permissions">{{orgPermission.orgName}}: {{perm.string}}
+      <ng-container *ngIf="perm.key !== 'users'">
+        <mat-icon *ngIf="!(perm.busy | async)" (click)="removePermission(orgPermission, perm)" class="permission-chip__close">close</mat-icon>
+        <mat-spinner *ngIf="perm.busy | async" diameter="15" class="permission-chip__busy-spinner"></mat-spinner>
+      </ng-container>
     </mat-chip>
   </ng-container>
 </mat-chip-list>

@@ -6,6 +6,7 @@ import { schema } from 'normalizr';
 import { ApiActionTypes } from './request.actions';
 import { PaginatedAction } from '../types/pagination.types';
 import { UserSchema } from '../types/user.types';
+import { OrgUserRoles } from '../../features/cloud-foundry/cf.helpers';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -36,11 +37,11 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction {
 export class RemoveUserPermission extends CFStartAction implements IRequestAction {
   constructor(
     public guid: string,
-    orgGuid: string,
-    permissionType: string
+    public orgGuid: string,
+    public permissionTypeKey: OrgUserRoles
   ) {
     super();
-    this.updatingKey = `${orgGuid}/${permissionType}/${guid}`;
+    this.updatingKey = RemoveUserPermission.generateUpdatingKey(orgGuid, permissionTypeKey, guid);
     this.options = new RequestOptions();
     this.options.url = `organizations/${this.updatingKey}`;
     this.options.method = 'delete';
@@ -50,4 +51,8 @@ export class RemoveUserPermission extends CFStartAction implements IRequestActio
   entityKey = UserSchema.key;
   options: RequestOptions;
   updatingKey: string;
+
+  static generateUpdatingKey(orgGuid: string, permissionType: OrgUserRoles, userGuid: string) {
+    return `${orgGuid}/${permissionType}/${userGuid}`;
+  }
 }

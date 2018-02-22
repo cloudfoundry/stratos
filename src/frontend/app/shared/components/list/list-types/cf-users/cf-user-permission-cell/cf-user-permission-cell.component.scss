@@ -3,11 +3,14 @@
   & + & {
     margin: 10px 5px 0;
   }
+  &__busy-spinner,
+  &__close {
+    margin-left: 5px;
+  }
   &__close {
     cursor: pointer;
     font-size: $size;
     height: $size;
-    margin-left: 5px;
     width: $size;
   }
 }

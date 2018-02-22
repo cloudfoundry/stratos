@@ -10,8 +10,10 @@ import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { CfUser, UserRoleInOrg, UserSchema } from '../../store/types/user.types';
+import { CfUser, UserRoleInOrg, UserSchema, IUserPermissionInOrg } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+
+
 
 @Injectable()
 export class CfUserService {
@@ -41,11 +43,11 @@ export class CfUserService {
       filter(p => p.length > 0)
     )
 
-  getRolesFromUser(user: CfUser) {
+  getRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
     return user.organizations.map(org => {
       const orgGuid = org.metadata.guid;
       return {
-        orgName: org.entity.name,
+        orgName: org.entity.name as string,
         orgGuid: org.metadata.guid,
         permissions: {
           orgManager: isOrgManager(user, orgGuid),
@@ -98,8 +100,4 @@ export class CfUserService {
       return users.filter(o => o.entity.guid === userGuid)[0];
     });
   }
-}
-
-export class EndpointUserController {
-
 }
