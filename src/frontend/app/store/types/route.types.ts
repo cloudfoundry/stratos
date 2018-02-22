@@ -6,7 +6,11 @@ export class Route {
     public path?: string,
     public port?: number,
     public isTCP: boolean = false
-  ) {}
+  ) {
+    if (this.path) {
+      this.path = '/' + this.path;
+    }
+  }
 }
 
 export interface RouteMode {
