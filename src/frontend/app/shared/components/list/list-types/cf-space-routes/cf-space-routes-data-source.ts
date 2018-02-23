@@ -17,10 +17,7 @@ import { CfRoute } from '../../../../../store/types/route.types';
 export const RouteSchema = new schema.Entity('route');
 
 export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
-
-  public static paginationKey = 'cf-space-routes';
   cfGuid: string;
-
   constructor(
     store: Store<AppState>,
     listConfig: IListConfig<APIResource>,
@@ -30,11 +27,11 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action: new GetRoutesInSpace(spaceGuid, cfGuid,
-        `${CfSpaceRoutesDataSource.paginationKey}-${spaceGuid}`),
+        getPaginationKey('cf-space-routes', cfGuid, spaceGuid)),
       schema: RouteSchema,
       getRowUniqueId: (object: EntityInfo) =>
         object.entity ? object.entity.guid : null,
-      paginationKey: `${CfSpaceRoutesDataSource.paginationKey}-${spaceGuid}`,
+      paginationKey: getPaginationKey('cf-space-routes', cfGuid, spaceGuid),
       isLocal: true,
       listConfig,
     });
