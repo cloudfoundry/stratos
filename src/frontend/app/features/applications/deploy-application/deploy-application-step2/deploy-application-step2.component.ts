@@ -27,7 +27,7 @@ import {
   selectSourceSubType,
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { BranchSchema, GITHUB_BRANCHES_ENTITY_KEY, SourceType } from '../../../../store/types/deploy-application.types';
 import {
   GitBranch,
@@ -175,7 +175,7 @@ export class DeployApplicationStep2Component
         if (branch) {
           this.store.dispatch(new SetBranch(branch));
 
-          const commitEntityService = this.entityServiceFactory.create(
+          const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             GithubCommitSchema.key,
             GithubCommitSchema,
             branch.commit.sha,

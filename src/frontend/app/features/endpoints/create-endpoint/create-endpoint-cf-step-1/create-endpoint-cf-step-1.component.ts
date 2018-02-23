@@ -18,6 +18,7 @@ import { EndpointsDataSource } from '../../../../shared/components/list/list-typ
 import { denormalize } from 'normalizr';
 import { EndpointSchema, GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/endpoint.actions';
 import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
+import { getFullEndpointApiUrl } from '../../endpoint-helpers';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
@@ -65,7 +66,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
         const endpoints = page.length ? denormalize(page, [EndpointSchema], entities) : [];
         return {
           names: endpoints.map(ep => ep.name),
-          urls: endpoints.map(ep => `${ep.api_endpoint.Scheme}://${ep.api_endpoint.Host}`),
+          urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
         };
       })
       );

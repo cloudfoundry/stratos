@@ -1,8 +1,15 @@
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
-import { EndpointModel } from '../types/endpoint.types';
+import { EndpointModel, endpointConnectionStatus } from '../types/endpoint.types';
 import { GetSystemSuccess, GET_SYSTEM_INFO_SUCCESS, GET_SYSTEM_INFO } from './../actions/system.actions';
 import { VERIFY_SESSION, SESSION_VERIFIED } from '../actions/auth.actions';
+import {
+  DISCONNECT_ENDPOINTS_SUCCESS,
+  CONNECT_ENDPOINTS_SUCCESS,
+  CONNECT_ENDPOINTS,
+  DISCONNECT_ENDPOINTS
+} from '../actions/endpoint.actions';
+import { ICFAction } from '../types/request.types';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
   switch (action.type) {
@@ -12,6 +19,13 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case SESSION_VERIFIED:
     case GET_SYSTEM_INFO_SUCCESS:
       return succeedEndpointInfo(state, action);
+    case DISCONNECT_ENDPOINTS_SUCCESS:
+      return changeEndpointConnectionStatus(state, action, 'disconnected');
+    case CONNECT_ENDPOINTS_SUCCESS:
+      return changeEndpointConnectionStatus(state, action, 'connected');
+    case CONNECT_ENDPOINTS:
+    case DISCONNECT_ENDPOINTS:
+      return changeEndpointConnectionStatus(state, action, 'checking');
     default:
       return state;
   }
@@ -46,6 +60,21 @@ function succeedEndpointInfo(state, action) {
     });
   });
   return newState;
+}
+
+function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
+  guid: string
+}, connectionStatus: endpointConnectionStatus) {
+  if (!action.guid) {
+    return state;
+  }
+  return {
+    ...state,
+    [action.guid]: {
+      ...state[action.guid],
+      connectionStatus
+    }
+  };
 }
 
 function getAllEnpointIds(endpoints, payloadEndpoints = {}) {
