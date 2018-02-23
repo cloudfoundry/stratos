@@ -1,7 +1,7 @@
 import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { RoutesSchema } from './space.actions';
+import { RoutesInSpaceSchema } from './space.actions';
 
 export const organisationSchemaKey = 'organization';
 export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {}, {

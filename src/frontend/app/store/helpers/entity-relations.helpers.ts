@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
-import { Schema, schema, denormalize } from 'normalizr';
+import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { first, skipWhile, takeWhile, tap, map } from 'rxjs/operators';
+import { first, map, skipWhile, takeWhile } from 'rxjs/operators';
 
 import { pathGet } from '../../core/utils.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
@@ -35,16 +35,15 @@ export class EntityRelation {
   /**
    * Create a new parent that contains the child entities. For example <org>.entity.<spaces>
    */
-  createParentWithChildren: (state, parentGuid: string, response: NormalizedResponse) => APIResource;
+  createParentWithChild: (state, parentGuid: string, response: NormalizedResponse) => APIResource;
   /**
    * An action that will fetch missing child entities
    */
-  fetchChildrenAction: (resource: APIResource, includeRelations: string[], populateMissing?: boolean) => EntityInlineParentAction;
+  fetchChildrenAction: (resource: APIResource, includeRelations: string[], populateMissing?: boolean) => EntityInlineChildAction;
   /**
    * Create the pagination key that is associated with the action to fetch the children
    */
   static createPaginationKey = (schemaKey: string, guid: string) => `${schemaKey}-${guid}`;
-
 }
 
 /**
@@ -75,7 +74,7 @@ export class EntityInlineChild extends schema.Array {
  * @export
  * @interface EntityInlineChildAction
  */
-export interface EntityInlineChildAction {
+export interface EntityInlineChildAction extends PaginatedAction {
   parentGuid: string;
 }
 
@@ -86,7 +85,7 @@ export interface EntityInlineChildAction {
  * @interface EntityInlineParentAction
  * @extends {PaginatedAction}
  */
-export interface EntityInlineParentAction extends PaginatedAction {
+export interface EntityInlineParentAction extends IRequestAction {
   includeRelations: string[];
   populateMissing: boolean;
 }
@@ -163,13 +162,14 @@ function validationLoop(
     parentEntity: any,
     entities: any[],
     parentEntitySchemaKey: string,
-    parentEntitySchemaParam,
+    parentEntitySchemaParam: any,
     childRelation: EntityRelation,
     path: string,
   }
 )
   : ValidateEntityResult[] {
   let results = [];
+
   const {
     store,
     action,

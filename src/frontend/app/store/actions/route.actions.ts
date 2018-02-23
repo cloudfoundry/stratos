@@ -6,6 +6,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { RouteSchema } from './action-types';
 import { getPaginationKey } from './pagination.actions';
+import { EntityInlineParentAction, EntityInlineChildAction } from '../helpers/entity-relations.helpers';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -13,9 +14,6 @@ export const CREATE_ROUTE_ERROR = '[Route] Create error';
 
 export const MAP_ROUTE_SELECTED = '[Map Route] Selected route';
 export const RouteEvents = {
-  GET_APP_ALL: '[Application Routes] Get all',
-  GET_APP_ALL_SUCCESS: '[Application Routes] Get all success',
-  GET_APP_ALL_FAILED: '[Application Routes] Get all failed',
   GET_SPACE_ALL: '[Space Routes] Get all',
   GET_SPACE_ALL_SUCCESS: '[Space Routes] Get all success',
   GET_SPACE_ALL_FAILED: '[Space Routes] Get all failed',
@@ -26,7 +24,6 @@ export const RouteEvents = {
   UNMAP_ROUTE_SUCCESS: '[Application Routes] Unmap route success',
   UNMAP_ROUTE_FAILED: '[Application Routes] Unmap route failed'
 };
-
 
 export interface NewRoute {
   domain_guid: string;
@@ -123,37 +120,6 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   options: RequestOptions;
   endpointGuid: string;
 }
-
-export class GetAppRoutes extends CFStartAction implements PaginatedAction {
-  constructor(public guid: string, public cfGuid: string) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/routes`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.endpointGuid = cfGuid;
-    this.paginationKey = getPaginationKey(this.entityKey, cfGuid, guid);
-  }
-  actions = [
-    RouteEvents.GET_APP_ALL,
-    RouteEvents.GET_APP_ALL_SUCCESS,
-    RouteEvents.GET_APP_ALL_FAILED
-  ];
-  initialParams = {
-    'results-per-page': 100,
-    'inline-relations-depth': '1',
-    page: 1,
-    'order-direction': 'desc',
-    'order-direction-field': 'route',
-  };
-  paginationKey: string;
-  entity = RouteSchema;
-  entityKey = RouteSchema.key;
-  options: RequestOptions;
-  endpointGuid: string;
-  flattenPagination = true;
-}
-
 
 export class MapRouteSelected implements Action {
   constructor(routeEntity: EntityInfo) { }

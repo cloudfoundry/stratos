@@ -1,6 +1,13 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 import { schema } from 'normalizr';
 
+import { pathGet } from '../../core/utils.service';
+import {
+  EntityInlineChild,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+  EntityRelation,
+} from '../helpers/entity-relations.helpers';
 import { pick } from '../helpers/reducer.helper';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { ActionMergeFunction } from '../types/api.types';
@@ -9,9 +16,10 @@ import { CfApplication } from '../types/application.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
+import { RouteSchema, SpaceWithOrganisationSchema } from './action-types';
 import { AppMetadataTypes } from './app-metadata.actions';
+import { getPaginationKey } from './pagination.actions';
 import { StackSchema } from './stack.action';
-import { SpaceWithOrganisationSchema } from './action-types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -45,26 +53,56 @@ export const DELETE_INSTANCE = '[Application Instance] Delete';
 export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
 export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
 
+export const applicationSchemaKey = 'application';
+
+export const AppRouteRelation: EntityRelation = {
+  key: 'app-route-relation',
+  parentEntityKey: applicationSchemaKey,
+  childEntity: RouteSchema,
+  createParentWithChild: (state, parentGuid, response) => {
+    const parentEntity = pathGet(`${applicationSchemaKey}.${parentGuid}`, state);
+    const newParentEntity = {
+      ...parentEntity,
+      entity: {
+        ...parentEntity.entity,
+        routes: response.result
+      }
+    };
+    return newParentEntity;
+  },
+  fetchChildrenAction: (app, includeRelations, populateMissing) => {
+    // tslint:disable-next-line:no-use-before-declare
+    return new GetAppRoutes(
+      app.metadata.guid,
+      app.entity.cfGuid,
+      EntityRelation.createPaginationKey(applicationSchemaKey, app.metadata.guid),
+      app.metadata.guid
+    );
+  },
+};
+
+export const RoutesInAppSchema = new EntityInlineChild([AppRouteRelation], RouteSchema);
+
 const ApplicationEntitySchema = {
   entity: {
     stack: StackSchema,
-    space: SpaceWithOrganisationSchema
+    space: SpaceWithOrganisationSchema,
+    routes: RoutesInAppSchema
   }
 };
 
 export const ApplicationSchema = new schema.Entity(
-  'application',
+  applicationSchemaKey,
   ApplicationEntitySchema,
   {
     idAttribute: getAPIResourceGuid
   }
 );
 
-export class GetAllApplications extends CFStartAction
-  implements PaginatedAction {
+export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
-  constructor(public paginationKey: string) {
+  constructor(public paginationKey: string, public includeRelations = [], public populateMissing = false) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'apps';
@@ -84,8 +122,8 @@ export class GetAllApplications extends CFStartAction
   flattenPagination = true;
 }
 
-export class GetApplication extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string) {
+export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
+  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
@@ -222,4 +260,39 @@ export class DeleteApplicationInstance extends CFStartAction
   entityKey = AppStatSchema.key;
   removeEntityOnDelete = true;
   options: RequestOptions;
+}
+
+export class GetAppRoutes extends CFStartAction implements PaginatedAction, EntityInlineChildAction {
+  constructor(
+    public guid: string,
+    public cfGuid: string,
+    public paginationKey: string = null,
+    public parentGuid: string = null
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}/routes`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+    this.endpointGuid = cfGuid;
+    this.parentGuid = guid;
+    this.paginationKey = paginationKey || getPaginationKey(this.entityKey, cfGuid, guid);
+  }
+  actions = [
+    '[Application Routes] Get all',
+    '[Application Routes] Get all success',
+    '[Application Routes] Get all failed',
+  ];
+  initialParams = {
+    'results-per-page': 100,
+    'inline-relations-depth': '1',
+    page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'route',
+  };
+  entity = [RouteSchema];
+  entityKey = RouteSchema.key;
+  options: RequestOptions;
+  endpointGuid: string;
+  flattenPagination = true;
 }

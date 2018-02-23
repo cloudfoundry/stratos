@@ -9,7 +9,6 @@ import {
   EntityRelation,
 } from '../helpers/entity-relations.helpers';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { APIResource } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { OrganisationSchema, organisationSchemaKey, spaceSchemaKey } from './action-types';
@@ -49,7 +48,7 @@ export const OrgSpaceRelation: EntityRelation = {
   key: 'org-space-relation',
   parentEntityKey: organisationSchemaKey,
   childEntity: SpaceSchema,
-  createParentWithChildren: (state, parentGuid, response) => {
+  createParentWithChild: (state, parentGuid, response) => {
     const parentEntity = pathGet(`${organisationSchemaKey}.${parentGuid}`, state);
     const newParentEntity = {
       ...parentEntity,
