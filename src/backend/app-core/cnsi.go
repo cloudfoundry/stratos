@@ -197,7 +197,7 @@ func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
 	}
 
 	var jsonString []byte
-	var clusterList []*cnsis.RegisteredCluster
+	var clusterList []*interfaces.ConnectedEndpoint
 
 	clusterList, err = cnsiRepo.ListByUser(userGUID)
 	if err != nil {
@@ -231,7 +231,7 @@ func marshalCNSIlist(cnsiList []*interfaces.CNSIRecord) ([]byte, error) {
 	return jsonString, nil
 }
 
-func marshalClusterList(clusterList []*cnsis.RegisteredCluster) ([]byte, error) {
+func marshalClusterList(clusterList []*interfaces.ConnectedEndpoint) ([]byte, error) {
 	log.Debug("marshalClusterList")
 	jsonString, err := json.Marshal(clusterList)
 	if err != nil {
@@ -355,20 +355,20 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 	return tr, true
 }
 
-//TODO: TokenRecord should include the GUID of the service
-func (p *portalProxy) ListCNSITokenRecordsForUser(userGUID string) ([]*interfaces.EndpointTokenRecord, error) {
-	log.Debug("ListCNSITokenRecordsForUser")
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
+	log.Debug("ListCEndpointsByUser")
+	cnsiRepo, err := cnsis.NewPostgresCNSIRepository(p.DatabaseConnectionPool)
+	if err != nil {
+		log.Errorf(dbReferenceError, err)
+		return nil, fmt.Errorf(dbReferenceError, err)
+	}
+
+	cnsiList, err := cnsiRepo.ListByUser(userGUID)
 	if err != nil {
 		return nil, err
 	}
 
-	tokensList, err := tokenRepo.ListCNSITokensForUser(userGUID, p.Config.EncryptionKeyInBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	return tokensList, nil
+	return cnsiList, nil
 }
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t interfaces.TokenRecord) error {

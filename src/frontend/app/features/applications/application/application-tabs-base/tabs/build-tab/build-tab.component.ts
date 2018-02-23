@@ -46,7 +46,10 @@ export class BuildTabComponent implements OnInit {
       headers: headers
     };
     
-    const metrics = this.http.get('/pp/v1/metrics/cf/app/' + this.appService.appGuid, requestArgs).subscribe();
+    const appMetrics = this.http.get('/pp/v1/metrics/cf/app/' + this.appService.appGuid + '/query?query=firehose_container_metric_memory_bytes{}', requestArgs).subscribe();
+
+
+    const cfMetrics = this.http.get('/pp/v1/metrics/cf/query?query=firehose_value_metric_rep_container_count{}', requestArgs).subscribe();
 
   }  
 }

@@ -31,9 +31,22 @@ type CNSIRecord struct {
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 }
 
+// ConnectedEndpoint
+type ConnectedEndpoint struct {
+	GUID                   string   `json:"guid"`
+	Name                   string   `json:"name"`
+	CNSIType               string   `json:"cnsi_type"`
+	APIEndpoint            *url.URL `json:"api_endpoint"`
+	Account                string   `json:"account"`
+	TokenExpiry            int64    `json:"token_expiry"`
+	DopplerLoggingEndpoint string   `json:"-"`
+	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
+	TokenMetadata          string   `json:"-"`
+}
+
 const (
 	AuthTypeOAuth2    = "OAuth2"
-	AuthTypeOIDC   	  = "OIDC"
+	AuthTypeOIDC      = "OIDC"
 	AuthTypeHttpBasic = "HttpBasic"
 )
 
@@ -44,8 +57,10 @@ const (
 // Token record for an endpoint (includes the Endpoint GUID)
 type EndpointTokenRecord struct {
 	*TokenRecord
-	EndpointGUID string
-	EndpointType string
+	EndpointGUID    string
+	EndpointType    string
+	APIEndpint      string
+	LoggingEndpoint string
 }
 
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
@@ -85,6 +100,16 @@ type LoginRes struct {
 }
 
 type LoginHookFunc func(c echo.Context) error
+
+type ProxyRequestInfo struct {
+	EndpointGUID    string
+	URI *url.URL
+	UserGUID string
+	ResultGUID string
+	Headers http.Header
+	Body []byte
+	Method string
+}
 
 type SessionStorer interface {
 	Get(r *http.Request, name string) (*sessions.Session, error)
@@ -150,6 +175,7 @@ type CNSIRequest struct {
 
 	Response []byte
 	Error    error
+	ResponseGUID	string
 }
 
 type PortalConfig struct {

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"io/ioutil"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -30,7 +30,7 @@ type UAAResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	Scope        string `json:"scope"`
 	JTI          string `json:"jti"`
-	IDToken 		 string `json:"id_token"`
+	IDToken      string `json:"id_token"`
 }
 
 // LoginHookFunc - function that can be hooked into a successful user login
@@ -703,18 +703,29 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 		return nil, false
 	}
 
-	// get the scope out of the JWT token data
-	userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
-	if err != nil {
-		msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
-		log.Errorf(msg, err)
-		return nil, false
-	}
+	var cnsiUser *interfaces.ConnectedUser
+	var scope = []string{}
 
-	// add the uaa entry to the output
-	cnsiUser := &interfaces.ConnectedUser{
-		GUID: userTokenInfo.UserGUID,
-		Name: userTokenInfo.UserName,
+	if cfTokenRecord.AuthType == interfaces.AuthTypeHttpBasic {
+		cnsiUser = &interfaces.ConnectedUser{
+			GUID: cfTokenRecord.RefreshToken,
+			Name: cfTokenRecord.RefreshToken,
+		}
+	} else {
+		// get the scope out of the JWT token data
+		userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
+		if err != nil {
+			msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
+			log.Errorf(msg, err)
+			return nil, false
+		}
+
+		// add the uaa entry to the output
+		cnsiUser = &interfaces.ConnectedUser{
+			GUID: userTokenInfo.UserGUID,
+			Name: userTokenInfo.UserName,
+		}
+		scope = userTokenInfo.Scope
 	}
 
 	// is the user an CF admin?
@@ -726,7 +737,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	}
 	// TODO should be an extension point
 	if cnsiRecord.CNSIType == "cf" {
-		cnsiAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.CFAdminIdentifier)
+		cnsiAdmin := strings.Contains(strings.Join(scope, ""), p.Config.CFAdminIdentifier)
 		cnsiUser.Admin = cnsiAdmin
 	}
 

@@ -2,8 +2,11 @@ package metrics
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 
 	"github.com/SUSE/stratos-ui/config"
@@ -22,40 +25,58 @@ const (
 	CLIENT_ID_KEY = "METRICS_CLIENT"
 )
 
+type MetricsProviderMetadata struct {
+	Type string `json:"type"`
+	URL  string `json:"url"`
+	Job  string `json:"job"`
+}
+
+type MetricsMetadata struct {
+	Type string
+	URL  string
+	Job  string
+	EndpointGUID        string
+}
+
+type EndpointMetricsRelation struct {
+	metrics *MetricsMetadata
+	endpoint *interfaces.ConnectedEndpoint
+}
+
 func Init(portalProxy interfaces.PortalProxy) (interfaces.StratosPlugin, error) {
 	return &MetricsSpecification{portalProxy: portalProxy, endpointType: EndpointType}, nil
 }
 
-func (c *MetricsSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
-	return c, nil
+func (m *MetricsSpecification) GetEndpointPlugin() (interfaces.EndpointPlugin, error) {
+	return m, nil
 }
 
-func (c *MetricsSpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
-	return c, nil
+func (m *MetricsSpecification) GetRoutePlugin() (interfaces.RoutePlugin, error) {
+	return m, nil
 }
 
-func (c *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
+func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin, error) {
 	return nil, errors.New("Not implemented!")
 }
 
 // Metrics endpoints - admin
-func (c *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
-	echoContext.GET("/metrics/cf", c.getCloudFoundryMetrics)
+func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
+	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
 
 	// TODOO: Kubernetes
 	//echoContext.GET("metrics/k8s", p.getKubernetesMetrics)
 }
 
 // Metrics API endpoints - non-admin
-func (c *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
-	echoContext.GET("/metrics/cf/app/:appId", c.getCloudFoundryAppMetrics)
+func (m *MetricsSpecification) AddSessionGroupRoutes(echoContext *echo.Group) {
+	echoContext.GET("/metrics/cf/app/:appId/:op", m.getCloudFoundryAppMetrics)
 }
 
-func (c *MetricsSpecification) GetType() string {
+func (m *MetricsSpecification) GetType() string {
 	return EndpointType
 }
 
-func (c *MetricsSpecification) GetClientId() string {
+func (m *MetricsSpecification) GetClientId() string {
 	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
 		return clientId
 	}
@@ -63,12 +84,12 @@ func (c *MetricsSpecification) GetClientId() string {
 	return "metrics"
 }
 
-func (c *MetricsSpecification) Register(echoContext echo.Context) error {
+func (m *MetricsSpecification) Register(echoContext echo.Context) error {
 	log.Debug("Metrics Register...")
-	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
+	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
 
-func (c *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
+func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CNSIRecord, userId string) (*interfaces.TokenRecord, bool, error) {
 	log.Debug("Metrics Connect...")
 
 	connectType := ec.FormValue("connect_type")
@@ -87,21 +108,42 @@ func (c *MetricsSpecification) Connect(ec echo.Context, cnsiRecord interfaces.CN
 	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
 
 	tr := &interfaces.TokenRecord{
-		AuthType:  interfaces.AuthTypeHttpBasic,
-		AuthToken: base64EncodedAuthString,
+		AuthType:     interfaces.AuthTypeHttpBasic,
+		AuthToken:    base64EncodedAuthString,
+		RefreshToken: username,
 	}
 
 	// Metadata indicates which Cloud Foundry/Kubernetes endpoints the metrics endpoint can supply data for
+	metricsMetadataEndpoint := fmt.Sprintf("%s/stratos", cnsiRecord.APIEndpoint)
+	req, err := http.NewRequest("GET", metricsMetadataEndpoint, nil)
+	if err != nil {
+		msg := "Failed to create request for the Metrics Endpoint: %v"
+		log.Errorf(msg, err)
+		return nil, false, fmt.Errorf(msg, err)
+	}
 
-	// Attempt to fetch info for metrics endpoint to validate credentials are valid
+	req.SetBasicAuth(username, password)
+
+	var h = m.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation)
+	res, err := h.Do(req)
+	if err != nil || res.StatusCode != http.StatusOK {
+		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		return nil, false, interfaces.LogHTTPError(res, err)
+	}
+
+	defer res.Body.Close()
+	body, _ := ioutil.ReadAll(res.Body)
+	// Put the body in the token metadata
+	tr.Metadata = string(body)
+
 	return tr, false, nil
 }
 
-func (c *MetricsSpecification) Init() error {
+func (m *MetricsSpecification) Init() error {
 	return nil
 }
 
-func (c *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
+func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) (interfaces.CNSIRecord, interface{}, error) {
 	log.Debug("Metrics Info")
 	var v2InfoResponse interfaces.V2Info
 	var newCNSI interfaces.CNSIRecord
@@ -143,7 +185,7 @@ func (c *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 	return newCNSI, v2InfoResponse, nil
 }
 
-func (c *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
+func (m *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID string, echoContext echo.Context) {
 
 	// Record of which endpoints have metrics
 	haveMetrics := make(map[string]string)
@@ -175,20 +217,70 @@ func (c *MetricsSpecification) UpdateMetadata(info *interfaces.Info, userGUID st
 	}
 }
 
-func (m *MetricsSpecification) getMetricsEndpoints(userGUID string) error {
+func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []string) (map[string]EndpointMetricsRelation, error) {
 
-	userEndpoints, err := m.portalProxy.ListCNSITokenRecordsForUser(userGUID)
+	metricsProviders := make([]MetricsMetadata, 0)
+	endpointsMap := make(map[string]*interfaces.ConnectedEndpoint)
+	results := make(map[string]EndpointMetricsRelation)
+
+	userEndpoints, err := m.portalProxy.ListEndpointsByUser(userGUID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	for _, endpointToken := range userEndpoints {
-		log.Info(endpointToken)
-		if endpointToken.EndpointType == "metrics" {
-			// Get the endpoints that this metrics endpoint supports from its metadata
-			log.Info("Got metrics endpoint: " + endpointToken.EndpointGUID)
+	for _, endpoint := range userEndpoints {
+		if stringInSlice(endpoint.GUID, cnsiList) {
+			// Found the Endpoint, so add it to our list
+			endpointsMap[endpoint.GUID] = endpoint
+		} else if endpoint.CNSIType == "metrics" {
+			// Parse out the metadata
+			//m := make([]MetricsProviderMetadata, 0)
+			var m []MetricsProviderMetadata
+			err := json.Unmarshal([]byte(endpoint.TokenMetadata), &m)
+			if err == nil {
+				for _, item := range m {
+					info := MetricsMetadata{}
+					info.EndpointGUID = endpoint.GUID
+					info.Type = item.Type
+					info.URL = item.URL
+					info.Job = item.Job
+					metricsProviders = append(metricsProviders, info)
+				}
+			}
 		}
 	}
 
-	return nil
+	for _, metricProviderInfo := range metricsProviders {
+		// Depends on the type
+		log.Info(metricProviderInfo.URL)
+
+		for guid, info := range endpointsMap {
+			if info.DopplerLoggingEndpoint == metricProviderInfo.URL {
+				log.Info("Found it")
+
+				relate := EndpointMetricsRelation{}
+				relate.endpoint = info
+				relate.metrics = &metricProviderInfo
+				results[guid] = relate
+				delete(endpointsMap, guid)
+				break
+			}
+		}
+	}
+
+	// If there are still items in the endpoints map, then we did not find all metric providers
+	if len(endpointsMap) != 0 {
+		return nil, errors.New("Can not find a metric provider for all of the specified endpoints")
+	}
+
+	return results, nil
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }

@@ -229,6 +229,29 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*in
 	return responses, nil
 }
 
+func (p *portalProxy) DoProxyRequest(requests []interfaces.ProxyRequestInfo) (map[string]*interfaces.CNSIRequest, error) {
+	log.Debug("DoProxyRequest")
+
+	// send the request to each endpoint
+	done := make(chan *interfaces.CNSIRequest)
+	for _, requestInfo := range requests {
+		cnsiRequest, buildErr := p.buildCNSIRequest(requestInfo.EndpointGUID, requestInfo.UserGUID, requestInfo.Method, requestInfo.URI, requestInfo.Body, requestInfo.Headers)
+		cnsiRequest.ResponseGUID = requestInfo.ResultGUID
+		if buildErr != nil {
+			return nil, echo.NewHTTPError(http.StatusBadRequest, buildErr.Error())
+		}
+		go p.doRequest(&cnsiRequest, done)
+	}
+
+	responses := make(map[string]*interfaces.CNSIRequest)
+	for range requests {
+		res := <-done
+		responses[res.ResponseGUID] = res
+	}
+
+	return responses, nil
+}
+
 func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*interfaces.CNSIRequest) error {
 	shouldPassthrough := "true" == c.Request().Header().Get("x-cap-passthrough")
 

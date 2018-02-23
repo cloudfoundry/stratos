@@ -34,11 +34,6 @@ var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, di
 										FROM tokens
 										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = '0'`
 
-var listCNSITokensForUser = `SELECT cnsi_guid, E.cnsi_type, auth_token, refresh_token, token_expiry, disconnected
-														FROM tokens T
-														JOIN cnsis E ON E.guid=T.cnsi_guid
-														WHERE token_type = 'cnsi' AND user_guid = $1 AND disconnected = '0'`
-
 var countCNSITokens = `SELECT COUNT(*)
 											FROM tokens
 											WHERE cnsi_guid=$1 AND user_guid = $2 AND token_type = 'cnsi'`
@@ -75,7 +70,6 @@ func InitRepositoryProvider(databaseProvider string) {
 	updateAuthToken = datastore.ModifySQLStatement(updateAuthToken, databaseProvider)
 	findCNSIToken = datastore.ModifySQLStatement(findCNSIToken, databaseProvider)
 	findCNSITokenConnected = datastore.ModifySQLStatement(findCNSITokenConnected, databaseProvider)
-	listCNSITokensForUser = datastore.ModifySQLStatement(listCNSITokensForUser, databaseProvider)
 	countCNSITokens = datastore.ModifySQLStatement(countCNSITokens, databaseProvider)
 	insertCNSIToken = datastore.ModifySQLStatement(insertCNSIToken, databaseProvider)
 	updateCNSIToken = datastore.ModifySQLStatement(updateCNSIToken, databaseProvider)
@@ -347,78 +341,6 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	tr.Metadata = metadata
 
 	return *tr, nil
-}
-
-// ListCNSITokensForUser - <TBD>
-func (p *PgsqlTokenRepository) ListCNSITokensForUser(userGUID string, encryptionKey []byte) ([]*interfaces.EndpointTokenRecord, error) {
-	log.Println("ListCNSITokensForUser")
-
-	if userGUID == "" {
-		msg := "Unable to list CNSI Tokens without a valid User GUID."
-		log.Println(msg)
-		return nil, errors.New(msg)
-	}
-
-	rows, err := p.db.Query(listCNSITokensForUser, userGUID)
-	if err != nil {
-		msg := "Unable to retrieve CNSI records: %v"
-		log.Printf(msg, err)
-		return nil, fmt.Errorf(msg, err)
-	}
-	defer rows.Close()
-
-	if err = rows.Err(); err != nil {
-		msg := "Unable to List token records: %v"
-		log.Printf(msg, err)
-		return nil, fmt.Errorf(msg, err)
-	}
-
-	var tokenRecordList []*interfaces.EndpointTokenRecord
-	tokenRecordList = make([]*interfaces.EndpointTokenRecord, 0)
-
-	for rows.Next() {
-		var (
-			cnsiGUID               string
-			cnsiType               string
-			ciphertextAuthToken    []byte
-			ciphertextRefreshToken []byte
-			tokenExpiry            int64
-			disconnected           bool
-		)
-
-		err := rows.Scan(&cnsiGUID, &cnsiType, &ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected)
-		if err != nil {
-			msg := "Unable to scan token records: %v"
-			log.Printf(msg, err)
-			return nil, fmt.Errorf(msg, err)
-		}
-
-		log.Println("Decrypting Auth Token")
-		plaintextAuthToken, err := crypto.DecryptToken(encryptionKey, ciphertextAuthToken)
-		if err != nil {
-			return nil, err
-		}
-
-		log.Println("Decrypting Refresh Token")
-		plaintextRefreshToken, err := crypto.DecryptToken(encryptionKey, ciphertextRefreshToken)
-		if err != nil {
-			return nil, err
-		}
-
-		tr := new(interfaces.EndpointTokenRecord)
-		tr.EndpointGUID = cnsiGUID
-		tr.EndpointType = cnsiType
-		tr.AuthToken = plaintextAuthToken
-		tr.RefreshToken = plaintextRefreshToken
-		tr.TokenExpiry = tokenExpiry
-		tr.Disconnected = disconnected
-
-		tokenRecordList = append(tokenRecordList, tr)
-	}
-
-	// rows.Close()
-
-	return tokenRecordList, nil
 }
 
 // DeleteCNSIToken - remove a CNSI token (disconnect from a given CNSI)

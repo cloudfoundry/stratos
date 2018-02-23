@@ -52,7 +52,7 @@ imports:
 - name: github.com/mattn/go-isatty
   version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
 - name: github.com/mattn/go-sqlite3
-  version: ca5e3819723d8eeaf170ad510e7da1d6d2e94a08
+  version: 6c771bb9887719704b210e87e934f08be014bdb1
 - name: github.com/nwmac/sqlitestore
   version: 3f93bd4dbffb827c47572d6d1342272be36bd6b0
 - name: github.com/pkg/errors

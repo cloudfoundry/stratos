@@ -38,7 +38,7 @@ type PortalProxy interface {
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
-	ListCNSITokenRecordsForUser(userGUID string) ([]*EndpointTokenRecord, error)
+	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 
 	GetClientId(cnsiType string) (string, error)
 
@@ -52,5 +52,6 @@ type PortalProxy interface {
 
 	// Proxy API requests
 	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
+	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
 	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 }
