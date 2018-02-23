@@ -52,7 +52,7 @@ export class EntityMonitor<T = any> {
   }
   private updatingSectionObservableCache: {
     [key: string]: Observable<ActionState>
-  };
+  } = {};
   private apiRequestData$: Observable<IRequestDataState>;
   public updatingSection$: Observable<UpdatingSection>;
   /**
@@ -111,7 +111,7 @@ export class EntityMonitor<T = any> {
       ]) => entity ? denormalize(entity, schema, entities) : null),
       shareReplay(1),
       startWith(null)
-      );
+    );
   }
 
 }

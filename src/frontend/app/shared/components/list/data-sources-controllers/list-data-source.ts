@@ -330,7 +330,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   connect(): Observable<T[]> {
-    return this.page$.tag('actual-page-obs');
+    return this.page$
+      .tag('actual-page-obs');
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {

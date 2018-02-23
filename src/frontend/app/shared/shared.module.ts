@@ -41,6 +41,7 @@ import { listCardComponents } from './components/list/list-cards/card.types';
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+/* tslint:enable:max-line-length */
 import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -83,7 +84,7 @@ import { TableCellServiceNameComponent } from './components/list/list-types/cf-s
 import { TableCellServicePlanComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import { TableCellServiceInstanceTagsComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import { TableCellServiceInstanceAppsAttachedComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
-
+import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 /* tslint:enable:max-line-length */
 
 @NgModule({
@@ -157,6 +158,8 @@ import { TableCellServiceInstanceAppsAttachedComponent } from './components/list
     TableCellServicePlanComponent,
     TableCellServiceInstanceTagsComponent,
     TableCellServiceInstanceAppsAttachedComponent,
+    AppChipsComponent,
+    CfSpacePermissionCellComponent,
   ],
   exports: [
     FormsModule,
@@ -209,6 +212,7 @@ import { TableCellServiceInstanceAppsAttachedComponent } from './components/list
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
+    CardCfOrgUserDetailsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

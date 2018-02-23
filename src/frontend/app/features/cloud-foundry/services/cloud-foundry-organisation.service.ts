@@ -56,7 +56,6 @@ export class CloudFoundryOrganisationService {
     );
 
     this.initialiseObservables();
-
   }
 
   private initialiseObservables() {

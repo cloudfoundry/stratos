@@ -15,10 +15,11 @@ import { CloudFoundryService } from '../services/cloud-foundry.service';
   selector: 'app-cloud-foundry',
   templateUrl: './cloud-foundry.component.html',
   styleUrls: ['./cloud-foundry.component.scss'],
-  providers: [{
-    provide: ListConfig,
-    useClass: CFEndpointsListConfigService,
-  }]
+  providers: [
+    {
+      provide: ListConfig,
+      useClass: CFEndpointsListConfigService,
+    }]
 })
 export class CloudFoundryComponent {
   hasOneCf$: Observable<boolean>;

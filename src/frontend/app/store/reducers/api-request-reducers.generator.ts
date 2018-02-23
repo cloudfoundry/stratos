@@ -20,6 +20,8 @@ import {
 } from '../types/deploy-application.types';
 import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
+import { UserSchema } from '../types/user.types';
+import { userReducer } from './users.reducer';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -65,7 +67,7 @@ const entities = [
   'routerReducer',
   'createApplication',
   'uaaSetup',
-  'user',
+   UserSchema.key,,
   'serviceInstance',
   'servicePlan',
   'service',
@@ -88,6 +90,7 @@ export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
+    [UserSchema.key]: [userReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
     application: [endpointDisconnectApplicationReducer('application')],
     space: [endpointDisconnectApplicationReducer('space')],
