@@ -31,6 +31,8 @@ import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.
 import { SharedModule } from '../shared/shared.module';
 import { AppState } from '../store/app-state';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
+import { BaseCF } from '../features/cloud-foundry/cf-page.types';
+import { CfOrgsListConfigService } from '../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -39,31 +41,18 @@ export const cfEndpointServiceProviderDeps = [
   PaginationMonitorFactory,
   EntityMonitorFactory
 ];
-
+class BaseCFMock {
+  constructor(public guid = '1234') { }
+}
 export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
-  return {
-    provide: CloudFoundryEndpointService,
-    useFactory: (
-      store: Store<AppState>,
-      entityServiceFactory: EntityServiceFactory,
-      cfOrgSpaceDataService: CfOrgSpaceDataService,
-      cfUserService: CfUserService,
-      paginationMonitorFactory: PaginationMonitorFactory
-    ) => {
-      const appService = new CloudFoundryEndpointService(
-        {
-          guid
-        },
-        store,
-        entityServiceFactory,
-        cfOrgSpaceDataService,
-        cfUserService,
-        paginationMonitorFactory
-      );
-      return appService;
+  return [
+    {
+      provide: BaseCF,
+      useFactory: () => new BaseCFMock(guid)
     },
-    deps: [Store, ...cfEndpointServiceProviderDeps]
-  };
+    CloudFoundryEndpointService,
+    CfOrgsListConfigService
+  ];
 }
 
 export function generateTestCfEndpointService() {

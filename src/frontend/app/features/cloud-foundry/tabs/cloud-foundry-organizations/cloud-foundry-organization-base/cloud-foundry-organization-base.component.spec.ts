@@ -14,7 +14,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryOrganizationBaseComponent],
       imports: [...getBaseTestModules],
-      providers: [generateTestCfEndpointServiceProvider()]
+      providers: [...generateTestCfEndpointServiceProvider()]
     })
       .compileComponents();
   }));
