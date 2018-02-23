@@ -8,25 +8,12 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import {
-  CF_INFO_ENTITY_KEY,
-  CFInfoSchema,
-  GetEndpointInfo
-} from '../../../store/actions/cloud-foundry.actions';
-import {
-  EndpointSchema,
-  GetAllEndpoints
-} from '../../../store/actions/endpoint.actions';
+import { CF_INFO_ENTITY_KEY, CFInfoSchema, GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
+import { EndpointSchema, GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import {
-  CfApplication,
-  CfApplicationState
-} from '../../../store/types/application.types';
-import {
-  EndpointModel,
-  EndpointUser
-} from '../../../store/types/endpoint.types';
+import { CfApplication, CfApplicationState } from '../../../store/types/application.types';
+import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfOrg } from '../../../store/types/org-and-space.types';
 import { CfUser } from '../../../store/types/user.types';
 
@@ -73,6 +60,8 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
+    // FIXME: The cfOrgSpaceDataService shouldn't be the source of any org collection. This will eventually retrieve a minified version of
+    // an org which won't have all the inline items required at this point (which shouldn't fill in if missing due to spammy calls)
     this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.cfGuid);
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
@@ -85,7 +74,7 @@ export class CloudFoundryEndpointService {
       // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
       map(orgs => orgs.filter(org => org.entity.spaces)),
       map(p => {
-        return p.map(o => o.entity.spaces.map(space => space.entity.apps));
+        return p.map(o => o.entity.spaces.map(space => space.entity.apps || []));
       }),
       map(a => {
         let flatArray = [];
@@ -104,9 +93,9 @@ export class CloudFoundryEndpointService {
       return Observable.of([]);
     }
     return this.allApps$.pipe(
-      map(apps => {
+      map(allApps => {
         const orgSpaces = org.entity.spaces.map(s => s.metadata.guid);
-        return apps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
+        return allApps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
       })
     );
   }

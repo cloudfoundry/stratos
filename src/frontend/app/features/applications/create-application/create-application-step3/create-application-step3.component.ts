@@ -13,13 +13,13 @@ import {
   CreateNewApplication,
   GetApplication,
 } from '../../../../store/actions/application.actions';
-import { CreateRoute, RouteSchema } from '../../../../store/actions/route.actions';
+import { CreateRoute } from '../../../../store/actions/route.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { organisationSchemaKey } from '../../../../store/actions/action-types';
+import { organisationSchemaKey, RouteSchema } from '../../../../store/actions/action-types';
 
 @Component({
   selector: 'app-create-application-step3',

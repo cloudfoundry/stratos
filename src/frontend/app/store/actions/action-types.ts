@@ -1,5 +1,7 @@
 import { schema } from 'normalizr';
+
 import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { RoutesSchema } from './space.actions';
 
 export const organisationSchemaKey = 'organization';
 export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {}, {
@@ -7,17 +9,6 @@ export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {}, {
 });
 
 export const spaceSchemaKey = 'space';
-export const SpaceSchema = new schema.Entity(spaceSchemaKey, {}, {
-  idAttribute: getAPIResourceGuid
-});
-
-export const OrganisationWithSpaceSchema = new schema.Entity(organisationSchemaKey, {
-  entity: {
-    spaces: [SpaceSchema]
-  }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
 
 export const SpaceWithOrganisationSchema = new schema.Entity(spaceSchemaKey, {
   entity: {
@@ -26,3 +17,7 @@ export const SpaceWithOrganisationSchema = new schema.Entity(spaceSchemaKey, {
 }, {
     idAttribute: getAPIResourceGuid
   });
+
+export const RouteSchema = new schema.Entity('route', {}, {
+  idAttribute: getAPIResourceGuid
+});

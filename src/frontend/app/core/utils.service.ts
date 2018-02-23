@@ -181,5 +181,33 @@ export class UtilsService {
     const val = (value * 100).toFixed(decimals);
     return val + '%';
   }
+}
 
+/**
+* Return the value in the object for the given dot separated param path
+*/
+export function pathGet(path: string, object: any): any {
+  const params = path.split('.');
+
+  let index = 0;
+  const length = params.length;
+
+  while (object !== null && object !== undefined && index < length) {
+    object = object[params[index++]];
+  }
+  return (index && index === length) ? object : undefined;
+}
+
+export function pathSet(path: string, object: any, value: any) {
+  const params = path.split('.');
+
+  let index = 0;
+  const length = params.length - 1;
+
+  while (object !== null && object !== undefined && index < length) {
+    object = object[params[index++]];
+  }
+  if ((index && index === length)) {
+    object[params[index++]] = value;
+  }
 }

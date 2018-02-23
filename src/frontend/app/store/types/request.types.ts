@@ -1,11 +1,11 @@
-import { IRequestArray } from '../reducers/api-request-reducer/types';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { Schema } from 'normalizr';
-import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
-import { PaginatedAction } from './pagination.types';
-import { NormalizedResponse } from './api.types';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
+import { Schema } from 'normalizr';
+
+import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from './api.types';
+import { PaginatedAction } from './pagination.types';
 
 export interface SingleEntityAction {
   entityKey: string;
@@ -28,6 +28,7 @@ export enum RequestEntityLocation {
   ARRAY, // The response is an array which contains the entities
   OBJECT, // The response is the entity
 }
+
 
 export interface IRequestAction extends RequestAction {
   entity?: Schema;

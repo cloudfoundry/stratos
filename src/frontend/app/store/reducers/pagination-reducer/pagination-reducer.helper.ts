@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { combineAll, filter, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
@@ -10,6 +10,8 @@ import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
+import { RequestTypes } from '../../actions/request.actions';
+import { validateEntityRelations } from '../../helpers/entity-relations.helpers';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -120,6 +122,7 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
+  let hasValidatedOnce = false;
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
@@ -148,6 +151,13 @@ function getObservables<T = any>(
           return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
         }),
         switchMap(() => paginationMonitor.currentPage$),
+        tap(currentPage => {
+          if (!hasValidatedOnce) {
+            // For improvement on how this is handled (optimise location, provide wait mechanism, etc) see issue #1641
+            hasValidatedOnce = true;
+            validateEntityRelations(store, action, currentPage, true, false);
+          }
+        }),
         shareReplay(1)
       );
 

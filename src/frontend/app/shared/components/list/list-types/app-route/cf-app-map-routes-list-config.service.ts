@@ -1,3 +1,4 @@
+import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
@@ -9,7 +10,6 @@ import { ApplicationService } from '../../../../../features/applications/applica
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import {
   DeleteRoute,
-  GetSpaceRoutes,
   UnmapRoute
 } from '../../../../../store/actions/route.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -116,7 +116,7 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetSpaceRoutes(spaceGuid, appService.cfGuid),
+      new GetSpaceRoutes(spaceGuid, appService.cfGuid, getPaginationKey('route', appService.cfGuid, spaceGuid)),
       getPaginationKey('route', appService.cfGuid, spaceGuid),
       true,
       this

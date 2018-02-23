@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { denormalize, Schema } from 'normalizr';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { filter, map, shareReplay, tap, withLatestFrom, share } from 'rxjs/operators';
+import { filter, map, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
+import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { AppState } from '../store/app-state';
 import {
   ActionState,
@@ -14,18 +14,10 @@ import {
   TRequestTypeKeys,
   UpdatingSection,
 } from '../store/reducers/api-request-reducer/types';
-import {
-  getAPIRequestDataState,
-  getEntityUpdateSections,
-  getUpdateSectionById,
-  selectEntity,
-  selectRequestInfo,
-} from '../store/selectors/api.selectors';
+import { getEntityUpdateSections, getUpdateSectionById } from '../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { IRequestAction } from '../store/types/request.types';
 import { composeFn } from './../store/helpers/reducer.helper';
-import { EntityMonitor } from '../shared/monitors/entity-monitor';
-import { combineLatest } from 'rxjs/operators/combineLatest';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
 /**
