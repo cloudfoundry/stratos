@@ -1,5 +1,5 @@
 import { endpointEntitiesSelector } from '../selectors/endpoint.selectors';
-import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
+import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction, APISuccessOrFailedAction } from './../types/request.types';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
@@ -106,7 +106,7 @@ export class APIEffect {
         response = this.handleMultiEndpoints(response, paginatedAction);
         const { entities, totalResults, totalPages } = response;
         const actions = [];
-        actions.push({ type: paginatedAction.actions[1], apiAction: paginatedAction });
+        actions.push(new APISuccessOrFailedAction(paginatedAction.actions[1], paginatedAction));
         actions.push(new WrapperRequestActionSuccess(
           entities,
           paginatedAction,
@@ -130,7 +130,7 @@ export class APIEffect {
       })
       .catch(err => {
         return [
-          { type: paginatedAction.actions[2], apiAction: paginatedAction },
+          new APISuccessOrFailedAction(paginatedAction.actions[2], paginatedAction),
           new WrapperRequestActionFailed(
             err.message,
             paginatedAction,

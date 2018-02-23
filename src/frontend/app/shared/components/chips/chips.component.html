@@ -1,5 +1,5 @@
-<span *ngIf="!chips.length">None</span>
-<mat-chip-list class="app-chips" *ngIf="chips.length">
+<span *ngIf="!chips || !chips.length">None</span>
+<mat-chip-list class="app-chips" *ngIf="chips && chips.length">
   <mat-chip class="app-chip" *ngFor="let chip of chips | slice:0:limit">{{chip.value}}
     <ng-container *ngIf="chip.clearAction && !chip.hideClearButton">
       <mat-icon *ngIf="!chip.busy || !(chip.busy | async)" (click)="chip.clearAction(chip)" class="app-chip__close">close</mat-icon>

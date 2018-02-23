@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AppChipsComponent } from './chips.component';
+import { getBaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CoreModule } from '../../../core/core.module';
 
 describe('AppChipsComponent', () => {
   let component: AppChipsComponent;
@@ -8,7 +10,10 @@ describe('AppChipsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [AppChipsComponent]
+      declarations: [AppChipsComponent],
+      imports: [
+        CoreModule
+      ]
     })
       .compileComponents();
   }));

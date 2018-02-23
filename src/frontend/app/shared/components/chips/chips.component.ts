@@ -31,7 +31,7 @@ export class AppChipsComponent {
   public limit = this.lowerLimit;
 
   @Input('chips')
-  public chips: AppChip[];
+  public chips: AppChip[] = [];
 
   public toggleLimit() {
     if (this.limit === this.lowerLimit) {

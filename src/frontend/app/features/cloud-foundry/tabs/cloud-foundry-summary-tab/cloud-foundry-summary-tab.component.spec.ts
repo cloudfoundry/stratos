@@ -1,11 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CloudFoundrySummaryTabComponent } from './cloud-foundry-summary-tab.component';
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModules
+  getBaseTestModules,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { testSCFGuid } from '../../../../test-framework/store-test-helper';
+import { CloudFoundrySummaryTabComponent } from './cloud-foundry-summary-tab.component';
 
 describe('CloudFoundrySummaryTabComponent', () => {
   let component: CloudFoundrySummaryTabComponent;
@@ -15,7 +14,7 @@ describe('CloudFoundrySummaryTabComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundrySummaryTabComponent],
         imports: [...getBaseTestModules],
-        providers: [generateTestCfEndpointServiceProvider()]
+        providers: [...generateTestCfEndpointServiceProvider()]
       }).compileComponents();
     })
   );
