@@ -17,11 +17,11 @@ import {
   CfOrg,
   CfPrivateDomain,
   CfQuotaDefinition,
-  CfServiceInstance,
   CfSpace,
 } from '../../../store/types/org-and-space.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { CfServiceInstance } from '../../../store/types/service.types';
 
 @Injectable()
 export class CloudFoundryOrganisationService {

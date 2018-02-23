@@ -12,10 +12,11 @@ import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplication } from '../../../store/types/application.types';
-import { CfQuotaDefinition, CfServiceInstance, CfSpace } from '../../../store/types/org-and-space.types';
+import { CfQuotaDefinition, CfSpace } from '../../../store/types/org-and-space.types';
 import { Route } from '../../../store/types/route.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { CfServiceInstance } from '../../../store/types/service.types';
 
 @Injectable()
 export class CloudFoundrySpaceService {

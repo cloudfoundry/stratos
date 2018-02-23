@@ -264,6 +264,7 @@ const testInitialStoreState: AppState = {
       },
       stack: {},
       space: {},
+      serviceInstance: {},
       organization: {
         endpointOrgSpaceService: {
           pageCount: 1,
@@ -578,6 +579,7 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      serviceInstance: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
@@ -3818,6 +3820,7 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      serviceInstance: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           entity: {

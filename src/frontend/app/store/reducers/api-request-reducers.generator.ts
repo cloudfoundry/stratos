@@ -32,7 +32,7 @@ const requestActions = [
 ] as IRequestArray;
 
 function chainReducers(baseReducer, extraReducers) {
-  return function(state, action) {
+  return function (state, action) {
     let newState = baseReducer(state, action);
     let nextState;
     Object.keys(extraReducers).forEach(key => {
@@ -66,6 +66,10 @@ const entities = [
   'createApplication',
   'uaaSetup',
   'user',
+  'serviceInstance',
+  'servicePlan',
+  'service',
+  'serviceBinding',
   CF_INFO_ENTITY_KEY,
   GITHUB_REPO_ENTITY_KEY,
   GITHUB_BRANCHES_ENTITY_KEY,
