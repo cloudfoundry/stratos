@@ -8,25 +8,12 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import {
-  CF_INFO_ENTITY_KEY,
-  CFInfoSchema,
-  GetEndpointInfo
-} from '../../../store/actions/cloud-foundry.actions';
-import {
-  EndpointSchema,
-  GetAllEndpoints
-} from '../../../store/actions/endpoint.actions';
+import { CF_INFO_ENTITY_KEY, CFInfoSchema, GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
+import { EndpointSchema, GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import {
-  CfApplication,
-  CfApplicationState
-} from '../../../store/types/application.types';
-import {
-  EndpointModel,
-  EndpointUser
-} from '../../../store/types/endpoint.types';
+import { CfApplication, CfApplicationState } from '../../../store/types/application.types';
+import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfOrg } from '../../../store/types/org-and-space.types';
 import { CfUser } from '../../../store/types/user.types';
 

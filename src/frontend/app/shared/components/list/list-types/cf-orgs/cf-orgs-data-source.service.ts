@@ -14,8 +14,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
 
   constructor(store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
     const { paginationKey } = CfOrgsDataSourceService;
-    const action = new GetAllOrganisations(paginationKey,
-      [OrgSpaceRelation.key, SpaceRouteRelation.key]);
+    const action = new GetAllOrganisations(paginationKey, [OrgSpaceRelation.key, SpaceRouteRelation.key]);
     super({
       store,
       action,

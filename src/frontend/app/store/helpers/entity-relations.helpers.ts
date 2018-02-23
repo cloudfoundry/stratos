@@ -49,7 +49,8 @@ export class EntityRelation {
 
 /**
  * Defines an schema entity array which should exist as a parameter in a parent entity. For example a space array in a parent organisation.
- * Also provides a framework to populate a parent entity's parameter with itself
+ * Also provides a framework to populate a parent entity's parameter with itself. For example we've fetched the space array and it needs
+ * to be stored in the parent organisation's entity.
  *
  * @export
  * @class EntityInlineChild
@@ -168,7 +169,7 @@ function validationLoop(
   }
 )
   : ValidateEntityResult[] {
-  let results2 = [];
+  let results = [];
   const {
     store,
     action,
@@ -206,7 +207,7 @@ function validationLoop(
           }
           // The actual check is step two of validation loop, but only after we've tried to discover if this child has any children
           // it needs validating
-          results2 = [].concat(results2,
+          results = [].concat(results,
             validationLoop({
               ...config,
               parentEntity: entity,
@@ -218,8 +219,8 @@ function validationLoop(
             }));
         });
       } else if (value instanceof Object) {
-        // This isn't a schema, continue checking it's children
-        results2 = [].concat(results2, validationLoop({
+        // This isn't a relation, continue checking it's children
+        results = [].concat(results, validationLoop({
           ...config,
           parentEntitySchemaParam: value,
           childRelation: null,
@@ -229,16 +230,17 @@ function validationLoop(
     });
   }
 
+  // Step 2) Determine what actions, if any, need to be raised given the state of the relationship and children
   // No relevant relation, skip
   if (!childRelation) {
-    return results2;
+    return results;
   }
 
   const paramAction = childRelation.fetchChildrenAction(parentEntity, action.includeRelations, populateMissing);
   // Have we found some entities that need to go into the pagination store OR are some entities missing that are required?
   if (entities && populateExisting) {
     if (!allEntities) {
-      return results2;
+      return results;
     }
     // We've got the value already, ensure we create a pagination section for them
     const guids = entities.map(entity => entity.metadata.guid);
@@ -255,13 +257,13 @@ function validationLoop(
       entities.length,
       1
     );
-    results2.push({
+    results.push({
       action: paginationSuccess,
       paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childRelation.childEntity)
     });
   } else if (!entities && populateMissing) {
     // The values are missing and we want them, go fetch
-    results2 = [].concat(results2, [{
+    results = [].concat(results, [{
       action: new SetInitialParams(paramAction.entityKey, paramAction.paginationKey, paramAction.initialParams, true)
     },
     {
@@ -271,7 +273,7 @@ function validationLoop(
     ]);
   }
 
-  return results2;
+  return results;
 }
 
 /**
@@ -365,6 +367,7 @@ export function validateEntityRelations(
       };
     })
   );
+  // This is a .first, so automatically closes
   observable.subscribe();
   return observable;
 
