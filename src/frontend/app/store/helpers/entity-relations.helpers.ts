@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
-import { Schema, schema, denormalize } from 'normalizr';
+import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { first, skipWhile, takeWhile, tap, map } from 'rxjs/operators';
+import { first, map, skipWhile, takeWhile } from 'rxjs/operators';
 
 import { pathGet } from '../../core/utils.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
@@ -35,16 +35,15 @@ export class EntityRelation {
   /**
    * Create a new parent that contains the child entities. For example <org>.entity.<spaces>
    */
-  createParentWithChildren: (state, parentGuid: string, response: NormalizedResponse) => APIResource;
+  createParentWithChild: (state, parentGuid: string, response: NormalizedResponse) => APIResource;
   /**
    * An action that will fetch missing child entities
    */
-  fetchChildrenAction: (resource: APIResource, includeRelations: string[], populateMissing?: boolean) => EntityInlineParentAction;
+  fetchChildrenAction: (resource: APIResource, includeRelations: string[], populateMissing?: boolean) => EntityInlineChildAction;
   /**
    * Create the pagination key that is associated with the action to fetch the children
    */
   static createPaginationKey = (schemaKey: string, guid: string) => `${schemaKey}-${guid}`;
-
 }
 
 /**
@@ -75,8 +74,12 @@ export class EntityInlineChild extends schema.Array {
  * @export
  * @interface EntityInlineChildAction
  */
-export interface EntityInlineChildAction {
+export interface EntityInlineChildAction extends PaginatedAction {
   parentGuid: string;
+}
+
+export function isEntityInlineParentAction(action: Action) {
+  return action && !!action['includeRelations'];
 }
 
 /**
@@ -86,7 +89,7 @@ export interface EntityInlineChildAction {
  * @interface EntityInlineParentAction
  * @extends {PaginatedAction}
  */
-export interface EntityInlineParentAction extends PaginatedAction {
+export interface EntityInlineParentAction extends IRequestAction {
   includeRelations: string[];
   populateMissing: boolean;
 }
@@ -163,13 +166,14 @@ function validationLoop(
     parentEntity: any,
     entities: any[],
     parentEntitySchemaKey: string,
-    parentEntitySchemaParam,
+    parentEntitySchemaParam: any,
     childRelation: EntityRelation,
     path: string,
   }
 )
   : ValidateEntityResult[] {
   let results = [];
+
   const {
     store,
     action,
@@ -309,23 +313,15 @@ export function validateEntityRelations(
     entityResults: []
   });
   // Does the entity associated with the action have inline params that need to be validated?
-  let parentEntitySchema = action.entity;
-
+  const parentEntitySchema = extractActionEntitySchema(action);
   if (!parentEntitySchema) {
     return emptyResponse;
-  }
-
-  if (EntityInlineChild.is(parentEntitySchema)) {
-    parentEntitySchema = (parentEntitySchema as EntityInlineChild).entitySchema;
-  } else {
-    parentEntitySchema = parentEntitySchema['length'] > 0 ? parentEntitySchema[0] : parentEntitySchema;
   }
 
   // Do we have entities in the response to validate?
   if (!parentEntities || !parentEntities.length) {
     return emptyResponse;
   }
-  const counter = 0;
   const relationAction = action as EntityInlineParentAction;
 
   const observable = store.select(getAPIRequestDataState).pipe(
@@ -371,4 +367,59 @@ export function validateEntityRelations(
   observable.subscribe();
   return observable;
 
+}
+
+function extractActionEntitySchema(action: IRequestAction) {
+  let parentEntitySchema = action.entity;
+
+  if (!parentEntitySchema) {
+    return null;
+  }
+
+  if (EntityInlineChild.is(parentEntitySchema)) {
+    parentEntitySchema = (parentEntitySchema as EntityInlineChild).entitySchema;
+  } else {
+    parentEntitySchema = parentEntitySchema['length'] > 0 ? parentEntitySchema[0] : parentEntitySchema;
+  }
+
+  return parentEntitySchema;
+}
+
+export interface ListRelationsResult {
+  maxDepth: number;
+  relations: string[];
+}
+export function listRelations(action: EntityInlineParentAction): ListRelationsResult {
+  const res = {
+    maxDepth: 0,
+    relations: []
+  };
+  const parentEntitySchema = extractActionEntitySchema(action);
+  if (!parentEntitySchema) {
+    return res;
+  }
+
+  loop(res, parentEntitySchema['schema']);
+
+  return res;
+}
+function loop(res: ListRelationsResult, parentEntitySchemaObj: string) {
+  let haveDelved = false;
+  Object.keys(parentEntitySchemaObj).forEach(key => {
+    const value = parentEntitySchemaObj[key];
+    if (value instanceof EntityInlineChild || value instanceof schema.Entity) {
+      const entityKey = value instanceof EntityInlineChild ? value.entitySchema.key : value.key;
+      const entitySchema = value instanceof EntityInlineChild ? value.entitySchema['schema'] : value['schema'];
+      if (res.relations.indexOf(key) < 0) {
+        res.relations.push(key);
+      }
+      loop(res, entitySchema);
+      haveDelved = true;
+    } else if (value instanceof Object) {
+      loop(res, value);
+    }
+  });
+  if (haveDelved) {
+    res.maxDepth++;
+  }
 }

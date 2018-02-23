@@ -93,7 +93,7 @@ function populateParentEntity(state, successAction, params: {
   // For each parent-child relationship
   parentRelations.forEach(relation => {
     // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
-    const newParentEntity = relation.createParentWithChildren(state, parentEntityGuid, successAction.response);
+    const newParentEntity = relation.createParentWithChild(state, parentEntityGuid, successAction.response);
     if (!newParentEntity) {
       return;
     }

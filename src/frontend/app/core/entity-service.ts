@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { filter, map, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { AppState } from '../store/app-state';
+import { validateEntityRelations } from '../store/helpers/entity-relations.helpers';
 import {
   ActionState,
   RequestInfoState,
@@ -30,7 +31,8 @@ export class EntityService<T = any> {
     private store: Store<AppState>,
     public entityMonitor: EntityMonitor<T>,
     public action: IRequestAction,
-    public entitySection: TRequestTypeKeys = RequestSectionKeys.CF
+    public validateRelations = false,
+    public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
     this.actionDispatch = (updatingKey) => {
       if (updatingKey) {
@@ -64,6 +66,15 @@ export class EntityService<T = any> {
       }),
       shareReplay(1)
     );
+
+    if (validateRelations) {
+      this.waitForEntity$.pipe(
+        first(),
+        tap(entityInfo => {
+          validateEntityRelations(store, action, [entityInfo.entity], true, false);
+        })
+      ).subscribe();
+    }
   }
 
   refreshKey = 'updating';
@@ -121,28 +132,28 @@ export class EntityService<T = any> {
   poll(interval = 10000, key = this.refreshKey) {
     return Observable.interval(interval)
       .pipe(
-      tag('poll'),
-      withLatestFrom(
-        this.entityMonitor.entity$,
-        this.entityMonitor.entityRequest$
-      ),
-      map(a => ({
-        resource: a[1],
-        updatingSection: composeFn(
-          getUpdateSectionById(key),
-          getEntityUpdateSections,
-          () => a[2]
-        )
-      })),
-      tap(({ resource, updatingSection }) => {
-        if (!updatingSection || !updatingSection.busy) {
-          this.actionDispatch(key);
-        }
-      }),
-      filter(({ resource, updatingSection }) => {
-        return !!updatingSection;
-      }),
-      share(),
+        tag('poll'),
+        withLatestFrom(
+          this.entityMonitor.entity$,
+          this.entityMonitor.entityRequest$
+        ),
+        map(a => ({
+          resource: a[1],
+          updatingSection: composeFn(
+            getUpdateSectionById(key),
+            getEntityUpdateSections,
+            () => a[2]
+          )
+        })),
+        tap(({ resource, updatingSection }) => {
+          if (!updatingSection || !updatingSection.busy) {
+            this.actionDispatch(key);
+          }
+        }),
+        filter(({ resource, updatingSection }) => {
+          return !!updatingSection;
+        }),
+        share(),
     );
   }
 

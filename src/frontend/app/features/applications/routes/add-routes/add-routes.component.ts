@@ -5,27 +5,20 @@ import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
 import { filter, map, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { AssociateRouteWithAppApplication } from '../../../../store/actions/application.actions';
-import {
-  CreateRoute,
-  GetAppRoutes,
-} from '../../../../store/actions/route.actions';
+import { RouteSchema } from '../../../../store/actions/action-types';
+import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application.actions';
+import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import {
-  selectEntity,
-  selectNestedEntity,
-  selectRequestInfo
-} from '../../../../store/selectors/api.selectors';
+import { selectEntity, selectNestedEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
-import { Observable } from 'rxjs/Observable';
-import { RouteSchema } from '../../../../store/actions/action-types';
 
 @Component({
   selector: 'app-add-routes',

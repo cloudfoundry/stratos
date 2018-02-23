@@ -9,11 +9,11 @@ import {
   EntityRelation,
 } from '../helpers/entity-relations.helpers';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { APIResource } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { RouteSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './action-types';
 import { RouteEvents } from './route.actions';
+import { ApplicationSchema } from './application.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -27,7 +27,7 @@ export const SpaceRouteRelation: EntityRelation = {
   key: 'space-route-relation',
   parentEntityKey: spaceSchemaKey,
   childEntity: RouteSchema,
-  createParentWithChildren: (state, parentGuid, response) => {
+  createParentWithChild: (state, parentGuid, response) => {
     const parentEntity = pathGet(`${spaceSchemaKey}.${parentGuid}`, state);
     const newParentEntity = {
       ...parentEntity,
@@ -49,11 +49,12 @@ export const SpaceRouteRelation: EntityRelation = {
   },
 };
 
-export const RoutesSchema = new EntityInlineChild([SpaceRouteRelation], RouteSchema);
+export const RoutesInSpaceSchema = new EntityInlineChild([SpaceRouteRelation], RouteSchema);
 
 export const SpaceSchema = new schema.Entity(spaceSchemaKey, {
   entity: {
-    routes: RoutesSchema
+    apps: ApplicationSchema,
+    routes: RoutesInSpaceSchema
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -122,7 +123,7 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'attachedApps',
   };
   parentGuid: string;
-  entity = RoutesSchema;
+  entity = RoutesInSpaceSchema;
   entityKey = RouteSchema.key;
   options: RequestOptions;
   endpointGuid: string;

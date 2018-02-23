@@ -16,7 +16,7 @@ import {
   GetAppStatsAction,
   GetAppSummaryAction,
 } from '../../store/actions/app-metadata.actions';
-import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
+import { GetApplication, UpdateApplication, UpdateExistingApplication, AppRouteRelation } from '../../store/actions/application.actions';
 import { ApplicationSchema } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
 import { ActionState } from '../../store/reducers/api-request-reducer/types';
@@ -75,7 +75,9 @@ export class ApplicationService {
       ApplicationSchema.key,
       ApplicationSchema,
       appGuid,
-      new GetApplication(appGuid, cfGuid));
+      new GetApplication(appGuid, cfGuid, [AppRouteRelation.key], true),
+      true
+    );
 
     this.appSummaryEntityService = this.entityServiceFactory.create(
       AppSummarySchema.key,
