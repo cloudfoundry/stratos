@@ -16,11 +16,8 @@ import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/
 export const RouteSchema = new schema.Entity('route');
 
 export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
-  public static paginationKey = 'cf-space-apps';
-
   constructor(store: Store<AppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource>) {
-    let { paginationKey } = CfSpaceAppsDataSource;
-    paginationKey = `${paginationKey}-${cfSpaceService.spaceGuid}`;
+    const paginationKey = getPaginationKey('cf-space-apps', cfSpaceService.cfGuid, cfSpaceService.spaceGuid);
     const action = new GetAllAppsInSpace(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey);
     super({
       store,
