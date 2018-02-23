@@ -36,3 +36,9 @@ export interface IUserPermissionInOrg {
     user: boolean
   };
 }
+
+export interface UserRoleInSpace {
+  manager: boolean;
+  developer: boolean;
+  auditor: boolean;
+}

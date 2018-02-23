@@ -3,18 +3,23 @@ import { BaseCF } from './../../features/cloud-foundry/cf-page.types';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, shareReplay } from 'rxjs/operators';
 
-import { isOrgAuditor, isOrgBillingManager, isOrgManager, isOrgUser } from '../../features/cloud-foundry/cf.helpers';
+import {
+  isOrgAuditor,
+  isOrgBillingManager,
+  isOrgManager,
+  isOrgUser,
+  isSpaceAuditor,
+  isSpaceDeveloper,
+  isSpaceManager,
+} from '../../features/cloud-foundry/cf.helpers';
 import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { CfUser, UserRoleInOrg, UserSchema, IUserPermissionInOrg } from '../../store/types/user.types';
+import { CfUser, UserRoleInOrg, UserSchema, UserRoleInSpace, IUserPermissionInOrg } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-
-
-
 @Injectable()
 export class CfUserService {
   public allUsersAction: GetAllUsers;
@@ -40,11 +45,11 @@ export class CfUserService {
     this.allUsers$.entities$.pipe(
       filter(p => !!p),
       map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
-      filter(p => p.length > 0)
+      filter(p => p.length > 0),
+      shareReplay(1),
     )
 
   getRolesFromUser(user: CfUser, type: 'organizations' | 'spaces' = 'organizations'): IUserPermissionInOrg[] {
-    debugger;
     return user[type].map(org => {
       const orgGuid = org.metadata.guid;
       return {
@@ -82,15 +87,14 @@ export class CfUserService {
     userGuid: string,
     spaceGuid: string,
     cfGuid: string
-  ): Observable<UserRoleInOrg> => {
+  ): Observable<UserRoleInSpace> => {
     return this.getUsers(cfGuid).pipe(
       this.getUser(userGuid),
       map(user => {
         return {
-          orgManager: isOrgManager(user.entity, spaceGuid),
-          billingManager: isOrgBillingManager(user.entity, spaceGuid),
-          auditor: isOrgAuditor(user.entity, spaceGuid),
-          user: isOrgUser(user.entity, spaceGuid)
+          manager: isSpaceManager(user.entity, spaceGuid),
+          auditor: isSpaceAuditor(user.entity, spaceGuid),
+          developer: isSpaceDeveloper(user.entity, spaceGuid)
         };
       })
     );

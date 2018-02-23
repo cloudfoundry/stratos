@@ -20,9 +20,10 @@ function cfOrganisationServiceFactory(
   paginationMonitorFactory: PaginationMonitorFactory,
   cfEndpointService: CloudFoundryEndpointService
 ) {
-  const { cfId, orgId } = activatedRoute.snapshot.params;
+  const { orgId } = activatedRoute.snapshot.params;
+  const { cfGuid } = cfEndpointService;
   return new CloudFoundryOrganisationService(
-    cfId,
+    cfGuid,
     orgId,
     store,
     entityServiceFactory,
@@ -67,7 +68,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       label: 'Users'
     }];
 
-  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
+  constructor(private cfEndpointService: CloudFoundryEndpointService, private cfOrgService: CloudFoundryOrganisationService) { }
 
   ngOnInit() {
   }

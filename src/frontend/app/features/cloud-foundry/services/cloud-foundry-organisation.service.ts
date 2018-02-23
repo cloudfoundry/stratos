@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Route } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
@@ -13,13 +13,21 @@ import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplication } from '../../../store/types/application.types';
-import { CfOrg, CfPrivateDomain, CfServiceInstance, CfSpace } from '../../../store/types/org-and-space.types';
+import {
+  CfOrg,
+  CfPrivateDomain,
+  CfQuotaDefinition,
+  CfServiceInstance,
+  CfSpace,
+} from '../../../store/types/org-and-space.types';
+import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-
 
 @Injectable()
 export class CloudFoundryOrganisationService {
 
+  userOrgRole$: Observable<string>;
+  quotaDefinition$: Observable<CfQuotaDefinition>;
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<CfPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
@@ -39,6 +47,7 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
+
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       OrganisationWithSpaceSchema,
@@ -54,38 +63,41 @@ export class CloudFoundryOrganisationService {
     this.org$ = this.organisationEntityService.entityObs$.pipe(
       filter(o => !!o && !!o.entity)
     );
-    this.spaces$ = this.org$.pipe(
-      map(o => o.entity.entity.spaces)
-    );
-    this.apps$ = this.spaces$.pipe(
-      this.getFlattenedList('apps')
-    );
 
+    this.initialiseOrgObservables();
 
-    this.appInstances$ = this.apps$.pipe(map(a => a.map(app => app.entity.instances)
-      .reduce((x, sum) => x + sum, 0)));
+    this.initialiseAppObservables();
 
-    this.serivceInstances$ = this.spaces$.pipe(
-      this.getFlattenedList('service_instances')
-    );
+    this.initialiseSpaceObservables();
 
-    this.routes$ = this.spaces$.pipe(
-      this.getFlattenedList('routes')
-    );
-
-    this.privateDomains$ = this.org$.pipe(
-      map(o => o.entity.entity.private_domains)
-    );
-
-    this.totalMem$ = this.apps$.pipe(
-      map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))
+    this.userOrgRole$ = this.cfEndpointService.currentUser$.pipe(
+      switchMap(u => this.cfUserService.getUserRoleInOrg(u.guid, this.orgGuid, this.cfGuid)),
+      map(u => getOrgRolesString(u))
     );
 
   }
 
+  private initialiseSpaceObservables() {
+    this.serivceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
+    this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
+  }
+
+  private initialiseAppObservables() {
+    this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
+    this.appInstances$ = this.apps$.pipe(map(a => a.map(app => app.entity.instances)
+      .reduce((x, sum) => x + sum, 0)));
+    this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
+  }
+
+  private initialiseOrgObservables() {
+    this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
+    this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
+    this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
+  }
+
   private getFlattenedList(property: string): (source: Observable<APIResource<CfSpace>[]>) => Observable<any> {
-    return map(spaces => {
-      const allInstances = spaces.map(s => s.entity[property]);
+    return map(entities => {
+      const allInstances = entities.map(s => s.entity[property]);
       return [].concat.apply([], allInstances);
     });
   }

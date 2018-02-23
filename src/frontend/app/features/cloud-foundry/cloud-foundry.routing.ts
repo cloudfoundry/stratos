@@ -2,9 +2,11 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AddOrganisationComponent } from './add-organisation/add-organisation.component';
+import { AddSpaceComponent } from './add-space/add-space.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
+import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
@@ -44,6 +46,14 @@ const cloudFoundry: Routes = [{
   {
     path: 'edit-org',
     component: AddOrganisationComponent
+  },
+  {
+    path: 'organizations/:orgId/edit-space',
+    component: EditSpaceComponent
+  },
+  {
+    path: 'organizations/:orgId/add-space',
+    component: AddSpaceComponent
   },
   {
     path: 'manage-users',

@@ -13,6 +13,7 @@ import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-ba
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
+import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { CloudFoundryService } from './services/cloud-foundry.service';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
@@ -39,6 +40,7 @@ import {
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import { AddSpaceComponent } from './add-space/add-space.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -59,7 +61,9 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,
     CloudFoundryOrganizationUsersComponent,
-    CloudFoundryOrganizationBaseComponent
+    CloudFoundryOrganizationBaseComponent,
+    EditSpaceComponent,
+    AddSpaceComponent
   ],
   providers: [
     CloudFoundryService,

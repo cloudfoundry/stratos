@@ -1,4 +1,4 @@
-import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
+import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 
 export enum OrgUserRoles {
   MANAGER = 'managers',
@@ -26,6 +26,21 @@ export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   }
   if (userRolesInOrg.user && !userRolesInOrg.orgManager) {
     roles = assignRole(roles, 'User');
+  }
+
+  return roles ? roles : 'None';
+}
+export function getSpaceRolesString(userRolesInSpace: UserRoleInSpace): string {
+  let roles = null;
+  if (userRolesInSpace.manager) {
+    roles = 'Manager';
+  }
+  if (userRolesInSpace.auditor) {
+    roles = assignRole(roles, 'Auditor');
+
+  }
+  if (userRolesInSpace.developer) {
+    roles = assignRole(roles, 'Developer');
   }
 
   return roles ? roles : 'None';
@@ -65,23 +80,35 @@ function assignRole(currentRoles: string, role: string) {
   return newRoles;
 }
 
-export function isOrgManager(user: CfUser, orgGuid: string): boolean {
-  return hasOrgRole(user, orgGuid, 'managed_organizations');
+export function isOrgManager(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'managed_organizations');
 }
 
-export function isOrgBillingManager(user: CfUser, orgGuid: string): boolean {
-  return hasOrgRole(user, orgGuid, 'billing_managed_organizations');
+export function isOrgBillingManager(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'billing_managed_organizations');
 }
 
-export function isOrgAuditor(user: CfUser, orgGuid: string): boolean {
-  return hasOrgRole(user, orgGuid, 'audited_organizations');
+export function isOrgAuditor(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'audited_organizations');
 }
 
-export function isOrgUser(user: CfUser, orgGuid: string): boolean {
-  return hasOrgRole(user, orgGuid, 'organizations');
+export function isOrgUser(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'organizations');
 }
 
-function hasOrgRole(user: CfUser, orgGuid: string, type: string) {
-  return user[type].find(o => o.metadata.guid === orgGuid) != null;
+export function isSpaceManager(user: CfUser, spaceGuid: string): boolean {
+  return hasRole(user, spaceGuid, 'managed_spaces');
+}
+
+export function isSpaceAuditor(user: CfUser, spaceGuid: string): boolean {
+  return hasRole(user, spaceGuid, 'audited_spaces');
+}
+
+export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
+  return hasRole(user, spaceGuid, 'spaces');
+}
+
+function hasRole(user: CfUser, guid: string, roleType: string) {
+  return user[roleType] && user[roleType].find(o => o.metadata.guid === guid) != null;
 }
 

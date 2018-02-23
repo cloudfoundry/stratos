@@ -1,7 +1,9 @@
-.org-card {
-  cursor: pointer;
+.space-card {
   &__title {
     width: 100%;
+    &-link {
+      cursor: pointer;
+    }
   }
   &__button {
     justify-content: flex-end;

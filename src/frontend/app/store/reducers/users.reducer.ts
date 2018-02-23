@@ -30,22 +30,22 @@ function removeUserPermission(user: CfUser, orgId: string, permissionType: OrgUs
     case OrgUserRoles.MANAGER:
       return {
         ...user,
-        managed_organizations: user.managed_organizations.filter(org => org.metadata.guid !== orgId);
+        managed_organizations: user.managed_organizations.filter(org => org.metadata.guid !== orgId)
       };
     case OrgUserRoles.BILLING_MANAGERS:
       return {
         ...user,
-        billing_managed_organizations: user.billing_managed_organizations.filter(org => org.metadata.guid !== orgId);
+        billing_managed_organizations: user.billing_managed_organizations.filter(org => org.metadata.guid !== orgId)
       };
     case OrgUserRoles.AUDITOR:
       return {
         ...user,
-        audited_organizations: user.audited_organizations.filter(org => org.metadata.guid !== orgId);
+        audited_organizations: user.audited_organizations.filter(org => org.metadata.guid !== orgId)
       };
     case OrgUserRoles.USER:
       return {
         ...user,
-        organizations: user.organizations.filter(org => org.metadata.guid !== orgId);
+        organizations: user.organizations.filter(org => org.metadata.guid !== orgId)
       };
     default:
       return user;
