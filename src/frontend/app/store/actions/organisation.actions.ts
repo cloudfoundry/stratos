@@ -1,11 +1,13 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import {
   OrganisationSchema,
   organisationSchemaKey,
-  OrganisationWithSpaceSchema
+  OrganisationWithSpaceSchema,
+  spaceSchemaKey,
+  SpaceWithOrganisationSchema,
 } from './action-types';
 import { getActions } from './action.helper';
 
@@ -17,12 +19,17 @@ export const GET_ORGANISATIONS = '[Organisation] Get all';
 export const GET_ORGANISATIONS_SUCCESS = '[Organisation] Get all success';
 export const GET_ORGANISATIONS_FAILED = '[Organisation] Get all failed';
 
+
 export class GetOrganisation extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string) {
+  constructor(public guid: string, public endpointGuid: string, private withInlineDepth = 0) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `organization/${guid}`;
+    this.options.url = `organizations/${guid}`;
     this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+    if (withInlineDepth !== 0) {
+      this.options.params.append('inline-relations-depth', '' + 2);
+    }
   }
   actions = [
     GET_ORGANISATION,
@@ -72,3 +79,23 @@ export class DeleteOrganisation extends CFStartAction implements ICFAction {
   entityKey = organisationSchemaKey;
   options: RequestOptions;
 }
+
+export class GetAllSpacesInOrg extends CFStartAction implements PaginationAction {
+  constructor(public cfGuid: string, public orgGuid: string, public paginationKey: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `organizations/${orgGuid}/spaces`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Organisations', 'Get Spaces');
+  entity = [SpaceWithOrganisationSchema];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'inline-relations-depth': 2
+  };
+}
+

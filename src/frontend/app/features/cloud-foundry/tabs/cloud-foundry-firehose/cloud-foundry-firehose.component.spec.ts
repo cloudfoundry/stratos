@@ -5,7 +5,7 @@ import {
   getBaseTestModules,
   generateTestCfEndpointServiceProvider
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryEndpointService } from '../../cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 describe('CloudFoundryFirehoseComponent', () => {
   let component: CloudFoundryFirehoseComponent;

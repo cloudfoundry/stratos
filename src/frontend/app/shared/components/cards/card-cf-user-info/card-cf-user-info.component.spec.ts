@@ -3,7 +3,7 @@ import { CoreModule } from '../../../../core/core.module';
 import { SharedModule } from '../../../shared.module';
 import { CardCfUserInfoComponent } from './card-cf-user-info.component';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   generateTestCfEndpointServiceProvider,
   getBaseTestModulesNoShared,

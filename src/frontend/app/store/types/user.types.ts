@@ -19,3 +19,8 @@ export interface UserRoleInOrg {
   auditor: boolean;
   user: boolean;
 }
+export interface UserRoleInSpace {
+  manager: boolean;
+  developer: boolean;
+  auditor: boolean;
+}

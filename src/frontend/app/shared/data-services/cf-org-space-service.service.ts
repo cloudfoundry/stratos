@@ -5,14 +5,12 @@ import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { OrganisationWithSpaceSchema } from '../../store/actions/action-types';
-import {
-  DeleteOrganisation,
-  GetAllOrganisations
-} from '../../store/actions/organisation.actions';
+import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
+import { DeleteSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   getCurrentPageRequestInfo,
-  getPaginationObservables
+  getPaginationObservables,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
@@ -169,5 +167,9 @@ export class CfOrgSpaceDataService {
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {
     return this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
+  }
+
+  public deleteSpace(spaceGuid: string, endpointGuid: string) {
+    return this.store.dispatch(new DeleteSpace(spaceGuid, endpointGuid));
   }
 }

@@ -2,6 +2,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { SpaceSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './action-types';
+import { getActions } from './action.helper';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -41,6 +42,22 @@ export class GetAllSpaces extends CFStartAction implements ICFAction {
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
   entity = [SpaceWithOrganisationSchema];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+}
+
+export class DeleteSpace extends CFStartAction implements ICFAction {
+  constructor(public guid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${guid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+    this.options.params.append('recursive', 'true');
+    this.options.params.append('async', 'false');
+  }
+  actions = getActions('Spaces', 'Delete Space');
+  entity = [SpaceSchema];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
 }

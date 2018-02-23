@@ -7,12 +7,12 @@ import { IListConfig } from '../../list.component.types';
 import { AppReducersModule } from '../../../../../store/reducers.module';
 import { GetAllOrganisations } from '../../../../../store/actions/organisation.actions';
 import { OrganisationSchema, OrganisationWithSpaceSchema } from '../../../../../store/actions/action-types';
+import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
-  public static paginationKey = 'cf-organizations';
-
-  constructor(store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
-    const { paginationKey } = CfOrgsDataSourceService;
+  constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
+    const paginationKey = getPaginationKey('cf-organizations', cfGuid);
     const action = new GetAllOrganisations(paginationKey);
     super({
       store,

@@ -12,11 +12,15 @@ import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-ba
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
 import { CloudFoundryComponent } from './cloud-foundry/cloud-foundry.component';
+import { EditSpaceComponent } from './edit-space/edit-space.component';
 import { ManageUsersComponent } from './manage-users/manage-users.component';
 import { CloudFoundryService } from './services/cloud-foundry.service';
 import { CloudFoundryBuildPacksComponent } from './tabs/cloud-foundry-build-packs/cloud-foundry-build-packs.component';
 import { CloudFoundryFeatureFlagsComponent } from './tabs/cloud-foundry-feature-flags/cloud-foundry-feature-flags.component';
 import { CloudFoundryFirehoseComponent } from './tabs/cloud-foundry-firehose/cloud-foundry-firehose.component';
+import {
+  CloudFoundryOrganizationBaseComponent,
+} from './tabs/cloud-foundry-organizations/cloud-foundry-organization-base/cloud-foundry-organization-base.component';
 import {
   CloudFoundryOrganizationSpacesComponent,
 } from './tabs/cloud-foundry-organizations/cloud-foundry-organization-spaces/cloud-foundry-organization-spaces.component';
@@ -35,6 +39,7 @@ import {
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import { AddSpaceComponent } from './add-space/add-space.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -54,7 +59,10 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
     ManageUsersComponent,
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,
-    CloudFoundryOrganizationUsersComponent
+    CloudFoundryOrganizationUsersComponent,
+    CloudFoundryOrganizationBaseComponent,
+    EditSpaceComponent,
+    AddSpaceComponent
   ],
   providers: [
     CloudFoundryService,
@@ -62,4 +70,4 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
     EndpointsListConfigService
   ]
 })
-export class CloudFoundryModule {}
+export class CloudFoundryModule { }
