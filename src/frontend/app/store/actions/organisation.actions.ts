@@ -11,7 +11,7 @@ import {
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { OrganisationSchema, organisationSchemaKey, spaceSchemaKey } from './action-types';
+import { OrganisationSchema, organisationSchemaKey, spaceSchemaKey, QuotaDefinitionSchema } from './action-types';
 import { getActions } from './action.helper';
 import { SpaceSchema } from './space.actions';
 
@@ -101,6 +101,7 @@ export class GetAllOrganisationSpaces extends CFStartAction implements Paginated
 
 export const OrganisationWithSpaceSchema = new schema.Entity(organisationSchemaKey, {
   entity: {
+    quota_definition: QuotaDefinitionSchema,
     spaces: SpacesSchema
   }
 }, {

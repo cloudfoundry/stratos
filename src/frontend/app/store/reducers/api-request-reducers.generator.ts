@@ -20,6 +20,7 @@ import {
 } from '../types/deploy-application.types';
 import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
+import { organisationSchemaKey, QuotaDefinitionSchema } from '../actions/action-types';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -32,7 +33,7 @@ const requestActions = [
 ] as IRequestArray;
 
 function chainReducers(baseReducer, extraReducers) {
-  return function(state, action) {
+  return function (state, action) {
     let newState = baseReducer(state, action);
     let nextState;
     Object.keys(extraReducers).forEach(key => {
@@ -56,7 +57,7 @@ const entities = [
   'application',
   'stack',
   'space',
-  'organization',
+  organisationSchemaKey,
   'route',
   'event',
   endpointStoreNames.type,
@@ -72,7 +73,8 @@ const entities = [
   GITHUB_COMMIT_ENTITY_KEY,
   AppEnvVarSchema.key,
   AppStatSchema.key,
-  AppSummarySchema.key
+  AppSummarySchema.key,
+  QuotaDefinitionSchema.key
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 

@@ -13,6 +13,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { RouteSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './action-types';
 import { RouteEvents } from './route.actions';
+import { ApplicationSchema } from './application.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -52,6 +53,7 @@ export const RoutesInSpaceSchema = new EntityInlineChild([SpaceRouteRelation], R
 
 export const SpaceSchema = new schema.Entity(spaceSchemaKey, {
   entity: {
+    apps: ApplicationSchema,
     routes: RoutesInSpaceSchema
   }
 }, {
@@ -93,7 +95,6 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction {
   };
 }
 
-// TODO: RC REmove parent?
 export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public spaceGuid: string,

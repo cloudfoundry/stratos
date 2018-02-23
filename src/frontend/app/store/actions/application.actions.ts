@@ -130,6 +130,7 @@ export class GetApplication extends CFStartAction implements ICFAction, EntityIn
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.options.params.set('inline-relations-depth', '2');
+    this.options.params.set('include-relations', 'space,organization,routes,domain');
   }
   actions = [GET, GET_SUCCESS, GET_FAILED];
   entity = [ApplicationSchema];
