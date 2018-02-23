@@ -1,13 +1,17 @@
 import { inject, TestBed } from '@angular/core/testing';
 
-import { getBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import {
+  getBaseTestModules,
+  generateTestCfEndpointServiceProvider
+} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgsListConfigService } from '../cf-orgs/cf-orgs-list-config.service';
 
-describe('CfOrgsListConfigService', () => {
+describe('CfOrgsSpaceListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfOrgsListConfigService],
+      providers: [...generateTestCfEndpointServiceProvider(), CfOrgsListConfigService],
       imports: [...getBaseTestModules]
+
     });
   });
 

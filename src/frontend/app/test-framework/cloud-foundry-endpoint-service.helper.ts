@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../core/core.module';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
+import { BaseCF } from '../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CloudFoundryService } from '../features/cloud-foundry/services/cloud-foundry.service';
 import {
@@ -31,8 +32,6 @@ import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.
 import { SharedModule } from '../shared/shared.module';
 import { AppState } from '../store/app-state';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
-import { BaseCF } from '../features/cloud-foundry/cf-page.types';
-import { CfOrgsListConfigService } from '../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -50,8 +49,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
       provide: BaseCF,
       useFactory: () => new BaseCFMock(guid)
     },
-    CloudFoundryEndpointService,
-    CfOrgsListConfigService
+    CloudFoundryEndpointService
   ];
 }
 
