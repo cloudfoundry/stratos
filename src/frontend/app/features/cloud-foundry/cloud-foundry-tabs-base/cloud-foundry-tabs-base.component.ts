@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
@@ -22,7 +21,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   ];
 
   isFetching$: Observable<boolean>;
-  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
+  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
 
   ngOnInit() {
     this.isFetching$ = Observable.of(false);

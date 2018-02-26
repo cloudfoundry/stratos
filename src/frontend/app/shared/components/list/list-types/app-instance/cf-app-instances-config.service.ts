@@ -19,14 +19,24 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   instancesSource: CfAppInstancesDataSource;
   columns: Array<ITableColumn<ListAppInstance>> = [
     {
-      columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: {
+      columnId: 'index',
+      headerCell: () => 'Index',
+      cellDefinition: {
+        getValue: (row) => `${row.index}`
+      },
+      sort: {
         type: 'sort',
         orderKey: 'index',
         field: 'index',
       }, cellFlex: '1'
     },
     {
-      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: {
+      columnId: 'state',
+      headerCell: () => 'State',
+      cellDefinition: {
+        getValue: (row) => `${row.value.state}`
+      },
+      sort: {
         type: 'sort',
         orderKey: 'state',
         field: 'value.state'
@@ -76,12 +86,16 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       }, cellFlex: '2'
     },
     {
-      columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
-        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: {
-          type: 'sort',
-          orderKey: 'uptime',
-          field: 'value.stats.uptime'
-        }, cellFlex: '5'
+      columnId: 'uptime',
+      headerCell: () => 'Uptime',
+      cellDefinition: {
+        getValue: (row) => row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'uptime',
+        field: 'value.stats.uptime'
+      }, cellFlex: '5'
     }
   ];
   pageSizeOptions = [5, 25, 50];

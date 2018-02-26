@@ -15,6 +15,7 @@ import { CfUserService } from '../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CardCfOrgUsageComponent } from './card-cf-org-usage.component';
+import { getBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('CardCfOrgUsageComponent', () => {
   let component: CardCfOrgUsageComponent;
