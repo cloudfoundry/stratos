@@ -206,7 +206,6 @@ jobs:
     passed: [create-sle-chart]
     trigger: true
   - get: helm-charts-repository
-    passed: [update-github-release]
   - get: helm-chart-Chart-sle
     passed: [build-sle-helm-images]
   - get: helm-chart-values-sle
