@@ -13,32 +13,41 @@ import { isTCPRoute, getMappedApps } from '../../../../../features/applications/
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { GetRoutesInSpace } from '../../../../../store/actions/space.actions';
 import { CfRoute } from '../../../../../store/types/route.types';
+import { SpaceRouteDataSourceHelper } from './cf-space-route-row-state.helper';
 
 export const RouteSchema = new schema.Entity('route');
 
 export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
+
   cfGuid: string;
+
   constructor(
     store: Store<AppState>,
     listConfig: IListConfig<APIResource>,
     spaceGuid: string,
     cfGuid: string
   ) {
+    const paginationKey = getPaginationKey('cf-space-routes', cfGuid, spaceGuid);
+    const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
+      store,
+      paginationKey
+    );
     super({
       store,
-      action: new GetRoutesInSpace(spaceGuid, cfGuid,
-        getPaginationKey('cf-space-routes', cfGuid, spaceGuid)),
+      action: new GetRoutesInSpace(
+        spaceGuid,
+        cfGuid,
+        paginationKey
+      ),
       schema: RouteSchema,
       getRowUniqueId: (object: EntityInfo) =>
         object.entity ? object.entity.guid : null,
-      paginationKey: getPaginationKey('cf-space-routes', cfGuid, spaceGuid),
+      paginationKey: paginationKey,
       isLocal: true,
       listConfig,
+      rowsState: rowStateManager.observable,
+      destroy: () => sub.unsubscribe()
     });
-
-  }
-
-  getAttachedAppGuids = (route: APIResource<CfRoute>): string[] => {
-    return route.entity.apps.map(a => a.metadata.guid);
+    this.cfGuid = cfGuid;
   }
 }

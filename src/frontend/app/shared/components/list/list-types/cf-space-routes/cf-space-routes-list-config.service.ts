@@ -52,7 +52,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         const confirmation = new ConfirmationDialogConfig(
           'Unmap Routes from Application',
           `Are you sure you want to unmap ${items.length} routes?`,
-          'Unmap All'
+          'Unmap All',
+          true
         );
         this.confirmDialog.open(confirmation, () =>
           items.forEach(item => this.dispatchUnmapAction(item))
@@ -81,7 +82,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     label: 'Unmap',
     description: 'Unmap route',
     visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    enabled: (row: APIResource) => row.entity.apps && row.entity.apps.length
   };
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -115,7 +116,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
   }
 
   dispatchUnmapAction(route) {
-    this.dataSource.getAttachedAppGuids(route).forEach(
+    return route.entity.apps.map(a => a.metadata.guid).forEach(
       p => this.store.dispatch(
         new UnmapRoute(
           route.entity.guid,
@@ -180,7 +181,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
           const confirmation = new ConfirmationDialogConfig(
             'Unmap Route from Application',
             `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-            'Unmap'
+            'Unmap',
+            true
           );
           this.confirmDialog.open(confirmation, () =>
             this.dispatchUnmapAction(item)

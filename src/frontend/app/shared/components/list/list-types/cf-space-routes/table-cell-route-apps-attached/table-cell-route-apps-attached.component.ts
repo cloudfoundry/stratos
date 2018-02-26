@@ -8,15 +8,12 @@ import { CloudFoundrySpaceService } from '../../../../../../features/cloud-found
   templateUrl: './table-cell-route-apps-attached.component.html',
   styleUrls: ['./table-cell-route-apps-attached.component.scss']
 })
-export class TableCellRouteAppsAttachedComponent implements OnInit {
-
+export class TableCellRouteAppsAttachedComponent {
   appNames: string;
-  @Input('row') row: APIResource<CfRoute>;
-
-  constructor(private cfSpaceService: CloudFoundrySpaceService) { }
-
-  ngOnInit() {
-    this.appNames = this.row.entity.apps.map(a => a.entity.name).reduce((a, x) => `${x}, ${a}`, '').replace(/,\s*/, '');
+  @Input('row')
+  set row(route: APIResource<CfRoute>) {
+    this.appNames = route.entity.apps.map(
+      app => app.entity.name
+    ).join(', ');
   }
-
 }

@@ -22,6 +22,8 @@ import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
 import { UserSchema } from '../types/user.types';
 import { userReducer } from './users.reducer';
+import { RouteSchema } from '../../shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source';
+import { routeReducer } from './routes.reducer';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -59,7 +61,7 @@ const entities = [
   'stack',
   'space',
   'organization',
-  'route',
+  RouteSchema.key,
   'event',
   endpointStoreNames.type,
   'domain',
@@ -87,6 +89,7 @@ export function requestDataReducer(state, action) {
 
   const extraReducers = {
     [UserSchema.key]: [userReducer],
+    [RouteSchema.key]: [routeReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
     application: [endpointDisconnectApplicationReducer('application')],
     space: [endpointDisconnectApplicationReducer('space')],

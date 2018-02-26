@@ -21,6 +21,7 @@
 
 .table-row {
   position: relative;
+  transition: opacity .25s;
   &__error {
     display: none;
     justify-content: middle;
