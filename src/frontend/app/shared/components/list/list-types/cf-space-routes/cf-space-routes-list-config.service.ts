@@ -10,13 +10,14 @@ import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
-import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 import { TableCellRouteComponent } from '../app-route/table-cell-route/table-cell-route.component';
 import { TableCellRouteAppsAttachedComponent } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 @Injectable()
 export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {
   dataSource: CfSpaceRoutesDataSource;
@@ -26,7 +27,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
       if (items.length === 1) {
         this.deleteSingleRoute(items[0]);
       } else {
-        const confirmation = new ConfirmationDialog(
+        const confirmation = new ConfirmationDialogConfig(
           'Delete Routes from Application',
           `Are you sure you want to delete ${items.length} routes?`,
           'Delete All'
@@ -48,7 +49,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
       if (items.length === 1) {
         this.unmapSingleRoute(items[0]);
       } else {
-        const confirmation = new ConfirmationDialog(
+        const confirmation = new ConfirmationDialogConfig(
           'Unmap Routes from Application',
           `Are you sure you want to unmap ${items.length} routes?`,
           'Unmap All'
@@ -155,10 +156,11 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         take(1),
         tap(domain => {
           const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialog(
+          const confirmation = new ConfirmationDialogConfig(
             'Delete Route',
-            `Are you sure you want to delete the route \'${routeUrl}\'?`,
-            'Delete'
+            `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
+            'Delete',
+            true
           );
           this.confirmDialog.open(confirmation, () =>
             this.dispatchDeleteAction(item)
@@ -175,7 +177,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         take(1),
         tap(domain => {
           const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialog(
+          const confirmation = new ConfirmationDialogConfig(
             'Unmap Route from Application',
             `Are you sure you want to unmap the route \'${routeUrl}\'?`,
             'Unmap'

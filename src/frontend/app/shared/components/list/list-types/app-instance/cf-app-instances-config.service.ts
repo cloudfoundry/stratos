@@ -6,11 +6,12 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
-import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -89,10 +90,12 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      const confirmation = new ConfirmationDialog(
+      const confirmation = new ConfirmationDialogConfig(
         'Terminate Instance?',
         `Are you sure you want to terminate instance ${item.index}?`,
-        'Terminate');
+        'Terminate',
+        true
+      );
       this.confirmDialog.open(
         confirmation,
         () => this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid))
