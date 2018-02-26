@@ -34,7 +34,7 @@ export class CloudFoundryComponent {
         const hasOne = connectedEndpoints.length === 1;
         if (hasOne) {
           this.store.dispatch(new RouterNav({
-            path: ['cloud-foundry', cfEndpoints[0].guid]
+            path: ['cloud-foundry', connectedEndpoints[0].guid]
           }));
         }
         return connectedEndpoints.length === 1;
