@@ -58,7 +58,6 @@ export class CloudFoundryOrganisationService {
     this.initialiseObservables();
   }
 
-
   private initialiseObservables() {
     this.org$ = this.organisationEntityService.entityObs$.pipe(
       filter(o => !!o && !!o.entity)

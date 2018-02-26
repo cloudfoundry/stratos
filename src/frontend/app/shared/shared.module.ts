@@ -21,6 +21,8 @@ import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/ca
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
+import { CardCfSpaceUsageComponent } from './components/cards/card-cf-space-usage/card-cf-space-usage.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -151,6 +153,8 @@ import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
     CfSpacePermissionCellComponent,
+    CardCfSpaceUsageComponent,
+    CardCfSpaceDetailsComponent,
   ],
   exports: [
     FormsModule,
@@ -200,7 +204,9 @@ import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-
     MetaCardValueComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
-    CardCfOrgUserDetailsComponent
+    CardCfOrgUserDetailsComponent,
+    CardCfSpaceUsageComponent,
+    CardCfSpaceDetailsComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
