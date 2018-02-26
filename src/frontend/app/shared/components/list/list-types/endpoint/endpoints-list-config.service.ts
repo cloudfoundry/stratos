@@ -30,7 +30,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'name',
     headerCell: () => 'Name',
-    cell: row => row.name,
+    cellDefinition: {
+      valuePath: 'name'
+    },
     sort: {
       type: 'sort',
       orderKey: 'name',
@@ -52,7 +54,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'type',
     headerCell: () => 'Type',
-    cell: getEndpointTypeString,
+    cellDefinition: {
+      getValue: getEndpointTypeString
+    },
     sort: {
       type: 'sort',
       orderKey: 'type',
@@ -63,7 +67,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'address',
     headerCell: () => 'Address',
-    cell: row => getFullEndpointApiUrl(row),
+    cellDefinition: {
+      getValue: getFullEndpointApiUrl
+    },
     sort: {
       type: 'sort',
       orderKey: 'address',

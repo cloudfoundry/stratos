@@ -1,0 +1,57 @@
+import { objectHelper } from './../../../../../core/helper-classes/object.helpers';
+import { ICellDefinition } from './../table.types';
+import { Component, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
+import { TableCellCustom } from '../table-cell/table-cell-custom';
+
+@Component({
+  moduleId: module.id,
+  selector: 'app-table-cell-default',
+  templateUrl: 'app-table-cell-default.component.html',
+  styleUrls: ['app-table-cell-default.component.scss']
+})
+export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnChanges {
+  public cellDefinition: ICellDefinition<T>;
+  public row: T;
+  public valueContext = { value: null };
+  public isLink = false;
+  public isExternalLink = false;
+  public linkValue: string;
+  public valueGenerator: (row: T) => string;
+
+  public init() {
+    this.setValueGenerator();
+    this.setValue(this.row);
+    this.isLink = !!this.cellDefinition.getLink;
+    this.isExternalLink = this.isLink && this.cellDefinition.externalLink;
+  }
+
+  private setValue(row: T) {
+    if (this.valueGenerator) {
+      this.valueContext.value = this.valueGenerator(this.row);
+    }
+  }
+
+  private setValueGenerator() {
+    this.valueGenerator = this.getValueGenerator(this.cellDefinition);
+  }
+
+  private getValueGenerator(cellDefinition: ICellDefinition<T>) {
+    return this.getValueGetter(cellDefinition);
+  }
+
+  private getValueGetter(cellDefinition: ICellDefinition<T>) {
+    if (cellDefinition.getValue) {
+      return cellDefinition.getValue;
+    } else if (cellDefinition.valuePath) {
+      return (row: T) => objectHelper.getPathFromString(row, cellDefinition.valuePath);
+    }
+    return null;
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    const row: SimpleChange = changes.row;
+    if (row) {
+      this.setValue(row.currentValue);
+    }
+  }
+}

@@ -8,8 +8,8 @@ import { map, tap, mergeMap } from 'rxjs/operators';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
-export class EndpointDataSourceHelper {
-  static getRowStateManager(
+export class ListRowSateHelper {
+  public getRowStateManager(
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     paginationKey: string
@@ -31,7 +31,7 @@ export class EndpointDataSourceHelper {
     };
   }
   // This pattern might be worth pulling out into a more general helper if we use it again.
-  static setUpManager(
+  private setUpManager(
     paginationMonitor: PaginationMonitor<EndpointModel>,
     entityMonitorFactory: EntityMonitorFactory,
     rowStateManager: TableRowStateManager

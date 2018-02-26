@@ -38,7 +38,11 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   columns: Array<ITableColumn<ListAppEnvVar>> = [
     {
-      columnId: 'name', headerCell: () => 'Name', cell: (row) => `${row.name}`, sort: {
+      columnId: 'name', headerCell: () => 'Name',
+      cellDefinition: {
+        getValue: (row) => `${row.name}`
+      },
+      sort: {
         type: 'sort',
         orderKey: 'name',
         field: 'name'

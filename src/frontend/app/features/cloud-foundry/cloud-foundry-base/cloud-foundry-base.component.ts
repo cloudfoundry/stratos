@@ -1,55 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { AppState } from '../../../store/app-state';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { tap } from 'rxjs/operators';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { BaseCF } from './../cf-page.types';
 
-const cfEndpointServiceFactory = (
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory
-) => {
-  const { cfId } = activatedRoute.snapshot.params;
-  return new CloudFoundryEndpointService(
-    cfId,
-    store,
-    entityServiceFactory,
-    cfOrgSpaceDataService,
-    cfUserService,
-    paginationMonitorFactory
-  );
-};
-
+function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
+  return {
+    guid: activatedRoute.snapshot.params.cfId
+  };
+}
 @Component({
   selector: 'app-cloud-foundry-base',
   templateUrl: './cloud-foundry-base.component.html',
   styleUrls: ['./cloud-foundry-base.component.scss'],
   providers: [
     {
-      provide: CloudFoundryEndpointService,
-      useFactory: cfEndpointServiceFactory,
+      provide: BaseCF,
+      useFactory: getCfIdFromUrl,
       deps: [
-        Store,
-        ActivatedRoute,
-        EntityServiceFactory,
-        CfOrgSpaceDataService,
-        CfUserService,
-        PaginationMonitorFactory
+        ActivatedRoute
       ]
-    }
+    },
+    CfUserService,
+    CloudFoundryEndpointService
   ]
 })
 export class CloudFoundryBaseComponent implements OnInit {
-  constructor() {}
+  constructor() { }
 
-  ngOnInit() {}
+  ngOnInit() { }
 }
