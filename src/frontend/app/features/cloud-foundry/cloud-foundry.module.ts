@@ -61,8 +61,6 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
-import { DetachServiceBindingComponent } from './detach-service-binding/detach-service-binding.component';
-import { EditServiceBindingComponent } from './edit-service-binding/edit-service-binding.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -92,8 +90,6 @@ import { EditServiceBindingComponent } from './edit-service-binding/edit-service
     CloudFoundrySpaceServiceInstancesComponent,
     CloudFoundrySpaceRoutesComponent,
     CloudFoundrySpaceUsersComponent,
-    DetachServiceBindingComponent,
-    EditServiceBindingComponent
   ],
   providers: [
     CloudFoundryService,
