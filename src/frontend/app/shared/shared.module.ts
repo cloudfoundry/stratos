@@ -80,6 +80,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+/* tslint:disable:max-line-length */
 import { TableCellServiceNameComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
 import { TableCellServicePlanComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import { TableCellServiceInstanceTagsComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';

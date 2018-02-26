@@ -8,15 +8,6 @@ import {
   AppSummarySchema
 } from './app-metadata.types';
 import { SystemInfo } from './system.types';
-
-export interface IRequestDataState extends IRequestDataInternal<APIResource> {
-  endpoint: IRequestEntityTypeState<EndpointModel>;
-}
-
-export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
-  endpoint: IRequestEntityTypeState<RequestInfoState>;
-}
-
 export interface IRequestDataInternal<T> extends IRequestTypeState {
   application: IRequestEntityTypeState<T>;
   stack: IRequestEntityTypeState<T>;
@@ -34,6 +25,15 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   service: IRequestEntityTypeState<T>;
   serviceBinding: IRequestEntityTypeState<T>;
 }
+
+export interface IRequestDataState extends IRequestDataInternal<APIResource> {
+  endpoint: IRequestEntityTypeState<EndpointModel>;
+}
+
+export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
+  endpoint: IRequestEntityTypeState<RequestInfoState>;
+}
+
 
 export const defaultCfEntitiesState = {
   application: {},

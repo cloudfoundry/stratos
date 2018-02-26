@@ -27,7 +27,9 @@ export interface CfService {
   version: string;
 }
 
-export interface CfServiceBinding { }
+export interface CfServiceBinding {
+  guid: string;
+}
 export interface CfServiceInstance {
   guid: string;
   cfGuid; string;
