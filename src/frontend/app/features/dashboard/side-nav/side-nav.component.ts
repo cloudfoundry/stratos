@@ -9,6 +9,7 @@ export interface SideNavItem {
   text: string;
   matIcon: string;
   link: string;
+  endpointType?: string;
 }
 
 @Component({

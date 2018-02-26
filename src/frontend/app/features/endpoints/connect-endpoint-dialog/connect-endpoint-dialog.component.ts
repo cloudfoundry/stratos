@@ -47,7 +47,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         username: ['', Validators.required],
         password: ['', Validators.required],
       },
-      types: [ 'cf', 'metrics' ]
+      types: [ 'cf', 'metrics', 'caasp' ]
     },
     {
       name: "Kube Config",

@@ -41,7 +41,8 @@ func (m *CaaspSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugin,
 
 // Caasp endpoint - admin
 func (m *CaaspSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
-	echoContext.GET("/caasp", m.getCaaspMetadata)
+	echoContext.GET("/caasp/:cnsiGuid/info", m.getCaaspMetadata)
+	echoContext.GET("/caasp/:cnsiGuid/kubeConfig", m.getCaaspKubeConfig)
 }
 
 // Metrics API endpoints - non-admin

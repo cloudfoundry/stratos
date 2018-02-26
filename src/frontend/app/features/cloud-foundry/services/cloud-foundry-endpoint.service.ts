@@ -8,26 +8,13 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import {
-  CF_INFO_ENTITY_KEY,
-  CFInfoSchema,
-  GetEndpointInfo
-} from '../../../store/actions/cloud-foundry.actions';
-import {
-  EndpointSchema,
-  GetAllEndpoints
-} from '../../../store/actions/endpoint.actions';
+import { CF_INFO_ENTITY_KEY, CFInfoSchema, GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
+import { EndpointSchema, GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import {
-  CfApplication,
-  CfApplicationState
-} from '../../../store/types/application.types';
-import {
-  EndpointModel,
-  EndpointUser
-} from '../../../store/types/endpoint.types';
-import { CfOrg } from '../../../store/types/org-and-space.types';
+import { CfApplication, CfApplicationState } from '../../../store/types/application.types';
+import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
+import { CfOrg, CfSpace } from '../../../store/types/org-and-space.types';
 import { CfUser } from '../../../store/types/user.types';
 
 @Injectable()
@@ -77,9 +64,9 @@ export class CloudFoundryEndpointService {
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user));
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
 
-    this.info$ = this.cfInfoEntityService.waitForEntity$.pipe(shareReplay(1));
+    this.info$ = this.cfInfoEntityService.waitForEntity$;
 
     this.allApps$ = this.orgs$.pipe(
       // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
@@ -96,6 +83,7 @@ export class CloudFoundryEndpointService {
       })
     );
   }
+
   getAppsInOrg(
     org: APIResource<CfOrg>
   ): Observable<APIResource<CfApplication>[]> {
@@ -107,6 +95,16 @@ export class CloudFoundryEndpointService {
       map(apps => {
         const orgSpaces = org.entity.spaces.map(s => s.metadata.guid);
         return apps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
+      })
+    );
+  }
+
+  getAppsInSpace(
+    space: APIResource<CfSpace>
+  ): Observable<APIResource<CfApplication>[]> {
+    return this.allApps$.pipe(
+      map(apps => {
+        return apps.filter(a => a.entity.space_guid === space.entity.guid);
       })
     );
   }
@@ -123,10 +121,10 @@ export class CloudFoundryEndpointService {
   public getMetricFromApps(
     apps: APIResource<CfApplication>[],
     statMetric: string
-  ): any {
-    return apps
+  ): number {
+    return apps ? apps
       .filter(a => a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
-      .reduce((a, t) => a + t, 0);
+      .reduce((a, t) => a + t, 0) : 0;
   }
 }

@@ -8,7 +8,7 @@ import { EntityServiceFactory } from '../../../../../../core/entity-service-fact
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
@@ -117,6 +117,6 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({
-    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces']
+    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid]
   }))
 }

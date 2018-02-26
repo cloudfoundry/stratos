@@ -52,5 +52,53 @@ export class EndpointsPageComponent {
     }).subscribe();
   }
 
+  testCaaSP() {
+    console.log('TESTING.....');
+
+    this.store.select(endpointEntitiesSelector).take(1).do(ep => {
+      console.log(ep);
+
+      Object.keys(ep).forEach(guid => {
+        const endpoint = ep[guid];
+        if (endpoint.cnsi_type === 'caasp' && endpoint.user) {
+          console.log('Testing: ' + guid);
+
+          const headers = new Headers({ 'x-cap-cnsi-list': guid });
+          const requestArgs = {
+            headers: headers
+          };
+          this.http.get('/pp/v1/caasp/' + guid + '/info', requestArgs).subscribe();
+        }
+      })
+
+    }).subscribe();
+  
+  }
+
+
+  testKubeConfig() {
+    console.log('TESTING.....');
+
+    this.store.select(endpointEntitiesSelector).take(1).do(ep => {
+      console.log(ep);
+
+      Object.keys(ep).forEach(guid => {
+        const endpoint = ep[guid];
+        if (endpoint.cnsi_type === 'caasp' && endpoint.user) {
+          console.log('Testing: ' + guid);
+
+          const headers = new Headers({ 'x-cap-cnsi-list': guid });
+          const requestArgs = {
+            headers: headers
+          };
+          this.http.get('/pp/v1/caasp/' + guid + '/kubeConfig', requestArgs).subscribe();
+        }
+      })
+
+    }).subscribe();
+  
+  }
+
+
 
 }

@@ -61,6 +61,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/cloud-foundry'
     },
     {
+      text: 'CaaSP',
+      matIcon: 'cloud',
+      link: '/caasp',
+      endpointType: 'caasp',
+    },
+    {
       text: 'Endpoints',
       matIcon: 'settings_ethernet',
       link: '/endpoints'
