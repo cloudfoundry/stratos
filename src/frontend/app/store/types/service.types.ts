@@ -1,7 +1,7 @@
 import { APIResource } from './api.types';
 
 export interface CfServicePlan {
-  action: boolean;
+  active: boolean;
   bindable: boolean;
   description: string;
   extra: string;
@@ -14,7 +14,7 @@ export interface CfServicePlan {
 }
 
 export interface CfService {
-  action: boolean;
+  active: boolean;
   bindable: boolean;
   description: string;
   extra: string;

@@ -26,8 +26,7 @@ export class TableCellServiceInstanceAppsAttachedComponent<T> extends TableCellC
   ngOnInit() {
 
     const parentRoute = this.activatedRoute.pathFromRoot.filter(route => !!route.snapshot.params['cfId'])[0];
-    const cfGuid = parentRoute.snapshot.params['cfId'];
-
+    const cfGuid = parentRoute && parentRoute.snapshot.params['cfId'];
     this.boundApps = this.row.entity.service_bindings
       .map(a => {
         return {

@@ -21,7 +21,8 @@ class TestModule {
 describe('CfOrgsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [...getBaseTestModules, ...generateTestCfEndpointServiceProvider()],
+      imports: [...getBaseTestModules],
+      providers: [...generateTestCfEndpointServiceProvider(), BaseCF]
 
     });
   });
@@ -30,18 +31,3 @@ describe('CfOrgsListConfigService', () => {
     expect(service).toBeTruthy();
   }));
 });
-
-// describe('CfUserListConfigService', () => {
-//   beforeEach(() => {
-//     TestBed.configureTestingModule({
-//       imports: [
-//         ...getBaseTestModules
-//       ],
-//       providers: [CfUserListConfigService, ...generateTestCfEndpointServiceProvider()]
-//     });
-//   });
-
-//   it('should be created', inject([CfUserListConfigService], (service: CfUserListConfigService) => {
-//     expect(service).toBeTruthy();
-//   }));
-// });

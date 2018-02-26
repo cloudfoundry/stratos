@@ -5,7 +5,7 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 
 @Component({
@@ -24,6 +24,7 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
   ngOnInit() {
     this.serviceName$ = this.store.select(selectEntity<APIResource<CfService>>('service', this.row.entity.service_guid))
       .pipe(
+        filter(s => !!s),
         map(s => s.entity.label)
       );
   }

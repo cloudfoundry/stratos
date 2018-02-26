@@ -4,7 +4,9 @@ import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../core/core.module';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
+import { BaseCF } from '../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundrySpaceService } from '../features/cloud-foundry/services/cloud-foundry-space.service';
 import { CloudFoundryService } from '../features/cloud-foundry/services/cloud-foundry.service';
 import {
   ApplicationStateIconComponent,
@@ -24,15 +26,15 @@ import {
 import {
   MetaCardValueComponent,
 } from '../shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import { CfOrgsListConfigService } from '../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 import { CfOrgSpaceDataService } from '../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../shared/data-services/cf-user.service';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
 import { SharedModule } from '../shared/shared.module';
 import { AppState } from '../store/app-state';
+import { CloudFoundrySpaceServiceMock } from './cloud-foundry-space.service.mock';
 import { createBasicStoreModule, testSCFGuid } from './store-test-helper';
-import { BaseCF } from '../features/cloud-foundry/cf-page.types';
-import { CfOrgsListConfigService } from '../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 
 export const cfEndpointServiceProviderDeps = [
   EntityServiceFactory,
@@ -102,6 +104,11 @@ export const getBaseTestModulesNoShared = [
 export const getBaseTestModules = [...getBaseTestModulesNoShared, SharedModule];
 
 export const getBaseProviders = [createBasicStoreModule()];
+
+export const getCfSpaceServiceMock = {
+  provide: CloudFoundrySpaceService,
+  useClass: CloudFoundrySpaceServiceMock
+};
 
 export const getMetadataCardComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,

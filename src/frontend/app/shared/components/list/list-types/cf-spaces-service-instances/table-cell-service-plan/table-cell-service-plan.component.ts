@@ -5,7 +5,7 @@ import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfServicePlan } from '../../../../../../store/types/service.types';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 
 @Component({
@@ -24,6 +24,7 @@ export class TableCellServicePlanComponent<T> extends TableCellCustom<T> impleme
   ngOnInit() {
     this.servicePlanName$ = this.store.select(selectEntity<APIResource<CfServicePlan>>('servicePlan', this.row.entity.service_plan_guid))
       .pipe(
+        filter(s => !!s),
         map(s => s.entity.name)
       );
   }
