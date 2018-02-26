@@ -1,0 +1,11 @@
+<app-meta-card class="cf-space-usage">
+  <app-meta-card-title>Summary</app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>User Space Role/s</app-meta-card-key>
+    <app-meta-card-value>{{ cfSpaceService.userRole$ | async }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Quota Definition Name</app-meta-card-key>
+    <app-meta-card-value>{{ (cfSpaceService.quotaDefinition$ | async)?.entity.name }}</app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

@@ -28,7 +28,7 @@ export class GetOrganisation extends CFStartAction implements ICFAction {
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     if (withInlineDepth !== 0) {
-      this.options.params.append('inline-relations-depth', '' + 2);
+      this.options.params.append('inline-relations-depth', '' + withInlineDepth);
     }
   }
   actions = [

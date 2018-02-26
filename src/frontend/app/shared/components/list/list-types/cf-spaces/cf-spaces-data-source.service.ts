@@ -6,12 +6,11 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
-  public static paginationKey = 'cf-org-space';
-
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
-    const { paginationKey } = CfSpacesDataSourceService;
+    const paginationKey = getPaginationKey('cf-org-space', cfGuid, orgGuid);
     const action = new GetAllSpacesInOrg(cfGuid, orgGuid, paginationKey);
     super({
       store,

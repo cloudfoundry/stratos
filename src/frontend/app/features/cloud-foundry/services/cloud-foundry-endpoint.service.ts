@@ -121,7 +121,7 @@ export class CloudFoundryEndpointService {
   public getMetricFromApps(
     apps: APIResource<CfApplication>[],
     statMetric: string
-  ): any {
+  ): number {
     return apps ? apps
       .filter(a => a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
