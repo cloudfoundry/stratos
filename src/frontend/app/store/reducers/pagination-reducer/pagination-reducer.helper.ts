@@ -155,7 +155,7 @@ function getObservables<T = any>(
           if (!hasValidatedOnce) {
             // For improvement on how this is handled (optimise location, provide wait mechanism, etc) see issue #1641
             hasValidatedOnce = true;
-            validateEntityRelations(store, action, currentPage, true, false);
+            // validateEntityRelations(store, action, currentPage, true, false); // TODO: RC
           }
         }),
         shareReplay(1)

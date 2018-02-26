@@ -8,10 +8,10 @@ import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, first } from 'rxjs/operators';
 
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
-import { EntityInlineParentAction, isEntityInlineParentAction, listRelations } from '../helpers/entity-relations.helpers';
+import { EntityInlineParentAction, isEntityInlineParentAction, listRelations, validateEntityRelations } from '../helpers/entity-relations.helpers';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
@@ -105,26 +105,33 @@ export class APIEffect {
         response = this.handleMultiEndpoints(response, actionClone);
         const { entities, totalResults, totalPages } = response;
         const actions = [];
-        actions.push({ type: actionClone.actions[1], apiAction: actionClone });
-        actions.push(new WrapperRequestActionSuccess(
-          entities,
-          actionClone,
-          requestType,
-          totalResults,
-          totalPages
-        ));
 
-        if (
-          !actionClone.updatingKey &&
-          actionClone.options.method === 'post' || actionClone.options.method === RequestMethod.Post ||
-          actionClone.options.method === 'delete' || actionClone.options.method === RequestMethod.Delete
-        ) {
-          if (actionClone.removeEntityOnDelete) {
-            actions.unshift(new ClearPaginationOfEntity(actionClone.entityKey, actionClone.guid));
-          } else {
-            actions.unshift(new ClearPaginationOfType(actionClone.entityKey));
-          }
-        }
+        validateEntityRelations(this.store, actionClone, entities, false, false).pipe(
+          map(result => result.allFinished),
+          first(result => {
+            actions.push({ type: actionClone.actions[1], apiAction: actionClone });
+            actions.push(new WrapperRequestActionSuccess(
+              entities,
+              actionClone,
+              requestType,
+              totalResults,
+              totalPages
+            ));
+
+            if (
+              !actionClone.updatingKey &&
+              actionClone.options.method === 'post' || actionClone.options.method === RequestMethod.Post ||
+              actionClone.options.method === 'delete' || actionClone.options.method === RequestMethod.Delete
+            ) {
+              if (actionClone.removeEntityOnDelete) {
+                actions.unshift(new ClearPaginationOfEntity(actionClone.entityKey, actionClone.guid));
+              } else {
+                actions.unshift(new ClearPaginationOfType(actionClone.entityKey));
+              }
+            }
+            return false;
+          })
+        ).subscribe();
 
         return actions;
       })

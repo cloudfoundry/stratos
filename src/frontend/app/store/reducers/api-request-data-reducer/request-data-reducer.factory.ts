@@ -21,11 +21,11 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
         } else if (success.response) {
           // Does the entity associated with the action have a parent property that requires the result to be stored with it?
           // For example we have fetched a list of spaces that need to be stored in an organisation's entity?
-          const parentParams = canPopulateParentEntity(success);
-          if (parentParams) {
-            // We have the required parameters to populate a parent's property with this response
-            return populateParentEntity(state, success, parentParams);
-          }
+          // const parentParams = canPopulateParentEntity(success);
+          // if (parentParams) {
+          //   // We have the required parameters to populate a parent's property with this response
+          //   return populateParentEntity(state, success, parentParams);
+          // }
           return deepMergeState(state, success.response.entities);
         }
         return state;
@@ -56,32 +56,33 @@ function canPopulateParentEntity(successAction): {
   parentEntityGuid: string;
   parentRelations: EntityRelation[]
 } {
-  // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent (empty lists)
-  const parentEntityGuid = successAction && successAction.apiAction ? successAction.apiAction['parentGuid'] : null;
-  if (!parentEntityGuid) {
-    return;
-  }
+  return;
+  // // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent (empty lists)
+  // const parentEntityGuid = successAction && successAction.apiAction ? successAction.apiAction['parentGuid'] : null;
+  // if (!parentEntityGuid) {
+  //   return;
+  // }
 
-  // Check for relations
-  const entity = pathGet('apiAction.entity', successAction) || [];
-  const entityWithInline = entity as EntityInlineChild;
-  const parentRelations = entityWithInline.parentRelations;
-  if (!parentRelations || !parentRelations.length) {
-    return;
-  }
+  // // Check for relations
+  // const entity = pathGet('apiAction.entity', successAction) || [];
+  // const entityWithInline = entity as EntityInlineChild;
+  // const parentRelations = entityWithInline.parentRelations;
+  // if (!parentRelations || !parentRelations.length) {
+  //   return;
+  // }
 
-  // Do we actually have any entities to store in a parent?
-  const response = successAction.response;
-  let entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
-  entities = Object.values(entities);
-  if (!entities) {
-    return;
-  }
+  // // Do we actually have any entities to store in a parent?
+  // const response = successAction.response;
+  // let entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
+  // entities = Object.values(entities);
+  // if (!entities) {
+  //   return;
+  // }
 
-  return {
-    parentEntityGuid,
-    parentRelations
-  };
+  // return {
+  //   parentEntityGuid,
+  //   parentRelations
+  // };
 }
 
 function populateParentEntity(state, successAction, params: {

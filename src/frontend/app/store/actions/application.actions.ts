@@ -211,7 +211,7 @@ export class DeleteApplicationInstance extends CFStartAction
   options: RequestOptions;
 }
 
-export class GetAppRoutes extends CFStartAction implements PaginatedAction, EntityInlineChildAction {
+export class GetAppRoutes extends CFStartAction implements EntityInlineChildAction {
   constructor(
     public guid: string,
     public cfGuid: string,

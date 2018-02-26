@@ -71,7 +71,7 @@ export class EntityService<T = any> {
       this.waitForEntity$.pipe(
         first(),
         tap(entityInfo => {
-          validateEntityRelations(store, action, [entityInfo.entity], true, false);
+          // validateEntityRelations(store, action, [entityInfo.entity], true, false); // TODO: RC
         })
       ).subscribe();
     }

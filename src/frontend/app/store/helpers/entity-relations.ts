@@ -1,12 +1,12 @@
 import { pathGet } from '../../core/utils.service';
-import { GetAppRoutes } from '../actions/application.actions';
-import { GetAllOrganisationSpaces } from '../actions/organisation.actions';
-import { GetSpaceRoutes } from '../actions/space.actions';
+import { FetchRelationAction } from '../actions/relation.actions';
 import {
   applicationSchemaKey,
   entityFactory,
   organisationSchemaKey,
   routeSchemaKey,
+  routesInAppKey,
+  routesInSpaceKey,
   spaceSchemaKey,
 } from './entity-factory';
 import { EntityInlineChild, EntityRelation } from './entity-relations.helpers';
@@ -31,13 +31,21 @@ export const AppRouteRelation: EntityRelation = {
     };
     return newParentEntity;
   },
-  fetchChildrenAction: (app, includeRelations, populateMissing) => {
-    return new GetAppRoutes(
-      app.metadata.guid,
+  fetchChildrenAction: (url, app) => {// includeRelations, populateMissing
+    return new FetchRelationAction(
       app.entity.cfGuid,
-      EntityRelation.createPaginationKey(applicationSchemaKey, app.metadata.guid),
-      app.metadata.guid
+      app.metadata.guid,
+      url,
+      [entityFactory<EntityInlineChild>(routesInAppKey)],
+      routeSchemaKey, // TODO: RC applicationSchemaKey??
+      EntityRelation.createPaginationKey(applicationSchemaKey, app.metadata.guid)
     );
+    // return new GetAppRoutes(
+    //   app.metadata.guid,
+    //   app.entity.cfGuid,
+    //   EntityRelation.createPaginationKey(applicationSchemaKey, app.metadata.guid),
+    //   app.metadata.guid
+    // );
   },
 };
 
@@ -56,13 +64,21 @@ export const SpaceRouteRelation: EntityRelation = {
     };
     return newParentEntity;
   },
-  fetchChildrenAction: (space, includeRelations, populateMissing) => {
-    return new GetSpaceRoutes(
-      space.metadata.guid,
+  fetchChildrenAction: (url, space) => {
+    return new FetchRelationAction(
       space.entity.cfGuid,
-      EntityRelation.createPaginationKey(spaceSchemaKey, space.metadata.guid),
-      includeRelations,
-      populateMissing);
+      space.metadata.guid,
+      url,
+      [entityFactory<EntityInlineChild>(routesInSpaceKey)],
+      routeSchemaKey, // TODO: RC routesInSpaceKey??
+      EntityRelation.createPaginationKey(spaceSchemaKey, space.metadata.guid)
+    );
+    // return new GetSpaceRoutes(
+    //   space.metadata.guid,
+    //   space.entity.cfGuid,
+    //   EntityRelation.createPaginationKey(spaceSchemaKey, space.metadata.guid),
+    //   includeRelations,
+    //   populateMissing);
   },
 };
 
@@ -81,13 +97,21 @@ export const OrgSpaceRelation: EntityRelation = {
     };
     return newParentEntity;
   },
-  fetchChildrenAction: (organisation, includeRelations, populateMissing) => {
-    return new GetAllOrganisationSpaces(
-      EntityRelation.createPaginationKey(organisationSchemaKey, organisation.metadata.guid),
-      organisation.metadata.guid,
+  fetchChildrenAction: (url, organisation) => {
+    return new FetchRelationAction(
       organisation.entity.cfGuid,
-      includeRelations,
-      populateMissing);
+      organisation.metadata.guid,
+      url,
+      [entityFactory<EntityInlineChild>(spaceSchemaKey)],
+      spaceSchemaKey, // TODO: RC routesInSpaceKey??
+      EntityRelation.createPaginationKey(organisationSchemaKey, organisation.metadata.guid)
+    );
+    // return new GetAllOrganisationSpaces(
+    //   EntityRelation.createPaginationKey(organisationSchemaKey, organisation.metadata.guid),
+    //   organisation.metadata.guid,
+    //   organisation.entity.cfGuid,
+    //   includeRelations,
+    //   populateMissing);
   },
 };
 

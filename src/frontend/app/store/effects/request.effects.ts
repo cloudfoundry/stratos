@@ -27,19 +27,19 @@ export class RequestEffect {
    */
   @Effect({ dispatch: false }) requestSuccess$ = this.actions$.ofType<WrapperRequestActionSuccess>(RequestTypes.SUCCESS)
     .map(action => {
-      const response = action.response;
-      if (!response) {
-        return;
-      }
+      // const response = action.response;
+      // if (!response) {
+      //   return;
+      // }
 
-      const entities = Object.values(pathGet(`entities.${action.apiAction.entityKey}`, response) || {});
-      validateEntityRelations(
-        this.store,
-        action.apiAction,
-        entities,
-        false,
-        true
-      );
+      // const entities = Object.values(pathGet(`entities.${action.apiAction.entityKey}`, response) || {});
+      // validateEntityRelations(
+      //   this.store,
+      //   action.apiAction,
+      //   entities,
+      //   false,
+      //   true
+      // );
     });
 
 }
