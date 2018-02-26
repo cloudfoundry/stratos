@@ -1,12 +1,8 @@
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
-import { endpointStoreNames, EndpointModel } from './endpoint.types';
+import { appEnvVarsSchemaKey, appStatsSchemaKey, appSummarySchemaKey } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
-import {
-  AppEnvVarSchema,
-  AppStatSchema,
-  AppSummarySchema
-} from './app-metadata.types';
+import { EndpointModel } from './endpoint.types';
 import { SystemInfo } from './system.types';
 
 export interface IRequestDataState extends IRequestTypeState {
@@ -50,7 +46,7 @@ export const defaultCfEntitiesState = {
   githubBranches: {},
   user: {},
   domain: {},
-  [AppEnvVarSchema.key]: {},
-  [AppStatSchema.key]: {},
-  [AppSummarySchema.key]: {}
+  [appEnvVarsSchemaKey]: {},
+  [appStatsSchemaKey]: {},
+  [appSummarySchemaKey]: {}
 };

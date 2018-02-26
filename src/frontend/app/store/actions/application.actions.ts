@@ -1,25 +1,17 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
-import { schema } from 'normalizr';
 
-import { pathGet } from '../../core/utils.service';
-import {
-  EntityInlineChild,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-  EntityRelation,
-} from '../helpers/entity-relations.helpers';
+import { EntityInlineChildAction, EntityInlineParentAction, EntityInlineChild } from '../helpers/entity-relations.helpers';
 import { pick } from '../helpers/reducer.helper';
-import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { ActionMergeFunction } from '../types/api.types';
-import { AppStatSchema } from '../types/app-metadata.types';
 import { CfApplication } from '../types/application.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
-import { RouteSchema, SpaceWithOrganisationSchema } from './action-types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { getPaginationKey } from './pagination.actions';
-import { StackSchema } from './stack.action';
+import { applicationSchemaKey, routeSchemaKey, routesInAppKey, appStatsSchemaKey } from '../helpers/entity-factory';
+import { entityFactory } from '../helpers/entity-factory';
+import { schema } from 'normalizr';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -53,51 +45,7 @@ export const DELETE_INSTANCE = '[Application Instance] Delete';
 export const DELETE_INSTANCE_SUCCESS = '[Application Instance] Delete success';
 export const DELETE_INSTANCE_FAILED = '[Application Instance] Delete failed';
 
-export const applicationSchemaKey = 'application';
-
-export const AppRouteRelation: EntityRelation = {
-  key: 'app-route-relation',
-  parentEntityKey: applicationSchemaKey,
-  childEntity: RouteSchema,
-  createParentWithChild: (state, parentGuid, response) => {
-    const parentEntity = pathGet(`${applicationSchemaKey}.${parentGuid}`, state);
-    const newParentEntity = {
-      ...parentEntity,
-      entity: {
-        ...parentEntity.entity,
-        routes: response.result
-      }
-    };
-    return newParentEntity;
-  },
-  fetchChildrenAction: (app, includeRelations, populateMissing) => {
-    // tslint:disable-next-line:no-use-before-declare
-    return new GetAppRoutes(
-      app.metadata.guid,
-      app.entity.cfGuid,
-      EntityRelation.createPaginationKey(applicationSchemaKey, app.metadata.guid),
-      app.metadata.guid
-    );
-  },
-};
-
-export const RoutesInAppSchema = new EntityInlineChild([AppRouteRelation], RouteSchema);
-
-const ApplicationEntitySchema = {
-  entity: {
-    stack: StackSchema,
-    space: SpaceWithOrganisationSchema,
-    routes: RoutesInAppSchema
-  }
-};
-
-export const ApplicationSchema = new schema.Entity(
-  applicationSchemaKey,
-  ApplicationEntitySchema,
-  {
-    idAttribute: getAPIResourceGuid
-  }
-);
+const applicationEntitySchema = entityFactory(applicationSchemaKey);
 
 export class GetAllApplications extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
@@ -109,8 +57,8 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     this.options.method = 'get';
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
-  entity = [ApplicationSchema];
-  entityKey = ApplicationSchema.key;
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
   options: RequestOptions;
   initialParams = {
     'order-direction': 'asc',
@@ -133,8 +81,8 @@ export class GetApplication extends CFStartAction implements ICFAction, EntityIn
     this.options.params.set('include-relations', 'space,organization,routes,domain');
   }
   actions = [GET, GET_SUCCESS, GET_FAILED];
-  entity = [ApplicationSchema];
-  entityKey = ApplicationSchema.key;
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
   options: RequestOptions;
 }
 
@@ -154,8 +102,8 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
     };
   }
   actions = [CREATE, CREATE_SUCCESS, CREATE_FAILED];
-  entity = [ApplicationSchema];
-  entityKey = ApplicationSchema.key;
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
   options: RequestOptions;
 }
 
@@ -172,8 +120,8 @@ export class AssociateRouteWithAppApplication extends CFStartAction
     this.options.method = 'put';
   }
   actions = [ASSIGN_ROUTE, ASSIGN_ROUTE_SUCCESS, ASSIGN_ROUTE_FAILED];
-  entity = [ApplicationSchema];
-  entityKey = ApplicationSchema.key;
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
   options: RequestOptions;
   updatingKey = 'Assigning-Route';
 }
@@ -204,17 +152,17 @@ export class UpdateExistingApplication extends CFStartAction
     this.options.body = application;
   }
   actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
-  entity = [ApplicationSchema];
-  entityKey = ApplicationSchema.key;
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
   options: RequestOptions;
   updatingKey = UpdateExistingApplication.updateKey;
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
     const keepFromOld = pick(
-      oldEntities[ApplicationSchema.key][this.guid].entity,
-      Object.keys(ApplicationEntitySchema.entity) as [string]
+      oldEntities[applicationSchemaKey][this.guid].entity,
+      Object.keys(applicationEntitySchema['schema']) as [string]
     );
-    newEntities[ApplicationSchema.key][this.guid].entity = {
-      ...newEntities[ApplicationSchema.key][this.guid].entity,
+    newEntities[applicationSchemaKey][this.guid].entity = {
+      ...newEntities[applicationSchemaKey][this.guid].entity,
       ...keepFromOld
     };
     return newEntities;
@@ -234,8 +182,8 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     this.options.headers.set(endpointPassthroughHeader, 'true');
   }
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
-  entity = [ApplicationSchema];
-  entityKey = ApplicationSchema.key;
+  entity = [applicationEntitySchema];
+  entityKey = applicationSchemaKey;
   options: RequestOptions;
 }
 
@@ -257,8 +205,8 @@ export class DeleteApplicationInstance extends CFStartAction
     this.guid = `${appGuid}-${index}`;
   }
   actions = [DELETE_INSTANCE, DELETE_INSTANCE_SUCCESS, DELETE_INSTANCE_FAILED];
-  entity = [AppStatSchema];
-  entityKey = AppStatSchema.key;
+  entity = [entityFactory(appStatsSchemaKey)];
+  entityKey = appStatsSchemaKey;
   removeEntityOnDelete = true;
   options: RequestOptions;
 }
@@ -291,8 +239,8 @@ export class GetAppRoutes extends CFStartAction implements PaginatedAction, Enti
     'order-direction': 'desc',
     'order-direction-field': 'route',
   };
-  entity = [RouteSchema];
-  entityKey = RouteSchema.key;
+  entity = [entityFactory<EntityInlineChild>(routesInAppKey)];
+  entityKey = applicationSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
   flattenPagination = true;

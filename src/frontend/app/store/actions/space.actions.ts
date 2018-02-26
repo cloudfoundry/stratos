@@ -11,9 +11,9 @@ import {
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { RouteSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './action-types';
 import { RouteEvents } from './route.actions';
-import { ApplicationSchema } from './application.actions';
+import { entityFactory } from '../helpers/entity-factory';
+import { spaceSchemaKey, spaceWithOrgsEntitySchema, spaceWithOrgKey, routesInSpaceKey } from '../helpers/entity-factory';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -22,43 +22,6 @@ export const GET_SPACES_FAILED = '[Space] Get all failed';
 export const GET_SPACE = '[Space] Get one';
 export const GET_SPACE_SUCCESS = '[Space] Get one success';
 export const GET_SPACE_FAILED = '[Space] Get one failed';
-
-export const SpaceRouteRelation: EntityRelation = {
-  key: 'space-route-relation',
-  parentEntityKey: spaceSchemaKey,
-  childEntity: RouteSchema,
-  createParentWithChild: (state, parentGuid, response) => {
-    const parentEntity = pathGet(`${spaceSchemaKey}.${parentGuid}`, state);
-    const newParentEntity = {
-      ...parentEntity,
-      entity: {
-        ...parentEntity.entity,
-        routes: response.result
-      }
-    };
-    return newParentEntity;
-  },
-  fetchChildrenAction: (space, includeRelations, populateMissing) => {
-    // tslint:disable-next-line:no-use-before-declare
-    return new GetSpaceRoutes(
-      space.metadata.guid,
-      space.entity.cfGuid,
-      EntityRelation.createPaginationKey(spaceSchemaKey, space.metadata.guid),
-      includeRelations,
-      populateMissing);
-  },
-};
-
-export const RoutesInSpaceSchema = new EntityInlineChild([SpaceRouteRelation], RouteSchema);
-
-export const SpaceSchema = new schema.Entity(spaceSchemaKey, {
-  entity: {
-    apps: ApplicationSchema,
-    routes: RoutesInSpaceSchema
-  }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
 
 export class GetSpace extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
@@ -72,7 +35,7 @@ export class GetSpace extends CFStartAction implements ICFAction {
     GET_SPACE_SUCCESS,
     GET_SPACE_FAILED
   ];
-  entity = [SpaceSchema];
+  entity = [entityFactory(spaceSchemaKey)];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
 }
@@ -85,10 +48,9 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction {
     this.options.method = 'get';
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
-  entity = [SpaceWithOrganisationSchema];
+  entity = [entityFactory(spaceWithOrgKey)];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
-  flattenPagination = true;
   initialParams = {
     'results-per-page': 100,
     'inline-relations-depth': '1'
@@ -123,8 +85,8 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'attachedApps',
   };
   parentGuid: string;
-  entity = RoutesInSpaceSchema;
-  entityKey = RouteSchema.key;
+  entity = entityFactory<EntityInlineChild>(routesInSpaceKey);
+  entityKey = routesInSpaceKey;
   options: RequestOptions;
   endpointGuid: string;
   flattenPagination = true;

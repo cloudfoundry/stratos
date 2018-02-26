@@ -31,7 +31,7 @@ export class EntityRelation {
   /**
    * The entity schema of the child
    */
-  childEntity: schema.Entity;
+  childEntity: schema.Entity | EntityInlineChild;
   /**
    * Create a new parent that contains the child entities. For example <org>.entity.<spaces>
    */
@@ -56,6 +56,7 @@ export class EntityRelation {
  * @extends {schema.Array}
  */
 export class EntityInlineChild extends schema.Array {
+  key: string;
   static is(value): boolean {
     return !!value.parentRelations;
   }
@@ -65,6 +66,7 @@ export class EntityInlineChild extends schema.Array {
     schemaAttribute?: string | schema.SchemaFunction) {
     super(entitySchema, schemaAttribute); {
     }
+    this.key = entitySchema.key;
   }
 }
 

@@ -4,7 +4,7 @@ import { take, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
-import { applicationSchemaKey, GetAppRoutes } from '../../../../../store/actions/application.actions';
+import { GetAppRoutes } from '../../../../../store/actions/application.actions';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
@@ -18,6 +18,7 @@ import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListView
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
+import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CfAppRoutesListConfigService implements IListConfig<APIResource> {

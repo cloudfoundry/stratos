@@ -2,11 +2,10 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { Action } from '@ngrx/store';
 
 import { EntityInfo } from '../types/api.types';
-import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { RouteSchema } from './action-types';
-import { getPaginationKey } from './pagination.actions';
-import { EntityInlineParentAction, EntityInlineChildAction } from '../helpers/entity-relations.helpers';
+import { entityFactory } from '../helpers/entity-factory';
+import { routeSchemaKey } from '../helpers/entity-factory';
+import { schema } from 'normalizr';
 
 export const CREATE_ROUTE = '[Route] Create start';
 export const CREATE_ROUTE_SUCCESS = '[Route] Create success';
@@ -44,8 +43,8 @@ export class CreateRoute extends CFStartAction implements ICFAction {
     this.endpointGuid = cfGuid;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
-  entity = [RouteSchema];
-  entityKey = RouteSchema.key;
+  entity = [entityFactory(routeSchemaKey)];
+  entityKey = routeSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
 }
@@ -71,8 +70,8 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
     RouteEvents.DELETE_SUCCESS,
     RouteEvents.DELETE_FAILED
   ];
-  entity = [RouteSchema];
-  entityKey = RouteSchema.key;
+  entity = [entityFactory(routeSchemaKey)];
+  entityKey = routeSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
   removeEntityOnDelete = true;
@@ -96,8 +95,8 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
     RouteEvents.UNMAP_ROUTE_SUCCESS,
     RouteEvents.UNMAP_ROUTE_FAILED
   ];
-  entity = [RouteSchema];
-  entityKey = RouteSchema.key;
+  entity = [entityFactory(routeSchemaKey)];
+  entityKey = routeSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
 }
@@ -115,8 +114,8 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
     this.endpointGuid = cfGuid;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
-  entity = [RouteSchema];
-  entityKey = RouteSchema.key;
+  entity = [entityFactory(routeSchemaKey)];
+  entityKey = routeSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
 }

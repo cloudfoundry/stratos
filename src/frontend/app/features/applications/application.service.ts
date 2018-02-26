@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { map, mergeMap } from 'rxjs/operators';
 
@@ -9,6 +10,7 @@ import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
+import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import {
   AppMetadataTypes,
@@ -16,27 +18,27 @@ import {
   GetAppStatsAction,
   GetAppSummaryAction,
 } from '../../store/actions/app-metadata.actions';
-import { GetApplication, UpdateApplication, UpdateExistingApplication, AppRouteRelation } from '../../store/actions/application.actions';
-import { ApplicationSchema } from '../../store/actions/application.actions';
+import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
+import { entityFactory } from '../../store/helpers/entity-factory';
+import { appRouteRelationKey } from '../../store/helpers/entity-relations';
+import {
+  appEnvVarsSchemaKey,
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  spaceSchemaKey,
+  organisationSchemaKey,
+} from '../../store/helpers/entity-factory';
 import { ActionState } from '../../store/reducers/api-request-reducer/types';
-import { selectEntity } from '../../store/selectors/api.selectors';
-import { selectUpdateInfo } from '../../store/selectors/api.selectors';
+import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
-import {
-  AppEnvVarSchema,
-  AppStat,
-  AppStatSchema,
-  AppStatsSchema,
-  AppSummary,
-  AppSummarySchema,
-} from '../../store/types/app-metadata.types';
+import { AppStat, AppSummary } from '../../store/types/app-metadata.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
-
   PaginationObservables,
 } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
@@ -44,8 +46,6 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
-import { spaceSchemaKey, organisationSchemaKey } from '../../store/actions/action-types';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -72,16 +72,16 @@ export class ApplicationService {
   ) {
 
     this.appEntityService = this.entityServiceFactory.create(
-      ApplicationSchema.key,
-      ApplicationSchema,
+      applicationSchemaKey,
+      entityFactory(applicationSchemaKey),
       appGuid,
-      new GetApplication(appGuid, cfGuid, [AppRouteRelation.key], true),
+      new GetApplication(appGuid, cfGuid, [appRouteRelationKey], true),
       true
     );
 
     this.appSummaryEntityService = this.entityServiceFactory.create(
-      AppSummarySchema.key,
-      AppSummarySchema,
+      appSummarySchemaKey,
+      entityFactory(appSummarySchemaKey),
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid));
 
@@ -135,7 +135,7 @@ export class ApplicationService {
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      AppStatSchema
+      entityFactory(appStatsSchemaKey)
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
@@ -180,7 +180,7 @@ export class ApplicationService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        AppEnvVarSchema
+        entityFactory(appEnvVarsSchemaKey)
       )
     }, true);
   }
@@ -193,7 +193,7 @@ export class ApplicationService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        AppStatSchema
+        entityFactory(appStatsSchemaKey)
       )
     }, true);
     // This will fail to fetch the app stats if the current app is not running but we're
@@ -292,7 +292,7 @@ export class ApplicationService {
     ));
 
     // Create an Observable that can be used to determine when the update completed
-    const actionState = selectUpdateInfo(ApplicationSchema.key,
+    const actionState = selectUpdateInfo(applicationSchemaKey,
       this.appGuid,
       UpdateExistingApplication.updateKey);
     return this.store.select(actionState).filter(item => !item.busy);

@@ -8,7 +8,6 @@ import { Observable, Subscription } from 'rxjs/Rx';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import {
-  ApplicationSchema,
   AssociateRouteWithAppApplication,
   CreateNewApplication,
   GetApplication,
@@ -19,7 +18,7 @@ import { selectNewAppState } from '../../../../store/effects/create-app-effects'
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { organisationSchemaKey, RouteSchema } from '../../../../store/actions/action-types';
+import { applicationSchemaKey, routeSchemaKey, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-create-application-step3',
@@ -87,7 +86,7 @@ export class CreateApplicationStep3Component implements OnInit {
         space_guid: space
       }
     ));
-    return this.store.select(selectRequestInfo(ApplicationSchema.key, newAppGuid));
+    return this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid));
   }
 
   createRoute(): Observable<RequestInfoState> | Observable<string> {
@@ -111,7 +110,7 @@ export class CreateApplicationStep3Component implements OnInit {
         }
       ));
     }
-    return shouldCreate ? this.store.select(selectRequestInfo(RouteSchema.key, newRouteGuid)) : Observable.of('NO_ROUTE');
+    return shouldCreate ? this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)) : Observable.of('NO_ROUTE');
   }
 
   ngOnInit() {

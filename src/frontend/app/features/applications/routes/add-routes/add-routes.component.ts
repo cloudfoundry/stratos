@@ -9,7 +9,6 @@ import { Observable } from 'rxjs/Observable';
 import { filter, map, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { RouteSchema } from '../../../../store/actions/action-types';
 import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -19,6 +18,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
+import { routeSchemaKey } from '../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-add-routes',
@@ -173,7 +173,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       )
     );
     const associateRoute$ = this.store
-      .select(selectRequestInfo(RouteSchema.key, newRouteGuid))
+      .select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
         filter(route => !route.creating),
         map(route => {

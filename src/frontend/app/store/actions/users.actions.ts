@@ -5,18 +5,12 @@ import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
 import { PaginatedAction } from '../types/pagination.types';
+import { entityFactory } from '../helpers/entity-factory';
+import { cfUserSchemaKey } from '../helpers/entity-factory';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
 export const GET_ALL_FAILED = '[Users] Get all failed';
-
-export const UserSchema = new schema.Entity(
-  'user',
-  {},
-  {
-    idAttribute: getAPIResourceGuid
-  }
-);
 
 export class GetAllUsers extends CFStartAction implements PaginatedAction {
   constructor(public paginationKey: string) {
@@ -26,8 +20,8 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction {
     this.options.method = 'get';
   }
   actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
-  entity = [UserSchema];
-  entityKey = UserSchema.key;
+  entity = [entityFactory(cfUserSchemaKey)];
+  entityKey = cfUserSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,

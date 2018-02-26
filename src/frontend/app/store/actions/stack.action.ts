@@ -1,16 +1,13 @@
-import { CFStartAction, IRequestAction, ICFAction } from '../types/request.types';
-import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { schema } from 'normalizr';
-import { ApiActionTypes } from './request.actions';
 import { RequestOptions } from '@angular/http';
+
+import { entityFactory } from '../helpers/entity-factory';
+import { CFStartAction, ICFAction } from '../types/request.types';
+import { schema } from 'normalizr';
+import { stackSchemaKey } from '../helpers/entity-factory';
 
 export const GET = '[Stack] Get one';
 export const GET_SUCCESS = '[Stack] Get one success';
 export const GET_FAILED = '[Stack] Get one failed';
-
-export const StackSchema = new schema.Entity('stack', {}, {
-  idAttribute: getAPIResourceGuid
-});
 
 export class GetStack extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
@@ -24,7 +21,7 @@ export class GetStack extends CFStartAction implements ICFAction {
     GET_SUCCESS,
     GET_FAILED
   ];
-  entity = [StackSchema];
-  entityKey = StackSchema.key;
+  entity = [entityFactory(stackSchemaKey)];
+  entityKey = stackSchemaKey;
   options: RequestOptions;
 }

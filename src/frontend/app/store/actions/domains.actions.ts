@@ -4,18 +4,12 @@ import { schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
+import { entityFactory } from '../helpers/entity-factory';
+import { domainSchemaKey } from '../helpers/entity-factory';
 
 export const GET_DOMAIN = '[domain] Get domain ';
 export const GET_DOMAIN_SUCCESS = '[domain] Get domain success';
 export const GET_DOMAIN_FAILED = '[domain] Get domain failed';
-
-export const DomainSchema = new schema.Entity(
-  'domain',
-  {},
-  {
-    idAttribute: getAPIResourceGuid
-  }
-);
 
 export class FetchDomain extends CFStartAction implements ICFAction {
   cnis: string;
@@ -28,8 +22,8 @@ export class FetchDomain extends CFStartAction implements ICFAction {
     this.cnis = cfGuid;
   }
   actions = [GET_DOMAIN, GET_DOMAIN_SUCCESS, GET_DOMAIN_FAILED];
-  entity = [DomainSchema];
-  entityKey = DomainSchema.key;
+  entity = [entityFactory(domainSchemaKey)];
+  entityKey = domainSchemaKey;
   options: RequestOptions;
 }
 export class FetchAllDomains extends CFStartAction implements PaginatedAction {
@@ -43,8 +37,8 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
     this.cnis = cfGuid;
   }
   actions = [GET_DOMAIN, GET_DOMAIN_SUCCESS, GET_DOMAIN_FAILED];
-  entity = [DomainSchema];
-  entityKey = DomainSchema.key;
+  entity = [entityFactory(domainSchemaKey)];
+  entityKey = domainSchemaKey;
   options: RequestOptions;
   paginationKey = 'domain';
 }

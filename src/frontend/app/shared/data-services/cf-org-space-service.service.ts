@@ -1,17 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { schema } from 'normalizr';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
-import {
-  DeleteOrganisation,
-  GetAllOrganisations,
-  OrganisationWithSpaceSchema,
-  OrgSpaceRelation,
-} from '../../store/actions/organisation.actions';
-import { SpaceRouteRelation } from '../../store/actions/space.actions';
+import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
 import { AppState } from '../../store/app-state';
+import { entityFactory } from '../../store/helpers/entity-factory';
+import { orgSpaceRelationKey } from '../../store/helpers/entity-relations';
+import { organisationWithSpaceKey } from '../../store/helpers/entity-factory';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -34,7 +32,7 @@ export class CfOrgSpaceDataService {
   public org: CfOrgSpaceItem;
   public space: CfOrgSpaceItem;
 
-  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, [OrgSpaceRelation.key]);
+  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, [orgSpaceRelationKey]);
 
   // TODO: We should optimise this to only fetch the orgs for the current endpoint
   // (if we inline depth the get orgs request it could be hefty... or we could use a different action to only fetch required data..
@@ -44,7 +42,7 @@ export class CfOrgSpaceDataService {
     action: this.paginationAction,
     paginationMonitor: this.paginationMonitorFactory.create(
       this.paginationAction.paginationKey,
-      OrganisationWithSpaceSchema
+      entityFactory(organisationWithSpaceKey)
     )
   });
 

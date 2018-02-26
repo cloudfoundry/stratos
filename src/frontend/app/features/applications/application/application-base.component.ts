@@ -1,4 +1,4 @@
-import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
+import { GetApplication } from '../../../store/actions/application.actions';
 import { ApplicationService } from '../application.service';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { EntityService } from '../../../core/entity-service';
@@ -11,6 +11,9 @@ import { RouterNav } from '../../../store/actions/router.actions';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
+import { entityFactory } from '../../../store/helpers/entity-factory';
+import { schema } from 'normalizr';
 
 
 const applicationServiceFactory = (
@@ -40,8 +43,8 @@ const entityServiceFactory = (
   const { id, cfId } = activatedRoute.snapshot.params;
   // const entityMonitor = new en
   return _entityServiceFactory.create(
-    ApplicationSchema.key,
-    ApplicationSchema,
+    applicationSchemaKey,
+    entityFactory(applicationSchemaKey),
     id,
     new GetApplication(id, cfId)
   );

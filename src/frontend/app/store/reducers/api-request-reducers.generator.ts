@@ -1,26 +1,22 @@
-import { RequestTypes } from './../actions/request.actions';
-import { ApiActionTypes } from '../actions/request.actions';
-import { RequestSectionKeys, IRequestArray } from './api-request-reducer/types';
-import { OtherEntityStateNames } from '../types/other-entity.types';
+import {
+  appEnvVarsSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  cfInfoSchemaKey,
+  githubBranchesSchemaKey,
+  githubCommitSchemaKey,
+  githubRepoSchemaKey,
+  organisationSchemaKey,
+  quotaDefinitionSchemaKey,
+} from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
-import { systemEndpointsReducer } from './system-endpoints.reducer';
-import { Action, ActionReducerMap, combineReducers } from '@ngrx/store';
+import { RequestTypes } from './../actions/request.actions';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
+import { IRequestArray } from './api-request-reducer/types';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
-import {
-  AppEnvVarSchema,
-  AppStatsSchema,
-  AppSummarySchema,
-  AppStatSchema
-} from '../types/app-metadata.types';
-import {
-  GITHUB_BRANCHES_ENTITY_KEY,
-  GITHUB_COMMIT_ENTITY_KEY
-} from '../types/deploy-application.types';
-import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
-import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
-import { organisationSchemaKey, QuotaDefinitionSchema } from '../actions/action-types';
+import { systemEndpointsReducer } from './system-endpoints.reducer';
+
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -67,14 +63,14 @@ const entities = [
   'createApplication',
   'uaaSetup',
   'user',
-  CF_INFO_ENTITY_KEY,
-  GITHUB_REPO_ENTITY_KEY,
-  GITHUB_BRANCHES_ENTITY_KEY,
-  GITHUB_COMMIT_ENTITY_KEY,
-  AppEnvVarSchema.key,
-  AppStatSchema.key,
-  AppSummarySchema.key,
-  QuotaDefinitionSchema.key
+  cfInfoSchemaKey,
+  githubRepoSchemaKey,
+  githubBranchesSchemaKey,
+  githubCommitSchemaKey,
+  appEnvVarsSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  quotaDefinitionSchemaKey
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 

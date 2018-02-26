@@ -1,11 +1,14 @@
 import { Store } from '@ngrx/store';
 
-import { ApplicationSchema, GetAllApplications } from '../../../../../store/actions/application.actions';
+import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { schema } from 'normalizr';
+import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 
 
@@ -23,7 +26,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: ApplicationSchema,
+      schema: entityFactory(applicationSchemaKey),
       getRowUniqueId: (entity: APIResource) => {
         return entity.metadata ? entity.metadata.guid : null;
       },

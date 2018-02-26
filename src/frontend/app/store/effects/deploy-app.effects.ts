@@ -16,9 +16,9 @@ import {
 } from '../../store/actions/deploy-applications.actions';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
-import { GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../types/deploy-application.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { AppState } from './../app-state';
+import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 
 @Injectable()
 export class DeployAppEffects {
@@ -50,7 +50,7 @@ export class DeployAppEffects {
     .flatMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityKey: GITHUB_BRANCHES_ENTITY_KEY,
+        entityKey: githubBranchesSchemaKey,
         type: action.type,
         paginationKey: 'branches'
       };
@@ -68,7 +68,7 @@ export class DeployAppEffects {
             const id = `${action.projectName}-${b.name}`;
             b.projectId = action.projectName;
             b.entityId = id;
-            mappedData.entities[GITHUB_BRANCHES_ENTITY_KEY][id] = {
+            mappedData.entities[githubBranchesSchemaKey][id] = {
               entity: b,
               metadata: {}
             };
@@ -89,7 +89,7 @@ export class DeployAppEffects {
     .flatMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityKey: GITHUB_COMMIT_ENTITY_KEY,
+        entityKey: githubCommitSchemaKey,
         type: action.type
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));

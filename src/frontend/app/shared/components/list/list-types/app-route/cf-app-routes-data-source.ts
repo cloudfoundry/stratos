@@ -10,7 +10,8 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { map } from 'rxjs/operators';
 import { isTCPRoute, getMappedApps } from '../../../../../features/applications/routes/routes.helper';
-import { RouteSchema } from '../../../../../store/actions/action-types';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { routeSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
   public cfGuid: string;
@@ -27,7 +28,7 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: RouteSchema,
+      schema: entityFactory(routeSchemaKey),
       getRowUniqueId: (object: EntityInfo) =>
         object.entity ? object.entity.guid : null,
       paginationKey,

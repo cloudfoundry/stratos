@@ -4,12 +4,14 @@ import { Observable } from 'rxjs/Observable';
 import { filter, map } from 'rxjs/operators';
 
 import { isAuditor, isBillingManager, isManager, isUser } from '../../features/cloud-foundry/cf.helpers';
-import { GetAllUsers, UserSchema } from '../../store/actions/users.actions';
+import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { entityFactory } from '../../store/helpers/entity-factory';
+import { cfUserSchemaKey } from '../../store/helpers/entity-factory';
 
 @Injectable()
 export class CfUserService {
@@ -22,7 +24,7 @@ export class CfUserService {
     action: this.allUsersAction,
     paginationMonitor: this.paginationMonitorFactory.create(
       this.allUsersAction.paginationKey,
-      UserSchema
+      entityFactory(cfUserSchemaKey)
     )
   });
 

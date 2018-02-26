@@ -5,21 +5,20 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { DisconnectEndpoint, UnregisterEndpoint, EndpointSchema } from '../../../../../store/actions/endpoint.actions';
+import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
+import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
+import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
-import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
