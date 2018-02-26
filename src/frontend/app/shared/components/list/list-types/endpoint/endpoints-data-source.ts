@@ -13,7 +13,7 @@ import { tap } from 'rxjs/operators/tap';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { EndpointDataSourceHelper } from './endpoint-data-source.helpers';
+import { ListRowSateHelper } from './endpoint-data-source.helpers';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -26,7 +26,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     entityMonitorFactory: EntityMonitorFactory
   ) {
     const action = new GetAllEndpoints();
-    const { rowStateManager, sub } = EndpointDataSourceHelper.getRowStateManager(
+    const rowStatehelper = new ListRowSateHelper();
+    const { rowStateManager, sub } = rowStatehelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
       GetAllEndpoints.storeKey

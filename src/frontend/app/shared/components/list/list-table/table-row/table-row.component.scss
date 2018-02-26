@@ -2,7 +2,11 @@
   &__blocked {
     .table-row {
       cursor: not-allowed;
-      opacity: .22;
+      &__inner {
+        * {
+          opacity: .8;
+        }
+      }
     }
     .table-row__blocker {
       display: block;

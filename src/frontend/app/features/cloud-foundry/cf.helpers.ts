@@ -1,5 +1,17 @@
 import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 
+export enum OrgUserRoles {
+  MANAGER = 'managers',
+  BILLING_MANAGERS = 'billing_managers',
+  AUDITOR = 'auditors',
+  USER = 'users'
+}
+
+export interface IOrgUserRole {
+  string: string;
+  key: OrgUserRoles;
+}
+
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   let roles = null;
   if (userRolesInOrg.orgManager) {
@@ -32,6 +44,35 @@ export function getSpaceRolesString(userRolesInSpace: UserRoleInSpace): string {
   }
 
   return roles ? roles : 'None';
+}
+
+export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IOrgUserRole[] {
+  const roles = [];
+  if (userRolesInOrg.orgManager) {
+    roles.push({
+      string: 'Manager',
+      key: OrgUserRoles.MANAGER
+    });
+  }
+  if (userRolesInOrg.billingManager) {
+    roles.push({
+      string: 'Billing Manager',
+      key: OrgUserRoles.BILLING_MANAGERS
+    });
+  }
+  if (userRolesInOrg.auditor) {
+    roles.push({
+      string: 'Auditor',
+      key: OrgUserRoles.AUDITOR
+    });
+  }
+  if (userRolesInOrg.user) {
+    roles.push({
+      string: 'User',
+      key: OrgUserRoles.USER
+    });
+  }
+  return roles;
 }
 
 function assignRole(currentRoles: string, role: string) {

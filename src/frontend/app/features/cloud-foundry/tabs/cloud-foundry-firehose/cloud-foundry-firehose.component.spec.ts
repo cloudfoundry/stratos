@@ -1,11 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CloudFoundryFirehoseComponent } from './cloud-foundry-firehose.component';
 import {
+  generateTestCfEndpointServiceProvider,
   getBaseTestModules,
-  generateTestCfEndpointServiceProvider
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryFirehoseComponent } from './cloud-foundry-firehose.component';
 
 describe('CloudFoundryFirehoseComponent', () => {
   let component: CloudFoundryFirehoseComponent;
@@ -16,7 +15,7 @@ describe('CloudFoundryFirehoseComponent', () => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryFirehoseComponent],
         imports: [...getBaseTestModules],
-        providers: [generateTestCfEndpointServiceProvider()]
+        providers: [...generateTestCfEndpointServiceProvider()]
       }).compileComponents();
     })
   );

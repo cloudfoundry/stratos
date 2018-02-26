@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 
 import { CoreModule } from '../core/core.module';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
+import { BaseCF } from '../features/cloud-foundry/cf-page.types';
 import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CloudFoundryService } from '../features/cloud-foundry/services/cloud-foundry.service';
 import {
@@ -39,29 +40,17 @@ export const cfEndpointServiceProviderDeps = [
   PaginationMonitorFactory,
   EntityMonitorFactory
 ];
-
-export function generateTestCfEndpointServiceProvider(cfGuid = testSCFGuid) {
-  return {
-    provide: CloudFoundryEndpointService,
-    useFactory: (
-      store: Store<AppState>,
-      entityServiceFactory: EntityServiceFactory,
-      cfOrgSpaceDataService: CfOrgSpaceDataService,
-      cfUserService: CfUserService,
-      paginationMonitorFactory: PaginationMonitorFactory
-    ) => {
-      const appService = new CloudFoundryEndpointService(
-        cfGuid,
-        store,
-        entityServiceFactory,
-        cfOrgSpaceDataService,
-        cfUserService,
-        paginationMonitorFactory
-      );
-      return appService;
+class BaseCFMock {
+  constructor(public guid = '1234') { }
+}
+export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
+  return [
+    {
+      provide: BaseCF,
+      useFactory: () => new BaseCFMock(guid)
     },
-    deps: [Store, ...cfEndpointServiceProviderDeps]
-  };
+    CloudFoundryEndpointService
+  ];
 }
 
 export function generateTestCfEndpointService() {
@@ -71,14 +60,14 @@ export function generateTestCfEndpointService() {
   ];
 }
 
-export function generateTestCfUserServiceProvider(cfGuid = testSCFGuid) {
+export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
   return {
     provide: CfUserService,
     useFactory: (
       store: Store<AppState>,
       paginationMonitorFactory: PaginationMonitorFactory
     ) => {
-      const cfUserService = new CfUserService(store, paginationMonitorFactory);
+      const cfUserService = new CfUserService(store, paginationMonitorFactory, { guid });
       return cfUserService;
     },
     deps: [Store, PaginationMonitorFactory]
