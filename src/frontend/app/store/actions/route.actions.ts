@@ -147,7 +147,7 @@ export class GetAppRoutes extends CFStartAction implements PaginatedAction {
     'order-direction-field': 'route',
   };
   paginationKey: string;
-  entity = RouteSchema;
+  entity = [RouteSchema];
   entityKey = RouteSchema.key;
   options: RequestOptions;
   endpointGuid: string;
