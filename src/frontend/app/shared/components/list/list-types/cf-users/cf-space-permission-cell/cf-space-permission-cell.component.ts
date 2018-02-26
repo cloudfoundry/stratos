@@ -32,8 +32,8 @@ interface ICellPermissionUpdates {
 export class CfSpacePermissionCellComponent {
   @Input('row')
   set row(row: APIResource<CfUser>) {
-    this.setChipConfig(row);
-    this.guid = row.metadata.guid;
+    // this.setChipConfig(row);
+    // this.guid = row.metadata.guid;
   }
   public chipsConfig: AppChip<ICellPermissionList>[];
   private guid: string;

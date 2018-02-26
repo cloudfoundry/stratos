@@ -1,5 +1,10 @@
 import { endpointEntitiesSelector } from '../selectors/endpoint.selectors';
-import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction, APISuccessOrFailedAction } from './../types/request.types';
+import {
+  WrapperRequestActionSuccess,
+  WrapperRequestActionFailed,
+  StartRequestAction,
+  APISuccessOrFailedAction
+} from './../types/request.types';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';

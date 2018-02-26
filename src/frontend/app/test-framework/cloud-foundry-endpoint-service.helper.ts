@@ -52,8 +52,7 @@ export function generateTestCfEndpointServiceProvider(guid = testSCFGuid) {
       provide: BaseCF,
       useFactory: () => new BaseCFMock(guid)
     },
-    CloudFoundryEndpointService,
-    CfOrgsListConfigService
+    CloudFoundryEndpointService
   ];
 }
 

@@ -1,6 +1,5 @@
 .app-chip {
   $size: 15px;
-  margin: 5px 5px 5px 0 !important;
   &__busy-spinner,
   &__close {
     margin-left: 5px;
@@ -20,4 +19,11 @@
     cursor: pointer;
     padding-left: 5px;
   }
+}
+
+// Overriding mat-chips overly specific styles.
+mat-chip.app-chip,
+mat-chip.app-chip + mat-chip.app-chip {
+  $chip-padding: 5px;
+  margin: $chip-padding $chip-padding $chip-padding 0;
 }
