@@ -27,6 +27,7 @@ export interface CfService {
   version: string;
 }
 
+export interface CfServiceBinding { }
 export interface CfServiceInstance {
   guid: string;
   cfGuid; string;
@@ -36,6 +37,7 @@ export interface CfServiceInstance {
   gateway_data: string;
   service_guid: string;
   service_plan_guid: string;
+  service_bindings: APIResource<CfServiceBinding>[];
   space_guid: string;
   tags: string[];
   type: string;

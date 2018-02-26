@@ -27,7 +27,6 @@ import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-u
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
-import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
@@ -86,6 +85,7 @@ import { TableCellServicePlanComponent } from './components/list/list-types/cf-s
 import { TableCellServiceInstanceTagsComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import { TableCellServiceInstanceAppsAttachedComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+import { AppChipsComponent } from './components/chips/chips.component';
 /* tslint:enable:max-line-length */
 
 @NgModule({

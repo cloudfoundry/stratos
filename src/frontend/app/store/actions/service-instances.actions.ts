@@ -3,12 +3,9 @@ import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { PaginationAction } from '../types/pagination.types';
-import { CFStartAction } from '../types/request.types';
+import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { ServiceInstancesSchema } from './action-types';
-
-
-
 
 export class GetServicesInstancesInSpace extends CFStartAction implements PaginationAction {
   constructor(public cfGuid: string, public spaceGuid: string, public paginationKey: string) {
@@ -28,5 +25,38 @@ export class GetServicesInstancesInSpace extends CFStartAction implements Pagina
     'inline-relations-depth': 2,
     'exclude-relations': 'space'
   };
+}
+
+export class DeleteServiceInstance extends CFStartAction implements ICFAction {
+  constructor(public cfGuid: string, public serviceInstanceGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_instances/${serviceInstanceGuid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+    this.options.params.set('async', 'false');
+    this.options.params.set('recursive', 'true');
+  }
+  actions = getActions('Service Instaces', 'Delete Service Instance');
+  entity = ServiceInstancesSchema;
+  entityKey = ServiceInstancesSchema.key;
+  options: RequestOptions;
+}
+
+
+export class DeleteServiceBinding extends CFStartAction implements ICFAction {
+  constructor(public cfGuid: string, public serviceBindingGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_bindings/${serviceBindingGuid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+    this.options.params.set('async', 'false');
+
+  }
+  actions = getActions('Service Instaces', 'Delete Service binding');
+  entity = ServiceInstancesSchema;
+  entityKey = ServiceInstancesSchema.key;
+  options: RequestOptions;
 }
 

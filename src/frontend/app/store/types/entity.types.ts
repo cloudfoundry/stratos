@@ -23,7 +23,7 @@ export interface IRequestDataState extends IRequestTypeState {
   domain: IRequestEntityTypeState<APIResource>;
   user: IRequestEntityTypeState<APIResource>;
   serviceInstance: IRequestEntityTypeState<APIResource>;
-  servicePlans: IRequestEntityTypeState<APIResource>;
+  servicePlan: IRequestEntityTypeState<APIResource>;
   service: IRequestEntityTypeState<APIResource>;
   serviceBinding: IRequestEntityTypeState<APIResource>;
 }
@@ -42,7 +42,7 @@ export interface IRequestState extends IRequestTypeState {
   domain: IRequestEntityTypeState<RequestInfoState>;
   user: IRequestEntityTypeState<RequestInfoState>;
   serviceInstance: IRequestEntityTypeState<RequestInfoState>;
-  servicePlans: IRequestEntityTypeState<RequestInfoState>;
+  servicePlan: IRequestEntityTypeState<RequestInfoState>;
   service: IRequestEntityTypeState<RequestInfoState>;
   serviceBinding: IRequestEntityTypeState<RequestInfoState>;
 
@@ -60,7 +60,7 @@ export const defaultCfEntitiesState = {
   user: {},
   domain: {},
   serviceInstance: {},
-  servicePlans: {},
+  servicePlan: {},
   service: {},
   serviceBinding: {},
   [AppEnvVarSchema.key]: {},

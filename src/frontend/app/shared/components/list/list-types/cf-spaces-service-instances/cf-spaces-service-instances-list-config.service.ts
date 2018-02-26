@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
-import { ListViewTypes } from '../../list.component.types';
+import { ListViewTypes, IListAction } from '../../list.component.types';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
@@ -11,7 +11,11 @@ import { CfServiceInstance } from '../../../../../store/types/service.types';
 import { TableCellServiceNameComponent } from './table-cell-service-name/table-cell-service-name.component';
 import { TableCellServicePlanComponent } from './table-cell-service-plan/table-cell-service-plan.component';
 import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import { TableCellServiceInstanceAppsAttachedComponent } from './table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
+import {
+  TableCellServiceInstanceAppsAttachedComponent
+} from './table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
+import { DeleteServiceInstance, DeleteServiceBinding } from '../../../../../store/actions/service-instances.actions';
+import { RouterNav } from '../../../../../store/actions/router.actions';
 @Injectable()
 export class CfSpacesServiceInstancesListConfigService {
   viewType = ListViewTypes.TABLE_ONLY;
@@ -24,7 +28,9 @@ export class CfSpacesServiceInstancesListConfigService {
     {
       columnId: 'serviceInstances',
       headerCell: () => 'Service Instances',
-      cell: row => row.entity.name,
+      cellDefinition: {
+        getValue: (row) => `${row.entity.name}`
+      },
       sort: {
         type: 'sort',
         orderKey: 'name',
@@ -78,14 +84,53 @@ export class CfSpacesServiceInstancesListConfigService {
     },
   ];
 
+  private listActionDelete: IListAction<APIResource> = {
+    action: (item: APIResource) => this.deleteServiceInstance(item),
+    icon: 'delete',
+    label: 'Delete',
+    description: 'Delete Service Instance',
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
+  };
+
+  private listActionDetach: IListAction<APIResource> = {
+    action: (item: APIResource) => this.deleteServiceBinding(item),
+    icon: 'settings',
+    label: 'Detach',
+    description: 'Detach Service Instance',
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => row.entity.service_bindings.length === 1
+  };
+
   constructor(private store: Store<AppState>, private cfSpaceService: CloudFoundrySpaceService) {
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
   }
 
+  deleteServiceInstance = (serviceInstance: APIResource<CfServiceInstance>) =>
+    this.store.dispatch(new DeleteServiceInstance(this.cfSpaceService.cfGuid, serviceInstance.metadata.guid))
+
+
+  deleteServiceBinding = (serviceInstance: APIResource<CfServiceInstance>) => {
+    /**
+     * If only one binding exists, carry out the action otherwise
+     * take user to a form to select which app binding they want to remove
+    **/
+    if (serviceInstance.entity.service_bindings.length === 1) {
+      this.store.dispatch(new DeleteServiceBinding(
+        this.cfSpaceService.cfGuid,
+        serviceInstance.entity.service_bindings[0].metadata.guid));
+    } else {
+      this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));
+    }
+  }
+
+  editServiceInstance = (serviceInstance: APIResource<CfServiceInstance>) => {
+    this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'edit-service-binding'] }));
+  }
+
   getGlobalActions = () => [];
-  // TODO implement actions
   getMultiActions = () => [];
-  getSingleActions = () => [];
+  getSingleActions = () => [this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
   getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;

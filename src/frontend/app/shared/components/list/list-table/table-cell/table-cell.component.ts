@@ -40,9 +40,6 @@ import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-n
 import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
 /* tslint:disable:max-line-length */
 import {
-  CfSpacePermissionCellComponent,
-} 
-import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 /* tslint:enable:max-line-length */
@@ -69,6 +66,7 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { TableCellCustom } from './table-cell-custom';
+import { CfSpacePermissionCellComponent } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 
 
 export const listTableCells = [
