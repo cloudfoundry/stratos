@@ -22,6 +22,7 @@ import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
 import { UserSchema } from '../types/user.types';
 import { userReducer } from './users.reducer';
+import { ServiceInstancesSchema, ServicePlanSchema, ServiceSchema, ServiceBindingsSchema } from '../actions/action-types';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -67,11 +68,11 @@ const entities = [
   'routerReducer',
   'createApplication',
   'uaaSetup',
-   UserSchema.key,,
-  'serviceInstance',
-  'servicePlan',
-  'service',
-  'serviceBinding',
+  UserSchema.key, ,
+  ServiceInstancesSchema.key,
+  ServicePlanSchema.key,
+  ServiceSchema.key,
+  ServiceBindingsSchema.key,
   CF_INFO_ENTITY_KEY,
   GITHUB_REPO_ENTITY_KEY,
   GITHUB_BRANCHES_ENTITY_KEY,

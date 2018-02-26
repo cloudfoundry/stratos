@@ -89,7 +89,7 @@ import { AddSpaceComponent } from './add-space/add-space.component';
     CloudFoundrySpaceAppsComponent,
     CloudFoundrySpaceServiceInstancesComponent,
     CloudFoundrySpaceRoutesComponent,
-    CloudFoundrySpaceUsersComponent,
+    CloudFoundrySpaceUsersComponent
   ],
   providers: [
     CloudFoundryService,
