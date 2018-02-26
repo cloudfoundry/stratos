@@ -53,6 +53,10 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       value: 'metrics',
       label: 'Metrics'
     },
+    {
+      value: 'caasp',
+      label: 'SUSE CaaSP'
+    },
   ];
 
   constructor(private store: Store<AppState>, public utilsService: UtilsService) {
