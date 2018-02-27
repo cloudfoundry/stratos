@@ -25,7 +25,8 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   defaultView = 'table' as ListView;
   getColumns = (): ITableColumn<APIResource<CfApplication>>[] => [
     {
-      columnId: 'apps', headerCell: () => 'Applications', cellComponent: TableCellAppNameComponent,
+      columnId: 'apps', headerCell: () => 'Applications',
+      cellComponent: TableCellAppNameComponent,
       cellFlex: '1',
       sort: {
         type: 'sort',
@@ -34,7 +35,13 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       }
     },
     {
-      columnId: 'status', headerCell: () => 'Status', cellFlex: '2', cellComponent: TableCellAppStatusComponent
+      columnId: 'status', headerCell: () => 'Status',
+      cellFlex: '2',
+      cellConfig: {
+        hideIcon: true,
+        initialStateOnly: true
+      },
+      cellComponent: TableCellAppStatusComponent
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
