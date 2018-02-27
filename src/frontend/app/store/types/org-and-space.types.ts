@@ -34,6 +34,7 @@ export interface CfSpace {
   service_instances: APIResource<CfServiceInstance>[];
   allow_ssh: boolean;
   space_quota_definition_guid: string;
+  name: string;
 }
 export interface CfQuotaDefinition {
   memory_limit: number;
