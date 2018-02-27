@@ -1,5 +1,6 @@
-import { IListDataSource, RowState } from '../../data-sources-controllers/list-data-source-types';
 import { Observable } from 'rxjs/Observable';
+
+import { IListDataSource, RowState } from '../../data-sources-controllers/list-data-source-types';
 
 export enum CardSize {
   LARGE = 'large'

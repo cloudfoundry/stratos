@@ -8,10 +8,22 @@ import { Action, ActionReducerMap, combineReducers } from '@ngrx/store';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
-import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
-import { GITHUB_BRANCHES_ENTITY_KEY, GITHUB_COMMIT_ENTITY_KEY } from '../types/deploy-application.types';
+import {
+  AppEnvVarSchema,
+  AppStatsSchema,
+  AppSummarySchema,
+  AppStatSchema
+} from '../types/app-metadata.types';
+import {
+  GITHUB_BRANCHES_ENTITY_KEY,
+  GITHUB_COMMIT_ENTITY_KEY
+} from '../types/deploy-application.types';
 import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
+import { UserSchema } from '../types/user.types';
+import { userReducer } from './users.reducer';
+import { RouteSchema } from '../../shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source';
+import { routeReducer } from './routes.reducer';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -23,7 +35,6 @@ const requestActions = [
   RequestTypes.FAILED
 ] as IRequestArray;
 
-
 function chainReducers(baseReducer, extraReducers) {
   return function (state, action) {
     let newState = baseReducer(state, action);
@@ -34,7 +45,8 @@ function chainReducers(baseReducer, extraReducers) {
       }, newState[key]);
       if (nextState !== newState[key]) {
         newState = {
-          ...newState, ...{
+          ...newState,
+          ...{
             [key]: nextState
           }
         };
@@ -49,7 +61,7 @@ const entities = [
   'stack',
   'space',
   'organization',
-  'route',
+  RouteSchema.key,
   'event',
   endpointStoreNames.type,
   'domain',
@@ -57,13 +69,14 @@ const entities = [
   'routerReducer',
   'createApplication',
   'uaaSetup',
+  UserSchema.key,
   CF_INFO_ENTITY_KEY,
   GITHUB_REPO_ENTITY_KEY,
   GITHUB_BRANCHES_ENTITY_KEY,
   GITHUB_COMMIT_ENTITY_KEY,
   AppEnvVarSchema.key,
   AppStatSchema.key,
-  AppSummarySchema.key,
+  AppSummarySchema.key
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 
@@ -75,22 +88,13 @@ export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
-    [endpointStoreNames.type]: [
-      systemEndpointsReducer
-    ],
-    'application': [
-      endpointDisconnectApplicationReducer('application')
-    ],
-    'space': [
-      endpointDisconnectApplicationReducer('space')
-    ],
-    'organization': [
-      endpointDisconnectApplicationReducer('organization')
-    ]
+    [UserSchema.key]: [userReducer],
+    [RouteSchema.key]: [routeReducer],
+    [endpointStoreNames.type]: [systemEndpointsReducer],
+    application: [endpointDisconnectApplicationReducer('application')],
+    space: [endpointDisconnectApplicationReducer('space')],
+    organization: [endpointDisconnectApplicationReducer('organization')]
   };
 
-  return chainReducers(
-    baseDataReducer,
-    extraReducers
-  )(state, action);
+  return chainReducers(baseDataReducer, extraReducers)(state, action);
 }
