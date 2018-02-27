@@ -121,8 +121,10 @@ export class APIEffect {
         ));
         if (
           !paginatedAction.updatingKey &&
-          (paginatedAction.options.method === 'post' || paginatedAction.options.method === RequestMethod.Post ||
-            paginatedAction.options.method === 'delete' || paginatedAction.options.method === RequestMethod.Delete)
+          (
+            paginatedAction.options.method === 'post' || paginatedAction.options.method === RequestMethod.Post ||
+            paginatedAction.options.method === 'delete' || paginatedAction.options.method === RequestMethod.Delete
+          )
         ) {
           if (paginatedAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(paginatedAction.entityKey, paginatedAction.guid));

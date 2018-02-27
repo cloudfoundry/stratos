@@ -2,4 +2,17 @@
   &__actions {
     justify-content: flex-end;
   }
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__warn-icon {
+    $size: 28px;
+    font-size: $size;
+    height: $size;
+    width: $size;
+  }
+  &__message {
+    white-space: pre-wrap;
+  }
 }
