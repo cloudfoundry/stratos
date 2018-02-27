@@ -20,9 +20,7 @@ import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers
   ]
 })
 export class BuildTabComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
-
-  appService = this.applicationService;
+  constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
 
   cardTwoFetching$: Observable<boolean>;
 
@@ -31,9 +29,9 @@ export class BuildTabComponent implements OnInit {
   getFullApiUrl = getFullEndpointApiUrl;
 
   ngOnInit() {
-    this.cardTwoFetching$ = this.appService.application$
+    this.cardTwoFetching$ = this.applicationService.application$
       .combineLatest(
-      this.appService.appSummary$
+      this.applicationService.appSummary$
       )
       .map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
