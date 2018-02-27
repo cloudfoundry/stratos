@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { skipWhile, takeWhile } from 'rxjs/operators';
+import { skipWhile, takeWhile, zip } from 'rxjs/operators';
 
 import { pathGet } from '../../core/utils.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
@@ -353,15 +353,9 @@ export function validateEntityRelations(
   action: IRequestAction,
   parentEntities: any[],
   populateMissing = false,
-  populateExisting = false): {
-    allFinished: Observable<any>,
-    entities: Observable<tempAppStore>
-  } {
+  populateExisting = false): Observable<any[]> {
 
-  const emptyResponse = {
-    allFinished: Observable.of(true),
-    entities: Observable.of(null)
-  };
+  const emptyResponse = Observable.of(null);
   // Does the entity associated with the action have inline params that need to be validated?
   const parentEntitySchema = extractActionEntitySchema(action);
   if (!parentEntitySchema) {
@@ -400,10 +394,7 @@ export function validateEntityRelations(
     }
   });
 
-  return {
-    allFinished: Observable.zip(...paginationFinished),
-    entities: Observable.of(null)
-  };
+  return Observable.zip(...paginationFinished).first();
 }
 
 function extractActionEntitySchema(action: IRequestAction): {

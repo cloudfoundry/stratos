@@ -111,7 +111,7 @@ export class APIEffect {
       }),
       map(response => {
         const { entities, totalResults, totalPages } = response;
-        const validationResponse = validateEntityRelations(
+        const validationFinished = validateEntityRelations(
           this.store,
           entities.entities,
           actionClone,
@@ -119,12 +119,11 @@ export class APIEffect {
           true, false);
         return {
           response,
-          validationResponse
+          validationFinished
         };
       }),
       mergeMap(result => {
-        return result.validationResponse.allFinished.pipe(
-          first(),
+        return result.validationFinished.pipe(
           map(() => result)
         );
       }),
