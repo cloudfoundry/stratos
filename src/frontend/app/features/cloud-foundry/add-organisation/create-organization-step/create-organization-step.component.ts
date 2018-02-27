@@ -103,6 +103,8 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
-    this.submitSubscription.unsubscribe();
+    if (this.submitSubscription) {
+      this.submitSubscription.unsubscribe();
+    }
   }
 }
