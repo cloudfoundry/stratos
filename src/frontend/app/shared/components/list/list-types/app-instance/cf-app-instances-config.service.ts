@@ -8,7 +8,7 @@ import { DeleteApplicationInstance } from '../../../../../store/actions/applicat
 import { AppState } from '../../../../../store/app-state';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { IListAction, IListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
@@ -98,9 +98,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       }, cellFlex: '5'
     }
   ];
-  pageSizeOptions = [5, 25, 50];
   viewType = ListViewTypes.TABLE_ONLY;
-
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
@@ -122,7 +120,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     enabled: row => true,
   };
 
-
   private listActionSsh: IListAction<any> = {
     action: (item) => {
       const index = item.index;
@@ -137,8 +134,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     visible: row => true,
     enabled: row => !!(row.value && row.value.state === 'RUNNING'),
   };
-
-
 
   private singleActions = [
     this.listActionTerminate,
