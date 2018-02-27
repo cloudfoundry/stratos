@@ -23,7 +23,7 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
     value = value || {
       hideIcon: false,
       initialStateOnly: false
-    }
+    };
     this.hideIcon = value.hideIcon || false;
     this.initialStateOnly = value.initialStateOnly || false;
   }
