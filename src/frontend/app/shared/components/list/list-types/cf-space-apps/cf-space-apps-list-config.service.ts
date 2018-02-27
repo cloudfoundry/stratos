@@ -38,7 +38,9 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
-      cell: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`, sort: {
+      cellDefinition: {
+        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+      }, sort: {
         type: 'sort',
         orderKey: 'creation',
         field: 'metadata.created_at'
