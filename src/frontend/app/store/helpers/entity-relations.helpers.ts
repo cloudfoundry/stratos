@@ -1,19 +1,16 @@
 import { Action, Store } from '@ngrx/store';
-import { denormalize, schema, Schema } from 'normalizr';
+import { denormalize, Schema, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { first, map, skipWhile, takeWhile, tap } from 'rxjs/operators';
+import { skipWhile, takeWhile } from 'rxjs/operators';
 
 import { pathGet } from '../../core/utils.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { SetInitialParams } from '../actions/pagination.actions';
+import { FetchRelationAction } from '../actions/relation.actions';
 import { AppState } from '../app-state';
-import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { pick } from './reducer.helper';
-import { FetchRelationAction } from '../actions/relation.actions';
-import { entityFactory } from './entity-factory';
 
 export function generateEntityRelationKey(parentKey: string, childKey) {
   return `${parentKey}-${childKey}`;
@@ -187,7 +184,6 @@ function handleRelation({
       paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childEntitySchemaSafe)
     }
     ]);
-    console.log(paramAction.paginationKey);
   }
 
   return results;
@@ -397,9 +393,8 @@ export function validateEntityRelations(
     // TODO: RC Failures?
     if (newActions.paginationMonitor) {
       const obs = newActions.paginationMonitor.fetchingCurrentPage$.pipe(
-        tap(a => console.log(a)),
-        skipWhile(fetching => !fetching),
-        takeWhile(fetching => fetching)
+        skipWhile(fetching => fetching),
+        takeWhile(fetching => !fetching)
       );
       paginationFinished.push(obs);
     }
@@ -409,10 +404,6 @@ export function validateEntityRelations(
     allFinished: Observable.zip(...paginationFinished),
     entities: Observable.of(null)
   };
-  // This is a .first, so automatically closes
-  // observable.subscribe();
-  // return observable;
-
 }
 
 function extractActionEntitySchema(action: IRequestAction): {
