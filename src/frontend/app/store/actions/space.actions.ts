@@ -6,7 +6,6 @@ import {
   EntityInlineChild,
   EntityInlineChildAction,
   EntityInlineParentAction,
-  EntityRelation,
 } from '../helpers/entity-relations.helpers';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { PaginatedAction } from '../types/pagination.types';

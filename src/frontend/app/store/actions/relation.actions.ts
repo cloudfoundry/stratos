@@ -15,7 +15,7 @@ export class FetchRelationAction extends CFStartAction implements EntityInlineCh
   ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = url;
+    this.options.url = url.startsWith('/v2/') ? url.substring(4, url.length) : url;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }

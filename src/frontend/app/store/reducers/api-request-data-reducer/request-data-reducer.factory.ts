@@ -7,7 +7,7 @@ import { ISuccessRequestAction } from '../../types/request.types';
 import { deepMergeState, mergeEntity } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
 import { pathGet, pathSet } from '../../../core/utils.service';
-import { EntityRelation, EntityInlineChild } from '../../helpers/entity-relations.helpers';
+import { EntityInlineChild } from '../../helpers/entity-relations.helpers';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -54,7 +54,7 @@ function deleteEntity(state, entityKey, guid) {
 
 function canPopulateParentEntity(successAction): {
   parentEntityGuid: string;
-  parentRelations: EntityRelation[]
+  parentRelations: any;// EntityRelation[]
 } {
   return;
   // // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent (empty lists)
@@ -87,7 +87,7 @@ function canPopulateParentEntity(successAction): {
 
 function populateParentEntity(state, successAction, params: {
   parentEntityGuid: string;
-  parentRelations: EntityRelation[]
+  parentRelations: any; // EntityRelation[]
 }) {
   const { parentEntityGuid, parentRelations } = params;
 

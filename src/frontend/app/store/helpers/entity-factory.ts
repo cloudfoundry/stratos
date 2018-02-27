@@ -30,9 +30,9 @@ export const spacesKey = 'spaces';
 
 export const AppSummarySchema = new schema.Entity(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
 export const AppStatSchema = new schema.Entity(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-export const AppStatsSchema = new schema.Array(AppStatSchema); // TODO: RC
+// export const AppStatsSchema = new schema.Array(AppStatSchema); // TODO: RC
 export const AppEnvVarSchema = new schema.Entity(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-export const AppEnvVarsSchema = new schema.Array(AppEnvVarSchema); // TODO: RC
+// export const AppEnvVarsSchema = new schema.Array(AppEnvVarSchema); // TODO: RC
 
 export const GithubBranchSchema = new schema.Entity(githubBranchesSchemaKey, {}, { idAttribute: 'entityId' });
 // export const BranchesSchema = new schema.Array(GithubBranchSchema); // TODO: RC

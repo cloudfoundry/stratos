@@ -8,10 +8,16 @@ import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { map, mergeMap, first, switchMap } from 'rxjs/operators';
+import { first, map, mergeMap } from 'rxjs/operators';
 
+import { LoggerService } from '../../core/logger.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
-import { EntityInlineParentAction, isEntityInlineParentAction, listRelations, validateEntityRelations } from '../helpers/entity-relations.helpers';
+import {
+  EntityInlineParentAction,
+  isEntityInlineParentAction,
+  listRelations,
+  validateEntityRelations,
+} from '../helpers/entity-relations.helpers';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
@@ -24,7 +30,6 @@ import { ApiActionTypes } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
-import { withLatestFrom } from 'rxjs/operator/withLatestFrom';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -32,6 +37,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
 export class APIEffect {
 
   constructor(
+    private logger: LoggerService,
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
@@ -103,19 +109,18 @@ export class APIEffect {
       map(response => {
         return this.handleMultiEndpoints(response, actionClone);
       }),
-      mergeMap(response => {
+      map(response => {
         const { entities, totalResults, totalPages } = response;
-        return validateEntityRelations(
+        const validationResponse = validateEntityRelations(
           this.store,
+          entities.entities,
           actionClone,
           Object.values(entities.entities[apiAction.entityKey]),
-          false, false)
-          .pipe(
-            map(validationResponse => ({
-              response,
-              validationResponse
-            }))
-          );
+          true, false);
+        return {
+          response,
+          validationResponse
+        };
       }),
       mergeMap(result => {
         return result.validationResponse.allFinished.pipe(
@@ -123,7 +128,7 @@ export class APIEffect {
         );
       }),
       first(),
-      mergeMap((result) => {
+      mergeMap(result => {
         const actions = [];
         actions.push({ type: actionClone.actions[1], apiAction: actionClone });
         actions.push(new WrapperRequestActionSuccess(
@@ -145,11 +150,10 @@ export class APIEffect {
             actions.unshift(new ClearPaginationOfType(actionClone.entityKey));
           }
         }
-
-        // actions.forEach(action, this.store.dispatch(action));
         return actions;
       })
     ).catch(err => {
+      this.logger.warn(`API request process failed ${err}`);
       return [
         { type: actionClone.actions[2], apiAction: actionClone },
         new WrapperRequestActionFailed(

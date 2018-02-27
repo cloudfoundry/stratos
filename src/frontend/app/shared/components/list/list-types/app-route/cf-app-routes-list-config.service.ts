@@ -9,7 +9,6 @@ import { getPaginationKey } from '../../../../../store/actions/pagination.action
 import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
-import { EntityRelation } from '../../../../../store/helpers/entity-relations.helpers';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -19,6 +18,7 @@ import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { entityRelationCreatePaginationKey } from '../../../../../store/helpers/entity-relations.helpers';
 
 @Injectable()
 export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
@@ -185,10 +185,10 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
       new GetAppRoutes(
         appService.appGuid,
         appService.cfGuid,
-        EntityRelation.createPaginationKey(applicationSchemaKey, appService.appGuid),
+        entityRelationCreatePaginationKey(applicationSchemaKey, appService.appGuid),
         appService.appGuid
       ),
-      EntityRelation.createPaginationKey(applicationSchemaKey, appService.appGuid),
+      entityRelationCreatePaginationKey(applicationSchemaKey, appService.appGuid),
       false,
       this
     );
