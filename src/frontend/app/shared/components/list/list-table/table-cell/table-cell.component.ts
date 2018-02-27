@@ -39,6 +39,9 @@ import {
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
 import {
+  TableCellRouteAppsAttachedComponent,
+} from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+import {
   CfSpacePermissionCellComponent,
 } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import {
@@ -54,6 +57,9 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { TableCellCustom } from './table-cell-custom';
+
+/* tslint:disable:max-line-length */
+/* tslint:enable:max-line-length */
 
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -75,6 +81,7 @@ export const listTableCells = [
   TableCellAppInstancesComponent,
   TableCellAppRouteComponent,
   TableCellRadioComponent,
+  TableCellRouteAppsAttachedComponent,
   TableCellCfUserPermissionComponent,
   CfSpacePermissionCellComponent
 ];

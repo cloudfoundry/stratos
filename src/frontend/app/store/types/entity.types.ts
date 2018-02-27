@@ -8,13 +8,14 @@ import {
   AppSummarySchema
 } from './app-metadata.types';
 import { SystemInfo } from './system.types';
+import { IRoute } from '../../core/cf-api.types';
 
 export interface IRequestDataState extends IRequestTypeState {
   application: IRequestEntityTypeState<APIResource>;
   stack: IRequestEntityTypeState<APIResource>;
   space: IRequestEntityTypeState<APIResource>;
   organization: IRequestEntityTypeState<APIResource>;
-  route: IRequestEntityTypeState<APIResource>;
+  route: IRequestEntityTypeState<APIResource<IRoute>>;
   event: IRequestEntityTypeState<APIResource>;
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
