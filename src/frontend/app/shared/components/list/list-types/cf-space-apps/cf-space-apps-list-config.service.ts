@@ -40,7 +40,8 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       columnId: 'creation', headerCell: () => 'Creation Date',
       cellDefinition: {
         getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
-      }, sort: {
+      },
+      sort: {
         type: 'sort',
         orderKey: 'creation',
         field: 'metadata.created_at'
@@ -48,7 +49,12 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       cellFlex: '2'
     },
     {
-      columnId: 'instances', headerCell: () => 'Instances', cellComponent: TableCellAppInstancesComponent, cellFlex: '1', sort: {
+      columnId: 'instances',
+      headerCell: () => 'Instances',
+      cellDefinition: {
+        getValue: (row: APIResource) => `${row.entity.instances}`
+      },
+      cellFlex: '1', sort: {
         type: 'sort',
         orderKey: 'instances',
         field: 'entity.instances'
