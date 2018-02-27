@@ -20,6 +20,7 @@ import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { AppReducersModule } from './reducers.module';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
+import { CaaspEffects } from './effects/caasp.effects';
 
 @NgModule({
   imports: [
@@ -42,7 +43,8 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
       SetClientFilterEffect,
       DeployAppEffects,
       GithubEffects,
-      CloudFoundryEffects
+      CloudFoundryEffects,
+      CaaspEffects,
     ])
   ]
 })

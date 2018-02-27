@@ -20,9 +20,16 @@ $side-nav-header-spacing: $side-nav-padding-h / 2 + $side-nav-mat-icon-width + $
     margin: 0;
     padding: 0;
   }
+  &__itemContainer {
+    height: 54px;
+    overflow: hidden;
+    transition: height 0.3s ease-in-out;
+    &-hidden {
+      height: 0;
+    }
+  }
   &__item {
     align-items: center;
-    border-bottom: 1px solid;
     border-color: transparent;
     cursor: pointer;
     display: flex;
