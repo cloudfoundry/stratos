@@ -262,6 +262,7 @@ const testInitialStoreState: AppState = {
           }
         },
       },
+      caaspInfo: {},
       stack: {},
       space: {},
       organization: {
@@ -640,6 +641,7 @@ const testInitialStoreState: AppState = {
           message: ''
         }
       },
+      caaspInfo: {},
       domain:{},
       githubBranches:{},
       cloudFoundryInfo: {},
@@ -3818,6 +3820,7 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      caaspInfo: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           entity: {

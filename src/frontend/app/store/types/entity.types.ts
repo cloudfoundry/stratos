@@ -22,6 +22,7 @@ export interface IRequestDataState extends IRequestTypeState {
   githubCommits: IRequestEntityTypeState<APIResource>;
   domain: IRequestEntityTypeState<APIResource>;
   user: IRequestEntityTypeState<APIResource>;
+  caaspInfo: IRequestEntityTypeState<APIResource>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -37,6 +38,7 @@ export interface IRequestState extends IRequestTypeState {
   githubCommits: IRequestEntityTypeState<APIResource>;
   domain: IRequestEntityTypeState<RequestInfoState>;
   user: IRequestEntityTypeState<RequestInfoState>;
+  caaspInfo: IRequestEntityTypeState<RequestInfoState>;
 }
 
 export const defaultCfEntitiesState = {
@@ -52,5 +54,6 @@ export const defaultCfEntitiesState = {
   domain: {},
   [AppEnvVarSchema.key]: {},
   [AppStatSchema.key]: {},
-  [AppSummarySchema.key]: {}
+  [AppSummarySchema.key]: {},
+  caaspInfo: {}
 };

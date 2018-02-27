@@ -26,7 +26,7 @@ export class CaaspEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
-  ) {}
+  ) { }
 
   @Effect()
   fetchInfo$ = this.actions$.ofType<GetCaaspInfo>(GET_INFO).pipe(

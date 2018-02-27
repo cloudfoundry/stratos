@@ -22,6 +22,7 @@ import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
 import { UserSchema } from '../types/user.types';
 import { userReducer } from './users.reducer';
+import { CAASP_INFO_ENTITY_KEY } from '../actions/caasp.actions';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -74,7 +75,8 @@ const entities = [
   GITHUB_COMMIT_ENTITY_KEY,
   AppEnvVarSchema.key,
   AppStatSchema.key,
-  AppSummarySchema.key
+  AppSummarySchema.key,
+  CAASP_INFO_ENTITY_KEY
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 

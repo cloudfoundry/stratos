@@ -6,7 +6,7 @@ import { AppState } from '../../../store/app-state';
 import { ActionHistoryDump } from '../../../store/actions/action-history.actions';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { TableCellAppNameComponent } from '../../../shared/components/list/list-types/app/table-cell-app-name/table-cell-app-name.component';
-import { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs/Subscription';
 
 export interface SideNavItem {
   text: string;
@@ -65,5 +65,5 @@ export class SideNavComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.sub.unsubscribe();
   }
-  
+
 }
