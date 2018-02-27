@@ -1,4 +1,4 @@
-import { APIResource } from "../store/types/api.types";
+import { APIResource } from '../store/types/api.types';
 
 export interface IRoute {
   host: string;
