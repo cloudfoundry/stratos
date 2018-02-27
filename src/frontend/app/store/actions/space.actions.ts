@@ -65,3 +65,22 @@ export class DeleteSpace extends CFStartAction implements ICFAction {
   entityKey = spaceSchemaKey;
   options: RequestOptions;
 }
+
+export class CreateSpace extends CFStartAction implements ICFAction {
+  constructor(public name: string, public orgGuid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces`;
+    this.options.method = 'post';
+    this.guid = `${orgGuid}-${name}`;
+    this.options.body = {
+      name: name,
+      organization_guid: orgGuid
+    };
+  }
+  actions = getActions('Spaces', 'Create Space');
+  entity = [SpaceSchema];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+  guid: string;
+}
