@@ -3,7 +3,6 @@ import { schema } from 'normalizr';
 
 import { pathGet } from '../../core/utils.service';
 import {
-  EntityInlineChild,
   EntityInlineChildAction,
   EntityInlineParentAction,
 } from '../helpers/entity-relations.helpers';
@@ -84,7 +83,7 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'attachedApps',
   };
   parentGuid: string;
-  entity = entityFactory<EntityInlineChild>(routesInSpaceKey);
+  entity = entityFactory(routesInSpaceKey);
   entityKey = routesInSpaceKey;
   options: RequestOptions;
   endpointGuid: string;

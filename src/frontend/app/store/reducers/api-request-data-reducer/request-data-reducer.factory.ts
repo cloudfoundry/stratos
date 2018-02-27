@@ -7,7 +7,6 @@ import { ISuccessRequestAction } from '../../types/request.types';
 import { deepMergeState, mergeEntity } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
 import { pathGet, pathSet } from '../../../core/utils.service';
-import { EntityInlineChild } from '../../helpers/entity-relations.helpers';
 import { FetchRelationAction } from '../../actions/relation.actions';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
@@ -23,12 +22,6 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
           // TODO: RC
           // Does the entity associated with the action have a parent property that requires the result to be stored with it?
           // For example we have fetched a list of spaces that need to be stored in an organisation's entity?
-          // const parentParams = canPopulateParentEntity(success);
-          // const populatedState = populateParentEntity(state, success);
-          // if (populatedState) {
-          //   // We have the required parameters to populate a parent's property with this response
-          //   return populatedState;
-          // }
           const entities = populateParentEntity(state, success) || success.response.entities;
           return deepMergeState(state, entities);
         }

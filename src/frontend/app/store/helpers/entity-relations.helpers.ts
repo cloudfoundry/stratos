@@ -16,69 +16,7 @@ export function generateEntityRelationKey(parentKey: string, childKey) {
   return `${parentKey}-${childKey}`;
 }
 
-// /**
-//  * Provides a way for a collection of child entities to populate a parent entity with itself,.. or request child entities if missing
-//  *
-//  * @export
-//  * @class EntityRelation
-//  */
-// export class EntityRelation {
-//   /**
-//    * Unique id for this entity relationship. For example `org-space-relation`
-//    */
-//   key: string;
-//   /**
-//    * The entity schema key of the parent that should contain the child entities
-//    */
-//   parentEntityKey: string;
-//   /**
-//    * The entity schema of the child
-//    */
-//   childEntity: schema.Entity | EntityInlineChild;
-//   /**
-//    * Create a new parent that contains the child entities. For example <org>.entity.<spaces>
-//    */
-//   createParentWithChild: (state, parentGuid: string, response: NormalizedResponse) => APIResource;
-//   /**
-//    * An action that will fetch missing child entities
-//    */
-//   fetchChildrenAction: (url: string, resource: APIResource) => EntityInlineChildAction;
-//   // fetchChildrenAction: (resource: APIResource, includeRelations: string[], populateMissing?: boolean) => EntityInlineChildAction;
-//   /**
-//    * Create the pagination key that is associated with the action to fetch the children
-//    */
-//   static createPaginationKey = (schemaKey: string, guid: string) => `${schemaKey}-${guid}`;
-// }
-
 export function entityRelationCreatePaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
-
-
-// TODO: RC Does this go away??
-/**
- * Defines an schema entity array which should exist as a parameter in a parent entity. For example a space array in a parent organisation.
- * Also provides a framework to populate a parent entity's parameter with itself. For example we've fetched the space array and it needs
- * to be stored in the parent organisation's entity.
- *
- * @export
- * @class EntityInlineChild
- * @extends {schema.Array}
- */
-export class EntityInlineChild extends schema.Array {
-  key: string;
-  schema: Schema;
-  // static is(value): boolean {
-  //   return !!value.parentRelations;
-  // }
-  constructor(
-    // public parentRelations: EntityRelation[],
-    public entitySchema: schema.Entity,
-    schemaAttribute?: string | schema.SchemaFunction) {
-    super(entitySchema, schemaAttribute); {
-    }
-    this.key = entitySchema.key;
-    this.schema = entitySchema['schema'];
-  }
-}
 
 /**
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
@@ -279,9 +217,8 @@ function validationLoop(
       const value = parentEntitySchemaParam[key];
       const arraySafeValue = value['length'] > 0 ? value[0] : value;
 
-      if (arraySafeValue instanceof EntityInlineChild || arraySafeValue instanceof schema.Entity) {
-        let schema: EntityInlineChild | schema.Entity = arraySafeValue;
-        schema = (schema as EntityInlineChild).entitySchema || schema;
+      if (arraySafeValue instanceof schema.Entity) {
+        const schema: schema.Entity = arraySafeValue;
         if (!validRelation(parentEntitySchemaKey, schema.key, action.includeRelations)) {
           return;
         }
@@ -410,12 +347,7 @@ function extractActionEntitySchema(action: IRequestAction): {
 }
 
 function extractEntitySchema(entity) {
-  // if (EntityInlineChild.is(entity)) {
-  //   entity = (entity as EntityInlineChild).entitySchema;
-  // } else {
-  entity = entity['length'] > 0 ? entity[0] : entity;
-  // }
-  return entity;
+  return entity['length'] > 0 ? entity[0] : entity;
 }
 
 export interface ListRelationsResult {
@@ -441,13 +373,13 @@ function loop(res: ListRelationsResult, includeRelations: string[], parentEntity
   Object.keys(parentEntitySchemaObj).forEach(key => {
     let value = parentEntitySchemaObj[key];
     value = value['length'] > 0 ? value[0] : value;
-    const entityKey = value instanceof EntityInlineChild ? value.entitySchema.key : value.key;
-    const entitySchema = value instanceof EntityInlineChild ? value.entitySchema['schema'] : value['schema'];
+    const entityKey = value.key;
+    const entitySchema = value['schema'];
     if (res.relations.indexOf(key) >= 0) {
       return;
     }
 
-    if (value instanceof EntityInlineChild || value instanceof schema.Entity) {
+    if (value instanceof schema.Entity) {
       if (validRelation(parentEntitySchemaKey, entityKey, includeRelations)) {
         res.relations.push(key);
         haveDelved = true;

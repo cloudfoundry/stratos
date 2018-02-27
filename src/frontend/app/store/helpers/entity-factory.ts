@@ -1,7 +1,6 @@
 import { schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { EntityInlineChild } from './entity-relations.helpers';
 
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
@@ -128,48 +127,48 @@ export const ApplicationEntitySchema = new schema.Entity(
 );
 
 
-export function entityFactory<T extends schema.Entity | EntityInlineChild = schema.Entity>(key: string): T {
+export function entityFactory(key: string): schema.Entity {
   switch (key) {
     case applicationSchemaKey:
-      return ApplicationEntitySchema as T;
+      return ApplicationEntitySchema;
     case stackSchemaKey:
-      return StackSchema as T;
+      return StackSchema;
     case spaceWithOrgKey:
-      return SpaceWithOrgsEntitySchema as T;
+      return SpaceWithOrgsEntitySchema;
     // case routesInAppKey:
     //   return RoutesInAppSchema as T;
     case routeSchemaKey:
-      return RouteSchema as T;
+      return RouteSchema;
     case domainSchemaKey:
-      return DomainSchema as T;
+      return DomainSchema;
     case organisationSchemaKey:
-      return OrganisationSchema as T;
+      return OrganisationSchema;
     case domainSchemaKey:
-      return QuotaDefinitionSchema as T;
+      return QuotaDefinitionSchema;
     case appEventSchemaKey:
-      return EventSchema as T;
+      return EventSchema;
     case endpointSchemaKey:
-      return EndpointSchema as T;
+      return EndpointSchema;
     case organisationWithSpaceKey:
-      return OrganisationWithSpaceSchema as T;
+      return OrganisationWithSpaceSchema;
     case spaceSchemaKey:
-      return SpaceSchema as T;
+      return SpaceSchema;
     case cfUserSchemaKey:
-      return UserSchema as T;
+      return UserSchema;
     case appSummarySchemaKey:
-      return AppSummarySchema as T;
+      return AppSummarySchema;
     case appStatsSchemaKey:
-      return AppStatSchema as T;
+      return AppStatSchema;
     case appEnvVarsSchemaKey:
-      return AppEnvVarSchema as T;
+      return AppEnvVarSchema;
     case githubBranchesSchemaKey:
-      return GithubBranchSchema as T;
+      return GithubBranchSchema;
     case githubRepoSchemaKey:
-      return GithubRepoSchema as T;
+      return GithubRepoSchema;
     case githubCommitSchemaKey:
-      return GithubCommitSchema as T;
+      return GithubCommitSchema;
     case quotaDefinitionSchemaKey:
-      return QuotaDefinitionSchema as T;
+      return QuotaDefinitionSchema;
     // case routesInSpaceKey:
     //   return RoutesInSpaceSchema as T;
     // case spacesKey:

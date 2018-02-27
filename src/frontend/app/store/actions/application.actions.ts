@@ -1,6 +1,6 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
-import { EntityInlineChildAction, EntityInlineParentAction, EntityInlineChild } from '../helpers/entity-relations.helpers';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.helpers';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { CfApplication } from '../types/application.types';
@@ -239,7 +239,7 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineChildActi
     'order-direction': 'desc',
     'order-direction-field': 'route',
   };
-  entity = [entityFactory<EntityInlineChild>(routesInAppKey)];
+  entity = [entityFactory(routesInAppKey)];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
