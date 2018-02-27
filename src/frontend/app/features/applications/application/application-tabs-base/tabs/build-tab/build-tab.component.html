@@ -43,7 +43,7 @@
             <mat-card-title>Cloud Foundry</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-metadata-item icon="title" label="Name" tooltip="{{ getFullApiUrl(appSvc.cf) }}"><a [routerLink]="['/cloud-foundry/', appSvc.cf.guid]">{{ appSvc.cf?.name}}</a></app-metadata-item>
+            <app-metadata-item icon="title" label="Name" tooltip="{{ getFullApiUrl(appSvc.cf) }}"><a [routerLink]="['/cloud-foundry/', appSvc.cf.guid]">{{ appSvc.cf.name}}</a></app-metadata-item>
             <ng-container *ngIf="applicationService.appOrg$ | async as appOrg">
               <app-metadata-item icon="location_city" label="Organization">
                 <a [routerLink]="['/cloud-foundry/' + appSvc.cf.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
