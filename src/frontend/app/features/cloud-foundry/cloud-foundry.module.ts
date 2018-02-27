@@ -62,6 +62,7 @@ import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-ta
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
+import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -91,7 +92,8 @@ import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-
     CloudFoundrySpaceServiceInstancesComponent,
     CloudFoundrySpaceRoutesComponent,
     CloudFoundrySpaceUsersComponent,
-    EditSpaceStepComponent
+    EditSpaceStepComponent,
+    CreateSpaceStepComponent
   ],
   providers: [
     CloudFoundryService,
