@@ -14,7 +14,7 @@
             </mat-header-cell>
           </div>
           <mat-cell class="app-table__cell" *matCellDef="let row" [ngClass]="column.class" [style.flex]="column.cellFlex">
-            <app-table-cell [component]="column.cellComponent" [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
+            <app-table-cell [cellDefinition]="column.cellDefinition" [component]="column.cellComponent" [config]="column.cellConfig" [func]="column.cell" [row]="row" [dataSource]="dataSource"></app-table-cell>
           </mat-cell>
         </ng-container>
         <mat-header-row [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0" class="app-table__header-row" [hidden]="!(dataSource.isLoadingPage$ | async) && (dataSource.pagination$ | async)?.totalResults === 0"

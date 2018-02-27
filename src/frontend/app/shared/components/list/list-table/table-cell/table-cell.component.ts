@@ -39,15 +39,30 @@ import {
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
 import {
+  TableCellRouteAppsAttachedComponent,
+} from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+import {
+  CfSpacePermissionCellComponent,
+} from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+import {
+  TableCellCfUserPermissionComponent,
+} from '../../list-types/cf-users/cf-user-permission-cell/cf-user-permission-cell.component';
+import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
+import { ICellDefinition } from '../table.types';
 import { TableCellCustom } from './table-cell-custom';
 
+/* tslint:disable:max-line-length */
+/* tslint:enable:max-line-length */
+
 export const listTableCells = [
+  TableCellDefaultComponent,
   TableHeaderSelectComponent,
   TableCellSelectComponent,
   TableCellEditComponent,
@@ -65,9 +80,11 @@ export const listTableCells = [
   TableCellTCPRouteComponent,
   TableCellAppInstancesComponent,
   TableCellAppRouteComponent,
-  TableCellRadioComponent
+  TableCellRadioComponent,
+  TableCellRouteAppsAttachedComponent,
+  TableCellCfUserPermissionComponent,
+  CfSpacePermissionCellComponent
 ];
-
 @Component({
   selector: 'app-table-cell',
   templateUrl: './table-cell.component.html',
@@ -79,11 +96,12 @@ export const listTableCells = [
 })
 export class TableCellComponent<T> implements OnInit, OnChanges {
   @ViewChild('target', { read: ViewContainerRef })
-  target;
+  target: ViewContainerRef;
 
   @Input('dataSource') dataSource = null as IListDataSource<T>;
 
   @Input('component') component: Type<{}>;
+  @Input('cellDefinition') cellDefinition: ICellDefinition<T>;
   @Input('func') func: () => string;
   @Input('row') row: T;
   @Input('config') config: any;
@@ -92,25 +110,47 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  ngOnInit() {
-    if (this.component) {
-      const componentFactory = this.componentFactoryResolver.resolveComponentFactory(
+  private getComponent() {
+    if (this.cellDefinition) {
+      return this.componentFactoryResolver.resolveComponentFactory(
+        TableCellDefaultComponent
+      );
+    } else if (this.component) {
+      return this.componentFactoryResolver.resolveComponentFactory(
         this.component
       );
+    }
+    return null;
+  }
+
+  private createComponent() {
+    const component = this.getComponent();
+    return !!component ? this.target.createComponent(component) : null;
+  }
+
+  ngOnInit() {
+    const component = this.createComponent();
+    if (component) {
+
       // Add to target to ensure ngcontent is correct in new component
-      const componentRef = this.target.createComponent(componentFactory);
-      this.cellComponent = <TableCellCustom<T>>componentRef.instance;
+      this.cellComponent = <TableCellCustom<T>>component.instance;
+
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
       this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+      if (this.cellDefinition) {
+        const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;
+        defaultTableCell.cellDefinition = this.cellDefinition;
+        defaultTableCell.init();
+      }
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
     const row: SimpleChange = changes.row;
     if (row && this.cellComponent && row.previousValue !== row.currentValue) {
-      this.cellComponent.row = row.currentValue;
+      this.cellComponent.row = { ...row.currentValue };
     }
   }
 }

@@ -9,16 +9,20 @@ import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-spac
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { CF_INFO_ENTITY_KEY, CFInfoSchema, GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
+import { DomainSchema, FetchAllDomains } from '../../../store/actions/domains.actions';
 import { EndpointSchema, GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { AppState } from '../../../store/app-state';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplication, CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfOrg, CfSpace } from '../../../store/types/org-and-space.types';
 import { CfUser } from '../../../store/types/user.types';
+import { BaseCF } from '../cf-page.types';
 
 @Injectable()
 export class CloudFoundryEndpointService {
+  paginationSubscription: any;
   allApps$: Observable<APIResource<CfApplication>[]>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<CfOrg>[]>;
@@ -28,19 +32,21 @@ export class CloudFoundryEndpointService {
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
+  cfGuid: string;
 
   constructor(
-    public cfGuid: string,
+    public baseCf: BaseCF,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
+    this.cfGuid = baseCf.guid;
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       EndpointSchema.key,
       EndpointSchema,
-      cfGuid,
+      this.cfGuid,
       new GetAllEndpoints()
     );
 
@@ -82,6 +88,8 @@ export class CloudFoundryEndpointService {
         return flatArray;
       })
     );
+
+    this.fetchDomains();
   }
 
   getAppsInOrg(
@@ -126,5 +134,20 @@ export class CloudFoundryEndpointService {
       .filter(a => a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
       .reduce((a, t) => a + t, 0) : 0;
+  }
+
+  fetchDomains = () => {
+    const action = new FetchAllDomains(this.cfGuid);
+    this.paginationSubscription = getPaginationObservables<APIResource>(
+      {
+        store: this.store,
+        action,
+        paginationMonitor: this.paginationMonitorFactory.create(
+          action.paginationKey,
+          DomainSchema
+        )
+      },
+      true
+    ).entities$.subscribe();
   }
 }

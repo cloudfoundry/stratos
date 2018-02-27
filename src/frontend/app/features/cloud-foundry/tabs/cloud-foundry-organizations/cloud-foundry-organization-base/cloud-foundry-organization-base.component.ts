@@ -11,7 +11,7 @@ import { AppState } from '../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
 
-const cfOrganisationServiceFactory = (
+function cfOrganisationServiceFactory(
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
@@ -19,7 +19,7 @@ const cfOrganisationServiceFactory = (
   cfUserService: CfUserService,
   paginationMonitorFactory: PaginationMonitorFactory,
   cfEndpointService: CloudFoundryEndpointService
-) => {
+) {
   const { orgId } = activatedRoute.snapshot.params;
   const { cfGuid } = cfEndpointService;
   return new CloudFoundryOrganisationService(
@@ -31,7 +31,7 @@ const cfOrganisationServiceFactory = (
     paginationMonitorFactory,
     cfEndpointService
   );
-};
+}
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',

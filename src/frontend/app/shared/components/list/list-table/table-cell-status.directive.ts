@@ -35,6 +35,6 @@ export class TableCellStatusDirective implements OnChanges {
         return 'text-tentative';
       default:
         return '';
-      }
+    }
   }
 }

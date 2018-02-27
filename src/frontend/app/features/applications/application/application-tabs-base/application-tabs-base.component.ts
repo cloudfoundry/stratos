@@ -6,31 +6,33 @@ import { take } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { EntityService } from '../../../../core/entity-service';
-import { ConfirmationDialog, ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
 import { APIResource } from '../../../../store/types/api.types';
+import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 
 // Confirmation dialogs
-const appStopConfirmation = new ConfirmationDialog(
+const appStopConfirmation = new ConfirmationDialogConfig(
   'Stop Application',
   'Are you sure you want to stop this Application?',
   'Stop'
 );
-const appStartConfirmation = new ConfirmationDialog(
+const appStartConfirmation = new ConfirmationDialogConfig(
   'Start Application',
   'Are you sure you want to start this Application?',
   'Start'
 );
 
 // App delete will have a richer delete experience
-const appDeleteConfirmation = new ConfirmationDialog(
+const appDeleteConfirmation = new ConfirmationDialogConfig(
   'Delete Application',
   'Are you sure you want to delete this Application?',
-  'Delete'
+  'Delete',
+  true
 );
 
 @Component({

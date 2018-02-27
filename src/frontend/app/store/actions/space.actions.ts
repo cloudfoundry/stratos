@@ -5,6 +5,7 @@ import { SpaceSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './acti
 import { getActions } from './action.helper';
 import { PaginationAction } from '../types/pagination.types';
 import { ApplicationSchema } from './application.actions';
+import { RouteSchema } from '../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -87,4 +88,23 @@ export class DeleteSpace extends CFStartAction implements ICFAction {
   entity = [SpaceSchema];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
+}
+
+export class GetRoutesInSpace extends CFStartAction implements PaginationAction {
+  constructor(public spaceGuid: string, public cfGuid: string, public paginationKey: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${spaceGuid}/routes`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Spaces', 'Get routes');
+  entity = [RouteSchema];
+  entityKey = RouteSchema.key;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'inline-relations-depth': 2
+  };
 }
