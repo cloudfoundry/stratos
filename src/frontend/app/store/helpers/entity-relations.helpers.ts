@@ -15,6 +15,10 @@ import { pick } from './reducer.helper';
 import { FetchRelationAction } from '../actions/relation.actions';
 import { entityFactory } from './entity-factory';
 
+export function generateEntityRelationKey(parentKey: string, childKey) {
+  return `${parentKey}-${childKey}`;
+}
+
 /**
  * Provides a way for a collection of child entities to populate a parent entity with itself,.. or request child entities if missing
  *
@@ -368,8 +372,8 @@ export function validateEntityRelations(
         path: ''
       });
 
-      let allFinished = Observable.of([]);
-      const paginationFinished = new Array<Observable<any>>();
+      // let allFinished = Observable.of([]);
+      const paginationFinished = new Array<Observable<any>>(Observable.of(true));
       results.forEach(newActions => {
         // TODO: RC Failures?
         if (newActions.paginationMonitor) {
@@ -381,12 +385,12 @@ export function validateEntityRelations(
         }
         store.dispatch(newActions.action);
         if (paginationFinished.length) {
-          allFinished = Observable.combineLatest(paginationFinished);
+          // allFinished = Observable.combineLatest(paginationFinished);
         }
       });
 
       return {
-        allFinished: Observable.zip(paginationFinished),
+        allFinished: Observable.zip(...paginationFinished),
         entityResults: results
       };
     })
@@ -400,18 +404,17 @@ export function validateEntityRelations(
 function extractActionEntitySchema(action: IRequestAction): {
   key: string;
 } {
-  if (!action.entity) {
-    return null;
-  }
+  let parentEntitySchema;
 
-  let parentEntitySchema = action.entity;
+  if (action.entity) {
+    parentEntitySchema = action.entity;
+  }
 
   if (EntityInlineChild.is(parentEntitySchema)) {
     parentEntitySchema = (parentEntitySchema as EntityInlineChild).entitySchema;
   } else {
     parentEntitySchema = parentEntitySchema['length'] > 0 ? parentEntitySchema[0] : parentEntitySchema;
   }
-
   return {
     ...parentEntitySchema,
     key: action.entityKey
@@ -443,16 +446,16 @@ function loop(res: ListRelationsResult, includeRelations: string[], parentEntity
     value = value['length'] > 0 ? value[0] : value;
     const entityKey = value instanceof EntityInlineChild ? value.entitySchema.key : value.key;
     const entitySchema = value instanceof EntityInlineChild ? value.entitySchema['schema'] : value['schema'];
-    if (res.relations.indexOf(key) >= 0 || validRelation(parentEntitySchemaKey, entityKey, includeRelations)) {
+    if (res.relations.indexOf(key) >= 0) {
       return;
     }
 
     if (value instanceof EntityInlineChild || value instanceof schema.Entity) {
-      if (res.relations.indexOf(key) < 0) {
+      if (validRelation(parentEntitySchemaKey, entityKey, includeRelations)) {
         res.relations.push(key);
+        haveDelved = true;
       }
       loop(res, includeRelations, entityKey, entitySchema);
-      haveDelved = true;
     } else if (value instanceof Object) {
       loop(res, includeRelations, parentEntitySchemaKey, value);
     }

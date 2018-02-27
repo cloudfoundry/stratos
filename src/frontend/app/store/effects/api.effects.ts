@@ -8,7 +8,7 @@ import { Store } from '@ngrx/store';
 import { normalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { map, mergeMap, first } from 'rxjs/operators';
+import { map, mergeMap, first, switchMap } from 'rxjs/operators';
 
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
 import { EntityInlineParentAction, isEntityInlineParentAction, listRelations, validateEntityRelations } from '../helpers/entity-relations.helpers';
@@ -24,6 +24,7 @@ import { ApiActionTypes } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+import { withLatestFrom } from 'rxjs/operator/withLatestFrom';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -89,9 +90,7 @@ export class APIEffect {
       options.params.set('page', '1');
     }
 
-    if (isEntityInlineParentAction(action)) {
-      this.addRelationParams(options, action);
-    }
+    this.addRelationParams(options, apiAction);
 
     let request = this.makeRequest(options);
 
@@ -100,51 +99,66 @@ export class APIEffect {
       request = this.flattenPagination(request, options);
     }
 
-    return request
-      .mergeMap(response => {
-        response = this.handleMultiEndpoints(response, actionClone);
+    return request.pipe(
+      map(response => {
+        return this.handleMultiEndpoints(response, actionClone);
+      }),
+      mergeMap(response => {
         const { entities, totalResults, totalPages } = response;
+        return validateEntityRelations(
+          this.store,
+          actionClone,
+          Object.values(entities.entities[apiAction.entityKey]),
+          false, false)
+          .pipe(
+            map(validationResponse => ({
+              response,
+              validationResponse
+            }))
+          );
+      }),
+      mergeMap(result => {
+        return result.validationResponse.allFinished.pipe(
+          map(() => result)
+        );
+      }),
+      first(),
+      mergeMap((result) => {
         const actions = [];
+        actions.push({ type: actionClone.actions[1], apiAction: actionClone });
+        actions.push(new WrapperRequestActionSuccess(
+          result.response.entities,
+          actionClone,
+          requestType,
+          result.response.totalResults,
+          result.response.totalPages
+        ));
 
-        validateEntityRelations(this.store, actionClone, entities, false, false).pipe(
-          map(result => result.allFinished),
-          first(result => {
-            actions.push({ type: actionClone.actions[1], apiAction: actionClone });
-            actions.push(new WrapperRequestActionSuccess(
-              entities,
-              actionClone,
-              requestType,
-              totalResults,
-              totalPages
-            ));
+        if (
+          !actionClone.updatingKey &&
+          actionClone.options.method === 'post' || actionClone.options.method === RequestMethod.Post ||
+          actionClone.options.method === 'delete' || actionClone.options.method === RequestMethod.Delete
+        ) {
+          if (actionClone.removeEntityOnDelete) {
+            actions.unshift(new ClearPaginationOfEntity(actionClone.entityKey, actionClone.guid));
+          } else {
+            actions.unshift(new ClearPaginationOfType(actionClone.entityKey));
+          }
+        }
 
-            if (
-              !actionClone.updatingKey &&
-              actionClone.options.method === 'post' || actionClone.options.method === RequestMethod.Post ||
-              actionClone.options.method === 'delete' || actionClone.options.method === RequestMethod.Delete
-            ) {
-              if (actionClone.removeEntityOnDelete) {
-                actions.unshift(new ClearPaginationOfEntity(actionClone.entityKey, actionClone.guid));
-              } else {
-                actions.unshift(new ClearPaginationOfType(actionClone.entityKey));
-              }
-            }
-            return false;
-          })
-        ).subscribe();
-
+        // actions.forEach(action, this.store.dispatch(action));
         return actions;
       })
-      .catch(err => {
-        return [
-          { type: actionClone.actions[2], apiAction: actionClone },
-          new WrapperRequestActionFailed(
-            err.message,
-            actionClone,
-            requestType
-          )
-        ];
-      });
+    ).catch(err => {
+      return [
+        { type: actionClone.actions[2], apiAction: actionClone },
+        new WrapperRequestActionFailed(
+          err.message,
+          actionClone,
+          requestType
+        )
+      ];
+    });
   }
 
   private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
@@ -357,10 +371,12 @@ export class APIEffect {
     );
   }
 
-  private addRelationParams(options, action: EntityInlineParentAction) {
-    const relationInfo = listRelations(action);
-    options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
-    options.params.set('include-relations', relationInfo.relations.join(','));
+  private addRelationParams(options, action: any) {
+    if (isEntityInlineParentAction(action)) {
+      const relationInfo = listRelations(action as EntityInlineParentAction);
+      options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
+      options.params.set('include-relations', relationInfo.relations.join(','));
+    }
   }
 }
 

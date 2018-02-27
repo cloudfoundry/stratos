@@ -7,8 +7,7 @@ import { map } from 'rxjs/operators';
 
 import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory } from '../../store/helpers/entity-factory';
-import { orgSpaceRelationKey } from '../../store/helpers/entity-relations';
+import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { organisationWithSpaceKey } from '../../store/helpers/entity-factory';
 import {
   getCurrentPageRequestInfo,
@@ -17,6 +16,7 @@ import {
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { generateEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
 
 export interface CfOrgSpaceItem {
   list$: Observable<EndpointModel[] | any[]>;
@@ -32,7 +32,9 @@ export class CfOrgSpaceDataService {
   public org: CfOrgSpaceItem;
   public space: CfOrgSpaceItem;
 
-  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, [orgSpaceRelationKey]);
+  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, [
+    generateEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
+  ]);
 
   // TODO: We should optimise this to only fetch the orgs for the current endpoint
   // (if we inline depth the get orgs request it could be hefty... or we could use a different action to only fetch required data..

@@ -20,8 +20,7 @@ import {
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory } from '../../store/helpers/entity-factory';
-import { appRouteRelationKey } from '../../store/helpers/entity-relations';
+import { entityFactory, routeSchemaKey } from '../../store/helpers/entity-factory';
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
@@ -46,6 +45,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { generateEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -75,7 +75,9 @@ export class ApplicationService {
       applicationSchemaKey,
       entityFactory(applicationSchemaKey),
       appGuid,
-      new GetApplication(appGuid, cfGuid, [appRouteRelationKey], true),
+      new GetApplication(appGuid, cfGuid, [
+        generateEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+      ], true),
       true
     );
 

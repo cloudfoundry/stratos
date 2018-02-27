@@ -64,14 +64,6 @@ export const RouteSchema = new schema.Entity(routeSchemaKey, {
 
 export const QuotaDefinitionSchema = new schema.Entity(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 
-export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {
-  entity: {
-    quota_definition: QuotaDefinitionSchema
-  }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
-
 export const ApplicationWithoutSpaceEntitySchema = new schema.Entity(
   applicationSchemaKey,
   {
@@ -90,6 +82,15 @@ export const SpaceSchema = new schema.Entity(spaceSchemaKey, {
     apps: [ApplicationWithoutSpaceEntitySchema],
     routes: [RouteSchema]
     // routes: entityFactory<EntityInlineChild>(routesInSpaceKey)
+  }
+}, {
+    idAttribute: getAPIResourceGuid
+  });
+
+export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {
+  entity: {
+    spaces: [SpaceSchema],
+    quota_definition: QuotaDefinitionSchema
   }
 }, {
     idAttribute: getAPIResourceGuid
