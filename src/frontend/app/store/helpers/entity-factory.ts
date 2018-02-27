@@ -81,7 +81,6 @@ export const SpaceSchema = new schema.Entity(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
     routes: [RouteSchema]
-    // routes: entityFactory<EntityInlineChild>(routesInSpaceKey)
   }
 }, {
     idAttribute: getAPIResourceGuid

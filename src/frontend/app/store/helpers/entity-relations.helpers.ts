@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize, schema, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { first, map, skipWhile, takeWhile } from 'rxjs/operators';
+import { first, map, skipWhile, takeWhile, tap } from 'rxjs/operators';
 
 import { pathGet } from '../../core/utils.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
@@ -138,6 +138,7 @@ function handleRelation({
   if (!childEntitySchema) {
     return results;
   }
+  const childEntitySchemaSafe = extractEntitySchema(childEntitySchema);
 
   function createParamAction() {
     return new FetchRelationAction(
@@ -173,7 +174,7 @@ function handleRelation({
     );
     results.push({
       action: paginationSuccess,
-      paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childEntitySchema)
+      paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childEntitySchemaSafe)
     });
   } else if (!entities && populateMissing) {
     const paramAction = createParamAction();
@@ -183,10 +184,12 @@ function handleRelation({
     },
     {
       action: paramAction,
-      paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childEntitySchema)
+      paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childEntitySchemaSafe)
     }
     ]);
+    console.log(paramAction.paginationKey);
   }
+
   return results;
 }
 
@@ -394,6 +397,7 @@ export function validateEntityRelations(
     // TODO: RC Failures?
     if (newActions.paginationMonitor) {
       const obs = newActions.paginationMonitor.fetchingCurrentPage$.pipe(
+        tap(a => console.log(a)),
         skipWhile(fetching => !fetching),
         takeWhile(fetching => fetching)
       );

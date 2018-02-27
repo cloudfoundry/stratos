@@ -124,10 +124,10 @@ export class APIEffect {
       }),
       mergeMap(result => {
         return result.validationResponse.allFinished.pipe(
+          first(),
           map(() => result)
         );
       }),
-      first(),
       mergeMap(result => {
         const actions = [];
         actions.push({ type: actionClone.actions[1], apiAction: actionClone });
