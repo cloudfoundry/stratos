@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
@@ -24,7 +24,7 @@ import { BaseCF } from '../../cf-page.types';
   templateUrl: './create-space-step.component.html',
   styleUrls: ['./create-space-step.component.scss']
 })
-export class CreateSpaceStepComponent implements OnInit {
+export class CreateSpaceStepComponent implements OnInit, OnDestroy {
 
   orgGuid: string;
   allSpacesInOrg: string[];
