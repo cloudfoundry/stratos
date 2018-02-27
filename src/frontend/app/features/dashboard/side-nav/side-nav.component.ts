@@ -13,7 +13,7 @@ export interface SideNavItem {
   matIcon: string;
   link: string;
   endpointType?: string;
-  visible: boolean;
+  visible?: boolean;
 }
 
 @Component({
