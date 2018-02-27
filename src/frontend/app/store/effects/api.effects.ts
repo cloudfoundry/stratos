@@ -116,7 +116,7 @@ export class APIEffect {
           entities.entities,
           actionClone,
           Object.values(entities.entities[apiAction.entityKey]),
-          true, false);
+          true, true);
         return {
           response,
           validationFinished

@@ -52,6 +52,8 @@ export function generateEntityRelationKey(parentKey: string, childKey) {
 
 export function entityRelationCreatePaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
 
+
+// TODO: RC Does this go away??
 /**
  * Defines an schema entity array which should exist as a parameter in a parent entity. For example a space array in a parent organisation.
  * Also provides a framework to populate a parent entity's parameter with itself. For example we've fetched the space array and it needs
@@ -64,9 +66,9 @@ export function entityRelationCreatePaginationKey(schemaKey: string, guid: strin
 export class EntityInlineChild extends schema.Array {
   key: string;
   schema: Schema;
-  static is(value): boolean {
-    return !!value.parentRelations;
-  }
+  // static is(value): boolean {
+  //   return !!value.parentRelations;
+  // }
   constructor(
     // public parentRelations: EntityRelation[],
     public entitySchema: schema.Entity,
@@ -123,6 +125,7 @@ function handleRelation({
   entities,
   parentEntitySchemaKey,
   parentEntity,
+  childEntityParentParam,
   childEntitySchemaKey,
   childEntitySchema,
   childEntitiesUrl,
@@ -141,9 +144,11 @@ function handleRelation({
     return new FetchRelationAction(
       parentEntity.entity.cfGuid,
       parentEntity.metadata.guid,
+      parentEntitySchemaKey,
       childEntitiesUrl,
       childEntitySchema,
       childEntitySchemaKey, // TODO: RC routesInSpaceKey??
+      childEntityParentParam,
       entityRelationCreatePaginationKey(parentEntitySchemaKey, parentEntity.metadata.guid)
     );
   }
@@ -292,6 +297,7 @@ function validationLoop(
             entities: childEntities,
             parentEntitySchemaKey,
             parentEntity: entity,
+            childEntityParentParam: key,
             childEntitySchemaKey: schema.key,
             childEntitySchema: value,
             childEntitiesUrl: pathGet(newPath + '_url', entity),
@@ -404,11 +410,11 @@ function extractActionEntitySchema(action: IRequestAction): {
 }
 
 function extractEntitySchema(entity) {
-  if (EntityInlineChild.is(entity)) {
-    entity = (entity as EntityInlineChild).entitySchema;
-  } else {
-    entity = entity['length'] > 0 ? entity[0] : entity;
-  }
+  // if (EntityInlineChild.is(entity)) {
+  //   entity = (entity as EntityInlineChild).entitySchema;
+  // } else {
+  entity = entity['length'] > 0 ? entity[0] : entity;
+  // }
   return entity;
 }
 

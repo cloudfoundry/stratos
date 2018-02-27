@@ -5,12 +5,16 @@ import { EntityInlineChildAction } from '../helpers/entity-relations.helpers';
 import { CFStartAction } from '../types/request.types';
 
 export class FetchRelationAction extends CFStartAction implements EntityInlineChildAction {
+  static isIdString = 'FetchRelationAction';
   constructor(
     public endpointGuid: string, // Always go out to a single cf
-    public parentGuid: string, // TODO: RC is this needed??
+    public parentGuid: string,
+    public parentEntityKey: string,
     private url: string,
     public entity: Schema,
     public entityKey: string,
+    // This is the parameter name for the children in the parent entity, for example app `routes` (not the entity key `route`)
+    public entityKeyInParent: string,
     public paginationKey: string
   ) {
     super();
@@ -19,6 +23,7 @@ export class FetchRelationAction extends CFStartAction implements EntityInlineCh
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }
+  isId = FetchRelationAction.isIdString;
   actions = [
     '[Fetch Relations] Start',
     '[Fetch Relations] Success',
@@ -31,4 +36,7 @@ export class FetchRelationAction extends CFStartAction implements EntityInlineCh
   };
   flattenPagination = true;
   options: RequestOptions;
+  static is(anything): FetchRelationAction {
+    return (anything['isId'] === FetchRelationAction.isIdString) ? anything as FetchRelationAction : null;
+  }
 }

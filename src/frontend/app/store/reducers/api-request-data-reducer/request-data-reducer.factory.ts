@@ -8,6 +8,7 @@ import { deepMergeState, mergeEntity } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
 import { pathGet, pathSet } from '../../../core/utils.service';
 import { EntityInlineChild } from '../../helpers/entity-relations.helpers';
+import { FetchRelationAction } from '../../actions/relation.actions';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -19,14 +20,17 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
+          // TODO: RC
           // Does the entity associated with the action have a parent property that requires the result to be stored with it?
           // For example we have fetched a list of spaces that need to be stored in an organisation's entity?
           // const parentParams = canPopulateParentEntity(success);
-          // if (parentParams) {
+          // const populatedState = populateParentEntity(state, success);
+          // if (populatedState) {
           //   // We have the required parameters to populate a parent's property with this response
-          //   return populateParentEntity(state, success, parentParams);
+          //   return populatedState;
           // }
-          return deepMergeState(state, success.response.entities);
+          const entities = populateParentEntity(state, success) || success.response.entities;
+          return deepMergeState(state, entities);
         }
         return state;
       default:
@@ -52,57 +56,37 @@ function deleteEntity(state, entityKey, guid) {
   return newState;
 }
 
-function canPopulateParentEntity(successAction): {
-  parentEntityGuid: string;
-  parentRelations: any;// EntityRelation[]
-} {
-  return;
-  // // Is there a parent guid. If this is missing there is no consistent way to assign these entities to their parent (empty lists)
-  // const parentEntityGuid = successAction && successAction.apiAction ? successAction.apiAction['parentGuid'] : null;
-  // if (!parentEntityGuid) {
-  //   return;
-  // }
+function populateParentEntity(state, successAction) {
+  const fetchRelationAction: FetchRelationAction = FetchRelationAction.is(successAction.apiAction);
+  if (!fetchRelationAction) {
+    return;
+  }
+  // TODO: RC comments
+  // Do we actually have any entities to store in a parent?
+  const response = successAction.response;
+  let entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
+  entities = Object.values(entities);
+  if (!entities) {
+    return;
+  }
+  const { parentGuid, parentEntityKey, entityKeyInParent } = fetchRelationAction;
 
-  // // Check for relations
-  // const entity = pathGet('apiAction.entity', successAction) || [];
-  // const entityWithInline = entity as EntityInlineChild;
-  // const parentRelations = entityWithInline.parentRelations;
-  // if (!parentRelations || !parentRelations.length) {
-  //   return;
-  // }
+  // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
 
-  // // Do we actually have any entities to store in a parent?
-  // const response = successAction.response;
-  // let entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
-  // entities = Object.values(entities);
-  // if (!entities) {
-  //   return;
-  // }
-
-  // return {
-  //   parentEntityGuid,
-  //   parentRelations
-  // };
-}
-
-function populateParentEntity(state, successAction, params: {
-  parentEntityGuid: string;
-  parentRelations: any; // EntityRelation[]
-}) {
-  const { parentEntityGuid, parentRelations } = params;
-
-  // For each parent-child relationship
-  parentRelations.forEach(relation => {
-    // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
-    const newParentEntity = relation.createParentWithChild(state, parentEntityGuid, successAction.response);
-    if (!newParentEntity) {
-      return;
+  let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || { metadata: {} };
+  newParentEntity = {
+    ...newParentEntity,
+    entity: {
+      ...newParentEntity.entity,
+      [entityKeyInParent]: successAction.response.result
     }
-    // Apply the new entity to the response which will me merged into the store's state
-    successAction.response.entities[relation.parentEntityKey] = {
-      ...successAction.response.entities[relation.parentEntityKey],
-      [parentEntityGuid]: newParentEntity
-    };
-  });
-  return deepMergeState(state, successAction.response.entities);
+  };
+
+  // Apply the new entity to the response which will me merged into the store's state
+  successAction.response.entities[parentEntityKey] = {
+    ...successAction.response.entities[parentEntityKey],
+    [parentGuid]: newParentEntity
+  };
+
+  return successAction.response.entities;
 }
