@@ -44,6 +44,10 @@ import {
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 /* tslint:enable:max-line-length */
 import {
+  TableCellRouteAppsAttachedComponent,
+} from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+
+import {
   TableCellCfUserPermissionComponent,
 } from '../../list-types/cf-users/cf-user-permission-cell/cf-user-permission-cell.component';
 
@@ -56,6 +60,7 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+
 import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -93,6 +98,7 @@ export const listTableCells = [
   TableCellServiceInstanceTagsComponent,
   TableCellServicePlanComponent,
   TableCellServiceNameComponent,
+  TableCellRouteAppsAttachedComponent,
   TableCellCfUserPermissionComponent,
   CfSpacePermissionCellComponent
 ];

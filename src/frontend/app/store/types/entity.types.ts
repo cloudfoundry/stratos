@@ -8,6 +8,7 @@ import {
   AppSummarySchema
 } from './app-metadata.types';
 import { SystemInfo } from './system.types';
+
 export interface IRequestDataInternal<T> extends IRequestTypeState {
   application: IRequestEntityTypeState<T>;
   stack: IRequestEntityTypeState<T>;

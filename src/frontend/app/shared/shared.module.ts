@@ -87,6 +87,10 @@ import { TableCellServiceInstanceTagsComponent } from './components/list/list-ty
 import { TableCellServiceInstanceAppsAttachedComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { AppChipsComponent } from './components/chips/chips.component';
+import {
+  TableCellRouteAppsAttachedComponent,
+} from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+
 /* tslint:enable:max-line-length */
 
 @NgModule({
@@ -162,6 +166,7 @@ import { AppChipsComponent } from './components/chips/chips.component';
     TableCellServiceInstanceAppsAttachedComponent,
     AppChipsComponent,
     CfSpacePermissionCellComponent,
+    TableCellRouteAppsAttachedComponent
   ],
   exports: [
     FormsModule,

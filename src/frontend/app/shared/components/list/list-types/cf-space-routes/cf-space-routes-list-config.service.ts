@@ -12,21 +12,15 @@ import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  IGlobalListAction,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component.types';
-import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
-import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
-import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
+import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
+import { TableCellRouteComponent } from '../app-route/table-cell-route/table-cell-route.component';
+import { TableCellRouteAppsAttachedComponent } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
-
 @Injectable()
-export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
-  routesDataSource: CfAppRoutesDataSource;
+export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {
+  dataSource: CfSpaceRoutesDataSource;
 
   private multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
@@ -36,8 +30,7 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
         const confirmation = new ConfirmationDialogConfig(
           'Delete Routes from Application',
           `Are you sure you want to delete ${items.length} routes?`,
-          'Delete All',
-          true
+          'Delete All'
         );
         this.confirmDialog.open(confirmation, () =>
           items.forEach(item => this.dispatchDeleteAction(item))
@@ -89,37 +82,7 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     label: 'Unmap',
     description: 'Unmap route',
     visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
-  };
-
-  private listActionAdd: IGlobalListAction<APIResource> = {
-    action: () => {
-      this.appService.application$
-        .pipe(
-          take(1),
-          tap(app => {
-            this.store.dispatch(
-              new RouterNav({
-                path: [
-                  'applications',
-                  this.appService.cfGuid,
-                  this.appService.appGuid,
-                  'add-route'
-                ],
-                query: {
-                  spaceGuid: app.app.entity.space_guid
-                }
-              })
-            );
-          })
-        )
-        .subscribe();
-    },
-    icon: 'add',
-    label: 'Add',
-    description: 'Add new route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    enabled: (row: APIResource) => row.entity.apps && row.entity.apps.length
   };
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -135,62 +98,55 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
       }
     },
     {
-      columnId: 'tcproute',
-      headerCell: () => 'TCP Route',
-      cellComponent: TableCellTCPRouteComponent,
+      columnId: 'mappedapps',
+      headerCell: () => 'Application Attached',
+      cellComponent: TableCellRouteAppsAttachedComponent,
       cellFlex: '4',
-      sort: {
-        type: 'sort',
-        orderKey: 'tcproute',
-        field: 'entity.isTCPRoute'
-      },
     }
   ];
 
+  pageSizeOptions = [5, 15, 30];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Routes'
-  };
   isLocal = true;
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
-      new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
+      new DeleteRoute(route.entity.guid, this.dataSource.cfGuid)
     );
   }
 
   dispatchUnmapAction(route) {
-    return this.store.dispatch(
-      new UnmapRoute(
-        route.entity.guid,
-        this.routesDataSource.appGuid,
-        this.routesDataSource.cfGuid
+    return route.entity.apps.map(a => a.metadata.guid).forEach(
+      p => this.store.dispatch(
+        new UnmapRoute(
+          route.entity.guid,
+          p,
+          this.dataSource.cfGuid
+        )
       )
     );
   }
 
-  getGlobalActions = () => [this.listActionAdd];
+  getGlobalActions = () => [];
   getMultiActions() {
     return [this.multiListActionUnmap, this.multiListActionDelete];
   }
 
   getSingleActions = () => [this.listActionDelete, this.listActionUnmap];
   getColumns = () => this.columns;
-  getDataSource = () => this.routesDataSource;
+  getDataSource = () => this.dataSource;
   getMultiFiltersConfigs = () => [];
 
   constructor(
     private store: Store<AppState>,
-    private appService: ApplicationService,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    private cfSpaceService: CloudFoundrySpaceService
   ) {
-    this.routesDataSource = new CfAppRoutesDataSource(
+    this.dataSource = new CfSpaceRoutesDataSource(
       this.store,
-      this.appService,
-      new GetAppRoutes(appService.appGuid, appService.cfGuid),
-      getPaginationKey('route', appService.cfGuid, appService.appGuid),
-      false,
-      this
+      this,
+      this.cfSpaceService.spaceGuid,
+      this.cfSpaceService.cfGuid
     );
   }
 
