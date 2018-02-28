@@ -34,7 +34,7 @@ export class BuildTabComponent implements OnInit {
   ngOnInit() {
     this.cardTwoFetching$ = this.appService.application$
       .combineLatest(
-      this.appService.appSummary$
+        this.appService.appSummary$
       )
       .map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;
@@ -48,11 +48,11 @@ export class BuildTabComponent implements OnInit {
     const requestArgs = {
       headers: headers
     };
-    
+
     const appMetrics = this.http.get('/pp/v1/metrics/cf/app/' + this.appService.appGuid + '/query?query=firehose_container_metric_memory_bytes{}', requestArgs).subscribe();
 
 
     const cfMetrics = this.http.get('/pp/v1/metrics/cf/query?query=firehose_value_metric_rep_container_count{}', requestArgs).subscribe();
 
-  }  
+  }
 }
