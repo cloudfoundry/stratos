@@ -36,9 +36,7 @@ function cfOrganisationServiceFactory(
   cfEndpointService: CloudFoundryEndpointService
 ) {
   const { orgId } = activatedRoute.snapshot.params;
-  const { cfGuid } = cfEndpointService;
   return new CloudFoundryOrganisationService(
-    cfGuid,
     orgId,
     store,
     entityServiceFactory,

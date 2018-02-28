@@ -19,6 +19,7 @@ import { IQuotaDefinition, IPrivateDomain, IServiceInstance, ISpace, IOrganizati
 @Injectable()
 export class CloudFoundryOrganisationService {
 
+  cfGuid: string;
   userOrgRole$: Observable<string>;
   quotaDefinition$: Observable<IQuotaDefinition>;
   totalMem$: Observable<number>;
@@ -31,7 +32,6 @@ export class CloudFoundryOrganisationService {
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   organisationEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
-    public cfGuid: string,
     public orgGuid: string,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
@@ -40,12 +40,12 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
-
+    this.cfGuid = cfEndpointService.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       OrganisationWithSpaceSchema,
       orgGuid,
-      new GetOrganisation(orgGuid, cfGuid, 2)
+      new GetOrganisation(orgGuid, this.cfGuid, 2)
     );
 
     this.initialiseObservables();
