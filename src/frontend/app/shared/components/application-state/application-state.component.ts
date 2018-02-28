@@ -16,12 +16,15 @@ export class ApplicationStateComponent implements OnInit {
 
   public status$: Observable<CardStatus>;
 
-  private subLabel$: Observable<string>;
+  public subLabel$: Observable<string>;
 
-  private label$: Observable<string>;
+  public label$: Observable<string>;
 
   @Input('hideIcon')
-  public hideIcon: boolean;
+  public hideIcon = false;
+
+  @Input('initialStateOnly')
+  public initialStateOnly = false;
 
   constructor() { }
 

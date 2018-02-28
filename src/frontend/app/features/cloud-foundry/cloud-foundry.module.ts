@@ -62,6 +62,7 @@ import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-ta
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
+import { CreateOrganizationStepComponent } from './add-organisation/create-organization-step/create-organization-step.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -91,7 +92,8 @@ import { CreateSpaceStepComponent } from './add-space/create-space-step/create-s
     CloudFoundrySpaceServiceInstancesComponent,
     CloudFoundrySpaceRoutesComponent,
     CloudFoundrySpaceUsersComponent,
-    CreateSpaceStepComponent
+    CreateSpaceStepComponent,
+    CreateOrganizationStepComponent
   ],
   providers: [
     CloudFoundryService,
