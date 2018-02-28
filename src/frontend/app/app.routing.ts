@@ -27,6 +27,7 @@ const appRoutes: Routes = [
       { path: 'service-catalogue', loadChildren: 'app/features/service-catalogue/service-catalogue.module#ServiceCatalogueModule' },
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'caasp', loadChildren: 'app/features/caasp/caasp.module#CaaspModule' },
+      { path: 'kubernetes', loadChildren: 'app/features/kubernetes/kubernetes.module#KubernetesModule' },
     ]
   },
   {

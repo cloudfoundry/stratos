@@ -6,25 +6,17 @@
     <app-tile-group>
       <app-tile>
         <mat-card>
-            <mat-card-header>
-              <mat-card-title>One</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              {{ stats?.total }}
-            </mat-card-content>
-          </mat-card>
-      </app-tile>
-      <app-tile>
-          <mat-card>
-              <mat-card-header>
-                <mat-card-title>Two</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                Contnet
-              </mat-card-content>
-            </mat-card>
-      </app-tile>
-      <app-tile>
+                <div class="chart">
+                  <ngx-charts-advanced-pie-chart
+              [view]="none"
+              [results]="chartData"
+              [gradient]="false"
+              (select)="onSelect($event)">
+            </ngx-charts-advanced-pie-chart>
+            </div>
+        </mat-card>
+    </app-tile>
+      <app-tile size="1of3">
         <mat-card>
             <mat-card-header>
               <mat-card-title>Kube Config</mat-card-title>
@@ -37,3 +29,4 @@
     </app-tile-group>
   </app-tile-grid>
 </div>
+<app-list></app-list>

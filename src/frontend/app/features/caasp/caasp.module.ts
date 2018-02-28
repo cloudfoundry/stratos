@@ -8,6 +8,7 @@ import { CaaspEndpointsListConfigService } from '../../shared/components/list/li
 import { EndpointsListConfigService } from '../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { CoreModule } from '../../core/core.module';
+import {NgxChartsModule} from '@swimlane/ngx-charts';
 
 @NgModule({
   imports: [
@@ -15,6 +16,7 @@ import { CoreModule } from '../../core/core.module';
     CommonModule,
     SharedModule,    
     CaaspRoutingModule,
+    NgxChartsModule,
   ],
   declarations: [CaaspComponent, CaaspSummaryComponent, ],
   providers: [

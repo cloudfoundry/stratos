@@ -61,6 +61,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/cloud-foundry'
     },
     {
+      text: 'Kubernetes',
+      matIcon: 'cloud',
+      link: '/kubernetes',
+      endpointType: 'k8s',
+    },
+    {
       text: 'CaaSP',
       matIcon: 'cloud',
       link: '/caasp',

@@ -1,23 +1,29 @@
-import {
-  RequestAction,
-  IRequestAction,
-  CFStartAction,
-  ICFAction
-} from '../types/request.types';
-import { RequestOptions } from '@angular/http';
 import { Schema, schema } from 'normalizr';
-import { Action, createSelector } from '@ngrx/store';
 
-import { AppState } from '../app-state';
 import { PaginatedAction } from '../types/pagination.types';
 
 export const CAASP_INFO_ENTITY_KEY = 'caaspInfo';
 
 export const GET_INFO = '[CAASP Endpoint] Get Info';
+
+//export const GET_INFO_SUCCESS = '[CAASP Endpoint] Get Info Success';
+
 export const CaaspInfoSchema = new schema.Entity(CAASP_INFO_ENTITY_KEY);
 
-export class GetCaaspInfo implements IRequestAction {
-  constructor(public caaspGuid) {}
+/**
+ * Action to request the information for a given CaaSP cluster
+ */
+export class GetCaaspInfo implements PaginatedAction {
+  constructor(public caaspGuid) {
+    console.log('HELLO');
+    console.log(this.constructor.name);
+  }
   type = GET_INFO;
   entityKey = CaaspInfoSchema.key;
+  actions = [
+    GET_INFO,
+    //GET_INFO_SUCCESS,
+    //GET_INFO_SUCCESS
+  ];
+  paginationKey = CAASP_INFO_ENTITY_KEY;
 }

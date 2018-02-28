@@ -31,14 +31,8 @@ export class CaaspEffects {
   @Effect()
   fetchInfo$ = this.actions$.ofType<GetCaaspInfo>(GET_INFO).pipe(
     flatMap(action => {
-      const actionType = 'fetch';
-      const apiAction = {
-        entityKey: CAASP_INFO_ENTITY_KEY,
-        type: action.type
-      };
-      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      this.store.dispatch(new StartRequestAction(action));
       return this.http
-        //.get(`/pp/${this.proxyAPIVersion}/proxy/v2/info`, requestArgs)
         .get(`/pp/${this.proxyAPIVersion}/caasp/${action.caaspGuid}/info`)
         .pipe(
           mergeMap(response => {
@@ -54,15 +48,12 @@ export class CaaspEffects {
               metadata: {}
             };
             mappedData.result.push(id);
-
-            console.log('HELLO')
-            console.log(mappedData);
             return [
-              new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+              new WrapperRequestActionSuccess(mappedData, action)
             ];
           }),
           catchError(err => [
-            new WrapperRequestActionFailed(err.message, apiAction, actionType)
+            new WrapperRequestActionFailed(err.message, action)
           ])
         );
     })

@@ -7,15 +7,16 @@ import { Http } from '@angular/http';
 import { tap } from 'rxjs/operators';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { GetCaaspInfo } from '../../../store/actions/caasp.actions';
+import { CaaspNodesListConfigService } from '../../../shared/components/list/list-types/caasp-nodes/caasp-nodes-list-config.service';
 
 @Component({
   selector: 'app-caasp-summary',
   templateUrl: './caasp-summary.component.html',
   styleUrls: ['./caasp-summary.component.scss'],
-  // providers: [{
-  //   provide: ListConfig,
-  //   useClass: CaaspNodesListConfigService,
-  // }]
+  providers: [{
+    provide: ListConfig,
+    useClass: CaaspNodesListConfigService,
+  }]
 })
 export class CaaspSummaryComponent implements OnInit {
 
@@ -29,6 +30,9 @@ export class CaaspSummaryComponent implements OnInit {
 
   constructor(private http: Http, private store: Store<AppState>, private activatedRoute: ActivatedRoute) {}
 
+  colorScheme: any;
+  chartData: any;
+
   ngOnInit() {
     //this.fetch();
 
@@ -36,6 +40,20 @@ export class CaaspSummaryComponent implements OnInit {
     this.store.dispatch(new GetCaaspInfo(caaspId));
 
     //this.store.dispatch(new LoggerDebugAction(message));
+    this.colorScheme = {
+      domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+    };
+
+    this.chartData = [
+      {
+        "name": "Master",
+        "value": 1
+      },
+      {
+        "name": "Worker",
+        "value": 2
+      }
+    ]
 
   }
 
