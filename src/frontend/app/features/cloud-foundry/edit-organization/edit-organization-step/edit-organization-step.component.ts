@@ -1,43 +1,93 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
 import { FormGroup, FormControl } from '@angular/forms';
-import { map, take, tap } from 'rxjs/operators';
+import { map, take, tap, filter } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
-import { CfOrg } from '../../../../store/types/org-and-space.types';
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
-import { GetAllOrganisations } from '../../../../store/actions/organisation.actions';
+import { GetAllOrganisations, UpdateOrganization } from '../../../../store/actions/organisation.actions';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../../store/types/api.types';
-import { OrganisationSchema } from '../../../../store/actions/action-types';
+import { OrganisationSchema, organisationSchemaKey } from '../../../../store/actions/action-types';
 import { Subscription } from 'rxjs/Subscription';
+import { IOrganization } from '../../../../core/cf-api.types';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../store/app-state';
+import { ActivatedRoute } from '@angular/router';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { MatSnackBar } from '@angular/material';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { CfUserService } from '../../../../shared/data-services/cf-user.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
+const enum OrgStatus {
+  ACTIVE = 'active',
+  SUSPENDED = 'suspended'
+}
+function cfOrganisationServiceFactory(
+  store: Store<AppState>,
+  activatedRoute: ActivatedRoute,
+  entityServiceFactory: EntityServiceFactory,
+  cfOrgSpaceDataService: CfOrgSpaceDataService,
+  cfUserService: CfUserService,
+  paginationMonitorFactory: PaginationMonitorFactory,
+  cfEndpointService: CloudFoundryEndpointService
+) {
+  const { orgId } = activatedRoute.snapshot.params;
+  const { cfGuid } = cfEndpointService;
+  return new CloudFoundryOrganisationService(
+    cfGuid,
+    orgId,
+    store,
+    entityServiceFactory,
+    cfUserService,
+    paginationMonitorFactory,
+    cfEndpointService
+  );
+}
 @Component({
   selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
-  styleUrls: ['./edit-organization-step.component.scss']
+  styleUrls: ['./edit-organization-step.component.scss'],
+  providers: [{
+    provide: CloudFoundryOrganisationService,
+    useFactory: cfOrganisationServiceFactory,
+    deps: [
+      Store,
+      ActivatedRoute,
+      EntityServiceFactory,
+      CfOrgSpaceDataService,
+      CfUserService,
+      PaginationMonitorFactory,
+      CloudFoundryEndpointService
+    ]
+  }]
 })
-export class EditOrganizationStepComponent implements OnInit {
+export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
+  submitSubscription: Subscription;
+  fetchOrgsSub: Subscription;
+  allOrgsInEndpoint: any;
   allOrgsInEndpoint$: Observable<any>;
   orgSubscription: Subscription;
   currentStatus: string;
   originalName: string;
   orgName: string;
-  org$: Observable<CfOrg>;
+  org$: Observable<IOrganization>;
   editOrgName: FormGroup;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
   constructor(
     private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar,
     private cfOrgService: CloudFoundryOrganisationService
   ) {
-    const { cfId, orgId } = activatedRoute.snapshot.params;
-    this.orgGuid = orgId;
-    this.cfGuid = cfId;
+    this.orgGuid = cfOrgService.orgGuid;
+    this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
     this.editOrgName = new FormGroup({
       orgName: new FormControl(''),
@@ -49,8 +99,8 @@ export class EditOrganizationStepComponent implements OnInit {
       tap(n => {
         this.orgName = n.name;
         this.originalName = n.name;
-        this.status = n.status;
-        this.currentStatus = this.status ? 'Active' : 'Disabled';
+        this.status = n.status === OrgStatus.ACTIVE ? true : false;
+        this.currentStatus = n.status;
       })
     );
 
@@ -73,14 +123,14 @@ export class EditOrganizationStepComponent implements OnInit {
     ).entities$.pipe(
       filter(o => !!o),
       map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allSpacesInOrg = o)
+      tap((o) => this.allOrgsInEndpoint = o)
     );
-    this.fetchSpacesSubscription = this.allSpacesInSpace$.subscribe();
+    this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
   }
 
   validate = () => {
-    if (this.allSpacesInOrg) {
-      return this.allSpacesInOrg
+    if (this.allOrgsInEndpoint) {
+      return this.allOrgsInEndpoint
         .filter(o => o !== this.originalName)
         .indexOf(this.orgName) === -1;
     }
@@ -88,21 +138,21 @@ export class EditOrganizationStepComponent implements OnInit {
   }
 
   submit = () => {
-    this.store.dispatch(new UpdateSpace(this.spaceGuid, this.cfGuid, {
+    this.store.dispatch(new UpdateOrganization(this.orgGuid, this.cfGuid, {
       name: this.orgName,
-      allow_ssh: this.status
+      status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
     }));
 
     // Update action
-    this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, this.spaceGuid)).pipe(
-      filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
+    this.submitSubscription = this.store.select(selectRequestInfo(organisationSchemaKey, this.orgGuid)).pipe(
+      filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
       map(o => {
         if (o.error) {
           this.displaySnackBar();
         } else {
           this.store.dispatch(
             new RouterNav({
-              path: ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces']
+              path: ['/cloud-foundry', this.cfGuid, 'organizations']
             })
           );
         }
@@ -112,12 +162,12 @@ export class EditOrganizationStepComponent implements OnInit {
   }
 
   displaySnackBar = () => this.snackBar.open(
-    'Failed to update space! Please try again or contact your space manager!',
+    'Failed to update organization! Please try again or contact your organization manager!',
     'Dismiss'
   )
 
   ngOnDestroy(): void {
-    this.fetchSpacesSubscription.unsubscribe();
+    this.fetchOrgsSub.unsubscribe();
     if (this.submitSubscription) {
       this.submitSubscription.unsubscribe();
     }

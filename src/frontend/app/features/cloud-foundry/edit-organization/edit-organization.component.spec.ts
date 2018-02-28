@@ -8,9 +8,10 @@ describe('EditOrganizationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditOrganizationComponent ]
+      declarations: [EditOrganizationComponent],
+      imports: [...getBaseTestModules]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

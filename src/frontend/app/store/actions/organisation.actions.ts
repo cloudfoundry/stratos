@@ -10,6 +10,7 @@ import {
   SpaceWithOrganisationSchema,
 } from './action-types';
 import { getActions } from './action.helper';
+import { IUpdateOrganization } from '../../core/cf-api.types';
 
 export const GET_ORGANISATION = '[Organisation] Get one';
 export const GET_ORGANISATION_SUCCESS = '[Organisation] Get one success';
@@ -117,3 +118,19 @@ export class GetAllSpacesInOrg extends CFStartAction implements PaginationAction
   };
 }
 
+export class UpdateOrganization extends CFStartAction implements ICFAction {
+
+  public static UpdateExistingOrg = 'Updating-Existing-Org';
+  constructor(public guid: string, public endpointGuid: string, updateOrg: IUpdateOrganization) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `organizations/${guid}`;
+    this.options.method = 'put';
+    this.options.body = updateOrg;
+  }
+  actions = getActions('Spaces', 'Update Space');
+  entity = [OrganisationSchema];
+  entityKey = organisationSchemaKey;
+  options: RequestOptions;
+  updatingKey = UpdateOrganization.UpdateExistingOrg;
+}

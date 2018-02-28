@@ -189,3 +189,10 @@ export interface IUpdateSpace {
   allow_ssh?: boolean;
   isolation_segment_guid?: string;
 }
+
+export interface IUpdateOrganization {
+  name?: string;
+  status?: string;
+  quota_definition_guid?: string;
+  default_isolation_segment_guid?: string;
+}
