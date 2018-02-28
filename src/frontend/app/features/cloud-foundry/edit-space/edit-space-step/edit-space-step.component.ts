@@ -70,6 +70,7 @@ const cfSpaceServiceFactory = (
 
 export class EditSpaceStepComponent implements OnInit, OnDestroy {
 
+  originalName: any;
   currentSshStatus: string;
   submitSubscription: Subscription;
   spaceSubscription: Subscription;
@@ -106,6 +107,7 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
       take(1),
       tap(n => {
         this.spaceName = n.name;
+        this.originalName = n.name;
         this.sshEnabled = n.allow_ssh;
         this.currentSshStatus = this.sshEnabled ? 'Enabled' : 'Disabled';
       })
@@ -136,19 +138,18 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
   }
 
   validate = () => {
-    const currValue = this.editSpaceForm && this.editSpaceForm.value['space'];
     if (this.allSpacesInOrg) {
-      return this.allSpacesInOrg.indexOf(currValue) === -1;
+      return this.allSpacesInOrg
+        .filter(o => o !== this.originalName)
+        .indexOf(this.spaceName) === -1;
     }
     return true;
   }
 
   submit = () => {
-    const space = this.editSpaceForm.value['spaceName'];
-    const enableSsh = this.editSpaceForm.value['toggleSsh'];
     this.store.dispatch(new UpdateSpace(this.spaceGuid, this.cfGuid, {
-      name: space,
-      allow_ssh: enableSsh
+      name: this.spaceName,
+      allow_ssh: this.sshEnabled
     }));
 
     // Update action

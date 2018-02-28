@@ -22,6 +22,7 @@ import { MetaCardKeyComponent } from '../../../list-cards/meta-card/meta-card-ke
 import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgCardComponent } from './cf-org-card.component';
+import { ISpace } from '../../../../../../core/cf-api.types';
 
 describe('CfOrgCardComponent', () => {
   let component: CfOrgCardComponent;

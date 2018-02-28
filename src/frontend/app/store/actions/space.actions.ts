@@ -91,24 +91,6 @@ export class DeleteSpace extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
-export class GetRoutesInSpace extends CFStartAction implements PaginationAction {
-  constructor(public spaceGuid: string, public cfGuid: string, public paginationKey: string) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `spaces/${spaceGuid}/routes`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-  }
-  actions = getActions('Spaces', 'Get routes');
-  entity = [RouteSchema];
-  entityKey = RouteSchema.key;
-  options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'inline-relations-depth': 2
-  };
-}
 export class CreateSpace extends CFStartAction implements ICFAction {
   constructor(public name: string, public orgGuid: string, public endpointGuid: string) {
     super();
