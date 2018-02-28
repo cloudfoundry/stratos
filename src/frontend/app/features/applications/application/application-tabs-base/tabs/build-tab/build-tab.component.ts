@@ -10,6 +10,7 @@ import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { FetchCFMetricsAction, FetchApplicationMetricsAction } from '../../../../../../store/actions/metrics.actions';
 
 @Component({
   selector: 'app-build-tab',
@@ -20,7 +21,11 @@ import { ApplicationData, ApplicationService } from '../../../../application.ser
   ]
 })
 export class BuildTabComponent implements OnInit {
-  constructor(private http: Http, private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
+  constructor(
+    private route: ActivatedRoute,
+    private applicationService: ApplicationService,
+    private store: Store<AppState>
+  ) { }
 
   appService = this.applicationService;
 
@@ -41,8 +46,16 @@ export class BuildTabComponent implements OnInit {
   }
 
   testMetrics() {
-
-    this.store.dispatch(new FetchCFMetrics(this.appService.cfGuid));
-    this.store.dispatch(new FetchApplicationMetrics(this.appService.appGuid, this.appService.cfGuid));
+    console.log('TESTING METRICS.....');
+    this.store.dispatch(new FetchCFMetricsAction(
+      this.appService.cfGuid,
+      'firehose_container_metric_memory_bytes{}')
+    );
+    this.store.dispatch(new FetchApplicationMetricsAction(
+      this.appService.appGuid,
+      this.appService.cfGuid,
+      'firehose_value_metric_rep_container_count{}'
+    )
+    );
   }
 }

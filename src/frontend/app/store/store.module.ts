@@ -21,6 +21,7 @@ import { UpdateAppEffects } from './effects/update-app-effects';
 import { AppReducersModule } from './reducers.module';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CaaspEffects } from './effects/caasp.effects';
+import { MetricsEffect } from './effects/metrics.effects';
 
 @NgModule({
   imports: [
@@ -45,7 +46,8 @@ import { CaaspEffects } from './effects/caasp.effects';
       GithubEffects,
       CloudFoundryEffects,
       CaaspEffects,
+      MetricsEffect
     ])
   ]
 })
-export class AppStoreModule {}
+export class AppStoreModule { }
