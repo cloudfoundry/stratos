@@ -8,7 +8,6 @@ import { IRoute } from '../../core/cf-api.types';
 export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>, action: Action) {
   switch (action.type) {
     case RouteEvents.UNMAP_ROUTE_SUCCESS:
-      console.log('here');
       const successAction = action as APISuccessOrFailedAction;
       const removeUserPermissionAction = successAction.apiAction as UnmapRoute;
       const { appGuid, routeGuid } = removeUserPermissionAction;

@@ -12,7 +12,13 @@ import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import {
+  IGlobalListAction,
+  IListAction,
+  IListConfig,
+  IMultiListAction,
+  ListViewTypes,
+} from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
@@ -141,7 +147,6 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     }
   ];
 
-  pageSizeOptions = [5, 15, 30];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: 'Routes'
