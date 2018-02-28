@@ -14,18 +14,17 @@ import { EndpointSchema, GetAllEndpoints } from '../../../store/actions/endpoint
 import { AppState } from '../../../store/app-state';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplication, CfApplicationState } from '../../../store/types/application.types';
+import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
-import { CfOrg, CfSpace } from '../../../store/types/org-and-space.types';
 import { CfUser } from '../../../store/types/user.types';
 import { BaseCF } from '../cf-page.types';
-
+import { IOrganization, ISpace, IApp } from '../../../core/cf-api.types';
 @Injectable()
 export class CloudFoundryEndpointService {
   paginationSubscription: any;
-  allApps$: Observable<APIResource<CfApplication>[]>;
+  allApps$: Observable<APIResource<IApp>[]>;
   users$: Observable<APIResource<CfUser>[]>;
-  orgs$: Observable<APIResource<CfOrg>[]>;
+  orgs$: Observable<APIResource<IOrganization>[]>;
   info$: Observable<EntityInfo<any>>;
   cfInfoEntityService: EntityService<any>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
@@ -93,8 +92,8 @@ export class CloudFoundryEndpointService {
   }
 
   getAppsInOrg(
-    org: APIResource<CfOrg>
-  ): Observable<APIResource<CfApplication>[]> {
+    org: APIResource<IOrganization>
+  ): Observable<APIResource<IApp>[]> {
     // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
     if (!org.entity.spaces) {
       return Observable.of([]);
@@ -108,8 +107,8 @@ export class CloudFoundryEndpointService {
   }
 
   getAppsInSpace(
-    space: APIResource<CfSpace>
-  ): Observable<APIResource<CfApplication>[]> {
+    space: APIResource<ISpace>
+  ): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       map(apps => {
         return apps.filter(a => a.entity.space_guid === space.entity.guid);
@@ -118,7 +117,7 @@ export class CloudFoundryEndpointService {
   }
 
   getAggregateStat(
-    org: APIResource<CfOrg>,
+    org: APIResource<IOrganization>,
     statMetric: string
   ): Observable<number> {
     return this.getAppsInOrg(org).pipe(
@@ -127,7 +126,7 @@ export class CloudFoundryEndpointService {
   }
 
   public getMetricFromApps(
-    apps: APIResource<CfApplication>[],
+    apps: APIResource<IApp>[],
     statMetric: string
   ): number {
     return apps ? apps

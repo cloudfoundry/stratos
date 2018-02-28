@@ -33,7 +33,7 @@ export interface ISpace {
   auditors_url: string;
   auditors: any[];
   apps_url: string;
-  apps: APIResource<IApp[]>;
+  apps: APIResource<IApp>[];
   routes_url: string;
   domains_url: string;
   domains: IDomain[];
@@ -45,6 +45,10 @@ export interface ISpace {
   security_groups: ISecurityGroup[];
   staging_security_groups_url: string;
   staging_security_groups: ISecurityGroup[];
+  space_quota_definition?: APIResource<IQuotaDefinition>;
+  routes?: APIResource<IRoute>[];
+  guid: string;
+  cfGuid: string;
 }
 
 export interface ISecurityGroup {
@@ -64,41 +68,41 @@ export interface IRule {
 
 export interface IApp {
   name: string;
-  production: boolean;
+  production?: boolean;
   space_guid: string;
-  stack_guid: string;
+  stack_guid?: string;
   buildpack?: any;
-  detected_buildpack: string;
-  detected_buildpack_guid: string;
-  environment_json: IEnvironmentjson;
-  memory: number;
-  instances: number;
-  disk_quota: number;
-  state: string;
-  version: string;
+  detected_buildpack?: string;
+  detected_buildpack_guid?: string;
+  environment_json?: IEnvironmentjson;
+  memory?: number;
+  instances?: number;
+  disk_quota?: number;
+  state?: string;
+  version?: string;
   command?: any;
-  console: boolean;
+  console?: boolean;
   debug?: any;
-  staging_task_id: string;
-  package_state: string;
-  health_check_type: string;
+  staging_task_id?: string;
+  package_state?: string;
+  health_check_type?: string;
   health_check_timeout?: any;
   health_check_http_endpoint?: any;
   staging_failed_reason?: any;
   staging_failed_description?: any;
-  diego: boolean;
+  diego?: boolean;
   docker_image?: any;
-  docker_credentials: IDockercredentials;
-  package_updated_at: string;
-  detected_start_command: string;
-  enable_ssh: boolean;
-  ports: number[];
-  space_url: string;
-  stack_url: string;
-  routes_url: string;
-  events_url: string;
-  service_bindings_url: string;
-  route_mappings_url: string;
+  docker_credentials?: IDockercredentials;
+  package_updated_at?: string;
+  detected_start_command?: string;
+  allow_ssh?: boolean;
+  ports?: number[];
+  space_url?: string;
+  stack_url?: string;
+  routes_url?: string;
+  events_url?: string;
+  service_bindings_url?: string;
+  route_mappings_url?: string;
 }
 
 export interface IDockercredentials {
@@ -125,26 +129,63 @@ export interface IDeveloper {
 
 export interface IOrganization {
   name: string;
-  billing_enabled: boolean;
-  quota_definition_guid: string;
-  status: string;
+  billing_enabled?: boolean;
+  quota_definition_guid?: string;
+  status?: string;
   default_isolation_segment_guid?: any;
-  quota_definition_url: string;
-  spaces_url: string;
-  domains_url: string;
-  private_domains_url: string;
-  users_url: string;
-  managers_url: string;
-  billing_managers_url: string;
-  auditors_url: string;
-  app_events_url: string;
-  space_quota_definitions_url: string;
+  quota_definition_url?: string;
+  spaces_url?: string;
+  domains_url?: string;
+  private_domains_url?: string;
+  users_url?: string;
+  managers_url?: string;
+  billing_managers_url?: string;
+  auditors_url?: string;
+  app_events_url?: string;
+  space_quota_definitions_url?: string;
   guid: string;
   cfGuid: string;
+  spaces?: APIResource<ISpace>[];
+  private_domains?: APIResource<IPrivateDomain>[];
+  quota_definition?: APIResource<IQuotaDefinition>;
 }
 
 export interface IDomain {
   name: string;
   router_group_guid?: any;
   router_group_type?: any;
+}
+
+export interface IServiceInstance {
+  guid: string;
+  cfGuid: string;
+}
+
+export interface IPrivateDomain {
+  guid: string;
+  cfGuid: string;
+}
+
+export interface IQuotaDefinition {
+  memory_limit: number;
+  app_instance_limit: number;
+  instance_memory_limit: number;
+  name: string;
+  organization_guid?: string;
+  total_services?: number;
+  total_routes?: number;
+  total_private_domains?: number;
+}
+
+
+export interface IUpdateSpace {
+  name?: string;
+  organization_guid?: string;
+  developer_guids?: string[];
+  manager_guids?: string[];
+  auditor_guids?: string[];
+  domain_guids?: string[];
+  security_group_guids?: string[];
+  allow_ssh?: boolean;
+  isolation_segment_guid?: string;
 }

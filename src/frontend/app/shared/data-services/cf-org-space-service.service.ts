@@ -170,6 +170,7 @@ export class CfOrgSpaceDataService {
   }
 
   public deleteSpace(spaceGuid: string, endpointGuid: string) {
-    return this.store.dispatch(new DeleteSpace(spaceGuid, endpointGuid));
+    this.store.dispatch(new DeleteSpace(spaceGuid, endpointGuid));
+    return;
   }
 }

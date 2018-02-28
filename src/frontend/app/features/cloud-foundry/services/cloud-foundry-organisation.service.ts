@@ -12,31 +12,24 @@ import { organisationSchemaKey, OrganisationWithSpaceSchema } from '../../../sto
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplication } from '../../../store/types/application.types';
-import {
-  CfOrg,
-  CfPrivateDomain,
-  CfQuotaDefinition,
-  CfServiceInstance,
-  CfSpace,
-} from '../../../store/types/org-and-space.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { IQuotaDefinition, IPrivateDomain, IServiceInstance, ISpace, IOrganization, IApp } from '../../../core/cf-api.types';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
 
   userOrgRole$: Observable<string>;
-  quotaDefinition$: Observable<CfQuotaDefinition>;
+  quotaDefinition$: Observable<IQuotaDefinition>;
   totalMem$: Observable<number>;
-  privateDomains$: Observable<APIResource<CfPrivateDomain>[]>;
+  privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
-  serivceInstances$: Observable<APIResource<CfServiceInstance>[]>;
-  spaces$: Observable<APIResource<CfSpace>[]>;
+  serivceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  spaces$: Observable<APIResource<ISpace>[]>;
   appInstances$: Observable<number>;
-  apps$: Observable<APIResource<CfApplication>[]>;
-  org$: Observable<EntityInfo<APIResource<CfOrg>>>;
-  organisationEntityService: EntityService<APIResource<CfOrg>>;
+  apps$: Observable<APIResource<IApp>[]>;
+  org$: Observable<EntityInfo<APIResource<IOrganization>>>;
+  organisationEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
     public cfGuid: string,
     public orgGuid: string,
@@ -94,7 +87,7 @@ export class CloudFoundryOrganisationService {
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
   }
 
-  private getFlattenedList(property: string): (source: Observable<APIResource<CfSpace>[]>) => Observable<any> {
+  private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {
     return map(entities => {
       const allInstances = entities.map(s => s.entity[property]);
       return [].concat.apply([], allInstances);

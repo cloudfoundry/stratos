@@ -61,6 +61,8 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
+import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
+import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
 import { CreateOrganizationStepComponent } from './add-organisation/create-organization-step/create-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
@@ -93,6 +95,8 @@ import { EditOrganizationStepComponent } from './edit-organization/edit-organiza
     CloudFoundrySpaceServiceInstancesComponent,
     CloudFoundrySpaceRoutesComponent,
     CloudFoundrySpaceUsersComponent,
+    EditSpaceStepComponent,
+    CreateSpaceStepComponent,
     CreateOrganizationStepComponent,
     EditOrganizationComponent,
     EditOrganizationStepComponent

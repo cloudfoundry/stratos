@@ -86,6 +86,10 @@ const cloudFoundry: Routes = [{
         component: EditOrganizationComponent
       },
       {
+        path: 'organizations/:orgId/spaces/:spaceId/edit-space',
+        component: EditSpaceComponent
+      },
+      {
         path: '',
         // Root for Tabs
         component: CloudFoundryTabsBaseComponent,

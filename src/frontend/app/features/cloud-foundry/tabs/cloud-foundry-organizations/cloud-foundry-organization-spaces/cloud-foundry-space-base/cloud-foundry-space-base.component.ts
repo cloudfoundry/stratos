@@ -9,7 +9,6 @@ import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagi
 import { AppState } from '../../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-import { CfOrg } from '../../../../../../store/types/org-and-space.types';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 
 const cfSpaceServiceFactory = (
