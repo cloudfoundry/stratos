@@ -80,6 +80,24 @@ export class DeleteOrganisation extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
+export class CreateOrganization extends CFStartAction implements ICFAction {
+  constructor(public name: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `organizations`;
+    this.options.method = 'post';
+    this.guid = name;
+    this.options.body = {
+      name: name
+    };
+  }
+  actions = getActions('Organisations', 'Create Org');
+  entity = [OrganisationSchema];
+  entityKey = organisationSchemaKey;
+  options: RequestOptions;
+  guid: string;
+}
+
 export class GetAllSpacesInOrg extends CFStartAction implements PaginationAction {
   constructor(public cfGuid: string, public orgGuid: string, public paginationKey: string) {
     super();

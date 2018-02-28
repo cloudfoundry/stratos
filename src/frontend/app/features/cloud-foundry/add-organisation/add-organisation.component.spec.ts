@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AddOrganisationComponent } from './add-organisation.component';
+import { getBaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { CreateOrganizationStepComponent } from './create-organization-step/create-organization-step.component';
 
 describe('AddOrganisationComponent', () => {
   let component: AddOrganisationComponent;
@@ -8,9 +10,10 @@ describe('AddOrganisationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddOrganisationComponent ]
+      declarations: [AddOrganisationComponent, CreateOrganizationStepComponent],
+      imports: [...getBaseTestModules]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
