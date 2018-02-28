@@ -224,6 +224,9 @@ func (m *CaaspSpecification) getCaaspKubeConfig(c echo.Context) error {
 
 	defer res.Body.Close()
 	body, _ = ioutil.ReadAll(res.Body)
+
+
+	c.Response().Header().Set("Content-Disposition", "attachment; filename=kubeconfig.yaml")
 	c.String(http.StatusOK, string(body))
 	return nil
 }
