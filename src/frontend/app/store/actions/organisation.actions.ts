@@ -43,7 +43,7 @@ export class GetOrganisation extends CFStartAction implements ICFAction {
 
 export class GetAllOrganisations extends CFStartAction
   implements PaginatedAction {
-  constructor(public paginationKey: string) {
+  constructor(public paginationKey: string, public endpointGuid: string = null) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'organizations';

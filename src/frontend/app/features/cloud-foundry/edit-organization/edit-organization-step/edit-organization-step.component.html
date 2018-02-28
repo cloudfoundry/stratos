@@ -1,0 +1,20 @@
+<div class="edit-org">
+  <div>Specify the new name for the organization (leave unchanged if don't wish to rename it): </div>
+  <form [formGroup]="editOrgName" class="edit-org__stepper-form">
+    <mat-form-field>
+      <input matInput formControlName="orgName" [(ngModel)]="orgName" placeholder="Organization Name">
+    </mat-form-field>
+    <div class="edit-org__stepper-form__ssh">
+      <div>
+        Change Organization Status ( Currently {{ currentStatus }})
+      </div>
+      <div>
+        <mat-slide-toggle formControlName="toggleStatus" [(ngModel)]="status">
+          <div *ngIf="status ">Active</div>
+          <div *ngIf="!status ">Disable</div>
+        </mat-slide-toggle>
+      </div>
+
+    </div>
+  </form>
+</div>
