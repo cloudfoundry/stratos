@@ -2,7 +2,6 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfSpace } from '../../../../../../store/types/org-and-space.types';
 import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
@@ -45,7 +44,7 @@ describe('CfOrgCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        spaces: Object.values(getInitialTestStoreState().requestData.space) as APIResource<CfSpace>[],
+        spaces: Object.values(getInitialTestStoreState().requestData.space) as APIResource<ISpace>[],
         guid: '',
         cfGuid: '',
         name: 'test0',

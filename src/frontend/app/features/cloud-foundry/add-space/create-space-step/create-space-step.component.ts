@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { CfSpace } from '../../../../store/types/org-and-space.types';
 import { APIResource } from '../../../../store/types/api.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
@@ -18,6 +17,7 @@ import { CreateSpace } from '../../../../store/actions/space.actions';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { BaseCF } from '../../cf-page.types';
+import { ISpace } from '../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-create-space-step',
@@ -31,7 +31,7 @@ export class CreateSpaceStepComponent implements OnInit, OnDestroy {
   fetchSpacesSubscription: Subscription;
   submitSubscription: Subscription;
   cfGuid: string;
-  allSpacesInSpace$: Observable<APIResource<CfSpace>[]>;
+  allSpacesInSpace$: Observable<APIResource<ISpace>[]>;
   cfUrl: string;
   createSpaceForm: FormGroup;
 

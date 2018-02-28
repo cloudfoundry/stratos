@@ -5,6 +5,7 @@ import { SpaceSchema, spaceSchemaKey, SpaceWithOrganisationSchema } from './acti
 import { getActions } from './action.helper';
 import { PaginationAction } from '../types/pagination.types';
 import { RouteSchema } from '../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
+import { IUpdateSpace } from '../../core/cf-api.types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -86,8 +87,6 @@ export class GetRoutesInSpace extends CFStartAction implements PaginationAction 
     'inline-relations-depth': 2
   };
 }
-
-
 export class CreateSpace extends CFStartAction implements ICFAction {
   constructor(public name: string, public orgGuid: string, public endpointGuid: string) {
     super();
@@ -105,4 +104,17 @@ export class CreateSpace extends CFStartAction implements ICFAction {
   entityKey = spaceSchemaKey;
   options: RequestOptions;
   guid: string;
+}
+export class UpdateSpace extends CFStartAction implements ICFAction {
+  constructor(public guid: string, public endpointGuid: string, updateSpace: IUpdateSpace) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${guid}`;
+    this.options.method = 'put';
+    this.options.body = updateSpace;
+  }
+  actions = getActions('Spaces', 'Create Space');
+  entity = [SpaceSchema];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
 }

@@ -11,25 +11,24 @@ import { spaceSchemaKey, SpaceWithOrganisationSchema } from '../../../store/acti
 import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplication } from '../../../store/types/application.types';
-import { CfQuotaDefinition, CfServiceInstance, CfSpace } from '../../../store/types/org-and-space.types';
 import { Route } from '../../../store/types/route.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { IQuotaDefinition, IServiceInstance, ISpace, IApp, IRoute } from '../../../core/cf-api.types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
 
   userRole$: Observable<string>;
-  quotaDefinition$: Observable<APIResource<CfQuotaDefinition>>;
+  quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
   allowSsh$: Observable<string>;
   totalMem$: Observable<number>;
-  routes$: Observable<APIResource<Route>[]>;
-  serviceInstances$: Observable<APIResource<CfServiceInstance>[]>;
+  routes$: Observable<APIResource<IRoute>[]>;
+  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   appInstances$: Observable<number>;
-  apps$: Observable<APIResource<CfApplication>[]>;
-  space$: Observable<EntityInfo<APIResource<CfSpace>>>;
-  spaceEntitySchema: EntityService<APIResource<CfSpace>>;
+  apps$: Observable<APIResource<IApp>[]>;
+  space$: Observable<EntityInfo<APIResource<ISpace>>>;
+  spaceEntitySchema: EntityService<APIResource<ISpace>>;
   constructor(
     public cfGuid: string,
     public orgGuid: string,
