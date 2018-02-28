@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-add-organisation',
@@ -7,7 +8,13 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AddOrganisationComponent implements OnInit {
 
-  constructor() { }
+  cfUrl: string;
+  constructor(
+    private activatedRoute: ActivatedRoute
+  ) {
+    const { cfId } = activatedRoute.snapshot.params;
+    this.cfUrl = `/cloud-foundry/${cfId}/organizations`;
+  }
 
   ngOnInit() {
   }
