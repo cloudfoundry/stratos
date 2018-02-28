@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { combineAll, filter, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { combineAll, filter, shareReplay, switchMap, tap, first } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
@@ -10,7 +10,7 @@ import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { RequestTypes } from '../../actions/request.actions';
+import { RequestTypes, FetchEntities } from '../../actions/request.actions';
 import { validateEntityRelations } from '../../helpers/entity-relations.helpers';
 
 export interface PaginationObservables<T> {
@@ -122,7 +122,7 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
-  let hasValidatedOnce = false;
+  let hasValidatedOnce = false; // TODO: RC Delete me
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
@@ -137,6 +137,19 @@ function getObservables<T = any>(
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         store.dispatch(action);
       }
+      // store.dispatch(new FetchEntities(
+      //   action,
+      //   false,
+      //   null,
+      //   {
+      //     guids: () => {
+      //       return pagination ? pagination.ids[pagination.currentPage] : null;
+      //     },
+      //     shouldFetch: () => {
+      //       return !pagination || !hasError(pagination) && !isFetchingPage(pagination);
+      //     },
+      //   }
+      // ));
     }),
     shareReplay(1)
   );
@@ -183,7 +196,16 @@ export function isPageReady(pagination: PaginationEntityState) {
   return !!pagination && !!pagination.ids[pagination.currentPage];
 }
 
-export function hasValidOrGettingPage(pagination: PaginationEntityState) {
+export function isFetchingPage(pagination: PaginationEntityState): boolean {
+  if (pagination) {
+    const currentPageRequest = getCurrentPageRequestInfo(pagination);
+    return currentPageRequest.busy;
+  } else {
+    return false;
+  }
+}
+
+export function hasValidOrGettingPage(pagination: PaginationEntityState): boolean {
   if (pagination && Object.keys(pagination).length) {
     const hasPage = !!pagination.ids[pagination.currentPage];
     const currentPageRequest = getCurrentPageRequestInfo(pagination);
@@ -193,7 +215,7 @@ export function hasValidOrGettingPage(pagination: PaginationEntityState) {
   }
 }
 
-export function hasError(pagination: PaginationEntityState) {
+export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 

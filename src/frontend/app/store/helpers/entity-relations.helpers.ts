@@ -1,7 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { skipWhile, takeWhile, zip } from 'rxjs/operators';
+import { skipWhile, takeWhile, zip, tap, pairwise, map } from 'rxjs/operators';
 
 import { pathGet } from '../../core/utils.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
@@ -114,7 +114,6 @@ function handleRelation({
     );
     results.push({
       action: paginationSuccess,
-      paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childEntitySchemaSafe)
     });
   } else if (!entities && populateMissing) {
     const paramAction = createParamAction();
@@ -215,8 +214,10 @@ function validationLoop(
   if (entities) {
     Object.keys(parentEntitySchemaParam).forEach(key => {
       const value = parentEntitySchemaParam[key];
-      const arraySafeValue = value['length'] > 0 ? value[0] : value;
+      const arraySchema = value['length'] > 0;
+      const arraySafeValue = arraySchema ? value[0] : value;
 
+      // TODO: RC comment... if this is not an array we'll never be missing it... however we may want to check it's own relations in the else
       if (arraySafeValue instanceof schema.Entity) {
         const schema: schema.Entity = arraySafeValue;
         if (!validRelation(parentEntitySchemaKey, schema.key, action.includeRelations)) {
@@ -224,23 +225,24 @@ function validationLoop(
         }
         const newPath = path.length ? path + '.' + key : key;
         entities.forEach(entity => {
-          let childEntities = pathGet(newPath, entity);
-          if (childEntities && childEntities.length && typeof (childEntities[0]) === 'string') {
-            childEntities = denormalize(childEntities, value, allEntities);
+          const childEntities = pathGet(newPath, entity);
+
+          if (arraySchema) {
+            results = [].concat(results, handleRelation({
+              store,
+              allEntities,
+              entities: childEntities,
+              parentEntitySchemaKey,
+              parentEntity: entity,
+              childEntityParentParam: key,
+              childEntitySchemaKey: schema.key,
+              childEntitySchema: value,
+              childEntitiesUrl: pathGet(newPath + '_url', entity),
+              populateExisting,
+              populateMissing
+            }));
           }
-          results = [].concat(results, handleRelation({
-            store,
-            allEntities,
-            entities: childEntities,
-            parentEntitySchemaKey,
-            parentEntity: entity,
-            childEntityParentParam: key,
-            childEntitySchemaKey: schema.key,
-            childEntitySchema: value,
-            childEntitiesUrl: pathGet(newPath + '_url', entity),
-            populateExisting,
-            populateMissing
-          }));
+
           // The actual check is step two of validation loop, but only after we've tried to discover if this child has any children
           // it needs validating
           results = [].concat(results,
@@ -296,9 +298,15 @@ export function validateEntityRelations(
   action: IRequestAction,
   parentEntities: any[],
   populateMissing = false,
-  populateExisting = false): Observable<any[]> {
+  populateExisting = false): {
+    started: boolean,
+    completed$: Observable<any[]>
+  } {
 
-  const emptyResponse = Observable.of(null);
+  const emptyResponse = {
+    started: false,
+    completed$: Observable.of(null)
+  };
   // Does the entity associated with the action have inline params that need to be validated?
   const parentEntitySchema = extractActionEntitySchema(action);
   if (!parentEntitySchema) {
@@ -309,6 +317,11 @@ export function validateEntityRelations(
   if (!parentEntities || !parentEntities.length) {
     return emptyResponse;
   }
+  // let denormedEnterties = entities;
+  if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
+    parentEntities = denormalize(parentEntities, action.entity, allEntities);
+  }
+
   const relationAction = action as EntityInlineParentAction;
 
   const results = validationLoop({
@@ -329,15 +342,24 @@ export function validateEntityRelations(
     store.dispatch(newActions.action);
     // TODO: RC Failures?
     if (newActions.paginationMonitor) {
+      console.log('Adding... ', newActions.action);
       const obs = newActions.paginationMonitor.fetchingCurrentPage$.pipe(
-        skipWhile(fetching => fetching),
-        takeWhile(fetching => !fetching)
+        tap(a => console.log(a)),
+        pairwise(),
+        // skipWhile(fetching => fetching),
+        takeWhile(([oldFetching, newFetching]) => {
+          // Don't tweak this unless you test child actions finish before parent action
+          return oldFetching !== true && newFetching !== false;
+        }),
       );
       paginationFinished.push(obs);
     }
   });
 
-  return Observable.zip(...paginationFinished).first();
+  return {
+    started: !!results.length,
+    completed$: Observable.zip(...paginationFinished)
+  };
 }
 
 function extractActionEntitySchema(action: IRequestAction): {

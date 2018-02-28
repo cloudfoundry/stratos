@@ -19,6 +19,8 @@ import { CreateNewApplicationState } from '../../../../store/types/create-applic
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { applicationSchemaKey, routeSchemaKey, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
+import { generateEntityRelationKey } from '../../../../store/helpers/entity-relations.helpers';
+import { createGetApplicationAction } from '../../application.service';
 
 @Component({
   selector: 'app-create-application-step3',
@@ -64,10 +66,7 @@ export class CreateApplicationStep3Component implements OnInit {
             cloudFoundry
           ));
         }
-        this.store.dispatch(new GetApplication(
-          app.response.result[0],
-          cloudFoundry
-        ));
+        this.store.dispatch(createGetApplicationAction(app.response.result[0], cloudFoundry));
         this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'summary'] }));
         return { success: true };
       });

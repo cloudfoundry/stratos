@@ -1,5 +1,6 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
+import { applicationSchemaKey, appStatsSchemaKey, entityFactory, routeSchemaKey } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.helpers';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
@@ -9,9 +10,6 @@ import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { getPaginationKey } from './pagination.actions';
-import { applicationSchemaKey, routeSchemaKey, routesInAppKey, appStatsSchemaKey } from '../helpers/entity-factory';
-import { entityFactory } from '../helpers/entity-factory';
-import { schema } from 'normalizr';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -239,7 +237,7 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineChildActi
     'order-direction': 'desc',
     'order-direction-field': 'route',
   };
-  entity = [entityFactory(routesInAppKey)];
+  entity = [entityFactory(routeSchemaKey)];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
   endpointGuid: string;

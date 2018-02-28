@@ -1,5 +1,5 @@
 import { GetApplication } from '../../../store/actions/application.actions';
-import { ApplicationService } from '../application.service';
+import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { EntityService } from '../../../core/entity-service';
 import { AppState } from '../../../store/app-state';
@@ -11,9 +11,10 @@ import { RouterNav } from '../../../store/actions/router.actions';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
+import { applicationSchemaKey, routeSchemaKey } from '../../../store/helpers/entity-factory';
 import { entityFactory } from '../../../store/helpers/entity-factory';
 import { schema } from 'normalizr';
+import { generateEntityRelationKey } from '../../../store/helpers/entity-relations.helpers';
 
 
 const applicationServiceFactory = (
@@ -46,7 +47,7 @@ const entityServiceFactory = (
     applicationSchemaKey,
     entityFactory(applicationSchemaKey),
     id,
-    new GetApplication(id, cfId)
+    createGetApplicationAction(id, cfId)
   );
 };
 

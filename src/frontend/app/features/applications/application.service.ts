@@ -20,7 +20,7 @@ import {
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, routeSchemaKey } from '../../store/helpers/entity-factory';
+import { entityFactory, routeSchemaKey, stackSchemaKey, domainSchemaKey } from '../../store/helpers/entity-factory';
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
@@ -46,6 +46,18 @@ import {
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { generateEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
+
+export function createGetApplicationAction(guid: string, endpointGuid: string) {
+  return new GetApplication(
+    guid,
+    endpointGuid, [
+      generateEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+      generateEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      generateEntityRelationKey(applicationSchemaKey, stackSchemaKey),
+      generateEntityRelationKey(routeSchemaKey, domainSchemaKey),
+    ]
+  );
+}
 
 export interface ApplicationData {
   fetching: boolean;
@@ -75,9 +87,7 @@ export class ApplicationService {
       applicationSchemaKey,
       entityFactory(applicationSchemaKey),
       appGuid,
-      new GetApplication(appGuid, cfGuid, [
-        generateEntityRelationKey(applicationSchemaKey, routeSchemaKey),
-      ], true),
+      createGetApplicationAction(appGuid, cfGuid),
       true
     );
 

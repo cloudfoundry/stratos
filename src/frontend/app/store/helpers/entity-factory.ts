@@ -21,7 +21,6 @@ export const githubRepoSchemaKey = 'githubRepo';
 export const githubCommitSchemaKey = 'githubBranches';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
-export const routesInAppKey = 'routesInApp';
 export const routesInSpaceKey = 'routesInSpace';
 export const organisationWithSpaceKey = 'organization';
 export const spacesKey = 'spaces';
@@ -135,15 +134,13 @@ export function entityFactory(key: string): schema.Entity {
       return StackSchema;
     case spaceWithOrgKey:
       return SpaceWithOrgsEntitySchema;
-    // case routesInAppKey:
-    //   return RoutesInAppSchema as T;
     case routeSchemaKey:
       return RouteSchema;
     case domainSchemaKey:
       return DomainSchema;
     case organisationSchemaKey:
       return OrganisationSchema;
-    case domainSchemaKey:
+    case quotaDefinitionSchemaKey:
       return QuotaDefinitionSchema;
     case appEventSchemaKey:
       return EventSchema;
