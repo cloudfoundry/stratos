@@ -43,8 +43,8 @@ const cfSpaceServiceFactory = (
     cfUserService,
     paginationMonitorFactory,
     cfEndpointService
-  )
-}
+  );
+};
 
 
 @Component({
@@ -70,6 +70,7 @@ const cfSpaceServiceFactory = (
 
 export class EditSpaceStepComponent implements OnInit, OnDestroy {
 
+  currentSshStatus: string;
   submitSubscription: Subscription;
   spaceSubscription: Subscription;
   space: string;
@@ -82,6 +83,7 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
   cfGuid: string;
   editSpaceForm: FormGroup;
   sshEnabled: boolean;
+  spaceName: string;
 
   constructor(
     private store: Store<AppState>,
@@ -90,21 +92,22 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     private cfSpaceService: CloudFoundrySpaceService
   ) {
-    const { cfId, orgId, spaceId } = activatedRoute.snapshot.params;
-    this.cfGuid = cfId;
+    const { orgId, spaceId } = activatedRoute.snapshot.params;
+    this.cfGuid = cfSpaceService.cfGuid;
     this.orgGuid = orgId;
     this.spaceGuid = spaceId;
     this.sshEnabled = false;
+    this.editSpaceForm = new FormGroup({
+      spaceName: new FormControl(''),
+      toggleSsh: new FormControl(false),
+    });
     this.space$ = this.cfSpaceService.space$.pipe(
-      tap(o => console.log(o)),
       map(o => o.entity.entity),
       take(1),
       tap(n => {
-        this.editSpaceForm = new FormGroup({
-          spaceName: new FormControl(n.name),
-          toggleSsh: new FormControl(n.allow_ssh),
-        });
+        this.spaceName = n.name;
         this.sshEnabled = n.allow_ssh;
+        this.currentSshStatus = this.sshEnabled ? 'Enabled' : 'Disabled';
       })
     );
 
@@ -146,7 +149,7 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
     this.store.dispatch(new UpdateSpace(this.spaceGuid, this.cfGuid, {
       name: space,
       allow_ssh: enableSsh
-    }))
+    }));
 
     // Update action
     this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, this.spaceGuid)).pipe(
@@ -167,7 +170,7 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
   }
 
   displaySnackBar = () => this.snackBar.open(
-    'Failed to create space! Please select a different name and try again!',
+    'Failed to update space! Please try again or contact your space manager!',
     'Dismiss'
   )
 

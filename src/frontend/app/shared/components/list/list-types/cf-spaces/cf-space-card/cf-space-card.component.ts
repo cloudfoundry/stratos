@@ -28,6 +28,7 @@ import { ISpace } from '../../../../../../core/cf-api.types';
 })
 export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   implements OnInit, OnDestroy {
+  spaceGuid: string;
   serviceInstancesCount: number;
   appInstancesCount: number;
   serviceInstancesLimit: number;
@@ -58,11 +59,13 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
 
   ngOnInit() {
 
+    this.spaceGuid = this.row.entity.guid;
+
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         return this.cfUserService.getUserRoleInSpace(
           u.guid,
-          this.row.entity.guid,
+          this.spaceGuid,
           this.row.entity.cfGuid
         );
       }),
@@ -77,7 +80,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
     );
 
     this.subscriptions.push(fetchData$.subscribe());
-    this.orgGuid = this.row.entity.guid;
+    this.orgGuid = this.cfOrgService.orgGuid;
 
   }
 
@@ -129,19 +132,19 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   edit = () => {
     this.store.dispatch(
       new RouterNav({
-        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.row.entity.guid, 'edit-space']
+        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.spaceGuid, 'edit-space']
       })
     );
   }
 
   delete = () => {
     this.cfOrgSpaceDataService.deleteSpace(
-      this.row.entity.guid,
+      this.spaceGuid,
       this.cfEndpointService.cfGuid
     );
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({
-    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.row.entity.guid]
+    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.spaceGuid]
   }))
 }
