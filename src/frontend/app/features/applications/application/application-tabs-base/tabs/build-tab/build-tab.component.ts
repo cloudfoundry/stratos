@@ -1,16 +1,15 @@
-import { AppState } from '../../../../../../store/app-state';
 import { Component, OnInit } from '@angular/core';
+import { Http } from '@angular/http';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { AppState } from '../../../../../../store/app-state';
 import { EntityInfo } from '../../../../../../store/types/api.types';
 import { AppSummary } from '../../../../../../store/types/app-metadata.types';
-
-import { Store } from '@ngrx/store';
-import { ApplicationMonitorService } from '../../../../application-monitor.service';
-import { Http, Headers } from '@angular/http';
 import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
+import { ApplicationMonitorService } from '../../../../application-monitor.service';
+import { ApplicationData, ApplicationService } from '../../../../application.service';
 
 @Component({
   selector: 'app-build-tab',
@@ -42,17 +41,8 @@ export class BuildTabComponent implements OnInit {
   }
 
   testMetrics() {
-    console.log('TESTING METRICS.....');
 
-    const headers = new Headers({ 'x-cap-cnsi-list': this.appService.cfGuid });
-    const requestArgs = {
-      headers: headers
-    };
-
-    const appMetrics = this.http.get('/pp/v1/metrics/cf/app/' + this.appService.appGuid + '/query?query=firehose_container_metric_memory_bytes{}', requestArgs).subscribe();
-
-
-    const cfMetrics = this.http.get('/pp/v1/metrics/cf/query?query=firehose_value_metric_rep_container_count{}', requestArgs).subscribe();
-
+    this.store.dispatch(new FetchCFMetrics(this.appService.cfGuid));
+    this.store.dispatch(new FetchApplicationMetrics(this.appService.appGuid, this.appService.cfGuid));
   }
 }
