@@ -1,6 +1,7 @@
 import { Schema, schema } from 'normalizr';
 
 import { PaginatedAction } from '../types/pagination.types';
+import { getPaginationKey } from './pagination.actions';
 
 export const CAASP_INFO_ENTITY_KEY = 'caaspInfo';
 
@@ -17,13 +18,15 @@ export class GetCaaspInfo implements PaginatedAction {
   constructor(public caaspGuid) {
     console.log('HELLO');
     console.log(this.constructor.name);
+    this.paginationKey = getPaginationKey(CaaspInfoSchema.key, caaspGuid);
   }
   type = GET_INFO;
+  entity = CaaspInfoSchema;
   entityKey = CaaspInfoSchema.key;
   actions = [
-    GET_INFO,
+    //GET_INFO,
     //GET_INFO_SUCCESS,
     //GET_INFO_SUCCESS
   ];
-  paginationKey = CAASP_INFO_ENTITY_KEY;
+  paginationKey: string;
 }

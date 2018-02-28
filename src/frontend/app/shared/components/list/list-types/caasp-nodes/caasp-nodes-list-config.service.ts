@@ -16,24 +16,49 @@ export class CaaspNodesListConfigService implements IListConfig<CaaspNodeInfo> {
 
   columns: Array<ITableColumn<CaaspNodeInfo>> = [
     {
-      columnId: 'name', headerCell: () => 'Name',
+      columnId: 'minion_id', headerCell: () => 'ID',
       cellDefinition: {
-        getValue: (row) => `${row.name}`
+        getValue: (row) => `${row.minion_id}`
       },
       sort: {
         type: 'sort',
-        orderKey: 'name',
-        field: 'name'
-      }, cellFlex: '5'
+        orderKey: 'minion_id',
+        field: 'minion_id'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'fqdn', headerCell: () => 'FQDN',
+      cellDefinition: {
+        getValue: (row) => `${row.fqdn}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'fqdn',
+        field: 'fqdn'
+      },
+      cellFlex: '5',
+    },
+    {
+      columnId: 'role', headerCell: () => 'Role',
+      cellDefinition: {
+        getValue: (row) => `${row.role}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'role',
+        field: 'role'
+      },
+      cellFlex: '1',
     },
   ];
 
   pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Nodes', filter: 'Search by name'
+    title: 'Nodes'
   };
-  enableTextFilter = true;
+  enableTextFilter = false;
 
   getGlobalActions = () => null;
   getMultiActions = () => [];

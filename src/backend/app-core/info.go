@@ -72,9 +72,10 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 			Metadata:   make(map[string]string),
 		}
 		// try to get the user info for this cnsi for the user
-		cnsiUser, ok := p.GetCNSIUser(cnsi.GUID, userGUID)
+		cnsiUser, token, ok := p.GetCNSIUserAndToken(cnsi.GUID, userGUID)
 		if ok {
 			endpoint.User = cnsiUser
+			endpoint.TokenMetadata = token.Metadata
 		}
 		cnsiType := cnsi.CNSIType
 		s.Endpoints[cnsiType][cnsi.GUID] = endpoint

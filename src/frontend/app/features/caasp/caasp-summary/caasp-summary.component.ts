@@ -37,7 +37,7 @@ export class CaaspSummaryComponent implements OnInit {
     //this.fetch();
 
     const { caaspId } = this.activatedRoute.snapshot.params;
-    this.store.dispatch(new GetCaaspInfo(caaspId));
+    //this.store.dispatch(new GetCaaspInfo(caaspId));
 
     //this.store.dispatch(new LoggerDebugAction(message));
     this.colorScheme = {

@@ -43,10 +43,14 @@ export class CaaspEffects {
             } as NormalizedResponse;
             const id = action.caaspGuid;
 
-            mappedData.entities[CAASP_INFO_ENTITY_KEY][id] = {
-              entity: info,
-              metadata: {}
-            };
+            // mappedData.entities[CAASP_INFO_ENTITY_KEY][id] = {
+            //   entity: info,
+            //   metadata: {}
+            // };
+
+            mappedData.entities[CAASP_INFO_ENTITY_KEY][id] = info;
+
+
             mappedData.result.push(id);
             return [
               new WrapperRequestActionSuccess(mappedData, action)

@@ -144,6 +144,7 @@ type EndpointDetail struct {
 	*CNSIRecord
 	User     *ConnectedUser    `json:"user"`
 	Metadata map[string]string `json:"metadata,omitempty"`
+	TokenMetadata string			 `json:"-"`
 }
 
 // Versions - response returned to caller from a getVersions action

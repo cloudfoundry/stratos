@@ -10,11 +10,12 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { AppEnvVarSchema, AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { GetCaaspInfo } from '../../../../../store/actions/caasp.actions';
+import { GetCaaspInfo, CaaspInfoSchema } from '../../../../../store/actions/caasp.actions';
 
 export interface CaaspNodeInfo {
-  name: string;
-  value: string;
+  fqdn: string;
+  minion_id: string;
+  role: string;
 }
 
 export class CaaspNodesDataSource extends ListDataSource<CaaspNodeInfo, any> {
@@ -29,19 +30,18 @@ export class CaaspNodesDataSource extends ListDataSource<CaaspNodeInfo, any> {
     super({
       store,
       action: new GetCaaspInfo(caaspId),
-      schema: AppEnvVarSchema,
+      schema: CaaspInfoSchema,
       getRowUniqueId: object => object.name,
     //   getEmptyType: () => ({ name: '', value: '', }),
-      paginationKey: getPaginationKey(AppEnvVarSchema.key, caaspId ),
+      paginationKey: getPaginationKey(CaaspInfoSchema.key, caaspId ),
       transformEntity: map(variables => {
-
         console.log('HERE');
         console.log(variables);
         if (!variables || variables.length === 0) {
           return [];
         }
-        const env = variables[0].entity.environment_json;
-        const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
+        const rows = [...variables[0].assigned_minions];
+        //const rows = Object.keys(env).map(name => ({ name, value: env[name] }));
         return rows;
       }),
       isLocal: true,

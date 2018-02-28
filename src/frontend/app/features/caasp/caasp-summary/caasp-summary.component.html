@@ -5,15 +5,8 @@
   <app-tile-grid>
     <app-tile-group>
       <app-tile>
-        <mat-card>
-                <div class="chart">
-                  <ngx-charts-advanced-pie-chart
-              [view]="none"
-              [results]="chartData"
-              [gradient]="false"
-              (select)="onSelect($event)">
-            </ngx-charts-advanced-pie-chart>
-            </div>
+        <mat-card class="full-card">
+          <app-ring-chart [data]="chartData" label="Nodes"></app-ring-chart>
         </mat-card>
     </app-tile>
       <app-tile size="1of3">

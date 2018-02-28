@@ -84,6 +84,8 @@ import { ValuesPipe } from './pipes/values.pipe';
 /* tslint:disable:max-line-length */
 import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
+import { RingChartComponent } from './components/ring-chart/ring-chart.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 /* tslint:enable:max-line-length */
 
 
@@ -96,7 +98,8 @@ import { FileInputComponent } from './components/file-input/file-input.component
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule
+    CdkTableModule,
+    NgxChartsModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -157,6 +160,7 @@ import { FileInputComponent } from './components/file-input/file-input.component
     CfSpacePermissionCellComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
+    RingChartComponent,
   ],
   exports: [
     FormsModule,
@@ -210,6 +214,7 @@ import { FileInputComponent } from './components/file-input/file-input.component
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
+    RingChartComponent,    
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

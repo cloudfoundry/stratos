@@ -693,6 +693,11 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 }
 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {
+	user, _, ok := p.GetCNSIUserAndToken(cnsiGUID, userGUID)
+	return user, ok
+}
+
+func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, *interfaces.TokenRecord, bool) {
 	log.Debug("GetCNSIUser")
 
 	// get the uaa token record
@@ -700,7 +705,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	if !ok {
 		msg := "Unable to retrieve CNSI token record."
 		log.Error(msg)
-		return nil, false
+		return nil, nil, false
 	}
 
 	var cnsiUser *interfaces.ConnectedUser
@@ -717,7 +722,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 		if err != nil {
 			msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
 			log.Errorf(msg, err)
-			return nil, false
+			return nil, nil, false
 		}
 
 		// add the uaa entry to the output
@@ -733,7 +738,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	if err != nil {
 		msg := "Unable to load CNSI record: %s"
 		log.Errorf(msg, err)
-		return nil, false
+		return nil, nil, false
 	}
 	// TODO should be an extension point
 	if cnsiRecord.CNSIType == "cf" {
@@ -741,7 +746,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 		cnsiUser.Admin = cnsiAdmin
 	}
 
-	return cnsiUser, true
+	return cnsiUser, &cfTokenRecord, true
 }
 
 // Refresh the UAA Token for the user
