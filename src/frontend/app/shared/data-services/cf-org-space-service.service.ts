@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
-import { organisationWithSpaceKey } from '../../store/helpers/entity-factory';
+import { entityFactory, organisationWithSpaceKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
+import { generateEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -16,7 +15,6 @@ import {
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { generateEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
 
 export interface CfOrgSpaceItem {
   list$: Observable<EndpointModel[] | any[]>;

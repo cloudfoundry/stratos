@@ -1,16 +1,18 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize, Schema, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { skipWhile, takeWhile, zip, tap, pairwise, map } from 'rxjs/operators';
+import { skipWhile, takeWhile, zip, tap, pairwise, map, skip } from 'rxjs/operators';
 
 import { pathGet } from '../../core/utils.service';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { SetInitialParams } from '../actions/pagination.actions';
 import { FetchRelationAction } from '../actions/relation.actions';
 import { AppState } from '../app-state';
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { pick } from './reducer.helper';
+import { selectPaginationState } from '../selectors/pagination.selectors';
+import { ActionState } from '../reducers/api-request-reducer/types';
 
 export function generateEntityRelationKey(parentKey: string, childKey) {
   return `${parentKey}-${childKey}`;
@@ -54,7 +56,7 @@ export interface EntityInlineParentAction extends IRequestAction {
  */
 export interface ValidateEntityResult {
   action: Action;
-  paginationMonitor?: PaginationMonitor;
+  paginationState$?: Observable<PaginationEntityState>;
 }
 
 function handleRelation({
@@ -123,7 +125,7 @@ function handleRelation({
     },
     {
       action: paramAction,
-      paginationMonitor: new PaginationMonitor(store, paramAction.paginationKey, childEntitySchemaSafe)
+      paginationState$: store.select(selectPaginationState(paramAction.entityKey, paramAction.paginationKey))
     }
     ]);
   }
@@ -317,7 +319,7 @@ export function validateEntityRelations(
   if (!parentEntities || !parentEntities.length) {
     return emptyResponse;
   }
-  // let denormedEnterties = entities;
+
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
     parentEntities = denormalize(parentEntities, action.entity, allEntities);
   }
@@ -341,16 +343,18 @@ export function validateEntityRelations(
   results.forEach(newActions => {
     store.dispatch(newActions.action);
     // TODO: RC Failures?
-    if (newActions.paginationMonitor) {
-      console.log('Adding... ', newActions.action);
-      const obs = newActions.paginationMonitor.fetchingCurrentPage$.pipe(
-        tap(a => console.log(a)),
-        pairwise(),
-        // skipWhile(fetching => fetching),
-        takeWhile(([oldFetching, newFetching]) => {
-          // Don't tweak this unless you test child actions finish before parent action
-          return oldFetching !== true && newFetching !== false;
+    if (newActions.paginationState$) {
+      const obs = newActions.paginationState$.pipe(
+        map(paginationState => {
+          const pageRequest: ActionState =
+            paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+          return pageRequest ? pageRequest.busy : true;
         }),
+        pairwise(),
+        map(([oldFetching, newFetching]) => {
+          return oldFetching === true && newFetching === false;
+        }),
+        skipWhile(completed => !completed),
       );
       paginationFinished.push(obs);
     }
@@ -358,7 +362,7 @@ export function validateEntityRelations(
 
   return {
     started: !!results.length,
-    completed$: Observable.zip(...paginationFinished)
+    completed$: Observable.zip(...paginationFinished).first()
   };
 }
 
