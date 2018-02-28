@@ -154,7 +154,7 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
 
     // Update action
     this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, this.spaceGuid)).pipe(
-      filter(o => !!o && !o.creating),
+      filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
       map(o => {
         if (o.error) {
           this.displaySnackBar();
@@ -177,5 +177,8 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.fetchSpacesSubscription.unsubscribe();
+    if (this.submitSubscription) {
+      this.submitSubscription.unsubscribe();
+    }
   }
 }

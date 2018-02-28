@@ -7,6 +7,8 @@ import { PaginationAction } from '../types/pagination.types';
 import { ApplicationSchema } from './application.actions';
 import { RouteSchema } from '../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import { IUpdateSpace } from '../../core/cf-api.types';
+import { ActionMergeFunction } from '../types/api.types';
+import { pick } from '../helpers/reducer.helper';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -110,6 +112,8 @@ export class CreateSpace extends CFStartAction implements ICFAction {
   guid: string;
 }
 export class UpdateSpace extends CFStartAction implements ICFAction {
+
+  public static UpdateExistingSpace = 'Updating-Existing-Space';
   constructor(public guid: string, public endpointGuid: string, updateSpace: IUpdateSpace) {
     super();
     this.options = new RequestOptions();
@@ -117,10 +121,11 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
     this.options.method = 'put';
     this.options.body = updateSpace;
   }
-  actions = getActions('Spaces', 'Create Space');
+  actions = getActions('Spaces', 'Update Space');
   entity = [SpaceSchema];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
+  updatingKey = UpdateSpace.UpdateExistingSpace;
 }
 
 export class GetRoutesInSpace extends CFStartAction implements PaginationAction {
