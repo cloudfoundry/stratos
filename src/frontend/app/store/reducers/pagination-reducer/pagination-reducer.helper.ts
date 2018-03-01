@@ -10,7 +10,7 @@ import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { RequestTypes, FetchEntities } from '../../actions/request.actions';
+import { RequestTypes, FetchEntities, ValidateEntitiesStart } from '../../actions/request.actions';
 import { validateEntityRelations } from '../../helpers/entity-relations.helpers';
 
 export interface PaginationObservables<T> {
@@ -122,7 +122,7 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
-  let hasValidatedOnce = false; // TODO: RC Delete me
+  let lastValidationFootprint: string;
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
@@ -130,6 +130,7 @@ function getObservables<T = any>(
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
     tap(pagination => {
+
       if (
         (!pagination && !hasDispatchedOnce) ||
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
@@ -137,19 +138,6 @@ function getObservables<T = any>(
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         store.dispatch(action);
       }
-      // store.dispatch(new FetchEntities(
-      //   action,
-      //   false,
-      //   null,
-      //   {
-      //     guids: () => {
-      //       return pagination ? pagination.ids[pagination.currentPage] : null;
-      //     },
-      //     shouldFetch: () => {
-      //       return !pagination || !hasError(pagination) && !isFetchingPage(pagination);
-      //     },
-      //   }
-      // ));
     }),
     shareReplay(1)
   );
@@ -160,18 +148,22 @@ function getObservables<T = any>(
       fetchPagination$
     )
       .pipe(
-        filter(([ent, pagination]) => {
-          return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
-        }),
-        switchMap(() => paginationMonitor.currentPage$),
-        tap(currentPage => {
-          if (!hasValidatedOnce) {
-            // For improvement on how this is handled (optimise location, provide wait mechanism, etc) see issue #1641
-            hasValidatedOnce = true;
-            // validateEntityRelations(store, action, currentPage, true, false); // TODO: RC
-          }
-        }),
-        shareReplay(1)
+      filter(([ent, pagination]) => {
+        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+      }),
+      tap(([ent, pagination]) => {
+        const newValidationFootprint = getPaginationCompareString(pagination);
+        if (lastValidationFootprint !== newValidationFootprint) {
+          lastValidationFootprint = newValidationFootprint;
+          store.dispatch(new ValidateEntitiesStart(
+            action,
+            pagination.ids[pagination.currentPage],
+            false
+          ));
+        }
+      }),
+      switchMap(() => paginationMonitor.currentPage$),
+      shareReplay(1)
       );
 
   return {

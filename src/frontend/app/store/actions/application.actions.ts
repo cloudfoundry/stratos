@@ -238,7 +238,7 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineChildActi
     'order-direction-field': 'route',
   };
   entity = [entityFactory(routeSchemaKey)];
-  entityKey = applicationSchemaKey;
+  entityKey = routeSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
   flattenPagination = true;

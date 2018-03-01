@@ -227,7 +227,7 @@ function validationLoop(
         }
         const newPath = path.length ? path + '.' + key : key;
         entities.forEach(entity => {
-          const childEntities = pathGet(newPath, entity);
+          let childEntities = pathGet(newPath, entity);
 
           if (arraySchema) {
             results = [].concat(results, handleRelation({
@@ -243,6 +243,8 @@ function validationLoop(
               populateExisting,
               populateMissing
             }));
+          } else {
+            childEntities = [childEntities];
           }
 
           // The actual check is step two of validation loop, but only after we've tried to discover if this child has any children
@@ -276,6 +278,11 @@ export class tempAppStore { // TODO: RC
     [guid: string]: any;
   }
 }
+
+export class ValidationResult {
+  started: boolean;
+  completed$: Observable<any[]>;
+}
 /**
  * Ensure all required inline parameters specified by the entity associated with the request exist.
  * If the inline parameter/s are..
@@ -291,7 +298,7 @@ export class tempAppStore { // TODO: RC
  * @param {boolean} [populateExisting=false] If a child exists, should we raise an action to store it as a pagination list?
  * @returns {Observable<{
  *     allFinished: Observable<any>,
- *     entityResults: ValidateEntityResult[]
+ *     entityResults: ValidateEntityResult[] // TODO: RC
  *   }>}
  */
 export function validateEntityRelations(
@@ -300,10 +307,7 @@ export function validateEntityRelations(
   action: IRequestAction,
   parentEntities: any[],
   populateMissing = false,
-  populateExisting = false): {
-    started: boolean,
-    completed$: Observable<any[]>
-  } {
+  populateExisting = false): ValidationResult {
 
   const emptyResponse = {
     started: false,

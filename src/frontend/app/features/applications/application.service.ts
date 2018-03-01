@@ -55,6 +55,7 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
       generateEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
       generateEntityRelationKey(applicationSchemaKey, stackSchemaKey),
       generateEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      generateEntityRelationKey(spaceSchemaKey, domainSchemaKey),
     ]
   );
 }
@@ -216,7 +217,7 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
-        this.store.select(endpointEntitiesSelector),
+      this.store.select(endpointEntitiesSelector),
     )
       .filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;

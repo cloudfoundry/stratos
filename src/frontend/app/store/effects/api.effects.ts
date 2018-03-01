@@ -26,7 +26,7 @@ import { EndpointModel } from '../types/endpoint.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
 import { ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { environment } from './../../../environments/environment';
-import { ApiActionTypes, ValidateEntities } from './../actions/request.actions';
+import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
@@ -117,7 +117,7 @@ export class APIEffect {
         //   actionClone,
         //   Object.values(entities.entities[apiAction.entityKey]),
         //   true, true);
-        return [new ValidateEntities(
+        return [new ValidateEntitiesStart(
           actionClone,
           entities.result,
           true,
@@ -157,12 +157,12 @@ export class APIEffect {
       //   }
       //   return actions;
       // })
-    ).catch(err => {
-      this.logger.warn(`API request process failed ${err}`);
+    ).catch(errObservable => {
+      this.logger.warn(`API request process failed`, errObservable.error);
       return [
         { type: actionClone.actions[2], apiAction: actionClone },
         new WrapperRequestActionFailed(
-          err.message,
+          errObservable.message,
           actionClone,
           requestType
         )

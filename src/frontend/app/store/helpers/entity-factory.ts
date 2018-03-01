@@ -96,7 +96,8 @@ export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {
 export const SpaceWithOrgsEntitySchema = new schema.Entity(spaceSchemaKey, {
   entity: {
     apps: ApplicationWithoutSpaceEntitySchema,
-    organization: OrganisationSchema
+    organization: OrganisationSchema,
+    domains: [DomainSchema]
   }
 }, {
     idAttribute: getAPIResourceGuid

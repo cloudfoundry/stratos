@@ -6,8 +6,11 @@ import { PaginationAction, PaginationEntityState } from '../../types/pagination.
 export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {
   const { apiAction } = action;
   const params = getParams(apiAction);
-  const totalResults = action.totalResults || action.response.result.length;
+  const totalResults = action.totalResults || action.response ? action.response.result.length : state.totalResults;
+  const totalPages = action.totalPages || action.response ? action.response.totalPages : state.pageCount;
   const page = action.apiAction.pageNumber || state.currentPage;
+  const pageResult = action.result || action.response ? action.response.result : state[page];
+
   return {
     ...state,
     pageRequests: {
@@ -20,9 +23,9 @@ export function paginationSuccess(state: PaginationEntityState, action): Paginat
     },
     ids: {
       ...state.ids,
-      [page]: action.response.result
+      [page]: pageResult
     },
-    pageCount: action.totalPages,
+    pageCount: totalPages,
     totalResults,
     clientPagination: {
       ...state.clientPagination,

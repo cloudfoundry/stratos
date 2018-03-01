@@ -16,14 +16,14 @@ export const RequestTypes = {
 };
 
 export const EntitiesPipelineActionTypes = {
-  FETCH: '[Entities Pipeline] Fetch',
-  VALIDATE: '[Entities Pipeline] Validate',
-  COMPLETE: '[Entities Pipeline] Complete',
+  FETCH: '[Validate Entities] Fetch',
+  VALIDATE: '[Validate Entities] Start',
+  COMPLETE: '[Validate Entities] Complete',
 };
 
 export type EntitiesPipelineAction = ICFAction | PaginatedAction;
 
-
+// TODO: RC Delete
 export class FetchEntities implements Action {
   type = EntitiesPipelineActionTypes.FETCH;
   constructor(
@@ -38,7 +38,7 @@ export class FetchEntities implements Action {
   }
 }
 
-export class ValidateEntities implements Action {
+export class ValidateEntitiesStart implements Action {
   type = EntitiesPipelineActionTypes.VALIDATE;
   constructor(
     public action: EntitiesPipelineAction,
@@ -55,7 +55,7 @@ export class APIResponse {
   totalPages: number;
 }
 
-export class CompleteEntities implements Action {
+export class ValidateEntitiesCompleted implements Action {
   type = EntitiesPipelineActionTypes.COMPLETE;
   constructor(
     public action: EntitiesPipelineAction,

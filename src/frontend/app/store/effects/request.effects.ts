@@ -1,19 +1,25 @@
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, mergeMap, tap } from 'rxjs/operators';
+import { first, map, mergeMap } from 'rxjs/operators';
 
+import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
-import { CompleteEntities, EntitiesPipelineActionTypes, FetchEntities, ValidateEntities } from '../actions/request.actions';
+import {
+  APIResponse,
+  ValidateEntitiesCompleted,
+  EntitiesPipelineActionTypes,
+  FetchEntities,
+  ValidateEntitiesStart,
+} from '../actions/request.actions';
 import { AppState } from '../app-state';
-import { validateEntityRelations } from '../helpers/entity-relations.helpers';
+import { validateEntityRelations, ValidationResult } from '../helpers/entity-relations.helpers';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { StartRequestAction, WrapperRequestActionSuccess, WrapperRequestActionFailed } from '../types/request.types';
-import { LoggerService } from '../../core/logger.service';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 
 @Injectable()
 export class RequestEffect {
@@ -35,39 +41,37 @@ export class RequestEffect {
    * @memberof RequestEffect
    */
 
+  // TODO: RC DELETE
   @Effect() fetchEntities$ = this.actions$.ofType<FetchEntities>(EntitiesPipelineActionTypes.FETCH).pipe(
-    map(action => {
+    mergeMap((action): Action[] => {
       const fetchAction: FetchEntities = action;
       const guids = fetchAction.config.guids();
-      if (guids) {
-        // const state = {
-        //   [fetchAction.action.entityKey]
-        // }
-        return new ValidateEntities(
+      if (guids && this.canValidateAction(fetchAction.action)) {
+        return [new ValidateEntitiesStart(
           fetchAction.action,
           guids,
           fetchAction.haveStarted
-        );
+        )];
       } else {
-        return fetchAction.config.shouldFetch() ? fetchAction.action : null;
+        return fetchAction.config.shouldFetch() ? [fetchAction.action] : [];
       }
     })
   );
 
-  @Effect() validateEntities$ = this.actions$.ofType<ValidateEntities>(EntitiesPipelineActionTypes.VALIDATE).pipe(
+  @Effect() validateEntities$ = this.actions$.ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE).pipe(
     mergeMap(action => {
-      const validateAction: ValidateEntities = action;
+      const validateAction: ValidateEntitiesStart = action;
       const apiAction = validateAction.action;
       const requestType = getRequestTypeFromMethod(apiAction.options.method);
 
-      const allEntities$ = validateAction.apiResponse ?
-        Observable.of(validateAction.apiResponse.response.entities) :
+      const apiResponse = validateAction.apiResponse;
+      const allEntities$ = apiResponse ?
+        Observable.of(apiResponse.response.entities) :
         this.store.select(getAPIRequestDataState);
 
       return allEntities$.pipe(
         first(),
         map(allEntities => {
-          console.log('STARTING: ', validateAction.action);
           return validateEntityRelations(
             this.store,
             allEntities,
@@ -81,17 +85,18 @@ export class RequestEffect {
             this.store.dispatch(new StartRequestAction(apiAction, requestType));
             this.store.dispatch({ type: apiAction.actions[0] });
           }
-          return validation.completed$;
+          return validation.completed$.pipe(
+            map(() => validation)
+          );
         }),
-        mergeMap(validationCompleted => {
-          console.log('COMPLETED: ', validateAction.action);
-          return [new CompleteEntities(
+        mergeMap((validation: ValidationResult) => {
+          return validateAction.haveStarted || validation.started ? [new ValidateEntitiesCompleted(
             apiAction,
-            validateAction.apiResponse
-          )];
+            apiResponse
+          )] : [];
         })
       ).catch(error => {
-        this.logger.warn(`Entity validation process failed ${error}`);
+        this.logger.warn(`Entity validation process failed`, error);
         return [
           { type: apiAction.actions[2], apiAction: apiAction },
           new WrapperRequestActionFailed(
@@ -104,21 +109,25 @@ export class RequestEffect {
     })
   );
 
-  @Effect() completeEntities$ = this.actions$.ofType<CompleteEntities>(EntitiesPipelineActionTypes.COMPLETE).pipe(
+  @Effect() completeEntities$ = this.actions$.ofType<ValidateEntitiesCompleted>(EntitiesPipelineActionTypes.COMPLETE).pipe(
     mergeMap(action => {
-      const completeAction: CompleteEntities = action;
+      const completeAction: ValidateEntitiesCompleted = action;
       const apiAction = completeAction.action;
       const requestType = getRequestTypeFromMethod(apiAction.options.method);
-      const apiResponse = completeAction.apiResponse || {};
+      const apiResponse: APIResponse = completeAction.apiResponse || {
+        response: null,
+        totalPages: 0,
+        totalResults: 0,
+      };
 
       const actions = [];
       actions.push({ type: apiAction.actions[1], apiAction: apiAction });
       actions.push(new WrapperRequestActionSuccess(
-        completeAction.apiResponse.response,
+        apiResponse.response,
         apiAction,
         requestType,
-        completeAction.apiResponse.totalResults,
-        completeAction.apiResponse.totalPages
+        apiResponse.totalResults,
+        apiResponse.totalPages
       ));
 
       if (
@@ -134,4 +143,10 @@ export class RequestEffect {
       }
       return actions;
     }));
+
+
+  canValidateAction = (object) => {
+    return false; // object['entity'];// TODO: RC
+  }
+
 }
