@@ -8,6 +8,7 @@ import {
   AppSummarySchema
 } from './app-metadata.types';
 import { SystemInfo } from './system.types';
+import { metricSchema, metricsKey } from '../actions/metrics.actions';
 
 export interface IRequestDataState extends IRequestTypeState {
   application: IRequestEntityTypeState<APIResource>;
@@ -23,6 +24,7 @@ export interface IRequestDataState extends IRequestTypeState {
   domain: IRequestEntityTypeState<APIResource>;
   user: IRequestEntityTypeState<APIResource>;
   caaspInfo: IRequestEntityTypeState<APIResource>;
+  metrics: IRequestEntityTypeState<IMetrics>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -55,5 +57,6 @@ export const defaultCfEntitiesState = {
   [AppEnvVarSchema.key]: {},
   [AppStatSchema.key]: {},
   [AppSummarySchema.key]: {},
-  caaspInfo: {}
+  caaspInfo: {},
+  metrics: {}
 };

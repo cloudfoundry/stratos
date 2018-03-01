@@ -23,6 +23,7 @@ import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
 import { UserSchema } from '../types/user.types';
 import { userReducer } from './users.reducer';
 import { CAASP_INFO_ENTITY_KEY } from '../actions/caasp.actions';
+import { metricSchema } from '../actions/metrics.actions';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -76,7 +77,8 @@ const entities = [
   AppEnvVarSchema.key,
   AppStatSchema.key,
   AppSummarySchema.key,
-  CAASP_INFO_ENTITY_KEY
+  CAASP_INFO_ENTITY_KEY,
+  metricSchema.key
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 

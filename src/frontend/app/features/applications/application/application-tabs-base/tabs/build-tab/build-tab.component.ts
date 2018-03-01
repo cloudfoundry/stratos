@@ -47,6 +47,7 @@ export class BuildTabComponent implements OnInit {
 
   testMetrics() {
     console.log('TESTING METRICS.....');
+
     this.store.dispatch(new FetchCFMetricsAction(
       this.appService.cfGuid,
       'firehose_container_metric_memory_bytes{}')

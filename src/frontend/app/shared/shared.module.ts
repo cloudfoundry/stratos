@@ -86,6 +86,7 @@ import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 /* tslint:enable:max-line-length */
 
 
@@ -161,6 +162,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     RingChartComponent,
+    MetricsChartComponent,
   ],
   exports: [
     FormsModule,

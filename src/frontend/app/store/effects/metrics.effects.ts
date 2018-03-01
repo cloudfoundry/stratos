@@ -1,11 +1,13 @@
-import { map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
-import { Effect, Actions } from '@ngrx/effects';
-import { ActionHistoryDump, ActionHistoryActions } from '../actions/action-history.actions';
-import { MetricsAction, METRICS_START } from '../actions/metrics.actions';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
+
+import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
+import { AppState } from '../app-state';
+import { metricSchema } from './../actions/metrics.actions';
+import { IRequestAction, WrapperRequestActionSuccess } from './../types/request.types';
 
 
 @Injectable()
@@ -17,18 +19,35 @@ export class MetricsEffect {
         private httpClient: HttpClient
     ) { }
 
-    @Effect({ dispatch: false }) metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START)
-        .map(action => {
+    @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START)
+        .mergeMap(action => {
             const fullUrl = this.buildFullUrl(action);
-            this.httpClient.get(fullUrl, {
+            return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
                 headers: { 'x-cap-cnsi-list': action.cfGuid }
             }).pipe(
-                map(metrics => console.log(metrics))
+                map(metrics => {
+                    const metric = metrics[action.cfGuid];
+                    const apiAction = {
+                        guid: action.guid,
+                        entityKey: metricSchema.key
+                    } as IRequestAction
+                    return new WrapperRequestActionSuccess(
+                        {
+                            entities: {
+                                [metricSchema.key]: {
+                                    [action.guid]: metric.data
+                                }
+                            },
+                            result: [action.guid]
+                        },
+                        apiAction
+                    );
+                })
             );
         });
 
     private buildFullUrl(action: MetricsAction) {
-        return `${action.url}?query=${action.query}`;
+        return `${action.url}/query?query=${action.query}`;
     }
 }
 
