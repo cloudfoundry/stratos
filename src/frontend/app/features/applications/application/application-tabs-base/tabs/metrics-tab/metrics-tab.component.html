@@ -1,2 +1,6 @@
-<app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid"></app-application-instance-chart>
-<app-application-instance-memory-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid"></app-application-instance-memory-chart>
+<mat-card class="metric-chart-wrapper">
+  <app-application-instance-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid"></app-application-instance-chart>
+</mat-card>
+<mat-card class="metric-chart-wrapper">
+  <app-application-instance-memory-chart [appGuid]="applicationService.appGuid" [endpointGuid]="applicationService.cfGuid"></app-application-instance-memory-chart>
+</mat-card>

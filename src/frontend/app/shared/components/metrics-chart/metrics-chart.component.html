@@ -1,6 +1,5 @@
-<span *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
-    <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [results]="results" [legend]="true" [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true" [showYAxisLabel]="true" [xAxis]="true"
-    [yAxis]="true" [autoScale]="true" [timeline]="true">
-    </ngx-charts-line-chart>
-    <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
-</span>
+<div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
+  <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [results]="results" [legend]="true" [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true" [showYAxisLabel]="true" [xAxis]="true" [yAxis]="true" [autoScale]="true">
+  </ngx-charts-line-chart>
+  <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>
+</div>
