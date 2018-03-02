@@ -185,7 +185,6 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
         appService.appGuid,
         appService.cfGuid,
         entityRelationCreatePaginationKey(applicationSchemaKey, appService.appGuid),
-        appService.appGuid
       ),
       entityRelationCreatePaginationKey(applicationSchemaKey, appService.appGuid),
       false,

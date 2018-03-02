@@ -40,5 +40,5 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
   entity = [entityFactory(domainSchemaKey)];
   entityKey = domainSchemaKey;
   options: RequestOptions;
-  paginationKey = 'domain';
+  paginationKey = 'all-domains';
 }

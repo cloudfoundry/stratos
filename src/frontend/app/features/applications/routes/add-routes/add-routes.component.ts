@@ -81,27 +81,27 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     const space$ = this.store
       .select(selectEntity('application', this.appGuid))
       .pipe(
-        filter(p => !!p),
-        tap(p => {
-          this.spaceGuid = p.entity.space_guid;
-          if (this.domains$) {
-            this.domains$.unsubscribe();
-          }
-          this.domains$ = this.store
-            .select(
-              selectNestedEntity('space', this.spaceGuid, ['entity', 'domains'])
-            )
-            .pipe(
-              filter(d => !!d),
-              tap(d => {
-                d.forEach(domain => {
-                  this.domains[domain.metadata.guid] = domain;
-                });
-                this.selectedDomain = Object.values(this.domains)[0];
-              })
-            )
-            .subscribe();
-        })
+      filter(p => !!p),
+      tap(p => {
+        this.spaceGuid = p.entity.space_guid;
+        if (this.domains$) {
+          this.domains$.unsubscribe();
+        }
+        this.domains$ = this.store
+          .select(
+          selectNestedEntity('space', this.spaceGuid, ['entity', 'domains'])
+          )
+          .pipe(
+          filter(d => !!d),
+          tap(d => {
+            d.forEach(domain => {
+              this.domains[domain.metadata.guid] = domain;
+            });
+            this.selectedDomain = Object.values(this.domains)[0];
+          })
+          )
+          .subscribe();
+      })
       );
 
     this.subscriptions.push(space$.subscribe());
@@ -175,26 +175,26 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     const associateRoute$ = this.store
       .select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
-        filter(route => !route.creating),
-        map(route => {
-          if (route.error) {
-            this.submitted = false;
-            this.displaySnackBar();
-          } else {
-            const routeAssignAction = new AssociateRouteWithAppApplication(
-              this.appGuid,
-              route.response.result[0],
-              this.cfGuid
-            );
-            this.store.dispatch(routeAssignAction);
-            this.submitted = false;
-            this.store.dispatch(
-              new RouterNav({
-                path: ['/applications', this.cfGuid, this.appGuid]
-              })
-            );
-          }
-        })
+      filter(route => !route.creating),
+      map(route => {
+        if (route.error) {
+          this.submitted = false;
+          this.displaySnackBar();
+        } else {
+          const routeAssignAction = new AssociateRouteWithAppApplication(
+            this.appGuid,
+            route.response.result[0],
+            this.cfGuid
+          );
+          this.store.dispatch(routeAssignAction);
+          this.submitted = false;
+          this.store.dispatch(
+            new RouterNav({
+              path: ['/applications', this.cfGuid, this.appGuid]
+            })
+          );
+        }
+      })
       );
 
     this.subscriptions.push(associateRoute$.subscribe());
@@ -229,7 +229,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               'Dismiss'
             );
           } else {
-            this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
+            this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));//TODO: RC
             this.store.dispatch(
               new RouterNav({
                 path: ['applications', this.cfGuid, this.appGuid]

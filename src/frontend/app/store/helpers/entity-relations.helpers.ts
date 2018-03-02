@@ -50,7 +50,7 @@ export interface EntityInlineParentAction extends IRequestAction {
  * An object to represent the action and monitor for a missing inline depth/entity relation. For instance, if spaces are missing from an
  * organisation then the action would be for GetAllOrganisationSpaces and the paginationMonitor would contain a monitor for that pagination
  * section
- *
+ * //TODO: RC check
  * @export
  * @interface ValidateEntityResult
  */
@@ -69,6 +69,7 @@ function handleRelation({
   childEntitySchemaKey,
   childEntitySchema,
   childEntitiesUrl,
+  includeRelations,
   populateExisting,
   populateMissing
 }): ValidateEntityResult[] {
@@ -89,7 +90,9 @@ function handleRelation({
       childEntitySchema,
       childEntitySchemaKey, // TODO: RC routesInSpaceKey??
       childEntityParentParam,
-      entityRelationCreatePaginationKey(parentEntitySchemaKey, parentEntity.metadata.guid)
+      entityRelationCreatePaginationKey(parentEntitySchemaKey, parentEntity.metadata.guid),
+      includeRelations,
+      populateMissing
     );
   }
 
@@ -240,11 +243,12 @@ function validationLoop(
               childEntitySchemaKey: schema.key,
               childEntitySchema: value,
               childEntitiesUrl: pathGet(newPath + '_url', entity),
+              includeRelations: action.includeRelations,
               populateExisting,
               populateMissing
             }));
           } else {
-            childEntities = [childEntities];
+            childEntities = childEntities ? [childEntities] : null;
           }
 
           // The actual check is step two of validation loop, but only after we've tried to discover if this child has any children
@@ -365,7 +369,7 @@ export function validateEntityRelations(
   });
 
   return {
-    started: !!results.length,
+    started: !!(paginationFinished.length - 1),
     completed$: Observable.zip(...paginationFinished).first()
   };
 }

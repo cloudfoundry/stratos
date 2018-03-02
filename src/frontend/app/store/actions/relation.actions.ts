@@ -1,10 +1,10 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 import { Schema } from 'normalizr';
 
-import { EntityInlineChildAction } from '../helpers/entity-relations.helpers';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.helpers';
 import { CFStartAction } from '../types/request.types';
 
-export class FetchRelationAction extends CFStartAction implements EntityInlineChildAction {
+export class FetchRelationAction extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
   static isIdString = 'FetchRelationAction';
   constructor(
     public endpointGuid: string, // Always go out to a single cf
@@ -15,7 +15,9 @@ export class FetchRelationAction extends CFStartAction implements EntityInlineCh
     public entityKey: string,
     // This is the parameter name for the children in the parent entity, for example app `routes` (not the entity key `route`)
     public entityKeyInParent: string,
-    public paginationKey: string
+    public paginationKey: string,
+    public includeRelations: string[],
+    public populateMissing = true,
   ) {
     super();
     this.options = new RequestOptions();

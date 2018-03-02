@@ -16,9 +16,9 @@ export const RequestTypes = {
 };
 
 export const EntitiesPipelineActionTypes = {
-  FETCH: '[Validate Entities] Fetch',
-  VALIDATE: '[Validate Entities] Start',
-  COMPLETE: '[Validate Entities] Complete',
+  FETCH: '[Entities Pipeline] Fetch',
+  VALIDATE: '[Entities Pipeline] Validating',
+  COMPLETE: '[Entities Pipeline] Completed',
 };
 
 export type EntitiesPipelineAction = ICFAction | PaginatedAction;
@@ -55,7 +55,7 @@ export class APIResponse {
   totalPages: number;
 }
 
-export class ValidateEntitiesCompleted implements Action {
+export class EntitiesPipelineCompleted implements Action {
   type = EntitiesPipelineActionTypes.COMPLETE;
   constructor(
     public action: EntitiesPipelineAction,

@@ -42,7 +42,7 @@ export class CfOrgSpaceDataService {
     action: this.paginationAction,
     paginationMonitor: this.paginationMonitorFactory.create(
       this.paginationAction.paginationKey,
-      entityFactory(organisationWithSpaceKey)
+      entityFactory(this.paginationAction.entityKey)
     )
   });
 
@@ -120,7 +120,7 @@ export class CfOrgSpaceDataService {
         }
         return [];
       }
-    );
+      );
 
     this.org = {
       list$: orgList$,
