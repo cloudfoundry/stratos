@@ -1,14 +1,10 @@
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
-import { endpointStoreNames, EndpointModel } from './endpoint.types';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
-import {
-  AppEnvVarSchema,
-  AppStatSchema,
-  AppSummarySchema
-} from './app-metadata.types';
+import { AppEnvVarSchema, AppStatSchema, AppSummarySchema } from './app-metadata.types';
+import { IMetrics } from './base-metric.types';
+import { EndpointModel } from './endpoint.types';
 import { SystemInfo } from './system.types';
-import { metricSchema, metricsKey } from '../actions/metrics.actions';
 
 export interface IRequestDataState extends IRequestTypeState {
   application: IRequestEntityTypeState<APIResource>;

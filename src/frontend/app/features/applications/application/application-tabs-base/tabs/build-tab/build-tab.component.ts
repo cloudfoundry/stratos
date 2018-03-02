@@ -11,6 +11,8 @@ import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
 import { FetchCFMetricsAction, FetchApplicationMetricsAction } from '../../../../../../store/actions/metrics.actions';
+import { MetricsChartConfig } from '../../../../../../shared/components/metrics-chart/metrics-chart.component';
+import { IMetrics, IMetricMatrixResult } from '../../../../../../store/types/base-metric.types';
 
 @Component({
   selector: 'app-build-tab',
@@ -35,6 +37,17 @@ export class BuildTabComponent implements OnInit {
 
   getFullApiUrl = getFullEndpointApiUrl;
 
+  public instanceChartConfig: MetricsChartConfig<IMetricMatrixResult<IMetricApplication>> = {
+    getSeriesName: result => `Instance ${result.metric.instance_index}`,
+    metricsAction: new FetchApplicationMetricsAction(
+      this.appService.appGuid,
+      this.appService.cfGuid,
+      'firehose_container_metric_cpu_percentage{}[5m]'
+    ),
+    xAxisLabel: 'Time',
+    yAxisLabel: 'CPU usage %'
+  };
+
   ngOnInit() {
     this.cardTwoFetching$ = this.appService.application$
       .combineLatest(
@@ -48,10 +61,10 @@ export class BuildTabComponent implements OnInit {
   testMetrics() {
     console.log('TESTING METRICS.....');
 
-    this.store.dispatch(new FetchCFMetricsAction(
-      this.appService.cfGuid,
-      'firehose_container_metric_memory_bytes{}')
-    );
+    // this.store.dispatch(new FetchCFMetricsAction(
+    //   this.appService.cfGuid,
+    //   'firehose_container_metric_cpu_percentage{}[5m]')
+    // );
     this.store.dispatch(new FetchApplicationMetricsAction(
       this.appService.appGuid,
       this.appService.cfGuid,

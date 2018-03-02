@@ -1,27 +1,34 @@
-interface IMetricsResponse<T = any> {
+export enum MetricResultTypes {
+    MATRIX = 'matrix',
+    VECTOR = 'vector',
+    SCALAR = 'scalar',
+    STRING = 'string'
+}
+
+export interface IMetricsResponse<T = any> {
     status: string;
-    data: IMetrics<T>;
+    data: IMetrics<T>; BG
 }
 
-interface IMetrics<T = any> {
+export interface IMetrics<T = any> {
     resultType: string;
-    result: IMetricResult<T>[];
+    result: [T];
 }
 
-interface IMetricResult<T> {
+interface _IVectorResult<T> {
     metric: T;
-    value: (number | string)[];
+}
+//[unixTimeStamp, sampleValue]
+export type IMetricSample = [number, string];
+
+export interface IMetricMatrixResult<T = any> extends _IVectorResult<T> {
+    values: IMetricSample[];
 }
 
-interface IMetric {
-    __name__: string;
-    application_id: string;
-    bosh_deployment: string;
-    bosh_job_id: string;
-    bosh_job_ip: string;
-    bosh_job_name: string;
-    instance: string;
-    instance_index: string;
-    job: string;
-    origin: string;
+export interface IMetricVectorResult<T = any> extends _IVectorResult<T> {
+    value: IMetricSample;
 }
+
+// They're the same interface but I'm going to keep both for continuity.
+export type IMetricScalarResult = IMetricSample[];
+export type IMetricStringsResult = IMetricSample[];

@@ -8,6 +8,7 @@ import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
 import { metricSchema } from './../actions/metrics.actions';
 import { IRequestAction, WrapperRequestActionSuccess } from './../types/request.types';
+import { IMetricsResponse } from '../types/base-metric.types';
 
 
 @Injectable()
@@ -27,6 +28,7 @@ export class MetricsEffect {
             }).pipe(
                 map(metrics => {
                     const metric = metrics[action.cfGuid];
+                    const metricKey = MetricsAction.buildMetricKey(action.guid, action.query);
                     const apiAction = {
                         guid: action.guid,
                         entityKey: metricSchema.key
@@ -35,7 +37,7 @@ export class MetricsEffect {
                         {
                             entities: {
                                 [metricSchema.key]: {
-                                    [action.guid]: metric.data
+                                    [metricKey]: metric.data
                                 }
                             },
                             result: [action.guid]

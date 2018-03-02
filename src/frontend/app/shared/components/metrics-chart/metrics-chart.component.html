@@ -1,3 +1,5 @@
-<p>
-  metrics-chart works!
-</p>
+<span *ngIf="config">
+    <ngx-charts-line-chart *ngIf="results$ | async as results" [results]="results" [legend]="true" [yAxisLabel]="config.yAxisLabel" [xAxisLabel]="config.xAxisLabel" [showXAxisLabel]="true" [showYAxisLabel]="true" [xAxis]="true"
+    [yAxis]="true" [autoScale]="true" [timeline]="true">
+    </ngx-charts-line-chart>
+</span>

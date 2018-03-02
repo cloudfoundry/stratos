@@ -11,20 +11,29 @@ export const metricsKey = 'metrics';
 export const metricSchema = new schema.Entity(metricsKey);
 
 export abstract class MetricsAction implements Action {
+    constructor(guid: string, query: string) {
+        this.metricId = MetricsAction.buildMetricKey(guid, query);
+    }
     type = METRICS_START;
     url: string;
     query: string;
     guid: string;
     cfGuid: string;
+    metricId: string;
     static getBaseMetricsURL() {
         return `/pp/${proxyAPIVersion}/metrics`;
+    }
+
+    // Builds the key that is used to store the metric in the app state.
+    static buildMetricKey(guid: string, query: string) {
+        return `${guid}:${query}`;
     }
 }
 
 export class FetchCFMetricsAction extends MetricsAction {
     public cfGuid: string;
     constructor(public guid: string, public query: string) {
-        super();
+        super(guid, query);
         this.cfGuid = guid;
         this.url = `${MetricsAction.getBaseMetricsURL()}/cf`;
     }
@@ -32,7 +41,7 @@ export class FetchCFMetricsAction extends MetricsAction {
 
 export class FetchApplicationMetricsAction extends MetricsAction {
     constructor(public guid: string, public cfGuid: string, public query: string) {
-        super();
+        super(guid, query);
         this.url = `${MetricsAction.getBaseMetricsURL()}/cf/app/${guid}`;
     }
 }

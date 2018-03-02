@@ -216,7 +216,8 @@ import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    RingChartComponent,    
+    RingChartComponent,
+    MetricsChartComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
