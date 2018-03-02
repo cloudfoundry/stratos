@@ -7,6 +7,9 @@ import { LoggedInService } from './logged-in.service';
 import { create, PartialLogger } from 'rxjs-spy';
 import { environment } from '../environments/environment';
 
+export class MetricsMetatdata {
+  avaliable = false;
+};
 
 @Component({
   selector: 'app-root',

@@ -1,16 +1,17 @@
-import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
-import { ApplicationService } from '../application.service';
-import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
-import { EntityService } from '../../../core/entity-service';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { Store } from '@ngrx/store';
+import { first, map } from 'rxjs/operators';
+
+import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { ApplicationSchema, GetApplication } from '../../../store/actions/application.actions';
+import { AppState } from '../../../store/app-state';
+import { endpointsEntityRequestDataSelector } from '../../../store/selectors/endpoint.selectors';
+import { ApplicationService } from '../application.service';
+import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 
 function applicationServiceFactory(
@@ -52,7 +53,6 @@ function entityServiceFactory(
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
   providers: [
-    ApplicationService,
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
@@ -62,17 +62,8 @@ function entityServiceFactory(
       provide: EntityService,
       useFactory: entityServiceFactory,
       deps: [EntityServiceFactory, ActivatedRoute]
-    }
+    },
+
   ]
 })
-export class ApplicationBaseComponent implements OnInit, OnDestroy {
-
-  constructor(
-  ) { }
-
-  ngOnInit(): void {
-  }
-
-  ngOnDestroy(): void {
-  }
-}
+export class ApplicationBaseComponent { }

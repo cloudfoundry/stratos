@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { AppComponent } from './app.component';
+import { AppComponent, MetricsMetatdata } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
 import { ApplicationsModule } from './features/applications/applications.module';
@@ -17,7 +17,6 @@ import { LoggedInService } from './logged-in.service';
 import { Params, RouterStateSnapshot } from '@angular/router';
 // import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
-
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
 // - https://github.com/ngrx/platform/issues/201 (https://github.com/ngrx/platform/pull/355)
@@ -68,6 +67,7 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
   ],
   providers: [
     LoggedInService,
+    MetricsMetatdata
     // { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]

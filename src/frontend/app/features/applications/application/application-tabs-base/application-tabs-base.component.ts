@@ -1,18 +1,21 @@
+import { EndpointsService } from './../../../../core/endpoints.service';
+import { EndpointSchema } from './../../../../store/actions/endpoint.actions';
+import { take, first } from 'rxjs/operators';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { take } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
+import { MetricsMetatdata } from '../../../../app.component';
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { ApplicationService } from '../../application.service';
 import { APIResource } from '../../../../store/types/api.types';
+import { ApplicationService } from '../../application.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialog(
@@ -45,8 +48,37 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService
-  ) { }
+    private confirmDialog: ConfirmationDialogService,
+    private endpointsService: EndpointsService
+  ) {
+    this.tabLinks = [
+      { link: 'summary', label: 'Summary' },
+      { link: 'instances', label: 'Instances' },
+      { link: 'log-stream', label: 'Log Stream' },
+      { link: 'services', label: 'Services' },
+      { link: 'variables', label: 'Variables' },
+      { link: 'events', label: 'Events' }
+    ];
+    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+      if (hasMetrics) {
+        this.tabLinks.push({
+          link: 'metrics',
+          label: 'Metrics'
+        })
+      }
+    })
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          stratProject.deploySource.type === 'github'
+        ) {
+          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+        }
+      });
+  }
 
   public async: any;
 
@@ -63,14 +95,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     update => update[this.autoRefreshString] || { busy: false }
   );
 
-  tabLinks = [
-    { link: 'summary', label: 'Summary' },
-    { link: 'instances', label: 'Instances' },
-    { link: 'log-stream', label: 'Log Stream' },
-    { link: 'services', label: 'Services' },
-    { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
-  ];
+  tabLinks: { link: string, label: string }[];
 
   stopApplication() {
     this.confirmDialog.open(appStopConfirmation, () => {
@@ -152,18 +177,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
       return !!(isFetchingApp || isUpdating);
     });
-
-    this.applicationService.applicationStratProject$
-      .pipe(take(1))
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          stratProject.deploySource.type === 'github'
-        ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
-        }
-      });
   }
 
   ngOnDestroy() {

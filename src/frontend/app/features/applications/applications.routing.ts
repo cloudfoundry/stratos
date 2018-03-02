@@ -1,3 +1,4 @@
+
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -19,6 +20,7 @@ import { EditApplicationComponent } from './edit-application/edit-application.co
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
+import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
 
 const appplicationsRoutes: Routes = [
   {
@@ -64,6 +66,7 @@ const appplicationsRoutes: Routes = [
               { path: 'variables', component: VariablesTabComponent },
               { path: 'events', component: EventsTabComponent },
               { path: 'github', component: GithubTabComponent },
+              { path: 'metrics', component: MetricsTabComponent },
             ]
           },
           {

@@ -28,10 +28,16 @@ export interface EndpointModel {
   name: string;
   skip_ssl_validation?: boolean;
   token_endpoint?: string;
-  // This is generated client side when we login
-  registered?: boolean;
   user?: EndpointUser;
+  metadata?: {
+    metrics: string
+  }
+  // These are generated client side when we login
+  registered?: boolean;
   connectionStatus?: endpointConnectionStatus;
+  metricsAvaliable: boolean;
+  //
+
 }
 
 // Metadata for the user connected to an endpoint
