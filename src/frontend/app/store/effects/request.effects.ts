@@ -72,11 +72,7 @@ export class RequestEffect {
             validateAction.action,
             validateAction.validateEntities,
             true,
-            validateAction.apiRequestStarted);// TODO: RC only populate missing if from api request, otherwise we've already popualted missing
-          // return {
-          //   started: false,
-          //   completed$: Observable.of(new Array<string>())
-          // };
+            validateAction.apiRequestStarted); // TODO: RC only populate missing if from api request, otherwise we've already popualted missing
         }),
         mergeMap(validation => {
           if (!validateAction.apiRequestStarted && validation.started) {

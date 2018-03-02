@@ -119,10 +119,9 @@ function handleRelation(
   // Have we found some entities that need to go into the pagination store OR are some entities missing that are required?
   if (entities) {
     if (!allEntities || !arraySchema || !populateExisting) {
-      // Only care about paginated
+      // Only care about paginated (array schema)
       return results;
     }
-    // populate missing pagination
 
     const paramAction = createAction();
     // We've got the value already, ensure we create a pagination section for them
@@ -136,6 +135,7 @@ function handleRelation(
         result: guids
       };
     } else {
+      // TODO: RC REMOVE. Tidy up... only need to dispatch success action if pagination
       const guid = entities.metadata.guid;
       response = {
         entities: {
