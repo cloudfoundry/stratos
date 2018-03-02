@@ -214,7 +214,6 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineChildActi
     public guid: string,
     public cfGuid: string,
     public paginationKey: string = null,
-    public parentGuid: string = null
   ) {
     super();
     this.options = new RequestOptions();
@@ -242,4 +241,5 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineChildActi
   options: RequestOptions;
   endpointGuid: string;
   flattenPagination = true;
+  parentGuid: string;
 }

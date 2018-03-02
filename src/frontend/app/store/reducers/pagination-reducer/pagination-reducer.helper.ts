@@ -93,7 +93,6 @@ export const getPaginationObservables = <T = any>(
 ): PaginationObservables<T> => {
   const paginationKey = paginationMonitor.paginationKey;
   const entityKey = paginationMonitor.schema.key;
-  // console.log(`${paginationKey} - getPaginationObservables `);
 
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
@@ -131,12 +130,10 @@ function getObservables<T = any>(
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
     tap(pagination => {
-      console.log(`OUT ${paginationKey}`, pagination);
       if (
         (!pagination && !hasDispatchedOnce) ||
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
-        console.log(`!!!!!!!!!!IN ${paginationKey} `, pagination);
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         store.dispatch(action);
       }
@@ -156,8 +153,8 @@ function getObservables<T = any>(
       tap(([ent, pagination]) => {
         const newValidationFootprint = getPaginationCompareString(pagination);
         if (lastValidationFootprint !== newValidationFootprint) {
+          // TODO: RC endpoints
           lastValidationFootprint = newValidationFootprint;
-          // console.log(`${paginationKey} - entities$ validation `);
           store.dispatch(new ValidateEntitiesStart(
             action,
             pagination.ids[pagination.currentPage],

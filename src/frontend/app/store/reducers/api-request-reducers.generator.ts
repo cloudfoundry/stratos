@@ -25,7 +25,8 @@ import { systemEndpointsReducer } from './system-endpoints.reducer';
 const requestActions = [
   RequestTypes.START,
   RequestTypes.SUCCESS,
-  RequestTypes.FAILED
+  RequestTypes.FAILED,
+  RequestTypes.UPDATE
 ] as IRequestArray;
 
 function chainReducers(baseReducer, extraReducers) {

@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { tempAppStore } from '../helpers/entity-relations.helpers';
+import { tempAppStore, ValidationResult } from '../helpers/entity-relations.helpers';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
@@ -12,7 +12,8 @@ export const ApiActionTypes = {
 export const RequestTypes = {
   START: 'REQUEST_START',
   SUCCESS: 'REQUEST_SUCCESS',
-  FAILED: 'REQUEST_FAILED'
+  FAILED: 'REQUEST_FAILED',
+  UPDATE: 'REQUEST_UPDATE'
 };
 
 export const EntitiesPipelineActionTypes = {
@@ -43,7 +44,7 @@ export class ValidateEntitiesStart implements Action {
   constructor(
     public action: EntitiesPipelineAction,
     public validateEntities: string[],
-    public haveStarted: boolean,
+    public apiRequestStarted: boolean,
     public apiResponse?: APIResponse, // For http check we have a new set of entities, otherwise null look at current set of entities
   ) {
   }
@@ -58,8 +59,10 @@ export class APIResponse {
 export class EntitiesPipelineCompleted implements Action {
   type = EntitiesPipelineActionTypes.COMPLETE;
   constructor(
-    public action: EntitiesPipelineAction,
-    public apiResponse: APIResponse
+    public apiAction: EntitiesPipelineAction,
+    public apiResponse: APIResponse,
+    public validateAction: ValidateEntitiesStart,
+    public validationResult: ValidationResult
   ) {
 
   }

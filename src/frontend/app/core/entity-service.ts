@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { filter, first, map, share, shareReplay, tap, withLatestFrom, startWith, pairwise } from 'rxjs/operators';
+import { filter, first, map, share, shareReplay, tap, withLatestFrom, startWith, pairwise, distinctUntilChanged } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
@@ -52,27 +52,25 @@ export class EntityService<T = any> {
     this.isFetchingEntity$ = entityMonitor.isFetchingEntity$;
     this.entityObs$ = this.getEntityObservable(
       entityMonitor,
-      this.actionDispatch
+      this.actionDispatch,
     ).pipe(
+      shareReplay(1),
       startWith({
         entity: null,
         entityRequestInfo: null
       }),
       pairwise(),
-      tap(([oldEntity, newEntity]) => {
+      tap(([prevResult, result]) => {
         if (!validateRelations) {
           return;
         }
-        const firstTime = !oldEntity.entity && !!newEntity.entity;
+        const firstTime = !prevResult.entity && !!result.entity;
         // const changed = firstTime
         //   || (this.isEntityChanging(oldEntity.entityRequestInfo) && !this.isEntityChanging(newEntity.entityRequestInfo));
-        // console.log(haveOldEntity);
-        // console.log(haveNewEntity);
-        if (firstTime) {
-          console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+        if (firstTime && !this.isEntityChanging(result.entityRequestInfo)) {
           store.dispatch(new ValidateEntitiesStart(
             action as ICFAction, // TODO: RC needs options and actions.. but in theory just anything with entity
-            [newEntity.entity.metadata.guid], // TODO: RC
+            [result.entity.metadata.guid], // TODO: RC
             false
           ));
         }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, filter } from 'rxjs/operators';
 
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -29,7 +29,7 @@ import {
   spaceSchemaKey,
   organisationSchemaKey,
 } from '../../store/helpers/entity-factory';
-import { ActionState } from '../../store/reducers/api-request-reducer/types';
+import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
@@ -173,6 +173,7 @@ export class ApplicationService {
       .do(app => {
         this.appSpace$ = this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
         this.appOrg$ = this.appSpace$.pipe(
+          filter(space => !!space),
           map(space => space.entity.organization_guid),
           mergeMap(orgGuid => {
             return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
@@ -252,10 +253,14 @@ export class ApplicationService {
 
     this.isUpdatingApp$ =
       this.app$.map(a => {
+        console.log('sasdsadasdsafdsfdsfsdgdsfgssdffdg', a.entityRequestInfo.updating[rootUpdatingKey]);
+        const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || {
+          busy: false
+        };
         const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || {
           busy: false
         };
-        return updatingSection.busy || false;
+        return updatingRoot.busy || updatingSection.busy || false;
       });
 
     this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).shareReplay(1);

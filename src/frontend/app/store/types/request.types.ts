@@ -43,6 +43,10 @@ export interface IRequestAction extends RequestAction {
   removeEntityOnDelete?: boolean;
 }
 
+export interface IUpdateRequestAction {
+  apiAction: IRequestAction | PaginatedAction;
+}
+
 export interface IStartRequestAction {
   apiAction: IRequestAction | PaginatedAction;
   requestType: ApiRequestTypes;
@@ -74,6 +78,17 @@ export abstract class RequestSuccessAction implements Action {
 }
 export abstract class RequestFailedAction implements Action {
   type = RequestTypes.FAILED;
+}
+export abstract class RequestUpdateAction implements Action {
+  type = RequestTypes.UPDATE;
+}
+
+export class UpdateCfAction extends RequestUpdateAction implements IUpdateRequestAction {
+  constructor(
+    public apiAction: ICFAction | PaginatedAction,
+  ) {
+    super();
+  }
 }
 
 export interface ICFAction extends IRequestAction {

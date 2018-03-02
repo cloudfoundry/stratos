@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { take } from 'rxjs/operators';
+import { take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { EntityService } from '../../../../core/entity-service';
@@ -13,6 +13,7 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
 import { APIResource } from '../../../../store/types/api.types';
+import { interval } from 'rxjs/observable/interval';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialog(
@@ -130,6 +131,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         this.store.dispatch(new RouterNav({ path: ['applications'] }));
       }
     });
+
+    this.applicationService.isUpdatingApp$.do(a => {
+      // console.log('sdsdfsd!!!!!!sfdsdsg!!!!!!!', a);
+    }).subscribe();
 
     this.isFetching$ = this.applicationService.isFetchingApp$;
 

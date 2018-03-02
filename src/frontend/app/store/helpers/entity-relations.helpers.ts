@@ -1,18 +1,21 @@
+import { NormalizedResponse } from '../types/api.types';
+import { selectRequestInfo } from '../selectors/api.selectors';
 import { Action, Store } from '@ngrx/store';
-import { denormalize, Schema, schema } from 'normalizr';
+import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { skipWhile, takeWhile, zip, tap, pairwise, map, skip } from 'rxjs/operators';
+import { interval } from 'rxjs/observable/interval';
+import { map, pairwise, skipWhile, tap, first } from 'rxjs/operators';
 
+import { environment } from '../../../environments/environment';
 import { pathGet } from '../../core/utils.service';
-import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { SetInitialParams } from '../actions/pagination.actions';
-import { FetchRelationAction } from '../actions/relation.actions';
+import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { AppState } from '../app-state';
+import { ActionState, RequestInfoState } from '../reducers/api-request-reducer/types';
+import { selectPaginationState } from '../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { pick } from './reducer.helper';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { ActionState } from '../reducers/api-request-reducer/types';
 
 export function generateEntityRelationKey(parentKey: string, childKey) {
   return `${parentKey}-${childKey}`;
@@ -26,7 +29,7 @@ export function entityRelationCreatePaginationKey(schemaKey: string, guid: strin
  * @export
  * @interface EntityInlineChildAction
  */
-export interface EntityInlineChildAction extends PaginatedAction {
+export interface EntityInlineChildAction {
   parentGuid: string;
 }
 
@@ -56,10 +59,14 @@ export interface EntityInlineParentAction extends IRequestAction {
  */
 export interface ValidateEntityResult {
   action: Action;
-  paginationState$?: Observable<PaginationEntityState>;
+  fetchingState$?: Observable<{
+    fetching: boolean
+  }>;
 }
 
-function handleRelation({
+
+function handleRelation(
+  cfGuid,
   store,
   allEntities,
   entities,
@@ -68,11 +75,11 @@ function handleRelation({
   childEntityParentParam,
   childEntitySchemaKey,
   childEntitySchema,
-  childEntitiesUrl,
+  childEntitiesUrl: string,
   includeRelations,
   populateExisting,
   populateMissing
-}): ValidateEntityResult[] {
+): ValidateEntityResult[] {
   let results = [];
   // Step 2) Determine what actions, if any, need to be raised given the state of the relationship and children
   // No relevant relation, skip
@@ -81,37 +88,67 @@ function handleRelation({
   }
   const childEntitySchemaSafe = extractEntitySchema(childEntitySchema);
 
-  function createParamAction() {
-    return new FetchRelationAction(
-      parentEntity.entity.cfGuid,
+
+  const arraySchema = entities['length'] > 0;
+
+  function createAction() {
+    return arraySchema ? new FetchRelationPaginatedAction(
+      cfGuid,
       parentEntity.metadata.guid,
       parentEntitySchemaKey,
       childEntitiesUrl,
       childEntitySchema,
       childEntitySchemaKey, // TODO: RC routesInSpaceKey??
       childEntityParentParam,
+      includeRelations,
       entityRelationCreatePaginationKey(parentEntitySchemaKey, parentEntity.metadata.guid),
+      populateMissing
+    ) : new FetchRelationSingleAction(
+      cfGuid,
+      parentEntity.metadata.guid,
+      parentEntitySchemaKey,
+      childEntitiesUrl,
+      childEntitySchema,
+      childEntitySchemaKey, // TODO: RC routesInSpaceKey??
+      childEntityParentParam,
       includeRelations,
       populateMissing
     );
   }
 
   // Have we found some entities that need to go into the pagination store OR are some entities missing that are required?
-  if (entities && populateExisting) {
-    if (!allEntities) {
+  if (entities) {
+    if (!allEntities || !arraySchema || !populateExisting) {
+      // Only care about paginated
       return results;
     }
-    const paramAction = createParamAction();
+    // populate missing pagination
+
+    const paramAction = createAction();
     // We've got the value already, ensure we create a pagination section for them
-    const guids = entities.map(entity => entity.metadata.guid);
-    const normalizedEntities = pick(allEntities[childEntitySchemaKey], guids as [string]);
-    const paginationSuccess = new WrapperRequestActionSuccess(
-      {
+    let response: NormalizedResponse;
+    if (arraySchema) {
+      const guids = entities.map(entity => entity.metadata.guid);
+      response = {
         entities: {
-          [childEntitySchemaKey]: normalizedEntities
+          [childEntitySchemaKey]: pick(allEntities[childEntitySchemaKey], guids as [string])
         },
         result: guids
-      },
+      };
+    } else {
+      const guid = entities.metadata.guid;
+      response = {
+        entities: {
+          [childEntitySchemaKey]: {
+            [guid]: entities
+          }
+        },
+        result: guid
+      };
+    }
+
+    const paginationSuccess = new WrapperRequestActionSuccess(
+      response,
       paramAction,
       'fetch',
       entities.length,
@@ -121,16 +158,41 @@ function handleRelation({
       action: paginationSuccess,
     });
   } else if (!entities && populateMissing) {
-    const paramAction = createParamAction();
     // The values are missing and we want them, go fetch
-    results = [].concat(results, [{
-      action: new SetInitialParams(paramAction.entityKey, paramAction.paginationKey, paramAction.initialParams, true)
-    },
-    {
-      action: paramAction,
-      paginationState$: store.select(selectPaginationState(paramAction.entityKey, paramAction.paginationKey))
+
+    const paramAction = createAction();
+
+    if (arraySchema) {
+      const paramPaginationAction = paramAction as FetchRelationPaginatedAction;
+      results = [].concat(results, [{
+        action: new SetInitialParams(paramAction.entityKey, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
+      },
+      {
+        action: paramAction,
+        fetchingState$: store.select(selectPaginationState(paramAction.entityKey, paramPaginationAction.paginationKey)).pipe(
+          map((paginationState: PaginationEntityState) => {
+            const pageRequest: ActionState =
+              paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+            return {
+              fetching: pageRequest ? pageRequest.busy : true
+            };
+          })
+        )
+      }
+      ]);
+    } else {
+      const guid = childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1);
+      results.push({
+        action: paramAction,
+        fetchingState$: store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
+          map((requestInfo: RequestInfoState) => {
+            return {
+              fetching: requestInfo ? requestInfo.fetching : true
+            };
+          })
+        )
+      });
     }
-    ]);
   }
 
   return results;
@@ -187,6 +249,7 @@ function handleRelation({
  */
 function validationLoop(
   config: {
+    cfGuid: string,
     store: Store<AppState>,
     action: EntityInlineParentAction,
     allEntities: tempAppStore,
@@ -203,6 +266,7 @@ function validationLoop(
   let results = [];
 
   const {
+    cfGuid,
     store,
     action,
     allEntities,
@@ -214,7 +278,6 @@ function validationLoop(
     parentEntitySchemaParam,
     path
   } = config;
-
   // Step 1) Iterate through the entities schema structure discovering all the entities and whether they need to be checked for relations
   if (entities) {
     Object.keys(parentEntitySchemaParam).forEach(key => {
@@ -222,7 +285,6 @@ function validationLoop(
       const arraySchema = value['length'] > 0;
       const arraySafeValue = arraySchema ? value[0] : value;
 
-      // TODO: RC comment... if this is not an array we'll never be missing it... however we may want to check it's own relations in the else
       if (arraySafeValue instanceof schema.Entity) {
         const schema: schema.Entity = arraySafeValue;
         if (!validRelation(parentEntitySchemaKey, schema.key, action.includeRelations)) {
@@ -230,38 +292,37 @@ function validationLoop(
         }
         const newPath = path.length ? path + '.' + key : key;
         entities.forEach(entity => {
-          let childEntities = pathGet(newPath, entity);
+          const childEntities = pathGet(newPath, entity);
 
-          if (arraySchema) {
-            results = [].concat(results, handleRelation({
-              store,
-              allEntities,
-              entities: childEntities,
-              parentEntitySchemaKey,
-              parentEntity: entity,
-              childEntityParentParam: key,
-              childEntitySchemaKey: schema.key,
-              childEntitySchema: value,
-              childEntitiesUrl: pathGet(newPath + '_url', entity),
-              includeRelations: action.includeRelations,
-              populateExisting,
-              populateMissing
-            }));
-          } else {
-            childEntities = childEntities ? [childEntities] : null;
-          }
+          results = [].concat(results, handleRelation(
+            cfGuid,
+            store,
+            allEntities,
+            childEntities,
+            parentEntitySchemaKey,
+            entity,
+            key,
+            schema.key,
+            value,
+            pathGet(newPath + '_url', entity),
+            action.includeRelations,
+            populateExisting,
+            populateMissing
+          ));
 
           // The actual check is step two of validation loop, but only after we've tried to discover if this child has any children
           // it needs validating
-          results = [].concat(results,
-            validationLoop({
-              ...config,
-              parentEntity: entity,
-              entities: childEntities,
-              parentEntitySchemaKey: schema.key,
-              parentEntitySchemaParam: schema['schema'],
-              path: ''
-            }));
+          if (childEntities) {
+            results = [].concat(results,
+              validationLoop({
+                ...config,
+                parentEntity: entity,
+                entities: arraySchema ? childEntities : [childEntities],
+                parentEntitySchemaKey: schema.key,
+                parentEntitySchemaParam: schema['schema'],
+                path: ''
+              }));
+          }
         });
       } else if (arraySafeValue instanceof Object) {
         // This isn't a relation, continue checking it's children
@@ -306,6 +367,7 @@ export class ValidationResult {
  *   }>}
  */
 export function validateEntityRelations(
+  cfGuid: string,
   store: Store<AppState>,
   allEntities: tempAppStore,
   action: IRequestAction,
@@ -335,6 +397,7 @@ export function validateEntityRelations(
   const relationAction = action as EntityInlineParentAction;
 
   const results = validationLoop({
+    cfGuid,
     store,
     action: relationAction,
     allEntities,
@@ -348,19 +411,34 @@ export function validateEntityRelations(
   });
 
   const paginationFinished = new Array<Observable<any>>(Observable.of(true));
+
+  const dispatchInterval = environment.production ? 0 : 10000;
+
+  // setInterval((a) => {
+  //   console.log('1wank: ', a);
+  // }, 1000);
+  // interval(1000).pipe(
+  //   tap((a) => {
+  //     console.log('2wank: ', a);
+  //   }),
+  // ).subscribe();
+
   results.forEach(newActions => {
-    store.dispatch(newActions.action);
+
+    interval(dispatchInterval).pipe(
+      tap(() => {
+        console.log('Dispatching: ', newActions.action);
+        store.dispatch(newActions.action);
+      }),
+      first(),
+    ).subscribe();
+    // TODO: RC Test that the below actually blocks
     // TODO: RC Failures?
-    if (newActions.paginationState$) {
-      const obs = newActions.paginationState$.pipe(
-        map(paginationState => {
-          const pageRequest: ActionState =
-            paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-          return pageRequest ? pageRequest.busy : true;
-        }),
+    if (newActions.fetchingState$) {
+      const obs = newActions.fetchingState$.pipe(
         pairwise(),
         map(([oldFetching, newFetching]) => {
-          return oldFetching === true && newFetching === false;
+          return oldFetching.fetching === true && newFetching.fetching === false;
         }),
         skipWhile(completed => !completed),
       );
