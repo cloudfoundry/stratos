@@ -21,47 +21,26 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { BaseCFOrg } from '../../cf-page.types';
 
 const enum OrgStatus {
   ACTIVE = 'active',
   SUSPENDED = 'suspended'
 }
-function cfOrganisationServiceFactory(
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory,
-  cfEndpointService: CloudFoundryEndpointService
-) {
-  const { orgId } = activatedRoute.snapshot.params;
-  return new CloudFoundryOrganisationService(
-    orgId,
-    store,
-    entityServiceFactory,
-    cfUserService,
-    paginationMonitorFactory,
-    cfEndpointService
-  );
+function getOrgIdFromRouter(activatedRoute: ActivatedRoute) {
+  return {
+    guid: activatedRoute.snapshot.params.orgId
+  };
 }
+
 @Component({
   selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
   styleUrls: ['./edit-organization-step.component.scss'],
-  providers: [{
-    provide: CloudFoundryOrganisationService,
-    useFactory: cfOrganisationServiceFactory,
-    deps: [
-      Store,
-      ActivatedRoute,
-      EntityServiceFactory,
-      CfOrgSpaceDataService,
-      CfUserService,
-      PaginationMonitorFactory,
-      CloudFoundryEndpointService
-    ]
-  }]
+  providers: [
+    {provide: BaseCFOrg, useFactory: getOrgIdFromRouter, deps:[ActivatedRoute]},
+    CloudFoundryOrganisationService
+  ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 

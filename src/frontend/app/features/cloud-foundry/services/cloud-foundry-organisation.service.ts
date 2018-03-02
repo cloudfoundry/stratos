@@ -15,10 +15,11 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { IQuotaDefinition, IPrivateDomain, IServiceInstance, ISpace, IOrganization, IApp } from '../../../core/cf-api.types';
+import { BaseCFOrg } from '../cf-page.types';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
-
+  orgGuid: string;
   cfGuid: string;
   userOrgRole$: Observable<string>;
   quotaDefinition$: Observable<IQuotaDefinition>;
@@ -32,7 +33,7 @@ export class CloudFoundryOrganisationService {
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   organisationEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
-    public orgGuid: string,
+    public baseCfOrg: BaseCFOrg,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -40,12 +41,13 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
+    this.orgGuid = baseCfOrg.guid;
     this.cfGuid = cfEndpointService.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       OrganisationWithSpaceSchema,
-      orgGuid,
-      new GetOrganisation(orgGuid, this.cfGuid, 2)
+      this.orgGuid,
+      new GetOrganisation(this.orgGuid, this.cfGuid, 2)
     );
 
     this.initialiseObservables();
