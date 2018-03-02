@@ -148,3 +148,11 @@ export interface IDomain {
   router_group_guid?: any;
   router_group_type?: any;
 }
+
+export interface IBuildpack {
+  name: string;
+  position: number;
+  enabled: boolean;
+  locked: boolean;
+  filename: string;
+}

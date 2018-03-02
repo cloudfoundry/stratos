@@ -87,6 +87,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
 
 /* tslint:enable:max-line-length */
 
@@ -162,6 +163,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     TableCellRouteAppsAttachedComponent,
+    CfBuildpackCardComponent,
   ],
   exports: [
     FormsModule,
