@@ -23,7 +23,7 @@ function getOrgIdFromRouter(activatedRoute: ActivatedRoute) {
   templateUrl: './cloud-foundry-organization-base.component.html',
   styleUrls: ['./cloud-foundry-organization-base.component.scss'],
   providers: [
-    {provide: BaseCFOrg, useFactory: getOrgIdFromRouter, deps:[ActivatedRoute]},
+    { provide: BaseCFOrg, useFactory: getOrgIdFromRouter, deps: [ActivatedRoute] },
     CloudFoundryOrganisationService
   ]
 })
