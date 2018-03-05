@@ -101,6 +101,7 @@ const testInitialStoreState: AppState = {
   },
   pagination: {
     buildpack: {},
+    securityGroup: {},
     application: {
       applicationWall: {
         pageCount: 1,
@@ -529,7 +530,6 @@ const testInitialStoreState: AppState = {
     environmentVars: {},
     stats: {},
     summary: {},
-    securityGroup: {},
     user: {
       endpointUsersService: {
         pageCount: 1,
@@ -585,6 +585,7 @@ const testInitialStoreState: AppState = {
   },
   request: {
     buildpack: {},
+    securityGroup: {},
     service: {},
     serviceBinding: {},
     servicePlan: {},
@@ -3830,6 +3831,7 @@ const testInitialStoreState: AppState = {
   },
   requestData: {
     buildpack: {},
+    securityGroup: {},
     service: {},
     serviceBinding: {},
     servicePlan: {},
