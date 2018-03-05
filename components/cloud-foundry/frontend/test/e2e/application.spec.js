@@ -2,7 +2,6 @@
   'use strict';
 
   var _ = require('lodash');
-  var Q = require('q');
   var appSetupHelper = require('./po/app-setup.po');
   var galleryWall = require('./po/applications/applications.po');
   var addAppWizard = require('./po/applications/add-application-wizard.po');
@@ -334,13 +333,6 @@
             return newValue;
           });
 
-          newMem = Q.all([
-            newMem,
-            newInstance
-          ]).then(function (res) {
-            return res[0] * newInstance[1];
-          });
-
           // Input values should be correct
           expect(editApplicationModal.name().getValue()).toBe(newName);
           expect(editApplicationModal.memoryUsage().getValue()).toBe(newMem);
@@ -350,9 +342,16 @@
           editApplicationModal.save();
           browser.wait(until.not(until.presenceOf(editApplicationModal.getElement())), 5000);
 
+          var newMemAllInstances = protractor.promise.all([
+            newMem,
+            newInstance
+          ]).then(function (res) {
+            return res[0] * newInstance[1];
+          });
+
           // App values should be correct
           expect(application.getHeaderAppName().getText()).toBe(newName);
-          expect(getMemoryUtilisation()).toBe(newMem);
+          expect(getMemoryUtilisation()).toBe(newMemAllInstances);
           expect(getInstances()).toBe(newInstance);
         });
 
