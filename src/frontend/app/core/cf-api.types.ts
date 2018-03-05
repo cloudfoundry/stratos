@@ -204,3 +204,7 @@ export interface IUpdateOrganization {
   quota_definition_guid?: string;
   default_isolation_segment_guid?: string;
 }
+export interface IStack {
+  name: string;
+  description: string;
+}
