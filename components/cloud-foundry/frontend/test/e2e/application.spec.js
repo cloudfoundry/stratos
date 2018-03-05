@@ -2,6 +2,7 @@
   'use strict';
 
   var _ = require('lodash');
+  var Q = require('q');
   var appSetupHelper = require('./po/app-setup.po');
   var galleryWall = require('./po/applications/applications.po');
   var addAppWizard = require('./po/applications/add-application-wizard.po');
@@ -331,6 +332,14 @@
             editApplicationModal.instances().clear();
             editApplicationModal.instances().addText(newValue);
             return newValue;
+          });
+
+          newMem = Q.all([
+            newMem,
+            newInstance
+          ]).then(function (res) {
+            console.log('!!!!' + res);
+            return res[0] * newInstance[1];
           });
 
           // Input values should be correct
