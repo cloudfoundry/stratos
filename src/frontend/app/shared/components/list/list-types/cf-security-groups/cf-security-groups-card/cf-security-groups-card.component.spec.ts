@@ -40,7 +40,7 @@ describe('CfSecurityGroupsCardComponent', () => {
         guid: '',
         url: ''
       }
-    }
+    };
     fixture.detectChanges();
   });
 
