@@ -1,13 +1,11 @@
-import { ApplicationData } from './../../../features/applications/application.service';
-import { APIResource } from './../../types/api.types';
-import { IRequestEntityTypeState } from './../../app-state';
-import { IRequestArray } from '../api-request-reducer/types';
-import { generateDefaultState } from '../api-request-reducer/request-helpers';
-import { ISuccessRequestAction } from '../../types/request.types';
-import { deepMergeState, mergeEntity } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
-import { pathGet, pathSet } from '../../../core/utils.service';
+
+import { pathGet } from '../../../core/utils.service';
 import { FetchRelationAction } from '../../actions/relation.actions';
+import { deepMergeState } from '../../helpers/reducer.helper';
+import { ISuccessRequestAction } from '../../types/request.types';
+import { generateDefaultState } from '../api-request-reducer/request-helpers';
+import { IRequestArray } from '../api-request-reducer/types';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -62,7 +60,9 @@ function populateParentEntity(state, successAction) {
   if (!entities) {
     return;
   }
-  const { parentGuid, parentEntityKey, entityKeyInParent } = fetchRelationAction;
+  const parentGuid = fetchRelationAction.parentGuid;
+  const parentEntityKey = fetchRelationAction.parent.entityKey;
+  const entityParamName = fetchRelationAction.child.paramName;
 
   // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
 
@@ -71,7 +71,7 @@ function populateParentEntity(state, successAction) {
     ...newParentEntity,
     entity: {
       ...newParentEntity.entity,
-      [entityKeyInParent]: successAction.response.result
+      [entityParamName]: successAction.response.result
     }
   };
 

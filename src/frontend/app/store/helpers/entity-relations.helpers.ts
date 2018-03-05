@@ -1,27 +1,39 @@
-import { NormalizedResponse } from '../types/api.types';
-import { selectRequestInfo } from '../selectors/api.selectors';
 import { Action, Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { interval } from 'rxjs/observable/interval';
-import { map, pairwise, skipWhile, tap, first } from 'rxjs/operators';
+import { first, map, pairwise, skipWhile, tap } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { pathGet } from '../../core/utils.service';
 import { SetInitialParams } from '../actions/pagination.actions';
-import { FetchRelationAction, FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
+import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { AppState } from '../app-state';
 import { ActionState, RequestInfoState } from '../reducers/api-request-reducer/types';
+import { selectRequestInfo } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
+import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { pick } from './reducer.helper';
 
-export function generateEntityRelationKey(parentKey: string, childKey) {
-  return `${parentKey}-${childKey}`;
+export interface ListRelationsResult {
+  maxDepth: number;
+  relations: string[];
 }
 
-export function entityRelationCreatePaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
+export class EntityTreeRelation {
+  constructor(
+    public entityKey: string,
+    public entity: schema.Entity,
+    public isArray = false,
+    public paramName: string, // space/spaces
+    public path = '', // entity.space
+    public childRelations: EntityTreeRelation[]
+  ) {
+
+  }
+}
 
 /**
  * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
@@ -31,10 +43,6 @@ export function entityRelationCreatePaginationKey(schemaKey: string, guid: strin
  */
 export interface EntityInlineChildAction {
   parentGuid: string;
-}
-
-export function isEntityInlineParentAction(action: Action) {
-  return action && !!action['includeRelations'];
 }
 
 /**
@@ -64,105 +72,133 @@ export interface ValidateEntityResult {
   }>;
 }
 
+export class tempAppStore { // TODO: RC
+  [entityKey: string]: {
+    [guid: string]: any;
+  }
+}
+
+export class ValidationResult {
+  started: boolean;
+  completed$: Observable<any[]>;
+}
+
+class EntityTree {
+  rootRelation: EntityTreeRelation;
+  requiredParamNames: string[];
+  maxDepth?: number;
+}
+
+const entityTreeCache: {
+  [entityKey: string]: EntityTree
+} = {};
+
+export function generateEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
+
+export function entityRelationCreatePaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
+
+export function isEntityInlineParentAction(action: Action) {
+  return action && !!action['includeRelations'];
+}
+
+function createEntityUrl(relation: EntityTreeRelation) {
+  return relation.path + '_url';
+}
 
 function handleRelation(
-  cfGuid,
-  store,
-  allEntities,
-  entities,
-  parentEntitySchemaKey,
-  parentEntity,
-  childEntityParentParam,
-  childEntitySchemaKey,
-  childEntitySchema,
-  childEntitiesUrl: string,
-  includeRelations,
-  populateExisting,
-  populateMissing
+  config: {
+    cfGuid: string,
+    store: any,
+    allEntities: tempAppStore,
+    parentRelation: EntityTreeRelation,
+    parentEntity: APIResource,
+    childRelation: EntityTreeRelation,
+    childEntities: object | any[],
+    childEntitiesUrl: string,
+    includeRelations: string[],
+    populateExisting: boolean,
+    populateMissing: boolean
+  }
 ): ValidateEntityResult[] {
+  const {
+    cfGuid,
+    store,
+    allEntities,
+    parentRelation,
+    parentEntity,
+    childRelation,
+    childEntities,
+    childEntitiesUrl,
+    includeRelations,
+    populateExisting,
+    populateMissing
+  } = config;
+
+  if (!cfGuid) {
+    throw Error(`No CF Guid provided when validating
+     ${parentRelation.entityKey} ${parentEntity.metadata.guid}'s ${childRelation.entityKey}`);
+  }
+
   let results = [];
   // Step 2) Determine what actions, if any, need to be raised given the state of the relationship and children
   // No relevant relation, skip
-  if (!childEntitySchema) {
-    return results;
-  }
-  const childEntitySchemaSafe = extractEntitySchema(childEntitySchema);
-
-
-  const arraySchema = entities['length'] > 0;
 
   function createAction() {
-    return arraySchema ? new FetchRelationPaginatedAction(
+    return childRelation.isArray ? new FetchRelationPaginatedAction(
       cfGuid,
       parentEntity.metadata.guid,
-      parentEntitySchemaKey,
-      childEntitiesUrl,
-      childEntitySchema,
-      childEntitySchemaKey, // TODO: RC routesInSpaceKey??
-      childEntityParentParam,
+      parentRelation,
+      childRelation,
       includeRelations,
-      entityRelationCreatePaginationKey(parentEntitySchemaKey, parentEntity.metadata.guid),
-      populateMissing
+      entityRelationCreatePaginationKey(parentRelation.entityKey, parentEntity.metadata.guid),
+      populateMissing,
+      childEntitiesUrl
     ) : new FetchRelationSingleAction(
       cfGuid,
       parentEntity.metadata.guid,
-      parentEntitySchemaKey,
-      childEntitiesUrl,
-      childEntitySchema,
-      childEntitySchemaKey, // TODO: RC routesInSpaceKey??
-      childEntityParentParam,
+      parentRelation,
+      childRelation,
       includeRelations,
-      populateMissing
+      populateMissing,
+      childEntitiesUrl
     );
   }
 
   // Have we found some entities that need to go into the pagination store OR are some entities missing that are required?
-  if (entities) {
-    if (!allEntities || !arraySchema || !populateExisting) {
+  if (childEntities) {
+    if (!allEntities || !childRelation.isArray || !populateExisting) {
       // Only care about paginated (array schema)
       return results;
     }
+    const childEntitiesAsArray = childEntities as Array<any>;
 
     const paramAction = createAction();
     // We've got the value already, ensure we create a pagination section for them
     let response: NormalizedResponse;
-    if (arraySchema) {
-      const guids = entities.map(entity => entity.metadata.guid);
-      response = {
-        entities: {
-          [childEntitySchemaKey]: pick(allEntities[childEntitySchemaKey], guids as [string])
-        },
-        result: guids
-      };
-    } else {
-      // TODO: RC REMOVE. Tidy up... only need to dispatch success action if pagination
-      const guid = entities.metadata.guid;
-      response = {
-        entities: {
-          [childEntitySchemaKey]: {
-            [guid]: entities
-          }
-        },
-        result: guid
-      };
-    }
+    const guids = childEntitiesAsArray.map(entity => entity.metadata.guid);
+    response = {
+      entities: {
+        [childRelation.entityKey]: pick(allEntities[childRelation.entityKey], guids as [string])
+      },
+      result: guids
+    };
 
     const paginationSuccess = new WrapperRequestActionSuccess(
       response,
       paramAction,
       'fetch',
-      entities.length,
+      childEntitiesAsArray.length,
       1
     );
     results.push({
       action: paginationSuccess,
     });
-  } else if (!entities && populateMissing) {
+  } else if (!childEntities && populateMissing) {
     // The values are missing and we want them, go fetch
 
     const paramAction = createAction();
 
-    if (arraySchema) {
+    if (childRelation.isArray) {
       const paramPaginationAction = paramAction as FetchRelationPaginatedAction;
       results = [].concat(results, [{
         action: new SetInitialParams(paramAction.entityKey, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
@@ -198,68 +234,16 @@ function handleRelation(
   return results;
 }
 
-/**
- * Inner loop for validateEntityRelations. Does two parts
- * 1) Iterates through the schema of an entity alongside an entity. For example a schema could be
- * ```
- * {
- *  entity: {
- *    spaces: SpacesSchema  {
- *                            entity: {
- *                              routes: RoutesSchema
- *                            }
- *                          }
- *  }
- * }
- * ```
- * whilst a entity structure could be
- * ```
- * {
- *  entity: {
- *    spaces: [
- *      xyz: {
- *        routes: [
- *        ]
- *      }
- *    ]
- *  }
- * }
- * ```
- * We'd recurse through both structures at the same time, ensuring all entities (parent, space, route) checking the state of each defined
- * relationship (parent-space, space-route)
- *
- * 2) Check for missing or existing inline relations
- * At each state of the recursion ensure all entities at that level (spaces, routes) satisfy any configured relationship (parent-space,
- * space-route).
- *
- * @param {{
- *     store: Store<AppState>,
- *     action: EntityInlineParentAction,
- *     allEntities: {},
- *     populateExisting: boolean,
- *     populateMissing: boolean,
- *     parentEntity: any,
- *     entities: any[],
- *     parentEntitySchemaKey: string,
- *     parentEntitySchemaParam,
- *     childRelation: EntityRelation,
- *     path: string,
- *   }} config
- * @returns {ValidateEntityResult[]}
- */
 function validationLoop(
   config: {
     cfGuid: string,
     store: Store<AppState>,
-    action: EntityInlineParentAction,
+    includeRelations: string[],
     allEntities: tempAppStore,
     populateExisting: boolean,
     populateMissing: boolean,
-    parentEntity: any,
     entities: any[],
-    parentEntitySchemaKey: string,
-    parentEntitySchemaParam: any,
-    path: string,
+    parentRelation: EntityTreeRelation,
   }
 )
   : ValidateEntityResult[] {
@@ -268,86 +252,48 @@ function validationLoop(
   const {
     cfGuid,
     store,
-    action,
+    includeRelations,
     allEntities,
     populateExisting,
     populateMissing,
-    parentEntity,
     entities,
-    parentEntitySchemaKey,
-    parentEntitySchemaParam,
-    path
+    parentRelation,
   } = config;
+
   // Step 1) Iterate through the entities schema structure discovering all the entities and whether they need to be checked for relations
   if (entities) {
-    Object.keys(parentEntitySchemaParam).forEach(key => {
-      const value = parentEntitySchemaParam[key];
-      const arraySchema = value['length'] > 0;
-      const arraySafeValue = arraySchema ? value[0] : value;
-
-      if (arraySafeValue instanceof schema.Entity) {
-        const schema: schema.Entity = arraySafeValue;
-        if (!validRelation(parentEntitySchemaKey, schema.key, action.includeRelations)) {
-          return;
+    parentRelation.childRelations.forEach(childRelation => {
+      entities.forEach(entity => {
+        const childEntities = pathGet(childRelation.path, entity);
+        results = [].concat(results, handleRelation({
+          cfGuid: cfGuid || entity.entity.cfGuid,
+          store,
+          allEntities,
+          parentRelation,
+          parentEntity: entity,
+          childRelation,
+          childEntities: childEntities,
+          childEntitiesUrl: pathGet(createEntityUrl(childRelation), entity),
+          includeRelations,
+          populateExisting,
+          populateMissing,
         }
-        const newPath = path.length ? path + '.' + key : key;
-        entities.forEach(entity => {
-          const childEntities = pathGet(newPath, entity);
-
-          results = [].concat(results, handleRelation(
-            cfGuid,
-            store,
-            allEntities,
-            childEntities,
-            parentEntitySchemaKey,
-            entity,
-            key,
-            schema.key,
-            value,
-            pathGet(newPath + '_url', entity),
-            action.includeRelations,
-            populateExisting,
-            populateMissing
-          ));
-
-          // The actual check is step two of validation loop, but only after we've tried to discover if this child has any children
-          // it needs validating
-          if (childEntities) {
-            results = [].concat(results,
-              validationLoop({
-                ...config,
-                parentEntity: entity,
-                entities: arraySchema ? childEntities : [childEntities],
-                parentEntitySchemaKey: schema.key,
-                parentEntitySchemaParam: schema['schema'],
-                path: ''
-              }));
-          }
-        });
-      } else if (arraySafeValue instanceof Object) {
-        // This isn't a relation, continue checking it's children
-        results = [].concat(results, validationLoop({
-          ...config,
-          parentEntitySchemaParam: arraySafeValue,
-          path: path.length ? path + '.' + key : key
-        }));
-      }
+        ));
+        if (childEntities && childRelation.childRelations.length) {
+          results = [].concat(results,
+            validationLoop({
+              ...config,
+              entities: childRelation.isArray ? childEntities : [childEntities],
+              parentRelation: childRelation
+            }));
+        }
+      });
     });
   }
 
   return results;
 }
 
-export class tempAppStore { // TODO: RC
-  [entityKey: string]: {
-    [guid: string]: any;
-  }
-}
-
-export class ValidationResult {
-  started: boolean;
-  completed$: Observable<any[]>;
-}
 /**
  * Ensure all required inline parameters specified by the entity associated with the request exist.
  * If the inline parameter/s are..
@@ -379,16 +325,6 @@ export function validateEntityRelations(
     started: false,
     completed$: Observable.of(null)
   };
-  // Does the entity associated with the action have inline params that need to be validated?
-  const parentEntitySchema = extractActionEntitySchema(action);
-  if (!parentEntitySchema) {
-    return emptyResponse;
-  }
-
-  // Do we have entities in the response to validate?
-  if (!parentEntities || !parentEntities.length) {
-    return emptyResponse;
-  }
 
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
     parentEntities = denormalize(parentEntities, action.entity, allEntities);
@@ -396,18 +332,17 @@ export function validateEntityRelations(
 
   const relationAction = action as EntityInlineParentAction;
 
+  const entityTree = fetchEntityTree(relationAction);
+
   const results = validationLoop({
     cfGuid,
     store,
-    action: relationAction,
+    includeRelations: relationAction.includeRelations,
     allEntities,
     populateExisting,
     populateMissing: populateMissing || relationAction.populateMissing,
-    parentEntity: null,
     entities: parentEntities,
-    parentEntitySchemaKey: parentEntitySchema['key'],
-    parentEntitySchemaParam: parentEntitySchema['schema'],
-    path: ''
+    parentRelation: entityTree.rootRelation,
   });
 
   const paginationFinished = new Array<Observable<any>>(Observable.of(true));
@@ -452,60 +387,88 @@ export function validateEntityRelations(
   };
 }
 
-function extractActionEntitySchema(action: IRequestAction): {
-  key: string;
-} {
-  return extractEntitySchema(action.entity);
-}
 
-function extractEntitySchema(entity) {
-  return entity['length'] > 0 ? entity[0] : entity;
-}
-
-export interface ListRelationsResult {
-  maxDepth: number;
-  relations: string[];
-}
 export function listRelations(action: EntityInlineParentAction): ListRelationsResult {
-  const res = {
-    maxDepth: 0,
-    relations: []
+  const tree = fetchEntityTree(action);
+  return {
+    maxDepth: tree.maxDepth,
+    relations: tree.requiredParamNames
   };
-  const parentEntitySchema = extractActionEntitySchema(action);
-  if (!parentEntitySchema) {
-    return res;
-  }
-
-  loop(res, action.includeRelations, parentEntitySchema.key, parentEntitySchema['schema']);
-  return res;
-}
-
-function loop(res: ListRelationsResult, includeRelations: string[], parentEntitySchemaKey: string, parentEntitySchemaObj: string) {
-  let haveDelved = false;
-  Object.keys(parentEntitySchemaObj).forEach(key => {
-    let value = parentEntitySchemaObj[key];
-    value = value['length'] > 0 ? value[0] : value;
-    const entityKey = value.key;
-    const entitySchema = value['schema'];
-    if (res.relations.indexOf(key) >= 0) {
-      return;
-    }
-
-    if (value instanceof schema.Entity) {
-      if (validRelation(parentEntitySchemaKey, entityKey, includeRelations)) {
-        res.relations.push(key);
-        haveDelved = true;
-      }
-      loop(res, includeRelations, entityKey, entitySchema);
-    } else if (value instanceof Object) {
-      loop(res, includeRelations, parentEntitySchemaKey, value);
-    }
-  });
-  if (haveDelved) {
-    res.maxDepth++;
-  }
 }
 
 function validRelation(parentSchemaKey: string, childSchemaKey: string, includeRelations: string[] = []): boolean {
   return includeRelations.indexOf(`${parentSchemaKey}-${childSchemaKey}`) >= 0;
 }
+
+export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
+  let entity = action.entity;
+  const isArray = entity['length'] > 0;
+  entity = isArray ? entity[0] : entity;
+  const entityKey = entity['key'];
+  let entityTree = entityTreeCache[entityKey];
+  if (!entityTree) {
+    const rootEntityRelation = new EntityTreeRelation(
+      entityKey,
+      entity as schema.Entity,
+      isArray,
+      null,
+      '',
+      new Array<EntityTreeRelation>()
+    );
+    entityTree = {
+      rootRelation: rootEntityRelation,
+      requiredParamNames: new Array<string>(),
+    };
+    createEntityTree(entityTree, rootEntityRelation);
+    entityTreeCache[entityKey] = entityTree;
+  }
+  // Calc max depth and exclude not needed
+  entityTree = JSON.parse(JSON.stringify(entityTree));
+  parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
+  return entityTree;
+}
+
+export function createEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
+  const rootEntitySchema = schemaObj || entityRelation.entity['schema'];
+  Object.keys(rootEntitySchema).forEach(key => {
+    let value = rootEntitySchema[key];
+    const isArray = value['length'] > 0;
+    value = isArray ? value[0] : value;
+
+    const newPath = path ? path + '.' + key : key;
+    if (value instanceof schema.Entity) {
+      const newEntityRelation = new EntityTreeRelation(
+        value.key,
+        value,
+        isArray,
+        key,
+        newPath,
+        new Array<EntityTreeRelation>()
+      );
+      entityRelation.childRelations.push(newEntityRelation);
+      createEntityTree(tree, newEntityRelation, null, '');
+    } else if (value instanceof Object) {
+      createEntityTree(tree, entityRelation, value, newPath);
+    }
+  });
+}
+
+export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = []) {
+  const newChildRelations = new Array<EntityTreeRelation>();
+  entityRelation.childRelations.forEach((relation, index, array) => {
+    const parentChildKey = generateEntityRelationKey(entityRelation.entityKey, relation.entityKey);
+    if (includeRelations.indexOf(parentChildKey) >= 0) {
+      newChildRelations.push(relation);
+      if (tree.requiredParamNames.indexOf(relation.paramName) < 0) {
+        tree.requiredParamNames.push(relation.paramName);
+      }
+      parseEntityTree(tree, relation, includeRelations);
+    }
+  });
+  entityRelation.childRelations = newChildRelations;
+  if (entityRelation.childRelations.length) {
+    tree.maxDepth = tree.maxDepth || 0;
+    tree.maxDepth++;
+  }
+}
+

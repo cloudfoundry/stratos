@@ -1,25 +1,19 @@
-import { EntityInfo, APIResource } from '../../../../store/types/api.types';
-import { selectRequestInfo, selectUpdateInfo, selectEntity } from '../../../../store/selectors/api.selectors';
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import {
-  AssociateRouteWithAppApplication,
-  CreateNewApplication,
-  GetApplication,
-} from '../../../../store/actions/application.actions';
+import { AssociateRouteWithAppApplication, CreateNewApplication } from '../../../../store/actions/application.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
-import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
-import { RouterNav } from '../../../../store/actions/router.actions';
+import { applicationSchemaKey, organisationSchemaKey, routeSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { applicationSchemaKey, routeSchemaKey, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
-import { generateEntityRelationKey } from '../../../../store/helpers/entity-relations.helpers';
+import { selectEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
 
 @Component({

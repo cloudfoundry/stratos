@@ -1,14 +1,14 @@
 import { Store } from '@ngrx/store';
+import { schema } from 'normalizr';
 
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
+import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { generateEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
-import { schema } from 'normalizr';
-import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 
 
@@ -21,7 +21,9 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     listConfig?: IListConfig<APIResource>
   ) {
     const { paginationKey } = CfAppsDataSource;
-    const action = new GetAllApplications(paginationKey);
+    const action = new GetAllApplications(paginationKey, [
+      generateEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+    ]);
 
     super({
       store,

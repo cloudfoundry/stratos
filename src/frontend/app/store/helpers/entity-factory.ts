@@ -1,10 +1,14 @@
-import { schema } from 'normalizr';
+import { Schema, schema } from 'normalizr';
 
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 
 export const applicationSchemaKey = 'application';
+// export const applicationWithoutSpaceRelationKey = 'applicationWithoutSpace';
+// export const applicationWithoutSpaceAppsRelationKey = 'applicationWithoutSpaceApps';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
+export const spaceWithOrgRelationKey = 'spaceWithOrg';
+// export const spaceWithoutAppsRelationKey = 'spaceWithoutApps';
 export const routeSchemaKey = 'route';
 export const domainSchemaKey = 'domain';
 export const organisationSchemaKey = 'organization';
@@ -25,34 +29,43 @@ export const routesInSpaceKey = 'routesInSpace';
 export const organisationWithSpaceKey = 'organization';
 export const spacesKey = 'spaces';
 
+export class EntitySchema extends schema.Entity {
+  constructor(entityKey: string, definition?: Schema, options?: schema.EntityOptions, public relationKey?: string, ) {
+    super(entityKey, definition, options);
+    if (!relationKey) {
+      this.relationKey = entityKey;
+    }
+  }
+}
 
-export const AppSummarySchema = new schema.Entity(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
-export const AppStatSchema = new schema.Entity(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+
+export const AppSummarySchema = new EntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+export const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 // export const AppStatsSchema = new schema.Array(AppStatSchema); // TODO: RC
-export const AppEnvVarSchema = new schema.Entity(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+export const AppEnvVarSchema = new EntitySchema(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 // export const AppEnvVarsSchema = new schema.Array(AppEnvVarSchema); // TODO: RC
 
-export const GithubBranchSchema = new schema.Entity(githubBranchesSchemaKey, {}, { idAttribute: 'entityId' });
+export const GithubBranchSchema = new EntitySchema(githubBranchesSchemaKey, {}, { idAttribute: 'entityId' });
 // export const BranchesSchema = new schema.Array(GithubBranchSchema); // TODO: RC
 
-export const GithubRepoSchema = new schema.Entity(githubRepoSchemaKey);
-export const GithubCommitSchema = new schema.Entity(githubCommitSchemaKey);
-// export const GithubBranchSchema = new schema.Entity(GITHUB_BRANCHES_ENTITY_KEY); // TODO: RC
+export const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
+export const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey);
+// export const GithubBranchSchema = new EntitySchema(GITHUB_BRANCHES_ENTITY_KEY); // TODO: RC
 // export const GithubBranchesSchema = new schema.Array(GithubBranchSchema); // TODO: RC
 
-export const EndpointSchema = new schema.Entity(endpointSchemaKey, {}, { idAttribute: 'guid' });
+export const EndpointSchema = new EntitySchema(endpointSchemaKey, {}, { idAttribute: 'guid' });
 
-export const CFInfoSchema = new schema.Entity(cfInfoSchemaKey);
+export const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);
 
-export const EventSchema = new schema.Entity(appEventSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+export const EventSchema = new EntitySchema(appEventSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 
-export const UserSchema = new schema.Entity(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+export const UserSchema = new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 
-export const StackSchema = new schema.Entity(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+export const StackSchema = new EntitySchema(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 
-export const DomainSchema = new schema.Entity(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+export const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 
-export const RouteSchema = new schema.Entity(routeSchemaKey, {
+export const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
     domain: DomainSchema
   }
@@ -60,9 +73,18 @@ export const RouteSchema = new schema.Entity(routeSchemaKey, {
     idAttribute: getAPIResourceGuid
   });
 
-export const QuotaDefinitionSchema = new schema.Entity(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+export const QuotaDefinitionSchema = new EntitySchema(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 
-export const ApplicationWithoutSpaceEntitySchema = new schema.Entity(
+// export const SpaceWithoutAppsSchema = new EntitySchema(spaceSchemaKey, {
+//   entity: {
+//     routes: [RouteSchema]
+//   }
+// }, {
+//     idAttribute: getAPIResourceGuid
+//   },
+//   );
+
+export const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
   applicationSchemaKey,
   {
     entity: {
@@ -72,10 +94,26 @@ export const ApplicationWithoutSpaceEntitySchema = new schema.Entity(
   },
   {
     idAttribute: getAPIResourceGuid
-  }
+  },
+
 );
 
-export const SpaceSchema = new schema.Entity(spaceSchemaKey, {
+// export const ApplicationWithoutSpaceAppsEntitySchema = new EntitySchema(
+//   applicationSchemaKey,
+//   {
+//     entity: {
+//       space: SpaceWithoutAppsSchema,
+//       stack: StackSchema,
+//       routes: [RouteSchema]
+//     }
+//   },
+//   {
+//     idAttribute: getAPIResourceGuid
+//   },
+//   applicationWithoutSpaceAppsRelationKey
+// );
+
+export const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
     routes: [RouteSchema]
@@ -84,7 +122,9 @@ export const SpaceSchema = new schema.Entity(spaceSchemaKey, {
     idAttribute: getAPIResourceGuid
   });
 
-export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {
+
+
+export const OrganisationSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
     spaces: [SpaceSchema],
     quota_definition: QuotaDefinitionSchema
@@ -93,17 +133,18 @@ export const OrganisationSchema = new schema.Entity(organisationSchemaKey, {
     idAttribute: getAPIResourceGuid
   });
 
-export const SpaceWithOrgsEntitySchema = new schema.Entity(spaceSchemaKey, {
+export const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
-    apps: ApplicationWithoutSpaceEntitySchema,
+    apps: [ApplicationWithoutSpaceEntitySchema],
     organization: OrganisationSchema,
     domains: [DomainSchema]
   }
 }, {
     idAttribute: getAPIResourceGuid
-  });
+  },
+  spaceWithOrgRelationKey); // TODO: RC everywhere
 
-export const OrganisationWithSpaceSchema = new schema.Entity(organisationSchemaKey, {
+export const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
     quota_definition: QuotaDefinitionSchema,
     spaces: SpaceSchema
@@ -112,7 +153,7 @@ export const OrganisationWithSpaceSchema = new schema.Entity(organisationSchemaK
     idAttribute: getAPIResourceGuid
   });
 
-export const ApplicationEntitySchema = new schema.Entity(
+export const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,
   {
     entity: {
@@ -131,10 +172,17 @@ export function entityFactory(key: string): schema.Entity {
   switch (key) {
     case applicationSchemaKey:
       return ApplicationEntitySchema;
+    // case applicationWithoutSpaceRelationKey:
+    //   return ApplicationWithoutSpaceEntitySchema;
+
+    // applicationWithoutSpaceAppsRelationKey
+
     case stackSchemaKey:
       return StackSchema;
     case spaceWithOrgKey:
       return SpaceWithOrgsEntitySchema;
+    // case spaceWithoutAppsRelationKey:
+    //   return SpaceWithoutAppsSchema;
     case routeSchemaKey:
       return RouteSchema;
     case domainSchemaKey:
