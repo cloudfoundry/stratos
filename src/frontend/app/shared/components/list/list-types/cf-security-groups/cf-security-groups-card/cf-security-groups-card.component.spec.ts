@@ -25,6 +25,22 @@ describe('CfSecurityGroupsCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CfSecurityGroupsCardComponent);
     component = fixture.componentInstance;
+    component.row = {
+      entity: {
+        name: '',
+        rules: [],
+        running_default: false,
+        staging_default: false,
+        spaces_url: '',
+        staging_spaces_url: ''
+      },
+      metadata: {
+        created_at: '',
+        updated_at: '',
+        guid: '',
+        url: ''
+      }
+    }
     fixture.detectChanges();
   });
 
