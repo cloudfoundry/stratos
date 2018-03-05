@@ -1,6 +1,6 @@
 <app-meta-card class="buildpack-card">
   <app-meta-card-title class="buildpack-card__title">
-    <div class="buildpack-card__title-link" >{{ row.entity.name }}</div>
+    <div class="buildpack-card__title-link">{{ row.entity.name }}</div>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Position</app-meta-card-key>
@@ -8,16 +8,38 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Enabled</app-meta-card-key>
-    <app-meta-card-value>{{ row.entity.enabled }}</app-meta-card-value>
+    <app-meta-card-value *ngIf="isEnabled()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon">check_circle</mat-icon>
+        <div>Enabled</div>
+      </div>
+    </app-meta-card-value>
+    <app-meta-card-value *ngIf="!isEnabled()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon">block</mat-icon>
+        <div>Disabled</div>
+      </div>
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Locked</app-meta-card-key>
-    <app-meta-card-value>{{ row.entity.locked }}</app-meta-card-value>
+    <app-meta-card-value *ngIf="isLocked()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon">lock_outline</mat-icon>
+        <div>Locked</div>
+      </div>
+    </app-meta-card-value>
+    <app-meta-card-value *ngIf="!isLocked()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon">lock_open</mat-icon>
+        <div>Unlocked</div>
+      </div>
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Created</app-meta-card-key>
     <app-meta-card-value>{{ row.metadata.created_at }}</app-meta-card-value>
-      </app-meta-card-item>
+  </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Updated</app-meta-card-key>
     <app-meta-card-value>{{ row.metadata.updated_at }}</app-meta-card-value>

@@ -5,7 +5,7 @@ import { IBuildpack } from '../../../../../../core/cf-api.types';
 @Component({
   selector: 'app-cf-buildpack-card',
   templateUrl: './cf-buildpack-card.component.html',
-  styleUrls: ['./cf-buildpack-card.component.scss']
+  styleUrls: ['./cf-buildpack-card.component.theme.scss']
 })
 export class CfBuildpackCardComponent implements OnInit {
 
@@ -15,4 +15,7 @@ export class CfBuildpackCardComponent implements OnInit {
   ngOnInit() {
   }
 
+  isLocked = () => this.row.entity.locked;
+
+  isEnabled = () => this.row.entity.enabled;
 }
