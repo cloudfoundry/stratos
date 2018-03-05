@@ -346,7 +346,8 @@
             newMem,
             newInstance
           ]).then(function (res) {
-            return res[0] * newInstance[1];
+            var newMem = parseInt(res[0], 10) * parseInt(res[1], 10);
+            return newMem.toString();
           });
 
           // App values should be correct
