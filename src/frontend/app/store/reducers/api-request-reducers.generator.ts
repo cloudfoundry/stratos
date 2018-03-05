@@ -76,6 +76,7 @@ const entities = [
   ServicePlanSchema.key,
   ServiceSchema.key,
   ServiceBindingsSchema.key,
+  ServiceInstancesSchema.key,
   CF_INFO_ENTITY_KEY,
   GITHUB_REPO_ENTITY_KEY,
   GITHUB_BRANCHES_ENTITY_KEY,

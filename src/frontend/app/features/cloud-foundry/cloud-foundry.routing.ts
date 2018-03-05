@@ -65,10 +65,6 @@ const cloudFoundry: Routes = [{
     component: AddOrganisationComponent
   },
   {
-    path: 'organizations/:orgId/spaces/:spaceId/edit-space',
-    component: EditSpaceComponent
-  },
-  {
     path: 'organizations/:orgId/add-space',
     component: AddSpaceComponent
   },
