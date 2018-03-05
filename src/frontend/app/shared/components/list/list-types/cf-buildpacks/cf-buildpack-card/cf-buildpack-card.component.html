@@ -38,11 +38,11 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Created</app-meta-card-key>
-    <app-meta-card-value>{{ row.metadata.created_at }}</app-meta-card-value>
+    <app-meta-card-value>{{ row.metadata.created_at | date: 'medium' }}</app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Updated</app-meta-card-key>
-    <app-meta-card-value>{{ row.metadata.updated_at }}</app-meta-card-value>
+    <app-meta-card-value>{{ row.metadata.updated_at | date: 'medium' }}</app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>File Name</app-meta-card-key>
