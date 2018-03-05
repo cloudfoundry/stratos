@@ -9,7 +9,7 @@ import { IBuildpack } from '../../../../../../core/cf-api.types';
 })
 export class CfBuildpackCardComponent implements OnInit {
 
-  @Input('row') row: APIResource<IBuildpack>
+  @Input('row') row: APIResource<IBuildpack>;
   constructor() { }
 
   ngOnInit() {

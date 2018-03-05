@@ -10,10 +10,7 @@ import { ListView } from '../../../../../store/actions/list.actions';
 
 @Injectable()
 export class CfBuildpacksListConfigService implements IListConfig<APIResource> {
-  isLocal?: boolean;
   viewType = ListViewTypes.CARD_ONLY;
-  enableTextFilter = false;
-  tableFixedRowHeight?: boolean;
   dataSource: CfBuildpacksDataSource;
   pageSizeOptions = [9, 45, 90];
   cardComponent = CfBuildpackCardComponent;
