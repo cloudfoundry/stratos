@@ -338,7 +338,6 @@
             newMem,
             newInstance
           ]).then(function (res) {
-            console.log('!!!!' + res);
             return res[0] * newInstance[1];
           });
 
