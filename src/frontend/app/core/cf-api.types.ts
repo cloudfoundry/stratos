@@ -148,3 +148,8 @@ export interface IDomain {
   router_group_guid?: any;
   router_group_type?: any;
 }
+
+export interface IStack {
+  name: string;
+  description: string;
+}
