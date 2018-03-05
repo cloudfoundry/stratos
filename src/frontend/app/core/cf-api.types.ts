@@ -56,6 +56,11 @@ export interface ISecurityGroup {
   staging_spaces_url: string;
 }
 
+export enum IRuleType {
+  all = 'all',
+  tcp = 'tcp',
+  udp = 'udp'
+}
 export interface IRule {
   destination: string;
   protocol: string;

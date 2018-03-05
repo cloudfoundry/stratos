@@ -1,0 +1,13 @@
+.security-rule {
+  display: flex;
+  flex-direction: row;
+  border: 1px solid black;
+  margin-bottom: 2px;
+  &__type {
+    margin-right: 6px;
+    margin-left: 3px;
+  }
+  &__rule {
+    margin-right: 3px;
+  }
+}
