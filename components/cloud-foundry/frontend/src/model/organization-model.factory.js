@@ -344,78 +344,101 @@
         });
       }
 
-      function getUsedMem(spaces) {
-        if (spaces) {
-          if (spaces.length === 0) {
-            return $q.resolve(0);
-          }
-          if (spaces[0].entity.apps) { // check if apps were inlined in the spaces
-            var totalMem = 0;
-            _.forEach(spaces, function (space) {
-              var apps = space.entity.apps;
-              _.forEach(apps, function (app) {
-                // Only count running apps, like the CF API would do
-                if (app.entity.state === 'STARTED') {
-                  totalMem += parseInt(app.entity.memory, 10);
-                }
-              });
-            });
-            return $q.resolve(totalMem);
+      function countEntitiesInSpace(spaces, countFn) {
+        // Run through the list of spaces counting entities of specific types. In some cases these lists can be missing
+        // (inline depth missing from request that fetched space, more than 50 entities in list, etc). This function
+        // helps iterate through each space and returning early if an entities list is missing
+        if (!spaces || spaces.length === 0) {
+          return 0;
+        }
+
+        var total = 0;
+        for (var i = 0; i < spaces.length; i++) {
+          var space = spaces[i];
+          var countFromSpace = countFn(space);
+          if (countFromSpace >= 0) {
+            total += countFromSpace;
+          } else {
+            // Cannot successfully count entities in this space
+            total = -1;
+            break;
           }
         }
-        // If spaces apps collection is missing it could be due to incorrect relation params in the list orgs requests.
-        // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
-        // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a
-        // new request. The new request will be made once per org with this issue. This number may become troublesome
-        // if there are 50+ such orgs.
+        return total;
+      }
+
+      function getUsedMem(spaces) {
+        // Attempt to count the memory usage from each app in each space. If an app section is missing it could be due
+        // to a space fetched with a request that's missing inline-depth params or there are more than 50 apps in a
+        // space. If any app list is missing make a separate request. This could get costly if there are many spaces
+        var totalMem = countEntitiesInSpace(spaces, function (space) {
+          var total = 0;
+          if (space.entity.apps) {
+            _.forEach(space.entity.apps, function (app) {
+              // Only count running apps, like the CF API would do
+              if (app.entity.state === 'STARTED') {
+                total += parseInt(app.entity.memory, 10);
+              }
+            });
+          } else {
+            total = -1;
+          }
+          return total;
+        });
+        if (totalMem >= 0) {
+          return $q.resolve(totalMem);
+        }
+
         return orgsApi.RetrievingOrganizationMemoryUsage(orgGuid, params, httpConfig).then(function (res) {
           return res.data.memory_usage_in_mb;
         });
       }
 
       function getInstances(spaces) {
-        if (spaces) {
-          if (spaces.length === 0) {
-            return $q.resolve(0);
-          }
-          if (spaces[0].entity.apps) { // check if apps were inlined in the spaces
-            var totalInstances = 0;
-            _.forEach(spaces, function (space) {
-              var apps = space.entity.apps;
-              _.forEach(apps, function (app) {
-                // Only count running apps, like the CF API would do
-                if (app.entity.state === 'STARTED') {
-                  totalInstances += parseInt(app.entity.instances, 10);
-                }
-              });
+        // Attempt to count the instances in each app in each space. If an app section is missing it could be due
+        // to a space fetched with a request that's missing inline-depth params or there are more than 50 apps in a
+        // space. If any app list is missing make a separate request. This could get costly if there are many spaces
+        var totalInstances = countEntitiesInSpace(spaces, function (space) {
+          var total = 0;
+          if (space.entity.apps) {
+            _.forEach(space.entity.apps, function (app) {
+              // Only count running apps, like the CF API would do
+              if (app.entity.state === 'STARTED') {
+                total += parseInt(app.entity.instances, 10);
+              }
             });
-            return $q.resolve(totalInstances);
+          } else {
+            total = -1;
           }
+          return total;
+        });
+        if (totalInstances >= 0) {
+          return $q.resolve(totalInstances);
         }
-        // If spaces apps collection is missing it could be due to incorrect relation params in the list orgs requests.
-        // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
-        // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a
-        // new request. The new request will be made once per org with this issue. This number may become troublesome
-        // if there are 50+ such orgs.
+
         return orgsApi.RetrievingOrganizationInstanceUsage(orgGuid, params, httpConfig).then(function (res) {
           return res.data.instance_usage;
         });
       }
 
       function getRouteCount(spaces) {
-        if (spaces) {
-          if (spaces.length === 0) {
-            return $q.resolve(0);
+        // Attempt to count the routes in each app in each space. If an app section is missing it could be due
+        // to a space fetched with a request that's missing inline-depth params or there are more than 50 apps in a
+        // space. If any app list is missing make a separate request. This could get costly if there are many spaces
+        var totalRoutes = countEntitiesInSpace(spaces, function (space) {
+          var total = 0;
+          if (space.entity.routes) {
+            total += space.entity.routes.length;
           } else {
-            if (spaces[0].entity.routes) { // check if routes were inlined in the spaces
-              var totalRoutes = 0;
-              _.forEach(spaces, function (space) {
-                totalRoutes += space.entity.routes.length;
-              });
-              return $q.resolve(totalRoutes);
-            }
+            total = -1;
           }
+          return total;
+        });
+
+        if (totalRoutes >= 0) {
+          return $q.resolve(totalRoutes);
         }
+
         // If spaces routes collection is missing it could be due to incorrect relation params in the list orgs requests.
         // More likely it's due to the items count exceeding the max items per page limit. Instead of returning this
         // large collection the _url is passed back instead. Therefore we cannot use the inline data and must make a

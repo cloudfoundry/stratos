@@ -49,9 +49,9 @@
       var orgPromise = cfOrganizationModel.listAllOrganizations(that.guid, inDepthParams).then(function (orgs) {
         var allDetailsP = [];
         _.forEach(orgs, function (org) {
-          var orgDetailsP = cfOrganizationModel.getOrganizationDetails(that.guid, org).catch(function () {
+          var orgDetailsP = cfOrganizationModel.getOrganizationDetails(that.guid, org).catch(function (err) {
             // Swallow errors for individual orgs
-            $log.error('Failed to fetch details for org - ' + org.entity.name);
+            $log.error('Failed to fetch details for org - ' + org.entity.name, err);
           });
           allDetailsP.push(orgDetailsP);
         });
