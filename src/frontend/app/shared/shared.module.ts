@@ -95,6 +95,8 @@ import { AppChipsComponent } from './components/chips/chips.component';
 import {
   TableCellRouteAppsAttachedComponent,
 } from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+import { SecurityRuleComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/security-rule/security-rule.component';
+import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
 
 /* tslint:enable:max-line-length */
 
@@ -178,7 +180,8 @@ import {
     TableCellRouteAppsAttachedComponent,
     CfStacksCardComponent,
     CfBuildpackCardComponent,
-    TableCellRouteAppsAttachedComponent
+    TableCellRouteAppsAttachedComponent,
+    SecurityRuleComponent
   ],
   exports: [
     FormsModule,

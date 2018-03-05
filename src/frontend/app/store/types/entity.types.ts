@@ -26,6 +26,7 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   service: IRequestEntityTypeState<T>;
   serviceBinding: IRequestEntityTypeState<T>;
   buildpack: IRequestEntityTypeState<T>;
+  securityGroup: IRequestEntityTypeState<T>;
 }
 
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
@@ -53,7 +54,8 @@ export const defaultCfEntitiesState = {
   service: {},
   serviceBinding: {},
   buildpack: {},
-  [AppEnvVarSchema.key]: {},
+  securityGroup: {},
+ [AppEnvVarSchema.key]: {},
   [AppStatSchema.key]: {},
   [AppSummarySchema.key]: {}
 };
