@@ -1,0 +1,10 @@
+.buildpack-card {
+  &__item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    &__icon {
+      margin-right: 6px;
+    }
+  }
+}

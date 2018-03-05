@@ -10,13 +10,13 @@
     <app-meta-card-key>Enabled</app-meta-card-key>
     <app-meta-card-value *ngIf="isEnabled()">
       <div class=buildpack-card__item>
-        <mat-icon class="buildpack-card__item__icon">check_circle</mat-icon>
+        <mat-icon class="buildpack-card__item__icon-true">check_circle</mat-icon>
         <div>Enabled</div>
       </div>
     </app-meta-card-value>
     <app-meta-card-value *ngIf="!isEnabled()">
       <div class=buildpack-card__item>
-        <mat-icon class="buildpack-card__item__icon">block</mat-icon>
+        <mat-icon class="buildpack-card__item__icon-false">block</mat-icon>
         <div>Disabled</div>
       </div>
     </app-meta-card-value>
@@ -25,13 +25,13 @@
     <app-meta-card-key>Locked</app-meta-card-key>
     <app-meta-card-value *ngIf="isLocked()">
       <div class=buildpack-card__item>
-        <mat-icon class="buildpack-card__item__icon">lock_outline</mat-icon>
+        <mat-icon class="buildpack-card__item__icon-false">lock_outline</mat-icon>
         <div>Locked</div>
       </div>
     </app-meta-card-value>
     <app-meta-card-value *ngIf="!isLocked()">
       <div class=buildpack-card__item>
-        <mat-icon class="buildpack-card__item__icon">lock_open</mat-icon>
+        <mat-icon class="buildpack-card__item__icon-true">lock_open</mat-icon>
         <div>Unlocked</div>
       </div>
     </app-meta-card-value>
