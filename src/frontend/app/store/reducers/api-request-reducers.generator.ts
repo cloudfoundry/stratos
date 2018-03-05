@@ -24,6 +24,7 @@ import { UserSchema } from '../types/user.types';
 import { userReducer } from './users.reducer';
 import { RouteSchema } from '../../shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source';
 import { routeReducer } from './routes.reducer';
+import { BuildpackSchema } from '../actions/buildpack.action';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -69,6 +70,7 @@ const entities = [
   'routerReducer',
   'createApplication',
   'uaaSetup',
+  BuildpackSchema.key,
   UserSchema.key,
   CF_INFO_ENTITY_KEY,
   GITHUB_REPO_ENTITY_KEY,

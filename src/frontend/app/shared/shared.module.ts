@@ -88,7 +88,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-
+import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
 /* tslint:enable:max-line-length */
 
 
@@ -164,6 +164,7 @@ import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf
     CardCfSpaceDetailsComponent,
     TableCellRouteAppsAttachedComponent,
     CfStacksCardComponent,
+    CfBuildpackCardComponent,
   ],
   exports: [
     FormsModule,

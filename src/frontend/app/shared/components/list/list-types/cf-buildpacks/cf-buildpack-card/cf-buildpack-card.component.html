@@ -1,0 +1,51 @@
+<app-meta-card class="buildpack-card">
+  <app-meta-card-title class="buildpack-card__title">
+    <div class="buildpack-card__title-link">{{ row.entity.name }}</div>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Position</app-meta-card-key>
+    <app-meta-card-value>{{ row.entity.position }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Enabled</app-meta-card-key>
+    <app-meta-card-value *ngIf="isEnabled()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon-true">check_circle</mat-icon>
+        <div>Enabled</div>
+      </div>
+    </app-meta-card-value>
+    <app-meta-card-value *ngIf="!isEnabled()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon-false">block</mat-icon>
+        <div>Disabled</div>
+      </div>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Locked</app-meta-card-key>
+    <app-meta-card-value *ngIf="isLocked()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon-false">lock_outline</mat-icon>
+        <div>Locked</div>
+      </div>
+    </app-meta-card-value>
+    <app-meta-card-value *ngIf="!isLocked()">
+      <div class=buildpack-card__item>
+        <mat-icon class="buildpack-card__item__icon-true">lock_open</mat-icon>
+        <div>Unlocked</div>
+      </div>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Created</app-meta-card-key>
+    <app-meta-card-value>{{ row.metadata.created_at | date: 'medium' }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Updated</app-meta-card-key>
+    <app-meta-card-value>{{ row.metadata.updated_at | date: 'medium' }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>File Name</app-meta-card-key>
+    <app-meta-card-value>{{ row.entity.filename }}</app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

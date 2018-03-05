@@ -153,3 +153,11 @@ export interface IStack {
   name: string;
   description: string;
 }
+
+export interface IBuildpack {
+  name: string;
+  position: number;
+  enabled: boolean;
+  locked: boolean;
+  filename: string;
+}
