@@ -265,6 +265,10 @@ const testInitialStoreState: AppState = {
       },
       stack: {},
       space: {},
+      serviceInstance: {},
+      service:{},
+      serviceBinding:{},
+      servicePlan: {},
       organization: {
         endpointOrgSpaceService: {
           pageCount: 1,
@@ -579,7 +583,14 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+<<<<<<< HEAD
       buildpack:{},
+=======
+      service:{},
+      serviceBinding:{},
+      servicePlan: {},
+      serviceInstance: {},
+>>>>>>> origin/space-summary-service-instances
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
@@ -3820,7 +3831,14 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+<<<<<<< HEAD
       buildpack: {},
+=======
+      service:{},
+      serviceBinding:{},
+      servicePlan: {},
+      serviceInstance: {},
+>>>>>>> origin/space-summary-service-instances
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           entity: {

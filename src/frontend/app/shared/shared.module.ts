@@ -40,9 +40,11 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
+/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+/* tslint:enable:max-line-length */
 import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -89,6 +91,18 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
+
+/* tslint:disable:max-line-length */
+import { TableCellServiceNameComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
+import { TableCellServicePlanComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+import { TableCellServiceInstanceTagsComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
+import { TableCellServiceInstanceAppsAttachedComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
+import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+import { AppChipsComponent } from './components/chips/chips.component';
+import {
+  TableCellRouteAppsAttachedComponent,
+} from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+
 /* tslint:enable:max-line-length */
 
 
@@ -158,6 +172,12 @@ import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildp
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
+    CardCfSpaceUsageComponent,
+    CardCfSpaceDetailsComponent,
+    TableCellServiceNameComponent,
+    TableCellServicePlanComponent,
+    TableCellServiceInstanceTagsComponent,
+    TableCellServiceInstanceAppsAttachedComponent,
     AppChipsComponent,
     CfSpacePermissionCellComponent,
     CardCfSpaceUsageComponent,
@@ -165,6 +185,7 @@ import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildp
     TableCellRouteAppsAttachedComponent,
     CfStacksCardComponent,
     CfBuildpackCardComponent,
+    TableCellRouteAppsAttachedComponent
   ],
   exports: [
     FormsModule,
