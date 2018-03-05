@@ -67,7 +67,7 @@ export class EntityService<T = any> {
         const firstTime = !prevResult.entity && !!result.entity;
         // const changed = firstTime
         //   || (this.isEntityChanging(oldEntity.entityRequestInfo) && !this.isEntityChanging(newEntity.entityRequestInfo));
-        if (firstTime && !this.isEntityChanging(result.entityRequestInfo)) {
+        if (firstTime && !this.isEntityBlocked(result.entityRequestInfo)) {
           store.dispatch(new ValidateEntitiesStart(
             action as ICFAction, // TODO: RC needs options and actions.. but in theory just anything with entity
             [result.entity.metadata.guid], // TODO: RC
@@ -77,12 +77,12 @@ export class EntityService<T = any> {
       }),
       filter(([oldEntity, newEntity]) => !!newEntity),
       map(([oldEntity, newEntity]) => newEntity)
-      );
+    );
 
     this.waitForEntity$ = this.entityObs$.pipe(
       filter((ent) => {
         const { entityRequestInfo, entity } = ent;
-        return !this.isEntityChanging(entityRequestInfo);
+        return !this.isEntityBlocked(entityRequestInfo);
       }),
       shareReplay(1)
     );
@@ -126,7 +126,7 @@ export class EntityService<T = any> {
       });
   }
 
-  private isEntityChanging(entityRequestInfo: RequestInfoState) {
+  private isEntityBlocked(entityRequestInfo: RequestInfoState) {
     if (!entityRequestInfo) {
       return false;
     }
@@ -134,11 +134,11 @@ export class EntityService<T = any> {
       entityRequestInfo.error ||
       entityRequestInfo.deleting.busy ||
       entityRequestInfo.deleting.deleted ||
-      entityRequestInfo.updating._root_.busy;
+      entityRequestInfo.updating._root_.busy
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
-    return !entityRequestInfo || (!entity && !this.isEntityChanging(entityRequestInfo));
+    return !entityRequestInfo || (!entity && !this.isEntityBlocked(entityRequestInfo));
   }
 
   /**
@@ -148,28 +148,28 @@ export class EntityService<T = any> {
   poll(interval = 10000, key = this.refreshKey) {
     return Observable.interval(interval)
       .pipe(
-      tag('poll'),
-      withLatestFrom(
-        this.entityMonitor.entity$,
-        this.entityMonitor.entityRequest$
-      ),
-      map(a => ({
-        resource: a[1],
-        updatingSection: composeFn(
-          getUpdateSectionById(key),
-          getEntityUpdateSections,
-          () => a[2]
-        )
-      })),
-      tap(({ resource, updatingSection }) => {
-        if (!updatingSection || !updatingSection.busy) {
-          this.actionDispatch(key);
-        }
-      }),
-      filter(({ resource, updatingSection }) => {
-        return !!updatingSection;
-      }),
-      share(),
+        tag('poll'),
+        withLatestFrom(
+          this.entityMonitor.entity$,
+          this.entityMonitor.entityRequest$
+        ),
+        map(a => ({
+          resource: a[1],
+          updatingSection: composeFn(
+            getUpdateSectionById(key),
+            getEntityUpdateSections,
+            () => a[2]
+          )
+        })),
+        tap(({ resource, updatingSection }) => {
+          if (!updatingSection || !updatingSection.busy) {
+            this.actionDispatch(key);
+          }
+        }),
+        filter(({ resource, updatingSection }) => {
+          return !!updatingSection;
+        }),
+        share(),
     );
   }
 

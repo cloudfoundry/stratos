@@ -57,11 +57,8 @@ export class RequestEffect {
       const requestType = getRequestTypeFromMethod(apiAction.options.method);
 
       const apiResponse = validateAction.apiResponse;
-      const allEntities$ = apiResponse ?
-        Observable.of(apiResponse.response.entities) :
-        this.store.select(getAPIRequestDataState).first();
 
-      return allEntities$.pipe(
+      return this.store.select(getAPIRequestDataState).first().pipe(
         first(),
         map(allEntities => {
           // this.logger.debug(`${apiAction['paginationKey']} - re - validateEntities - validateEntityRelations`);
@@ -69,6 +66,7 @@ export class RequestEffect {
             validateAction.action.endpointGuid,
             this.store,
             allEntities,
+            apiResponse ? apiResponse.response.entities : null,
             validateAction.action,
             validateAction.validateEntities,
             true,
@@ -81,7 +79,7 @@ export class RequestEffect {
 
             } else {
               this.store.dispatch({
-                type: RequestTypes.START,
+                type: RequestTypes.UPDATE,
                 apiAction: {
                   ...apiAction,
                   updatingKey: rootUpdatingKey
@@ -93,11 +91,14 @@ export class RequestEffect {
 
 
           }
-          return validation.completed$.pipe(
-            map(() => validation)
-          );
+          return validation.completed.then(() => validation);
         }),
         mergeMap((validationResult: ValidationResult) => {
+          console.log(action.action['entityKey'] + 'after validation.completed$');
+          if (action.action['entityKey'] === 'application') {
+            console.log('ewrewrewr');
+          }
+
           return [new EntitiesPipelineCompleted(
             apiAction,
             apiResponse,
@@ -123,17 +124,20 @@ export class RequestEffect {
   @Effect() completeEntities$ = this.actions$.ofType<EntitiesPipelineCompleted>(EntitiesPipelineActionTypes.COMPLETE).pipe(
     mergeMap(action => {
       const completeAction: EntitiesPipelineCompleted = action;
+      console.log(completeAction.apiAction['entityKey'] + 'in complete');
+      if (completeAction.apiAction['entityKey'] === 'application') {
+        console.log('2ewrewrewr');
+      }
 
       const actions = [];
-      if (completeAction.validationResult.started) {
+      if (!completeAction.validateAction.apiRequestStarted && completeAction.validationResult.started) {
         if (completeAction.apiAction['paginationKey']) {
 
         } else {
           actions.push({
-            type: RequestTypes.SUCCESS,
+            type: RequestTypes.UPDATE,
             apiAction: {
               ...completeAction.apiAction,
-              updatingKey: rootUpdatingKey
             }
           });
         }

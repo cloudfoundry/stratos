@@ -164,6 +164,11 @@ export class ApplicationService {
 
   private constructCoreObservables() {
     // First set up all the base observables
+    this.appEntityService.entityObs$.do(entityOb => console.log(this.appGuid + ' - entityObs', entityOb.entityRequestInfo.updating[rootUpdatingKey])).subscribe();
+    this.appEntityService.waitForEntity$.do(entityOb => console.log(this.appGuid + ' - waitForEntity', entityOb.entityRequestInfo.updating[rootUpdatingKey])).subscribe();
+
+
+
     this.app$ = this.appEntityService.waitForEntity$;
 
     // App org and space
@@ -218,7 +223,7 @@ export class ApplicationService {
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(
-      this.store.select(endpointEntitiesSelector),
+        this.store.select(endpointEntitiesSelector),
     )
       .filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
@@ -253,7 +258,6 @@ export class ApplicationService {
 
     this.isUpdatingApp$ =
       this.app$.map(a => {
-        console.log('sasdsadasdsafdsfdsfsdgdsfgssdffdg', a.entityRequestInfo.updating[rootUpdatingKey]);
         const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || {
           busy: false
         };

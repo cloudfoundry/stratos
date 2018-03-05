@@ -33,7 +33,7 @@ export class BuildTabComponent implements OnInit {
   ngOnInit() {
     this.cardTwoFetching$ = this.appService.application$
       .combineLatest(
-      this.appService.appSummary$
+        this.appService.appSummary$
       )
       .map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;

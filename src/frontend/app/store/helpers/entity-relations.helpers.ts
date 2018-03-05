@@ -1,8 +1,8 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { interval } from 'rxjs/observable/interval';
-import { first, map, pairwise, skipWhile, tap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs/operator/combineLatest';
+import { first, map, skipWhile, combineAll, pairwise, tap, zip } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { pathGet } from '../../core/utils.service';
@@ -16,6 +16,7 @@ import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import { pick } from './reducer.helper';
+import { forkJoin } from 'rxjs/observable/forkJoin';
 
 export interface ListRelationsResult {
   maxDepth: number;
@@ -57,6 +58,10 @@ export interface EntityInlineParentAction extends IRequestAction {
   populateMissing: boolean;
 }
 
+// TODO: RC remove uneeded exports
+interface ValidateResultFetchingState {
+  fetching: boolean;
+}
 /**
  * An object to represent the action and monitor for a missing inline depth/entity relation. For instance, if spaces are missing from an
  * organisation then the action would be for GetAllOrganisationSpaces and the paginationMonitor would contain a monitor for that pagination
@@ -67,9 +72,7 @@ export interface EntityInlineParentAction extends IRequestAction {
  */
 export interface ValidateEntityResult {
   action: Action;
-  fetchingState$?: Observable<{
-    fetching: boolean
-  }>;
+  fetchingState$?: Observable<ValidateResultFetchingState>;
 }
 
 export class tempAppStore { // TODO: RC
@@ -80,7 +83,7 @@ export class tempAppStore { // TODO: RC
 
 export class ValidationResult {
   started: boolean;
-  completed$: Observable<any[]>;
+  completed: Promise<boolean[]>;
 }
 
 class EntityTree {
@@ -110,6 +113,7 @@ function handleRelation(
     cfGuid: string,
     store: any,
     allEntities: tempAppStore,
+    newEntities: tempAppStore,
     parentRelation: EntityTreeRelation,
     parentEntity: APIResource,
     childRelation: EntityTreeRelation,
@@ -124,6 +128,7 @@ function handleRelation(
     cfGuid,
     store,
     allEntities,
+    newEntities,
     parentRelation,
     parentEntity,
     childRelation,
@@ -157,6 +162,7 @@ function handleRelation(
       cfGuid,
       parentEntity.metadata.guid,
       parentRelation,
+      childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1),
       childRelation,
       includeRelations,
       populateMissing,
@@ -176,9 +182,11 @@ function handleRelation(
     // We've got the value already, ensure we create a pagination section for them
     let response: NormalizedResponse;
     const guids = childEntitiesAsArray.map(entity => entity.metadata.guid);
+    const entities = pick(newEntities[childRelation.entityKey], guids as [string]) ||
+      pick(allEntities[childRelation.entityKey], guids as [string]);
     response = {
       entities: {
-        [childRelation.entityKey]: pick(allEntities[childRelation.entityKey], guids as [string])
+        [childRelation.entityKey]: entities
       },
       result: guids
     };
@@ -211,7 +219,7 @@ function handleRelation(
               paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
             return {
               fetching: pageRequest ? pageRequest.busy : true
-            };
+            } as ValidateResultFetchingState;
           })
         )
       }
@@ -240,6 +248,7 @@ function validationLoop(
     store: Store<AppState>,
     includeRelations: string[],
     allEntities: tempAppStore,
+    newEntities: tempAppStore,
     populateExisting: boolean,
     populateMissing: boolean,
     entities: any[],
@@ -254,6 +263,7 @@ function validationLoop(
     store,
     includeRelations,
     allEntities,
+    newEntities,
     populateExisting,
     populateMissing,
     entities,
@@ -261,35 +271,37 @@ function validationLoop(
   } = config;
 
   // Step 1) Iterate through the entities schema structure discovering all the entities and whether they need to be checked for relations
-  if (entities) {
-    parentRelation.childRelations.forEach(childRelation => {
-      entities.forEach(entity => {
-        const childEntities = pathGet(childRelation.path, entity);
-        results = [].concat(results, handleRelation({
-          cfGuid: cfGuid || entity.entity.cfGuid,
-          store,
-          allEntities,
-          parentRelation,
-          parentEntity: entity,
-          childRelation,
-          childEntities: childEntities,
-          childEntitiesUrl: pathGet(createEntityUrl(childRelation), entity),
-          includeRelations,
-          populateExisting,
-          populateMissing,
-        }
-        ));
-        if (childEntities && childRelation.childRelations.length) {
-          results = [].concat(results,
-            validationLoop({
-              ...config,
-              entities: childRelation.isArray ? childEntities : [childEntities],
-              parentRelation: childRelation
-            }));
-        }
-      });
-    });
+  if (!entities) {
+    return results;
   }
+  parentRelation.childRelations.forEach(childRelation => {
+    entities.forEach(entity => {
+      const childEntities = pathGet(childRelation.path, entity);
+      results = [].concat(results, handleRelation({
+        cfGuid: cfGuid || entity.entity.cfGuid,
+        store,
+        allEntities,
+        newEntities,
+        parentRelation,
+        parentEntity: entity,
+        childRelation,
+        childEntities: childEntities,
+        childEntitiesUrl: pathGet(createEntityUrl(childRelation), entity),
+        includeRelations,
+        populateExisting,
+        populateMissing,
+      }
+      ));
+      if (childEntities && childRelation.childRelations.length) {
+        results = [].concat(results,
+          validationLoop({
+            ...config,
+            entities: childRelation.isArray ? childEntities : [childEntities],
+            parentRelation: childRelation
+          }));
+      }
+    });
+  });
 
   return results;
 }
@@ -316,36 +328,46 @@ export function validateEntityRelations(
   cfGuid: string,
   store: Store<AppState>,
   allEntities: tempAppStore,
+  newEntities: tempAppStore,
   action: IRequestAction,
   parentEntities: any[],
   populateMissing = false,
   populateExisting = false): ValidationResult {
 
+  const startTime = new Date().getTime().toString();
+  console.group(startTime);
+  console.time(startTime);
   const emptyResponse = {
     started: false,
     completed$: Observable.of(null)
   };
 
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
-    parentEntities = denormalize(parentEntities, action.entity, allEntities);
+    parentEntities = denormalize(parentEntities, action.entity, newEntities || allEntities);
   }
 
   const relationAction = action as EntityInlineParentAction;
 
+  console.time(startTime + 'fetch');
   const entityTree = fetchEntityTree(relationAction);
+  console.timeEnd(startTime + 'fetch');
 
+  console.time(startTime + 'validate');
   const results = validationLoop({
     cfGuid,
     store,
     includeRelations: relationAction.includeRelations,
     allEntities,
+    newEntities,
     populateExisting,
     populateMissing: populateMissing || relationAction.populateMissing,
     entities: parentEntities,
     parentRelation: entityTree.rootRelation,
   });
+  console.timeEnd(startTime + 'validate');
 
-  const paginationFinished = new Array<Observable<any>>(Observable.of(true));
+
+  const paginationFinished = new Array<Promise<boolean>>();
 
   const dispatchInterval = environment.production ? 0 : 10000;
 
@@ -359,45 +381,52 @@ export function validateEntityRelations(
   // ).subscribe();
 
   results.forEach(newActions => {
-
-    interval(dispatchInterval).pipe(
-      tap(() => {
-        console.log('Dispatching: ', newActions.action);
-        store.dispatch(newActions.action);
-      }),
-      first(),
-    ).subscribe();
-    // TODO: RC Test that the below actually blocks
-    // TODO: RC Failures?
+    console.log('Dispatching: ', newActions.action);
+    store.dispatch(newActions.action);
     if (newActions.fetchingState$) {
       const obs = newActions.fetchingState$.pipe(
         pairwise(),
         map(([oldFetching, newFetching]) => {
+          // console.log(`--------------------${relationAction.entityKey} - ${newActions.action['entityKey']}-${oldFetching.fetching}-${newFetching.fetching}`);
           return oldFetching.fetching === true && newFetching.fetching === false;
         }),
         skipWhile(completed => !completed),
-      );
+        first(),
+      ).toPromise();
       paginationFinished.push(obs);
     }
   });
 
+  const b = Promise.all(paginationFinished);
+
+  console.timeEnd(startTime);
+  console.groupEnd();
+  const started = !!(paginationFinished.length);
   return {
-    started: !!(paginationFinished.length - 1),
-    completed$: Observable.zip(...paginationFinished).first()
+    started,
+    completed: Promise.all(paginationFinished)
   };
 }
 
 
 export function listRelations(action: EntityInlineParentAction): ListRelationsResult {
+  console.group('listRelations' + action.entityKey);
+  console.time('adsdgdssgf' + action.entityKey);
   const tree = fetchEntityTree(action);
+  console.timeEnd('adsdgdssgf' + action.entityKey);
+  console.groupEnd();
   return {
     maxDepth: tree.maxDepth,
     relations: tree.requiredParamNames
   };
 }
 
-function validRelation(parentSchemaKey: string, childSchemaKey: string, includeRelations: string[] = []): boolean {
-  return includeRelations.indexOf(`${parentSchemaKey}-${childSchemaKey}`) >= 0;
+function generateCacheKey(entityKey: string, action: EntityInlineParentAction): string {
+  let includeRelations = action.includeRelations || [];
+  includeRelations = includeRelations.sort((a, b) => {
+    return a.localeCompare(b);
+  });
+  return entityKey + '+' + includeRelations.join(',');
 }
 
 export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
@@ -405,7 +434,8 @@ export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
   const isArray = entity['length'] > 0;
   entity = isArray ? entity[0] : entity;
   const entityKey = entity['key'];
-  let entityTree = entityTreeCache[entityKey];
+  const cacheKey = generateCacheKey(entityKey, action);
+  let entityTree = entityTreeCache[cacheKey];
   if (!entityTree) {
     const rootEntityRelation = new EntityTreeRelation(
       entityKey,
@@ -420,7 +450,10 @@ export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
       requiredParamNames: new Array<string>(),
     };
     createEntityTree(entityTree, rootEntityRelation);
-    entityTreeCache[entityKey] = entityTree;
+    entityTreeCache[cacheKey] = entityTree;
+    console.log('fetchEntity: Not Found');
+  } else {
+    console.log('fetchEntity: Found');
   }
   // Calc max depth and exclude not needed
   entityTree = JSON.parse(JSON.stringify(entityTree));

@@ -3,7 +3,7 @@ import { schema } from 'normalizr';
 
 import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations.helpers';
 import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction } from '../types/request.types';
+import { CFStartAction, RequestEntityLocation } from '../types/request.types';
 
 const relationActionId = 'FetchRelationAction';
 
@@ -19,13 +19,12 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
   ) {
     super();
     this.entityKey = child.entityKey;
-    this.entity = child.entity;
     this.options = new RequestOptions();
     this.options.url = url.startsWith('/v2/') ? url.substring(4, url.length) : url;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }
-  entity: schema.Entity;
+  entity: schema.Entity | [schema.Entity];
   entityKey: string;
   isId = relationActionId;
   actions = [
@@ -59,6 +58,7 @@ export class FetchRelationPaginatedAction extends FetchRelationAction implements
       populateMissing,
       url,
     );
+    this.entity = [child.entity];
   }
   // inline-relations-depth + include-relationships will be automatically calculated
   initialParams = {
@@ -73,6 +73,7 @@ export class FetchRelationSingleAction extends FetchRelationAction {
     endpointGuid: string, // Always go out to a single cf
     parentGuid: string,
     parent: EntityTreeRelation,
+    public guid: string,
     child: EntityTreeRelation,
     includeRelations: string[],
     populateMissing = true,
@@ -87,5 +88,8 @@ export class FetchRelationSingleAction extends FetchRelationAction {
       populateMissing,
       url,
     );
+    this.entityLocation = RequestEntityLocation.OBJECT;
+    this.entity = child.entity;
   }
+  entityLocation: RequestEntityLocation;
 }
