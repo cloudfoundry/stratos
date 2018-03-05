@@ -3,18 +3,17 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   generateTestCfEndpointServiceProvider,
   getBaseTestModules,
-} from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseCF } from '../cf-page.types';
-import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.component';
-import { EditSpaceComponent } from './edit-space.component';
+} from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseCF } from '../../cf-page.types';
+import { EditOrganizationStepComponent } from './edit-organization-step.component';
 
-describe('EditSpaceComponent', () => {
-  let component: EditSpaceComponent;
-  let fixture: ComponentFixture<EditSpaceComponent>;
+describe('EditOrganizationStepComponent', () => {
+  let component: EditOrganizationStepComponent;
+  let fixture: ComponentFixture<EditOrganizationStepComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EditSpaceComponent, EditSpaceStepComponent],
+      declarations: [EditOrganizationStepComponent],
       imports: [...getBaseTestModules],
       providers: [BaseCF, generateTestCfEndpointServiceProvider()]
     })
@@ -22,7 +21,7 @@ describe('EditSpaceComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditSpaceComponent);
+    fixture = TestBed.createComponent(EditOrganizationStepComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

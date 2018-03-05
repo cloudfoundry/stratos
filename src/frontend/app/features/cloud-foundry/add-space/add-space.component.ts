@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-add-space',
@@ -7,7 +8,14 @@ import { Component, OnInit } from '@angular/core';
 })
 export class AddSpaceComponent implements OnInit {
 
-  constructor() { }
+  ogrSpacesUrl: string;
+  constructor(
+    private activatedRoute: ActivatedRoute
+  ) {
+    const cfId = activatedRoute.snapshot.params.cfId;
+    const orgId = activatedRoute.snapshot.params.orgId;
+    this.ogrSpacesUrl = `/cloud-foundry/${cfId}/organizations/${orgId}/spaces`;
+  }
 
   ngOnInit() {
   }

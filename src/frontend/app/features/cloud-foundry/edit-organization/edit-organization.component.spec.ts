@@ -5,24 +5,25 @@ import {
   getBaseTestModules,
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BaseCF } from '../cf-page.types';
-import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.component';
-import { EditSpaceComponent } from './edit-space.component';
+import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
+import { EditOrganizationComponent } from './edit-organization.component';
 
-describe('EditSpaceComponent', () => {
-  let component: EditSpaceComponent;
-  let fixture: ComponentFixture<EditSpaceComponent>;
+describe('EditOrganizationComponent', () => {
+  let component: EditOrganizationComponent;
+  let fixture: ComponentFixture<EditOrganizationComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [EditSpaceComponent, EditSpaceStepComponent],
+      declarations: [EditOrganizationComponent, EditOrganizationStepComponent],
       imports: [...getBaseTestModules],
       providers: [BaseCF, generateTestCfEndpointServiceProvider()]
+
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EditSpaceComponent);
+    fixture = TestBed.createComponent(EditOrganizationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

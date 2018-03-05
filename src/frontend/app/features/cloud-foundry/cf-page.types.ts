@@ -4,3 +4,8 @@ import { InjectionToken, Injectable } from '@angular/core';
 export class BaseCF {
   guid: string;
 }
+
+@Injectable()
+export class BaseCFOrg {
+  guid: string;
+}
