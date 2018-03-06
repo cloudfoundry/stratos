@@ -1,7 +1,7 @@
 package cnsis
 
 import (
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"net/url"
 )
 

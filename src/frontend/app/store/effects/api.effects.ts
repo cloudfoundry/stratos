@@ -1,5 +1,10 @@
 import { endpointEntitiesSelector } from '../selectors/endpoint.selectors';
-import { WrapperRequestActionSuccess, WrapperRequestActionFailed, StartRequestAction } from './../types/request.types';
+import {
+  WrapperRequestActionSuccess,
+  WrapperRequestActionFailed,
+  StartRequestAction,
+  APISuccessOrFailedAction
+} from './../types/request.types';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
@@ -106,7 +111,7 @@ export class APIEffect {
         response = this.handleMultiEndpoints(response, paginatedAction);
         const { entities, totalResults, totalPages } = response;
         const actions = [];
-        actions.push({ type: paginatedAction.actions[1], apiAction: paginatedAction });
+        actions.push(new APISuccessOrFailedAction(paginatedAction.actions[1], paginatedAction));
         actions.push(new WrapperRequestActionSuccess(
           entities,
           paginatedAction,
@@ -114,11 +119,12 @@ export class APIEffect {
           totalResults,
           totalPages
         ));
-
         if (
           !paginatedAction.updatingKey &&
-          paginatedAction.options.method === 'post' || paginatedAction.options.method === RequestMethod.Post ||
-          paginatedAction.options.method === 'delete' || paginatedAction.options.method === RequestMethod.Delete
+          (
+            paginatedAction.options.method === 'post' || paginatedAction.options.method === RequestMethod.Post ||
+            paginatedAction.options.method === 'delete' || paginatedAction.options.method === RequestMethod.Delete
+          )
         ) {
           if (paginatedAction.removeEntityOnDelete) {
             actions.unshift(new ClearPaginationOfEntity(paginatedAction.entityKey, paginatedAction.guid));
@@ -131,7 +137,7 @@ export class APIEffect {
       })
       .catch(err => {
         return [
-          { type: paginatedAction.actions[2], apiAction: paginatedAction },
+          new APISuccessOrFailedAction(paginatedAction.actions[2], paginatedAction),
           new WrapperRequestActionFailed(
             err.message,
             paginatedAction,
@@ -211,8 +217,8 @@ export class APIEffect {
               // Treat the response as RequestEntityLocation.OBJECT
               return this.completeResourceEntity(cfData, cfGuid, apiAction.guid);
             }
-            totalResults = cfData['total_results'];
-            totalPages = cfData['total_pages'];
+            totalResults += cfData['total_results'];
+            totalPages += cfData['total_pages'];
             if (!cfData.resources.length) {
               return null;
             }

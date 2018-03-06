@@ -1,5 +1,6 @@
 # compiled output
 /dist
+.dist
 /tmp
 /out-tsc
 /out
@@ -80,3 +81,5 @@ deploy/glide-cache/
 
 .dist/
 deploy/uaa/tmp/
+src/backend/app-core/plugins
+src/backend/app-core/debug

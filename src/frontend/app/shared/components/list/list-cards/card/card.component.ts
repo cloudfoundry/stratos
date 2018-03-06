@@ -4,19 +4,25 @@ import {
   Input,
   OnChanges,
   OnInit,
+  SimpleChange,
+  SimpleChanges,
   Type,
   ViewChild,
   ViewContainerRef,
-  SimpleChanges,
-  SimpleChange,
 } from '@angular/core';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { TableCellCustom } from '../../list-table/table-cell/table-cell-custom';
 import { CardAppComponent } from '../../list-types/app/card/card-app.component';
+import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
+import { EndpointCardComponent } from '../custom-cards/endpoint-card/endpoint-card.component';
 
 export const listCards = [
   CardAppComponent,
+  EndpointCardComponent,
+  CfOrgCardComponent,
+  CfSpaceCardComponent
 ];
 
 @Component({

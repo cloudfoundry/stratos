@@ -2,10 +2,20 @@ import { Injectable } from '@angular/core';
 
 export interface ApplicationStateData {
   label: string;
-  indicator: string;
+  subLabel?: string;
+  indicator: CardStatus;
   actions: {
     [key: string]: boolean
   };
+}
+
+export enum CardStatus {
+  OK = 'ok',
+  WARNING = 'warning',
+  TENTATIVE = 'tentative',
+  INCOMPLETE = 'incomplete',
+  ERROR = 'error',
+  BUSY = 'busy'
 }
 
 @Injectable()
@@ -28,37 +38,37 @@ export class ApplicationStateService {
     '?': {
       FAILED: {
         label: 'Staging Failed',
-        indicator: 'error',
+        indicator: CardStatus.ERROR,
         actions: 'delete'
       }
     },
     PENDING: {
       '?': {
         label: 'Pending',
-        indicator: 'busy',
+        indicator: CardStatus.BUSY,
         actions: 'delete'
       }
     },
     LOADING: {
       '?': {
         label: 'Loading',
-        indicator: 'busy'
+        indicator: CardStatus.BUSY
       }
     },
     STOPPED: {
       PENDING: {
         label: 'Offline while Updating',
-        indicator: 'warning',
+        indicator: CardStatus.WARNING,
         actions: 'delete'
       },
       STAGED: {
         label: 'Offline',
-        indicator: 'warning',
+        indicator: CardStatus.WARNING,
         actions: 'start,delete,cli'
       },
       '*NONE*': {
         label: 'Incomplete',
-        indicator: 'incomplete',
+        indicator: CardStatus.INCOMPLETE,
         actions: 'delete,cli'
       }
     },
@@ -66,65 +76,65 @@ export class ApplicationStateService {
       NO_INSTANCES: {
         label: 'Deployed',
         subLabel: 'No Instances',
-        indicator: 'ok',
+        indicator: CardStatus.OK,
         actions: 'stop,restart,cli'
       },
       PENDING: {
         label: 'Staging App',
-        indicator: 'busy',
+        indicator: CardStatus.BUSY,
         actions: 'delete'
       },
       'STAGED(?,?,?)': {
         label: 'Deployed',
-        indicator: 'tentative',
+        indicator: CardStatus.TENTATIVE,
         actions: 'stop,restart,cli'
       },
       'STAGED(0,0,0)': {
         label: 'Deployed',
         subLabel: 'Starting App',
-        indicator: 'busy',
+        indicator: CardStatus.BUSY,
         actions: 'stop,restart,cli'
       },
       'STAGED(N,0,0,N)': {
         label: 'Deployed',
         subLabel: 'Starting App',
-        indicator: 'busy',
+        indicator: CardStatus.BUSY,
         actions: 'stop,restart,cli'
       },
       'STAGED(N,0,0)': {
         label: 'Deployed',
         subLabel: 'Online',
-        indicator: 'ok',
+        indicator: CardStatus.OK,
         actions: 'stop,restart,launch,cli'
       },
       'STAGED(0,N,0)': {
         label: 'Deployed',
         subLabel: 'Crashed',
-        indicator: 'error',
+        indicator: CardStatus.ERROR,
         actions: 'stop,restart,cli'
       },
       'STAGED(0,0,N)': {
         label: 'Deployed',
         subLabel: 'Starting App',
-        indicator: 'warning',
+        indicator: CardStatus.WARNING,
         actions: 'stop,restart,cli'
       },
       'STAGED(0,N,N)': {
         label: 'Deployed',
         subLabel: 'Crashing',
-        indicator: 'error',
+        indicator: CardStatus.ERROR,
         actions: 'stop,restart,cli'
       },
       'STAGED(N,N,0)': {
         label: 'Deployed',
         subLabel: 'Partially Online',
-        indicator: 'warning',
+        indicator: CardStatus.WARNING,
         actions: 'stop,restart,launch,cli'
       },
       'STAGED(N,0,N)': {
         label: 'Deployed',
         subLabel: 'Partially Online',
-        indicator: 'warning',
+        indicator: CardStatus.WARNING,
         actions: 'stop,restart,launch,cli'
       }
     }
@@ -143,7 +153,7 @@ export class ApplicationStateService {
           map[a.trim()] = true;
         });
         obj.actions = map;
-      } else if (typeof(v) === 'object') {
+      } else if (typeof (v) === 'object') {
         this.mapActions(v);
       }
     }
@@ -215,7 +225,7 @@ export class ApplicationStateService {
     // No match against the state table, so return unknown
     return {
       label: 'Unknown',
-      indicator: 'error',
+      indicator: CardStatus.ERROR,
       actions: null
     };
   }
@@ -308,20 +318,20 @@ export class ApplicationStateService {
   getInstanceState(summary: any, appInstances: any): ApplicationStateData {
     const appState: string = summary ? summary.state : 'UNKNOWN';
     if (appState !== 'STARTED') {
-      return this.getStateForIndicator('tentative');
+      return this.getStateForIndicator(CardStatus.TENTATIVE);
     } else {
       const running = this.getCount(undefined, appInstances, 'RUNNING');
       if (running === summary.instances) {
-        return this.getStateForIndicator('ok');
+        return this.getStateForIndicator(CardStatus.OK);
       } else if (running > 0) {
-        return this.getStateForIndicator('warning');
+        return this.getStateForIndicator(CardStatus.WARNING);
       }
 
-      return this.getStateForIndicator('error');
+      return this.getStateForIndicator(CardStatus.ERROR);
     }
   }
 
-  private getStateForIndicator(indicator: string): ApplicationStateData {
+  private getStateForIndicator(indicator: CardStatus): ApplicationStateData {
     return {
       indicator: indicator,
       label: '-',

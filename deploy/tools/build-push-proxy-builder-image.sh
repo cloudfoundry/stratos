@@ -46,7 +46,7 @@ else
   echo "  REGISTRY: ${DOCKER_REGISTRY}"
   echo "  ORG: ${DOCKER_ORG}"
 fi
-NAME=stratos-proxy-builder
+NAME=stratos-jetstream-builder
 TAG=${TAG:-opensuse}
 BK_BUILD_BASE=${BK_BUILD_BASE:-splatform/stratos-bk-build-base:opensuse}
 

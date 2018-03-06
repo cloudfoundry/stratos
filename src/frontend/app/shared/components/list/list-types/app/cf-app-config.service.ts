@@ -9,7 +9,13 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { CfOrgSpaceDataService, CfOrgSpaceItem } from '../../../../data-services/cf-org-space-service.service';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, IListMultiFilterConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import {
+  defaultPaginationPageSizeOptionsCards,
+  IListConfig,
+  IListMultiFilterConfig,
+  ListConfig,
+  ListViewTypes,
+} from '../../list.component.types';
 import { CardAppComponent } from './card/card-app.component';
 import { CfAppsDataSource } from './cf-apps-data-source';
 import { TableCellAppInstancesComponent } from './table-cell-app-instances/table-cell-app-instances.component';
@@ -59,7 +65,11 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     },
     {
       columnId: 'disk', headerCell: () => 'Disk Quota',
-      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`, cellFlex: '1', sort: {
+      cellDefinition: {
+        getValue: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`
+      },
+      cellFlex: '1',
+      sort: {
         type: 'sort',
         orderKey: 'disk_quota',
         field: 'entity.disk_quota'
@@ -67,7 +77,11 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     },
     {
       columnId: 'memory', headerCell: () => 'Memory',
-      cell: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`, cellFlex: '1', sort: {
+      cellDefinition: {
+        getValue: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.memory)}`
+      },
+      cellFlex: '1',
+      sort: {
         type: 'sort',
         orderKey: 'memory',
         field: 'entity.memory'
@@ -75,7 +89,10 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
     },
     {
       columnId: 'creation', headerCell: () => 'Creation Date',
-      cell: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`, sort: {
+      cellDefinition: {
+        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+      },
+      sort: {
         type: 'sort',
         orderKey: 'creation',
         field: 'metadata.created_at'
@@ -83,7 +100,6 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       cellFlex: '2'
     },
   ];
-  pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.BOTH;
   text = {
     title: '',

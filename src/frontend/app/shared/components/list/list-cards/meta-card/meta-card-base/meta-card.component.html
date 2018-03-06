@@ -1,0 +1,15 @@
+<mat-card>
+  <app-card-status *ngIf="status$" [status$]="status$">
+  </app-card-status>
+  <mat-card-header *ngIf="title">
+    <ng-container *ngTemplateOutlet="title.content"></ng-container>
+    <app-application-state-icon *ngIf="status$" [status]="status$ | async"></app-application-state-icon>
+  </mat-card-header>
+  <mat-card-content>
+    <div *ngFor="let metaItem of metaItems">
+      <span *ngIf="metaItem?.content">
+        <ng-container  *ngTemplateOutlet="metaItem.content"></ng-container>
+      </span>
+    </div>
+  </mat-card-content>
+</mat-card>

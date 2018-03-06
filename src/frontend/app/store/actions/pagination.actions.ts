@@ -1,18 +1,11 @@
-import { AppState } from '../app-state';
-import { Action, compose } from '@ngrx/store';
-import {
-  PaginationAction,
-  // PaginationEntityState,
-  PaginationEntityTypeState,
-  PaginationParam,
-  PaginationState,
-  PaginationClientFilter,
-} from '../types/pagination.types';
-import { ListFilter } from './list.actions';
+import { Action } from '@ngrx/store';
+
+import { PaginationAction, PaginationClientFilter, PaginationParam } from '../types/pagination.types';
 
 export const CLEAR_PAGINATION_OF_TYPE = '[Pagination] Clear all pages of type';
 export const CLEAR_PAGINATION_OF_ENTITY = '[Pagination] Clear pagination of entity';
 export const RESET_PAGINATION = '[Pagination] Reset pagination';
+export const CREATE_PAGINATION = '[Pagination] Create pagination';
 export const CLEAR_PAGES = '[Pagination] Clear pages only';
 export const SET_PAGE = '[Pagination] Set page';
 export const SET_RESULT_COUNT = '[Pagination] Set result count';
@@ -24,8 +17,12 @@ export const SET_INITIAL_PARAMS = '[Pagination] Set initial params';
 export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 
-export function getPaginationKey(entityKey, endpointGuid, guid) {
-  return `${entityKey}:${endpointGuid}:${guid}`;
+export function getPaginationKey(entityKey, endpointGuid, guid = null) {
+  if (guid) {
+    return `${entityKey}:${endpointGuid}:${guid}`;
+  } else {
+    return `${entityKey}:${endpointGuid}`;
+  }
 }
 
 export class ClearPaginationOfType implements Action {
@@ -45,6 +42,18 @@ export class ResetPagination implements PaginationAction {
   }
   type = RESET_PAGINATION;
 }
+
+export class CreatePagination implements PaginationAction {
+  /**
+   * @param entityKey
+   * @param paginationKey
+   * @param seed The pagination key for the section we should use as a seed when creating the new pagination section.
+   */
+  constructor(public entityKey: string, public paginationKey: string, public seed?: string) {
+  }
+  type = CREATE_PAGINATION;
+}
+
 
 export class ClearPages implements PaginationAction {
   constructor(public entityKey: string, public paginationKey: string) {

@@ -18,8 +18,8 @@ import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { OrganisationSchema } from '../../../../store/actions/organisation.action';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
+import { organisationSchemaKey } from '../../../../store/actions/action-types';
 
 @Component({
   selector: 'app-create-application-step3',
@@ -124,7 +124,7 @@ export class CreateApplicationStep3Component implements OnInit {
       })
       .filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.org)
       .mergeMap(state => {
-        return this.store.select(selectEntity(OrganisationSchema.key, state.cloudFoundryDetails.org))
+        return this.store.select(selectEntity(organisationSchemaKey, state.cloudFoundryDetails.org))
           .first()
           .map(org => org.entity.domains);
       });
