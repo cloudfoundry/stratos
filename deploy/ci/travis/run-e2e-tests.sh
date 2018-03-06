@@ -4,40 +4,7 @@ set -e
 
 echo "Running e2e tests..."
 
-cat << EOF > ./build/secrets.json
-{
-  "headless": true,
-  "cloudFoundry": {
-    "url": "${CF_LOCATION}",
-    "admin": {
-      "username": "${CF_ADMIN_USER}",
-      "password": "${CF_ADMIN_PASSWORD}"
-    },
-    "user": {
-      "username": "${CF_E2E_USER}",
-      "password": "${CF_E2E_USER_PASSWORD}"
-    }
-  },
-  "console": {
-    "host": "localhost",
-    "port": "443",
-    "admin": {
-      "username": "${CONSOLE_ADMIN_USER}",
-      "password": "${CONSOLE_ADMIN_PASSWORD}"
-    },
-    "user": {
-      "username": "${CONSOLE_USER_USER}",
-      "password": "${CONSOLE_USER_PASSWORD}"
-    }
-  },
-  "uaa": {
-    "url": "http://uaa:8080",
-    "clientId": "console",
-    "adminUsername": "admin",
-    "adminPassword": "hscadmin"
-  }
-}
-EOF
+curl -sL -o ./build/secrets.json https://travis.capbristol.com
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
