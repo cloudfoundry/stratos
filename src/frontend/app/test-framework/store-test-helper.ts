@@ -580,6 +580,12 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      serviceInstance:{},
+      servicePlan: {},
+      service: {},
+      serviceBinding: {},
+      securityGroup: {},
+      featureFlag: {},
       buildpack:{},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
@@ -3821,6 +3827,12 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      serviceInstance:{},
+      servicePlan: {},
+      service: {},
+      serviceBinding: {},
+      securityGroup: {},
+      featureFlag: {},
       buildpack: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
