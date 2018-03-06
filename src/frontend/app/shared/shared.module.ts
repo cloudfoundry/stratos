@@ -81,10 +81,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 /* tslint:disable:max-line-length */
-import { TableCellServiceNameComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import { TableCellServicePlanComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { TableCellServiceInstanceTagsComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import { TableCellServiceInstanceAppsAttachedComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import {
@@ -160,10 +156,6 @@ import {
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    TableCellServiceNameComponent,
-    TableCellServicePlanComponent,
-    TableCellServiceInstanceTagsComponent,
-    TableCellServiceInstanceAppsAttachedComponent,
     AppChipsComponent,
     CfSpacePermissionCellComponent,
     TableCellRouteAppsAttachedComponent
