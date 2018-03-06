@@ -168,7 +168,7 @@ export const ApplicationEntitySchema = new EntitySchema(
 );
 
 
-export function entityFactory(key: string): schema.Entity {
+export function entityFactory(key: string): EntitySchema {
   switch (key) {
     case applicationSchemaKey:
       return ApplicationEntitySchema;

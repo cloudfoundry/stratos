@@ -6,6 +6,7 @@ import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
+import { EntitySchema } from '../helpers/entity-factory';
 
 export interface SingleEntityAction {
   entityKey: string;
@@ -29,9 +30,9 @@ export enum RequestEntityLocation {
   OBJECT, // The response is the entity
 }
 
-
+export type IRequestActionEntity = EntitySchema | EntitySchema[];
 export interface IRequestAction extends RequestAction {
-  entity?: Schema;
+  entity?: IRequestActionEntity;
   entityKey: string;
   endpointGuid?: string;
   updatingKey?: string;

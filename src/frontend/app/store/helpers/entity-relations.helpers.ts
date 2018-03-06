@@ -14,9 +14,10 @@ import { selectRequestInfo } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
+import { IRequestAction, WrapperRequestActionSuccess, IRequestActionEntity } from '../types/request.types';
 import { pick } from './reducer.helper';
 import { forkJoin } from 'rxjs/observable/forkJoin';
+import { EntitySchema } from './entity-factory';
 
 export interface ListRelationsResult {
   maxDepth: number;
@@ -26,7 +27,7 @@ export interface ListRelationsResult {
 export class EntityTreeRelation {
   constructor(
     public entityKey: string,
-    public entity: schema.Entity,
+    public entity: EntitySchema,
     public isArray = false,
     public paramName: string, // space/spaces
     public path = '', // entity.space
@@ -456,8 +457,7 @@ export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
     console.log('fetchEntity: Found');
   }
   // Calc max depth and exclude not needed
-  entityTree = JSON.parse(JSON.stringify(entityTree));
-  parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
+  entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
   return entityTree;
 }
 
@@ -486,16 +486,18 @@ export function createEntityTree(tree: EntityTree, entityRelation: EntityTreeRel
   });
 }
 
-export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = []) {
+export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [])
+  : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
   entityRelation.childRelations.forEach((relation, index, array) => {
     const parentChildKey = generateEntityRelationKey(entityRelation.entityKey, relation.entityKey);
     if (includeRelations.indexOf(parentChildKey) >= 0) {
-      newChildRelations.push(relation);
+      const clone = { ...relation };
+      newChildRelations.push(clone);
       if (tree.requiredParamNames.indexOf(relation.paramName) < 0) {
         tree.requiredParamNames.push(relation.paramName);
       }
-      parseEntityTree(tree, relation, includeRelations);
+      clone.childRelations = parseEntityTree(tree, relation, includeRelations);
     }
   });
   entityRelation.childRelations = newChildRelations;
@@ -503,5 +505,6 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
     tree.maxDepth = tree.maxDepth || 0;
     tree.maxDepth++;
   }
+  return newChildRelations;
 }
 

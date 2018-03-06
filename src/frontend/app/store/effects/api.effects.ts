@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 import { Headers, Http, Request, RequestMethod, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { normalize } from 'normalizr';
+import { normalize, schema, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 import { first, map, mergeMap } from 'rxjs/operators';
@@ -251,8 +251,17 @@ export class APIEffect {
         }
       });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
+
+    let entityArray;
+    if (apiAction.entity['length'] > 0) {
+      entityArray = apiAction.entity;
+    } else {
+      entityArray = new Array<Schema>();
+      entityArray.push(apiAction.entity);
+    }
+
     return {
-      entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,
+      entities: flatEntities.length ? normalize(flatEntities, entityArray) : null,
       totalResults,
       totalPages
     };

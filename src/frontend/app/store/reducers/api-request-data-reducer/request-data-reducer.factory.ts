@@ -71,7 +71,7 @@ function populateParentEntity(state, successAction) {
     ...newParentEntity,
     entity: {
       ...newParentEntity.entity,
-      [entityParamName]: successAction.response.result
+      [entityParamName]: fetchRelationAction.child.isArray ? successAction.response.result : successAction.response.result[0]
     }
   };
 

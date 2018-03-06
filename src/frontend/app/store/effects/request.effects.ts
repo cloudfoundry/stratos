@@ -88,16 +88,14 @@ export class RequestEffect {
             }
             // this.store.dispatch(new StartRequestAction(apiAction, requestType));
             // this.store.dispatch({ type: apiAction.actions[0] });
-
-
           }
           return validation.completed.then(() => validation);
         }),
         mergeMap((validationResult: ValidationResult) => {
-          console.log(action.action['entityKey'] + 'after validation.completed$');
-          if (action.action['entityKey'] === 'application') {
-            console.log('ewrewrewr');
-          }
+          // console.log(action.action['entityKey'] + 'after validation.completed$');
+          // if (action.action['entityKey'] === 'application') {
+          //   console.log('ewrewrewr');
+          // }
 
           return [new EntitiesPipelineCompleted(
             apiAction,

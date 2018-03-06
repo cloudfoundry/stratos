@@ -3,7 +3,7 @@ import { schema } from 'normalizr';
 
 import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations.helpers';
 import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, RequestEntityLocation } from '../types/request.types';
+import { CFStartAction, RequestEntityLocation, IRequestActionEntity } from '../types/request.types';
 
 const relationActionId = 'FetchRelationAction';
 
@@ -24,7 +24,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }
-  entity: schema.Entity | [schema.Entity];
+  entity: IRequestActionEntity;
   entityKey: string;
   isId = relationActionId;
   actions = [
