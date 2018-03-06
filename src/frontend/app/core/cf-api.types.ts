@@ -165,6 +165,6 @@ export interface IBuildpack {
 export interface IFeatureFlag {
   name: string;
   enabled: boolean;
-  url: string;
-  error_message: string;
+  url?: string;
+  error_message?: string;
 }
