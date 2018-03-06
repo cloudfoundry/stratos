@@ -1,32 +1,24 @@
-import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
-import { isTCPRoute } from '../../../../../features/applications/routes/routes.helper';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
-import {
-  DeleteRoute,
-  UnmapRoute
-} from '../../../../../store/actions/route.actions';
+import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
+import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  IMultiListAction,
-  ListViewTypes,
-  IListConfig
-} from '../../list.component.types';
+import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-app-route.component';
 import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
-import { PaginationEntityState } from '../../../../../store/types/pagination.types';
+import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
+import { spaceSchemaKey, routeSchemaKey, domainSchemaKey, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService implements IListConfig<APIResource> {
@@ -116,8 +108,12 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetSpaceRoutes(spaceGuid, appService.cfGuid, getPaginationKey('route', appService.cfGuid, spaceGuid)),
-      getPaginationKey('route', appService.cfGuid, spaceGuid),
+      new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+        createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+        createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+      ]),
+      createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid),
       true,
       this
     );

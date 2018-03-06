@@ -39,9 +39,15 @@ export class ApplicationServiceMock {
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
   waitForAppEntity$: Observable<EntityInfo> = Observable.of({
     entity: {
+      metadata: {},
       entity: {
-
-      }
+        space: {
+          metadata: {},
+          entity: {
+            domains: []
+          }
+        }
+      },
     }
   } as EntityInfo);
   appEnvVars = {

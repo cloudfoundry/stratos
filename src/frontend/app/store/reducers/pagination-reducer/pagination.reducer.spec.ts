@@ -1,12 +1,10 @@
-import { ApplicationSchema } from '../../actions/application.actions';
 import { RequestOptions } from '@angular/http';
 
-import {
-  RequestTypes,
-} from '../../actions/request.actions';
-import { createPaginationReducer, defaultPaginationState } from './pagination.reducer';
+import { RequestTypes } from '../../actions/request.actions';
+import { applicationSchemaKey, entityFactory, EntitySchema } from '../../helpers/entity-factory';
 import { PaginatedAction } from '../../types/pagination.types';
-import { StartRequestAction, WrapperRequestActionSuccess, WrapperRequestActionFailed } from '../../types/request.types';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../../types/request.types';
+import { createPaginationReducer, defaultPaginationState } from './pagination.reducer';
 
 function getReducer() {
   return createPaginationReducer([
@@ -19,8 +17,8 @@ function getReducer() {
 class MockPagAction implements PaginatedAction {
   actions = ['ONE', 'TWO', 'THREE'];
   options = new RequestOptions();
-  entity = ApplicationSchema;
-  entityKey = ApplicationSchema.key;
+  entity = entityFactory(applicationSchemaKey);
+  entityKey = applicationSchemaKey;
   paginationKey = 'PaginationKey';
   type = RequestTypes.START;
 }
@@ -56,7 +54,7 @@ describe('PaginationReducer', () => {
       RequestTypes.SUCCESS,
       RequestTypes.FAILED
     ]);
-    const entityKey = ApplicationSchema.key;
+    const entityKey = applicationSchemaKey;
     const paginationKey = 'PaginationKey';
     const apiAction = new MockPagAction();
     apiAction.entityKey = entityKey;
@@ -66,7 +64,7 @@ describe('PaginationReducer', () => {
     const newState = paginationReducer(
       {
         ...defaultPaginationState,
-        [ApplicationSchema.key]: {
+        [applicationSchemaKey]: {
           [paginationKey]: {
             pageCount: 0,
             currentPage: 1,
@@ -80,7 +78,7 @@ describe('PaginationReducer', () => {
       }, startApiAction);
     const expectedNewState = {
       ...defaultPaginationState,
-      [ApplicationSchema.key]: {
+      [applicationSchemaKey]: {
         [paginationKey]: {
           pageCount: 0,
           currentPage: 1,
@@ -119,8 +117,9 @@ describe('PaginationReducer', () => {
         entityKey,
         paginationKey,
         type: 'type',
-        entity: {},
-        options: {}
+        entity: {} as EntitySchema,
+        options: {},
+        actions: []
       },
       'fetch',
       2,
@@ -181,7 +180,8 @@ describe('PaginationReducer', () => {
         entityKey,
         paginationKey,
         type: 'type',
-        entity: {}
+        entity: {} as EntitySchema,
+        actions: []
       },
       'fetch'
     );

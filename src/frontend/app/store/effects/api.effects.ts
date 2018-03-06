@@ -111,12 +111,6 @@ export class APIEffect {
       }),
       mergeMap(response => {
         const { entities, totalResults, totalPages } = response;
-        // const validationFinished = validateEntityRelations(
-        //   this.store,
-        //   entities.entities,
-        //   actionClone,
-        //   Object.values(entities.entities[apiAction.entityKey]),
-        //   true, true);
         return [new ValidateEntitiesStart(
           actionClone,
           entities.result,
@@ -128,35 +122,6 @@ export class APIEffect {
           }
         )];
       }),
-      // mergeMap(result => {
-      //   return result.validationFinished.pipe(
-      //     map(() => result)
-      //   );
-      // }),
-      // mergeMap(result => {
-      //   const actions = [];
-      //   actions.push({ type: actionClone.actions[1], apiAction: actionClone });
-      //   actions.push(new WrapperRequestActionSuccess(
-      //     result.response.entities,
-      //     actionClone,
-      //     requestType,
-      //     result.response.totalResults,
-      //     result.response.totalPages
-      //   ));
-
-      //   if (
-      //     !actionClone.updatingKey &&
-      //     actionClone.options.method === 'post' || actionClone.options.method === RequestMethod.Post ||
-      //     actionClone.options.method === 'delete' || actionClone.options.method === RequestMethod.Delete
-      //   ) {
-      //     if (actionClone.removeEntityOnDelete) {
-      //       actions.unshift(new ClearPaginationOfEntity(actionClone.entityKey, actionClone.guid));
-      //     } else {
-      //       actions.unshift(new ClearPaginationOfType(actionClone.entityKey));
-      //     }
-      //   }
-      //   return actions;
-      // })
     ).catch(errObservable => {
       this.logger.warn(`API request process failed`, errObservable.error);
       return [

@@ -1,17 +1,10 @@
 import { RequestOptions } from '@angular/http';
-import { schema } from 'normalizr';
 
-import { pathGet } from '../../core/utils.service';
-import {
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../helpers/entity-relations.helpers';
-import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { entityFactory, routeSchemaKey, spaceSchemaKey, spaceWithOrgKey } from '../helpers/entity-factory';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.helpers';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { RouteEvents } from './route.actions';
-import { entityFactory } from '../helpers/entity-factory';
-import { spaceSchemaKey, SpaceWithOrgsEntitySchema, spaceWithOrgKey, routesInSpaceKey } from '../helpers/entity-factory';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -83,8 +76,8 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     'order-direction-field': 'attachedApps',
   };
   parentGuid: string;
-  entity = entityFactory(routesInSpaceKey);
-  entityKey = routesInSpaceKey;
+  entity = entityFactory(routeSchemaKey);
+  entityKey = routeSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
   flattenPagination = true;

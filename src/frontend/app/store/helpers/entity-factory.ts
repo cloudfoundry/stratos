@@ -22,7 +22,7 @@ export const githubRepoSchemaKey = 'githubRepo';
 export const githubCommitSchemaKey = 'githubCommits';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
-export const routesInSpaceKey = 'routesInSpace';
+// export const routesInSpaceKey = 'routesInSpace';
 export const organisationWithSpaceKey = 'organization';
 export const spacesKey = 'spaces';
 
@@ -56,8 +56,16 @@ export const StackSchema = new EntitySchema(stackSchemaKey, {}, { idAttribute: g
 
 export const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 
+export const ApplicationWithoutRoutesSchema = new EntitySchema(applicationSchemaKey, {
+  entity: {
+  }
+}, {
+    idAttribute: getAPIResourceGuid
+  });
+
 export const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
+    apps: [ApplicationWithoutRoutesSchema],
     domain: DomainSchema
   }
 }, {
@@ -89,8 +97,17 @@ export const SpaceSchema = new EntitySchema(spaceSchemaKey, {
     idAttribute: getAPIResourceGuid
   });
 
+// export const SpaceRoutesOnlySchema = new EntitySchema(spaceSchemaKey, {
+//   entity: {
+//     routes: [RouteSchema]
+//   }
+// }, {
+//     idAttribute: getAPIResourceGuid
+//   }, routesInSpaceKey);
+
 export const OrganisationSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
+    domains: [DomainSchema],
     spaces: [SpaceSchema],
     quota_definition: QuotaDefinitionSchema
   }
@@ -174,6 +191,8 @@ export function entityFactory(key: string): EntitySchema {
       return QuotaDefinitionSchema;
     case cfInfoSchemaKey:
       return CFInfoSchema;
+    // case routesInSpaceKey:
+    //   return SpaceRoutesOnlySchema;
     default:
       throw new Error(`Unknown entity schema type: ${key}`);
   }

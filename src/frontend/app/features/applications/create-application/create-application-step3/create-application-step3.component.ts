@@ -2,17 +2,28 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { filter, map, mergeMap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AssociateRouteWithAppApplication, CreateNewApplication } from '../../../../store/actions/application.actions';
+import { GetOrganisation } from '../../../../store/actions/organisation.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
-import { applicationSchemaKey, organisationSchemaKey, routeSchemaKey } from '../../../../store/helpers/entity-factory';
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  organisationSchemaKey,
+  routeSchemaKey,
+} from '../../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.helpers';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { selectEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { APIResource } from '../../../../store/types/api.types';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
 
@@ -23,7 +34,7 @@ import { createGetApplicationAction } from '../../application.service';
 })
 export class CreateApplicationStep3Component implements OnInit {
 
-  constructor(private store: Store<AppState>, private router: Router) { }
+  constructor(private store: Store<AppState>, private router: Router, private entityServiceFactory: EntityServiceFactory) { }
 
   @ViewChild('form')
   form: NgForm;
@@ -107,19 +118,27 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   ngOnInit() {
-    const state$ = this.store.select(selectNewAppState);
-
-    this.domains = state$
-      .do(state => {
+    this.domains = this.store.select(selectNewAppState).pipe(
+      filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.cloudFoundry && state.cloudFoundryDetails.org),
+      mergeMap(state => {
         this.hostName = state.name.split(' ').join('-').toLowerCase();
         this.newAppData = state;
+        const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
+          organisationSchemaKey,
+          entityFactory(organisationSchemaKey),
+          state.cloudFoundryDetails.org,
+          new GetOrganisation(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
+            createEntityRelationKey(organisationSchemaKey, domainSchemaKey)
+          ]),
+          true
+        );
+        return orgEntService.waitForEntity$.pipe(
+          map(({ entity, entityRequestInfo }) => {
+            return entity.entity.domains;
+          })
+        );
       })
-      .filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.org)
-      .mergeMap(state => {
-        return this.store.select(selectEntity(organisationSchemaKey, state.cloudFoundryDetails.org))
-          .first()
-          .map(org => org.entity.domains);
-      });
+    );
   }
 
 }

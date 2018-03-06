@@ -33,7 +33,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   domains: APIResource<Domain>[] = [];
   addTCPRoute: FormGroup;
   addHTTPRoute: FormGroup;
-  domains$: Subscription;
   appGuid: string;
   cfGuid: string;
   spaceGuid: string;
@@ -79,29 +78,15 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       ])
     });
 
-    const space$ = this.store
-      .select(selectEntity('application', this.appGuid))
+    const space$ = this.appService.waitForAppEntity$
       .pipe(
-        filter(p => !!p),
         tap(p => {
-          this.spaceGuid = p.entity.space_guid;
-          if (this.domains$) {
-            this.domains$.unsubscribe();
-          }
-          this.domains$ = this.store
-            .select(
-              selectNestedEntity('space', this.spaceGuid, ['entity', 'domains'])
-            )
-            .pipe(
-              filter(d => !!d),
-              tap(d => {
-                d.forEach(domain => {
-                  this.domains[domain.metadata.guid] = domain;
-                });
-                this.selectedDomain = Object.values(this.domains)[0];
-              })
-            )
-            .subscribe();
+          this.spaceGuid = p.entity.entity.space.metadata.guid;
+          const domains = p.entity.entity.space.entity.domains;
+          domains.forEach(domain => {
+            this.domains[domain.metadata.guid] = domain;
+          });
+          this.selectedDomain = Object.values(this.domains)[0];
         })
       );
 
@@ -176,7 +161,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     const associateRoute$ = this.store
       .select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
-        filter(route => !route.creating),
+        // TODO: RC for some reason the new entity is now not creating but fetching? need to confirm in v2-master
+        filter(route => !route.creating && !route.fetching),
         map(route => {
           if (route.error) {
             this.submitted = false;
@@ -261,10 +247,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.createTCPRoute = !this.createTCPRoute;
   }
   ngOnDestroy(): void {
-    if (this.domains$) {
-      this.domains$.unsubscribe();
-    }
-
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 }

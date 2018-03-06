@@ -356,24 +356,23 @@ export function validateEntityRelations(
   }
 
   const startTime = new Date().getTime().toString();
-  console.group(startTime);
-  console.time(startTime);
+  // console.group(startTime);
+  // console.time(startTime);
   const emptyResponse = {
     started: false,
     completed$: Observable.of(null)
   };
 
+  const relationAction = action as EntityInlineParentAction;
+  // console.time(startTime + 'fetch');
+  const entityTree = fetchEntityTree(relationAction);
+  // console.timeEnd(startTime + 'fetch');
+
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
-    parentEntities = denormalize(parentEntities, action.entity, newEntities || allEntities);
+    parentEntities = denormalize(parentEntities, [entityTree.rootRelation.entity], newEntities || allEntities);
   }
 
-  const relationAction = action as EntityInlineParentAction;
-
-  console.time(startTime + 'fetch');
-  const entityTree = fetchEntityTree(relationAction);
-  console.timeEnd(startTime + 'fetch');
-
-  console.time(startTime + 'validate');
+  // console.time(startTime + 'validate');
   const results = validationLoop({
     cfGuid,
     store,
@@ -385,30 +384,20 @@ export function validateEntityRelations(
     entities: parentEntities,
     parentRelation: entityTree.rootRelation,
   });
-  console.timeEnd(startTime + 'validate');
+  // console.timeEnd(startTime + 'validate');
 
 
   const paginationFinished = new Array<Promise<boolean>>();
 
   const dispatchInterval = environment.production ? 0 : 10000;
 
-  // setInterval((a) => {
-  //   console.log('1wank: ', a);
-  // }, 1000);
-  // interval(1000).pipe(
-  //   tap((a) => {
-  //     console.log('2wank: ', a);
-  //   }),
-  // ).subscribe();
-
   results.forEach(newActions => {
-    console.log('Dispatching: ', newActions.action);
+    // console.log('Dispatching: ', newActions.action);
     store.dispatch(newActions.action);
     if (newActions.fetchingState$) {
       const obs = newActions.fetchingState$.pipe(
         pairwise(),
         map(([oldFetching, newFetching]) => {
-          // console.log(`--------------------${relationAction.entityKey} - ${newActions.action['entityKey']}-${oldFetching.fetching}-${newFetching.fetching}`);
           return oldFetching.fetching === true && newFetching.fetching === false;
         }),
         skipWhile(completed => !completed),
@@ -420,8 +409,8 @@ export function validateEntityRelations(
 
   const b = Promise.all(paginationFinished);
 
-  console.timeEnd(startTime);
-  console.groupEnd();
+  // console.timeEnd(startTime);
+  // console.groupEnd();
   const started = !!(paginationFinished.length);
   return {
     started,
@@ -431,11 +420,11 @@ export function validateEntityRelations(
 
 
 export function listRelations(action: EntityInlineParentAction): ListRelationsResult {
-  console.group('listRelations' + action.entityKey);
-  console.time('adsdgdssgf' + action.entityKey);
+  // console.group('listRelations' + action.entityKey);
+  // console.time('adsdgdssgf' + action.entityKey);
   const tree = fetchEntityTree(action);
-  console.timeEnd('adsdgdssgf' + action.entityKey);
-  console.groupEnd();
+  // console.timeEnd('adsdgdssgf' + action.entityKey);
+  // console.groupEnd();
   return {
     maxDepth: tree.maxDepth,
     relations: tree.requiredParamNames
@@ -472,9 +461,9 @@ export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
     };
     createEntityTree(entityTree, rootEntityRelation);
     entityTreeCache[cacheKey] = entityTree;
-    console.log('fetchEntity: Not Found');
+    // console.log('fetchEntity: Not Found');
   } else {
-    console.log('fetchEntity: Found');
+    // console.log('fetchEntity: Found');
   }
   // Calc max depth and exclude not needed
   entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);

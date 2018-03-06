@@ -19,8 +19,11 @@ export const GET_ORGANISATION_SPACES = '[Space] Get all org spaces';
 export const GET_ORGANISATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
 export const GET_ORGANISATION_SPACES_FAILED = '[Space] Get all org spaces failed';
 
-export class GetOrganisation extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string) {
+export class GetOrganisation extends CFStartAction implements ICFAction, EntityInlineParentAction {
+  constructor(public guid: string,
+    public endpointGuid: string,
+    public includeRelations: string[] = [],
+    public populateMissing = false) {
     super();
     this.options = new RequestOptions();
     this.options.url = `organization/${guid}`;
