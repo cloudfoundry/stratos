@@ -86,17 +86,11 @@ import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf
 import { CfBuildpackCardComponent } from './components/list/list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
 
 /* tslint:disable:max-line-length */
-import { TableCellServiceNameComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import { TableCellServicePlanComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { TableCellServiceInstanceTagsComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import { TableCellServiceInstanceAppsAttachedComponent } from './components/list/list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { AppChipsComponent } from './components/chips/chips.component';
-import {
-  TableCellRouteAppsAttachedComponent,
-} from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { SecurityRuleComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/security-rule/security-rule.component';
 import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 
 /* tslint:enable:max-line-length */
 
@@ -169,19 +163,14 @@ import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-s
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    TableCellServiceNameComponent,
-    TableCellServicePlanComponent,
-    TableCellServiceInstanceTagsComponent,
-    TableCellServiceInstanceAppsAttachedComponent,
     AppChipsComponent,
     CfSpacePermissionCellComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    TableCellRouteAppsAttachedComponent,
     CfStacksCardComponent,
     CfBuildpackCardComponent,
-    TableCellRouteAppsAttachedComponent,
-    SecurityRuleComponent
+    SecurityRuleComponent,
+    BooleanIndicatorComponent
   ],
   exports: [
     FormsModule,

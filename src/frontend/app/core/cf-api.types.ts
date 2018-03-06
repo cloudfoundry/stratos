@@ -165,6 +165,10 @@ export interface IServiceInstance {
   guid: string;
   cfGuid: string;
 }
+export interface IStack {
+  name: string;
+  description: string;
+}
 
 export interface IBuildpack {
   name: string;
@@ -229,4 +233,10 @@ export interface IInfo {
   app_ssh_oauth_client: string;
   routing_endpoint: string;
   doppler_logging_endpoint: string;
+}
+export interface IFeatureFlag {
+  name: string;
+  enabled: boolean;
+  url?: string;
+  error_message?: string;
 }

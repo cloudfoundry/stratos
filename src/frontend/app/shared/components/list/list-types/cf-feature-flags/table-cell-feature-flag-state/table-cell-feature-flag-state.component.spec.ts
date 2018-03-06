@@ -1,39 +1,37 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-state.component';
+
 import {
   getBaseTestModulesNoShared,
-  getMetadataCardComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfBuildpackCardComponent } from './cf-buildpack-card.component';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 
-describe('CfBuildpackCardComponent', () => {
-  let component: CfBuildpackCardComponent;
-  let fixture: ComponentFixture<CfBuildpackCardComponent>;
+describe('TableCellFeatureFlagStateComponent', () => {
+  let component: TableCellFeatureFlagStateComponent;
+  let fixture: ComponentFixture<TableCellFeatureFlagStateComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfBuildpackCardComponent, ...getMetadataCardComponents, BooleanIndicatorComponent],
+      declarations: [TableCellFeatureFlagStateComponent, BooleanIndicatorComponent],
       imports: [...getBaseTestModulesNoShared]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CfBuildpackCardComponent);
+    fixture = TestBed.createComponent(TableCellFeatureFlagStateComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        name: '',
-        position: 1,
+        name: 'test',
         enabled: true,
-        locked: true,
-        filename: ''
+
       },
       metadata: {
+        guid: 'test',
         created_at: '',
         updated_at: '',
-        guid: '',
         url: ''
       }
     };

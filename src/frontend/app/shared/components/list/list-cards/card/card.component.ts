@@ -20,17 +20,18 @@ import {
 } from '../../list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { EndpointCardComponent } from '../custom-cards/endpoint-card/endpoint-card.component';
-import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
+import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 
 export const listCards = [
   CardAppComponent,
   EndpointCardComponent,
   CfOrgCardComponent,
   CfSpaceCardComponent,
-  CfStacksCardComponent,
   CfBuildpackCardComponent,
   CfSecurityGroupsCardComponent,
+  CfBuildpackCardComponent,
+  CfStacksCardComponent
 ];
 
 @Component({
