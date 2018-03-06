@@ -32,6 +32,7 @@ describe('CfSecurityGroupsCardComponent', () => {
         running_default: false,
         staging_default: false,
         spaces_url: '',
+        spaces: [],
         staging_spaces_url: ''
       },
       metadata: {
