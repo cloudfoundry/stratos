@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
+import { IInfo } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -22,12 +23,14 @@ import { BaseCF } from '../cf-page.types';
 
 @Injectable()
 export class CloudFoundryEndpointService {
+  hasSSHAccess$: Observable<boolean>;
+  totalMem$: Observable<number>;
   paginationSubscription: any;
   allApps$: Observable<APIResource<CfApplication>[]>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<CfOrg>[]>;
-  info$: Observable<EntityInfo<any>>;
-  cfInfoEntityService: EntityService<any>;
+  info$: Observable<EntityInfo<APIResource<IInfo>>>;
+  cfInfoEntityService: EntityService<APIResource<IInfo>>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
@@ -50,7 +53,7 @@ export class CloudFoundryEndpointService {
       new GetAllEndpoints()
     );
 
-    this.cfInfoEntityService = this.entityServiceFactory.create(
+    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<IInfo>>(
       CF_INFO_ENTITY_KEY,
       CFInfoSchema,
       this.cfGuid,
@@ -74,6 +77,13 @@ export class CloudFoundryEndpointService {
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
+    this.hasSSHAccess$ = this.info$.pipe(
+      map(p => !!(p.entity.entity &&
+        p.entity.entity.app_ssh_endpoint &&
+        p.entity.entity.app_ssh_host_key_fingerprint &&
+        p.entity.entity.app_ssh_oauth_client))
+    );
+
     this.allApps$ = this.orgs$.pipe(
       // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
       map(orgs => orgs.filter(org => org.entity.spaces)),
@@ -88,6 +98,8 @@ export class CloudFoundryEndpointService {
         return flatArray;
       })
     );
+
+    this.totalMem$ = this.allApps$.pipe(map(a => this.getMetricFromApps(a, 'memory')));
 
     this.fetchDomains();
   }
@@ -125,7 +137,6 @@ export class CloudFoundryEndpointService {
       map(apps => this.getMetricFromApps(apps, statMetric))
     );
   }
-
   public getMetricFromApps(
     apps: APIResource<CfApplication>[],
     statMetric: string
