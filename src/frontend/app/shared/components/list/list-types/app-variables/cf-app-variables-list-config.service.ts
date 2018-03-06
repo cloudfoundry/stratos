@@ -6,13 +6,7 @@ import { AppVariablesDelete } from '../../../../../store/actions/app-variables.a
 import { AppState } from '../../../../../store/app-state';
 import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  defaultPaginationPageSizeOptionsTable,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component.types';
+import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 

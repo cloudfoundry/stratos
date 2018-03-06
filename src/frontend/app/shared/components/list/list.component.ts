@@ -124,6 +124,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       initialPageEvent.pageIndex = pagination.pageIndex - 1;
       initialPageEvent.pageSize = pagination.pageSize;
       if (this.paginator.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
+        initialPageEvent.pageSize = this.paginator.pageSizeOptions[0];
         this.paginationController.pageSize(this.paginator.pageSizeOptions[0]);
       }
     });
