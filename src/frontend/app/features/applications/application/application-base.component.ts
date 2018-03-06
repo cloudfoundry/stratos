@@ -13,14 +13,14 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 
-const applicationServiceFactory = (
+function applicationServiceFactory(
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsService,
   paginationMonitorFactory: PaginationMonitorFactory
-) => {
+) {
   const { id, cfId } = activatedRoute.snapshot.params;
   return new ApplicationService(
     cfId,
@@ -31,12 +31,12 @@ const applicationServiceFactory = (
     appEnvVarsService,
     paginationMonitorFactory
   );
-};
+}
 
-const entityServiceFactory = (
+function entityServiceFactory(
   _entityServiceFactory: EntityServiceFactory,
   activatedRoute: ActivatedRoute
-) => {
+) {
   const { id, cfId } = activatedRoute.snapshot.params;
   // const entityMonitor = new en
   return _entityServiceFactory.create(
@@ -45,7 +45,7 @@ const entityServiceFactory = (
     id,
     new GetApplication(id, cfId)
   );
-};
+}
 
 @Component({
   selector: 'app-application-base',

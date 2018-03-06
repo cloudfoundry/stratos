@@ -5,21 +5,26 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { DisconnectEndpoint, UnregisterEndpoint, EndpointSchema } from '../../../../../store/actions/endpoint.actions';
+import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
+import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
+import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import {
+  defaultPaginationPageSizeOptionsTable,
+  IListAction,
+  IListConfig,
+  IMultiListAction,
+  ListViewTypes,
+} from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
-import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -30,7 +35,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'name',
     headerCell: () => 'Name',
-    cell: row => row.name,
+    cellDefinition: {
+      valuePath: 'name'
+    },
     sort: {
       type: 'sort',
       orderKey: 'name',
@@ -52,7 +59,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'type',
     headerCell: () => 'Type',
-    cell: getEndpointTypeString,
+    cellDefinition: {
+      getValue: getEndpointTypeString
+    },
     sort: {
       type: 'sort',
       orderKey: 'type',
@@ -63,7 +72,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'address',
     headerCell: () => 'Address',
-    cell: row => getFullEndpointApiUrl(row),
+    cellDefinition: {
+      getValue: getFullEndpointApiUrl
+    },
     sort: {
       type: 'sort',
       orderKey: 'address',
@@ -133,7 +144,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     enabled: row => true,
   };
 
-
   private singleActions = [
     this.listActionDisconnect,
     this.listActionConnect,
@@ -146,7 +156,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   columns = endpointColumns;
   isLocal = true;
   dataSource: EndpointsDataSource;
-  pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: '',

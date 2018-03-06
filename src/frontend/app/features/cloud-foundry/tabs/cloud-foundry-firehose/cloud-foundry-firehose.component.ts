@@ -7,7 +7,7 @@ import { catchError, filter, map, share } from 'rxjs/operators';
 
 import { environment } from '../../../../../environments/environment';
 import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
-import { CloudFoundryEndpointService } from '../../cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
 
 @Component({

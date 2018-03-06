@@ -8,7 +8,7 @@ import { ApiActionTypes } from './request.actions';
 import { StackSchema } from './stack.action';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { NewApplication } from '../types/application.types';
+import { CfApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { AppStatSchema } from '../types/app-metadata.types';
@@ -54,12 +54,16 @@ const ApplicationEntitySchema = {
   }
 };
 
-export const ApplicationSchema = new schema.Entity('application', ApplicationEntitySchema, {
-  idAttribute: getAPIResourceGuid
-});
+export const ApplicationSchema = new schema.Entity(
+  'application',
+  ApplicationEntitySchema,
+  {
+    idAttribute: getAPIResourceGuid
+  }
+);
 
-export class GetAllApplications extends CFStartAction implements PaginatedAction {
-
+export class GetAllApplications extends CFStartAction
+  implements PaginatedAction {
   private static sortField = 'creation'; // This is the field that 'order-direction' is applied to. Cannot be changed
 
   constructor(public paginationKey: string) {
@@ -68,11 +72,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     this.options.url = 'apps';
     this.options.method = 'get';
   }
-  actions = [
-    GET_ALL,
-    GET_ALL_SUCCESS,
-    GET_ALL_FAILED
-  ];
+  actions = [GET_ALL, GET_ALL_SUCCESS, GET_ALL_FAILED];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
@@ -95,18 +95,18 @@ export class GetApplication extends CFStartAction implements ICFAction {
     this.options.params = new URLSearchParams();
     this.options.params.set('inline-relations-depth', '2');
   }
-  actions = [
-    GET,
-    GET_SUCCESS,
-    GET_FAILED
-  ];
+  actions = [GET, GET_SUCCESS, GET_FAILED];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
 }
 
 export class CreateNewApplication extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string, application: NewApplication) {
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    application: CfApplication
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps`;
@@ -116,28 +116,25 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
       space_guid: application.space_guid
     };
   }
-  actions = [
-    CREATE,
-    CREATE_SUCCESS,
-    CREATE_FAILED
-  ];
+  actions = [CREATE, CREATE_SUCCESS, CREATE_FAILED];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
 }
 
-export class AssociateRouteWithAppApplication extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public routeGuid: string, public endpointGuid: string) {
+export class AssociateRouteWithAppApplication extends CFStartAction
+  implements ICFAction {
+  constructor(
+    public guid: string,
+    public routeGuid: string,
+    public endpointGuid: string
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}/routes/${routeGuid}`;
     this.options.method = 'put';
   }
-  actions = [
-    ASSIGN_ROUTE,
-    ASSIGN_ROUTE_SUCCESS,
-    ASSIGN_ROUTE_FAILED
-  ];
+  actions = [ASSIGN_ROUTE, ASSIGN_ROUTE_SUCCESS, ASSIGN_ROUTE_FAILED];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
@@ -153,33 +150,36 @@ export interface UpdateApplication {
   state?: string;
 }
 
-
-export class UpdateExistingApplication extends CFStartAction implements ICFAction {
+export class UpdateExistingApplication extends CFStartAction
+  implements ICFAction {
   static updateKey = 'Updating-Existing-Application';
 
   constructor(
     public guid: string,
     public endpointGuid: string,
     private application: UpdateApplication,
-    public updateEntities?: AppMetadataTypes[]) {
+    public updateEntities?: AppMetadataTypes[]
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'put';
     this.options.body = application;
   }
-  actions = [
-    UPDATE,
-    UPDATE_SUCCESS,
-    UPDATE_FAILED
-  ];
+  actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
   updatingKey = UpdateExistingApplication.updateKey;
   entityMerge: ActionMergeFunction = (oldEntities, newEntities) => {
-    const keepFromOld = pick(oldEntities[ApplicationSchema.key][this.guid].entity, Object.keys(ApplicationEntitySchema.entity) as [string]);
-    newEntities[ApplicationSchema.key][this.guid].entity = { ...newEntities[ApplicationSchema.key][this.guid].entity, ...keepFromOld };
+    const keepFromOld = pick(
+      oldEntities[ApplicationSchema.key][this.guid].entity,
+      Object.keys(ApplicationEntitySchema.entity) as [string]
+    );
+    newEntities[ApplicationSchema.key][this.guid].entity = {
+      ...newEntities[ApplicationSchema.key][this.guid].entity,
+      ...keepFromOld
+    };
     return newEntities;
   }
 }
@@ -196,19 +196,20 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     const endpointPassthroughHeader = 'x-cap-passthrough';
     this.options.headers.set(endpointPassthroughHeader, 'true');
   }
-  actions = [
-    DELETE,
-    DELETE_SUCCESS,
-    DELETE_FAILED
-  ];
+  actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
   entity = [ApplicationSchema];
   entityKey = ApplicationSchema.key;
   options: RequestOptions;
 }
 
-export class DeleteApplicationInstance extends CFStartAction implements ICFAction {
+export class DeleteApplicationInstance extends CFStartAction
+  implements ICFAction {
   guid: string;
-  constructor(public appGuid: string, private index: number, public endpointGuid: string) {
+  constructor(
+    public appGuid: string,
+    private index: number,
+    public endpointGuid: string
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${appGuid}/instances/${index}`;
@@ -218,11 +219,7 @@ export class DeleteApplicationInstance extends CFStartAction implements ICFActio
     this.options.headers.set(endpointPassthroughHeader, 'true');
     this.guid = `${appGuid}-${index}`;
   }
-  actions = [
-    DELETE_INSTANCE,
-    DELETE_INSTANCE_SUCCESS,
-    DELETE_INSTANCE_FAILED
-  ];
+  actions = [DELETE_INSTANCE, DELETE_INSTANCE_SUCCESS, DELETE_INSTANCE_FAILED];
   entity = [AppStatSchema];
   entityKey = AppStatSchema.key;
   removeEntityOnDelete = true;

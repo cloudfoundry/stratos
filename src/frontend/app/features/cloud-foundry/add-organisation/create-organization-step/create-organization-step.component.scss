@@ -1,0 +1,13 @@
+.add-org {
+  height: 100%;
+  &__stepper-form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    max-width: 60%;
+    mat-form-field {
+      padding-top: 10px;
+      width: 100%;
+    }
+  }
+}
