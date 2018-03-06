@@ -60,29 +60,17 @@ export class CloudFoundryEndpointService {
       new GetEndpointInfo(this.cfGuid)
     );
     this.constructCoreObservables();
+    this.constructSecondaryObservable();
   }
 
   constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
 
-    this.connected$ = this.endpoint$.pipe(
-      map(p => p.entity.connectionStatus === 'connected')
-    );
-
     this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.cfGuid);
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
-
     this.info$ = this.cfInfoEntityService.waitForEntity$;
-
-    this.hasSSHAccess$ = this.info$.pipe(
-      map(p => !!(p.entity.entity &&
-        p.entity.entity.app_ssh_endpoint &&
-        p.entity.entity.app_ssh_host_key_fingerprint &&
-        p.entity.entity.app_ssh_oauth_client))
-    );
 
     this.allApps$ = this.orgs$.pipe(
       // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
@@ -99,9 +87,25 @@ export class CloudFoundryEndpointService {
       })
     );
 
+    this.fetchDomains();
+  }
+
+  constructSecondaryObservable() {
+
+    this.hasSSHAccess$ = this.info$.pipe(
+      map(p => !!(p.entity.entity &&
+        p.entity.entity.app_ssh_endpoint &&
+        p.entity.entity.app_ssh_host_key_fingerprint &&
+        p.entity.entity.app_ssh_oauth_client))
+    );
     this.totalMem$ = this.allApps$.pipe(map(a => this.getMetricFromApps(a, 'memory')));
 
-    this.fetchDomains();
+    this.connected$ = this.endpoint$.pipe(
+      map(p => p.entity.connectionStatus === 'connected')
+    );
+
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
+
   }
 
   getAppsInOrg(
