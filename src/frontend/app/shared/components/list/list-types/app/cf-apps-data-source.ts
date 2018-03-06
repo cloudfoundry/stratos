@@ -4,7 +4,7 @@ import { schema } from 'normalizr';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { generateEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
@@ -22,7 +22,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
   ) {
     const { paginationKey } = CfAppsDataSource;
     const action = new GetAllApplications(paginationKey, [
-      generateEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
     ]);
 
     super({

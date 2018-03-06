@@ -41,17 +41,12 @@ export class EntitySchema extends schema.Entity {
 
 export const AppSummarySchema = new EntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
 export const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-// export const AppStatsSchema = new schema.Array(AppStatSchema); // TODO: RC
 export const AppEnvVarSchema = new EntitySchema(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-// export const AppEnvVarsSchema = new schema.Array(AppEnvVarSchema); // TODO: RC
 
 export const GithubBranchSchema = new EntitySchema(githubBranchesSchemaKey, {}, { idAttribute: 'entityId' });
-// export const BranchesSchema = new schema.Array(GithubBranchSchema); // TODO: RC
 
 export const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
 export const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey);
-// export const GithubBranchSchema = new EntitySchema(GITHUB_BRANCHES_ENTITY_KEY); // TODO: RC
-// export const GithubBranchesSchema = new schema.Array(GithubBranchSchema); // TODO: RC
 
 export const EndpointSchema = new EntitySchema(endpointSchemaKey, {}, { idAttribute: 'guid' });
 
@@ -74,15 +69,6 @@ export const RouteSchema = new EntitySchema(routeSchemaKey, {
   });
 
 export const QuotaDefinitionSchema = new EntitySchema(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-
-// export const SpaceWithoutAppsSchema = new EntitySchema(spaceSchemaKey, {
-//   entity: {
-//     routes: [RouteSchema]
-//   }
-// }, {
-//     idAttribute: getAPIResourceGuid
-//   },
-//   );
 
 export const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
   applicationSchemaKey,
@@ -167,22 +153,14 @@ export const ApplicationEntitySchema = new EntitySchema(
   }
 );
 
-
 export function entityFactory(key: string): EntitySchema {
   switch (key) {
     case applicationSchemaKey:
       return ApplicationEntitySchema;
-    // case applicationWithoutSpaceRelationKey:
-    //   return ApplicationWithoutSpaceEntitySchema;
-
-    // applicationWithoutSpaceAppsRelationKey
-
     case stackSchemaKey:
       return StackSchema;
     case spaceWithOrgKey:
       return SpaceWithOrgsEntitySchema;
-    // case spaceWithoutAppsRelationKey:
-    //   return SpaceWithoutAppsSchema;
     case routeSchemaKey:
       return RouteSchema;
     case domainSchemaKey:
@@ -217,10 +195,6 @@ export function entityFactory(key: string): EntitySchema {
       return QuotaDefinitionSchema;
     case cfInfoSchemaKey:
       return CFInfoSchema;
-    // case routesInSpaceKey:
-    //   return RoutesInSpaceSchema as T;
-    // case spacesKey:
-    //   return SpacesSchema as T;
     default:
       throw new Error(`Unknown entity schema type: ${key}`);
   }

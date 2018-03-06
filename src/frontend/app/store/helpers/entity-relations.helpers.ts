@@ -18,13 +18,23 @@ import { IRequestAction, WrapperRequestActionSuccess, IRequestActionEntity } fro
 import { pick } from './reducer.helper';
 import { forkJoin } from 'rxjs/observable/forkJoin';
 import { EntitySchema } from './entity-factory';
-
-export interface ListRelationsResult {
-  maxDepth: number;
-  relations: string[];
-}
-
+/**
+ * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
+ *
+ * @export
+ * @class EntityTreeRelation
+ */
 export class EntityTreeRelation {
+  /**
+ * Creates an instance of EntityTreeRelation.
+ * @param {string} entityKey
+ * @param {EntitySchema} entity
+ * @param {boolean} [isArray=false] is this a collection of entities (should be paginationed) or not
+ * @param {string} paramName parameter name of the entity within the schema. For example `space` may be `spaces` (entity.spaces)
+ * @param {string} [path=''] location of the entity within the parent. For example `space` entity maybe be `entity.spaces`
+ * @param {EntityTreeRelation[]} childRelations
+ * @memberof EntityTreeRelation
+ */
   constructor(
     public entityKey: string,
     public entity: EntitySchema,
@@ -59,32 +69,34 @@ export interface EntityInlineParentAction extends IRequestAction {
   populateMissing: boolean;
 }
 
-// TODO: RC remove uneeded exports
-interface ValidateResultFetchingState {
-  fetching: boolean;
-}
-/**
- * An object to represent the action and monitor for a missing inline depth/entity relation. For instance, if spaces are missing from an
- * organisation then the action would be for GetAllOrganisationSpaces and the paginationMonitor would contain a monitor for that pagination
- * section
- * //TODO: RC check
- * @export
- * @interface ValidateEntityResult
- */
-export interface ValidateEntityResult {
-  action: Action;
-  fetchingState$?: Observable<ValidateResultFetchingState>;
+export class ValidationResult {
+  started: boolean;
+  completed: Promise<boolean[]>;
 }
 
-export class tempAppStore { // TODO: RC
+class AppStoreLayout {
   [entityKey: string]: {
     [guid: string]: any;
   }
 }
 
-export class ValidationResult {
-  started: boolean;
-  completed: Promise<boolean[]>;
+interface ListRelationsResult {
+  maxDepth: number;
+  relations: string[];
+}
+
+interface ValidateResultFetchingState {
+  fetching: boolean;
+}
+
+/**
+ * An object to represent the action and status of a missing inline depth/entity relation.
+ * @export
+ * @interface ValidateEntityResult
+ */
+interface ValidateEntityResult {
+  action: Action;
+  fetchingState$?: Observable<ValidateResultFetchingState>;
 }
 
 class EntityTree {
@@ -97,9 +109,9 @@ const entityTreeCache: {
   [entityKey: string]: EntityTree
 } = {};
 
-export function generateEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
+export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
 
-export function entityRelationCreatePaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
+export function createEntityRelationPaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
 
 export function isEntityInlineParentAction(action: Action) {
   return action && !!action['includeRelations'];
@@ -113,8 +125,8 @@ function handleRelation(
   config: {
     cfGuid: string,
     store: any,
-    allEntities: tempAppStore,
-    newEntities: tempAppStore,
+    allEntities: AppStoreLayout,
+    newEntities: AppStoreLayout,
     parentRelation: EntityTreeRelation,
     parentEntity: APIResource,
     childRelation: EntityTreeRelation,
@@ -147,7 +159,7 @@ function handleRelation(
 
   let results = [];
   // Step 2) Determine what actions, if any, need to be raised given the state of the relationship and children
-  // No relevant relation, skip
+  // No relevant relation, skip //TODO: RC
 
   function createAction() {
     return childRelation.isArray ? new FetchRelationPaginatedAction(
@@ -156,7 +168,7 @@ function handleRelation(
       parentRelation,
       childRelation,
       includeRelations,
-      entityRelationCreatePaginationKey(parentRelation.entityKey, parentEntity.metadata.guid),
+      createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid),
       populateMissing,
       childEntitiesUrl
     ) : new FetchRelationSingleAction(
@@ -248,8 +260,8 @@ function validationLoop(
     cfGuid: string,
     store: Store<AppState>,
     includeRelations: string[],
-    allEntities: tempAppStore,
-    newEntities: tempAppStore,
+    allEntities: AppStoreLayout,
+    newEntities: AppStoreLayout,
     populateExisting: boolean,
     populateMissing: boolean,
     entities: any[],
@@ -329,8 +341,8 @@ function validationLoop(
 export function validateEntityRelations(
   cfGuid: string,
   store: Store<AppState>,
-  allEntities: tempAppStore,
-  newEntities: tempAppStore,
+  allEntities: AppStoreLayout,
+  newEntities: AppStoreLayout,
   action: IRequestAction,
   parentEntities: any[],
   populateMissing = false,
@@ -498,7 +510,7 @@ export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRela
   : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
   entityRelation.childRelations.forEach((relation, index, array) => {
-    const parentChildKey = generateEntityRelationKey(entityRelation.entityKey, relation.entityKey);
+    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entityKey);
     if (includeRelations.indexOf(parentChildKey) >= 0) {
       const clone = { ...relation };
       newChildRelations.push(clone);

@@ -152,7 +152,6 @@ function getObservables<T = any>(
         tap(([ent, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
-            // TODO: RC endpoints
             lastValidationFootprint = newValidationFootprint;
             store.dispatch(new ValidateEntitiesStart(
               action,

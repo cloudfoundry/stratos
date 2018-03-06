@@ -19,7 +19,7 @@ import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
 import { routeSchemaKey, domainSchemaKey, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
-import { generateEntityRelationKey } from '../../../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.helpers';
 
 @Component({
   selector: 'app-add-routes',
@@ -231,7 +231,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             );
           } else {
             this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid,
-              generateEntityRelationKey(applicationSchemaKey, domainSchemaKey)
+              createEntityRelationKey(applicationSchemaKey, domainSchemaKey)
             ));
             this.store.dispatch(
               new RouterNav({

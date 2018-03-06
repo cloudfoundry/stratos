@@ -13,7 +13,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { applicationSchemaKey, routeSchemaKey } from '../../../store/helpers/entity-factory';
 import { entityFactory } from '../../../store/helpers/entity-factory';
 import { schema } from 'normalizr';
-import { generateEntityRelationKey } from '../../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations.helpers';
 
 
 const applicationServiceFactory = (

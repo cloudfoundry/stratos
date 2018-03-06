@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, organisationWithSpaceKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
-import { generateEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -31,7 +31,7 @@ export class CfOrgSpaceDataService {
   public space: CfOrgSpaceItem;
 
   public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, [
-    generateEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
+    createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
   ]);
 
   // TODO: We should optimise this to only fetch the orgs for the current endpoint
@@ -120,7 +120,7 @@ export class CfOrgSpaceDataService {
         }
         return [];
       }
-      );
+    );
 
     this.org = {
       list$: orgList$,

@@ -45,17 +45,17 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { generateEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
     guid,
     endpointGuid, [
-      generateEntityRelationKey(applicationSchemaKey, routeSchemaKey),
-      generateEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-      generateEntityRelationKey(applicationSchemaKey, stackSchemaKey),
-      generateEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      generateEntityRelationKey(spaceSchemaKey, domainSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, stackSchemaKey),
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, domainSchemaKey),
     ]
   );
 }

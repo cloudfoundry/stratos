@@ -8,7 +8,7 @@ import { organisationWithSpaceKey } from '../../../../../store/helpers/entity-fa
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { generateEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
 
 const orgWithSpaceSchema = entityFactory(organisationWithSpaceKey);
 const spaceSchema = entityFactory(spaceSchemaKey);
@@ -20,8 +20,8 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
     const { paginationKey } = CfOrgsDataSourceService;
     const action = new GetAllOrganisations(
       paginationKey, [
-        generateEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
-        generateEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+        createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       ]);
     super({
       store,
