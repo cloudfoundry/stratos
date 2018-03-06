@@ -101,6 +101,7 @@ const testInitialStoreState: AppState = {
     },
     pagination: {
       securityGroup:{},
+      buildpack: {},
       application: {
         applicationWall: {
           pageCount: 1,
@@ -581,6 +582,7 @@ const testInitialStoreState: AppState = {
     request: {
       securityGroup:{},
       securityRule:{},
+      buildpack:{},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
@@ -3823,6 +3825,7 @@ const testInitialStoreState: AppState = {
     requestData: {
       securityGroup: {},
       securityRule: {},
+      buildpack: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           entity: {

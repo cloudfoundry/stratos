@@ -90,6 +90,7 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 import { SecurityRuleComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/security-rule/security-rule.component';
 import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 
 /* tslint:enable:max-line-length */
 
@@ -166,7 +167,8 @@ import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-s
     CardCfSpaceDetailsComponent,
     TableCellRouteAppsAttachedComponent,
     CfStacksCardComponent,
-    SecurityRuleComponent
+    SecurityRuleComponent,
+    BooleanIndicatorComponent
   ],
   exports: [
     FormsModule,

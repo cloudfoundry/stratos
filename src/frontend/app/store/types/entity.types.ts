@@ -24,6 +24,7 @@ export interface IRequestDataState extends IRequestTypeState {
   domain: IRequestEntityTypeState<APIResource>;
   user: IRequestEntityTypeState<APIResource>;
   securityGroup: IRequestEntityTypeState<APIResource>;
+  buildpack: IRequestEntityTypeState<APIResource>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -40,6 +41,7 @@ export interface IRequestState extends IRequestTypeState {
   domain: IRequestEntityTypeState<RequestInfoState>;
   user: IRequestEntityTypeState<RequestInfoState>;
   securityGroup: IRequestEntityTypeState<APIResource>;
+  buildpack: IRequestEntityTypeState<RequestInfoState>;
 }
 
 export const defaultCfEntitiesState = {
@@ -54,6 +56,7 @@ export const defaultCfEntitiesState = {
   user: {},
   domain: {},
   securityGroup: {},
+  buildpack: {},
   [AppEnvVarSchema.key]: {},
   [AppStatSchema.key]: {},
   [AppSummarySchema.key]: {}
