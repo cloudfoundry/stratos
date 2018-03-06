@@ -164,13 +164,6 @@ export class ApplicationService {
 
   private constructCoreObservables() {
     // First set up all the base observables
-
-    // TODO: RC Remove
-    this.appEntityService.entityObs$.do(entityOb => console.log(this.appGuid + ' - entityObs', entityOb.entityRequestInfo.updating[rootUpdatingKey])).subscribe();
-    this.appEntityService.waitForEntity$.do(entityOb => console.log(this.appGuid + ' - waitForEntity', entityOb.entityRequestInfo.updating[rootUpdatingKey])).subscribe();
-
-
-
     this.app$ = this.appEntityService.waitForEntity$;
 
     // App org and space
@@ -239,11 +232,6 @@ export class ApplicationService {
           appUrl: this.getAppUrl(entity)
         };
       }).shareReplay(1);
-
-    //TODO: RC remove
-    // this.applicationStack$ = this.waitForAppEntity$.map(({ entity, entityRequestInfo }: EntityInfo<APIResource>) => {
-    //   return this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
-    // })
 
     this.applicationState$ = this.waitForAppEntity$
       .combineLatest(this.appStats$.startWith(null))

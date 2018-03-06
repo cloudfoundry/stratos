@@ -65,12 +65,10 @@ export class EntityService<T = any> {
           return;
         }
         const firstTime = !prevResult.entity && !!result.entity;
-        // const changed = firstTime
-        //   || (this.isEntityChanging(oldEntity.entityRequestInfo) && !this.isEntityChanging(newEntity.entityRequestInfo));
         if (firstTime && !this.isEntityBlocked(result.entityRequestInfo)) {
           store.dispatch(new ValidateEntitiesStart(
-            action as ICFAction, // TODO: RC needs options and actions.. but in theory just anything with entity
-            [result.entity.metadata.guid], // TODO: RC
+            action as ICFAction,
+            [result.entity.metadata.guid],
             false
           ));
         }
@@ -134,7 +132,7 @@ export class EntityService<T = any> {
       entityRequestInfo.error ||
       entityRequestInfo.deleting.busy ||
       entityRequestInfo.deleting.deleted ||
-      entityRequestInfo.updating._root_.busy
+      entityRequestInfo.updating._root_.busy;
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {

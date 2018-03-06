@@ -392,7 +392,7 @@ export class APIEffect {
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
       const relationInfo = listRelations(action as EntityInlineParentAction);
-      if (relationInfo.maxDepth > 1) {
+      if (relationInfo.maxDepth > 0) {
         options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
       }
       if (relationInfo.relations.length) {

@@ -1,6 +1,6 @@
 import { Action } from '@ngrx/store';
 
-import { tempAppStore, ValidationResult } from '../helpers/entity-relations.helpers';
+import { ValidationResult } from '../helpers/entity-relations.helpers';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
@@ -17,27 +17,26 @@ export const RequestTypes = {
 };
 
 export const EntitiesPipelineActionTypes = {
-  FETCH: '[Entities Pipeline] Fetch',
+  // FETCH: '[Entities Pipeline] Fetch',
   VALIDATE: '[Entities Pipeline] Validating',
   COMPLETE: '[Entities Pipeline] Completed',
 };
 
 export type EntitiesPipelineAction = ICFAction | PaginatedAction;
 
-// TODO: RC Delete
-export class FetchEntities implements Action {
-  type = EntitiesPipelineActionTypes.FETCH;
-  constructor(
-    public action: EntitiesPipelineAction,
-    public haveStarted: boolean,
-    public config: {
-      guids: () => any[],
-      shouldFetch: () => boolean
-    },
-  ) {
+// export class FetchEntities implements Action {
+//   type = EntitiesPipelineActionTypes.FETCH;
+//   constructor(
+//     public action: EntitiesPipelineAction,
+//     public haveStarted: boolean,
+//     public config: {
+//       guids: () => any[],
+//       shouldFetch: () => boolean
+//     },
+//   ) {
 
-  }
-}
+//   }
+// }
 
 export class ValidateEntitiesStart implements Action {
   type = EntitiesPipelineActionTypes.VALIDATE;

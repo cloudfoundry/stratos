@@ -1,9 +1,7 @@
-import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Store } from '@ngrx/store';
 import { first, map, mergeMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
@@ -11,17 +9,16 @@ import { UtilsService } from '../../core/utils.service';
 import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
 import {
   APIResponse,
-  EntitiesPipelineCompleted,
   EntitiesPipelineActionTypes,
-  FetchEntities,
+  EntitiesPipelineCompleted,
   ValidateEntitiesStart,
-  RequestTypes,
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
-import { validateEntityRelations, ValidationResult } from '../helpers/entity-relations.helpers';
+import { validateEntityRelations } from '../helpers/entity-relations.helpers';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, UpdateCfAction } from '../types/request.types';
+import { UpdateCfAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 
 @Injectable()
 export class RequestEffect {
@@ -32,23 +29,38 @@ export class RequestEffect {
     private logger: LoggerService,
   ) { }
 
-  // TODO: RC DELETE
-  @Effect() fetchEntities$ = this.actions$.ofType<FetchEntities>(EntitiesPipelineActionTypes.FETCH).pipe(
-    mergeMap((action): Action[] => {
-      const fetchAction: FetchEntities = action;
-      const guids = fetchAction.config.guids();
-      if (guids && this.canValidateAction(fetchAction.action)) {
-        return [new ValidateEntitiesStart(
-          fetchAction.action,
-          guids,
-          fetchAction.haveStarted
-        )];
-      } else {
-        return fetchAction.config.shouldFetch() ? [fetchAction.action] : [];
-      }
-    })
-  );
+  // @Effect() fetchEntities$ = this.actions$.ofType<FetchEntities>(EntitiesPipelineActionTypes.FETCH).pipe(
+  //   mergeMap((action): Action[] => {
+  //     const fetchAction: FetchEntities = action;
+  //     const guids = fetchAction.config.guids();
+  //     if (guids && this.canValidateAction(fetchAction.action)) {
+  //       return [new ValidateEntitiesStart(
+  //         fetchAction.action,
+  //         guids,
+  //         fetchAction.haveStarted
+  //       )];
+  //     } else {
+  //       return fetchAction.config.shouldFetch() ? [fetchAction.action] : [];
+  //     }
+  //   })
+  // );
 
+  /**
+   * Ensure all required inline parameters specified by the entity associated with the request exist.
+   * If the inline parameter/s are..
+   * - missing - dispatch an action to fetch them and, if a list, store in a pagination. This will also populate the parent entities inline
+   * parameter (see the generic request data reducer).
+   * - exist - if a list, dispatch an action to store them in pagination.
+   * For example
+   * 1) a space may require routes
+   * 2) space is fetched as part of a different call that has not requested a space's routes be fetched line
+   * 3) this validation process will check each space, and if routes are missing fetch them
+   * 4) routes list is then stored in original space and as a pagination section
+   * 5) alternatively... if we've reached here for the same space but from an api request for that space.. ensure that the routes have not
+   *    been dropped because their count is over 50
+   *
+   * @memberof RequestEffect
+   */
   @Effect() validateEntities$ = this.actions$.ofType<ValidateEntitiesStart>(EntitiesPipelineActionTypes.VALIDATE).pipe(
     mergeMap(action => {
       const validateAction: ValidateEntitiesStart = action;
@@ -57,11 +69,9 @@ export class RequestEffect {
 
       const apiResponse = validateAction.apiResponse;
 
-
       return this.store.select(getAPIRequestDataState).first().pipe(
         first(),
         map(allEntities => {
-          // this.logger.debug(`${apiAction['paginationKey']} - re - validateEntities - validateEntityRelations`);
           return validateEntityRelations(
             validateAction.action.endpointGuid,
             this.store,
@@ -70,7 +80,9 @@ export class RequestEffect {
             validateAction.action,
             validateAction.validateEntities,
             true,
-            validateAction.apiRequestStarted); // TODO: RC only populate missing if from api request, otherwise we've already popualted missing
+            // populateMissing: We only want to populate the store with missing entities if this is an api request. If this is a standard
+            // validation request any entity/entities we already have should already exist in the store
+            validateAction.apiRequestStarted);
         }),
         mergeMap(validation => {
           const independentUpdates = !validateAction.apiRequestStarted && validation.started;
@@ -113,11 +125,6 @@ export class RequestEffect {
   @Effect() completeEntities$ = this.actions$.ofType<EntitiesPipelineCompleted>(EntitiesPipelineActionTypes.COMPLETE).pipe(
     mergeMap(action => {
       const completeAction: EntitiesPipelineCompleted = action;
-      // console.log(completeAction.apiAction['entityKey'] + 'in complete');
-      // if (completeAction.apiAction['entityKey'] === 'application') {
-      //   console.log('2ewrewrewr');
-      // }
-
       const actions = [];
       if (!completeAction.validateAction.apiRequestStarted && completeAction.validationResult.started) {
         if (completeAction.independentUpdates) {
@@ -159,10 +166,6 @@ export class RequestEffect {
     }));
 
 
-  canValidateAction = (object) => {
-    return false; // object['entity'];// TODO: RC
-  }
-
   update(apiAction, busy: boolean, error: string) {
     if (apiAction['paginationKey']) {
       this.store.dispatch({
@@ -186,13 +189,4 @@ export class RequestEffect {
 
 
 
-  // TODO: RC Junk
-  /**
-   * Ensure all required inline parameters specified by the entity associated with the request exist.
-   * If the inline parameter/s are..
-   * - missing - dispatch an action to fetch them and ultimately store in a pagination. This will also populate the parent entities inline
-   * parameter (see the generic request data reducer).
-   * - exist - dispatch an action to store them in pagination.
-   *
-   * @memberof RequestEffect
-   */
+

@@ -1,17 +1,16 @@
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { combineAll, filter, shareReplay, switchMap, tap, first } from 'rxjs/operators';
+import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
+import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
-import { RequestTypes, FetchEntities, ValidateEntitiesStart } from '../../actions/request.actions';
-import { validateEntityRelations } from '../../helpers/entity-relations.helpers';
 
 export interface PaginationObservables<T> {
   pagination$: Observable<PaginationEntityState>;
@@ -147,23 +146,23 @@ function getObservables<T = any>(
       fetchPagination$
     )
       .pipe(
-      filter(([ent, pagination]) => {
-        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
-      }),
-      tap(([ent, pagination]) => {
-        const newValidationFootprint = getPaginationCompareString(pagination);
-        if (lastValidationFootprint !== newValidationFootprint) {
-          // TODO: RC endpoints
-          lastValidationFootprint = newValidationFootprint;
-          store.dispatch(new ValidateEntitiesStart(
-            action,
-            pagination.ids[pagination.currentPage],
-            false
-          ));
-        }
-      }),
-      switchMap(() => paginationMonitor.currentPage$),
-      shareReplay(1)
+        filter(([ent, pagination]) => {
+          return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+        }),
+        tap(([ent, pagination]) => {
+          const newValidationFootprint = getPaginationCompareString(pagination);
+          if (lastValidationFootprint !== newValidationFootprint) {
+            // TODO: RC endpoints
+            lastValidationFootprint = newValidationFootprint;
+            store.dispatch(new ValidateEntitiesStart(
+              action,
+              pagination.ids[pagination.currentPage],
+              false
+            ));
+          }
+        }),
+        switchMap(() => paginationMonitor.currentPage$),
+        shareReplay(1)
       );
 
   return {
