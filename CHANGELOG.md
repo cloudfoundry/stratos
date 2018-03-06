@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.0.2 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.0...1.0.2)
+
+**Improvements:**
+
+- Added Confirmation prompts for stopping and restarting apps [\#1437](https://github.com/SUSE/stratos-ui/pull/1437)
+
+**Fixes:**
+
+- Memory and disk usage should respect the number of app instances [\#1625](https://github.com/SUSE/stratos-ui/pull/1625)
+- Fix issue around apps and routes missing from space entity [\#1447](https://github.com/SUSE/stratos-ui/pull/1447)
+- Fix minor localisation issue [\#1596](https://github.com/cloudfoundry-incubator/stratos/pull/1596)
+
 ## 1.0.0 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.9...1.0.0)
