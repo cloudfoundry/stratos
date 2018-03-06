@@ -13,26 +13,14 @@ export function updateRequest(state, action: IUpdateRequestAction) {
   const apiAction = action.apiAction as IRequestAction;
   const requestState = getEntityRequestState(state, apiAction);
 
-  if (apiAction.updatingKey) {
-    requestState.updating = mergeUpdatingState(
-      apiAction,
-      requestState.updating,
-      {
-        busy: true,
-        error: false,
-        message: '',
-      }
-    );
-  } else {
-    requestState.updating = mergeUpdatingState(
-      apiAction,
-      requestState.updating,
-      {
-        busy: false,
-        error: false,
-        message: '',
-      }
-    );
-  }
+  requestState.updating = mergeUpdatingState(
+    apiAction,
+    requestState.updating,
+    {
+      busy: !!apiAction.updatingKey,
+      error: !!action.error,
+      message: '',
+    }
+  );
   return setEntityRequestState(state, requestState, action.apiAction);
 }

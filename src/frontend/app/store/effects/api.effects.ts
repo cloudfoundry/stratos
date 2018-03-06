@@ -55,7 +55,7 @@ export class APIEffect {
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options };
-    const requestType = getRequestTypeFromMethod(apiAction.options.method);
+    const requestType = getRequestTypeFromMethod(apiAction);
 
     this.store.dispatch(new StartRequestAction(actionClone, requestType));
     this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
@@ -392,8 +392,12 @@ export class APIEffect {
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
       const relationInfo = listRelations(action as EntityInlineParentAction);
-      options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
-      options.params.set('include-relations', relationInfo.relations.join(','));
+      if (relationInfo.maxDepth > 1) {
+        options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
+      }
+      if (relationInfo.relations.length) {
+        options.params.set('include-relations', relationInfo.relations.join(','));
+      }
     }
   }
 }

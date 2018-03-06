@@ -5,6 +5,7 @@ import { PaginationAction, PaginationEntityState } from '../../types/pagination.
 
 export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {
   const { apiAction } = action;
+  const params = getParams(apiAction);
   const totalResults = action.totalResults || (action.response ? action.response.result.length : state.totalResults);
   const totalPages = action.totalPages || (action.response ? action.response.totalPages : state.pageCount);
   const page = action.apiAction.pageNumber || state.currentPage;

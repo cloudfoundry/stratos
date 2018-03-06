@@ -8,7 +8,7 @@ import { first, map, mergeMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
-import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
+import { ClearPaginationOfEntity, ClearPaginationOfType, SET_PAGE_BUSY } from '../actions/pagination.actions';
 import {
   APIResponse,
   EntitiesPipelineCompleted,
@@ -32,7 +32,6 @@ export class RequestEffect {
     private logger: LoggerService,
   ) { }
 
-
   // TODO: RC DELETE
   @Effect() fetchEntities$ = this.actions$.ofType<FetchEntities>(EntitiesPipelineActionTypes.FETCH).pipe(
     mergeMap((action): Action[] => {
@@ -54,9 +53,10 @@ export class RequestEffect {
     mergeMap(action => {
       const validateAction: ValidateEntitiesStart = action;
       const apiAction = validateAction.action;
-      const requestType = getRequestTypeFromMethod(apiAction.options.method);
+      const requestType = getRequestTypeFromMethod(apiAction);
 
       const apiResponse = validateAction.apiResponse;
+
 
       return this.store.select(getAPIRequestDataState).first().pipe(
         first(),
@@ -73,48 +73,39 @@ export class RequestEffect {
             validateAction.apiRequestStarted); // TODO: RC only populate missing if from api request, otherwise we've already popualted missing
         }),
         mergeMap(validation => {
-          if (!validateAction.apiRequestStarted && validation.started) {
-            // this.logger.debug(`${apiAction['paginationKey']} - re - validateEntities - StartRequestAction`);
-            if (apiAction['paginationKey']) {
-
-            } else {
-              this.store.dispatch({
-                type: RequestTypes.UPDATE,
-                apiAction: {
-                  ...apiAction,
-                  updatingKey: rootUpdatingKey
-                }
-              });
-            }
-            // this.store.dispatch(new StartRequestAction(apiAction, requestType));
-            // this.store.dispatch({ type: apiAction.actions[0] });
+          const independentUpdates = !validateAction.apiRequestStarted && validation.started;
+          if (independentUpdates) {
+            this.update(apiAction, true, null);
           }
-          return validation.completed.then(() => validation);
+          return validation.completed.then(() => ({
+            independentUpdates,
+            validation
+          }));
         }),
-        mergeMap((validationResult: ValidationResult) => {
-          // console.log(action.action['entityKey'] + 'after validation.completed$');
-          // if (action.action['entityKey'] === 'application') {
-          //   console.log('ewrewrewr');
-          // }
-
+        mergeMap(({ independentUpdates, validation }) => {
           return [new EntitiesPipelineCompleted(
             apiAction,
             apiResponse,
             validateAction,
-            validationResult
+            validation,
+            independentUpdates
           )];
-          // this.logger.debug(`${apiAction['paginationKey']} - re - validateEntities -  ${validateAction.haveStarted || validation.started}`);
         })
       ).catch(error => {
         this.logger.warn(`Entity validation process failed`, error);
-        return [
-          { type: apiAction.actions[2], apiAction: apiAction },
-          new WrapperRequestActionFailed(
-            error.message,
-            apiAction,
-            requestType
-          )
-        ];
+        if (validateAction.apiRequestStarted) {
+          return [
+            { type: apiAction.actions[2], apiAction: apiAction },
+            new WrapperRequestActionFailed(
+              error.message,
+              apiAction,
+              requestType
+            )
+          ];
+        } else {
+          this.update(apiAction, false, error.message);
+          return [];
+        }
       });
     })
   );
@@ -122,29 +113,20 @@ export class RequestEffect {
   @Effect() completeEntities$ = this.actions$.ofType<EntitiesPipelineCompleted>(EntitiesPipelineActionTypes.COMPLETE).pipe(
     mergeMap(action => {
       const completeAction: EntitiesPipelineCompleted = action;
-      console.log(completeAction.apiAction['entityKey'] + 'in complete');
-      if (completeAction.apiAction['entityKey'] === 'application') {
-        console.log('2ewrewrewr');
-      }
+      // console.log(completeAction.apiAction['entityKey'] + 'in complete');
+      // if (completeAction.apiAction['entityKey'] === 'application') {
+      //   console.log('2ewrewrewr');
+      // }
 
       const actions = [];
       if (!completeAction.validateAction.apiRequestStarted && completeAction.validationResult.started) {
-        if (completeAction.apiAction['paginationKey']) {
-
-        } else {
-          actions.push({
-            type: RequestTypes.UPDATE,
-            apiAction: {
-              ...completeAction.apiAction,
-            }
-          });
+        if (completeAction.independentUpdates) {
+          this.update(completeAction.apiAction, false, null);
         }
-
-
       } else if (completeAction.validateAction.apiRequestStarted) {
 
         const apiAction = completeAction.apiAction;
-        const requestType = getRequestTypeFromMethod(apiAction.options.method);
+        const requestType = getRequestTypeFromMethod(apiAction);
         const apiResponse: APIResponse = completeAction.apiResponse || {
           response: null,
           totalPages: 0,
@@ -179,6 +161,25 @@ export class RequestEffect {
 
   canValidateAction = (object) => {
     return false; // object['entity'];// TODO: RC
+  }
+
+  update(apiAction, busy: boolean, error: string) {
+    if (apiAction['paginationKey']) {
+      this.store.dispatch({
+        type: SET_PAGE_BUSY,
+        busy: busy,
+        error: error,
+        apiAction
+      });
+    } else {
+      const newAction = {
+        ...apiAction,
+      };
+      if (busy) {
+        newAction.updatingKey = rootUpdatingKey;
+      }
+      this.store.dispatch(new UpdateCfAction(newAction, error));
+    }
   }
 
 }

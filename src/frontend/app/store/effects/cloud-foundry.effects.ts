@@ -40,7 +40,7 @@ export class CloudFoundryEffects {
           mergeMap(response => {
             const info = response.json();
             const mappedData = {
-              entities: { cloudFoundryInfo: {} },
+              entities: { [cfInfoSchemaKey]: {} },
               result: []
             } as NormalizedResponse;
             const id = action.cfGuid;

@@ -14,7 +14,7 @@ export const domainSchemaKey = 'domain';
 export const organisationSchemaKey = 'organization';
 export const quotaDefinitionSchemaKey = 'quota_definition';
 export const appEventSchemaKey = 'event';
-export const cfInfoSchemaKey = 'info';
+export const cfInfoSchemaKey = 'cloudFoundryInfo';
 export const endpointSchemaKey = 'endpoint';
 export const cfUserSchemaKey = 'user';
 export const appSummarySchemaKey = 'summary';
@@ -215,6 +215,8 @@ export function entityFactory(key: string): EntitySchema {
       return GithubCommitSchema;
     case quotaDefinitionSchemaKey:
       return QuotaDefinitionSchema;
+    case cfInfoSchemaKey:
+      return CFInfoSchema;
     // case routesInSpaceKey:
     //   return RoutesInSpaceSchema as T;
     // case spacesKey:

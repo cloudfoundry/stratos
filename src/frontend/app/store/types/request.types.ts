@@ -46,6 +46,7 @@ export interface IRequestAction extends RequestAction {
 
 export interface IUpdateRequestAction {
   apiAction: IRequestAction | PaginatedAction;
+  error: string;
 }
 
 export interface IStartRequestAction {
@@ -87,6 +88,7 @@ export abstract class RequestUpdateAction implements Action {
 export class UpdateCfAction extends RequestUpdateAction implements IUpdateRequestAction {
   constructor(
     public apiAction: ICFAction | PaginatedAction,
+    public error: string,
   ) {
     super();
   }

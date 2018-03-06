@@ -16,13 +16,14 @@ import {
   SET_CLIENT_PAGE_SIZE,
   SET_INITIAL_PARAMS,
   SET_PAGE,
+  SET_PAGE_BUSY,
   SET_PARAMS,
   SET_RESULT_COUNT,
 } from '../../actions/pagination.actions';
 import { ApiActionTypes } from '../../actions/request.actions';
 import { mergeState } from '../../helpers/reducer.helper';
 import { defaultCfEntitiesState } from '../../types/entity.types';
-import { PaginationEntityState, PaginationState, PaginationEntityTypeState } from '../../types/pagination.types';
+import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
 import { paginationAddParams } from './pagination-reducer-add-params';
 import { paginationClearPages } from './pagination-reducer-clear-pages';
 import { paginationClearOfEntity } from './pagination-reducer-clear-pagination-of-entity';
@@ -38,6 +39,7 @@ import { paginationSetParams } from './pagination-reducer-set-params';
 import { paginationSetResultCount } from './pagination-reducer-set-result-count';
 import { paginationStart } from './pagination-reducer-start';
 import { paginationSuccess } from './pagination-reducer-success';
+import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
 
@@ -98,6 +100,8 @@ const getPaginationUpdater = function (types: [string, string, string]) {
         return paginationSetClientPage(state, action);
       case SET_CLIENT_FILTER:
         return paginationSetClientFilter(state, action);
+      case SET_PAGE_BUSY:
+        return paginationPageBusy(state, action);
       default:
         return state;
     }

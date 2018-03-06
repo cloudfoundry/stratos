@@ -62,7 +62,8 @@ export class EntitiesPipelineCompleted implements Action {
     public apiAction: EntitiesPipelineAction,
     public apiResponse: APIResponse,
     public validateAction: ValidateEntitiesStart,
-    public validationResult: ValidationResult
+    public validationResult: ValidationResult,
+    public independentUpdates: boolean
   ) {
 
   }

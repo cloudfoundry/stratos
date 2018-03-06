@@ -297,6 +297,7 @@ function validationLoop(
         results = [].concat(results,
           validationLoop({
             ...config,
+            cfGuid: cfGuid || entity.entity.cfGuid,
             entities: childRelation.isArray ? childEntities : [childEntities],
             parentRelation: childRelation
           }));
@@ -334,6 +335,13 @@ export function validateEntityRelations(
   parentEntities: any[],
   populateMissing = false,
   populateExisting = false): ValidationResult {
+
+  if (!action.entity || !parentEntities || parentEntities.length === 0) {
+    return {
+      started: false,
+      completed: Promise.resolve([])
+    };
+  }
 
   const startTime = new Date().getTime().toString();
   console.group(startTime);
