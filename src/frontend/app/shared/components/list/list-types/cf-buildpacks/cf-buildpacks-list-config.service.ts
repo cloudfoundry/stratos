@@ -7,23 +7,15 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
 import { BaseCF } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ListView } from '../../../../../store/actions/list.actions';
+import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 
 @Injectable()
-export class CfBuildpacksListConfigService implements IListConfig<APIResource> {
-  viewType = ListViewTypes.CARD_ONLY;
+export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource> {
   dataSource: CfBuildpacksDataSource;
-  pageSizeOptions = [9, 45, 90];
-  cardComponent = CfBuildpackCardComponent;
-  defaultView = 'cards' as ListView;
-  getColumns = () => [];
-
   constructor(private store: Store<AppState>, private baseCF: BaseCF) {
+    super();
     this.dataSource = new CfBuildpacksDataSource(this.store, baseCF.guid, this);
+    this.cardComponent = CfBuildpackCardComponent;
   }
-
-  getGlobalActions = () => [];
-  getMultiActions = () => [];
-  getSingleActions = () => [];
-  getMultiFiltersConfigs = () => [];
   getDataSource = () => this.dataSource;
 }
