@@ -21,10 +21,10 @@ export class BooleanIndicatorComponent implements OnInit {
   @Input('type') type: BooleanIndicatorType;
 
   private icons = {
-    Yes: 'check_circle',
+    Yes: 'check',
     Enabled: 'check_circle',
     True: 'check_circle',
-    No: 'block',
+    No: 'close',
     Disabled: 'block',
     False: 'block',
     Locked: 'lock_outline',

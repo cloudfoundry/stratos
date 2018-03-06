@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../core/core.module';
-import { BooleanIndicatorComponent } from './boolean-indicator.component';
+import { BooleanIndicatorComponent, BooleanIndicatorType } from './boolean-indicator.component';
 
 describe('BooleanIndicatorComponent', () => {
   let component: BooleanIndicatorComponent;
@@ -19,6 +19,7 @@ describe('BooleanIndicatorComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(BooleanIndicatorComponent);
     component = fixture.componentInstance;
+    component.type = BooleanIndicatorType.enabledDisabled;
     fixture.detectChanges();
   });
 

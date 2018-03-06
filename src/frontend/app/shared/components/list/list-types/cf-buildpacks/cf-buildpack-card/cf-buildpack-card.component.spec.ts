@@ -5,6 +5,7 @@ import {
   getMetadataCardComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfBuildpackCardComponent } from './cf-buildpack-card.component';
+import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 
 describe('CfBuildpackCardComponent', () => {
   let component: CfBuildpackCardComponent;
@@ -12,7 +13,7 @@ describe('CfBuildpackCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfBuildpackCardComponent, ...getMetadataCardComponents],
+      declarations: [CfBuildpackCardComponent, ...getMetadataCardComponents, BooleanIndicatorComponent],
       imports: [...getBaseTestModulesNoShared]
     })
       .compileComponents();
