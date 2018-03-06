@@ -30,7 +30,6 @@ export const listCards = [
   CfSpaceCardComponent,
   CfBuildpackCardComponent,
   CfSecurityGroupsCardComponent,
-  CfBuildpackCardComponent,
   CfStacksCardComponent
 ];
 

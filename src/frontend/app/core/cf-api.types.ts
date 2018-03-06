@@ -57,6 +57,7 @@ export interface ISecurityGroup {
   running_default: boolean;
   staging_default: boolean;
   spaces_url: string;
+  spaces?: APIResource<ISpace>[];
   staging_spaces_url: string;
 }
 

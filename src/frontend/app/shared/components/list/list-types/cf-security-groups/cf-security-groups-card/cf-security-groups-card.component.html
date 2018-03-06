@@ -12,11 +12,15 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Staging Default</app-meta-card-key>
-    <app-meta-card-value>{{ row.entity.staging_default }}</app-meta-card-value>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="row.entity.staging_default" type="yesNo"></app-boolean-indicator>
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Running Default</app-meta-card-key>
-    <app-meta-card-value>{{ row.entity.running_default }}</app-meta-card-value>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="row.entity.running_default" type="yesNo"></app-boolean-indicator>
+    </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Spaces</app-meta-card-key>

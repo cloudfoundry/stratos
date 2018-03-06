@@ -167,8 +167,8 @@ import { BooleanIndicatorComponent } from './components/boolean-indicator/boolea
     CfSpacePermissionCellComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    CfStacksCardComponent,
     CfBuildpackCardComponent,
+    CfStacksCardComponent,
     SecurityRuleComponent,
     BooleanIndicatorComponent
   ],

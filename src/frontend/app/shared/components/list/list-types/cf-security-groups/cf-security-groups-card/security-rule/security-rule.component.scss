@@ -1,11 +1,11 @@
 .security-rule {
+  border: 1px solid #000;
   display: flex;
   flex-direction: row;
-  border: 1px solid black;
   margin-bottom: 2px;
   &__type {
-    margin-right: 6px;
     margin-left: 3px;
+    margin-right: 6px;
   }
   &__rule {
     margin-right: 3px;

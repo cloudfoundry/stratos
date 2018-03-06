@@ -101,6 +101,7 @@ const testInitialStoreState: AppState = {
     },
     pagination: {
       featureFlag: {},
+      securityGroup:{},
       buildpack: {},
       application: {
         applicationWall: {
@@ -586,6 +587,7 @@ const testInitialStoreState: AppState = {
       serviceBinding: {},
       securityGroup: {},
       featureFlag: {},
+      securityRule:{},
       buildpack:{},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
@@ -3833,6 +3835,7 @@ const testInitialStoreState: AppState = {
       serviceBinding: {},
       securityGroup: {},
       featureFlag: {},
+      securityRule: {},
       buildpack: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
