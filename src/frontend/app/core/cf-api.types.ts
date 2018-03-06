@@ -149,6 +149,11 @@ export interface IDomain {
   router_group_type?: any;
 }
 
+export interface IStack {
+  name: string;
+  description: string;
+}
+
 export interface IBuildpack {
   name: string;
   position: number;

@@ -1,4 +1,5 @@
 import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import { APIResource } from '../../store/types/api.types';
 
 export enum OrgUserRoles {
   MANAGER = 'managers',
@@ -112,3 +113,6 @@ function hasRole(user: CfUser, guid: string, roleType: string) {
   return user[roleType] && user[roleType].find(o => o.metadata.guid === guid) != null;
 }
 
+export const getRowUniqueId = (entity: APIResource) => {
+  return entity.metadata ? entity.metadata.guid : null;
+};
