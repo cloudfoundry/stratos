@@ -17,7 +17,6 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
-          // TODO: RC
           // Does the entity associated with the action have a parent property that requires the result to be stored with it?
           // For example we have fetched a list of spaces that need to be stored in an organisation's entity?
           const entities = populateParentEntity(state, success) || success.response.entities;
@@ -52,7 +51,6 @@ function populateParentEntity(state, successAction) {
   if (!fetchRelationAction) {
     return;
   }
-  // TODO: RC comments
   // Do we actually have any entities to store in a parent?
   const response = successAction.response;
   let entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};

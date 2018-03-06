@@ -80,7 +80,7 @@ export class EntityService<T = any> {
     this.waitForEntity$ = this.entityObs$.pipe(
       filter((ent) => {
         const { entityRequestInfo, entity } = ent;
-        return !this.isEntityBlocked(entityRequestInfo);
+        return this.isEntityAvailable(entity, entityRequestInfo);
       }),
       shareReplay(1)
     );
@@ -122,6 +122,10 @@ export class EntityService<T = any> {
           entity: entity ? entity : null
         };
       });
+  }
+
+  private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
+    return entity && !this.isEntityBlocked(entityRequestInfo);
   }
 
   private isEntityBlocked(entityRequestInfo: RequestInfoState) {

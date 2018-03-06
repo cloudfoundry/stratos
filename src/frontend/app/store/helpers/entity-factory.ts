@@ -3,12 +3,9 @@ import { Schema, schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 
 export const applicationSchemaKey = 'application';
-// export const applicationWithoutSpaceRelationKey = 'applicationWithoutSpace';
-// export const applicationWithoutSpaceAppsRelationKey = 'applicationWithoutSpaceApps';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
 export const spaceWithOrgRelationKey = 'spaceWithOrg';
-// export const spaceWithoutAppsRelationKey = 'spaceWithoutApps';
 export const routeSchemaKey = 'route';
 export const domainSchemaKey = 'domain';
 export const organisationSchemaKey = 'organization';
@@ -22,7 +19,7 @@ export const appStatsSchemaKey = 'stats';
 export const appEnvVarsSchemaKey = 'environmentVars';
 export const githubBranchesSchemaKey = 'githubBranches';
 export const githubRepoSchemaKey = 'githubRepo';
-export const githubCommitSchemaKey = 'githubBranches';
+export const githubCommitSchemaKey = 'githubCommits';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 export const routesInSpaceKey = 'routesInSpace';
@@ -37,7 +34,6 @@ export class EntitySchema extends schema.Entity {
     }
   }
 }
-
 
 export const AppSummarySchema = new EntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
 export const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
@@ -84,21 +80,6 @@ export const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
 
 );
 
-// export const ApplicationWithoutSpaceAppsEntitySchema = new EntitySchema(
-//   applicationSchemaKey,
-//   {
-//     entity: {
-//       space: SpaceWithoutAppsSchema,
-//       stack: StackSchema,
-//       routes: [RouteSchema]
-//     }
-//   },
-//   {
-//     idAttribute: getAPIResourceGuid
-//   },
-//   applicationWithoutSpaceAppsRelationKey
-// );
-
 export const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
@@ -107,8 +88,6 @@ export const SpaceSchema = new EntitySchema(spaceSchemaKey, {
 }, {
     idAttribute: getAPIResourceGuid
   });
-
-
 
 export const OrganisationSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
@@ -128,7 +107,7 @@ export const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
 }, {
     idAttribute: getAPIResourceGuid
   },
-  spaceWithOrgRelationKey); // TODO: RC everywhere
+  spaceWithOrgRelationKey);
 
 export const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
   entity: {

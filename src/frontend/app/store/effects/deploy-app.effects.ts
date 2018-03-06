@@ -98,11 +98,11 @@ export class DeployAppEffects {
         .mergeMap(response => {
           const commit = response.json();
           const mappedData = {
-            entities: { githubCommits: {} },
+            entities: { [githubCommitSchemaKey]: {} },
             result: []
           } as NormalizedResponse;
           const commitId = commit.sha;
-          mappedData.entities.githubCommits[commitId] = {
+          mappedData.entities[githubCommitSchemaKey][commitId] = {
             entity: commit,
             metadata: {}
           };
