@@ -213,3 +213,20 @@ export interface IStack {
   name: string;
   description: string;
 }
+export interface IInfo {
+  name: string;
+  build: string;
+  support: string;
+  version: number;
+  description: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  min_cli_version?: any;
+  min_recommended_cli_version?: any;
+  api_version: string;
+  app_ssh_endpoint: string;
+  app_ssh_host_key_fingerprint: string;
+  app_ssh_oauth_client: string;
+  routing_endpoint: string;
+  doppler_logging_endpoint: string;
+}

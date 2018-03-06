@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
+import { IInfo } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -21,12 +22,14 @@ import { BaseCF } from '../cf-page.types';
 import { IOrganization, ISpace, IApp } from '../../../core/cf-api.types';
 @Injectable()
 export class CloudFoundryEndpointService {
+  hasSSHAccess$: Observable<boolean>;
+  totalMem$: Observable<number>;
   paginationSubscription: any;
   allApps$: Observable<APIResource<IApp>[]>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
-  info$: Observable<EntityInfo<any>>;
-  cfInfoEntityService: EntityService<any>;
+  info$: Observable<EntityInfo<APIResource<IInfo>>>;
+  cfInfoEntityService: EntityService<APIResource<IInfo>>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
@@ -49,27 +52,22 @@ export class CloudFoundryEndpointService {
       new GetAllEndpoints()
     );
 
-    this.cfInfoEntityService = this.entityServiceFactory.create(
+    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<IInfo>>(
       CF_INFO_ENTITY_KEY,
       CFInfoSchema,
       this.cfGuid,
       new GetEndpointInfo(this.cfGuid)
     );
     this.constructCoreObservables();
+    this.constructSecondaryObservable();
   }
 
   constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
 
-    this.connected$ = this.endpoint$.pipe(
-      map(p => p.entity.connectionStatus === 'connected')
-    );
-
     this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.cfGuid);
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
-
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
@@ -89,6 +87,24 @@ export class CloudFoundryEndpointService {
     );
 
     this.fetchDomains();
+  }
+
+  constructSecondaryObservable() {
+
+    this.hasSSHAccess$ = this.info$.pipe(
+      map(p => !!(p.entity.entity &&
+        p.entity.entity.app_ssh_endpoint &&
+        p.entity.entity.app_ssh_host_key_fingerprint &&
+        p.entity.entity.app_ssh_oauth_client))
+    );
+    this.totalMem$ = this.allApps$.pipe(map(a => this.getMetricFromApps(a, 'memory')));
+
+    this.connected$ = this.endpoint$.pipe(
+      map(p => p.entity.connectionStatus === 'connected')
+    );
+
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
+
   }
 
   getAppsInOrg(
@@ -124,7 +140,6 @@ export class CloudFoundryEndpointService {
       map(apps => this.getMetricFromApps(apps, statMetric))
     );
   }
-
   public getMetricFromApps(
     apps: APIResource<IApp>[],
     statMetric: string
