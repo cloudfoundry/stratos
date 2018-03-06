@@ -94,8 +94,7 @@
         source: {}
       },
       wizard: {
-        allowBack: true,
-        sourceType: 'git'
+        allowBack: true
       }
     };
 

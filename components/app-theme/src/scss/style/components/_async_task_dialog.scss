@@ -5,6 +5,10 @@ $async-dialog-footer-height: $button-height + $console-unit-space * 2 + 1;
   margin-right: $detail-view-margin;
   margin-left: $detail-view-margin;
 
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
   .spinner {
     display: flex;
     justify-content: center;

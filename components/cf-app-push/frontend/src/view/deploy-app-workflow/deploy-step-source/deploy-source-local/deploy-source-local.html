@@ -8,12 +8,12 @@
       <!-- File support only -->
       <label ng-if="!dplyLocalCtrl.folderSupport" class="form-control clickable" for="localPathSelectFile">
         <span ng-if="dplyLocalCtrl.userInput.localPath">{{ dplyLocalCtrl.userInput.localPath }}</span>
-        <span ng-if="!dplyLocalCtrl.userInput.localPath" translate>deploy-app-dialog.step-source.local.file.prompt</span>
+        <span ng-if="!dplyLocalCtrl.userInput.localPath" class="file-placeholder"  translate>deploy-app-dialog.step-source.local.file.prompt</span>
       </label>
       <!-- File and Folder support -->
       <label ng-if="dplyLocalCtrl.folderSupport" class="form-control">
         <span ng-if="dplyLocalCtrl.userInput.localPath">{{ dplyLocalCtrl.userInput.localPath }}</span>
-        <span ng-if="!dplyLocalCtrl.userInput.localPath" translate>deploy-app-dialog.step-source.local.folder.prompt</span>
+        <span ng-if="!dplyLocalCtrl.userInput.localPath" class="file-placeholder"  translate>deploy-app-dialog.step-source.local.folder.prompt</span>
         <label class="deploy-app-form-btn" for="localPathSelectFile">
           <i class="material-icons">insert_drive_file</i>
         </label>

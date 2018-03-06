@@ -6,11 +6,11 @@
     .directive('appDeploySourceLocal', DeploySourceLocal);
 
   /**
-   * @namespace cf-app-push.accountActions
+   * @namespace cf-app-push
    * @memberof cf-app-push
-   * @name DeploySourceGit
-   * @description ????????
-   * @returns {object} The ???????? directive definition object
+   * @name DeploySourceLocal
+   * @description Directive to aid user in selecting an archive or folder as a source to deploy an app from
+   * @returns {object} The appDeploySourceLocal directive definition object
    */
   function DeploySourceLocal() {
     return {
@@ -30,9 +30,9 @@
   }
 
   /**
-   * @namespace cf-app-push.DeploySourceGitController
+   * @namespace cf-app-push
    * @memberof cf-app-push
-   * @name DeploySourceGitController
+   * @name DeploySourceLocalController
    * @param {object} $translate - the angular $translate service
    * @param {object} $q - the angular $q service
    * @param {object} $scope - the angular $scope service
