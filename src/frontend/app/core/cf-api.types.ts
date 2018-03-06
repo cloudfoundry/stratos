@@ -161,3 +161,10 @@ export interface IBuildpack {
   locked: boolean;
   filename: string;
 }
+
+export interface IFeatureFlag {
+  name: string;
+  enabled: boolean;
+  url: string;
+  error_message: string;
+}

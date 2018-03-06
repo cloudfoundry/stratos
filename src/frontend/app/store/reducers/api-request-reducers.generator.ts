@@ -14,6 +14,7 @@ import {
   AppSummarySchema,
   AppStatSchema
 } from '../types/app-metadata.types';
+import { FeatureFlagSchema } from '../actions/feature-flags.actions';
 import {
   GITHUB_BRANCHES_ENTITY_KEY,
   GITHUB_COMMIT_ENTITY_KEY
@@ -78,7 +79,8 @@ const entities = [
   GITHUB_COMMIT_ENTITY_KEY,
   AppEnvVarSchema.key,
   AppStatSchema.key,
-  AppSummarySchema.key
+  AppSummarySchema.key,
+  FeatureFlagSchema.key
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 

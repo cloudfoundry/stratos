@@ -163,7 +163,7 @@ import { BooleanIndicatorComponent } from './components/boolean-indicator/boolea
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     TableCellRouteAppsAttachedComponent,
-    BooleanIndicatorComponent,
+    BooleanIndicatorComponent
   ],
   exports: [
     FormsModule,

@@ -100,6 +100,7 @@ const testInitialStoreState: AppState = {
       message: ''
     },
     pagination: {
+      featureFlag: {},
       buildpack: {},
       application: {
         applicationWall: {
@@ -579,6 +580,7 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      featureFlag: {},
       buildpack:{},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
@@ -3820,6 +3822,7 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      featureFlag: {},
       buildpack: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
