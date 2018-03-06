@@ -1,5 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import { CoreModule } from '../../../core/core.module';
 import { BooleanIndicatorComponent } from './boolean-indicator.component';
 
 describe('BooleanIndicatorComponent', () => {
@@ -8,9 +10,10 @@ describe('BooleanIndicatorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BooleanIndicatorComponent ]
+      declarations: [BooleanIndicatorComponent],
+      imports: [CoreModule, NoopAnimationsModule]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
