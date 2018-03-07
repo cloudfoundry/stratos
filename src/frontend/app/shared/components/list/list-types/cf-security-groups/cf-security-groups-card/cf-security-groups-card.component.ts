@@ -1,7 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { ISecurityGroup, ISpace } from '../../../../../../core/cf-api.types';
+import { ISecurityGroup, ISpace, IRule, IRuleType } from '../../../../../../core/cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { AppChip } from '../../../../chips/chips.component';
 
 @Component({
   selector: 'app-cf-security-groups-card',
@@ -10,13 +11,27 @@ import { CloudFoundryEndpointService } from '../../../../../../features/cloud-fo
 })
 export class CfSecurityGroupsCardComponent implements OnInit {
 
+  tags: AppChip<IRule>[] = [];
   @Input('row') row: APIResource<ISecurityGroup>;
   constructor(
     private cfEndpointService: CloudFoundryEndpointService
   ) { }
 
   ngOnInit() {
+    this.row.entity.rules.forEach(t => {
+      this.tags.push({
+        value: `${t.protocol} ${this.getRuleString(t)}`,
+        key: t,
+        hideClearButton: true
+      });
+    });
+
   }
+
+  /**
+   *  key: T;
+  value: string;
+   */
 
   getSpaceUrl = (space: APIResource<ISpace>) => {
     return [
@@ -28,5 +43,15 @@ export class CfSecurityGroupsCardComponent implements OnInit {
       `${space.metadata.guid}`
     ];
 
+  }
+
+  getRuleString = (rule: IRule) => {
+
+    let destination = rule.destination;
+
+    if (rule.protocol === IRuleType.tcp || rule.protocol === IRuleType.udp) {
+      destination = `${rule.destination}:${rule.ports}`;
+    }
+    return destination;
   }
 }

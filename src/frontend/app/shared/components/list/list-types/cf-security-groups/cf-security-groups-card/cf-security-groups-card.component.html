@@ -34,7 +34,7 @@
   <app-meta-card-item>
     <app-meta-card-key>Rules</app-meta-card-key>
     <app-meta-card-value>
-      <app-security-rule *ngFor="let rule of row.entity.rules" [rule]="rule"></app-security-rule>
+      <app-chips [chips]="tags"></app-chips>
     </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

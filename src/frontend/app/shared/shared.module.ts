@@ -55,9 +55,6 @@ import {
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
 import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import {
-  TableCellRouteAppsAttachedComponent,
-} from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import {
   CfSpacePermissionCellComponent,
 } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { ListComponent } from './components/list/list.component';
@@ -88,7 +85,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CfStacksCardComponent } from './components/list/list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-import { SecurityRuleComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/security-rule/security-rule.component';
 import { CfSecurityGroupsCardComponent } from './components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 
@@ -165,9 +161,7 @@ import { BooleanIndicatorComponent } from './components/boolean-indicator/boolea
     CfSpacePermissionCellComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    TableCellRouteAppsAttachedComponent,
     CfStacksCardComponent,
-    SecurityRuleComponent,
     BooleanIndicatorComponent
   ],
   exports: [
