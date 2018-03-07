@@ -34,7 +34,7 @@ export class CfSpacesServiceInstancesListConfigService {
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'row.entity.name'
       },
       cellFlex: '2'
     },
@@ -42,45 +42,25 @@ export class CfSpacesServiceInstancesListConfigService {
       columnId: 'service',
       headerCell: () => 'Service',
       cellComponent: TableCellServiceNameComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'connection',
-        field: 'info.user'
-      },
       cellFlex: '1'
     },
     {
       columnId: 'servicePlan',
       headerCell: () => 'Plan',
       cellComponent: TableCellServicePlanComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'connection',
-        field: 'info.user'
-      },
       cellFlex: '1'
     },
     {
       columnId: 'tags',
       headerCell: () => 'Tags',
       cellComponent: TableCellServiceInstanceTagsComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'type',
-        field: 'cnsi_type'
-      },
       cellFlex: '2'
     },
     {
       columnId: 'attachedApps',
       headerCell: () => 'Application Attached',
       cellComponent: TableCellServiceInstanceAppsAttachedComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'address',
-        field: 'api_endpoint.Host'
-      },
-      cellFlex: '5'
+      cellFlex: '3'
     },
   ];
 
