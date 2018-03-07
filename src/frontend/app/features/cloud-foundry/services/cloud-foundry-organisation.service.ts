@@ -83,8 +83,12 @@ export class CloudFoundryOrganisationService {
 
   private initialiseAppObservables() {
     this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
-    this.appInstances$ = this.apps$.pipe(map(a => a.map(app => app.entity.instances)
-      .reduce((x, sum) => x + sum, 0)));
+    this.appInstances$ = this.apps$.pipe(
+      map(a => {
+        return a ? a.map(app => app.entity.instances).reduce((x, sum) => x + sum, 0) : 0;
+      })
+    );
+
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
   }
 
@@ -96,7 +100,9 @@ export class CloudFoundryOrganisationService {
 
   private getFlattenedList(property: string): (source: Observable<APIResource<CfSpace>[]>) => Observable<any> {
     return map(entities => {
-      const allInstances = entities.map(s => s.entity[property]);
+      const allInstances = entities
+        .map(s => s.entity[property])
+        .filter(s => !!s);
       return [].concat.apply([], allInstances);
     });
   }
