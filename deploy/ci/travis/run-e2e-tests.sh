@@ -4,7 +4,7 @@ set -e
 
 echo "Running e2e tests..."
 
-curl -sL -o ./build/secrets.json https://travis.capbristol.com
+curl -sLk -o ./build/secrets.json https://travis.capbristol.com
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
