@@ -24,6 +24,10 @@ export const serviceSchemaKey = 'service';
 export const serviceBindingSchemaKey = 'serviceBinding';
 export const servicePlanSchemaKey = 'servicePlan';
 export const serviceInstancesSchemaKey = 'serviceInstance';
+export const buildpackSchemaKey = 'buildpack';
+export const securityGroupSchemaKey = 'securityGroup';
+export const featureFlagSchemaKey = 'featureFlag';
+
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 // export const routesInSpaceKey = 'routesInSpace';
@@ -46,40 +50,41 @@ export class EntitySchema extends schema.Entity {
 // Note - The cache entry is added as a secondary step. This helps keep the child entity definition's cleared and easier to spot circular
 // dependencies
 
-export const AppSummarySchema = new EntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const AppSummarySchema = new EntitySchema(appSummarySchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appSummarySchemaKey] = AppSummarySchema;
 
-export const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const AppStatSchema = new EntitySchema(appStatsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appStatsSchemaKey] = AppStatSchema;
 
-export const AppEnvVarSchema = new EntitySchema(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const AppEnvVarSchema = new EntitySchema(appEnvVarsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEnvVarsSchemaKey] = AppEnvVarSchema;
 
-export const GithubBranchSchema = new EntitySchema(githubBranchesSchemaKey, {}, { idAttribute: 'entityId' });
+const GithubBranchSchema = new EntitySchema(githubBranchesSchemaKey, {}, { idAttribute: 'entityId' });
 entityCache[githubBranchesSchemaKey] = GithubBranchSchema;
 
-export const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
+const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
 entityCache[githubRepoSchemaKey] = GithubRepoSchema;
 
-export const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey);
+const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey);
 entityCache[githubCommitSchemaKey] = GithubCommitSchema;
 
-export const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);
+const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);
 entityCache[cfInfoSchemaKey] = CFInfoSchema;
 
-export const EventSchema = new EntitySchema(appEventSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const EventSchema = new EntitySchema(appEventSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[appEventSchemaKey] = EventSchema;
 
-export const UserSchema = new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+// TODO: RC ConsoleUser & CFUser
+const UserSchema = new EntitySchema(cfUserSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[cfUserSchemaKey] = UserSchema;
 
-export const StackSchema = new EntitySchema(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const StackSchema = new EntitySchema(stackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[stackSchemaKey] = StackSchema;
 
-export const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[domainSchemaKey] = DomainSchema;
 
-export const ApplicationWithoutRoutesSchema = new EntitySchema(applicationSchemaKey, {
+const ApplicationWithoutRoutesSchema = new EntitySchema(applicationSchemaKey, {
   entity: {
   }
 }, {
@@ -87,7 +92,7 @@ export const ApplicationWithoutRoutesSchema = new EntitySchema(applicationSchema
   });
 entityCache[applicationSchemaKey] = ApplicationWithoutRoutesSchema;
 
-export const RouteSchema = new EntitySchema(routeSchemaKey, {
+const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
     apps: [ApplicationWithoutRoutesSchema],
     domain: DomainSchema
@@ -97,10 +102,10 @@ export const RouteSchema = new EntitySchema(routeSchemaKey, {
   });
 entityCache[routeSchemaKey] = RouteSchema;
 
-export const QuotaDefinitionSchema = new EntitySchema(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const QuotaDefinitionSchema = new EntitySchema(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[quotaDefinitionSchemaKey] = QuotaDefinitionSchema;
 
-export const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
+const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
   applicationSchemaKey,
   {
     entity: {
@@ -115,7 +120,7 @@ export const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
 );
 entityCache[applicationSchemaKey] = ApplicationWithoutSpaceEntitySchema;
 
-export const SpaceSchema = new EntitySchema(spaceSchemaKey, {
+const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
     routes: [RouteSchema]
@@ -125,7 +130,7 @@ export const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   });
 entityCache[spaceSchemaKey] = SpaceSchema;
 
-// export const SpaceRoutesOnlySchema = new EntitySchema(spaceSchemaKey, {
+// const SpaceRoutesOnlySchema = new EntitySchema(spaceSchemaKey, {
 //   entity: {
 //     routes: [RouteSchema]
 //   }
@@ -133,7 +138,7 @@ entityCache[spaceSchemaKey] = SpaceSchema;
 //     idAttribute: getAPIResourceGuid
 //   }, routesInSpaceKey);
 
-export const OrganisationSchema = new EntitySchema(organisationSchemaKey, {
+const OrganisationSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
     domains: [DomainSchema],
     spaces: [SpaceSchema],
@@ -144,7 +149,7 @@ export const OrganisationSchema = new EntitySchema(organisationSchemaKey, {
   });
 entityCache[organisationSchemaKey] = OrganisationSchema;
 
-export const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
+const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
     organization: OrganisationSchema,
@@ -156,7 +161,7 @@ export const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   spaceWithOrgKey);
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
 
-export const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
+const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
     quota_definition: QuotaDefinitionSchema,
     spaces: SpaceSchema
@@ -166,7 +171,7 @@ export const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKe
   });
 entityCache[organisationWithSpaceKey] = OrganisationWithSpaceSchema;
 
-export const ApplicationEntitySchema = new EntitySchema(
+const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,
   {
     entity: {
@@ -181,19 +186,19 @@ export const ApplicationEntitySchema = new EntitySchema(
 );
 entityCache[applicationSchemaKey] = ApplicationEntitySchema;
 
-export const ServiceSchema = new EntitySchema(serviceSchemaKey, {}, {
+const ServiceSchema = new EntitySchema(serviceSchemaKey, {}, {
   idAttribute: getAPIResourceGuid
 }
 );
 entityCache[serviceSchemaKey] = ServiceSchema;
 
-export const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {}, {
+const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {}, {
   idAttribute: getAPIResourceGuid
 }
 );
 entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
 
-export const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
+const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
   entity: {
     service: ServiceSchema
   }
@@ -203,7 +208,7 @@ export const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
 );
 entityCache[servicePlanSchemaKey] = ServicePlanSchema;
 
-export const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
+const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema]
@@ -214,12 +219,30 @@ export const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey
 );
 entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
 
-export const EndpointSchema = new EntitySchema(endpointSchemaKey, {
+const BuildpackSchema = new schema.Entity(
+  buildpackSchemaKey,
+  {},
+  {
+    idAttribute: getAPIResourceGuid
+  }
+);
+entityCache[serviceInstancesSchemaKey] = BuildpackSchema;
+
+const EndpointSchema = new EntitySchema(endpointSchemaKey, {
   users: [UserSchema]
 }, {
     idAttribute: 'guid'
   });
 entityCache[endpointSchemaKey] = EndpointSchema;
+
+const SecurityGroupSchema = new schema.Entity(securityGroupSchemaKey, {}, {
+  idAttribute: getAPIResourceGuid
+});
+entityCache[securityGroupSchemaKey] = SecurityGroupSchema;
+
+const FeatureFlagSchema = new schema.Entity(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[featureFlagSchemaKey] = FeatureFlagSchema;
+
 
 export function entityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

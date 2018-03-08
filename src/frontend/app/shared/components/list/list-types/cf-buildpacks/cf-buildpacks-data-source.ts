@@ -4,7 +4,8 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
 import { IListConfig } from '../../list.component.types';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
-import { FetchAllBuildpacks, BuildpackSchema } from '../../../../../store/actions/buildpack.action';
+import { FetchAllBuildpacks } from '../../../../../store/actions/buildpack.action';
+import { entityFactory, buildpackSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
@@ -13,7 +14,7 @@ export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: BuildpackSchema,
+      schema: entityFactory(buildpackSchemaKey),
       getRowUniqueId: (entity: APIResource) => {
         return entity.metadata ? entity.metadata.guid : null;
       },

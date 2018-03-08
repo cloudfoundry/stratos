@@ -1,12 +1,13 @@
 import { Store } from '@ngrx/store';
 
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
-import { FeatureFlagSchema, GetAllFeatureFlags } from '../../../../../store/actions/feature-flags.actions';
+import { GetAllFeatureFlags } from '../../../../../store/actions/feature-flags.actions';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityFactory, featureFlagSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export const FeatureFlagDescriptions = {
   user_org_creation: 'Any user can create an organization',
@@ -31,7 +32,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatur
     super({
       store,
       action,
-      schema: FeatureFlagSchema,
+      schema: entityFactory(featureFlagSchemaKey),
       getRowUniqueId: (entity: APIResource<IFeatureFlag>) => {
         return entity.metadata ? entity.metadata.guid : null;
       },

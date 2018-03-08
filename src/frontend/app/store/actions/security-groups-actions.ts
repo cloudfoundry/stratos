@@ -4,11 +4,7 @@ import { RequestOptions } from '@angular/http';
 import { schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { getActions } from './action.helper';
-
-export const SecurityGroupSchema = new schema.Entity('securityGroup', {}, {
-  idAttribute: getAPIResourceGuid
-});
-
+import { entityFactory, securityGroupSchemaKey } from '../helpers/entity-factory';
 
 export class GetAllSecurityGroups extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string, public paginationKey: string) {
@@ -18,8 +14,8 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
     this.options.method = 'get';
   }
   actions = getActions('Security Groups', 'Fetch all');
-  entity = [SecurityGroupSchema];
-  entityKey = SecurityGroupSchema.key;
+  entity = [entityFactory(securityGroupSchemaKey)];
+  entityKey = securityGroupSchemaKey;
   options: RequestOptions;
   initialParams = {
     'results-per-page': 100,

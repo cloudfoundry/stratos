@@ -13,7 +13,6 @@ import { isTCPRoute, getMappedApps } from '../../../../../features/applications/
 import { GetAllAppsInSpace } from '../../../../../store/actions/space.actions';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { entityFactory, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
-export const RouteSchema = new schema.Entity('route');
 
 export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource>) {

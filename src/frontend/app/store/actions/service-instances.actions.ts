@@ -3,7 +3,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { ServiceInstancesSchema } from '../helpers/entity-factory';
+import { serviceInstancesSchemaKey, entityFactory } from '../helpers/entity-factory';
 
 export class GetServicesInstancesInSpace extends CFStartAction implements PaginationAction {
   constructor(public endpointGuid: string, public spaceGuid: string, public paginationKey: string) {
@@ -13,9 +13,9 @@ export class GetServicesInstancesInSpace extends CFStartAction implements Pagina
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }
-  actions = getActions('Service Instaces', 'Get all in Space');
-  entity = [ServiceInstancesSchema];
-  entityKey = ServiceInstancesSchema.key;
+  actions = getActions('Service Instances', 'Get all in Space');
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -38,8 +38,8 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
     this.options.params.set('recursive', 'true');
   }
   actions = getActions('Service Instaces', 'Delete Service Instance');
-  entity = ServiceInstancesSchema;
-  entityKey = ServiceInstancesSchema.key;
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
 }
 
@@ -55,8 +55,8 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
 
   }
   actions = getActions('Service Instaces', 'Delete Service binding');
-  entity = ServiceInstancesSchema;
-  entityKey = ServiceInstancesSchema.key;
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
 }
 

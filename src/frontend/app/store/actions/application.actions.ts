@@ -69,14 +69,11 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
 }
 
 export class GetApplication extends CFStartAction implements ICFAction, EntityInlineParentAction {
-  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = false) {
+  constructor(public guid: string, public endpointGuid: string, public includeRelations = [], public populateMissing = true) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.options.params.set('inline-relations-depth', '2');
-    this.options.params.set('include-relations', 'space,organization,routes,domain');
   }
   actions = [GET, GET_SUCCESS, GET_FAILED];
   entity = [applicationEntitySchema];

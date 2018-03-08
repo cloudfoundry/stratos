@@ -1,12 +1,10 @@
-import { getPaginationKey } from './pagination.actions';
-import { schema } from 'normalizr';
-import { PaginatedAction, PaginationParam } from '../types/pagination.types';
-import { ICFAction, CFStartAction, RequestEntityLocation } from '../types/request.types';
 import { RequestOptions } from '@angular/http';
-import { appStatsSchemaKey, appEnvVarsSchemaKey, appSummarySchemaKey } from '../helpers/entity-factory';
-import { entityFactory } from '../helpers/entity-factory';
 
-// export type AppMetadataEntities = AppStatsSchema | AppEnvVarSchema | AppSummarySchema;
+import { appEnvVarsSchemaKey, appStatsSchemaKey, appSummarySchemaKey, entityFactory } from '../helpers/entity-factory';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, ICFAction, RequestEntityLocation } from '../types/request.types';
+import { getPaginationKey } from './pagination.actions';
+
 export enum AppMetadataTypes {
   STATS,
   ENV_VARS,

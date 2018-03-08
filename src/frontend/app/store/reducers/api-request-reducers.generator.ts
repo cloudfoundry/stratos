@@ -1,6 +1,3 @@
-import { BuildpackSchema } from '../actions/buildpack.action';
-import { FeatureFlagSchema } from '../actions/feature-flags.actions';
-import { SecurityGroupSchema } from '../actions/security-groups-actions';
 import {
   appEnvVarsSchemaKey,
   appStatsSchemaKey,
@@ -13,10 +10,13 @@ import {
   organisationSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
-  ServiceBindingsSchema,
-  ServiceInstancesSchema,
-  ServicePlanSchema,
-  ServiceSchema,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  buildpackSchemaKey,
+  securityGroupSchemaKey,
+  featureFlagSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -83,13 +83,13 @@ const entities = [
   appStatsSchemaKey,
   appSummarySchemaKey,
   quotaDefinitionSchemaKey,
-  BuildpackSchema.key,
-  SecurityGroupSchema.key,
-  ServicePlanSchema.key,
-  ServiceSchema.key,
-  ServiceBindingsSchema.key,
-  ServiceInstancesSchema.key,
-  FeatureFlagSchema.key
+  buildpackSchemaKey,
+  securityGroupSchemaKey,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  featureFlagSchemaKey
 ];
 // TODO: RC
 

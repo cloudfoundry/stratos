@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { GetServicesInstancesInSpace } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
-import { ServiceInstancesSchema } from '../../../../../store/helpers/entity-factory';
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfServiceInstance } from '../../../../../store/types/service.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
@@ -16,7 +16,7 @@ export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResour
     super({
       store,
       action,
-      schema: ServiceInstancesSchema,
+      schema: entityFactory(serviceInstancesSchemaKey),
       getRowUniqueId: (entity: APIResource<CfServiceInstance>) => {
         return entity.metadata ? entity.metadata.guid : null;
       },
