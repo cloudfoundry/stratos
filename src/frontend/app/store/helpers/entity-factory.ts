@@ -164,7 +164,7 @@ entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
 const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
     quota_definition: QuotaDefinitionSchema,
-    spaces: SpaceSchema
+    spaces: [SpaceSchema]
   }
 }, {
     idAttribute: getAPIResourceGuid

@@ -10,8 +10,6 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 
-
-
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';

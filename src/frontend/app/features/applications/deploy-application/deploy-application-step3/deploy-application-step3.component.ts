@@ -19,6 +19,7 @@ import { GetAllApplications } from '../../../../store/actions/application.action
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -156,7 +157,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
-        this.store.dispatch(new GetAllApplications('applicationWall'));
+        this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         this.streamTitle = 'Deployed';
