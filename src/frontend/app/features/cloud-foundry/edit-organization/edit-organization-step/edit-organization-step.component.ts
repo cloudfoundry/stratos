@@ -1,44 +1,34 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
-import { FormGroup, FormControl } from '@angular/forms';
-import { map, take, tap, filter } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { getPaginationKey } from '../../../../store/actions/pagination.actions';
-import { GetAllOrganisations, UpdateOrganization } from '../../../../store/actions/organisation.actions';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/types/api.types';
-import { OrganisationSchema, organisationSchemaKey } from '../../../../store/actions/action-types';
-import { Subscription } from 'rxjs/Subscription';
-import { IOrganization } from '../../../../core/cf-api.types';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { ActivatedRoute } from '@angular/router';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, FormGroup, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
-import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { filter, map, take, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { IOrganization } from '../../../../core/cf-api.types';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { OrganisationSchema, organisationSchemaKey } from '../../../../store/actions/action-types';
+import { GetAllOrganisations, UpdateOrganization } from '../../../../store/actions/organisation.actions';
+import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { BaseCFOrg } from '../../cf-page.types';
+import { AppState } from '../../../../store/app-state';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { APIResource } from '../../../../store/types/api.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
+import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
 
 const enum OrgStatus {
   ACTIVE = 'active',
   SUSPENDED = 'suspended'
 }
-function getOrgIdFromRouter(activatedRoute: ActivatedRoute) {
-  return {
-    guid: activatedRoute.snapshot.params.orgId
-  };
-}
-
 @Component({
   selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
   styleUrls: ['./edit-organization-step.component.scss'],
   providers: [
-    { provide: BaseCFOrg, useFactory: getOrgIdFromRouter, deps: [ActivatedRoute] },
+    getActiveRouteCfOrgSpaceProvider,
     CloudFoundryOrganisationService
   ]
 })
@@ -67,7 +57,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
     this.editOrgName = new FormGroup({
-      orgName: new FormControl(''),
+      orgName: new FormControl('', this.nameTakenValidator()),
       toggleStatus: new FormControl(false),
     });
     this.org$ = this.cfOrgService.org$.pipe(
@@ -82,6 +72,13 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     );
 
     this.orgSubscription = this.org$.subscribe();
+  }
+
+  nameTakenValidator = (): ValidatorFn => {
+    return (formField: AbstractControl): { [key: string]: any } => {
+      const nameValid = this.validate(formField.value);
+      return !nameValid ? { 'nameTaken': { value: formField.value } } : null;
+    };
   }
 
   ngOnInit() {
@@ -105,11 +102,11 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
   }
 
-  validate = () => {
+  validate = (value: string = null) => {
     if (this.allOrgsInEndpoint) {
       return this.allOrgsInEndpoint
         .filter(o => o !== this.originalName)
-        .indexOf(this.orgName) === -1;
+        .indexOf(value ? value : this.orgName) === -1;
     }
     return true;
   }

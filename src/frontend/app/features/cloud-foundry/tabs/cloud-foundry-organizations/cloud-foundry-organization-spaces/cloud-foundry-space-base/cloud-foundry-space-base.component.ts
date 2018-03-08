@@ -10,48 +10,15 @@ import { AppState } from '../../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
-
-const cfSpaceServiceFactory = (
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory,
-  cfEndpointService: CloudFoundryEndpointService
-) => {
-  const { orgId, spaceId } = activatedRoute.snapshot.params;
-  const { cfGuid } = cfEndpointService;
-  return new CloudFoundrySpaceService(
-    cfGuid,
-    orgId,
-    spaceId,
-    store,
-    entityServiceFactory,
-    cfUserService,
-    paginationMonitorFactory,
-    cfEndpointService
-  );
-};
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
   templateUrl: './cloud-foundry-space-base.component.html',
   styleUrls: ['./cloud-foundry-space-base.component.scss'],
   providers: [
-    {
-      provide: CloudFoundrySpaceService,
-      useFactory: cfSpaceServiceFactory,
-      deps: [
-        Store,
-        ActivatedRoute,
-        EntityServiceFactory,
-        CfOrgSpaceDataService,
-        CfUserService,
-        PaginationMonitorFactory,
-        CloudFoundryEndpointService
-      ]
-    }
+    getActiveRouteCfOrgSpaceProvider,
+    CloudFoundrySpaceService
   ]
 })
 export class CloudFoundrySpaceBaseComponent implements OnInit {

@@ -4,9 +4,9 @@ import {
   generateTestCfEndpointServiceProvider,
   getBaseTestModules,
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseCF } from '../cf-page.types';
 import { EditSpaceStepComponent } from './edit-space-step/edit-space-step.component';
 import { EditSpaceComponent } from './edit-space.component';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 describe('EditSpaceComponent', () => {
   let component: EditSpaceComponent;
@@ -16,7 +16,7 @@ describe('EditSpaceComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditSpaceComponent, EditSpaceStepComponent],
       imports: [...getBaseTestModules],
-      providers: [BaseCF, generateTestCfEndpointServiceProvider()]
+      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider()]
     })
       .compileComponents();
   }));

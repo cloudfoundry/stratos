@@ -13,7 +13,7 @@ import { organisationSchemaKey, OrganisationWithSpaceSchema } from '../../../sto
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { BaseCFOrg } from '../cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
@@ -33,7 +33,7 @@ export class CloudFoundryOrganisationService {
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   organisationEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
-    public baseCfOrg: BaseCFOrg,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -41,8 +41,8 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
-    this.orgGuid = baseCfOrg.guid;
-    this.cfGuid = cfEndpointService.cfGuid;
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       OrganisationWithSpaceSchema,

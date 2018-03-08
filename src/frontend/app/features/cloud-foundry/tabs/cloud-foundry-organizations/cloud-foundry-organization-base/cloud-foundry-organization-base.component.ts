@@ -10,20 +10,14 @@ import { PaginationMonitorFactory } from '../../../../../shared/monitors/paginat
 import { AppState } from '../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
-import { BaseCFOrg } from '../../../cf-page.types';
-
-function getOrgIdFromRouter(activatedRoute: ActivatedRoute) {
-  return {
-    guid: activatedRoute.snapshot.params.orgId
-  };
-}
+import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
   templateUrl: './cloud-foundry-organization-base.component.html',
   styleUrls: ['./cloud-foundry-organization-base.component.scss'],
   providers: [
-    { provide: BaseCFOrg, useFactory: getOrgIdFromRouter, deps: [ActivatedRoute] },
+    getActiveRouteCfOrgSpaceProvider,
     CloudFoundryOrganisationService
   ]
 })

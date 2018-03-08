@@ -17,7 +17,7 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfUser } from '../../../store/types/user.types';
-import { BaseCF } from '../cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { IOrganization, ISpace, IApp } from '../../../core/cf-api.types';
 @Injectable()
 export class CloudFoundryEndpointService {
@@ -34,14 +34,14 @@ export class CloudFoundryEndpointService {
   cfGuid: string;
 
   constructor(
-    public baseCf: BaseCF,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-    this.cfGuid = baseCf.guid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       EndpointSchema.key,
       EndpointSchema,

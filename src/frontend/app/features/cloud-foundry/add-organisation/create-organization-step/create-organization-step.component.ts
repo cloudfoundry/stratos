@@ -3,7 +3,6 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { BaseCF } from '../../cf-page.types';
 import { APIResource } from '../../../../store/types/api.types';
 import { DomainSchema } from '../../../../store/actions/domains.actions';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';

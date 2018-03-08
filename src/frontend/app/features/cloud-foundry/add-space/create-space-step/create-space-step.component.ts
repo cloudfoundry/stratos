@@ -12,11 +12,12 @@ import { CreateSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 @Component({
   selector: 'app-create-space-step',
   templateUrl: './create-space-step.component.html',
-  styleUrls: ['./create-space-step.component.scss']
+  styleUrls: ['./create-space-step.component.scss'],
 })
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
 
@@ -28,8 +29,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
     snackBar: MatSnackBar,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    super(store, activatedRoute, paginationMonitorFactory, snackBar);
+    super(store, activatedRoute, paginationMonitorFactory, snackBar, activeRouteCfOrgSpace);
   }
 
   ngOnInit() {

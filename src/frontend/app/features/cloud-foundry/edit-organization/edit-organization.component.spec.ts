@@ -4,9 +4,9 @@ import {
   generateTestCfEndpointServiceProvider,
   getBaseTestModules,
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseCF } from '../cf-page.types';
 import { EditOrganizationStepComponent } from './edit-organization-step/edit-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization.component';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 describe('EditOrganizationComponent', () => {
   let component: EditOrganizationComponent;
@@ -16,7 +16,7 @@ describe('EditOrganizationComponent', () => {
     TestBed.configureTestingModule({
       declarations: [EditOrganizationComponent, EditOrganizationStepComponent],
       imports: [...getBaseTestModules],
-      providers: [BaseCF, generateTestCfEndpointServiceProvider()]
+      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider()]
 
     })
       .compileComponents();

@@ -8,7 +8,6 @@ import {
 import { EndpointsListConfigService } from '../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { AddOrganisationComponent } from './add-organisation/add-organisation.component';
-import { BaseCF } from './cf-page.types';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
@@ -105,7 +104,6 @@ import { EditOrganizationStepComponent } from './edit-organization/edit-organiza
     CloudFoundryService,
     CFEndpointsListConfigService,
     EndpointsListConfigService,
-    BaseCF
   ]
 })
 export class CloudFoundryModule { }
