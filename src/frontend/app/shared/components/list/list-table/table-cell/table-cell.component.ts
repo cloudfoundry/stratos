@@ -38,18 +38,32 @@ import {
 } from '../../list-types/app/table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
+/* tslint:disable:max-line-length */
+import {
+  TableCellServiceInstanceAppsAttachedComponent,
+} from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
+/* tslint:enable:max-line-length */
 import {
   TableCellFeatureFlagStateComponent,
 } from '../../list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 import {
   TableCellRouteAppsAttachedComponent,
 } from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import {
-  CfSpacePermissionCellComponent,
-} from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+
 import {
   TableCellCfUserPermissionComponent,
 } from '../../list-types/cf-users/cf-user-permission-cell/cf-user-permission-cell.component';
+
+import {
+  TableCellServiceInstanceTagsComponent,
+} from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
+import {
+  TableCellServiceNameComponent,
+} from '../../list-types/cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
+import {
+  TableCellServicePlanComponent,
+} from '../../list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+
 import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
@@ -60,6 +74,8 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { TableCellCustom } from './table-cell-custom';
+import { CfSpacePermissionCellComponent } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+
 
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -81,11 +97,16 @@ export const listTableCells = [
   TableCellAppInstancesComponent,
   TableCellAppRouteComponent,
   TableCellRadioComponent,
+  TableCellServiceInstanceAppsAttachedComponent,
+  TableCellServiceInstanceTagsComponent,
+  TableCellServicePlanComponent,
+  TableCellServiceNameComponent,
   TableCellRouteAppsAttachedComponent,
   TableCellCfUserPermissionComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent
 ];
+
 @Component({
   selector: 'app-table-cell',
   templateUrl: './table-cell.component.html',

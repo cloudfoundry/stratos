@@ -1,5 +1,3 @@
-/* tslint:disable:max-line-length */
-
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -14,6 +12,7 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
@@ -29,7 +28,6 @@ import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-u
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
-import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
@@ -40,9 +38,11 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
+/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
+/* tslint:enable:max-line-length */
 import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -53,13 +53,6 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
-import {
-  TableCellRouteAppsAttachedComponent,
-} from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import {
-  CfSpacePermissionCellComponent,
-} from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -87,10 +80,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
-
-/* tslint:enable:max-line-length */
-
+import { AppChipsComponent } from './components/chips/chips.component';
 
 
 @NgModule({
@@ -154,16 +144,13 @@ import { BooleanIndicatorComponent } from './components/boolean-indicator/boolea
     MetaCardItemComponent,
     MetaCardKeyComponent,
     MetaCardValueComponent,
-    CfOrgCardComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
-    AppChipsComponent,
-    CfSpacePermissionCellComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    TableCellRouteAppsAttachedComponent,
-    BooleanIndicatorComponent
+    BooleanIndicatorComponent,
+    AppChipsComponent,
   ],
   exports: [
     FormsModule,
@@ -216,7 +203,7 @@ import { BooleanIndicatorComponent } from './components/boolean-indicator/boolea
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-
+    CardCfOrgUserDetailsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

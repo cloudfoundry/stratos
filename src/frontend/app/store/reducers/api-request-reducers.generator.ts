@@ -23,6 +23,7 @@ import { CF_INFO_ENTITY_KEY } from '../actions/cloud-foundry.actions';
 import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
 import { UserSchema } from '../types/user.types';
 import { userReducer } from './users.reducer';
+import { ServiceInstancesSchema, ServicePlanSchema, ServiceSchema, ServiceBindingsSchema } from '../actions/action-types';
 import { RouteSchema } from '../../shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source';
 import { routeReducer } from './routes.reducer';
 import { BuildpackSchema } from '../actions/buildpack.action';
@@ -72,7 +73,11 @@ const entities = [
   'createApplication',
   'uaaSetup',
   BuildpackSchema.key,
-  UserSchema.key,
+  UserSchema.key, ,
+  ServiceInstancesSchema.key,
+  ServicePlanSchema.key,
+  ServiceSchema.key,
+  ServiceBindingsSchema.key,
   CF_INFO_ENTITY_KEY,
   GITHUB_REPO_ENTITY_KEY,
   GITHUB_BRANCHES_ENTITY_KEY,
@@ -93,7 +98,6 @@ export function requestDataReducer(state, action) {
 
   const extraReducers = {
     [UserSchema.key]: [userReducer],
-    [RouteSchema.key]: [routeReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
     application: [endpointDisconnectApplicationReducer('application')],
     space: [endpointDisconnectApplicationReducer('space')],
