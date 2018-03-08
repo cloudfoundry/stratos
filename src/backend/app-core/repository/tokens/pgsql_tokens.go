@@ -46,7 +46,7 @@ var insertCNSIToken = `INSERT INTO tokens (cnsi_guid, user_guid, token_type, aut
 										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
 var updateCNSIToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5,
 										WHERE cnsi_guid = $6 AND user_guid = $7 AND token_type = $8 AND auth_type = $9`
 
 var deleteCNSIToken = `DELETE FROM tokens

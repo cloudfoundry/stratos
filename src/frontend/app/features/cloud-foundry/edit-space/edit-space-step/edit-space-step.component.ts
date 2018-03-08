@@ -22,84 +22,40 @@ import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.ser
 import { UpdateSpace } from '../../../../store/actions/space.actions';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { RouterNav } from '../../../../store/actions/router.actions';
-
-const cfSpaceServiceFactory = (
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory,
-  cfEndpointService: CloudFoundryEndpointService
-) => {
-  const { orgId, spaceId } = activatedRoute.snapshot.params;
-  const { cfGuid } = cfEndpointService;
-  return new CloudFoundrySpaceService(
-    cfGuid,
-    orgId,
-    spaceId,
-    store,
-    entityServiceFactory,
-    cfUserService,
-    paginationMonitorFactory,
-    cfEndpointService
-  );
-};
-
+import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
+import { BaseCF } from '../../cf-page.types';
 
 @Component({
   selector: 'app-edit-space-step',
   templateUrl: './edit-space-step.component.html',
   styleUrls: ['./edit-space-step.component.scss'],
-  providers: [
-    {
-      provide: CloudFoundrySpaceService,
-      useFactory: cfSpaceServiceFactory,
-      deps: [
-        Store,
-        ActivatedRoute,
-        EntityServiceFactory,
-        CfOrgSpaceDataService,
-        CfUserService,
-        PaginationMonitorFactory,
-        CloudFoundryEndpointService
-      ]
-    }
-  ]
 })
 
-export class EditSpaceStepComponent implements OnInit, OnDestroy {
+export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
 
   originalName: any;
   currentSshStatus: string;
-  submitSubscription: Subscription;
   spaceSubscription: Subscription;
   space: string;
   space$: Observable<any>;
-  allSpacesInSpace$: Observable<string[]>;
-  fetchSpacesSubscription: any;
-  allSpacesInOrg: string[];
   spaceGuid: string;
-  orgGuid: string;
-  cfGuid: string;
   editSpaceForm: FormGroup;
   sshEnabled: boolean;
   spaceName: string;
 
   constructor(
-    private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private snackBar: MatSnackBar,
+    store: Store<AppState>,
+    activatedRoute: ActivatedRoute,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    snackBar: MatSnackBar,
     private cfSpaceService: CloudFoundrySpaceService
   ) {
-    const { orgId, spaceId } = activatedRoute.snapshot.params;
-    this.cfGuid = cfSpaceService.cfGuid;
-    this.orgGuid = orgId;
-    this.spaceGuid = spaceId;
+    super(store, activatedRoute, paginationMonitorFactory, snackBar);
+    this.orgGuid = this.orgGuid;
+    this.spaceGuid = activatedRoute.snapshot.params.spaceId;
     this.sshEnabled = false;
     this.editSpaceForm = new FormGroup({
-      spaceName: new FormControl(''),
+      spaceName: new FormControl('', this.spaceNameTakenValidator()),
       toggleSsh: new FormControl(false),
     });
     this.space$ = this.cfSpaceService.space$.pipe(
@@ -117,31 +73,13 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const paginationKey = getPaginationKey('cf-space', this.cfGuid, this.orgGuid);
-    const action = new GetAllSpacesInOrg(this.cfGuid, this.orgGuid, paginationKey);
-    this.allSpacesInSpace$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          SpaceSchema
-        )
-      },
-      true
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allSpacesInOrg = o)
-    );
-    this.fetchSpacesSubscription = this.allSpacesInSpace$.subscribe();
   }
 
-  validate = () => {
+  validate = (spaceName: string = null) => {
     if (this.allSpacesInOrg) {
       return this.allSpacesInOrg
         .filter(o => o !== this.originalName)
-        .indexOf(this.spaceName) === -1;
+        .indexOf(spaceName ? spaceName : this.spaceName) === -1;
     }
     return true;
   }
@@ -152,33 +90,17 @@ export class EditSpaceStepComponent implements OnInit, OnDestroy {
       allow_ssh: this.sshEnabled
     }));
 
-    // Update action
     this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, this.spaceGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateSpace.UpdateExistingSpace].busy),
-      map(o => {
-        if (o.error) {
-          this.displaySnackBar();
-        } else {
-          this.store.dispatch(
-            new RouterNav({
-              path: ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces']
-            })
-          );
-        }
-      })
+      this.map(
+        ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces', this.spaceGuid],
+        'Failed to update space! Please try again or contact your space manager!'
+      )
     ).subscribe();
     return Observable.of({ success: true });
   }
 
-  displaySnackBar = () => this.snackBar.open(
-    'Failed to update space! Please try again or contact your space manager!',
-    'Dismiss'
-  )
-
   ngOnDestroy(): void {
-    this.fetchSpacesSubscription.unsubscribe();
-    if (this.submitSubscription) {
-      this.submitSubscription.unsubscribe();
-    }
+    this.destroy();
   }
 }
