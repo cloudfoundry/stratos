@@ -149,7 +149,7 @@ export interface IDomain {
   router_group_type?: any;
 }
 
-export interface IInfo {
+export interface ICfV2Info {
   name: string;
   build: string;
   support: string;

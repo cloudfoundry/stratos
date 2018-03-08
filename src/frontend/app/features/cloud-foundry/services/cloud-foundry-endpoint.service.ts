@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { IInfo } from '../../../core/cf-api.types';
+import { ICfV2Info } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -29,8 +29,8 @@ export class CloudFoundryEndpointService {
   allApps$: Observable<APIResource<CfApplication>[]>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<CfOrg>[]>;
-  info$: Observable<EntityInfo<APIResource<IInfo>>>;
-  cfInfoEntityService: EntityService<APIResource<IInfo>>;
+  info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
+  cfInfoEntityService: EntityService<APIResource<ICfV2Info>>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
@@ -53,7 +53,7 @@ export class CloudFoundryEndpointService {
       new GetAllEndpoints()
     );
 
-    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<IInfo>>(
+    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       CF_INFO_ENTITY_KEY,
       CFInfoSchema,
       this.cfGuid,
