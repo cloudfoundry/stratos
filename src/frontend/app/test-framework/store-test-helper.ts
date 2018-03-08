@@ -265,6 +265,10 @@ const testInitialStoreState: AppState = {
       },
       stack: {},
       space: {},
+      serviceInstance: {},
+      service:{},
+      serviceBinding:{},
+      servicePlan: {},
       organization: {
         endpointOrgSpaceService: {
           pageCount: 1,
@@ -580,6 +584,10 @@ const testInitialStoreState: AppState = {
     },
     request: {
       buildpack:{},
+      service:{},
+      serviceBinding:{},
+      servicePlan: {},
+      serviceInstance: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           fetching: false,
@@ -3821,6 +3829,10 @@ const testInitialStoreState: AppState = {
     },
     requestData: {
       buildpack: {},
+      service:{},
+      serviceBinding:{},
+      servicePlan: {},
+      serviceInstance: {},
       user: {
         'bcf78136-6225-4515-bf8e-a32243deea0c': {
           entity: {

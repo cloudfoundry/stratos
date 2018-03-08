@@ -28,7 +28,6 @@ import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-u
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
-import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
@@ -81,10 +80,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-
-
-
-
+import { AppChipsComponent } from './components/chips/chips.component';
 
 @NgModule({
   imports: [
@@ -150,10 +146,10 @@ import { ValuesPipe } from './pipes/values.pipe';
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
-    AppChipsComponent,
+    BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    BooleanIndicatorComponent,
+    AppChipsComponent,
   ],
   exports: [
     FormsModule,
@@ -206,7 +202,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-
+    CardCfOrgUserDetailsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

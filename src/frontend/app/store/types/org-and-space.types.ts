@@ -1,7 +1,7 @@
 import { APIResource } from './api.types';
 import { CfApplication } from './application.types';
 import { Route } from './route.types';
-
+import { CfServiceInstance } from './service.types';
 export interface CfOrg {
   spaces: APIResource<CfSpace>[];
   quota_definition: APIResource<CfQuotaDefinition>;
@@ -16,11 +16,6 @@ export interface CfPrivateDomain {
   cfGuid: string;
 }
 
-export interface CfServiceInstance {
-  guid: string;
-  cfGuid; string;
-}
-
 export interface CfSpace {
   apps: APIResource<CfApplication>[];
   routes: APIResource<Route>[];
@@ -31,7 +26,7 @@ export interface CfSpace {
   space_quota_definition?: APIResource<CfQuotaDefinition>;
   guid: string;
   cfGuid: string;
-  service_instances: APIResource<CfServiceInstance>[];
+  service_instances?: APIResource<CfServiceInstance>[];
   allow_ssh: boolean;
   space_quota_definition_guid: string;
 }

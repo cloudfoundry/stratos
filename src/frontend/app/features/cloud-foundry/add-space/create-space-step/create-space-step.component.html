@@ -1,0 +1,11 @@
+<div class="add-space">
+  <div>Specify the name of the new space</div>
+  <form [formGroup]="createSpaceForm" class="stepper-form">
+    <mat-form-field>
+      <input matInput formControlName="spaceName" placeholder="Space Name" required>
+      <mat-error *ngIf="!validate()">
+        A space with this name already exists. Please enter a different one.
+      </mat-error>
+    </mat-form-field>
+  </form>
+</div>
