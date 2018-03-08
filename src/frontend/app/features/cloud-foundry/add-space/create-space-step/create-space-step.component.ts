@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -44,6 +44,13 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       return this.allSpacesInOrg.indexOf(currValue) === -1;
     }
     return true;
+  }
+
+  spaceNameTakenValidator = (): ValidatorFn => {
+    return (formField: AbstractControl): { [key: string]: any } => {
+      const nameInvalid = this.validate();
+      return nameInvalid ? { 'spaceNameTaken': { value: formField.value } } : null;
+    };
   }
 
   submit = () => {

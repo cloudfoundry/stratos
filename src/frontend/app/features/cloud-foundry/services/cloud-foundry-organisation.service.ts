@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, switchMap } from 'rxjs/operators';
 
+import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, IServiceInstance, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -14,7 +15,6 @@ import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { IQuotaDefinition, IPrivateDomain, IServiceInstance, ISpace, IOrganization, IApp } from '../../../core/cf-api.types';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
@@ -76,8 +76,12 @@ export class CloudFoundryOrganisationService {
 
   private initialiseAppObservables() {
     this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
-    this.appInstances$ = this.apps$.pipe(map(a => a.map(app => app.entity.instances)
-      .reduce((x, sum) => x + sum, 0)));
+    this.appInstances$ = this.apps$.pipe(
+      map(a => {
+        return a ? a.map(app => app.entity.instances).reduce((x, sum) => x + sum, 0) : 0;
+      })
+    );
+
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
   }
 
@@ -89,7 +93,9 @@ export class CloudFoundryOrganisationService {
 
   private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {
     return map(entities => {
-      const allInstances = entities.map(s => s.entity[property]);
+      const allInstances = entities
+        .map(s => s.entity[property])
+        .filter(s => !!s);
       return [].concat.apply([], allInstances);
     });
   }
