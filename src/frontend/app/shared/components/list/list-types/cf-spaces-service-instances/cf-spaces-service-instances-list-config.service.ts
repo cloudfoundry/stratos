@@ -26,7 +26,7 @@ export class CfSpacesServiceInstancesListConfigService
 
   private serviceInstanceColumns: ITableColumn<APIResource<CfServiceInstance>>[] = [
     {
-      columnId: 'serviceInstances',
+      columnId: 'name',
       headerCell: () => 'Service Instances',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
@@ -34,7 +34,7 @@ export class CfSpacesServiceInstancesListConfigService
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'row.entity.name'
+        field: 'entity.name'
       },
       cellFlex: '2'
     },
