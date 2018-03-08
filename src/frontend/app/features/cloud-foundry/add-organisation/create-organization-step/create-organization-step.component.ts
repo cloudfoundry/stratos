@@ -6,7 +6,7 @@ import { AppState } from '../../../../store/app-state';
 import { BaseCF } from '../../cf-page.types';
 import { APIResource } from '../../../../store/types/api.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetAllOrganisations, CreateOrganization } from '../../../../store/actions/organisation.actions';
+import { CreateOrganization } from '../../../../store/actions/organisation.actions';
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { filter, map, tap } from 'rxjs/operators';
@@ -17,6 +17,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material';
 import { IOrganization } from '../../../../core/cf-api.types';
 import { entityFactory, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
+import { CfOrgsDataSourceService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-data-source.service';
 
 @Component({
   selector: 'app-create-organization-step',
@@ -46,8 +47,9 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     this.addOrg = new FormGroup({
       orgName: new FormControl('', [<any>Validators.required]),
     });
-    const paginationKey = getPaginationKey('cf-organizations', this.cfGuid);
-    const action = new GetAllOrganisations(paginationKey, this.cfGuid);
+    // const paginationKey = getPaginationKey('cf-organizations', this.cfGuid);
+    // TODO: RC Specific inludes for this request
+    const action = CfOrgsDataSourceService.createGetAllOrganisations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
       {
         store: this.store,

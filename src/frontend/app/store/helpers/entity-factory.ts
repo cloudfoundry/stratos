@@ -27,6 +27,8 @@ export const serviceInstancesSchemaKey = 'serviceInstance';
 export const buildpackSchemaKey = 'buildpack';
 export const securityGroupSchemaKey = 'securityGroup';
 export const featureFlagSchemaKey = 'featureFlag';
+export const privateDomainsSchemaKey = 'private_domains';
+export const spaceQuotaSchemaKey = 'space_quota_definition';
 
 
 export const spaceWithOrgKey = 'spaceWithOrg';
@@ -138,22 +140,30 @@ entityCache[spaceSchemaKey] = SpaceSchema;
 //     idAttribute: getAPIResourceGuid
 //   }, routesInSpaceKey);
 
+const PrivateDomainsSchema = new EntitySchema(privateDomainsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[privateDomainsSchemaKey] = PrivateDomainsSchema;
+
 const OrganisationSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
     domains: [DomainSchema],
     spaces: [SpaceSchema],
-    quota_definition: QuotaDefinitionSchema
+    quota_definition: QuotaDefinitionSchema,
+    private_domains: [PrivateDomainsSchema]
   }
 }, {
     idAttribute: getAPIResourceGuid
   });
 entityCache[organisationSchemaKey] = OrganisationSchema;
 
+const SpaceQuotaSchema = new schema.Entity(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
+
 const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
     organization: OrganisationSchema,
-    domains: [DomainSchema]
+    domains: [DomainSchema],
+    space_quota_definition: SpaceQuotaSchema
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -161,15 +171,15 @@ const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   spaceWithOrgKey);
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
 
-const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
-  entity: {
-    quota_definition: QuotaDefinitionSchema,
-    spaces: [SpaceSchema]
-  }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
-entityCache[organisationWithSpaceKey] = OrganisationWithSpaceSchema;
+// const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
+//   entity: {
+//     quota_definition: QuotaDefinitionSchema,
+//     spaces: [SpaceSchema]
+//   }
+// }, {
+//     idAttribute: getAPIResourceGuid
+//   });
+// entityCache[organisationWithSpaceKey] = OrganisationWithSpaceSchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,

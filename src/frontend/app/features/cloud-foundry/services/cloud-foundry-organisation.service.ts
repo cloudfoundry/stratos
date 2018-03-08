@@ -11,11 +11,22 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  organisationSchemaKey,
+  organisationWithSpaceKey,
+  privateDomainsSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { BaseCFOrg } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { organisationSchemaKey, entityFactory, organisationWithSpaceKey } from '../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
@@ -47,7 +58,14 @@ export class CloudFoundryOrganisationService {
       organisationSchemaKey,
       entityFactory(organisationWithSpaceKey),
       this.orgGuid,
-      new GetOrganisation(this.orgGuid, this.cfGuid)
+      new GetOrganisation(this.orgGuid, this.cfGuid, [
+        createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, domainSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, privateDomainsSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+      ])
     );
 
     this.initialiseObservables();

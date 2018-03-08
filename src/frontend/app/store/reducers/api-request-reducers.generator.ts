@@ -17,6 +17,8 @@ import {
   buildpackSchemaKey,
   securityGroupSchemaKey,
   featureFlagSchemaKey,
+  privateDomainsSchemaKey,
+  spaceQuotaSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -89,9 +91,10 @@ const entities = [
   serviceSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
-  featureFlagSchemaKey
+  featureFlagSchemaKey,
+  privateDomainsSchemaKey,
+  spaceQuotaSchemaKey
 ];
-// TODO: RC
 
 
 const _requestReducer = requestReducerFactory(entities, requestActions);

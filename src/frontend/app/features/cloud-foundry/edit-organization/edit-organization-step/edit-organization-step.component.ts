@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { GetAllOrganisations, UpdateOrganization } from '../../../../store/actions/organisation.actions';
+import { UpdateOrganization } from '../../../../store/actions/organisation.actions';
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
@@ -19,6 +19,7 @@ import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { BaseCFOrg } from '../../cf-page.types';
 import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
+import { CfOrgsDataSourceService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-data-source.service';
 
 const enum OrgStatus {
   ACTIVE = 'active',
@@ -82,8 +83,8 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const paginationKey = getPaginationKey('cf-org', this.cfGuid);
-    const action = new GetAllOrganisations(paginationKey, this.cfGuid);
+    const action = CfOrgsDataSourceService.createGetAllOrganisations(this.cfGuid);
+    // TODO: RC Specific inludes for this request
     this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
       {
         store: this.store,

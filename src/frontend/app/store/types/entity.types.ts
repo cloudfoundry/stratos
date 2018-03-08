@@ -1,10 +1,14 @@
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
-import { appEnvVarsSchemaKey, appStatsSchemaKey, appSummarySchemaKey } from '../helpers/entity-factory';
+import {
+  appEnvVarsSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  privateDomainsSchemaKey,
+  spaceQuotaSchemaKey,
+} from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { EndpointModel } from './endpoint.types';
-import { SystemInfo } from './system.types';
-import { IRoute, IFeatureFlag } from '../../core/cf-api.types';
 
 export interface IRequestDataInternal<T> extends IRequestTypeState {
   application: IRequestEntityTypeState<T>;
@@ -25,6 +29,8 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   buildpack: IRequestEntityTypeState<T>;
   securityGroup: IRequestEntityTypeState<T>;
   featureFlag: IRequestEntityTypeState<T>;
+  private_domains: IRequestEntityTypeState<T>;
+  space_quota_definition: IRequestEntityTypeState<T>;
 }
 
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
@@ -57,4 +63,6 @@ export const defaultCfEntitiesState = {
   buildpack: {},
   securityGroup: {},
   featureFlag: {},
+  [privateDomainsSchemaKey]: {},
+  [spaceQuotaSchemaKey]: {}
 };

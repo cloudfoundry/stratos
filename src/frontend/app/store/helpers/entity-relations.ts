@@ -223,6 +223,11 @@ function createEntityWatcher(store, paramAction, guid: string): Observable<Valid
 function createActionsForMissingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
   const { store, childRelation, childEntitiesUrl } = config;
 
+  if (!childEntitiesUrl) {
+    // There might genuinely be no entity. In those cases the url will be blank
+    return [];
+  }
+
   const paramAction = createAction(config);
   let results: ValidateEntityResult[] = [];
 

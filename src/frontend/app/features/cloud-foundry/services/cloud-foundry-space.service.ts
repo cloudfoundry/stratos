@@ -10,10 +10,11 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
+import { entityFactory, spaceSchemaKey, spaceWithOrgKey } from '../../../store/helpers/entity-factory';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { spaceSchemaKey, entityFactory, spaceWithOrgKey } from '../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -44,7 +45,9 @@ export class CloudFoundrySpaceService {
       spaceSchemaKey,
       entityFactory(spaceWithOrgKey),
       spaceGuid,
-      new GetSpace(spaceGuid, cfGuid)
+      new GetSpace(spaceGuid, cfGuid, [
+        // createEntityRelationKey(org)
+      ])
     );
 
     this.initialiseObservables();
