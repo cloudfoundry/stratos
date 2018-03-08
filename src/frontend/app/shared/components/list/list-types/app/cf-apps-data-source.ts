@@ -8,7 +8,7 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { createEntityRelationKey } from '../../../../../store/helpers/entity-relation.types';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 
 
 

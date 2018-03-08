@@ -53,9 +53,8 @@ function populateParentEntity(state, successAction) {
   }
   // Do we actually have any entities to store in a parent?
   const response = successAction.response;
-  let entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
-  entities = Object.values(entities);
-  if (!entities) {
+  const entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
+  if (!Object.values(entities)) {
     return;
   }
 

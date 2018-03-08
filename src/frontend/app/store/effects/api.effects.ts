@@ -23,8 +23,8 @@ import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.acti
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
-import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relation.types';
-import { listEntityRelations } from '../helpers/entity-relations.helpers';
+import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { listEntityRelations } from '../helpers/entity-relations';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 

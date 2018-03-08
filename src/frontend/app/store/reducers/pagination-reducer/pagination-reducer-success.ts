@@ -4,12 +4,14 @@ import { AppState } from '../../app-state';
 import { PaginationAction, PaginationEntityState } from '../../types/pagination.types';
 
 export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {
-  const { apiAction } = action;
+  const { apiAction, response, result } = action;
+  let { totalResults, totalPages } = action;
+
   const params = getParams(apiAction);
-  const totalResults = action.totalResults || (action.response ? action.response.result.length : state.totalResults);
-  const totalPages = action.totalPages || (action.response ? action.response.totalPages : state.pageCount);
-  const page = action.apiAction.pageNumber || state.currentPage;
-  const pageResult = action.result || (action.response ? action.response.result : state[page]);
+  totalResults = totalResults || (response ? response.result.length : state.totalResults);
+  totalPages = totalPages || (response ? response.totalPages : state.pageCount);
+  const page = apiAction.pageNumber || state.currentPage;
+  const pageResult = result || (response ? response.result : state[page]);
 
   return {
     ...state,

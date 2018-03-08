@@ -9,7 +9,7 @@ import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.acti
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
 import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relation.types';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';

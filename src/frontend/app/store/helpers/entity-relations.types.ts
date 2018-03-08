@@ -2,6 +2,13 @@ import { EntitySchema } from './entity-factory';
 import { IRequestAction } from '../types/request.types';
 import { Action } from '@ngrx/store';
 
+
+export class EntityTree {
+  rootRelation: EntityTreeRelation;
+  requiredParamNames: string[];
+  maxDepth?: number;
+}
+
 /**
  * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
  *

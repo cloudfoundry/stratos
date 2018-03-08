@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, organisationWithSpaceKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../store/helpers/entity-relation.types';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,

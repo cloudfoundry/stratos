@@ -1,7 +1,7 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory, routeSchemaKey } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relation.types';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { CfApplication } from '../types/application.types';

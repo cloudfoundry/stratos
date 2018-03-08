@@ -25,7 +25,7 @@ import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relation.types';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
 
 @Component({
   selector: 'app-create-application-step3',

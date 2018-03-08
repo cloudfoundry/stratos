@@ -14,11 +14,11 @@ import {
   ValidateEntitiesStart,
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
-import { validateEntityRelations } from '../helpers/entity-relations.helpers';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { UpdateCfAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import { validateEntityRelations } from '../helpers/entity-relations';
 
 @Injectable()
 export class RequestEffect {
@@ -54,7 +54,7 @@ export class RequestEffect {
    * - exist - if a list, dispatch an action to store them in pagination.
    * For example
    * 1) a space may require routes
-   * 2) space is fetched as part of a different call that has not requested a space's routes be fetched line
+   * 2) space is fetched as part of a different call that has not requested a space's routes be fetched inline
    * 3) this validation process will check each space, and if routes are missing fetch them
    * 4) routes list is then stored in original space and as a pagination section
    * 5) alternatively... if we've reached here for the same space but from an api request for that space.. ensure that the routes have not

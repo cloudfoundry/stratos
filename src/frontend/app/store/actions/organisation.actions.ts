@@ -7,7 +7,7 @@ import {
   spaceSchemaKey,
   spacesKey,
 } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relation.types';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';

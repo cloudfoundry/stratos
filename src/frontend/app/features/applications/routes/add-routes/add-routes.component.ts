@@ -19,7 +19,7 @@ import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
 import { routeSchemaKey, domainSchemaKey, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relation.types';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
 
 @Component({
   selector: 'app-add-routes',

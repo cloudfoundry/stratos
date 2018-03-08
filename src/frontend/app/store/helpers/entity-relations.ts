@@ -1,5 +1,5 @@
 import { Action, Store } from '@ngrx/store';
-import { denormalize, schema } from 'normalizr';
+import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { first, map, pairwise, skipWhile } from 'rxjs/operators';
 
@@ -15,13 +15,13 @@ import { APIResource, NormalizedResponse } from '../types/api.types';
 import { PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
 import {
-  createEntityRelationKey,
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
   EntityTreeRelation,
   ValidationResult,
-} from './entity-relation.types';
+} from './entity-relations.types';
 import { pick } from './reducer.helper';
+import { fetchEntityTree } from './entity-relations.tree';
 
 class AppStoreLayout {
   [entityKey: string]: {
@@ -49,15 +49,7 @@ interface ValidateEntityResult {
   fetchingState$?: Observable<ValidateResultFetchingState>;
 }
 
-class EntityTree {
-  rootRelation: EntityTreeRelation;
-  requiredParamNames: string[];
-  maxDepth?: number;
-}
 
-const entityTreeCache: {
-  [entityKey: string]: EntityTree
-} = {};
 
 class ValidateEntityRelationsConfig {
   /**
@@ -203,6 +195,29 @@ function createActionsForExisting(config: HandleRelationsConfig): ValidateEntity
   }];
 }
 
+function createPaginationWatcher(store, paramAction, paramPaginationAction: FetchRelationPaginatedAction):
+  Observable<ValidateResultFetchingState> {
+  return store.select(selectPaginationState(paramAction.entityKey, paramPaginationAction.paginationKey)).pipe(
+    map((paginationState: PaginationEntityState) => {
+      const pageRequest: ActionState =
+        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+      return {
+        fetching: pageRequest ? pageRequest.busy : true
+      } as ValidateResultFetchingState;
+    })
+  );
+}
+
+function createEntityWatcher(store, paramAction, guid: string): Observable<ValidateResultFetchingState> {
+  return store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
+    map((requestInfo: RequestInfoState) => {
+      return {
+        fetching: requestInfo ? requestInfo.fetching : true
+      };
+    })
+  );
+}
+
 /**
  * Create actions required to fetch missing relations
  *
@@ -222,28 +237,14 @@ function createActionsForMissing(config: HandleRelationsConfig): ValidateEntityR
     },
     {
       action: paramAction,
-      fetchingState$: store.select(selectPaginationState(paramAction.entityKey, paramPaginationAction.paginationKey)).pipe(
-        map((paginationState: PaginationEntityState) => {
-          const pageRequest: ActionState =
-            paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-          return {
-            fetching: pageRequest ? pageRequest.busy : true
-          } as ValidateResultFetchingState;
-        })
-      )
+      fetchingState$: createPaginationWatcher(store, paramAction, paramPaginationAction)
     }
     ]);
   } else {
     const guid = childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1);
     results.push({
       action: paramAction,
-      fetchingState$: store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
-        map((requestInfo: RequestInfoState) => {
-          return {
-            fetching: requestInfo ? requestInfo.fetching : true
-          };
-        })
-      )
+      fetchingState$: createEntityWatcher(store, paramAction, guid)
     });
   }
   return results;
@@ -287,15 +288,14 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
  * @param {ValidateLoopConfig} config
  * @returns {ValidateEntityResult[]}
  */
-function validationLoop(config: ValidateLoopConfig)
-  : ValidateEntityResult[] {
-  let results = [];
-
+function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   const { cfGuid, entities, parentRelation } = config;
 
   if (!entities) {
-    return results;
+    return [];
   }
+
+  let results: ValidateEntityResult[] = [];
   parentRelation.childRelations.forEach(childRelation => {
     entities.forEach(entity => {
       const childEntities = pathGet(childRelation.path, entity);
@@ -323,6 +323,31 @@ function validationLoop(config: ValidateLoopConfig)
   return results;
 }
 
+function handleValidationLoopResults(store, results) {
+  const paginationFinished = new Array<Promise<boolean>>();
+
+  results.forEach(newActions => {
+    // console.log('Dispatching: ', newActions.action);
+    store.dispatch(newActions.action);
+    if (newActions.fetchingState$) {
+      const obs = newActions.fetchingState$.pipe(
+        pairwise(),
+        map(([oldFetching, newFetching]) => {
+          return oldFetching.fetching === true && newFetching.fetching === false;
+        }),
+        skipWhile(completed => !completed),
+        first(),
+      ).toPromise();
+      paginationFinished.push(obs);
+    }
+  });
+
+  return {
+    started: !!(paginationFinished.length),
+    completed: Promise.all(paginationFinished)
+  };
+}
+
 /**
  * Ensure all required inline parameters specified by the entity associated with the request exist.
  * If the inline parameter/s are..
@@ -348,10 +373,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   const startTime = new Date().getTime().toString();
   // console.group(startTime);
   // console.time(startTime);
-  const emptyResponse = {
-    started: false,
-    completed$: Observable.of(null)
-  };
 
   const relationAction = action as EntityInlineParentAction;
   // console.time(startTime + 'fetch');
@@ -372,38 +393,12 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   });
   // console.timeEnd(startTime + 'validate');
 
-
-  const paginationFinished = new Array<Promise<boolean>>();
-
-  const dispatchInterval = environment.production ? 0 : 10000;
-
-  results.forEach(newActions => {
-    // console.log('Dispatching: ', newActions.action);
-    store.dispatch(newActions.action);
-    if (newActions.fetchingState$) {
-      const obs = newActions.fetchingState$.pipe(
-        pairwise(),
-        map(([oldFetching, newFetching]) => {
-          return oldFetching.fetching === true && newFetching.fetching === false;
-        }),
-        skipWhile(completed => !completed),
-        first(),
-      ).toPromise();
-      paginationFinished.push(obs);
-    }
-  });
-
-  const b = Promise.all(paginationFinished);
-
+  const result = handleValidationLoopResults(store, results);
   // console.timeEnd(startTime);
   // console.groupEnd();
-  const started = !!(paginationFinished.length);
-  return {
-    started,
-    completed: Promise.all(paginationFinished)
-  };
-}
+  return result;
 
+}
 
 export function listEntityRelations(action: EntityInlineParentAction) {
   // console.group('listRelations' + action.entityKey);
@@ -416,90 +411,3 @@ export function listEntityRelations(action: EntityInlineParentAction) {
     relations: tree.requiredParamNames
   };
 }
-
-function generateCacheKey(entityKey: string, action: EntityInlineParentAction): string {
-  let includeRelations = action.includeRelations || [];
-  includeRelations = includeRelations.sort((a, b) => {
-    return a.localeCompare(b);
-  });
-  return entityKey + '+' + includeRelations.join(',');
-}
-
-export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
-  let entity = action.entity;
-  const isArray = entity['length'] > 0;
-  entity = isArray ? entity[0] : entity;
-  const entityKey = entity['key'];
-  const cacheKey = generateCacheKey(entityKey, action);
-  let entityTree = entityTreeCache[cacheKey];
-  if (!entityTree) {
-    const rootEntityRelation = new EntityTreeRelation(
-      entityKey,
-      entity as schema.Entity,
-      isArray,
-      null,
-      '',
-      new Array<EntityTreeRelation>()
-    );
-    entityTree = {
-      rootRelation: rootEntityRelation,
-      requiredParamNames: new Array<string>(),
-    };
-    createEntityTree(entityTree, rootEntityRelation);
-    entityTreeCache[cacheKey] = entityTree;
-    // console.log('fetchEntity: Not Found');
-  } else {
-    // console.log('fetchEntity: Found');
-  }
-  // Calc max depth and exclude not needed
-  entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
-  return entityTree;
-}
-
-export function createEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
-  const rootEntitySchema = schemaObj || entityRelation.entity['schema'];
-  Object.keys(rootEntitySchema).forEach(key => {
-    let value = rootEntitySchema[key];
-    const isArray = value['length'] > 0;
-    value = isArray ? value[0] : value;
-
-    const newPath = path ? path + '.' + key : key;
-    if (value instanceof schema.Entity) {
-      const newEntityRelation = new EntityTreeRelation(
-        value.key,
-        value,
-        isArray,
-        key,
-        newPath,
-        new Array<EntityTreeRelation>()
-      );
-      entityRelation.childRelations.push(newEntityRelation);
-      createEntityTree(tree, newEntityRelation, null, '');
-    } else if (value instanceof Object) {
-      createEntityTree(tree, entityRelation, value, newPath);
-    }
-  });
-}
-
-export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [])
-  : EntityTreeRelation[] {
-  const newChildRelations = new Array<EntityTreeRelation>();
-  entityRelation.childRelations.forEach((relation, index, array) => {
-    const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entityKey);
-    if (includeRelations.indexOf(parentChildKey) >= 0) {
-      const clone = { ...relation };
-      newChildRelations.push(clone);
-      if (tree.requiredParamNames.indexOf(relation.paramName) < 0) {
-        tree.requiredParamNames.push(relation.paramName);
-      }
-      clone.childRelations = parseEntityTree(tree, relation, includeRelations);
-    }
-  });
-  entityRelation.childRelations = newChildRelations;
-  if (entityRelation.childRelations.length) {
-    tree.maxDepth = tree.maxDepth || 0;
-    tree.maxDepth++;
-  }
-  return newChildRelations;
-}
-
