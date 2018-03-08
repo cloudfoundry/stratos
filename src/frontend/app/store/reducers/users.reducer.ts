@@ -1,11 +1,11 @@
 import { Action } from '@ngrx/store';
 
-import { OrgUserRoles } from '../../features/cloud-foundry/cf.helpers';
-import { REMOVE_PERMISSION_SUCCESS, RemoveUserPermission } from '../actions/users.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
 import { CfUser } from '../types/user.types';
+import { REMOVE_PERMISSION_SUCCESS, RemoveUserPermission } from '../actions/users.actions';
+import { OrgUserRoles } from '../../features/cloud-foundry/cf.helpers';
+import { APISuccessOrFailedAction } from '../types/request.types';
 
 export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: Action) {
   switch (action.type) {

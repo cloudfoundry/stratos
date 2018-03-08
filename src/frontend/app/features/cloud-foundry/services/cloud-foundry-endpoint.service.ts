@@ -77,7 +77,11 @@ export class CloudFoundryEndpointService {
       // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
       map(orgs => orgs.filter(org => org.entity.spaces)),
       map(p => {
-        return p.map(o => o.entity.spaces.map(space => space.entity.apps));
+        return p.map(o => {
+          return o.entity.spaces
+            .map(space => space.entity.apps)
+            .filter(apps => !!apps);
+        });
       }),
       map(a => {
         let flatArray = [];

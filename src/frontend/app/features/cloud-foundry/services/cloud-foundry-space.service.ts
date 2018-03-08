@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, switchMap } from 'rxjs/operators';
 
+import { IApp, IQuotaDefinition, IRoute, IServiceInstance, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -11,10 +12,8 @@ import { spaceSchemaKey, SpaceWithOrganisationSchema } from '../../../store/acti
 import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { Route } from '../../../store/types/route.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { IQuotaDefinition, IServiceInstance, ISpace, IApp, IRoute } from '../../../core/cf-api.types';
 
 @Injectable()
 export class CloudFoundrySpaceService {

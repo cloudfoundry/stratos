@@ -3,7 +3,7 @@
     Edit {{spaceName$ | async}}
   </app-page-header>
   <app-steppers [cancel]="spaceUrl">
-    <app-step title="Edut Space" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Update">
+    <app-step title="Edit Space" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Update">
       <app-edit-space-step #step1></app-edit-space-step>
     </app-step>
   </app-steppers>
