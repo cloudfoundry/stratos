@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
-import { ListViewTypes, IListAction } from '../../list.component.types';
+import { ListViewTypes, IListAction, ListConfig, IListConfig } from '../../list.component.types';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
@@ -17,16 +17,16 @@ import {
 import { DeleteServiceInstance, DeleteServiceBinding } from '../../../../../store/actions/service-instances.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 @Injectable()
-export class CfSpacesServiceInstancesListConfigService {
+export class CfSpacesServiceInstancesListConfigService
+  extends ListConfig<APIResource<CfServiceInstance>>
+  implements IListConfig<APIResource<CfServiceInstance>>  {
   viewType = ListViewTypes.TABLE_ONLY;
-  enableTextFilter = false;
   dataSource: CfSpacesServiceInstancesDataSource;
-  pageSizeOptions = [9, 45, 90];
   defaultView = 'table' as ListView;
 
   private serviceInstanceColumns: ITableColumn<APIResource<CfServiceInstance>>[] = [
     {
-      columnId: 'serviceInstances',
+      columnId: 'name',
       headerCell: () => 'Service Instances',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
@@ -34,7 +34,7 @@ export class CfSpacesServiceInstancesListConfigService {
       sort: {
         type: 'sort',
         orderKey: 'name',
-        field: 'name'
+        field: 'entity.name'
       },
       cellFlex: '2'
     },
@@ -42,45 +42,25 @@ export class CfSpacesServiceInstancesListConfigService {
       columnId: 'service',
       headerCell: () => 'Service',
       cellComponent: TableCellServiceNameComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'connection',
-        field: 'info.user'
-      },
       cellFlex: '1'
     },
     {
       columnId: 'servicePlan',
       headerCell: () => 'Plan',
       cellComponent: TableCellServicePlanComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'connection',
-        field: 'info.user'
-      },
       cellFlex: '1'
     },
     {
       columnId: 'tags',
       headerCell: () => 'Tags',
       cellComponent: TableCellServiceInstanceTagsComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'type',
-        field: 'cnsi_type'
-      },
       cellFlex: '2'
     },
     {
       columnId: 'attachedApps',
       headerCell: () => 'Application Attached',
       cellComponent: TableCellServiceInstanceAppsAttachedComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'address',
-        field: 'api_endpoint.Host'
-      },
-      cellFlex: '5'
+      cellFlex: '3'
     },
   ];
 
@@ -103,6 +83,7 @@ export class CfSpacesServiceInstancesListConfigService {
   };
 
   constructor(private store: Store<AppState>, private cfSpaceService: CloudFoundrySpaceService) {
+    super();
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
   }
 
@@ -122,10 +103,6 @@ export class CfSpacesServiceInstancesListConfigService {
     } else {
       this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));
     }
-  }
-
-  editServiceInstance = (serviceInstance: APIResource<CfServiceInstance>) => {
-    this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'edit-service-binding'] }));
   }
 
   getGlobalActions = () => [];
