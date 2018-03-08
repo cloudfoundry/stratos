@@ -18,7 +18,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
     const action = new GetAllOrganisations(
       paginationKey, cfGuid, [
         createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+        // createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       ]);
     super({
       store,

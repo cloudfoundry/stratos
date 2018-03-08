@@ -58,6 +58,7 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
       createEntityRelationKey(applicationSchemaKey, stackSchemaKey),
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
       createEntityRelationKey(spaceSchemaKey, domainSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organisationSchemaKey),
     ]
   );
 }
