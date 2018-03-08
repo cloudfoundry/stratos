@@ -1,13 +1,20 @@
-import { CFStartAction } from '../types/request.types';
-import { PaginatedAction } from '../types/pagination.types';
 import { RequestOptions } from '@angular/http';
-import { schema } from 'normalizr';
-import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { getActions } from './action.helper';
-import { entityFactory, securityGroupSchemaKey } from '../helpers/entity-factory';
 
-export class GetAllSecurityGroups extends CFStartAction implements PaginatedAction {
-  constructor(public endpointGuid: string, public paginationKey: string) {
+import { entityFactory, securityGroupSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
+import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction } from '../types/request.types';
+import { getActions } from './action.helper';
+
+export class GetAllSecurityGroups extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  constructor(
+    public endpointGuid: string,
+    public paginationKey: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(securityGroupSchemaKey, spaceSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `security_groups`;
@@ -22,4 +29,3 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
     page: 1
   };
 }
-

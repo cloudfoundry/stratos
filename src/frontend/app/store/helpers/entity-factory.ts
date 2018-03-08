@@ -226,7 +226,7 @@ const BuildpackSchema = new schema.Entity(
     idAttribute: getAPIResourceGuid
   }
 );
-entityCache[serviceInstancesSchemaKey] = BuildpackSchema;
+entityCache[buildpackSchemaKey] = BuildpackSchema;
 
 const EndpointSchema = new EntitySchema(endpointSchemaKey, {
   users: [UserSchema]
@@ -235,9 +235,13 @@ const EndpointSchema = new EntitySchema(endpointSchemaKey, {
   });
 entityCache[endpointSchemaKey] = EndpointSchema;
 
-const SecurityGroupSchema = new schema.Entity(securityGroupSchemaKey, {}, {
-  idAttribute: getAPIResourceGuid
-});
+const SecurityGroupSchema = new schema.Entity(securityGroupSchemaKey, {
+  entity: {
+    spaces: [SpaceSchema]
+  }
+}, {
+    idAttribute: getAPIResourceGuid
+  });
 entityCache[securityGroupSchemaKey] = SecurityGroupSchema;
 
 const FeatureFlagSchema = new schema.Entity(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
