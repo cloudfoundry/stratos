@@ -17,7 +17,7 @@ import { AppState } from '../app-state';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { UpdateCfAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import { UpdateCfAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, APISuccessOrFailedAction } from '../types/request.types';
 import { validateEntityRelations } from '../helpers/entity-relations';
 
 @Injectable()
@@ -109,7 +109,7 @@ export class RequestEffect {
         this.logger.warn(`Entity validation process failed`, error);
         if (validateAction.apiRequestStarted) {
           return [
-            { type: apiAction.actions[2], apiAction: apiAction },
+            new APISuccessOrFailedAction(apiAction.actions[2], apiAction),
             new WrapperRequestActionFailed(
               error.message,
               apiAction,
@@ -142,7 +142,7 @@ export class RequestEffect {
           totalResults: 0,
         };
 
-        actions.push({ type: apiAction.actions[1], apiAction: apiAction });
+        actions.push(new APISuccessOrFailedAction(apiAction.actions[1], apiAction));
         actions.push(new WrapperRequestActionSuccess(
           apiResponse.response,
           apiAction,

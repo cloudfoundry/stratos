@@ -13,10 +13,10 @@ import { createEntityRelationKey } from '../../../../../store/helpers/entity-rel
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
   public static paginationKey = 'cf-organizations';
 
-  constructor(store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
+  constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const { paginationKey } = CfOrgsDataSourceService;
     const action = new GetAllOrganisations(
-      paginationKey, [
+      paginationKey, cfGuid, [
         createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       ]);

@@ -5,12 +5,10 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { BaseCF } from '../../cf-page.types';
 import { APIResource } from '../../../../store/types/api.types';
-import { DomainSchema } from '../../../../store/actions/domains.actions';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { GetAllOrganisations, CreateOrganization } from '../../../../store/actions/organisation.actions';
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { OrganisationSchema } from '../../../../store/actions/action-types';
 import { filter, map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -18,6 +16,7 @@ import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material';
 import { IOrganization } from '../../../../core/cf-api.types';
+import { entityFactory, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-create-organization-step',
@@ -55,7 +54,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          OrganisationSchema
+          entityFactory(organisationSchemaKey)
         )
       },
       true
@@ -80,7 +79,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     const orgName = this.addOrg.value['orgName'];
     this.store.dispatch(new CreateOrganization(orgName, this.cfGuid));
 
-    this.submitSubscription = this.store.select(selectRequestInfo(OrganisationSchema.key, orgName)).pipe(
+    this.submitSubscription = this.store.select(selectRequestInfo(organisationSchemaKey, orgName)).pipe(
       filter(o => !!o && !o.creating),
       map(o => {
         if (o.error) {

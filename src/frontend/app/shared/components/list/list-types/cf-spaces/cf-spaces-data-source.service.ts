@@ -1,12 +1,12 @@
 import { Store } from '@ngrx/store';
 
-import { SpaceWithOrganisationSchema } from '../../../../../store/actions/action-types';
 import { GetAllSpacesInOrg } from '../../../../../store/actions/organisation.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { entityFactory, spaceWithOrgKey } from '../../../../../store/helpers/entity-factory';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
@@ -15,7 +15,7 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: SpaceWithOrganisationSchema,
+      schema: entityFactory(spaceWithOrgKey),
       getRowUniqueId: (entity: APIResource) => {
         return entity.metadata ? entity.metadata.guid : null;
       },

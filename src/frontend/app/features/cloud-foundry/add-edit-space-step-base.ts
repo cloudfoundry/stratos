@@ -8,7 +8,6 @@ import { getPaginationObservables } from '../../store/reducers/pagination-reduce
 import { APIResource } from '../../store/types/api.types';
 import { getPaginationKey } from '../../store/actions/pagination.actions';
 import { GetAllSpacesInOrg } from '../../store/actions/organisation.actions';
-import { SpaceSchema } from '../../store/actions/action-types';
 import { filter, map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -17,6 +16,7 @@ import { RouterNav } from '../../store/actions/router.actions';
 import { BaseCF } from './cf-page.types';
 import { getIdFromRoute } from './cf.helpers';
 import { ValidatorFn, AbstractControl } from '@angular/forms';
+import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
 
 export class AddEditSpaceStepBase {
   submitSubscription: Subscription;
@@ -44,7 +44,7 @@ export class AddEditSpaceStepBase {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          SpaceSchema
+          entityFactory(spaceSchemaKey)
         )
       },
       true

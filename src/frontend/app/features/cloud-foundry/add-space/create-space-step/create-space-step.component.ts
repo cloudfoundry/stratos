@@ -7,11 +7,11 @@ import { Observable } from 'rxjs/Observable';
 import { filter } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { spaceSchemaKey } from '../../../../store/actions/action-types';
 import { CreateSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
+import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-create-space-step',

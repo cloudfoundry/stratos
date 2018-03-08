@@ -1,4 +1,4 @@
-import { RequestOptions } from '@angular/http';
+import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { entityFactory, routeSchemaKey, spaceSchemaKey, spaceWithOrgKey, applicationSchemaKey } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';

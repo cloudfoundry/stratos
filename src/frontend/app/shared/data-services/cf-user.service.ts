@@ -1,18 +1,27 @@
-import { PaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { BaseCF } from './../../features/cloud-foundry/cf-page.types';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, shareReplay } from 'rxjs/operators';
 
+import {
+  isOrgAuditor,
+  isOrgBillingManager,
+  isOrgManager,
+  isOrgUser,
+  isSpaceAuditor,
+  isSpaceDeveloper,
+  isSpaceManager,
+} from '../../features/cloud-foundry/cf.helpers';
 import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
+import { cfUserSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { CfUser, UserRoleInOrg, UserSchema, UserRoleInSpace, IUserPermissionInOrg } from '../../store/types/user.types';
+import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { entityFactory, cfUserSchemaKey } from '../../store/helpers/entity-factory';
-import { isOrgManager, isOrgBillingManager, isOrgAuditor, isOrgUser, isSpaceManager, isSpaceAuditor, isSpaceDeveloper } from '../../features/cloud-foundry/cf.helpers';
+import { BaseCF } from './../../features/cloud-foundry/cf-page.types';
+import { PaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+
 @Injectable()
 export class CfUserService {
   public allUsersAction: GetAllUsers;

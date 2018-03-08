@@ -9,13 +9,13 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { organisationSchemaKey, OrganisationWithSpaceSchema } from '../../../store/actions/action-types';
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { BaseCFOrg } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { organisationSchemaKey, entityFactory, organisationWithSpaceKey } from '../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
@@ -45,9 +45,9 @@ export class CloudFoundryOrganisationService {
     this.cfGuid = cfEndpointService.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
-      OrganisationWithSpaceSchema,
+      entityFactory(organisationWithSpaceKey),
       this.orgGuid,
-      new GetOrganisation(this.orgGuid, this.cfGuid, 2)
+      new GetOrganisation(this.orgGuid, this.cfGuid)
     );
 
     this.initialiseObservables();

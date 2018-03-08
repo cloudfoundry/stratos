@@ -1,11 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { schema } from 'normalizr';
 
-import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { ServiceInstancesSchema } from './action-types';
+import { ServiceInstancesSchema } from '../helpers/entity-factory';
 
 export class GetServicesInstancesInSpace extends CFStartAction implements PaginationAction {
   constructor(public endpointGuid: string, public spaceGuid: string, public paginationKey: string) {

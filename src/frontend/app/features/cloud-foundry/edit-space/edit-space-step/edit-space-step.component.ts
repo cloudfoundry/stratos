@@ -4,26 +4,16 @@ import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, tap, take } from 'rxjs/operators';
+import { filter, map, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { SpaceSchema, spaceSchemaKey } from '../../../../store/actions/action-types';
-import { GetAllSpacesInOrg } from '../../../../store/actions/organisation.actions';
-import { getPaginationKey } from '../../../../store/actions/pagination.actions';
-import { AppState } from '../../../../store/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/types/api.types';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { UpdateSpace } from '../../../../store/actions/space.actions';
+import { AppState } from '../../../../store/app-state';
+import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
-import { RouterNav } from '../../../../store/actions/router.actions';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
-import { BaseCF } from '../../cf-page.types';
+import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 
 @Component({
   selector: 'app-edit-space-step',

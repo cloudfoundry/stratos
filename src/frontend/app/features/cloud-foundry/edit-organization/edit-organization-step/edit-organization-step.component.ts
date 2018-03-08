@@ -1,27 +1,24 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
-import { FormGroup, FormControl } from '@angular/forms';
-import { map, take, tap, filter } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { getPaginationKey } from '../../../../store/actions/pagination.actions';
-import { GetAllOrganisations, UpdateOrganization } from '../../../../store/actions/organisation.actions';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { APIResource } from '../../../../store/types/api.types';
-import { OrganisationSchema, organisationSchemaKey } from '../../../../store/actions/action-types';
-import { Subscription } from 'rxjs/Subscription';
-import { IOrganization } from '../../../../core/cf-api.types';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { ActivatedRoute } from '@angular/router';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
-import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { filter, map, take, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { IOrganization } from '../../../../core/cf-api.types';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { GetAllOrganisations, UpdateOrganization } from '../../../../store/actions/organisation.actions';
+import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { AppState } from '../../../../store/app-state';
+import { entityFactory, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { APIResource } from '../../../../store/types/api.types';
 import { BaseCFOrg } from '../../cf-page.types';
+import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
 
 const enum OrgStatus {
   ACTIVE = 'active',
@@ -93,7 +90,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          OrganisationSchema
+          entityFactory(organisationSchemaKey)
         )
       },
       true

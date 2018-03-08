@@ -50,7 +50,7 @@ export const defaultCfEntitiesState = {
   [appEnvVarsSchemaKey]: {},
   [appStatsSchemaKey]: {},
   [appSummarySchemaKey]: {},
-  serviceInstance: {},// TODO: RC
+  serviceInstance: {}, // TODO: RC
   servicePlan: {},
   service: {},
   serviceBinding: {},

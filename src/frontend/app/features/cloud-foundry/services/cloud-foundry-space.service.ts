@@ -8,12 +8,12 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { spaceSchemaKey, SpaceWithOrganisationSchema } from '../../../store/actions/action-types';
 import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { spaceSchemaKey, entityFactory, spaceWithOrgKey } from '../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -42,9 +42,9 @@ export class CloudFoundrySpaceService {
 
     this.spaceEntitySchema = this.entityServiceFactory.create(
       spaceSchemaKey,
-      SpaceWithOrganisationSchema,
+      entityFactory(spaceWithOrgKey),
       spaceGuid,
-      new GetSpace(spaceGuid, cfGuid, 2)
+      new GetSpace(spaceGuid, cfGuid)
     );
 
     this.initialiseObservables();

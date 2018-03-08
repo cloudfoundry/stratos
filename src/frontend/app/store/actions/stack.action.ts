@@ -35,7 +35,7 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
     this.options.method = 'get';
   }
   actions = getActions('Stack', 'Fetch all');
-  entity = [StackSchema];
-  entityKey = StackSchema.key;
+  entity = [entityFactory(stackSchemaKey)];
+  entityKey = stackSchemaKey;
   options: RequestOptions;
 }

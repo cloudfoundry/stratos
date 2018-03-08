@@ -10,9 +10,9 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { map } from 'rxjs/operators';
 import { isTCPRoute, getMappedApps } from '../../../../../features/applications/routes/routes.helper';
-import { ApplicationSchema } from '../../../../../store/actions/application.actions';
 import { GetAllAppsInSpace } from '../../../../../store/actions/space.actions';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { entityFactory, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 export const RouteSchema = new schema.Entity('route');
 
 export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
@@ -22,7 +22,7 @@ export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: ApplicationSchema,
+      schema: entityFactory(applicationSchemaKey),
       getRowUniqueId: (entity: APIResource) => {
         return entity.metadata ? entity.metadata.guid : null;
       },

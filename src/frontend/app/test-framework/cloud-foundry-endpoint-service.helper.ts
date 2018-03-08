@@ -26,7 +26,6 @@ import {
 import {
   MetaCardValueComponent,
 } from '../shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { CfOrgsListConfigService } from '../shared/components/list/list-types/cf-orgs/cf-orgs-list-config.service';
 import { CfOrgSpaceDataService } from '../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../shared/data-services/cf-user.service';
 import { EntityMonitorFactory } from '../shared/monitors/entity-monitor.factory.service';
