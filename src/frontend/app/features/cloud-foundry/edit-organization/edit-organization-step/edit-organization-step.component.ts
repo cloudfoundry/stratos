@@ -57,8 +57,8 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
     this.editOrgName = new FormGroup({
-      orgName: new FormControl('', this.nameTakenValidator()),
-      toggleStatus: new FormControl(false),
+      orgName: new FormControl('', this.nameTakenValidator())
+      // toggleStatus: new FormControl(false),
     });
     this.org$ = this.cfOrgService.org$.pipe(
       map(o => o.entity.entity),
