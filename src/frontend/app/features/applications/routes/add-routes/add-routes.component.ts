@@ -19,7 +19,7 @@ import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
 import { routeSchemaKey, domainSchemaKey, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relation.types';
 
 @Component({
   selector: 'app-add-routes',
@@ -211,19 +211,14 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         take(1),
         tap(p => {
           if (p.error) {
-            this.snackBar.open(
-              'Failed to associate route with the app!',
-              'Dismiss'
-            );
+            this.snackBar.open('Failed to associate route with the app!', 'Dismiss');
           } else {
             this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid,
               createEntityRelationKey(applicationSchemaKey, domainSchemaKey)
             ));
-            this.store.dispatch(
-              new RouterNav({
-                path: ['applications', this.cfGuid, this.appGuid]
-              })
-            );
+            this.store.dispatch(new RouterNav({
+              path: ['applications', this.cfGuid, this.appGuid]
+            }));
           }
         })
       );

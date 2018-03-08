@@ -1,9 +1,9 @@
 import { Action } from '@ngrx/store';
 
-import { ValidationResult } from '../helpers/entity-relations.helpers';
 import { NormalizedResponse } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
+import { ValidationResult } from '../helpers/entity-relation.types';
 
 export const ApiActionTypes = {
   API_REQUEST_START: 'API_REQUEST_START'

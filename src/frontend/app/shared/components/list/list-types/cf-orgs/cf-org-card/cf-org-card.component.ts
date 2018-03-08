@@ -53,7 +53,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
   ngOnInit() {
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
-        // FIX ME: This is null if the endpoint is disconnected. Not sure we should init it if we're headed directly to org level?
+        // This is null if the endpoint is disconnected. Probably related to https://github.com/cloudfoundry-incubator/stratos/issues/1727
         if (!u) {
           return Observable.of({
             orgManager: false,
@@ -62,11 +62,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
             user: false
           });
         }
-        return this.cfUserService.getUserRoleInOrg(
-          u.guid,
-          this.row.entity.guid,
-          this.row.entity.cfGuid
-        );
+        return this.cfUserService.getUserRoleInOrg(u.guid, this.row.entity.guid, this.row.entity.cfGuid);
       }),
       map(u => getOrgRolesString(u))
     );

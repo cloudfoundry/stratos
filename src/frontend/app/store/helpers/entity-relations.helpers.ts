@@ -1,8 +1,7 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/operator/combineLatest';
-import { first, map, skipWhile, combineAll, pairwise, tap, zip } from 'rxjs/operators';
+import { first, map, pairwise, skipWhile } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { pathGet } from '../../core/utils.service';
@@ -13,66 +12,16 @@ import { ActionState, RequestInfoState } from '../reducers/api-request-reducer/t
 import { selectRequestInfo } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
-import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
-import { IRequestAction, WrapperRequestActionSuccess, IRequestActionEntity } from '../types/request.types';
+import { PaginationEntityState } from '../types/pagination.types';
+import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+  EntityInlineParentAction,
+  EntityTreeRelation,
+  ValidationResult,
+} from './entity-relation.types';
 import { pick } from './reducer.helper';
-import { forkJoin } from 'rxjs/observable/forkJoin';
-import { EntitySchema } from './entity-factory';
-/**
- * A structure which represents the tree like layout of entity dependencies. For example organization --> space --> routes
- *
- * @export
- * @class EntityTreeRelation
- */
-export class EntityTreeRelation {
-  /**
- * Creates an instance of EntityTreeRelation.
- * @param {string} entityKey
- * @param {EntitySchema} entity
- * @param {boolean} [isArray=false] is this a collection of entities (should be paginationed) or not
- * @param {string} paramName parameter name of the entity within the schema. For example `space` may be `spaces` (entity.spaces)
- * @param {string} [path=''] location of the entity within the parent. For example `space` entity maybe be `entity.spaces`
- * @param {EntityTreeRelation[]} childRelations
- * @memberof EntityTreeRelation
- */
-  constructor(
-    public entityKey: string,
-    public entity: EntitySchema,
-    public isArray = false,
-    public paramName: string, // space/spaces
-    public path = '', // entity.space
-    public childRelations: EntityTreeRelation[]
-  ) {
-
-  }
-}
-
-/**
- * Helper interface. Actions with entities that are children of a parent entity should specify the parent guid.
- *
- * @export
- * @interface EntityInlineChildAction
- */
-export interface EntityInlineChildAction {
-  parentGuid: string;
-}
-
-/**
- * Helper interface. Actions that are a parent of children entities should have these included parent-child relations
- *
- * @export
- * @interface EntityInlineParentAction
- * @extends {PaginatedAction}
- */
-export interface EntityInlineParentAction extends IRequestAction {
-  includeRelations: string[];
-  populateMissing: boolean;
-}
-
-export class ValidationResult {
-  started: boolean;
-  completed: Promise<boolean[]>;
-}
 
 class AppStoreLayout {
   [entityKey: string]: {
@@ -80,10 +29,11 @@ class AppStoreLayout {
   }
 }
 
-interface ListRelationsResult {
-  maxDepth: number;
-  relations: string[];
-}
+// TODO: RC
+// interface ListRelationsResult {
+//   maxDepth: number;
+//   relations: string[];
+// }
 
 interface ValidateResultFetchingState {
   fetching: boolean;
@@ -109,181 +59,240 @@ const entityTreeCache: {
   [entityKey: string]: EntityTree
 } = {};
 
-export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
+class ValidateEntityRelationsConfig {
+  /**
+   * The guid of the cf. If this is null or not known we'll try to extract it from the list of parentEntities
+   *
+   * @type {string}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  cfGuid: string;
+  store: Store<AppState>;
+  /**
+   * Entities store. Used to determine if we already have the entity/entities and to watch when fetching entities
+   *
+   * @type {AppStoreLayout}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  allEntities: AppStoreLayout;
+  /**
+   * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
+   * have an entity/entities
+   *
+   * @type {AppStoreLayout}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  newEntities: AppStoreLayout;
+  /**
+   * The action that has fetched the entity/entities
+   *
+   * @type {IRequestAction}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  action: IRequestAction;
+  /**
+   * Collection of parent entities whose children may be missing. for example a list of organisations that have missing spaces
+   *
+   * @type {any[]}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  parentEntities: any[];
+  /**
+   * If a child is missing, should we raise an action to fetch it?
+   *
+   * @memberof ValidateEntityRelationsConfig
+   */
+  populateMissing = false;
+  /**
+   * If a child exists, should we raise an action to store it as a pagination list?
+   *
+   * @memberof ValidateEntityRelationsConfig
+   */
+  populateExisting = false;
+}
 
-export function createEntityRelationPaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
+class ValidateLoopConfig extends ValidateEntityRelationsConfig {
+  /**
+   * List of `{parent entity key} - {child entity key}` strings which should exist in entities structure
+   *
+   * @type {string[]}
+   * @memberof ValidateLoopConfig
+   */
+  includeRelations: string[];
+  /**
+   * List of entities to validate
+   *
+   * @type {any[]}
+   * @memberof ValidateLoopConfig
+   */
+  entities: any[];
+  /**
+   * Parent entity relation of children in the entities param
+   *
+   * @type {EntityTreeRelation}
+   * @memberof ValidateLoopConfig
+   */
+  parentRelation: EntityTreeRelation;
+}
 
-export function isEntityInlineParentAction(action: Action) {
-  return action && !!action['includeRelations'];
+class HandleRelationsConfig extends ValidateLoopConfig {
+  parentEntity: APIResource;
+  childRelation: EntityTreeRelation;
+  childEntities: object | any[];
+  childEntitiesUrl: string;
 }
 
 function createEntityUrl(relation: EntityTreeRelation) {
   return relation.path + '_url';
 }
 
-function handleRelation(
-  config: {
-    cfGuid: string,
-    store: any,
-    allEntities: AppStoreLayout,
-    newEntities: AppStoreLayout,
-    parentRelation: EntityTreeRelation,
-    parentEntity: APIResource,
-    childRelation: EntityTreeRelation,
-    childEntities: object | any[],
-    childEntitiesUrl: string,
-    includeRelations: string[],
-    populateExisting: boolean,
-    populateMissing: boolean
-  }
-): ValidateEntityResult[] {
-  const {
+function createAction(config: HandleRelationsConfig) {
+  const { cfGuid, parentRelation, parentEntity, childRelation, childEntitiesUrl, includeRelations, populateMissing } = config;
+  return childRelation.isArray ? new FetchRelationPaginatedAction(
     cfGuid,
-    store,
-    allEntities,
-    newEntities,
+    parentEntity.metadata.guid,
     parentRelation,
-    parentEntity,
     childRelation,
-    childEntities,
-    childEntitiesUrl,
     includeRelations,
-    populateExisting,
-    populateMissing
-  } = config;
+    createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid),
+    populateMissing,
+    childEntitiesUrl
+  ) : new FetchRelationSingleAction(
+    cfGuid,
+    parentEntity.metadata.guid,
+    parentRelation,
+    childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1),
+    childRelation,
+    includeRelations,
+    populateMissing,
+    childEntitiesUrl
+  );
+}
+/**
+ * Create actions required to populate parent entities with exist children
+ *
+ * @param {HandleRelationsConfig} config
+ * @returns {ValidateEntityResult[]}
+ */
+function createActionsForExisting(config: HandleRelationsConfig): ValidateEntityResult[] {
+  const { allEntities, newEntities, childEntities, childRelation } = config;
+  const childEntitiesAsArray = childEntities as Array<any>;
+
+  const paramAction = createAction(config);
+  // We've got the value already, ensure we create a pagination section for them
+  let response: NormalizedResponse;
+  const guids = childEntitiesAsArray.map(entity => entity.metadata.guid);
+  const entities = pick(newEntities[childRelation.entityKey], guids as [string]) ||
+    pick(allEntities[childRelation.entityKey], guids as [string]);
+  response = {
+    entities: {
+      [childRelation.entityKey]: entities
+    },
+    result: guids
+  };
+
+  const paginationSuccess = new WrapperRequestActionSuccess(
+    response,
+    paramAction,
+    'fetch',
+    childEntitiesAsArray.length,
+    1
+  );
+  return [{
+    action: paginationSuccess,
+  }];
+}
+
+/**
+ * Create actions required to fetch missing relations
+ *
+ * @param {HandleRelationsConfig} config
+ * @returns {ValidateEntityResult[]}
+ */
+function createActionsForMissing(config: HandleRelationsConfig): ValidateEntityResult[] {
+  const { store, childRelation, childEntitiesUrl } = config;
+
+  const paramAction = createAction(config);
+  let results: ValidateEntityResult[] = [];
+
+  if (childRelation.isArray) {
+    const paramPaginationAction = paramAction as FetchRelationPaginatedAction;
+    results = [].concat(results, [{
+      action: new SetInitialParams(paramAction.entityKey, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
+    },
+    {
+      action: paramAction,
+      fetchingState$: store.select(selectPaginationState(paramAction.entityKey, paramPaginationAction.paginationKey)).pipe(
+        map((paginationState: PaginationEntityState) => {
+          const pageRequest: ActionState =
+            paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
+          return {
+            fetching: pageRequest ? pageRequest.busy : true
+          } as ValidateResultFetchingState;
+        })
+      )
+    }
+    ]);
+  } else {
+    const guid = childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1);
+    results.push({
+      action: paramAction,
+      fetchingState$: store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
+        map((requestInfo: RequestInfoState) => {
+          return {
+            fetching: requestInfo ? requestInfo.fetching : true
+          };
+        })
+      )
+    });
+  }
+  return results;
+}
+
+/**
+ * For a specific relationship check it exists (and if we need to populate other parts of entity store with it) or it does not (and we
+ * need to fetch it)
+ *
+ * @param {HandleRelationsConfig} config
+ * @returns {ValidateEntityResult[]}
+ */
+function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
+  const { cfGuid, allEntities, parentRelation, parentEntity, childRelation, childEntities, populateExisting, populateMissing } = config;
 
   if (!cfGuid) {
     throw Error(`No CF Guid provided when validating
      ${parentRelation.entityKey} ${parentEntity.metadata.guid}'s ${childRelation.entityKey}`);
   }
 
-  let results = [];
-  // Step 2) Determine what actions, if any, need to be raised given the state of the relationship and children
-  // No relevant relation, skip //TODO: RC
-
-  function createAction() {
-    return childRelation.isArray ? new FetchRelationPaginatedAction(
-      cfGuid,
-      parentEntity.metadata.guid,
-      parentRelation,
-      childRelation,
-      includeRelations,
-      createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid),
-      populateMissing,
-      childEntitiesUrl
-    ) : new FetchRelationSingleAction(
-      cfGuid,
-      parentEntity.metadata.guid,
-      parentRelation,
-      childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1),
-      childRelation,
-      includeRelations,
-      populateMissing,
-      childEntitiesUrl
-    );
-  }
-
   // Have we found some entities that need to go into the pagination store OR are some entities missing that are required?
+  let results = [];
   if (childEntities) {
+    // The values exist do we want to put them anywhere else?
     if (!allEntities || !childRelation.isArray || !populateExisting) {
       // Only care about paginated (array schema)
       return results;
     }
-    const childEntitiesAsArray = childEntities as Array<any>;
-
-    const paramAction = createAction();
-    // We've got the value already, ensure we create a pagination section for them
-    let response: NormalizedResponse;
-    const guids = childEntitiesAsArray.map(entity => entity.metadata.guid);
-    const entities = pick(newEntities[childRelation.entityKey], guids as [string]) ||
-      pick(allEntities[childRelation.entityKey], guids as [string]);
-    response = {
-      entities: {
-        [childRelation.entityKey]: entities
-      },
-      result: guids
-    };
-
-    const paginationSuccess = new WrapperRequestActionSuccess(
-      response,
-      paramAction,
-      'fetch',
-      childEntitiesAsArray.length,
-      1
-    );
-    results.push({
-      action: paginationSuccess,
-    });
+    results = [].concat(results, createActionsForExisting(config));
   } else if (!childEntities && populateMissing) {
     // The values are missing and we want them, go fetch
-
-    const paramAction = createAction();
-
-    if (childRelation.isArray) {
-      const paramPaginationAction = paramAction as FetchRelationPaginatedAction;
-      results = [].concat(results, [{
-        action: new SetInitialParams(paramAction.entityKey, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
-      },
-      {
-        action: paramAction,
-        fetchingState$: store.select(selectPaginationState(paramAction.entityKey, paramPaginationAction.paginationKey)).pipe(
-          map((paginationState: PaginationEntityState) => {
-            const pageRequest: ActionState =
-              paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-            return {
-              fetching: pageRequest ? pageRequest.busy : true
-            } as ValidateResultFetchingState;
-          })
-        )
-      }
-      ]);
-    } else {
-      const guid = childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1);
-      results.push({
-        action: paramAction,
-        fetchingState$: store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
-          map((requestInfo: RequestInfoState) => {
-            return {
-              fetching: requestInfo ? requestInfo.fetching : true
-            };
-          })
-        )
-      });
-    }
+    results = [].concat(results, createActionsForMissing(config));
   }
 
   return results;
 }
 
-function validationLoop(
-  config: {
-    cfGuid: string,
-    store: Store<AppState>,
-    includeRelations: string[],
-    allEntities: AppStoreLayout,
-    newEntities: AppStoreLayout,
-    populateExisting: boolean,
-    populateMissing: boolean,
-    entities: any[],
-    parentRelation: EntityTreeRelation,
-  }
-)
+/**
+ * Iterate through required parent-child relationships and check if they exist
+ *
+ * @param {ValidateLoopConfig} config
+ * @returns {ValidateEntityResult[]}
+ */
+function validationLoop(config: ValidateLoopConfig)
   : ValidateEntityResult[] {
   let results = [];
 
-  const {
-    cfGuid,
-    store,
-    includeRelations,
-    allEntities,
-    newEntities,
-    populateExisting,
-    populateMissing,
-    entities,
-    parentRelation,
-  } = config;
+  const { cfGuid, entities, parentRelation } = config;
 
-  // Step 1) Iterate through the entities schema structure discovering all the entities and whether they need to be checked for relations
   if (!entities) {
     return results;
   }
@@ -291,18 +300,12 @@ function validationLoop(
     entities.forEach(entity => {
       const childEntities = pathGet(childRelation.path, entity);
       results = [].concat(results, handleRelation({
+        ...config,
         cfGuid: cfGuid || entity.entity.cfGuid,
-        store,
-        allEntities,
-        newEntities,
-        parentRelation,
         parentEntity: entity,
         childRelation,
         childEntities: childEntities,
         childEntitiesUrl: pathGet(createEntityUrl(childRelation), entity),
-        includeRelations,
-        populateExisting,
-        populateMissing,
       }
       ));
       if (childEntities && childRelation.childRelations.length) {
@@ -328,25 +331,12 @@ function validationLoop(
  * - exist - (optionally) return an action that will store them in pagination.
  *
  * @export
- * @param {Store<AppState>} store //TODO: RC Check all
- * @param {IRequestAction} action The action that has fetched the collection of entities
- * @param {any[]} parentEntities Collection of parent entities whose children may be missing
- * @param {boolean} [populateMissing=false] If a child is missing, should we raise an action to fetch it?
- * @param {boolean} [populateExisting=false] If a child exists, should we raise an action to store it as a pagination list?
- * @returns {Observable<{
- *     allFinished: Observable<any>,
- *     entityResults: ValidateEntityResult[] // TODO: RC
- *   }>}
+ * @param {ValidateEntityRelationsConfig} config See ValidateEntityRelationsConfig
+ * @returns {ValidationResult}
  */
-export function validateEntityRelations(
-  cfGuid: string,
-  store: Store<AppState>,
-  allEntities: AppStoreLayout,
-  newEntities: AppStoreLayout,
-  action: IRequestAction,
-  parentEntities: any[],
-  populateMissing = false,
-  populateExisting = false): ValidationResult {
+export function validateEntityRelations(config: ValidateEntityRelationsConfig): ValidationResult {
+  const { action, populateMissing, newEntities, allEntities, store } = config;
+  let { parentEntities } = config;
 
   if (!action.entity || !parentEntities || parentEntities.length === 0) {
     return {
@@ -374,12 +364,8 @@ export function validateEntityRelations(
 
   // console.time(startTime + 'validate');
   const results = validationLoop({
-    cfGuid,
-    store,
+    ...config,
     includeRelations: relationAction.includeRelations,
-    allEntities,
-    newEntities,
-    populateExisting,
     populateMissing: populateMissing || relationAction.populateMissing,
     entities: parentEntities,
     parentRelation: entityTree.rootRelation,
@@ -419,7 +405,7 @@ export function validateEntityRelations(
 }
 
 
-export function listRelations(action: EntityInlineParentAction): ListRelationsResult {
+export function listEntityRelations(action: EntityInlineParentAction) {
   // console.group('listRelations' + action.entityKey);
   // console.time('adsdgdssgf' + action.entityKey);
   const tree = fetchEntityTree(action);

@@ -1,7 +1,7 @@
 import { RequestOptions } from '@angular/http';
 
 import { entityFactory, routeSchemaKey, spaceSchemaKey, spaceWithOrgKey } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.helpers';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relation.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { RouteEvents } from './route.actions';

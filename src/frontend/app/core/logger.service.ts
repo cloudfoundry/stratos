@@ -17,38 +17,36 @@ export class LoggerService {
   constructor(private store: Store<AppState>) { }
 
   private log(level: LogLevel, message: string, arg: any) {
-    if (LogLevelStringToNumber[level] >= LogLevelStringToNumber[environment.logLevel]) {
-      if (environment.logToConsole) {
-        const date = new Date();
-        message = `${date.toUTCString()}- ${message}`;
+    if (LogLevelStringToNumber[level] < LogLevelStringToNumber[environment.logLevel] || !environment.logToConsole) {
+      return;
+    }
+    const date = new Date();
+    message = `${date.toUTCString()}- ${message}`;
 
-        let func = console.log;
-        switch (level) {
-          case LogLevel.ERROR:
-            func = console.error;
-            this.store.dispatch(new LoggerErrorAction(message));
-            break;
-          case LogLevel.WARN:
-            func = console.warn;
-            this.store.dispatch(new LoggerWarnAction(message));
-            break;
-          case LogLevel.INFO:
-            func = console.info;
-            this.store.dispatch(new LoggerInfoAction(message));
-            break;
-          case LogLevel.DEBUG:
-            func = console.log;
-            this.store.dispatch(new LoggerDebugAction(message));
-            break;
-        }
+    let func = console.log;
+    switch (level) {
+      case LogLevel.ERROR:
+        func = console.error;
+        this.store.dispatch(new LoggerErrorAction(message));
+        break;
+      case LogLevel.WARN:
+        func = console.warn;
+        this.store.dispatch(new LoggerWarnAction(message));
+        break;
+      case LogLevel.INFO:
+        func = console.info;
+        this.store.dispatch(new LoggerInfoAction(message));
+        break;
+      case LogLevel.DEBUG:
+        func = console.log;
+        this.store.dispatch(new LoggerDebugAction(message));
+        break;
+    }
 
-        if (arg) {
-          func(message, arg);
-        } else {
-          func(message);
-        }
-
-      }
+    if (arg) {
+      func(message, arg);
+    } else {
+      func(message);
     }
   }
 

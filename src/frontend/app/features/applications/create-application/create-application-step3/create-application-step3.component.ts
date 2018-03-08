@@ -20,12 +20,12 @@ import {
   organisationSchemaKey,
   routeSchemaKey,
 } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.helpers';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relation.types';
 
 @Component({
   selector: 'app-create-application-step3',

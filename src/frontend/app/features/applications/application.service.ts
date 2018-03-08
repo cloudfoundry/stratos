@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { map, mergeMap, filter } from 'rxjs/operators';
+import { filter, map, mergeMap } from 'rxjs/operators';
 
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -20,15 +19,19 @@ import {
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, routeSchemaKey, stackSchemaKey, domainSchemaKey } from '../../store/helpers/entity-factory';
 import {
   appEnvVarsSchemaKey,
   applicationSchemaKey,
   appStatsSchemaKey,
   appSummarySchemaKey,
-  spaceSchemaKey,
+  domainSchemaKey,
+  entityFactory,
   organisationSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+  stackSchemaKey,
 } from '../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../store/helpers/entity-relation.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
@@ -45,7 +48,6 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations.helpers';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -250,15 +252,10 @@ export class ApplicationService {
     */
     this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
 
-
     this.isUpdatingApp$ =
       this.app$.map(a => {
-        const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || {
-          busy: false
-        };
-        const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || {
-          busy: false
-        };
+        const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
+        const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
         return updatingRoot.busy || updatingSection.busy || false;
       });
 
@@ -279,12 +276,7 @@ export class ApplicationService {
     }
     const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
     if (nonTCPRoutes.length > 0) {
-      return getRoute(
-        nonTCPRoutes[0],
-        true,
-        false,
-        nonTCPRoutes[0].entity.domain
-      );
+      return getRoute(nonTCPRoutes[0], true, false, nonTCPRoutes[0].entity.domain);
     }
     return null;
   }

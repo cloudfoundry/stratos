@@ -1,9 +1,8 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { schema } from 'normalizr';
 
-import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations.helpers';
+import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relation.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, RequestEntityLocation, IRequestActionEntity } from '../types/request.types';
+import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../types/request.types';
 
 const relationActionId = 'FetchRelationAction';
 

@@ -17,8 +17,8 @@ import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-ap
 import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
-import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
 import { spaceSchemaKey, routeSchemaKey, domainSchemaKey, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../../../store/helpers/entity-relation.types';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService implements IListConfig<APIResource> {

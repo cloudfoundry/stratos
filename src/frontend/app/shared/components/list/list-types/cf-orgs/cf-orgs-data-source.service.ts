@@ -8,7 +8,7 @@ import { organisationWithSpaceKey } from '../../../../../store/helpers/entity-fa
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.helpers';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relation.types';
 
 const orgWithSpaceSchema = entityFactory(organisationWithSpaceKey);
 const spaceSchema = entityFactory(spaceSchemaKey);

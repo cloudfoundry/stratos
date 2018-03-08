@@ -29,6 +29,7 @@ export class RequestEffect {
     private logger: LoggerService,
   ) { }
 
+  // This block may come back, keeping just in case
   // @Effect() fetchEntities$ = this.actions$.ofType<FetchEntities>(EntitiesPipelineActionTypes.FETCH).pipe(
   //   mergeMap((action): Action[] => {
   //     const fetchAction: FetchEntities = action;
@@ -72,17 +73,18 @@ export class RequestEffect {
       return this.store.select(getAPIRequestDataState).first().pipe(
         first(),
         map(allEntities => {
-          return validateEntityRelations(
-            validateAction.action.endpointGuid,
-            this.store,
+          return validateEntityRelations({
+            cfGuid: validateAction.action.endpointGuid,
+            store: this.store,
             allEntities,
-            apiResponse ? apiResponse.response.entities : null,
-            validateAction.action,
-            validateAction.validateEntities,
-            true,
+            newEntities: apiResponse ? apiResponse.response.entities : null,
+            action: validateAction.action,
+            parentEntities: validateAction.validateEntities,
+            populateMissing: true,
             // populateMissing: We only want to populate the store with missing entities if this is an api request. If this is a standard
             // validation request any entity/entities we already have should already exist in the store
-            validateAction.apiRequestStarted);
+            populateExisting: validateAction.apiRequestStarted,
+          });
         }),
         mergeMap(validation => {
           const independentUpdates = !validateAction.apiRequestStarted && validation.started;

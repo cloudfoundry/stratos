@@ -58,11 +58,11 @@ function populateParentEntity(state, successAction) {
   if (!entities) {
     return;
   }
+
+  // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
   const parentGuid = fetchRelationAction.parentGuid;
   const parentEntityKey = fetchRelationAction.parent.entityKey;
   const entityParamName = fetchRelationAction.child.paramName;
-
-  // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
 
   let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || { metadata: {} };
   newParentEntity = {

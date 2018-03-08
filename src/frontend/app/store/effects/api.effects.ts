@@ -2,22 +2,15 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, RequestMethod, URLSearchParams } from '@angular/http';
+import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { normalize, schema, Schema } from 'normalizr';
+import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { first, map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
-import { ClearPaginationOfEntity, ClearPaginationOfType } from '../actions/pagination.actions';
-import {
-  EntityInlineParentAction,
-  isEntityInlineParentAction,
-  listRelations,
-  validateEntityRelations,
-} from '../helpers/entity-relations.helpers';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
@@ -29,7 +22,9 @@ import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
 import { APIResource, NormalizedResponse } from './../types/api.types';
-import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
+import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relation.types';
+import { listEntityRelations } from '../helpers/entity-relations.helpers';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -356,7 +351,7 @@ export class APIEffect {
 
   private addRelationParams(options, action: any) {
     if (isEntityInlineParentAction(action)) {
-      const relationInfo = listRelations(action as EntityInlineParentAction);
+      const relationInfo = listEntityRelations(action as EntityInlineParentAction);
       if (relationInfo.maxDepth > 0) {
         options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
       }
