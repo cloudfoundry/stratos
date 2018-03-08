@@ -1,4 +1,19 @@
-import { CfUser, UserRoleInOrg } from '../../store/types/user.types';
+import { ActivatedRoute } from '@angular/router';
+
+import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import { APIResource } from '../../store/types/api.types';
+
+export enum OrgUserRoles {
+  MANAGER = 'managers',
+  BILLING_MANAGERS = 'billing_managers',
+  AUDITOR = 'auditors',
+  USER = 'users'
+}
+
+export interface IOrgUserRole {
+  string: string;
+  key: OrgUserRoles;
+}
 
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
   let roles = null;
@@ -18,29 +33,97 @@ export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
 
   return roles ? roles : 'None';
 }
+export function getSpaceRolesString(userRolesInSpace: UserRoleInSpace): string {
+  let roles = null;
+  if (userRolesInSpace.manager) {
+    roles = 'Manager';
+  }
+  if (userRolesInSpace.auditor) {
+    roles = assignRole(roles, 'Auditor');
+
+  }
+  if (userRolesInSpace.developer) {
+    roles = assignRole(roles, 'Developer');
+  }
+
+  return roles ? roles : 'None';
+}
+
+export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IOrgUserRole[] {
+  const roles = [];
+  if (userRolesInOrg.orgManager) {
+    roles.push({
+      string: 'Manager',
+      key: OrgUserRoles.MANAGER
+    });
+  }
+  if (userRolesInOrg.billingManager) {
+    roles.push({
+      string: 'Billing Manager',
+      key: OrgUserRoles.BILLING_MANAGERS
+    });
+  }
+  if (userRolesInOrg.auditor) {
+    roles.push({
+      string: 'Auditor',
+      key: OrgUserRoles.AUDITOR
+    });
+  }
+  if (userRolesInOrg.user) {
+    roles.push({
+      string: 'User',
+      key: OrgUserRoles.USER
+    });
+  }
+  return roles;
+}
 
 function assignRole(currentRoles: string, role: string) {
   const newRoles = currentRoles ? `${currentRoles}, ${role}` : role;
   return newRoles;
 }
 
-export function isManager(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'managed_organizations');
+export function isOrgManager(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'managed_organizations');
 }
 
-export function isBillingManager(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'billing_managed_organizations');
+export function isOrgBillingManager(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'billing_managed_organizations');
 }
 
-export function isAuditor(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'audited_organizations');
+export function isOrgAuditor(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'audited_organizations');
 }
 
-export function isUser(user: CfUser, orgGuid: string): boolean {
-  return hasRole(user, orgGuid, 'organizations');
+export function isOrgUser(user: CfUser, guid: string): boolean {
+  return hasRole(user, guid, 'organizations');
 }
 
-function hasRole(user: CfUser, orgGuid: string, type: string) {
-  return user[type].find(o => o.metadata.guid === orgGuid) != null;
+export function isSpaceManager(user: CfUser, spaceGuid: string): boolean {
+  return hasRole(user, spaceGuid, 'managed_spaces');
 }
 
+export function isSpaceAuditor(user: CfUser, spaceGuid: string): boolean {
+  return hasRole(user, spaceGuid, 'audited_spaces');
+}
+
+export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
+  return hasRole(user, spaceGuid, 'spaces');
+}
+
+function hasRole(user: CfUser, guid: string, roleType: string) {
+  return user[roleType] && user[roleType].find(o => o.metadata.guid === guid) != null;
+}
+
+export const getRowUniqueId = (entity: APIResource) => {
+  return entity.metadata ? entity.metadata.guid : null;
+};
+export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
+
+  if (activatedRoute.snapshot.params[id]) {
+    return activatedRoute.snapshot.params[id];
+  } else if (activatedRoute.parent) {
+    return getIdFromRoute(activatedRoute.parent, id);
+  }
+  return null;
+}

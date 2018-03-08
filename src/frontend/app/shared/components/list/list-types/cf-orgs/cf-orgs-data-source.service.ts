@@ -10,9 +10,6 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 
-const orgWithSpaceSchema = entityFactory(organisationWithSpaceKey);
-const spaceSchema = entityFactory(spaceSchemaKey);
-
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
   public static paginationKey = 'cf-organizations';
 
@@ -26,7 +23,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: orgWithSpaceSchema,
+      schema: entityFactory(organisationWithSpaceKey),
       getRowUniqueId: (entity: APIResource) => {
         return entity.metadata ? entity.metadata.guid : null;
       },

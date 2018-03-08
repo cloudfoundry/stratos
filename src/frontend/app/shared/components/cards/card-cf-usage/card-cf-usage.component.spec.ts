@@ -1,12 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CardCfUsageComponent } from './card-cf-usage.component';
 import {
+  generateTestCfEndpointService,
   getBaseTestModulesNoShared,
-  getBaseTestModules,
-  generateTestCfEndpointService
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
+import { CardCfUsageComponent } from './card-cf-usage.component';
 
 describe('CardCfUsageComponent', () => {
   let component: CardCfUsageComponent;

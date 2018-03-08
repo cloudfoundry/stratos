@@ -4,36 +4,37 @@ import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { EndpointModel } from './endpoint.types';
 import { SystemInfo } from './system.types';
+import { IRoute, IFeatureFlag } from '../../core/cf-api.types';
 
-export interface IRequestDataState extends IRequestTypeState {
-  application: IRequestEntityTypeState<APIResource>;
-  stack: IRequestEntityTypeState<APIResource>;
-  space: IRequestEntityTypeState<APIResource>;
-  organization: IRequestEntityTypeState<APIResource>;
-  route: IRequestEntityTypeState<APIResource>;
-  event: IRequestEntityTypeState<APIResource>;
+export interface IRequestDataInternal<T> extends IRequestTypeState {
+  application: IRequestEntityTypeState<T>;
+  stack: IRequestEntityTypeState<T>;
+  space: IRequestEntityTypeState<T>;
+  organization: IRequestEntityTypeState<T>;
+  route: IRequestEntityTypeState<T>;
+  event: IRequestEntityTypeState<T>;
+  system: IRequestEntityTypeState<T>;
+  githubBranches: IRequestEntityTypeState<T>;
+  githubCommits: IRequestEntityTypeState<T>;
+  domain: IRequestEntityTypeState<T>;
+  user: IRequestEntityTypeState<T>;
+  serviceInstance: IRequestEntityTypeState<T>;
+  servicePlan: IRequestEntityTypeState<T>;
+  service: IRequestEntityTypeState<T>;
+  serviceBinding: IRequestEntityTypeState<T>;
+  buildpack: IRequestEntityTypeState<T>;
+  securityGroup: IRequestEntityTypeState<T>;
+  featureFlag: IRequestEntityTypeState<T>;
+}
+
+export interface IRequestDataState extends IRequestDataInternal<APIResource> {
   endpoint: IRequestEntityTypeState<EndpointModel>;
-  system: IRequestEntityTypeState<SystemInfo>;
-  githubBranches: IRequestEntityTypeState<APIResource>;
-  githubCommits: IRequestEntityTypeState<APIResource>;
-  domain: IRequestEntityTypeState<APIResource>;
-  user: IRequestEntityTypeState<APIResource>;
 }
 
-export interface IRequestState extends IRequestTypeState {
-  application: IRequestEntityTypeState<RequestInfoState>;
-  stack: IRequestEntityTypeState<RequestInfoState>;
-  space: IRequestEntityTypeState<RequestInfoState>;
-  organization: IRequestEntityTypeState<RequestInfoState>;
-  route: IRequestEntityTypeState<RequestInfoState>;
-  event: IRequestEntityTypeState<RequestInfoState>;
+export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
-  system: IRequestEntityTypeState<RequestInfoState>;
-  githubBranches: IRequestEntityTypeState<RequestInfoState>;
-  githubCommits: IRequestEntityTypeState<APIResource>;
-  domain: IRequestEntityTypeState<RequestInfoState>;
-  user: IRequestEntityTypeState<RequestInfoState>;
 }
+
 
 export const defaultCfEntitiesState = {
   application: {},
@@ -48,5 +49,12 @@ export const defaultCfEntitiesState = {
   domain: {},
   [appEnvVarsSchemaKey]: {},
   [appStatsSchemaKey]: {},
-  [appSummarySchemaKey]: {}
+  [appSummarySchemaKey]: {},
+  serviceInstance: {},// TODO: RC
+  servicePlan: {},
+  service: {},
+  serviceBinding: {},
+  buildpack: {},
+  securityGroup: {},
+  featureFlag: {},
 };

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
+import { DeleteSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, organisationWithSpaceKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
@@ -30,7 +31,7 @@ export class CfOrgSpaceDataService {
   public org: CfOrgSpaceItem;
   public space: CfOrgSpaceItem;
 
-  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, [
+  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
     createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
   ]);
 
@@ -166,6 +167,10 @@ export class CfOrgSpaceDataService {
   }
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {
-    return this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
+    this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
+  }
+
+  public deleteSpace(spaceGuid: string, endpointGuid: string) {
+    this.store.dispatch(new DeleteSpace(spaceGuid, endpointGuid));
   }
 }

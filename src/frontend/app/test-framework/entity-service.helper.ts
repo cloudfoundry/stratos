@@ -12,10 +12,10 @@ export function generateTestEntityServiceProvider(
   schema: schema.Entity,
   action: IRequestAction
 ) {
-  const useFactory = (
+  function useFactory(
     store: Store<AppState>,
     entityServiceFactory: EntityServiceFactory
-  ) => {
+  ) {
     return entityServiceFactory.create(
       schema.key,
       schema,
@@ -24,7 +24,7 @@ export function generateTestEntityServiceProvider(
       false,
       RequestSectionKeys.CF
     );
-  };
+  }
 
   return {
     provide: EntityService,

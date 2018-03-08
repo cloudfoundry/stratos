@@ -9,8 +9,8 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
 
-export class EndpointDataSourceHelper {
-  static getRowStateManager(
+export class ListRowSateHelper {
+  public getRowStateManager(
     paginationMonitorFactory: PaginationMonitorFactory,
     entityMonitorFactory: EntityMonitorFactory,
     paginationKey: string
@@ -32,7 +32,7 @@ export class EndpointDataSourceHelper {
     };
   }
   // This pattern might be worth pulling out into a more general helper if we use it again.
-  static setUpManager(
+  private setUpManager(
     paginationMonitor: PaginationMonitor<EndpointModel>,
     entityMonitorFactory: EntityMonitorFactory,
     rowStateManager: TableRowStateManager

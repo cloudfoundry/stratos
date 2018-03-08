@@ -1,10 +1,12 @@
 import { RequestOptions } from '@angular/http';
 
-import { entityFactory, routeSchemaKey, spaceSchemaKey, spaceWithOrgKey } from '../helpers/entity-factory';
+import { entityFactory, routeSchemaKey, spaceSchemaKey, spaceWithOrgKey, applicationSchemaKey } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { RouteEvents } from './route.actions';
+import { getActions } from './action.helper';
+import { IUpdateSpace } from '../../core/cf-api.types';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -14,8 +16,13 @@ export const GET_SPACE = '[Space] Get one';
 export const GET_SPACE_SUCCESS = '[Space] Get one success';
 export const GET_SPACE_FAILED = '[Space] Get one failed';
 
-export class GetSpace extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string) {
+export class GetSpace extends CFStartAction implements ICFAction, EntityInlineParentAction {
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public includeRelations: string[] = [],
+    public populateMissing = true
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `space/${guid}`;
@@ -31,6 +38,7 @@ export class GetSpace extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
+// TODO: RC
 export class GetAllSpaces extends CFStartAction implements PaginatedAction {
   constructor(public paginationKey: string, public cnsi?: string) {
     super();
@@ -81,4 +89,91 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
   options: RequestOptions;
   endpointGuid: string;
   flattenPagination = true;
+}
+
+export class GetAllAppsInSpace extends CFStartAction implements PaginationAction {
+  constructor(public cfGuid: string, public spaceGuid: string, public paginationKey: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${spaceGuid}/apps`;
+    this.options.method = 'get';
+  }
+  actions = getActions('Spaces', 'Get Apps');
+  entity = [entityFactory(applicationSchemaKey)];
+  entityKey = applicationSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'inline-relations-depth': 2
+  };
+}
+
+export class DeleteSpace extends CFStartAction implements ICFAction {
+  constructor(public guid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${guid}`;
+    this.options.method = 'delete';
+    this.options.params = new URLSearchParams();
+    this.options.params.append('recursive', 'true');
+    this.options.params.append('async', 'false');
+  }
+  actions = getActions('Spaces', 'Delete Space');
+  entity = [entityFactory(spaceSchemaKey)];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+}
+
+export class CreateSpace extends CFStartAction implements ICFAction {
+  constructor(public name: string, public orgGuid: string, public endpointGuid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces`;
+    this.options.method = 'post';
+    this.guid = `${orgGuid}-${name}`;
+    this.options.body = {
+      name: name,
+      organization_guid: orgGuid
+    };
+  }
+  actions = getActions('Spaces', 'Create Space');
+  entity = [entityFactory(spaceSchemaKey)];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+  guid: string;
+}
+export class UpdateSpace extends CFStartAction implements ICFAction {
+
+  public static UpdateExistingSpace = 'Updating-Existing-Space';
+  constructor(public guid: string, public endpointGuid: string, updateSpace: IUpdateSpace) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${guid}`;
+    this.options.method = 'put';
+    this.options.body = updateSpace;
+  }
+  actions = getActions('Spaces', 'Update Space');
+  entity = [entityFactory(spaceSchemaKey)];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+  updatingKey = UpdateSpace.UpdateExistingSpace;
+}
+
+export class GetRoutesInSpace extends CFStartAction implements PaginationAction {
+  constructor(public spaceGuid: string, public cfGuid: string, public paginationKey: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${spaceGuid}/routes`;
+    this.options.method = 'get';
+  }
+  actions = getActions('Spaces', 'Get routes');
+  entity = [entityFactory(routeSchemaKey)];
+  entityKey = routeSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'inline-relations-depth': 2
+  };
 }

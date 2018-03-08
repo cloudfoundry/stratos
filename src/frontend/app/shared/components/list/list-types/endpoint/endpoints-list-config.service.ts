@@ -16,7 +16,13 @@ import { EndpointModel, endpointStoreNames } from '../../../../../store/types/en
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import {
+  defaultPaginationPageSizeOptionsTable,
+  IListAction,
+  IListConfig,
+  IMultiListAction,
+  ListViewTypes,
+} from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
@@ -29,7 +35,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'name',
     headerCell: () => 'Name',
-    cell: row => row.name,
+    cellDefinition: {
+      valuePath: 'name'
+    },
     sort: {
       type: 'sort',
       orderKey: 'name',
@@ -51,7 +59,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'type',
     headerCell: () => 'Type',
-    cell: getEndpointTypeString,
+    cellDefinition: {
+      getValue: getEndpointTypeString
+    },
     sort: {
       type: 'sort',
       orderKey: 'type',
@@ -62,7 +72,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'address',
     headerCell: () => 'Address',
-    cell: row => getFullEndpointApiUrl(row),
+    cellDefinition: {
+      getValue: getFullEndpointApiUrl
+    },
     sort: {
       type: 'sort',
       orderKey: 'address',
@@ -132,7 +144,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     enabled: row => true,
   };
 
-
   private singleActions = [
     this.listActionDisconnect,
     this.listActionConnect,
@@ -145,7 +156,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   columns = endpointColumns;
   isLocal = true;
   dataSource: EndpointsDataSource;
-  pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: '',

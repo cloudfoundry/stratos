@@ -12,14 +12,14 @@ import { ApplicationService, createGetApplicationAction } from '../application.s
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 
-const applicationServiceFactory = (
+function applicationServiceFactory(
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsService,
   paginationMonitorFactory: PaginationMonitorFactory
-) => {
+) {
   const { id, cfId } = activatedRoute.snapshot.params;
   return new ApplicationService(
     cfId,
@@ -30,12 +30,12 @@ const applicationServiceFactory = (
     appEnvVarsService,
     paginationMonitorFactory
   );
-};
+}
 
-const entityServiceFactory = (
+function entityServiceFactory(
   _entityServiceFactory: EntityServiceFactory,
   activatedRoute: ActivatedRoute
-) => {
+) {
   const { id, cfId } = activatedRoute.snapshot.params;
   // const entityMonitor = new en
   return _entityServiceFactory.create(
@@ -44,7 +44,7 @@ const entityServiceFactory = (
     id,
     createGetApplicationAction(id, cfId)
   );
-};
+}
 
 @Component({
   selector: 'app-application-base',

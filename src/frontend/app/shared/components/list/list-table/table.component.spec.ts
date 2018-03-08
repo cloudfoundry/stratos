@@ -28,6 +28,7 @@ import { CdkTableModule } from '@angular/cdk/table';
 import { TableRowComponent } from './table-row/table-row.component';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { IListConfig } from '../list.component.types';
+import { SharedModule } from '../../../shared.module';
 
 
 describe('TableComponent', () => {
@@ -36,25 +37,12 @@ describe('TableComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        ...listTableCells,
-        TableComponent,
-        TableCellComponent,
-        EventTabActorIconPipe,
-        ValuesPipe,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        UsageGaugeComponent,
-        PercentagePipe,
-        TableRowComponent,
-        RunningInstancesComponent
-      ],
       imports: [
         CoreModule,
         CdkTableModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
+        SharedModule
       ],
       providers: [
         UtilsService,

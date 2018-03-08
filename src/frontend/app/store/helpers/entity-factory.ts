@@ -5,7 +5,7 @@ import { getAPIResourceGuid } from '../selectors/api.selectors';
 export const applicationSchemaKey = 'application';
 export const stackSchemaKey = 'stack';
 export const spaceSchemaKey = 'space';
-export const spaceWithOrgRelationKey = 'spaceWithOrg';
+// export const spaceWithOrgRelationKey = 'spaceWithOrg';
 export const routeSchemaKey = 'route';
 export const domainSchemaKey = 'domain';
 export const organisationSchemaKey = 'organization';
@@ -124,7 +124,7 @@ export const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
 }, {
     idAttribute: getAPIResourceGuid
   },
-  spaceWithOrgRelationKey);
+  spaceWithOrgKey);
 
 export const OrganisationWithSpaceSchema = new EntitySchema(organisationSchemaKey, {
   entity: {
@@ -145,6 +145,61 @@ export const ApplicationEntitySchema = new EntitySchema(
     }
   },
   {
+    idAttribute: getAPIResourceGuid
+  }
+);
+
+export const OrganisationWithSpaceSchema = new schema.Entity(organisationSchemaKey, {
+  entity: {
+    spaces: [SpaceSchema]
+  }
+}, {
+    idAttribute: getAPIResourceGuid
+  });
+
+export const SpaceWithOrganisationSchema = new schema.Entity(spaceSchemaKey, {
+  entity: {
+    organization: OrganisationSchema
+  }
+}, {
+    idAttribute: getAPIResourceGuid
+  });
+
+
+export const ServiceSchema = new schema.Entity('service', {}, {
+  idAttribute: getAPIResourceGuid
+}
+);
+
+export const ServiceBindingsSchema = new schema.Entity('serviceBinding', {}, {
+  idAttribute: getAPIResourceGuid
+}
+);
+
+export const ServicePlanSchema = new schema.Entity('servicePlan', {
+  entity: {
+    service: ServiceSchema
+  }
+}, {
+    idAttribute: getAPIResourceGuid
+  }
+);
+
+export const ServiceInstancesSchema = new schema.Entity('serviceInstance', {
+  entity: {
+    service_plan: ServicePlanSchema,
+    service_bindings: [ServiceBindingsSchema]
+  }
+}, {
+    idAttribute: getAPIResourceGuid,
+  }
+);
+
+export const ServiceInstanceSchemaWithServiceBinding = new schema.Entity('serviceInstance', {
+  entity: {
+    service_bindings: ServiceBindingsSchema
+  }
+}, {
     idAttribute: getAPIResourceGuid
   }
 );

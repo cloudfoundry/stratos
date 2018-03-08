@@ -4,10 +4,19 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../store/helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
@@ -17,8 +26,6 @@ import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-ap
 import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
-import { spaceSchemaKey, routeSchemaKey, domainSchemaKey, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 
 @Injectable()
 export class CfAppMapRoutesListConfigService implements IListConfig<APIResource> {
@@ -67,7 +74,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     }
   ];
 
-  pageSizeOptions = [5, 15, 30];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: 'Available Routes'

@@ -3,62 +3,70 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
+import { IApp, IInfo, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../store/app-state';
+import { cfInfoSchemaKey, endpointSchemaKey, entityFactory, domainSchemaKey } from '../../../store/helpers/entity-factory';
+import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplication, CfApplicationState } from '../../../store/types/application.types';
-import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
-import { CfOrg } from '../../../store/types/org-and-space.types';
+import { BaseCF } from '../cf-page.types';
 import { CfUser } from '../../../store/types/user.types';
-import { endpointSchemaKey, CFInfoSchema, cfInfoSchemaKey } from '../../../store/helpers/entity-factory';
-import { entityFactory } from '../../../store/helpers/entity-factory';
-import { schema } from 'normalizr';
+import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
+import { CfApplicationState } from '../../../store/types/application.types';
+import { FetchAllDomains } from '../../../store/actions/domains.actions';
 
 @Injectable()
 export class CloudFoundryEndpointService {
-  allApps$: Observable<APIResource<CfApplication>[]>;
+  hasSSHAccess$: Observable<boolean>;
+  totalMem$: Observable<number>;
+  paginationSubscription: any;
+  allApps$: Observable<APIResource<IApp>[]>;
   users$: Observable<APIResource<CfUser>[]>;
-  orgs$: Observable<APIResource<CfOrg>[]>;
-  info$: Observable<EntityInfo<any>>;
-  cfInfoEntityService: EntityService<any>;
+  orgs$: Observable<APIResource<IOrganization>[]>;
+  info$: Observable<EntityInfo<APIResource<IInfo>>>;
+  cfInfoEntityService: EntityService<APIResource<IInfo>>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
   currentUser$: Observable<EndpointUser>;
+  cfGuid: string;
 
   constructor(
-    public cfGuid: string,
+    public baseCf: BaseCF,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
+    this.cfGuid = baseCf.guid;
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       endpointSchemaKey,
       entityFactory(endpointSchemaKey),
-      cfGuid,
+      this.cfGuid,
       new GetAllEndpoints()
     );
 
-    this.cfInfoEntityService = this.entityServiceFactory.create(
+    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<IInfo>>(
       cfInfoSchemaKey,
       entityFactory(cfInfoSchemaKey),
       this.cfGuid,
       new GetEndpointInfo(this.cfGuid)
     );
     this.constructCoreObservables();
+    this.constructSecondaryObservable();
   }
 
   constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
 
+    // TODO: RC CHeck
     this.connected$ = this.endpoint$.pipe(
       map(p => p.entity.connectionStatus === 'connected')
     );
@@ -69,9 +77,7 @@ export class CloudFoundryEndpointService {
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user));
-
-    this.info$ = this.cfInfoEntityService.waitForEntity$.pipe(shareReplay(1));
+    this.info$ = this.cfInfoEntityService.waitForEntity$;
 
     this.allApps$ = this.orgs$.pipe(
       // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
@@ -87,10 +93,31 @@ export class CloudFoundryEndpointService {
         return flatArray;
       })
     );
+
+    this.fetchDomains();
   }
+
+  constructSecondaryObservable() {
+
+    this.hasSSHAccess$ = this.info$.pipe(
+      map(p => !!(p.entity.entity &&
+        p.entity.entity.app_ssh_endpoint &&
+        p.entity.entity.app_ssh_host_key_fingerprint &&
+        p.entity.entity.app_ssh_oauth_client))
+    );
+    this.totalMem$ = this.allApps$.pipe(map(a => this.getMetricFromApps(a, 'memory')));
+
+    this.connected$ = this.endpoint$.pipe(
+      map(p => p.entity.connectionStatus === 'connected')
+    );
+
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
+
+  }
+
   getAppsInOrg(
-    org: APIResource<CfOrg>
-  ): Observable<APIResource<CfApplication>[]> {
+    org: APIResource<IOrganization>
+  ): Observable<APIResource<IApp>[]> {
     // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
     if (!org.entity.spaces) {
       return Observable.of([]);
@@ -103,22 +130,46 @@ export class CloudFoundryEndpointService {
     );
   }
 
+  getAppsInSpace(
+    space: APIResource<ISpace>
+  ): Observable<APIResource<IApp>[]> {
+    return this.allApps$.pipe(
+      map(apps => {
+        return apps.filter(a => a.entity.space_guid === space.entity.guid);
+      })
+    );
+  }
+
   getAggregateStat(
-    org: APIResource<CfOrg>,
+    org: APIResource<IOrganization>,
     statMetric: string
   ): Observable<number> {
     return this.getAppsInOrg(org).pipe(
       map(apps => this.getMetricFromApps(apps, statMetric))
     );
   }
-
   public getMetricFromApps(
-    apps: APIResource<CfApplication>[],
+    apps: APIResource<IApp>[],
     statMetric: string
-  ): any {
-    return apps
+  ): number {
+    return apps ? apps
       .filter(a => a.entity.state !== CfApplicationState.STOPPED)
       .map(a => a.entity[statMetric] * a.entity.instances)
-      .reduce((a, t) => a + t, 0);
+      .reduce((a, t) => a + t, 0) : 0;
+  }
+
+  fetchDomains = () => {
+    const action = new FetchAllDomains(this.cfGuid);
+    this.paginationSubscription = getPaginationObservables<APIResource>(
+      {
+        store: this.store,
+        action,
+        paginationMonitor: this.paginationMonitorFactory.create(
+          action.paginationKey,
+          entityFactory(domainSchemaKey)
+        )
+      },
+      true
+    ).entities$.subscribe();
   }
 }

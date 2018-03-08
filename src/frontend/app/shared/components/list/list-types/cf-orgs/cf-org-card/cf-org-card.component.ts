@@ -8,23 +8,22 @@ import { EntityServiceFactory } from '../../../../../../core/entity-service-fact
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
   CloudFoundryEndpointService,
-} from '../../../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfApplication } from '../../../../../../store/types/application.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
-import { CfOrg } from '../../../../../../store/types/org-and-space.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { IOrganization, IApp } from '../../../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-cf-org-card',
   templateUrl: './cf-org-card.component.html',
   styleUrls: ['./cf-org-card.component.scss']
 })
-export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
+export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganization>>
   implements OnInit, OnDestroy {
   orgGuid: string;
   normalisedMemoryUsage: number;
@@ -38,7 +37,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
 
-  @Input('row') row: APIResource<CfOrg>;
+  @Input('row') row: APIResource<IOrganization>;
 
   constructor(
     private cfUserService: CfUserService,
@@ -90,7 +89,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
     this.instancesCount = count;
   }
 
-  setValues = (role: string, apps: APIResource<CfApplication>[]) => {
+  setValues = (role: string, apps: APIResource<IApp>[]) => {
     this.userRolesInOrg = role;
     this.setCounts(apps);
     this.memoryTotal = this.cfEndpointService.getMetricFromApps(apps, 'memory');
@@ -109,7 +108,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
   edit = () => {
     this.store.dispatch(
       new RouterNav({
-        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'edit-org']
+        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'edit-org']
       })
     );
   }
@@ -122,6 +121,6 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<CfOrg>>
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({
-    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces']
+    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid]
   }))
 }

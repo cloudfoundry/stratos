@@ -2,6 +2,7 @@ import { Action } from '@ngrx/store';
 
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
+import { UserSchema } from '../types/user.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';

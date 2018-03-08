@@ -1,4 +1,6 @@
 import { RequestOptions } from '@angular/http';
+import { getActions } from './action.helper';
+import { PaginatedAction } from '../types/pagination.types';
 
 import { entityFactory } from '../helpers/entity-factory';
 import { CFStartAction, ICFAction } from '../types/request.types';
@@ -23,5 +25,17 @@ export class GetStack extends CFStartAction implements ICFAction {
   ];
   entity = [entityFactory(stackSchemaKey)];
   entityKey = stackSchemaKey;
+  options: RequestOptions;
+}
+export class GetAllStacks extends CFStartAction implements PaginatedAction {
+  constructor(public endpointGuid: string, public paginationKey: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `stacks`;
+    this.options.method = 'get';
+  }
+  actions = getActions('Stack', 'Fetch all');
+  entity = [StackSchema];
+  entityKey = StackSchema.key;
   options: RequestOptions;
 }

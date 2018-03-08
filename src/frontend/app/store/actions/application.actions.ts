@@ -1,10 +1,10 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
-import { applicationSchemaKey, appStatsSchemaKey, entityFactory, routeSchemaKey } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { IApp } from '../../core/cf-api.types';
+import { applicationSchemaKey, appStatsSchemaKey, entityFactory, routeSchemaKey, domainSchemaKey } from '../helpers/entity-factory';
+import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
-import { CfApplication } from '../types/application.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
@@ -88,7 +88,7 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
-    application: CfApplication
+    application: IApp
   ) {
     super();
     this.options = new RequestOptions();
@@ -209,11 +209,15 @@ export class DeleteApplicationInstance extends CFStartAction
   options: RequestOptions;
 }
 
-export class GetAppRoutes extends CFStartAction implements EntityInlineChildAction {
+export class GetAppRoutes extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public guid: string,
     public cfGuid: string,
     public paginationKey: string = null,
+    public includeRelations: string[] = [
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey)
+    ],
+    public populateMissing = true
   ) {
     super();
     this.options = new RequestOptions();
@@ -231,7 +235,6 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineChildActi
   ];
   initialParams = {
     'results-per-page': 100,
-    'inline-relations-depth': '1',
     page: 1,
     'order-direction': 'desc',
     'order-direction-field': 'route',

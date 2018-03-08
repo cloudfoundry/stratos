@@ -18,8 +18,12 @@ export const ADD_PARAMS = '[Pagination] Add Params';
 export const REMOVE_PARAMS = '[Pagination] Remove Params';
 export const SET_PAGE_BUSY = '[Pagination] Set Page Busy';
 
-export function getPaginationKey(entityKey, endpointGuid, guid) {
-  return `${entityKey}:${endpointGuid}:${guid}`;
+export function getPaginationKey(entityKey, endpointGuid, guid = null) {
+  if (guid) {
+    return `${entityKey}:${endpointGuid}:${guid}`;
+  } else {
+    return `${entityKey}:${endpointGuid}`;
+  }
 }
 
 export class ClearPaginationOfType implements Action {

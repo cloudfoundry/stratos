@@ -2,14 +2,13 @@ import { Store } from '@ngrx/store';
 
 import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
 import { AppState } from '../../../../../store/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { EndpointDataSourceHelper } from './endpoint-data-source.helpers';
-import { entityFactory } from '../../../../../store/helpers/entity-factory';
-import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { ListRowSateHelper } from './endpoint-data-source.helpers';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -22,7 +21,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     entityMonitorFactory: EntityMonitorFactory
   ) {
     const action = new GetAllEndpoints();
-    const { rowStateManager, sub } = EndpointDataSourceHelper.getRowStateManager(
+    const rowStatehelper = new ListRowSateHelper();
+    const { rowStateManager, sub } = rowStatehelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
       GetAllEndpoints.storeKey

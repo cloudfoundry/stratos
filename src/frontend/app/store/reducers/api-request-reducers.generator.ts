@@ -1,13 +1,22 @@
+import { BuildpackSchema } from '../actions/buildpack.action';
+import { FeatureFlagSchema } from '../actions/feature-flags.actions';
+import { SecurityGroupSchema } from '../actions/security-groups-actions';
 import {
   appEnvVarsSchemaKey,
   appStatsSchemaKey,
   appSummarySchemaKey,
   cfInfoSchemaKey,
+  cfUserSchemaKey,
   githubBranchesSchemaKey,
   githubCommitSchemaKey,
   githubRepoSchemaKey,
   organisationSchemaKey,
   quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  ServiceBindingsSchema,
+  ServiceInstancesSchema,
+  ServicePlanSchema,
+  ServiceSchema,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -15,7 +24,9 @@ import { requestDataReducerFactory } from './api-request-data-reducer/request-da
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { IRequestArray } from './api-request-reducer/types';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
+import { routeReducer } from './routes.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
+import { userReducer } from './users.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -55,7 +66,7 @@ const entities = [
   'stack',
   'space',
   organisationSchemaKey,
-  'route',
+  routeSchemaKey,
   'event',
   endpointStoreNames.type,
   'domain',
@@ -71,8 +82,18 @@ const entities = [
   appEnvVarsSchemaKey,
   appStatsSchemaKey,
   appSummarySchemaKey,
-  quotaDefinitionSchemaKey
+  quotaDefinitionSchemaKey,
+  BuildpackSchema.key,
+  SecurityGroupSchema.key,
+  ServicePlanSchema.key,
+  ServiceSchema.key,
+  ServiceBindingsSchema.key,
+  ServiceInstancesSchema.key,
+  FeatureFlagSchema.key
 ];
+// TODO: RC
+
+
 const _requestReducer = requestReducerFactory(entities, requestActions);
 
 export function requestReducer(state, action) {
@@ -83,6 +104,8 @@ export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
+    [cfUserSchemaKey]: [userReducer],
+    [routeSchemaKey]: [routeReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
     application: [endpointDisconnectApplicationReducer('application')],
     space: [endpointDisconnectApplicationReducer('space')],

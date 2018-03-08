@@ -17,7 +17,7 @@ import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagin
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { ICFAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
+import { ICFAction, IRequestAction, RequestEntityLocation, APISuccessOrFailedAction } from '../types/request.types';
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
@@ -120,7 +120,7 @@ export class APIEffect {
     ).catch(errObservable => {
       this.logger.warn(`API request process failed`, errObservable.error);
       return [
-        { type: actionClone.actions[2], apiAction: actionClone },
+        new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
         new WrapperRequestActionFailed(
           errObservable.message,
           actionClone,

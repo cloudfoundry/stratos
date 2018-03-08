@@ -19,6 +19,9 @@ export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
   appGuid = 'mockAppGuid';
   application$: Observable<ApplicationData> = Observable.of(({
+    cf: {
+      guid: 'mockCfGuid'
+    },
     app: {
       metadata: {},
       entity: {

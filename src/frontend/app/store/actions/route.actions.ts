@@ -99,6 +99,7 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
   entityKey = routeSchemaKey;
   options: RequestOptions;
   endpointGuid: string;
+  updatingKey = 'unmapping';
 }
 
 export class CheckRouteExists extends CFStartAction implements ICFAction {

@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
+import {
+  CloudFoundryOrganisationService,
+} from '../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
+
 @Component({
   selector: 'app-card-cf-org-usage',
   templateUrl: './card-cf-org-usage.component.html',
@@ -7,7 +11,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CardCfOrgUsageComponent implements OnInit {
 
-  constructor() { }
+  constructor(private cfOrganizationService: CloudFoundryOrganisationService) { }
 
   ngOnInit() {
   }

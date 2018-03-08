@@ -5,8 +5,8 @@
     </mat-card-header>
     <mat-card-content>
       <div class="app-metadata">
-        <app-metadata-item icon="memory" label="Account Username">{{ (cfEndpointService.endpoint$ | async )?.entity.user.name }}</app-metadata-item>
-        <app-metadata-item icon="memory" label="Administrator">{{ isAdmin((cfEndpointService.endpoint$ | async )?.entity.user)}}</app-metadata-item>
+        <app-metadata-item icon="person" label="Account Username">{{ (cfEndpointService.endpoint$ | async )?.entity.user.name }}</app-metadata-item>
+        <app-metadata-item icon="person" label="Administrator">{{ isAdmin((cfEndpointService.endpoint$ | async )?.entity.user)}}</app-metadata-item>
       </div>
     </mat-card-content>
   </mat-card>
