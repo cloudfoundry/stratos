@@ -41,7 +41,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
       sort: {
         type: 'sort',
         orderKey: 'state',
-        field: 'entity.entity.enabled'
+        field: 'entity.enabled'
       },
       cellFlex: '1'
     }
