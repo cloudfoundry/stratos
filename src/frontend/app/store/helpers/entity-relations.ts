@@ -166,7 +166,7 @@ function createAction(config: HandleRelationsConfig) {
  * @param {HandleRelationsConfig} config
  * @returns {ValidateEntityResult[]}
  */
-function createActionsForExisting(config: HandleRelationsConfig): ValidateEntityResult[] {
+function createActionsForExistingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
   const { allEntities, newEntities, childEntities, childRelation } = config;
   const childEntitiesAsArray = childEntities as Array<any>;
 
@@ -201,9 +201,7 @@ function createPaginationWatcher(store, paramAction, paramPaginationAction: Fetc
     map((paginationState: PaginationEntityState) => {
       const pageRequest: ActionState =
         paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-      return {
-        fetching: pageRequest ? pageRequest.busy : true
-      } as ValidateResultFetchingState;
+      return { fetching: pageRequest ? pageRequest.busy : true };
     })
   );
 }
@@ -211,9 +209,7 @@ function createPaginationWatcher(store, paramAction, paramPaginationAction: Fetc
 function createEntityWatcher(store, paramAction, guid: string): Observable<ValidateResultFetchingState> {
   return store.select(selectRequestInfo(paramAction.entityKey, guid)).pipe(
     map((requestInfo: RequestInfoState) => {
-      return {
-        fetching: requestInfo ? requestInfo.fetching : true
-      };
+      return { fetching: requestInfo ? requestInfo.fetching : true };
     })
   );
 }
@@ -224,7 +220,7 @@ function createEntityWatcher(store, paramAction, guid: string): Observable<Valid
  * @param {HandleRelationsConfig} config
  * @returns {ValidateEntityResult[]}
  */
-function createActionsForMissing(config: HandleRelationsConfig): ValidateEntityResult[] {
+function createActionsForMissingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
   const { store, childRelation, childEntitiesUrl } = config;
 
   const paramAction = createAction(config);
@@ -273,10 +269,10 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
       // Only care about paginated (array schema)
       return results;
     }
-    results = [].concat(results, createActionsForExisting(config));
+    results = [].concat(results, createActionsForExistingEntities(config));
   } else if (!childEntities && populateMissing) {
     // The values are missing and we want them, go fetch
-    results = [].concat(results, createActionsForMissing(config));
+    results = [].concat(results, createActionsForMissingEntities(config));
   }
 
   return results;
