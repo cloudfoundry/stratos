@@ -19,7 +19,6 @@ export class GetAllSecurityGroups extends CFStartAction implements PaginatedActi
   options: RequestOptions;
   initialParams = {
     'results-per-page': 100,
-    'inline-relations-depth': '1',
     page: 1
   };
 }

@@ -63,7 +63,6 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     'order-direction-field': GetAllApplications.sortField,
     page: 1,
     'results-per-page': 50,
-    'inline-relations-depth': 2
   };
   flattenPagination = true;
 }

@@ -1,17 +1,29 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { entityFactory, serviceInstancesSchemaKey, serviceBindingSchemaKey, servicePlanSchemaKey } from '../helpers/entity-factory';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { serviceInstancesSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { EntityInlineParentAction, EntityInlineChildAction, createEntityRelationKey } from '../helpers/entity-relations.types';
 
-export class GetServicesInstancesInSpace extends CFStartAction implements PaginationAction {
-  constructor(public endpointGuid: string, public spaceGuid: string, public paginationKey: string) {
+export class GetServicesInstancesInSpace
+  extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
+  constructor(
+    public endpointGuid: string,
+    public spaceGuid: string,
+    public paginationKey: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `spaces/${spaceGuid}/service_instances`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
+    this.parentGuid = spaceGuid;
   }
   actions = getActions('Service Instances', 'Get all in Space');
   entity = [entityFactory(serviceInstancesSchemaKey)];
@@ -20,11 +32,12 @@ export class GetServicesInstancesInSpace extends CFStartAction implements Pagina
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'inline-relations-depth': 2,
-    'exclude-relations': 'space',
+    // 'inline-relations-depth': 2,
+    // 'exclude-relations': 'space',
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
+  parentGuid: string;
 }
 
 export class DeleteServiceInstance extends CFStartAction implements ICFAction {

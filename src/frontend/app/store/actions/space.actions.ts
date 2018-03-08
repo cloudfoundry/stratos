@@ -39,8 +39,13 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
 }
 
 // TODO: RC
-export class GetAllSpaces extends CFStartAction implements PaginatedAction {
-  constructor(public paginationKey: string, public cnsi?: string) {
+export class GetAllSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  constructor(
+    public paginationKey: string,
+    public endpointGuid?: string,
+    public includeRelations: string[] = [],
+    public populateMissing = true,
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'spaces';
@@ -52,23 +57,21 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction {
   options: RequestOptions;
   initialParams = {
     'results-per-page': 100,
-    'inline-relations-depth': '1'
   };
 }
 
 export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public spaceGuid: string,
-    public cfGuid: string,
+    public endpointGuid: string,
     public paginationKey: string,
     public includeRelations = [],
-    public populateMissing = false
+    public populateMissing = true
   ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `spaces/${spaceGuid}/routes`;
     this.options.method = 'get';
-    this.endpointGuid = cfGuid;
     this.parentGuid = spaceGuid;
   }
   actions = [
@@ -78,7 +81,6 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
   ];
   initialParams = {
     'results-per-page': 100,
-    'inline-relations-depth': '1',
     page: 1,
     'order-direction': 'desc',
     'order-direction-field': 'attachedApps',
@@ -87,16 +89,22 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
   entity = entityFactory(routeSchemaKey);
   entityKey = routeSchemaKey;
   options: RequestOptions;
-  endpointGuid: string;
   flattenPagination = true;
 }
 
-export class GetAllAppsInSpace extends CFStartAction implements PaginationAction {
-  constructor(public cfGuid: string, public spaceGuid: string, public paginationKey: string) {
+export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
+  constructor(
+    public endpointGuid: string,
+    public spaceGuid: string,
+    public paginationKey: string,
+    public includeRelations = [],
+    public populateMissing = true
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `spaces/${spaceGuid}/apps`;
     this.options.method = 'get';
+    this.parentGuid = spaceGuid;
   }
   actions = getActions('Spaces', 'Get Apps');
   entity = [entityFactory(applicationSchemaKey)];
@@ -105,8 +113,8 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginationAction
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'inline-relations-depth': 2
   };
+  parentGuid: string;
 }
 
 export class DeleteSpace extends CFStartAction implements ICFAction {
@@ -160,12 +168,19 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
   updatingKey = UpdateSpace.UpdateExistingSpace;
 }
 
-export class GetRoutesInSpace extends CFStartAction implements PaginationAction {
-  constructor(public spaceGuid: string, public cfGuid: string, public paginationKey: string) {
+export class GetRoutesInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
+  constructor(
+    public spaceGuid: string,
+    public endpointGuid: string,
+    public paginationKey: string,
+    public includeRelations = [],
+    public populateMissing = true
+  ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `spaces/${spaceGuid}/routes`;
     this.options.method = 'get';
+    this.parentGuid = spaceGuid;
   }
   actions = getActions('Spaces', 'Get routes');
   entity = [entityFactory(routeSchemaKey)];
@@ -174,6 +189,6 @@ export class GetRoutesInSpace extends CFStartAction implements PaginationAction 
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'inline-relations-depth': 2
   };
+  parentGuid: string;
 }

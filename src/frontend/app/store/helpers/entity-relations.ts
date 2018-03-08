@@ -94,7 +94,7 @@ class ValidateEntityRelationsConfig {
    *
    * @memberof ValidateEntityRelationsConfig
    */
-  populateMissing = false;
+  populateMissing = true;
   /**
    * If a child exists, should we raise an action to store it as a pagination list?
    *

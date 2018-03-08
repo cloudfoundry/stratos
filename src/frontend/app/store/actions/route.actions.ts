@@ -31,7 +31,7 @@ export interface NewRoute {
 }
 
 export class CreateRoute extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cfGuid: string, route: NewRoute) {
+  constructor(public guid: string, public endpointGuid: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'routes';
@@ -40,19 +40,17 @@ export class CreateRoute extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
-    this.endpointGuid = cfGuid;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
   entity = [entityFactory(routeSchemaKey)];
   entityKey = routeSchemaKey;
   options: RequestOptions;
-  endpointGuid: string;
 }
 
 export class DeleteRoute extends CFStartAction implements ICFAction {
   constructor(
     public guid: string,
-    public cfGuid: string,
+    public endpointGuid: string,
     public async: boolean = false,
     public recursive: boolean = true
   ) {
@@ -63,7 +61,6 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
     this.options.params = new URLSearchParams();
     this.options.params.append('recursive', recursive ? 'true' : 'false');
     this.options.params.append('async', async ? 'true' : 'false');
-    this.endpointGuid = cfGuid;
   }
   actions = [
     RouteEvents.DELETE,
@@ -73,7 +70,6 @@ export class DeleteRoute extends CFStartAction implements ICFAction {
   entity = [entityFactory(routeSchemaKey)];
   entityKey = routeSchemaKey;
   options: RequestOptions;
-  endpointGuid: string;
   removeEntityOnDelete = true;
 }
 
@@ -81,14 +77,13 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
   constructor(
     public routeGuid: string,
     public appGuid: string,
-    public cfGuid: string
+    public endpointGuid: string
   ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `routes/${routeGuid}/apps/${appGuid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
-    this.endpointGuid = cfGuid;
   }
   actions = [
     RouteEvents.UNMAP_ROUTE,
@@ -98,12 +93,11 @@ export class UnmapRoute extends CFStartAction implements ICFAction {
   entity = [entityFactory(routeSchemaKey)];
   entityKey = routeSchemaKey;
   options: RequestOptions;
-  endpointGuid: string;
   updatingKey = 'unmapping';
 }
 
 export class CheckRouteExists extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public cfGuid: string, route: NewRoute) {
+  constructor(public guid: string, public endpointGuid: string, route: NewRoute) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'routes';
@@ -112,13 +106,11 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
       generate_port: true,
       ...route
     };
-    this.endpointGuid = cfGuid;
   }
   actions = [CREATE_ROUTE, CREATE_ROUTE_SUCCESS, CREATE_ROUTE_ERROR];
   entity = [entityFactory(routeSchemaKey)];
   entityKey = routeSchemaKey;
   options: RequestOptions;
-  endpointGuid: string;
 }
 
 export class MapRouteSelected implements Action {
