@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { CfSpace } from '../../../../store/types/org-and-space.types';
 import { APIResource } from '../../../../store/types/api.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
@@ -47,7 +48,7 @@ export class CreateSpaceStepComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.createSpaceForm = new FormGroup({
-      spaceName: new FormControl('', [<any>Validators.required]),
+      spaceName: new FormControl('', [<any>Validators.required, this.spaceNameTakenValidator()]),
     });
     const paginationKey = getPaginationKey('cf-space', this.cfGuid, this.orgGuid);
     const action = new GetAllSpacesInOrg(this.cfGuid, this.orgGuid, paginationKey);
@@ -76,6 +77,13 @@ export class CreateSpaceStepComponent implements OnInit, OnDestroy {
       return this.allSpacesInOrg.indexOf(currValue) === -1;
     }
     return true;
+  }
+
+  spaceNameTakenValidator = (): ValidatorFn => {
+    return (formField: AbstractControl): { [key: string]: any } => {
+      const nameInvalid = this.validate();
+      return nameInvalid ? { 'spaceNameTaken': { value: formField.value } } : null;
+    };
   }
 
   submit = () => {
