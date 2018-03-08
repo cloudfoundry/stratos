@@ -62,7 +62,7 @@ const entities = [
   'stack',
   'space',
   'organization',
-  'route',
+  RouteSchema.key,
   'event',
   endpointStoreNames.type,
   'domain',

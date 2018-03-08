@@ -80,14 +80,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-/* tslint:disable:max-line-length */
-import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { AppChipsComponent } from './components/chips/chips.component';
-import {
-  TableCellRouteAppsAttachedComponent,
-} from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-
-/* tslint:enable:max-line-length */
 
 @NgModule({
   imports: [
@@ -157,8 +150,6 @@ import {
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     AppChipsComponent,
-    CfSpacePermissionCellComponent,
-    TableCellRouteAppsAttachedComponent
   ],
   exports: [
     FormsModule,

@@ -8,7 +8,7 @@ import { getActions } from './action.helper';
 import { ServiceInstancesSchema } from './action-types';
 
 export class GetServicesInstancesInSpace extends CFStartAction implements PaginationAction {
-  constructor(public cfGuid: string, public spaceGuid: string, public paginationKey: string) {
+  constructor(public endpointGuid: string, public spaceGuid: string, public paginationKey: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `spaces/${spaceGuid}/service_instances`;
@@ -23,12 +23,14 @@ export class GetServicesInstancesInSpace extends CFStartAction implements Pagina
     page: 1,
     'results-per-page': 100,
     'inline-relations-depth': 2,
-    'exclude-relations': 'space'
+    'exclude-relations': 'space',
+    'order-direction': 'desc',
+    'order-direction-field': 'name',
   };
 }
 
 export class DeleteServiceInstance extends CFStartAction implements ICFAction {
-  constructor(public cfGuid: string, public serviceInstanceGuid: string) {
+  constructor(public endpointGuid: string, public serviceInstanceGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `service_instances/${serviceInstanceGuid}`;
@@ -45,7 +47,7 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
 
 
 export class DeleteServiceBinding extends CFStartAction implements ICFAction {
-  constructor(public cfGuid: string, public serviceBindingGuid: string) {
+  constructor(public endpointGuid: string, public serviceBindingGuid: string) {
     super();
     this.options = new RequestOptions();
     this.options.url = `service_bindings/${serviceBindingGuid}`;
