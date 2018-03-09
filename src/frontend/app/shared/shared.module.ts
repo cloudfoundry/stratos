@@ -146,9 +146,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
+    BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    BooleanIndicatorComponent,
     AppChipsComponent,
   ],
   exports: [

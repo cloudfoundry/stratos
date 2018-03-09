@@ -15,7 +15,4 @@ export class CfBuildpackCardComponent implements OnInit {
   ngOnInit() {
   }
 
-  isLocked = () => this.row.entity.locked;
-
-  isEnabled = () => this.row.entity.enabled;
 }
