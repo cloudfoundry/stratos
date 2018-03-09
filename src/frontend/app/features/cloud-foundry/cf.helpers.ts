@@ -1,6 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 
 import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export enum OrgUserRoles {
   MANAGER = 'managers',
@@ -123,3 +124,19 @@ export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   }
   return null;
 }
+
+export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
+  return ({
+    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
+    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId')
+  });
+}
+
+export const getActiveRouteCfOrgSpaceProvider = {
+  provide: ActiveRouteCfOrgSpace,
+  useFactory: getActiveRouteCfOrgSpace,
+  deps: [
+    ActivatedRoute,
+  ]
+};

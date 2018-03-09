@@ -13,12 +13,14 @@ import { organisationSchemaKey, OrganisationWithSpaceSchema } from '../../../sto
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
-
+  orgGuid: string;
+  cfGuid: string;
   userOrgRole$: Observable<string>;
   quotaDefinition$: Observable<IQuotaDefinition>;
   totalMem$: Observable<number>;
@@ -31,8 +33,7 @@ export class CloudFoundryOrganisationService {
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   organisationEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
-    public cfGuid: string,
-    public orgGuid: string,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -40,12 +41,13 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
-
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       OrganisationWithSpaceSchema,
-      orgGuid,
-      new GetOrganisation(orgGuid, cfGuid, 2)
+      this.orgGuid,
+      new GetOrganisation(this.orgGuid, this.cfGuid, 2)
     );
 
     this.initialiseObservables();

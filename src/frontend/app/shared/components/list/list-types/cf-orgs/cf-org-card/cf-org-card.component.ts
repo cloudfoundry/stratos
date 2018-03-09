@@ -103,7 +103,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
   edit = () => {
     this.store.dispatch(
       new RouterNav({
-        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'edit-org']
+        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'edit-org']
       })
     );
   }

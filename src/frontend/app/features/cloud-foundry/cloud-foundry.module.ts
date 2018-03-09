@@ -8,7 +8,6 @@ import {
 import { EndpointsListConfigService } from '../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../shared/shared.module';
 import { AddOrganisationComponent } from './add-organisation/add-organisation.component';
-import { BaseCF } from './cf-page.types';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
@@ -64,6 +63,8 @@ import { AddSpaceComponent } from './add-space/add-space.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
 import { CreateOrganizationStepComponent } from './add-organisation/create-organization-step/create-organization-step.component';
+import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
+import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -95,13 +96,14 @@ import { CreateOrganizationStepComponent } from './add-organisation/create-organ
     CloudFoundrySpaceUsersComponent,
     EditSpaceStepComponent,
     CreateSpaceStepComponent,
-    CreateOrganizationStepComponent
+    CreateOrganizationStepComponent,
+    EditOrganizationComponent,
+    EditOrganizationStepComponent
   ],
   providers: [
     CloudFoundryService,
     CFEndpointsListConfigService,
     EndpointsListConfigService,
-    BaseCF
   ]
 })
 export class CloudFoundryModule { }

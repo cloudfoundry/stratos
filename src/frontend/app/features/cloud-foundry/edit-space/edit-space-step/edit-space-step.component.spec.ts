@@ -5,9 +5,9 @@ import {
   getBaseTestModules,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundrySpaceServiceMock } from '../../../../test-framework/cloud-foundry-space.service.mock';
-import { BaseCF } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 import { EditSpaceStepComponent } from './edit-space-step.component';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('EditSpaceStepComponent', () => {
   let component: EditSpaceStepComponent;
@@ -19,8 +19,8 @@ describe('EditSpaceStepComponent', () => {
       imports: [...getBaseTestModules],
       providers: [
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock },
-        BaseCF,
-        generateTestCfEndpointServiceProvider()
+        generateTestCfEndpointServiceProvider(),
+        ActiveRouteCfOrgSpace
       ]
     })
       .compileComponents();

@@ -14,10 +14,14 @@ import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
 
+  cfGuid: string;
+  orgGuid: string;
+  spaceGuid: string;
   userRole$: Observable<string>;
   quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
   allowSsh$: Observable<string>;
@@ -29,9 +33,7 @@ export class CloudFoundrySpaceService {
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   spaceEntitySchema: EntityService<APIResource<ISpace>>;
   constructor(
-    public cfGuid: string,
-    public orgGuid: string,
-    public spaceGuid: string,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -40,11 +42,15 @@ export class CloudFoundrySpaceService {
 
   ) {
 
+    this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+
     this.spaceEntitySchema = this.entityServiceFactory.create(
       spaceSchemaKey,
       SpaceWithOrganisationSchema,
-      spaceGuid,
-      new GetSpace(spaceGuid, cfGuid, 2)
+      activeRouteCfOrgSpace.spaceGuid,
+      new GetSpace(activeRouteCfOrgSpace.spaceGuid, activeRouteCfOrgSpace.cfGuid, 2)
     );
 
     this.initialiseObservables();
@@ -67,7 +73,6 @@ export class CloudFoundrySpaceService {
     );
 
   }
-
 
   private initialiseSpaceObservables() {
     this.space$ = this.spaceEntitySchema.entityObs$.pipe(filter(o => !!o && !!o.entity));

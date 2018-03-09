@@ -52,6 +52,7 @@ import {
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 
 const cloudFoundry: Routes = [{
   path: '',
@@ -61,10 +62,6 @@ const cloudFoundry: Routes = [{
   path: ':cfId',
   children: [{
     path: 'add-org',
-    component: AddOrganisationComponent
-  },
-  {
-    path: 'edit-org',
     component: AddOrganisationComponent
   },
   {
@@ -80,6 +77,10 @@ const cloudFoundry: Routes = [{
     // Root for attaching CF wide actions (i.e assignments, tabs)
     component: CloudFoundryBaseComponent,
     children: [
+      {
+        path: 'organizations/:orgId/edit-org',
+        component: EditOrganizationComponent
+      },
       {
         path: 'organizations/:orgId/spaces/:spaceId/edit-space',
         component: EditSpaceComponent
