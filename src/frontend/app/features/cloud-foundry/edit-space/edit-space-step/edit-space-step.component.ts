@@ -13,6 +13,7 @@ import { AppState } from '../../../../store/app-state';
 import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundrySpaceService } from '../../services/cloud-foundry-space.service';
 
 @Component({
@@ -38,9 +39,10 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
     activatedRoute: ActivatedRoute,
     paginationMonitorFactory: PaginationMonitorFactory,
     snackBar: MatSnackBar,
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfSpaceService: CloudFoundrySpaceService
   ) {
-    super(store, activatedRoute, paginationMonitorFactory, snackBar);
+    super(store, activatedRoute, paginationMonitorFactory, snackBar, activeRouteCfOrgSpace);
     this.orgGuid = this.orgGuid;
     this.spaceGuid = activatedRoute.snapshot.params.spaceId;
     this.sshEnabled = false;

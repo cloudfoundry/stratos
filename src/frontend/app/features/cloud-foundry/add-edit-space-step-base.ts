@@ -13,7 +13,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
 import { RouterNav } from '../../store/actions/router.actions';
-import { BaseCF } from './cf-page.types';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { getIdFromRoute } from './cf.helpers';
 import { ValidatorFn, AbstractControl } from '@angular/forms';
 import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
@@ -31,9 +31,10 @@ export class AddEditSpaceStepBase {
     protected activatedRoute: ActivatedRoute,
     protected paginationMonitorFactory: PaginationMonitorFactory,
     protected snackBar: MatSnackBar,
+    protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    this.cfGuid = getIdFromRoute(activatedRoute, 'cfId');
-    this.orgGuid = getIdFromRoute(activatedRoute, 'orgId');
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     const paginationKey = getPaginationKey('cf-space', this.cfGuid, this.orgGuid);
 
     const action = new GetAllSpacesInOrg(this.cfGuid, this.orgGuid, paginationKey);

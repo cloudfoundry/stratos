@@ -10,20 +10,27 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
-import { entityFactory, spaceSchemaKey, spaceWithOrgKey } from '../../../store/helpers/entity-factory';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
+} from '../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
-import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
-import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
-import { routeSchemaKey } from '../../../store/helpers/entity-factory';
-import { serviceBindingSchemaKey } from '../../../store/helpers/entity-factory';
-import { applicationWithoutRelSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundrySpaceService {
 
+  cfGuid: string;
+  orgGuid: string;
+  spaceGuid: string;
   userRole$: Observable<string>;
   quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
   allowSsh$: Observable<string>;
@@ -35,9 +42,7 @@ export class CloudFoundrySpaceService {
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   spaceEntitySchema: EntityService<APIResource<ISpace>>;
   constructor(
-    public cfGuid: string,
-    public orgGuid: string,
-    public spaceGuid: string,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -46,11 +51,15 @@ export class CloudFoundrySpaceService {
 
   ) {
 
+    this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+
     this.spaceEntitySchema = this.entityServiceFactory.create(
       spaceSchemaKey,
       entityFactory(spaceWithOrgKey),
-      spaceGuid,
-      new GetSpace(spaceGuid, cfGuid, [
+      this.spaceGuid,
+      new GetSpace(this.spaceGuid, this.cfGuid, [
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
@@ -80,7 +89,6 @@ export class CloudFoundrySpaceService {
     );
 
   }
-
 
   private initialiseSpaceObservables() {
     this.space$ = this.spaceEntitySchema.entityObs$.pipe(filter(o => !!o && !!o.entity));

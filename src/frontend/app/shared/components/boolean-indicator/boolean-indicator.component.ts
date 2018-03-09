@@ -2,11 +2,11 @@ import { Component, OnInit, Input } from '@angular/core';
 import { split } from 'ts-node/dist';
 
 export enum BooleanIndicatorType {
-  enabledDisabled = 'enabledDisabled',
-  lockedUnlocked = 'lockedUnlocked',
-  unlockedLocked = 'unlockedLocked',
-  yesNo = 'yesNo',
-  trueFalse = 'trueFalse'
+  enabledDisabled = 'enabled-disabled',
+  lockedUnlocked = 'locked-unlocked',
+  unlockedLocked = 'unlocked-locked',
+  yesNo = 'yes-no',
+  trueFalse = 'true-false'
 }
 
 
@@ -21,12 +21,12 @@ export class BooleanIndicatorComponent implements OnInit {
   @Input('type') type: BooleanIndicatorType;
 
   private icons = {
-    Yes: 'check',
+    Yes: 'check_circle',
     Enabled: 'check_circle',
     True: 'check_circle',
-    No: 'close',
-    Disabled: 'block',
-    False: 'block',
+    No: 'highlight_off',
+    Disabled: 'highlight_off',
+    False: 'highlight_off',
     Locked: 'lock_outline',
     Unlocked: 'lock_open',
   };
@@ -40,10 +40,11 @@ export class BooleanIndicatorComponent implements OnInit {
   }
 
   getText = (): string => {
-    const [enabledText, disabledText] = this.splitCamelCaseToString(this.type);
-    return this.isTrue ? enabledText : disabledText;
+    const [enabledText, disabledText] = this.getTypeText(this.type);
+    return this.capitalizeFirstLetter(this.isTrue ? enabledText : disabledText);
   }
 
-  splitCamelCaseToString = (s) => s.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()).split(' ');
+  getTypeText = (s) => s.split('-');
 
+  capitalizeFirstLetter = (string) => string.charAt(0).toUpperCase() + string.slice(1);
 }

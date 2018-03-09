@@ -5,7 +5,7 @@
   .boolean-indicator {
     &__container {
       &__icon-true {
-        color: mat-color($primary);
+        color: #00c081;
       }
       &__icon-false {
         color: mat-color($warn);

@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { IApp, IInfo, IOrganization, ISpace } from '../../../core/cf-api.types';
+import { IApp, IApp, IInfo, IOrganization, IOrganization, ISpace, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfOrgsDataSourceService } from '../../../shared/components/list/list-types/cf-orgs/cf-orgs-data-source.service';
@@ -27,8 +27,7 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfUser } from '../../../store/types/user.types';
-import { BaseCF } from '../cf-page.types';
-
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 @Injectable()
 export class CloudFoundryEndpointService {
@@ -49,15 +48,14 @@ export class CloudFoundryEndpointService {
   getAllOrgsAction: GetAllOrganisations;
 
   constructor(
-    public baseCf: BaseCF,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-    this.cfGuid = baseCf.guid;
-
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.getAllOrgsAction = CfOrgsDataSourceService.createGetAllOrganisations(this.cfGuid);
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(

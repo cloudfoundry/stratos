@@ -20,14 +20,14 @@ import {
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
+  serviceInstancesSchemaKey,
   spaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { BaseCFOrg } from '../cf-page.types';
-import { getOrgRolesString } from '../cf.helpers';
-import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { getOrgRolesString, getOrgRolesString } from '../cf.helpers';
+import { CloudFoundryEndpointService, CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
@@ -45,7 +45,7 @@ export class CloudFoundryOrganisationService {
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   organisationEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
-    public baseCfOrg: BaseCFOrg,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -53,8 +53,8 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
-    this.orgGuid = baseCfOrg.guid;
-    this.cfGuid = cfEndpointService.cfGuid;
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       entityFactory(organisationWithSpaceKey),

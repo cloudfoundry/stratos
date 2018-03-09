@@ -53,7 +53,6 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import {
   SecurityRuleComponent,
 } from './components/list/list-types/cf-security-groups/cf-security-groups-card/security-rule/security-rule.component';
@@ -146,15 +145,13 @@ import { ValuesPipe } from './pipes/values.pipe';
     MetaCardItemComponent,
     MetaCardKeyComponent,
     MetaCardValueComponent,
-    CfOrgCardComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
+    BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     AppChipsComponent,
-    SecurityRuleComponent,
-    BooleanIndicatorComponent
   ],
   exports: [
     FormsModule,

@@ -27,9 +27,9 @@ export const FeatureFlagDescriptions = {
     'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables'
 };
 export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatureFlag>> {
-  constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
-    const paginationKey = getPaginationKey('featureFlags', cfGuid);
-    const action = new GetAllFeatureFlags(cfGuid, paginationKey);
+  constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
+    const paginationKey = getPaginationKey('featureFlags', endpointGuid);
+    const action = new GetAllFeatureFlags(endpointGuid, paginationKey);
     super({
       store,
       action,

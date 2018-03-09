@@ -3,7 +3,7 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
-import { BaseCF } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { CfFeatureFlagsDataSource, FeatureFlagDescriptions } from './cf-feature-flags-data-source';
@@ -41,14 +41,14 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
       sort: {
         type: 'sort',
         orderKey: 'state',
-        field: 'entity.entity.enabled'
+        field: 'entity.enabled'
       },
       cellFlex: '1'
     }
   ];
-  constructor(private store: Store<AppState>, private baseCF: BaseCF) {
+  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
-    this.dataSource = new CfFeatureFlagsDataSource(this.store, baseCF.guid, this);
+    this.dataSource = new CfFeatureFlagsDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.defaultView = 'table' as ListView;
     this.viewType = ListViewTypes.TABLE_ONLY;
     this.getDataSource = () => this.dataSource;

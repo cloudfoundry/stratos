@@ -13,7 +13,7 @@ import {
   createBasicStoreModule,
   testSCFGuid
 } from '../../../test-framework/store-test-helper';
-import { BaseCF } from '../cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
@@ -26,7 +26,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
         providers: [
           CloudFoundryEndpointService,
           generateTestCfEndpointServiceProvider(),
-          BaseCF
+          ActiveRouteCfOrgSpace
         ]
       }).compileComponents();
     })

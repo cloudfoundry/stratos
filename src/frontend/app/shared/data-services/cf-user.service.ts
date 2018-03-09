@@ -19,8 +19,11 @@ import { getPaginationObservables } from '../../store/reducers/pagination-reduce
 import { APIResource } from '../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { BaseCF } from './../../features/cloud-foundry/cf-page.types';
-import { PaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+import {
+  PaginationObservables,
+  PaginationObservables,
+} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Injectable()
 export class CfUserService {
@@ -30,9 +33,9 @@ export class CfUserService {
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
-    public baseCF: BaseCF
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    this.allUsersAction = new GetAllUsers(baseCF.guid);
+    this.allUsersAction = new GetAllUsers(activeRouteCfOrgSpace.cfGuid);
     this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
       store: this.store,
       action: this.allUsersAction,

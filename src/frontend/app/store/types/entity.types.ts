@@ -9,6 +9,8 @@ import {
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
 import { EndpointModel } from './endpoint.types';
+import { SystemInfo } from './system.types';
+import { IFeatureFlag } from '../../core/cf-api.types';
 
 export interface IRequestDataInternal<T> extends IRequestTypeState {
   application: IRequestEntityTypeState<T>;
@@ -17,7 +19,6 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   organization: IRequestEntityTypeState<T>;
   route: IRequestEntityTypeState<T>;
   event: IRequestEntityTypeState<T>;
-  system: IRequestEntityTypeState<T>;
   githubBranches: IRequestEntityTypeState<T>;
   githubCommits: IRequestEntityTypeState<T>;
   domain: IRequestEntityTypeState<T>;
@@ -35,10 +36,14 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
 
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
   endpoint: IRequestEntityTypeState<EndpointModel>;
+  system: IRequestEntityTypeState<SystemInfo>;
+  featureFlag: IRequestEntityTypeState<IFeatureFlag>;
 }
 
 export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
+  system: IRequestEntityTypeState<RequestInfoState>;
+  featureFlag: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
