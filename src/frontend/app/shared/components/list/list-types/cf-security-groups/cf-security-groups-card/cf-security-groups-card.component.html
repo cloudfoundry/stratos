@@ -13,13 +13,13 @@
   <app-meta-card-item>
     <app-meta-card-key>Staging Default</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="row.entity.staging_default" type="yesNo"></app-boolean-indicator>
+      <app-boolean-indicator [isTrue]="row.entity.staging_default" type="yes-no"></app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Running Default</app-meta-card-key>
     <app-meta-card-value>
-      <app-boolean-indicator [isTrue]="row.entity.running_default" type="yesNo"></app-boolean-indicator>
+      <app-boolean-indicator [isTrue]="row.entity.running_default" type="yes-no"></app-boolean-indicator>
     </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
@@ -31,10 +31,10 @@
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
+  <app-meta-card-item style="column">
     <app-meta-card-key>Rules</app-meta-card-key>
     <app-meta-card-value>
-      <app-security-rule *ngFor="let rule of row.entity.rules" [rule]="rule"></app-security-rule>
+      <app-chips [chips]="tags"></app-chips>
     </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

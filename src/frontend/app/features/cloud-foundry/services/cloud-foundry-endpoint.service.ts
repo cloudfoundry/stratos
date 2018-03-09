@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
+import { IApp, IOrganization, ISpace, ICfV2Info } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -42,8 +42,8 @@ export class CloudFoundryEndpointService {
   allApps$: Observable<APIResource<IApp>[]>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
-  info$: Observable<EntityInfo<APIResource<any>>>;
-  cfInfoEntityService: EntityService<APIResource<any>>;
+  info$: Observable<EntityInfo<APIResource<ICfV2Info>>>;
+  cfInfoEntityService: EntityService<APIResource<ICfV2Info>>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
@@ -86,7 +86,7 @@ export class CloudFoundryEndpointService {
       false
     );
 
-    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<any>>(
+    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
       cfInfoSchemaKey,
       entityFactory(cfInfoSchemaKey),
       this.cfGuid,

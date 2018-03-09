@@ -53,9 +53,6 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import {
-  SecurityRuleComponent,
-} from './components/list/list-types/cf-security-groups/cf-security-groups-card/security-rule/security-rule.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -83,6 +80,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+
 
 @NgModule({
   imports: [
@@ -151,8 +149,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    AppChipsComponent,
-    SecurityRuleComponent,
+    BooleanIndicatorComponent,
+    AppChipsComponent
   ],
   exports: [
     FormsModule,
@@ -205,7 +203,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    SecurityRuleComponent
+    CardCfOrgUserDetailsComponent,
+    AppChipsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
