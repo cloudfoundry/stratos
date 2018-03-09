@@ -12,6 +12,11 @@ import { AppChip } from '../../../../chips/chips.component';
 export class CfSecurityGroupsCardComponent implements OnInit {
 
   tags: AppChip<IRule>[] = [];
+  private typeColors = {
+    tcp: 'tcp-class',
+    all: 'all-class',
+    udp: 'udp-class'
+  };
   @Input('row') row: APIResource<ISecurityGroup>;
   constructor(
     private cfEndpointService: CloudFoundryEndpointService
@@ -22,17 +27,11 @@ export class CfSecurityGroupsCardComponent implements OnInit {
       this.tags.push({
         value: `${t.protocol} ${this.getRuleString(t)}`,
         key: t,
-        hideClearButton: true
+        color: this.typeColors[t.protocol]
       });
     });
 
   }
-
-  /**
-   *  key: T;
-  value: string;
-   */
-
   getSpaceUrl = (space: APIResource<ISpace>) => {
     return [
       '/cloud-foundry',
