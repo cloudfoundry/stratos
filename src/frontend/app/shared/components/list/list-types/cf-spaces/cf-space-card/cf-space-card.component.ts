@@ -16,18 +16,19 @@ import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
-import { CfSpace } from '../../../../../../store/types/org-and-space.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { ISpace } from '../../../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-cf-space-card',
   templateUrl: './cf-space-card.component.html',
   styleUrls: ['./cf-space-card.component.scss']
 })
-export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
+export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   implements OnInit, OnDestroy {
+  spaceGuid: string;
   serviceInstancesCount: number;
   appInstancesCount: number;
   serviceInstancesLimit: number;
@@ -43,7 +44,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
 
-  @Input('row') row: APIResource<CfSpace>;
+  @Input('row') row: APIResource<ISpace>;
 
   constructor(
     private cfUserService: CfUserService,
@@ -58,11 +59,13 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
 
   ngOnInit() {
 
+    this.spaceGuid = this.row.entity.guid;
+
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         return this.cfUserService.getUserRoleInSpace(
           u.guid,
-          this.row.entity.guid,
+          this.spaceGuid,
           this.row.entity.cfGuid
         );
       }),
@@ -77,7 +80,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
     );
 
     this.subscriptions.push(fetchData$.subscribe());
-    this.orgGuid = this.row.entity.guid;
+    this.orgGuid = this.cfOrgService.orgGuid;
 
   }
 
@@ -129,19 +132,19 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<CfSpace>>
   edit = () => {
     this.store.dispatch(
       new RouterNav({
-        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'edit-space']
+        path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.spaceGuid, 'edit-space']
       })
     );
   }
 
   delete = () => {
     this.cfOrgSpaceDataService.deleteSpace(
-      this.row.entity.guid,
+      this.spaceGuid,
       this.cfEndpointService.cfGuid
     );
   }
 
   goToSummary = () => this.store.dispatch(new RouterNav({
-    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.row.entity.guid]
+    path: ['cloud-foundry', this.cfEndpointService.cfGuid, 'organizations', this.orgGuid, 'spaces', this.spaceGuid]
   }))
 }

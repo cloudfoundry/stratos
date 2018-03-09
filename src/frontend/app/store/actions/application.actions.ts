@@ -8,12 +8,12 @@ import { ApiActionTypes } from './request.actions';
 import { StackSchema } from './stack.action';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
-import { CfApplication } from '../types/application.types';
 import { pick } from '../helpers/reducer.helper';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { AppStatSchema } from '../types/app-metadata.types';
 import { getPaginationKey } from './pagination.actions';
 import { SpaceWithOrganisationSchema } from './action-types';
+import { IApp } from '../../core/cf-api.types';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -105,7 +105,7 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
   constructor(
     public guid: string,
     public endpointGuid: string,
-    application: CfApplication
+    application: IApp
   ) {
     super();
     this.options = new RequestOptions();

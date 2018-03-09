@@ -101,6 +101,7 @@ const testInitialStoreState: AppState = {
     },
     pagination: {
       securityGroup:{},
+      featureFlag: {},
       buildpack: {},
       application: {
         applicationWall: {
@@ -586,6 +587,7 @@ const testInitialStoreState: AppState = {
     request: {
       securityGroup:{},
       securityRule:{},
+      featureFlag: {},
       buildpack:{},
       service:{},
       serviceBinding:{},
@@ -3833,6 +3835,7 @@ const testInitialStoreState: AppState = {
     requestData: {
       securityGroup: {},
       securityRule: {},
+      featureFlag: {},
       buildpack: {},
       service:{},
       serviceBinding:{},

@@ -1,4 +1,5 @@
 .meta-card-item-row {
+  $text-color: rgba(0, 0, 0, .60);
   align-items: center;
   display: flex;
   height: 30px;
@@ -22,7 +23,5 @@
 }
 
 .meta-card-item-column {
-  .meta-card-item__key {
-    padding-top: 10px;
-  }
+  padding-top: 10px;
 }

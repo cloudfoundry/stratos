@@ -8,6 +8,7 @@ import {
   AppSummarySchema
 } from './app-metadata.types';
 import { SystemInfo } from './system.types';
+import { IRoute, IFeatureFlag } from '../../core/cf-api.types';
 
 export interface IRequestDataInternal<T> extends IRequestTypeState {
   application: IRequestEntityTypeState<T>;
@@ -31,11 +32,13 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
+  featureFlag: IRequestEntityTypeState<IFeatureFlag>;
 }
 
 export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   system: IRequestEntityTypeState<RequestInfoState>;
+  featureFlag: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -52,6 +55,7 @@ export const defaultCfEntitiesState = {
   domain: {},
   securityGroup: {},
   buildpack: {},
+  featureFlag: {},
   serviceInstance: {},
   servicePlan: {},
   service: {},

@@ -1,0 +1,23 @@
+<div class="edit-space">
+  <div>Specify the new name for the space (leave unchanged if don't wish to rename it): </div>
+  <form [formGroup]="editSpaceForm" class="stepper-form">
+    <mat-form-field>
+      <input matInput formControlName="spaceName" [(ngModel)]="spaceName" placeholder="Space Name">
+      <mat-error *ngIf="!validate()">
+        A space with this name already exists. Please enter a different one.
+      </mat-error>
+    </mat-form-field>
+    <div class="edit-space__stepper-form__ssh">
+      <div>
+        Toggle SSH access in Space ( Currently {{ currentSshStatus }})
+      </div>
+      <div>
+        <mat-slide-toggle formControlName="toggleSsh" [(ngModel)]="sshEnabled">
+          <div *ngIf="sshEnabled ">Enabled</div>
+          <div *ngIf="!sshEnabled ">Disabled</div>
+        </mat-slide-toggle>
+      </div>
+
+    </div>
+  </form>
+</div>
