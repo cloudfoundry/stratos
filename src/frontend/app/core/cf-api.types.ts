@@ -169,6 +169,12 @@ export interface IBuildpack {
   filename: string;
 }
 
+export interface IFeatureFlag {
+  name: string;
+  enabled: boolean;
+  url?: string;
+  error_message?: string;
+}
 export interface IServiceInstance {
   guid: string;
   cfGuid: string;
