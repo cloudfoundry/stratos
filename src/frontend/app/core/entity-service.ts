@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { denormalize, Schema } from 'normalizr';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { filter, map, publishReplay, refCount, shareReplay, tap, withLatestFrom, share } from 'rxjs/operators';
+import { filter, map, shareReplay, tap, withLatestFrom, share } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { AppState } from '../store/app-state';
@@ -80,13 +80,13 @@ export class EntityService<T = any> {
 
   updateEntity: Function;
 
-  entityObs$: Observable<EntityInfo>;
+  entityObs$: Observable<EntityInfo<T>>;
 
   isFetchingEntity$: Observable<boolean>;
 
   isDeletingEntity$: Observable<boolean>;
 
-  waitForEntity$: Observable<EntityInfo>;
+  waitForEntity$: Observable<EntityInfo<T>>;
 
   updatingSection$: Observable<UpdatingSection>;
 
@@ -97,7 +97,7 @@ export class EntityService<T = any> {
     return entityMonitor.entityRequest$
       .withLatestFrom(entityMonitor.entity$)
       .do(([entityRequestInfo, entity]) => {
-        if (this.shouldCallAction(entityRequestInfo, entity)) {
+        if (actionDispatch && this.shouldCallAction(entityRequestInfo, entity)) {
           actionDispatch();
         }
       })

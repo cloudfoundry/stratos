@@ -1,0 +1,8 @@
+<div class="add-org">
+  <div>Specify the name of the new organization</div>
+  <form [formGroup]="addOrg" class="add-org__stepper-form">
+    <mat-form-field>
+      <input matInput formControlName="orgName" placeholder="Organization Name" required>
+    </mat-form-field>
+  </form>
+</div>

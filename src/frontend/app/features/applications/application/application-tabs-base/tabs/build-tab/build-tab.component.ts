@@ -9,6 +9,7 @@ import { AppSummary } from '../../../../../../store/types/app-metadata.types';
 
 import { Store } from '@ngrx/store';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
+import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 
 @Component({
   selector: 'app-build-tab',
@@ -19,18 +20,18 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
   ]
 })
 export class BuildTabComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
-
-  appService = this.applicationService;
+  constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
 
   cardTwoFetching$: Observable<boolean>;
 
   public async: any;
 
+  getFullApiUrl = getFullEndpointApiUrl;
+
   ngOnInit() {
-    this.cardTwoFetching$ = this.appService.application$
+    this.cardTwoFetching$ = this.applicationService.application$
       .combineLatest(
-      this.appService.appSummary$
+      this.applicationService.appSummary$
       )
       .map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;

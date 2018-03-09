@@ -1,32 +1,23 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { AppState } from '../../../store/app-state';
-import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { tap } from 'rxjs/operators';
-import { CloudFoundryService } from '../cloud-foundry.service';
+import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
-const cfEndpointServiceFactory = (
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory
-) => {
-  const { cfId } = activatedRoute.snapshot.params;
-  return new CloudFoundryEndpointService(cfId, store, entityServiceFactory);
-};
-
+function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
+  return {
+    guid: activatedRoute.snapshot.params.cfId
+  };
+}
 @Component({
   selector: 'app-cloud-foundry-base',
   templateUrl: './cloud-foundry-base.component.html',
   styleUrls: ['./cloud-foundry-base.component.scss'],
   providers: [
-    {
-      provide: CloudFoundryEndpointService,
-      useFactory: cfEndpointServiceFactory,
-      deps: [Store, ActivatedRoute, EntityServiceFactory]
-    }
+    getActiveRouteCfOrgSpaceProvider,
+    CfUserService,
+    CloudFoundryEndpointService
   ]
 })
 export class CloudFoundryBaseComponent implements OnInit {

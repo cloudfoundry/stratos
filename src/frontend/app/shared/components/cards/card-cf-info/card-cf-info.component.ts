@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 

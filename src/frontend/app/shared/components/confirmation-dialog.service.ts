@@ -1,25 +1,19 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
+import { ConfirmationDialogConfig } from './confirmation-dialog.config';
 
-
-// Configuration for a confirmation dialog
-export class ConfirmationDialog {
-  constructor(public title: string, public message: string, public confirmButton?: string) {
-    this.confirmButton = this.confirmButton || 'Ok';
-  }
-}
 
 @Injectable()
 export class ConfirmationDialogService {
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog) { }
 
-  open(dialog: ConfirmationDialog, doFn: Function): void {
+  open(dialog: ConfirmationDialogConfig, doFn: Function): void {
 
     const dialogRef = this.dialog.open(DialogConfirmComponent, {
       maxWidth: '400px',
-      data: { title: dialog.title, msg: dialog.message, confirm: dialog.confirmButton }
+      data: dialog
     });
 
     dialogRef.afterClosed().take(1).subscribe(result => {

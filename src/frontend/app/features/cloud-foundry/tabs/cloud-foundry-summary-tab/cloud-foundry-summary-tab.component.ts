@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CloudFoundryEndpointService } from '../../cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-cloud-foundry-summary-tab',

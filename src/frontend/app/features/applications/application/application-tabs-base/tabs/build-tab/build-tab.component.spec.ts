@@ -42,7 +42,7 @@ describe('BuildTabComponent', () => {
           {
             initialState
           }
-        ),
+        )
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },

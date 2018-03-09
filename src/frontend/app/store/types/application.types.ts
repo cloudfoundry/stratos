@@ -1,4 +1,4 @@
-export interface NewApplication {
-  name: string;
-  space_guid: string;
+export enum CfApplicationState {
+  STOPPED = 'STOPPED',
+  STARTED = 'STARTED'
 }

@@ -31,12 +31,19 @@ type CNSIRecord struct {
 	SkipSSLValidation      bool     `json:"skip_ssl_validation"`
 }
 
+const (
+	AuthTypeOAuth2    = "OAuth2"
+	AuthTypeHttpBasic = "HttpBasic"
+)
+
 //TODO this could be moved back to tokens subpackage, and extensions could import it?
 type TokenRecord struct {
 	AuthToken    string
 	RefreshToken string
 	TokenExpiry  int64
 	Disconnected bool
+	AuthType     string
+	Metadata     string
 }
 
 type CFInfo struct {
@@ -76,7 +83,7 @@ type ConsoleConfig struct {
 	UAAEndpoint         *url.URL `json:"uaa_endpoint"`
 	ConsoleAdminScope   string   `json:"console_admin_scope"`
 	ConsoleClient       string   `json:"console_client"`
-	ConsoleClientSecret string   `json:"console_client"`
+	ConsoleClientSecret string   `json:"console_client_secret"`
 	SkipSSLValidation   bool     `json:"skip_ssl_validation"`
 	IsSetupComplete     bool     `json:"is_setup_complete"`
 }

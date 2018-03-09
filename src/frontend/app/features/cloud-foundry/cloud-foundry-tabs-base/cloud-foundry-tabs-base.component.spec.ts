@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base.component';
-import { CloudFoundryEndpointService } from '../cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
@@ -13,6 +13,7 @@ import {
   createBasicStoreModule,
   testSCFGuid
 } from '../../../test-framework/store-test-helper';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
@@ -24,7 +25,8 @@ describe('CloudFoundryTabsBaseComponent', () => {
         imports: [...getBaseTestModules],
         providers: [
           CloudFoundryEndpointService,
-          generateTestCfEndpointServiceProvider()
+          generateTestCfEndpointServiceProvider(),
+          ActiveRouteCfOrgSpace
         ]
       }).compileComponents();
     })

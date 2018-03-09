@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 )
 

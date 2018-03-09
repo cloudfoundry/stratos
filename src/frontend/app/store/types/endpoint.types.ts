@@ -1,5 +1,5 @@
-import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 import { EndpointSchema } from '../actions/endpoint.actions';
+import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 
 export const endpointStoreNames: {
   section: TRequestTypeKeys,

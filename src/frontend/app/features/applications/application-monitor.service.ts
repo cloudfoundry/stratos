@@ -63,7 +63,7 @@ export class AppMonitorState {
 @Injectable()
 export class ApplicationMonitorService {
 
-  appMonitor$: Observable<any>;
+  appMonitor$: Observable<AppMonitorState>;
 
   constructor(
     private applicationService: ApplicationService,

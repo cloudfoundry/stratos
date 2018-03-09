@@ -7,16 +7,10 @@ import { isTCPRoute } from '../../../../../../features/applications/routes/route
   templateUrl: './table-cell-tcproute.component.html',
   styleUrls: ['./table-cell-tcproute.component.scss']
 })
-export class TableCellTCPRouteComponent<T> extends TableCellCustom<T> implements OnInit {
+export class TableCellTCPRouteComponent<T> extends TableCellCustom<T> {
 
   @Input('row') row;
-  isRouteTCP: boolean;
   constructor() {
     super();
   }
-
-  ngOnInit() {
-    this.isRouteTCP = isTCPRoute(this.row);
-  }
-
 }

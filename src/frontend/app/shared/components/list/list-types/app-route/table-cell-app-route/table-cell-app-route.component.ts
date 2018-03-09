@@ -20,7 +20,7 @@ export class TableCellAppRouteComponent<T> extends TableCellCustom<T>
 
   ngOnInit(): void {
     const apps = this.row.entity.apps;
-    this.mappedAppsCount = getMappedApps(this.row).length;
+    this.mappedAppsCount = this.row.entity.mappedAppsCount;
     const foundApp =
       apps && apps.find(a => a.metadata.guid === this.appService.appGuid);
     if (foundApp && foundApp.length !== 0) {

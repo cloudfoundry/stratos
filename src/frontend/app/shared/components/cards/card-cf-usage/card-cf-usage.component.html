@@ -5,10 +5,10 @@
     </mat-card-header>
     <mat-card-content>
       <div class="app-metadata">
-        <app-metadata-item icon="memory" label="Applications">N/A</app-metadata-item>
+        <app-metadata-item icon="apps" label="Applications">N/A</app-metadata-item>
         <app-metadata-item icon="memory" label="Memory Usage">N/A</app-metadata-item>
-        <app-metadata-item icon="memory" label="Organizations">N/A</app-metadata-item>
-        <app-metadata-item icon="memory" label="Users">N/A</app-metadata-item>
+        <app-metadata-item icon="memory" label="Organizations">{{ (cfEndpointService.orgs$ | async)?.length}}</app-metadata-item>
+        <app-metadata-item icon="memory" label="Users">{{ (cfEndpointService.users$ | async)?.length}}</app-metadata-item>
         <app-metadata-item icon="memory" label="SSH Access">N/A</app-metadata-item>
       </div>
     </mat-card-content>
