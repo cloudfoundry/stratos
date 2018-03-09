@@ -15,18 +15,22 @@ import { IListDataSource } from '../../data-sources-controllers/list-data-source
 import { TableCellCustom } from '../../list-table/table-cell/table-cell-custom';
 import { CardAppComponent } from '../../list-types/app/card/card-app.component';
 import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import {
+  CfSecurityGroupsCardComponent,
+} from '../../list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
-import { EndpointCardComponent } from '../custom-cards/endpoint-card/endpoint-card.component';
 import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
+import { EndpointCardComponent } from '../custom-cards/endpoint-card/endpoint-card.component';
 
 export const listCards = [
   CardAppComponent,
   EndpointCardComponent,
   CfOrgCardComponent,
   CfSpaceCardComponent,
-  CfBuildpackCardComponent,
-  CfStacksCardComponent
+  CfStacksCardComponent,
+  CfSecurityGroupsCardComponent,
+  CfBuildpackCardComponent
 ];
 
 @Component({

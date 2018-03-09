@@ -12,7 +12,6 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
-import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
@@ -54,6 +53,10 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
+import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
+import {
+  CfSpacePermissionCellComponent,
+} from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -81,6 +84,8 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
+
 
 @NgModule({
   imports: [
@@ -149,7 +154,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    AppChipsComponent,
+    BooleanIndicatorComponent,
+    AppChipsComponent
   ],
   exports: [
     FormsModule,
@@ -202,7 +208,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    CardCfOrgUserDetailsComponent
+    CardCfOrgUserDetailsComponent,
+    AppChipsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

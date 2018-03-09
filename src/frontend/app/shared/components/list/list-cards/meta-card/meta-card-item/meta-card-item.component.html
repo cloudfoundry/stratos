@@ -1,5 +1,5 @@
 <ng-template #content>
-  <div class="meta-card-item">
+  <div [ngClass]="itemStyle">
     <div class="meta-card-item__key">
       <span>
         <ng-content *ngTemplateOutlet="key.content"></ng-content>:

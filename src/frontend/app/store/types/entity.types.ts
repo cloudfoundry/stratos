@@ -25,6 +25,8 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   servicePlan: IRequestEntityTypeState<T>;
   service: IRequestEntityTypeState<T>;
   serviceBinding: IRequestEntityTypeState<T>;
+  securityGroup: IRequestEntityTypeState<T>;
+
 }
 
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
@@ -51,6 +53,7 @@ export const defaultCfEntitiesState = {
   githubBranches: {},
   user: {},
   domain: {},
+  securityGroup: {},
   buildpack: {},
   featureFlag: {},
   serviceInstance: {},

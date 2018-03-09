@@ -26,6 +26,7 @@ import { userReducer } from './users.reducer';
 import { ServiceInstancesSchema, ServicePlanSchema, ServiceSchema, ServiceBindingsSchema } from '../actions/action-types';
 import { RouteSchema } from '../../shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source';
 import { routeReducer } from './routes.reducer';
+import { SecurityGroupSchema } from '../actions/security-groups-actions';
 import { BuildpackSchema } from '../actions/buildpack.action';
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -73,6 +74,8 @@ const entities = [
   'createApplication',
   'uaaSetup',
   BuildpackSchema.key,
+  UserSchema.key,
+  SecurityGroupSchema.key,
   UserSchema.key, ,
   ServiceInstancesSchema.key,
   ServicePlanSchema.key,

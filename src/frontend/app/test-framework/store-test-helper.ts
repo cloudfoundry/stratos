@@ -100,6 +100,7 @@ const testInitialStoreState: AppState = {
       message: ''
     },
     pagination: {
+      securityGroup:{},
       featureFlag: {},
       buildpack: {},
       application: {
@@ -584,6 +585,8 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      securityGroup:{},
+      securityRule:{},
       featureFlag: {},
       buildpack:{},
       service:{},
@@ -3830,6 +3833,8 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      securityGroup: {},
+      securityRule: {},
       featureFlag: {},
       buildpack: {},
       service:{},
