@@ -1,10 +1,10 @@
 .meta-card-item {
   $text-color: rgba(0, 0, 0, .60);
+  align-items: center;
   display: flex;
+  height: 30px;
   justify-content: space-between;
   padding: 2px 0;
-  align-items: center;
-  height: 30px;
   &__value {
     overflow: hidden;
     text-align: end;

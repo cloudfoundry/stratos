@@ -84,6 +84,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
+import { AppChipsComponent } from './components/chips/chips.component';
 
 
 
@@ -154,7 +155,8 @@ import { BooleanIndicatorComponent } from './components/boolean-indicator/boolea
     BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    BooleanIndicatorComponent
+    BooleanIndicatorComponent,
+    AppChipsComponent
   ],
   exports: [
     FormsModule,
@@ -207,7 +209,8 @@ import { BooleanIndicatorComponent } from './components/boolean-indicator/boolea
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    CardCfOrgUserDetailsComponent
+    CardCfOrgUserDetailsComponent,
+    AppChipsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
