@@ -17,12 +17,16 @@ import { CardAppComponent } from '../../list-types/app/card/card-app.component';
 import { CfOrgCardComponent } from '../../list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { EndpointCardComponent } from '../custom-cards/endpoint-card/endpoint-card.component';
+import { CfBuildpackCardComponent } from '../../list-types/cf-buildpacks/cf-buildpack-card/cf-buildpack-card.component';
+import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 
 export const listCards = [
   CardAppComponent,
   EndpointCardComponent,
   CfOrgCardComponent,
-  CfSpaceCardComponent
+  CfSpaceCardComponent,
+  CfBuildpackCardComponent,
+  CfStacksCardComponent
 ];
 
 @Component({

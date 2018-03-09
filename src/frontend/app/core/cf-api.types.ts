@@ -174,6 +174,25 @@ export interface ICfV2Info {
   doppler_logging_endpoint: string;
 }
 
+export interface IStack {
+  name: string;
+  description: string;
+}
+
+export interface IBuildpack {
+  name: string;
+  position: number;
+  enabled: boolean;
+  locked: boolean;
+  filename: string;
+}
+
+export interface IFeatureFlag {
+  name: string;
+  enabled: boolean;
+  url?: string;
+  error_message?: string;
+}
 export interface IServiceInstance {
   guid: string;
   cfGuid: string;

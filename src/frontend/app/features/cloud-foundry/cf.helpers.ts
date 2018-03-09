@@ -1,6 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 
 import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import { APIResource } from '../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export enum OrgUserRoles {
@@ -114,6 +115,8 @@ export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
 function hasRole(user: CfUser, guid: string, roleType: string) {
   return user[roleType] && user[roleType].find(o => o.metadata.guid === guid) != null;
 }
+
+export const getRowUniqueId = (entity: APIResource) => entity.metadata ? entity.metadata.guid : null;
 
 export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
 

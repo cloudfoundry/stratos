@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloudFoundryBuildPacksComponent } from './cloud-foundry-build-packs.component';
+import { getBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('CloudFoundryBuildPacksComponent', () => {
   let component: CloudFoundryBuildPacksComponent;
@@ -8,9 +10,11 @@ describe('CloudFoundryBuildPacksComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CloudFoundryBuildPacksComponent ]
+      declarations: [CloudFoundryBuildPacksComponent],
+      imports: [...getBaseTestModules],
+      providers: [ActiveRouteCfOrgSpace]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

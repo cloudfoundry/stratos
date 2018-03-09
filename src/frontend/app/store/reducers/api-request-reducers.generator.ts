@@ -14,6 +14,7 @@ import {
   AppSummarySchema,
   AppStatSchema
 } from '../types/app-metadata.types';
+import { FeatureFlagSchema } from '../actions/feature-flags.actions';
 import {
   GITHUB_BRANCHES_ENTITY_KEY,
   GITHUB_COMMIT_ENTITY_KEY
@@ -25,6 +26,7 @@ import { userReducer } from './users.reducer';
 import { ServiceInstancesSchema, ServicePlanSchema, ServiceSchema, ServiceBindingsSchema } from '../actions/action-types';
 import { RouteSchema } from '../../shared/components/list/list-types/cf-space-routes/cf-space-routes-data-source';
 import { routeReducer } from './routes.reducer';
+import { BuildpackSchema } from '../actions/buildpack.action';
 /**
  * This module uses the request data reducer and request reducer factories to create
  * the reducers to be used when making http requests
@@ -70,6 +72,7 @@ const entities = [
   'routerReducer',
   'createApplication',
   'uaaSetup',
+  BuildpackSchema.key,
   UserSchema.key, ,
   ServiceInstancesSchema.key,
   ServicePlanSchema.key,
@@ -81,7 +84,8 @@ const entities = [
   GITHUB_COMMIT_ENTITY_KEY,
   AppEnvVarSchema.key,
   AppStatSchema.key,
-  AppSummarySchema.key
+  AppSummarySchema.key,
+  FeatureFlagSchema.key
 ];
 const _requestReducer = requestReducerFactory(entities, requestActions);
 

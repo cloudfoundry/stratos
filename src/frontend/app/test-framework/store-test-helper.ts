@@ -100,6 +100,8 @@ const testInitialStoreState: AppState = {
       message: ''
     },
     pagination: {
+      featureFlag: {},
+      buildpack: {},
       application: {
         applicationWall: {
           pageCount: 1,
@@ -582,6 +584,8 @@ const testInitialStoreState: AppState = {
       cloudFoundryDetails: null,
     },
     request: {
+      featureFlag: {},
+      buildpack:{},
       service:{},
       serviceBinding:{},
       servicePlan: {},
@@ -3826,6 +3830,8 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     requestData: {
+      featureFlag: {},
+      buildpack: {},
       service:{},
       serviceBinding:{},
       servicePlan: {},
