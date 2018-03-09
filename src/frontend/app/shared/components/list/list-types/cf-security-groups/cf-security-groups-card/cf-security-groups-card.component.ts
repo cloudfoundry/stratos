@@ -3,13 +3,14 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { ISecurityGroup, ISpace, IRule, IRuleType } from '../../../../../../core/cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { AppChip } from '../../../../chips/chips.component';
+import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 
 @Component({
   selector: 'app-cf-security-groups-card',
   templateUrl: './cf-security-groups-card.component.html',
   styleUrls: ['./cf-security-groups-card.component.scss']
 })
-export class CfSecurityGroupsCardComponent implements OnInit {
+export class CfSecurityGroupsCardComponent extends TableCellCustom<APIResource> implements OnInit {
 
   tags: AppChip<IRule>[] = [];
   private typeColors = {
@@ -20,7 +21,9 @@ export class CfSecurityGroupsCardComponent implements OnInit {
   @Input('row') row: APIResource<ISecurityGroup>;
   constructor(
     private cfEndpointService: CloudFoundryEndpointService
-  ) { }
+  ) {
+    super();
+  }
 
   ngOnInit() {
     this.row.entity.rules.forEach(t => {
