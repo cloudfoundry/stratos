@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, switchMap } from 'rxjs/operators';
 
+import { IApp, IQuotaDefinition, IRoute, IServiceInstance, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -11,30 +12,28 @@ import { spaceSchemaKey, SpaceWithOrganisationSchema } from '../../../store/acti
 import { GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplication } from '../../../store/types/application.types';
-import { CfQuotaDefinition, CfSpace } from '../../../store/types/org-and-space.types';
-import { Route } from '../../../store/types/route.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CfServiceInstance } from '../../../store/types/service.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
 
+  cfGuid: string;
+  orgGuid: string;
+  spaceGuid: string;
   userRole$: Observable<string>;
-  quotaDefinition$: Observable<APIResource<CfQuotaDefinition>>;
+  quotaDefinition$: Observable<APIResource<IQuotaDefinition>>;
   allowSsh$: Observable<string>;
   totalMem$: Observable<number>;
-  routes$: Observable<APIResource<Route>[]>;
-  serviceInstances$: Observable<APIResource<CfServiceInstance>[]>;
+  routes$: Observable<APIResource<IRoute>[]>;
+  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   appInstances$: Observable<number>;
-  apps$: Observable<APIResource<CfApplication>[]>;
-  space$: Observable<EntityInfo<APIResource<CfSpace>>>;
-  spaceEntitySchema: EntityService<APIResource<CfSpace>>;
+  apps$: Observable<APIResource<IApp>[]>;
+  space$: Observable<EntityInfo<APIResource<ISpace>>>;
+  spaceEntitySchema: EntityService<APIResource<ISpace>>;
   constructor(
-    public cfGuid: string,
-    public orgGuid: string,
-    public spaceGuid: string,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -43,11 +42,15 @@ export class CloudFoundrySpaceService {
 
   ) {
 
+    this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+
     this.spaceEntitySchema = this.entityServiceFactory.create(
       spaceSchemaKey,
       SpaceWithOrganisationSchema,
-      spaceGuid,
-      new GetSpace(spaceGuid, cfGuid, 2)
+      activeRouteCfOrgSpace.spaceGuid,
+      new GetSpace(activeRouteCfOrgSpace.spaceGuid, activeRouteCfOrgSpace.cfGuid, 2)
     );
 
     this.initialiseObservables();
@@ -70,7 +73,6 @@ export class CloudFoundrySpaceService {
     );
 
   }
-
 
   private initialiseSpaceObservables() {
     this.space$ = this.spaceEntitySchema.entityObs$.pipe(filter(o => !!o && !!o.entity));

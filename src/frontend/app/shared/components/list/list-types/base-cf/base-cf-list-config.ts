@@ -8,19 +8,15 @@ import {
   IListMultiFilterConfig,
   IMultiListAction,
   ListViewTypes,
+  ListConfig,
 } from '../../list.component.types';
 
 
-export class BaseCfListConfig<T> implements IListConfig<T> {
+export class BaseCfListConfig<T> extends ListConfig<T> implements IListConfig<T> {
   getDataSource: () => IListDataSource<T>;
   isLocal = true;
-  pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
-  text?: ITableText;
-  enableTextFilter = false;
-  tableFixedRowHeight?: boolean;
-  cardComponent?: any;
   getColumns = () => [];
   getGlobalActions = () => [];
   getMultiActions = () => [];
