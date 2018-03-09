@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, switchMap } from 'rxjs/operators';
 
+import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, IServiceInstance, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -12,34 +13,27 @@ import { organisationSchemaKey, OrganisationWithSpaceSchema } from '../../../sto
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplication } from '../../../store/types/application.types';
-import {
-  CfOrg,
-  CfPrivateDomain,
-  CfQuotaDefinition,
-  CfSpace,
-} from '../../../store/types/org-and-space.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { CfServiceInstance } from '../../../store/types/service.types';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
-
+  orgGuid: string;
+  cfGuid: string;
   userOrgRole$: Observable<string>;
-  quotaDefinition$: Observable<CfQuotaDefinition>;
+  quotaDefinition$: Observable<IQuotaDefinition>;
   totalMem$: Observable<number>;
-  privateDomains$: Observable<APIResource<CfPrivateDomain>[]>;
+  privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
-  serivceInstances$: Observable<APIResource<CfServiceInstance>[]>;
-  spaces$: Observable<APIResource<CfSpace>[]>;
+  serivceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  spaces$: Observable<APIResource<ISpace>[]>;
   appInstances$: Observable<number>;
-  apps$: Observable<APIResource<CfApplication>[]>;
-  org$: Observable<EntityInfo<APIResource<CfOrg>>>;
-  organisationEntityService: EntityService<APIResource<CfOrg>>;
+  apps$: Observable<APIResource<IApp>[]>;
+  org$: Observable<EntityInfo<APIResource<IOrganization>>>;
+  organisationEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
-    public cfGuid: string,
-    public orgGuid: string,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -47,12 +41,13 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
-
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       OrganisationWithSpaceSchema,
-      orgGuid,
-      new GetOrganisation(orgGuid, cfGuid, 2)
+      this.orgGuid,
+      new GetOrganisation(this.orgGuid, this.cfGuid, 2)
     );
 
     this.initialiseObservables();
@@ -98,7 +93,7 @@ export class CloudFoundryOrganisationService {
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
   }
 
-  private getFlattenedList(property: string): (source: Observable<APIResource<CfSpace>[]>) => Observable<any> {
+  private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {
     return map(entities => {
       const allInstances = entities
         .map(s => s.entity[property])

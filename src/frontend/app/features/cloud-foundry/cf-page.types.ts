@@ -1,6 +1,8 @@
-import { InjectionToken, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 
 @Injectable()
-export class BaseCF {
-  guid: string;
+export class ActiveRouteCfOrgSpace {
+  cfGuid: string;
+  orgGuid: string;
+  spaceGuid: string;
 }
