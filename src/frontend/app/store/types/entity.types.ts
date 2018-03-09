@@ -16,7 +16,6 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   organization: IRequestEntityTypeState<T>;
   route: IRequestEntityTypeState<T>;
   event: IRequestEntityTypeState<T>;
-  system: IRequestEntityTypeState<T>;
   githubBranches: IRequestEntityTypeState<T>;
   githubCommits: IRequestEntityTypeState<T>;
   domain: IRequestEntityTypeState<T>;
@@ -29,10 +28,12 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
 
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
   endpoint: IRequestEntityTypeState<EndpointModel>;
+  system: IRequestEntityTypeState<SystemInfo>;
 }
 
 export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
+  system: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -47,6 +48,7 @@ export const defaultCfEntitiesState = {
   githubBranches: {},
   user: {},
   domain: {},
+  buildpack: {},
   serviceInstance: {},
   servicePlan: {},
   service: {},

@@ -1,0 +1,15 @@
+@import '~@angular/material/theming';
+@mixin app-boolean-indicator-theme($theme) {
+  $primary: map-get($theme, primary);
+  $warn: map-get($theme, warn);
+  .boolean-indicator {
+    &__container {
+      &__icon-true {
+        color: #00c081;
+      }
+      &__icon-false {
+        color: mat-color($warn);
+      }
+    }
+  }
+}
