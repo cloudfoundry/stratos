@@ -43,7 +43,6 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction, Entit
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'inline-relations-depth': 2
   };
 }
 

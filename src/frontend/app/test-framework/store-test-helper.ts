@@ -3828,7 +3828,7 @@ const testInitialStoreState: AppState = {
     event: {},
     system: {},
     private_domains: {},
-    space_quota_definition: {}
+    space_quota_definition: {},
   },
   requestData: {
     serviceInstance: {},

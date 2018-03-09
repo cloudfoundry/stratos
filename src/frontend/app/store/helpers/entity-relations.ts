@@ -262,8 +262,8 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
   let results = [];
   if (childEntities) {
     // The values exist do we want to put them anywhere else?
-    if (!allEntities || !childRelation.isArray || !populateExisting) {
-      // Only care about paginated (array schema)
+    console.log(childRelation);
+    if (!allEntities || !childRelation.isArray || !populateExisting || childRelation.entity.populateExisting === false) {
       return results;
     }
     results = [].concat(results, createActionsForExistingEntities(config));

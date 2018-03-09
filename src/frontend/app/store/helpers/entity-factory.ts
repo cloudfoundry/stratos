@@ -35,8 +35,29 @@ const entityCache: {
   [key: string]: EntitySchema
 } = {};
 
+/**
+ * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
+ * 
+ * @export
+ * @class EntitySchema
+ * @extends {schema.Entity}
+ */
 export class EntitySchema extends schema.Entity {
-  constructor(entityKey: string, definition?: Schema, options?: schema.EntityOptions, public relationKey?: string) {
+  /**
+   * @param {string} entityKey As per schema.Entity ctor
+   * @param {Schema} [definition] As per schema.Entity ctor
+   * @param {schema.EntityOptions} [options] As per schema.Entity ctor
+   * @param {string} [relationKey] Allows multiple children of the same type within a single parent entity
+   * @param {boolean} [populateExisting] Override to ensure in some cases existing entities do not make it into the pagination section
+   * @memberof EntitySchema
+   */
+  constructor(
+    entityKey: string,
+    definition?: Schema,
+    options?: schema.EntityOptions,
+    public relationKey?: string,
+    public populateExisting?: boolean
+  ) {
     super(entityKey, definition, options);
   }
 }
@@ -214,16 +235,18 @@ entityCache[securityGroupSchemaKey] = SecurityGroupSchema;
 const FeatureFlagSchema = new EntitySchema(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[featureFlagSchemaKey] = FeatureFlagSchema;
 
-const OrganisationAuditedSchema = new EntitySchema(organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_organizations');
-const OrganisationManagedSchema = new EntitySchema(organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_organizations');
+const OrganisationAuditedSchema = new EntitySchema(
+  organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_organizations', false);
+const OrganisationManagedSchema = new EntitySchema(
+  organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_organizations', false);
 const OrganisationBillingSchema = new EntitySchema(
   organisationSchemaKey, {
   }, {
     idAttribute: getAPIResourceGuid
   },
-  'billing_managed_organizations');
-const SpaceManagedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_spaces');
-const SpaceAuditedSchema = new EntitySchema(organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces');
+  'billing_managed_organizations', false);
+const SpaceManagedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_spaces', false);
+const SpaceAuditedSchema = new EntitySchema(organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces', false);
 
 const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
   entity: {
