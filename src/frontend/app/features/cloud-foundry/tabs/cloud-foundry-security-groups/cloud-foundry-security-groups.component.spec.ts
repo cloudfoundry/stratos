@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloudFoundrySecurityGroupsComponent } from './cloud-foundry-security-groups.component';
 import { getBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseCF } from '../../cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('CloudFoundrySecurityGroupsComponent', () => {
   let component: CloudFoundrySecurityGroupsComponent;
@@ -12,7 +12,7 @@ describe('CloudFoundrySecurityGroupsComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySecurityGroupsComponent],
       imports: [...getBaseTestModules],
-      providers: [BaseCF]
+      providers: [ActiveRouteCfOrgSpace]
     })
       .compileComponents();
   }));

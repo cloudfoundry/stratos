@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseCF } from '../../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import {
   getBaseTestModulesNoShared,
   getMetadataCardComponents,
@@ -18,7 +18,7 @@ describe('CfSecurityGroupsCardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CfSecurityGroupsCardComponent, getMetadataCardComponents, BooleanIndicatorComponent, AppChipsComponent],
       imports: [...getBaseTestModulesNoShared],
-      providers: [BaseCF, generateTestCfEndpointService()]
+      providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointService()]
     })
       .compileComponents();
   }));
