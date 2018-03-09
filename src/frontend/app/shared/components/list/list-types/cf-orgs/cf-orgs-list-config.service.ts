@@ -8,7 +8,7 @@ import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfOrgCardComponent } from './cf-org-card/cf-org-card.component';
 import { CfOrgsDataSourceService } from './cf-orgs-data-source.service';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { BaseCF } from '../../../../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 
 @Injectable()
 export class CfOrgsListConfigService implements IListConfig<APIResource> {
@@ -22,8 +22,8 @@ export class CfOrgsListConfigService implements IListConfig<APIResource> {
   defaultView = 'cards' as ListView;
   getColumns = () => [];
 
-  constructor(private store: Store<AppState>, private baseCF: BaseCF) {
-    this.dataSource = new CfOrgsDataSourceService(this.store, baseCF.guid, this);
+  constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
+    this.dataSource = new CfOrgsDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }
 
   getGlobalActions = () => [];

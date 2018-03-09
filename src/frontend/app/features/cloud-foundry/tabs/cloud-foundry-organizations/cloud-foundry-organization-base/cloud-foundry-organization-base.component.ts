@@ -10,48 +10,17 @@ import { PaginationMonitorFactory } from '../../../../../shared/monitors/paginat
 import { AppState } from '../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
-
-function cfOrganisationServiceFactory(
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory,
-  cfEndpointService: CloudFoundryEndpointService
-) {
-  const { orgId } = activatedRoute.snapshot.params;
-  const { cfGuid } = cfEndpointService;
-  return new CloudFoundryOrganisationService(
-    cfGuid,
-    orgId,
-    store,
-    entityServiceFactory,
-    cfUserService,
-    paginationMonitorFactory,
-    cfEndpointService
-  );
-}
+import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
   templateUrl: './cloud-foundry-organization-base.component.html',
   styleUrls: ['./cloud-foundry-organization-base.component.scss'],
-  providers: [{
-    provide: CloudFoundryOrganisationService,
-    useFactory: cfOrganisationServiceFactory,
-    deps: [
-      Store,
-      ActivatedRoute,
-      EntityServiceFactory,
-      CfOrgSpaceDataService,
-      CfUserService,
-      PaginationMonitorFactory,
-      CloudFoundryEndpointService
-    ]
-  }]
+  providers: [
+    getActiveRouteCfOrgSpaceProvider,
+    CloudFoundryOrganisationService
+  ]
 })
-
 
 export class CloudFoundryOrganizationBaseComponent implements OnInit {
 

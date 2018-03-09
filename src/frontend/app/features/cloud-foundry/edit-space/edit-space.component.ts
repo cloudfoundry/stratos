@@ -1,13 +1,34 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
+
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
 
 @Component({
   selector: 'app-edit-space',
   templateUrl: './edit-space.component.html',
-  styleUrls: ['./edit-space.component.scss']
+  styleUrls: ['./edit-space.component.scss'],
+  providers: [
+    getActiveRouteCfOrgSpaceProvider,
+    CloudFoundrySpaceService
+  ]
 })
 export class EditSpaceComponent implements OnInit {
 
-  constructor() { }
+  spaceName: Observable<string>;
+  spaceUrl: string;
+
+  constructor(private cfSpaceService: CloudFoundrySpaceService) {
+
+    this.spaceUrl = '/cloud-foundry/' +
+      `${cfSpaceService.cfGuid}/organizations/` +
+      `${cfSpaceService.orgGuid}/spaces/` +
+      `${cfSpaceService.spaceGuid}/summary`;
+    this.spaceName = cfSpaceService.space$.pipe(
+      map(s => s.entity.entity.name)
+    );
+  }
 
   ngOnInit() {
   }

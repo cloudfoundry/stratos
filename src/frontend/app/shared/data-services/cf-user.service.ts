@@ -1,5 +1,5 @@
 import { PaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { BaseCF } from './../../features/cloud-foundry/cf-page.types';
+import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -28,9 +28,9 @@ export class CfUserService {
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
-    public baseCF: BaseCF
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    this.allUsersAction = new GetAllUsers(baseCF.guid);
+    this.allUsersAction = new GetAllUsers(activeRouteCfOrgSpace.cfGuid);
     this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
       store: this.store,
       action: this.allUsersAction,
