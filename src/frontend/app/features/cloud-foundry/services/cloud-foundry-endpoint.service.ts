@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { IApp, IApp, IInfo, IOrganization, IOrganization, ISpace, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfOrgsDataSourceService } from '../../../shared/components/list/list-types/cf-orgs/cf-orgs-data-source.service';
@@ -28,6 +27,7 @@ import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
 
 @Injectable()
 export class CloudFoundryEndpointService {
@@ -37,8 +37,8 @@ export class CloudFoundryEndpointService {
   allApps$: Observable<APIResource<IApp>[]>;
   users$: Observable<APIResource<CfUser>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
-  info$: Observable<EntityInfo<APIResource<IInfo>>>;
-  cfInfoEntityService: EntityService<APIResource<IInfo>>;
+  info$: Observable<EntityInfo<APIResource<any>>>;
+  cfInfoEntityService: EntityService<APIResource<any>>;
   endpoint$: Observable<EntityInfo<EndpointModel>>;
   cfEndpointEntityService: EntityService<EndpointModel>;
   connected$: Observable<boolean>;
@@ -65,7 +65,7 @@ export class CloudFoundryEndpointService {
       new GetAllEndpoints()
     );
 
-    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<IInfo>>(
+    this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<any>>(
       cfInfoSchemaKey,
       entityFactory(cfInfoSchemaKey),
       this.cfGuid,

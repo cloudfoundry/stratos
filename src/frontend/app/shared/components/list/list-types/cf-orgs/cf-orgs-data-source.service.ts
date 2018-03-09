@@ -9,6 +9,7 @@ import {
   quotaDefinitionSchemaKey,
   spaceSchemaKey,
   applicationSchemaKey,
+  endpointSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -24,7 +25,9 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
 
   // TODO: RC MOVE
   static createGetAllOrganisations(cfGuid) {
-    const paginationKey = createEntityRelationPaginationKey(organisationWithSpaceKey, cfGuid);
+    const paginationKey = cfGuid ?
+      createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
+      : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
     return new GetAllOrganisations(
       paginationKey,
       cfGuid, [
@@ -32,7 +35,6 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
         createEntityRelationKey(organisationWithSpaceKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
-        // createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       ]);
   }
 

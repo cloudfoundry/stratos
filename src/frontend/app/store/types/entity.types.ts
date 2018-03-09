@@ -29,21 +29,19 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   serviceBinding: IRequestEntityTypeState<T>;
   buildpack: IRequestEntityTypeState<T>;
   securityGroup: IRequestEntityTypeState<T>;
-  featureFlag: IRequestEntityTypeState<T>;
   private_domains: IRequestEntityTypeState<T>;
   space_quota_definition: IRequestEntityTypeState<T>;
+  featureFlag: IRequestEntityTypeState<T>;
 }
 
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
-  featureFlag: IRequestEntityTypeState<IFeatureFlag>;
 }
 
 export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
   endpoint: IRequestEntityTypeState<RequestInfoState>;
   system: IRequestEntityTypeState<RequestInfoState>;
-  featureFlag: IRequestEntityTypeState<RequestInfoState>;
 }
 
 

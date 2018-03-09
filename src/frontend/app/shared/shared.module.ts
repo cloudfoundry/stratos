@@ -152,6 +152,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     AppChipsComponent,
+    SecurityRuleComponent,
   ],
   exports: [
     FormsModule,
@@ -204,7 +205,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-
+    SecurityRuleComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

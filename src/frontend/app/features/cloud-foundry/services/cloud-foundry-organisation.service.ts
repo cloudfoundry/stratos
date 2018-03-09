@@ -26,8 +26,8 @@ import {
 import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { getOrgRolesString, getOrgRolesString } from '../cf.helpers';
-import { CloudFoundryEndpointService, CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { getOrgRolesString } from '../cf.helpers';
 
 @Injectable()
 export class CloudFoundryOrganisationService {

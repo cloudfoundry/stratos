@@ -12,12 +12,13 @@ import { map } from 'rxjs/operators';
 import { isTCPRoute, getMappedApps } from '../../../../../features/applications/routes/routes.helper';
 import { GetAllAppsInSpace } from '../../../../../store/actions/space.actions';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { entityFactory, applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { entityFactory, applicationSchemaKey, spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
 
 export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = getPaginationKey('cf-space-apps', cfSpaceService.cfGuid, cfSpaceService.spaceGuid);
+    const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, cfSpaceService.spaceGuid);
     // TODO: pag + refresh
     const action = new GetAllAppsInSpace(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey);
     super({

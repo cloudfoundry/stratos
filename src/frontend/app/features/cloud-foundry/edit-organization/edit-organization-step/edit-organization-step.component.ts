@@ -1,30 +1,23 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormControl, FormGroup, FormGroup, ValidatorFn } from '@angular/forms';
-import { MatSnackBar, MatSnackBar } from '@angular/material';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
+import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, take, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
 import { CfOrgsDataSourceService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-data-source.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { organisationSchemaKey } from '../../../../store/actions/action-types';
-import { UpdateOrganization, UpdateOrganization } from '../../../../store/actions/organisation.actions';
-import { RouterNav, RouterNav } from '../../../../store/actions/router.actions';
-import { AppState, AppState } from '../../../../store/app-state';
+import { UpdateOrganization } from '../../../../store/actions/organisation.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppState } from '../../../../store/app-state';
 import { entityFactory, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
-import {
-  getPaginationObservables,
-  getPaginationObservables,
-} from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectRequestInfo, selectRequestInfo } from '../../../../store/selectors/api.selectors';
-import { APIResource, APIResource } from '../../../../store/types/api.types';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { APIResource } from '../../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
-import {
-  CloudFoundryOrganisationService,
-  CloudFoundryOrganisationService,
-} from '../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
 
 const enum OrgStatus {
   ACTIVE = 'active',

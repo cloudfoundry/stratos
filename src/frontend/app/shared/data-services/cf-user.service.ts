@@ -14,16 +14,13 @@ import {
 } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import { cfUserSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { cfUserSchemaKey, entityFactory, endpointSchemaKey } from '../../store/helpers/entity-factory';
+import { getPaginationObservables, PaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
-import {
-  PaginationObservables,
-  PaginationObservables,
-} from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 
 @Injectable()
 export class CfUserService {
@@ -35,7 +32,7 @@ export class CfUserService {
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    this.allUsersAction = new GetAllUsers(activeRouteCfOrgSpace.cfGuid);
+    this.allUsersAction = new GetAllUsers(createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid));
     this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
       store: this.store,
       action: this.allUsersAction,
