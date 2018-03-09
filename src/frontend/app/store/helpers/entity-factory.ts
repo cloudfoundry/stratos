@@ -30,7 +30,7 @@ export const featureFlagSchemaKey = 'featureFlag';
 export const privateDomainsSchemaKey = 'private_domains';
 export const spaceQuotaSchemaKey = 'space_quota_definition';
 
-
+export const applicationWithoutRelSchemaKey = 'applicationNoRel';
 export const spaceWithOrgKey = 'spaceWithOrg';
 // export const routesInSpaceKey = 'routesInSpace';
 export const organisationWithSpaceKey = 'organization';
@@ -86,17 +86,50 @@ entityCache[stackSchemaKey] = StackSchema;
 const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[domainSchemaKey] = DomainSchema;
 
-const ApplicationWithoutRoutesSchema = new EntitySchema(applicationSchemaKey, {
+const ServiceSchema = new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceSchemaKey] = ServiceSchema;
+
+const ApplicationWithoutRelationsSchema = new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[applicationWithoutRelSchemaKey] = ApplicationWithoutRelationsSchema;
+
+const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
   entity: {
+    app: ApplicationWithoutRelationsSchema
   }
 }, {
     idAttribute: getAPIResourceGuid
-  });
-entityCache[applicationSchemaKey] = ApplicationWithoutRoutesSchema;
+  }
+);
+entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
+
+const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
+  entity: {
+    service: ServiceSchema
+  }
+}, {
+    idAttribute: getAPIResourceGuid
+  }
+);
+entityCache[servicePlanSchemaKey] = ServicePlanSchema;
+
+const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
+  entity: {
+    service: ServiceSchema,
+    service_plan: ServicePlanSchema,
+    service_bindings: [ServiceBindingsSchema]
+  }
+}, {
+    idAttribute: getAPIResourceGuid,
+  }
+);
+entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
+
+const BuildpackSchema = new schema.Entity(buildpackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[buildpackSchemaKey] = BuildpackSchema;
 
 const RouteSchema = new EntitySchema(routeSchemaKey, {
   entity: {
-    apps: [ApplicationWithoutRoutesSchema],
+    apps: [ApplicationWithoutRelationsSchema],
     domain: DomainSchema
   }
 }, {
@@ -125,7 +158,8 @@ entityCache[applicationSchemaKey] = ApplicationWithoutSpaceEntitySchema;
 const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
-    routes: [RouteSchema]
+    routes: [RouteSchema],
+    service_instances: [ServiceInstancesSchema]
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -163,7 +197,8 @@ const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
     apps: [ApplicationWithoutSpaceEntitySchema],
     organization: OrganisationSchema,
     domains: [DomainSchema],
-    space_quota_definition: SpaceQuotaSchema
+    space_quota_definition: SpaceQuotaSchema,
+    service_instances: [ServiceInstancesSchema]
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -195,48 +230,6 @@ const ApplicationEntitySchema = new EntitySchema(
   }
 );
 entityCache[applicationSchemaKey] = ApplicationEntitySchema;
-
-const ServiceSchema = new EntitySchema(serviceSchemaKey, {}, {
-  idAttribute: getAPIResourceGuid
-}
-);
-entityCache[serviceSchemaKey] = ServiceSchema;
-
-const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {}, {
-  idAttribute: getAPIResourceGuid
-}
-);
-entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
-
-const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
-  entity: {
-    service: ServiceSchema
-  }
-}, {
-    idAttribute: getAPIResourceGuid
-  }
-);
-entityCache[servicePlanSchemaKey] = ServicePlanSchema;
-
-const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
-  entity: {
-    service_plan: ServicePlanSchema,
-    service_bindings: [ServiceBindingsSchema]
-  }
-}, {
-    idAttribute: getAPIResourceGuid,
-  }
-);
-entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
-
-const BuildpackSchema = new schema.Entity(
-  buildpackSchemaKey,
-  {},
-  {
-    idAttribute: getAPIResourceGuid
-  }
-);
-entityCache[buildpackSchemaKey] = BuildpackSchema;
 
 const EndpointSchema = new EntitySchema(endpointSchemaKey, {
   users: [UserSchema]

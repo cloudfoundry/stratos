@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { getRowUniqueId } from '../../../../../features/cloud-foundry/cf.helpers';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { entityFactory, stackSchemaKey } from '../../../../../store/helpers/entity-factory';
@@ -17,7 +17,7 @@ export class CfStacksDataSource extends ListDataSource<APIResource> {
       store,
       action,
       schema: entityFactory(stackSchemaKey),
-      getRowUniqueId: getRowUniqueId,
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       transformEntities: [],

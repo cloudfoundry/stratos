@@ -1,12 +1,18 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, routeSchemaKey, spaceSchemaKey, spaceWithOrgKey, applicationSchemaKey } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
-import { PaginatedAction, PaginationAction } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
-import { RouteEvents } from './route.actions';
-import { getActions } from './action.helper';
 import { IUpdateSpace } from '../../core/cf-api.types';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
+} from '../helpers/entity-factory';
+import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, ICFAction } from '../types/request.types';
+import { getActions } from './action.helper';
+import { RouteEvents } from './route.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -25,7 +31,7 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
   ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `space/${guid}`;
+    this.options.url = `spaces/${guid}`;
     this.options.method = 'get';
   }
   actions = [

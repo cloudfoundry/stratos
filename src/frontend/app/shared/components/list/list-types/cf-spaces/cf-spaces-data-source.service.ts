@@ -4,12 +4,12 @@ import { GetAllSpacesInOrg } from '../../../../../store/actions/organisation.act
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
-  entityFactory,
   organisationSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
   serviceInstancesSchemaKey,
   spaceQuotaSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
+  entityFactory,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -18,6 +18,7 @@ import {
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
@@ -31,9 +32,7 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
       store,
       action,
       schema: entityFactory(spaceWithOrgKey),
-      getRowUniqueId: (entity: APIResource) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [],

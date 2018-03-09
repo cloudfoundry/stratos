@@ -15,6 +15,11 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
+import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
+import { routeSchemaKey } from '../../../store/helpers/entity-factory';
+import { serviceBindingSchemaKey } from '../../../store/helpers/entity-factory';
+import { applicationWithoutRelSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -46,6 +51,11 @@ export class CloudFoundrySpaceService {
       entityFactory(spaceWithOrgKey),
       spaceGuid,
       new GetSpace(spaceGuid, cfGuid, [
+        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+        createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+        // createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
         // createEntityRelationKey(org)
       ])
     );

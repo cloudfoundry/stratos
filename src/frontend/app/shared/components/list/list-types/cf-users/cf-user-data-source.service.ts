@@ -1,16 +1,17 @@
-import { CfUserListConfigService } from './cf-user-list-config.service';
-import { ListConfig } from './../../list.component.types';
+import { Store } from '@ngrx/store';
+import { tap } from 'rxjs/operators';
+
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { cfUserSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
+import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
+import { AppState } from './../../../../../store/app-state';
 import { APIResource } from './../../../../../store/types/api.types';
 import { CfUser } from './../../../../../store/types/user.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
-import { AppState } from './../../../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { Injectable } from '@angular/core';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
-import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { tap } from 'rxjs/operators';
-import { entityFactory, cfUserSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { CfUserListConfigService } from './cf-user-list-config.service';
+
 
 function setupStateManager(paginationMonitor: PaginationMonitor<APIResource<CfUser>>) {
   const rowStateManager = new TableRowStateManager();
@@ -41,9 +42,7 @@ export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>>
       store,
       action,
       schema: entityFactory(cfUserSchemaKey),
-      getRowUniqueId: (entity: APIResource) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       listConfig: cfUserListConfigService,

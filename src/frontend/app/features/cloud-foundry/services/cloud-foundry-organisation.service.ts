@@ -27,6 +27,7 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { BaseCFOrg } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
@@ -37,7 +38,7 @@ export class CloudFoundryOrganisationService {
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
-  serivceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   spaces$: Observable<APIResource<ISpace>[]>;
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
@@ -63,6 +64,7 @@ export class CloudFoundryOrganisationService {
         createEntityRelationKey(organisationSchemaKey, domainSchemaKey),
         createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(organisationSchemaKey, privateDomainsSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       ])
@@ -90,7 +92,7 @@ export class CloudFoundryOrganisationService {
   }
 
   private initialiseSpaceObservables() {
-    this.serivceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
+    this.serviceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
     this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
   }
 

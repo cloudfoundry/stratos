@@ -9,6 +9,7 @@ import { PaginationEntityState } from '../../../../../store/types/pagination.typ
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
@@ -27,9 +28,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       store,
       action,
       schema: entityFactory(applicationSchemaKey),
-      getRowUniqueId: (entity: APIResource) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       transformEntities: [

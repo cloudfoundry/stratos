@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 
-import { getRowUniqueId } from '../../../../../features/cloud-foundry/cf.helpers';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { GetAllSecurityGroups } from '../../../../../store/actions/security-groups-actions';
 import { AppState } from '../../../../../store/app-state';
@@ -17,7 +17,7 @@ export class CfSecurityGroupsDataSource extends ListDataSource<APIResource> {
       store,
       action,
       schema: entityFactory(securityGroupSchemaKey),
-      getRowUniqueId: getRowUniqueId,
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       transformEntities: [],

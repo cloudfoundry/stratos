@@ -17,6 +17,8 @@ import {
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { serviceInstancesSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
 
@@ -27,8 +29,9 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
       paginationKey,
       cfGuid, [
         createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(organisationWithSpaceKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         // createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       ]);
   }
@@ -39,9 +42,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
       store,
       action,
       schema: entityFactory(organisationWithSpaceKey),
-      getRowUniqueId: (entity: APIResource) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,
       transformEntities: [],
