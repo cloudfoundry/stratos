@@ -69,14 +69,16 @@ export class GithubTabComponent implements OnInit, OnDestroy {
           githubRepoSchemaKey,
           entityFactory(githubRepoSchemaKey),
           projectName,
-          new FetchGitHubRepoInfo(stProject)
+          new FetchGitHubRepoInfo(stProject),
+          false
         );
 
         this.gitCommitEntityService = this.entityServiceFactory.create(
           githubCommitSchemaKey,
           entityFactory(githubCommitSchemaKey),
           commitId,
-          new FetchCommit(commitId, projectName)
+          new FetchCommit(commitId, projectName),
+          false
         );
 
         const branchKey = `${projectName}-${stProject.deploySource.branch}`;
@@ -84,7 +86,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
           githubBranchesSchemaKey,
           entityFactory(githubBranchesSchemaKey),
           branchKey,
-          new FetchBranchesForProject(projectName)
+          new FetchBranchesForProject(projectName),
+          false
         );
 
         this.gitHubRepo$ = this.gitHubRepoEntityService.waitForEntity$.pipe(

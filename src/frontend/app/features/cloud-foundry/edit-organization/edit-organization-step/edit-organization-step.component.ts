@@ -2,12 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, take, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
-import { CfOrgsDataSourceService } from '../../../../shared/components/list/list-types/cf-orgs/cf-orgs-data-source.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { UpdateOrganization } from '../../../../store/actions/organisation.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -17,6 +16,7 @@ import { getPaginationObservables } from '../../../../store/reducers/pagination-
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
 
 const enum OrgStatus {
@@ -82,8 +82,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const action = CfOrgsDataSourceService.createGetAllOrganisations(this.cfGuid);
-    // TODO: RC Specific inludes for this request
+    const action = CloudFoundryEndpointService.createGetAllOrganisations(this.cfGuid);
     this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
       {
         store: this.store,

@@ -19,7 +19,6 @@ import { createEntityRelationPaginationKey } from '../../../../../store/helpers/
 export class CfSpaceAppsDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfSpaceService: CloudFoundrySpaceService, listConfig?: IListConfig<APIResource>) {
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, cfSpaceService.spaceGuid);
-    // TODO: pag + refresh
     const action = new GetAllAppsInSpace(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, paginationKey);
     super({
       store,

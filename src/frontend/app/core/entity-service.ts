@@ -32,7 +32,7 @@ export class EntityService<T = any> {
     private store: Store<AppState>,
     public entityMonitor: EntityMonitor<T>,
     public action: IRequestAction,
-    public validateRelations = false,
+    public validateRelations = true,
     public entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
     this.actionDispatch = (updatingKey) => {

@@ -91,15 +91,15 @@ export class ApplicationService {
       applicationSchemaKey,
       entityFactory(applicationSchemaKey),
       appGuid,
-      createGetApplicationAction(appGuid, cfGuid),
-      true
+      createGetApplicationAction(appGuid, cfGuid)
     );
 
     this.appSummaryEntityService = this.entityServiceFactory.create(
       appSummarySchemaKey,
       entityFactory(appSummarySchemaKey),
       appGuid,
-      new GetAppSummaryAction(appGuid, cfGuid));
+      new GetAppSummaryAction(appGuid, cfGuid),
+      false);
 
     this.constructCoreObservables();
     this.constructAmalgamatedObservables();

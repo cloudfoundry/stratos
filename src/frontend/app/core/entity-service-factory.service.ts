@@ -20,7 +20,7 @@ export class EntityServiceFactory {
     schema: schema.Entity,
     entityId: string,
     action: IRequestAction,
-    validateRelations = false,
+    validateRelations = true,
     entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
     const entityMonitor = this.entityMonitorFactory.create<T>(

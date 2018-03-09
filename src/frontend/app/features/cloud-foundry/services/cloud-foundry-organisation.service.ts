@@ -42,7 +42,7 @@ export class CloudFoundryOrganisationService {
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
-  organisationEntityService: EntityService<APIResource<IOrganization>>;
+  orgEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -54,7 +54,7 @@ export class CloudFoundryOrganisationService {
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.organisationEntityService = this.entityServiceFactory.create(
+    this.orgEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
       entityFactory(organisationSchemaKey),
       this.orgGuid,
@@ -73,7 +73,7 @@ export class CloudFoundryOrganisationService {
   }
 
   private initialiseObservables() {
-    this.org$ = this.organisationEntityService.entityObs$.pipe(
+    this.org$ = this.orgEntityService.entityObs$.pipe(
       filter(o => !!o && !!o.entity)
     );
 

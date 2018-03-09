@@ -44,7 +44,6 @@ export class GetSpace extends CFStartAction implements ICFAction, EntityInlinePa
   options: RequestOptions;
 }
 
-// TODO: RC
 export class GetAllSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,

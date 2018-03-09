@@ -1,6 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseCF } from '../../../../../../features/cloud-foundry/cf-page.types';
 import {
   getBaseTestModulesNoShared,
   getMetadataCardComponents,
@@ -18,7 +17,7 @@ describe('CfSecurityGroupsCardComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CfSecurityGroupsCardComponent, getMetadataCardComponents, SecurityRuleComponent, BooleanIndicatorComponent],
       imports: [...getBaseTestModulesNoShared],
-      providers: [BaseCF, generateTestCfEndpointService()]
+      providers: [generateTestCfEndpointService()]
     })
       .compileComponents();
   }));

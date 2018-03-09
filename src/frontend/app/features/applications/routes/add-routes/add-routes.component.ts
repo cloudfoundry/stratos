@@ -161,7 +161,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     const associateRoute$ = this.store
       .select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
-        // TODO: RC for some reason the new entity is now not creating but fetching? need to confirm in v2-master
         filter(route => !route.creating && !route.fetching),
         map(route => {
           if (route.error) {

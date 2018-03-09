@@ -179,7 +179,8 @@ export class DeployApplicationStep2Component
             githubCommitSchemaKey,
             entityFactory(githubCommitSchemaKey),
             branch.commit.sha,
-            new FetchCommit(branch.commit.sha, projectInfo.full_name)
+            new FetchCommit(branch.commit.sha, projectInfo.full_name),
+            false
           );
 
           if (this.commitSubscription) {
