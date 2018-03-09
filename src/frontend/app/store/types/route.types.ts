@@ -1,5 +1,5 @@
 import { APIResource } from './api.types';
-import { CfApplication } from './application.types';
+import { IApp } from '../../core/cf-api.types';
 
 export class Route {
   constructor(
@@ -24,5 +24,5 @@ export class CfRoute {
   path?: string;
   host?: string;
   port?: number;
-  apps?: APIResource<CfApplication>[];
+  apps?: APIResource<IApp>[];
 }

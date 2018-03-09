@@ -1,77 +1,45 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs/Observable';
-import { FormGroup, FormControl, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
-import { CfSpace } from '../../../../store/types/org-and-space.types';
-import { APIResource } from '../../../../store/types/api.types';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { ActivatedRoute } from '@angular/router';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
-import { getPaginationKey } from '../../../../store/actions/pagination.actions';
-import { GetAllSpacesInOrg } from '../../../../store/actions/organisation.actions';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { SpaceSchema, spaceSchemaKey } from '../../../../store/actions/action-types';
-import { filter, map, tap } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { filter } from 'rxjs/operators';
+
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { spaceSchemaKey } from '../../../../store/actions/action-types';
 import { CreateSpace } from '../../../../store/actions/space.actions';
+import { AppState } from '../../../../store/app-state';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { BaseCF } from '../../cf-page.types';
+import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 
 @Component({
   selector: 'app-create-space-step',
   templateUrl: './create-space-step.component.html',
   styleUrls: ['./create-space-step.component.scss']
 })
-export class CreateSpaceStepComponent implements OnInit, OnDestroy {
+export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
 
-  orgGuid: string;
-  allSpacesInOrg: string[];
-  fetchSpacesSubscription: Subscription;
-  submitSubscription: Subscription;
-  cfGuid: string;
-  allSpacesInSpace$: Observable<APIResource<CfSpace>[]>;
   cfUrl: string;
   createSpaceForm: FormGroup;
 
   constructor(
-    private store: Store<AppState>,
-    private activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
-    private snackBar: MatSnackBar
+    store: Store<AppState>,
+    activatedRoute: ActivatedRoute,
+    paginationMonitorFactory: PaginationMonitorFactory,
+    snackBar: MatSnackBar,
   ) {
-    this.cfGuid = activatedRoute.snapshot.params.cfId;
-    this.orgGuid = activatedRoute.snapshot.params.orgId;
+    super(store, activatedRoute, paginationMonitorFactory, snackBar);
   }
 
   ngOnInit() {
     this.createSpaceForm = new FormGroup({
       spaceName: new FormControl('', [<any>Validators.required, this.spaceNameTakenValidator()]),
     });
-    const paginationKey = getPaginationKey('cf-space', this.cfGuid, this.orgGuid);
-    const action = new GetAllSpacesInOrg(this.cfGuid, this.orgGuid, paginationKey);
-    this.allSpacesInSpace$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          SpaceSchema
-        )
-      },
-      true
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allSpacesInOrg = o)
-    );
-
-    this.fetchSpacesSubscription = this.allSpacesInSpace$.subscribe();
   }
 
-  validate = () => {
-    const currValue = this.createSpaceForm && this.createSpaceForm.value['spaceName'];
+  validate = (spaceName: string = null) => {
+    const currValue = spaceName ? spaceName : this.createSpaceForm && this.createSpaceForm.value['spaceName'];
     if (this.allSpacesInOrg) {
       return this.allSpacesInOrg.indexOf(currValue) === -1;
     }
@@ -91,30 +59,15 @@ export class CreateSpaceStepComponent implements OnInit, OnDestroy {
 
     this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(
       filter(o => !!o && !o.creating),
-      map(o => {
-        if (o.error) {
-          this.displaySnackBar();
-        } else {
-          this.store.dispatch(
-            new RouterNav({
-              path: ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces']
-            })
-          );
-        }
-      })
+      this.map(
+        ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces'],
+        'Failed to create space! Please select a different name and try again!'
+      )
     ).subscribe();
     return Observable.of({ success: true });
   }
 
-  displaySnackBar = () => this.snackBar.open(
-    'Failed to create space! Please select a different name and try again!',
-    'Dismiss'
-  )
-
   ngOnDestroy(): void {
-    this.fetchSpacesSubscription.unsubscribe();
-    if (this.submitSubscription) {
-      this.submitSubscription.unsubscribe();
-    }
+    this.destroy();
   }
 }

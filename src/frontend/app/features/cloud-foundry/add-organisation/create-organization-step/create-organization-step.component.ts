@@ -11,13 +11,13 @@ import { GetAllOrganisations, CreateOrganization } from '../../../../store/actio
 import { getPaginationKey } from '../../../../store/actions/pagination.actions';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { OrganisationSchema } from '../../../../store/actions/action-types';
-import { CfOrg } from '../../../../store/types/org-and-space.types';
 import { filter, map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material';
+import { IOrganization } from '../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-create-organization-step',
@@ -30,7 +30,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   submitSubscription: Subscription;
   cfGuid: string;
   allOrgs: string[];
-  orgs$: Observable<APIResource<CfOrg>[]>;
+  orgs$: Observable<APIResource<IOrganization>[]>;
   cfUrl: string;
   addOrg: FormGroup;
 
