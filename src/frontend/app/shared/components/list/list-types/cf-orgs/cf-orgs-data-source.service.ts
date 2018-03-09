@@ -5,11 +5,11 @@ import { GetAllOrganisations } from '../../../../../store/actions/organisation.a
 import { AppState } from '../../../../../store/app-state';
 import {
   entityFactory,
-  organisationWithSpaceKey,
   quotaDefinitionSchemaKey,
   spaceSchemaKey,
   applicationSchemaKey,
   endpointSchemaKey,
+  organisationSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -31,8 +31,8 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
     return new GetAllOrganisations(
       paginationKey,
       cfGuid, [
-        createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
-        createEntityRelationKey(organisationWithSpaceKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
       ]);
@@ -43,7 +43,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
     super({
       store,
       action,
-      schema: entityFactory(organisationWithSpaceKey),
+      schema: entityFactory(organisationSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,

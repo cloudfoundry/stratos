@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
 import { DeleteSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, organisationWithSpaceKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
+import { entityFactory, spaceSchemaKey, organisationSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
@@ -32,7 +32,7 @@ export class CfOrgSpaceDataService {
   public space: CfOrgSpaceItem;
 
   public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
-    createEntityRelationKey(organisationWithSpaceKey, spaceSchemaKey),
+    createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
   ]);
 
   // TODO: We should optimise this to only fetch the orgs for the current endpoint

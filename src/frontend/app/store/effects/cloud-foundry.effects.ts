@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { flatMap, mergeMap } from 'rxjs/operators';
 import { catchError } from 'rxjs/operators/catchError';
 
-import { GET_INFO, GetEndpointInfo } from '../actions/cloud-foundry.actions';
+import { GET_INFO, GetCFInfo } from '../actions/cloud-foundry.actions';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { environment } from './../../../environments/environment';
@@ -22,7 +22,7 @@ export class CloudFoundryEffects {
   ) { }
 
   @Effect()
-  fetchInfo$ = this.actions$.ofType<GetEndpointInfo>(GET_INFO).pipe(
+  fetchInfo$ = this.actions$.ofType<GetCFInfo>(GET_INFO).pipe(
     flatMap(action => {
       const actionType = 'fetch';
       const apiAction = {

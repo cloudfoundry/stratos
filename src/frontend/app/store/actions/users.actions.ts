@@ -5,9 +5,10 @@ import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
 import { PaginatedAction } from '../types/pagination.types';
-import { entityFactory } from '../helpers/entity-factory';
+import { entityFactory, organisationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { cfUserSchemaKey } from '../helpers/entity-factory';
 import { OrgUserRoles } from '../../features/cloud-foundry/cf.helpers';
+import { EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -17,8 +18,19 @@ export const REMOVE_PERMISSION = '[Users] Remove Permission';
 export const REMOVE_PERMISSION_SUCCESS = '[Users]  Remove Permission success';
 export const REMOVE_PERMISSION_FAILED = '[Users]  Remove Permission failed';
 
-export class GetAllUsers extends CFStartAction implements PaginatedAction {
-  constructor(public paginationKey: string) {
+export class GetAllUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  constructor(
+    public paginationKey: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(cfUserSchemaKey, organisationSchemaKey),
+      createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
+      createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
+      createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
+      createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
+      createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
+    ],
+    public populateMissing = true) {
     super();
     this.options = new RequestOptions();
     this.options.url = 'users';

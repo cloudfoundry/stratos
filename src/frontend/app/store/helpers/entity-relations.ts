@@ -29,12 +29,6 @@ class AppStoreLayout {
   }
 }
 
-// TODO: RC
-// interface ListRelationsResult {
-//   maxDepth: number;
-//   relations: string[];
-// }
-
 interface ValidateResultFetchingState {
   fetching: boolean;
 }
@@ -48,8 +42,6 @@ interface ValidateEntityResult {
   action: Action;
   fetchingState$?: Observable<ValidateResultFetchingState>;
 }
-
-
 
 class ValidateEntityRelationsConfig {
   /**
@@ -146,7 +138,7 @@ function createAction(config: HandleRelationsConfig) {
     parentRelation,
     childRelation,
     includeRelations,
-    createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid),
+    createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid, childRelation.entity.relationKey),
     populateMissing,
     childEntitiesUrl
   ) : new FetchRelationSingleAction(

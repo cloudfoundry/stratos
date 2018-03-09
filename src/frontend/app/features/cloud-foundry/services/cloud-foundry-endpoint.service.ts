@@ -9,7 +9,7 @@ import { CfOrgsDataSourceService } from '../../../shared/components/list/list-ty
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
+import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../store/actions/domains.actions';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { GetAllOrganisations } from '../../../store/actions/organisation.actions';
@@ -69,7 +69,7 @@ export class CloudFoundryEndpointService {
       cfInfoSchemaKey,
       entityFactory(cfInfoSchemaKey),
       this.cfGuid,
-      new GetEndpointInfo(this.cfGuid)
+      new GetCFInfo(this.cfGuid)
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();

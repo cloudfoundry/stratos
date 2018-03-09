@@ -16,7 +16,6 @@ import {
   domainSchemaKey,
   entityFactory,
   organisationSchemaKey,
-  organisationWithSpaceKey,
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
@@ -26,8 +25,8 @@ import {
 import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { getOrgRolesString } from '../cf.helpers';
+import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
@@ -57,7 +56,7 @@ export class CloudFoundryOrganisationService {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.organisationEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
-      entityFactory(organisationWithSpaceKey),
+      entityFactory(organisationSchemaKey),
       this.orgGuid,
       new GetOrganisation(this.orgGuid, this.cfGuid, [
         createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),

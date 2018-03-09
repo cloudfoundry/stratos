@@ -62,7 +62,18 @@ export interface EntityInlineParentAction extends IRequestAction {
 
 export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
 
-export function createEntityRelationPaginationKey(schemaKey: string, guid: string) { return `${schemaKey}-${guid}`; }
+export function createEntityRelationPaginationKey(schemaKey: string, guid: string, childSchemaRelation?: string) {
+  let key = `${schemaKey}-${guid}`;
+  // Usually, the above is enough to be unique, however in situations where there is more than one child with the same type we need to
+  // expand this to include this child relation text
+  // For instance
+  // Fine - Space with a collection of routes (stored in pagination 'route' section as 'space-<guid>)
+  // Fine - User with a collection of organisations (i.e is an org user of) (stored in pagination 'organisation' section as 'user-<guid>')
+  // Needs additional childSchemaRelation - User with a collection of organisations that they're billing manager of (stored in pagination
+  // 'organisation' section as 'user-<guid>-billing_managed_organisations')
+  key += childSchemaRelation ? `-${childSchemaRelation}` : '';
+  return key;
+}
 
 export function isEntityInlineParentAction(action: Action) {
   return action && !!action['includeRelations'];

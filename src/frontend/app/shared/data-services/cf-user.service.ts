@@ -32,6 +32,7 @@ export class CfUserService {
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
+    // FIXME: This action will fail if the CF user is not a CF admin
     this.allUsersAction = new GetAllUsers(createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid));
     this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
       store: this.store,

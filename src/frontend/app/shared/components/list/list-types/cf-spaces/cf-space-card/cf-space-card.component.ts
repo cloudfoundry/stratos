@@ -58,15 +58,14 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   }
 
   ngOnInit() {
-
-    this.spaceGuid = this.row.entity.guid;
+    this.spaceGuid = this.row.metadata.guid;
 
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
         return this.cfUserService.getUserRoleInSpace(
           u.guid,
           this.spaceGuid,
-          this.row.entity.cfGuid
+          this.cfEndpointService.cfGuid
         );
       }),
       map(u => getSpaceRolesString(u))

@@ -4,9 +4,7 @@ import { IUpdateOrganization } from '../../core/cf-api.types';
 import {
   entityFactory,
   organisationSchemaKey,
-  organisationWithSpaceKey,
   spaceSchemaKey,
-  spacesKey,
   spaceWithOrgKey,
 } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
@@ -62,7 +60,7 @@ export class GetAllOrganisationSpaces extends CFStartAction implements Paginated
     this.parentGuid = orgGuid;
   }
   actions = [GET_ORGANISATION_SPACES, GET_ORGANISATION_SPACES_SUCCESS, GET_ORGANISATION_SPACES_FAILED];
-  entity = entityFactory(spacesKey);
+  entity = entityFactory(spaceSchemaKey);
   entityKey = spaceSchemaKey;
   options: RequestOptions;
   flattenPagination = true;
@@ -89,7 +87,7 @@ export class GetAllOrganisations extends CFStartAction implements PaginatedActio
     GET_ORGANISATIONS_SUCCESS,
     GET_ORGANISATIONS_FAILED
   ];
-  entity = [entityFactory(organisationWithSpaceKey)];
+  entity = [entityFactory(organisationSchemaKey)];
   entityKey = organisationSchemaKey;
   options: RequestOptions;
   initialParams = {
@@ -127,7 +125,7 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
     };
   }
   actions = getActions('Organisations', 'Create Org');
-  entity = [entityFactory(organisationWithSpaceKey)];
+  entity = [entityFactory(organisationSchemaKey)];
   entityKey = organisationSchemaKey;
   options: RequestOptions;
   guid: string;

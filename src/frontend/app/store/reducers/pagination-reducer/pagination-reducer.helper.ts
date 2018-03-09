@@ -149,6 +149,7 @@ function getObservables<T = any>(
         filter(([ent, pagination]) => {
           return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
         }),
+        shareReplay(1),
         tap(([ent, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
@@ -161,8 +162,7 @@ function getObservables<T = any>(
           }
         }),
         switchMap(() => paginationMonitor.currentPage$),
-        shareReplay(1)
-      );
+    );
 
   return {
     pagination$,

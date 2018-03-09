@@ -61,7 +61,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
             user: false
           });
         }
-        return this.cfUserService.getUserRoleInOrg(u.guid, this.row.entity.guid, this.row.entity.cfGuid);
+        return this.cfUserService.getUserRoleInOrg(u.guid, this.row.metadata.guid, this.row.entity.cfGuid);
       }),
       map(u => getOrgRolesString(u))
     );
@@ -76,7 +76,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
     );
 
     this.subscriptions.push(fetchData$.subscribe());
-    this.orgGuid = this.row.entity.guid;
+    this.orgGuid = this.row.metadata.guid;
 
   }
 
@@ -115,7 +115,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
 
   delete = () => {
     this.cfOrgSpaceDataService.deleteOrg(
-      this.row.entity.guid,
+      this.row.metadata.guid,
       this.cfEndpointService.cfGuid
     );
   }
