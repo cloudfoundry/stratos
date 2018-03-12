@@ -1,0 +1,12 @@
+<app-page-header></app-page-header>
+<div class="no-connected-endpoints">
+  <div class="no-connected-endpoints__message">
+    <div class="no-connected-endpoints__message__primary">
+      <mat-icon>cloud</mat-icon>
+      <p>No connected Cloud Foundry endpoints.</p>
+    </div>
+    <div class="no-connected-endpoints__message__secondary">
+      <a [routerLink]="['/endpoints']"> Use the Endpoints Dashboard</a> to connect to registered instances.
+    </div>
+  </div>
+</div>

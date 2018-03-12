@@ -38,6 +38,11 @@ export class CloudFoundryComponent {
             path: ['cloud-foundry', connectedEndpoints[0].guid]
           }));
         }
+        if (connectedEndpoints.length === 0) {
+          this.store.dispatch(new RouterNav({
+            path: ['cloud-foundry', 'no-connected-endpoints']
+          }));
+        }
         return connectedEndpoints.length === 1;
       }),
       filter(hasOne => !hasOne),

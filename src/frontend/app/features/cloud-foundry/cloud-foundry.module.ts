@@ -65,6 +65,7 @@ import { CreateSpaceStepComponent } from './add-space/create-space-step/create-s
 import { CreateOrganizationStepComponent } from './add-organisation/create-organization-step/create-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
+import { NoConnectedEndpointsComponent } from './no-connected-endpoints/no-connected-endpoints.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -98,7 +99,8 @@ import { EditOrganizationStepComponent } from './edit-organization/edit-organiza
     CreateSpaceStepComponent,
     CreateOrganizationStepComponent,
     EditOrganizationComponent,
-    EditOrganizationStepComponent
+    EditOrganizationStepComponent,
+    NoConnectedEndpointsComponent
   ],
   providers: [
     CloudFoundryService,
