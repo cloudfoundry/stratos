@@ -1,10 +1,20 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, serviceInstancesSchemaKey, serviceBindingSchemaKey, servicePlanSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
+import {
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  servicePlanSchemaKey,
+  spaceSchemaKey,
+} from '../helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+} from '../helpers/entity-relations.types';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { EntityInlineParentAction, EntityInlineChildAction, createEntityRelationKey } from '../helpers/entity-relations.types';
 
 export class GetServicesInstancesInSpace
   extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -49,7 +59,7 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
     this.options.params.set('async', 'false');
     this.options.params.set('recursive', 'true');
   }
-  actions = getActions('Service Instaces', 'Delete Service Instance');
+  actions = getActions('Service Instances', 'Delete Service Instance');
   entity = [entityFactory(serviceInstancesSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
@@ -66,7 +76,7 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
     this.options.params.set('async', 'false');
 
   }
-  actions = getActions('Service Instaces', 'Delete Service binding');
+  actions = getActions('Service Instances', 'Delete Service binding');
   entity = [entityFactory(serviceInstancesSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;

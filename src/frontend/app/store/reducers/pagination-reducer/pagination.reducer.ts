@@ -146,14 +146,14 @@ function paginate(action, state, updatePagination) {
     return paginationClearOfEntity(state, action);
   }
 
-  if (isEnDpointAction(action)) {
+  if (isEndpointAction(action)) {
     return clearEndpointEntities(state, getDefaultPaginationEntityState());
   }
 
   return enterPaginationReducer(state, action, updatePagination);
 }
 
-function isEnDpointAction(action) {
+function isEndpointAction(action) {
   // ... that we care about.
   return action.type === DISCONNECT_ENDPOINTS_SUCCESS ||
     action.type === CONNECT_ENDPOINTS_SUCCESS ||

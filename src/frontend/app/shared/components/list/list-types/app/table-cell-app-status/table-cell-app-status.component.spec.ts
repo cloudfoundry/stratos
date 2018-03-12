@@ -44,7 +44,7 @@ describe('TableCellAppStatusComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppStatusComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {} };
+    component.row = { entity: {}, metadata: {} };
     fixture.detectChanges();
   });
 
