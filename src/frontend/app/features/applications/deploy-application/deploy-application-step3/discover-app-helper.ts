@@ -1,8 +1,8 @@
 import { TimerObservable } from 'rxjs/observable/TimerObservable';
-import { Http, Headers } from '@angular/http';
 import { environment } from './../../../../../environments/environment';
 import { mergeMap, catchError  } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 // Check every 5 seconds
 const DETECT_INTERVAL = 5000;
@@ -16,12 +16,12 @@ const DETECT_INTERVAL = 5000;
 export class DiscoverAppHelper {
 
   // Are we polling?
-  alive = true;
+  alive = false;
 
   proxyAPIVersion = environment.proxyAPIVersion;
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private cfGuid: string,
     private spaceGuid: string,
     private name: string
@@ -32,14 +32,15 @@ export class DiscoverAppHelper {
 
   // Start the poller
   startDetection() {
+
     if (!this.alive) {
+      this.alive = true;
       TimerObservable.create(0, DETECT_INTERVAL).takeWhile(() => this.alive)
       .subscribe(() => {
         return this.http
           .get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` + this.spaceGuid + '&q=name:' + this.name, this.getRequestArgs())
           .pipe(
-            mergeMap(response => {
-              const info = response.json();
+            mergeMap(info => {
               console.log(info);
               if (info && info[this.cfGuid]) {
                 const apps = info[this.cfGuid];
@@ -67,12 +68,11 @@ export class DiscoverAppHelper {
 
   // Helper to get the request args with the CNSI
   getRequestArgs() {
-    const headers = new Headers({ 'x-cap-cnsi-list': this.cfGuid });
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.cfGuid });
     const requestArgs = {
       headers: headers
     };
     return requestArgs;
   }
-
 
 }
