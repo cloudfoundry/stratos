@@ -6,7 +6,7 @@
       cursor: pointer;
     }
     &__button {
-      @extend .action-button
+      @extend %action-button;
     }
   }
 }
