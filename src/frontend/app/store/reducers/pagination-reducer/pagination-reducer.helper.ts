@@ -130,12 +130,10 @@ function getObservables<T = any>(
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
     tap(pagination => {
-      console.log('1', pagination);
       if (
         (!pagination && !hasDispatchedOnce) ||
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
-        console.log('1 - inner');
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
         populatePaginationFromExistingEntity(store, action).pipe(
           first(),
@@ -156,7 +154,6 @@ function getObservables<T = any>(
     )
       .pipe(
         filter(([ent, pagination]) => {
-          console.log('2', pagination);
           return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
         }),
         shareReplay(1),

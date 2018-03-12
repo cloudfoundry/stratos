@@ -32,7 +32,7 @@ export class CfUserService {
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    // FIXME: This action will fail if the CF user is not a CF admin
+    // See issue #1741
     this.allUsersAction = new GetAllUsers(createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid));
   }
 

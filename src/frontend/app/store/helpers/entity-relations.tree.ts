@@ -36,9 +36,6 @@ export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
     };
     createEntityTree(entityTree, rootEntityRelation);
     entityTreeCache[cacheKey] = entityTree;
-    // console.log('fetchEntity: Not Found');
-  } else {
-    // console.log('fetchEntity: Found');
   }
   // Calc max depth and exclude not needed
   entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);

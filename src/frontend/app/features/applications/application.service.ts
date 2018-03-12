@@ -31,6 +31,7 @@ import {
   spaceSchemaKey,
   stackSchemaKey,
 } from '../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
@@ -47,7 +48,6 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -220,9 +220,7 @@ export class ApplicationService {
     this.appStatsFetching$ = appStats.pagination$.shareReplay(1);
 
     this.application$ = this.waitForAppEntity$
-      .combineLatest(
-        this.store.select(endpointEntitiesSelector),
-    )
+      .combineLatest(this.store.select(endpointEntitiesSelector))
       .filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
       })

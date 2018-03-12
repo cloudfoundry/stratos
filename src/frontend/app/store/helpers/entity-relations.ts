@@ -270,7 +270,6 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
     if (!allEntities || !childRelation.isArray || !populateExisting || childRelation.entity.populateExisting === false) {
       return results;
     }
-    console.log(childRelation);
     results = [].concat(results, createActionsForExistingEntities(config));
   } else if (!childEntities && populateMissing) {
     // The values are missing and we want them, go fetch
