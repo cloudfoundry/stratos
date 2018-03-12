@@ -316,6 +316,7 @@ nav.secondary-nav {
     transition: opacity 0.6s linear;
     position: fixed;
     top: 0;
+    width: 100%;
 
     &.nav-logo-hide {
       opacity: 1;
