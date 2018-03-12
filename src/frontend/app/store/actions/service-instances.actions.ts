@@ -1,6 +1,6 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, serviceInstancesSchemaKey, serviceBindingSchemaKey, servicePlanSchemaKey } from '../helpers/entity-factory';
+import { entityFactory, serviceInstancesSchemaKey, serviceBindingSchemaKey, servicePlanSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
@@ -32,12 +32,11 @@ export class GetServicesInstancesInSpace
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    // 'inline-relations-depth': 2,
-    // 'exclude-relations': 'space',
     'order-direction': 'desc',
     'order-direction-field': 'name',
   };
   parentGuid: string;
+  parentEntitySchema = entityFactory(spaceSchemaKey);
 }
 
 export class DeleteServiceInstance extends CFStartAction implements ICFAction {

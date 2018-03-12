@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { filter, map, pairwise, share, shareReplay, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, pairwise, share, shareReplay, startWith, tap, withLatestFrom, refCount, publishReplay } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
@@ -53,7 +53,8 @@ export class EntityService<T = any> {
       entityMonitor,
       this.actionDispatch,
     ).pipe(
-      shareReplay(1),
+      publishReplay(1),
+      refCount(),
       startWith({
         entity: null,
         entityRequestInfo: null

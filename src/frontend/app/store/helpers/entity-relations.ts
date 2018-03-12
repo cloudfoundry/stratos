@@ -1,27 +1,31 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { first, map, pairwise, skipWhile } from 'rxjs/operators';
+import { first, map, pairwise, skipWhile, withLatestFrom, filter, mergeMap } from 'rxjs/operators';
 
-import { environment } from '../../../environments/environment';
 import { pathGet } from '../../core/utils.service';
 import { SetInitialParams } from '../actions/pagination.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { AppState } from '../app-state';
-import { ActionState, RequestInfoState } from '../reducers/api-request-reducer/types';
-import { selectRequestInfo } from '../selectors/api.selectors';
+import { ActionState, RequestInfoState, rootUpdatingKey } from '../reducers/api-request-reducer/types';
+import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
-import { PaginationEntityState } from '../types/pagination.types';
+import { PaginatedAction, PaginationEntityState } from '../types/pagination.types';
 import { IRequestAction, WrapperRequestActionSuccess } from '../types/request.types';
+import { EntitySchema } from './entity-factory';
+import { fetchEntityTree } from './entity-relations.tree';
 import {
+  createEntityRelationKey,
   createEntityRelationPaginationKey,
   EntityInlineParentAction,
   EntityTreeRelation,
+  isEntityInlineChildAction,
   ValidationResult,
 } from './entity-relations.types';
 import { pick } from './reducer.helper';
-import { fetchEntityTree } from './entity-relations.tree';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 
 class AppStoreLayout {
   [entityKey: string]: {
@@ -152,6 +156,7 @@ function createAction(config: HandleRelationsConfig) {
     childEntitiesUrl
   );
 }
+
 /**
  * Create actions required to populate parent entities with exist children
  *
@@ -165,7 +170,7 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Valida
   const paramAction = createAction(config);
   // We've got the value already, ensure we create a pagination section for them
   let response: NormalizedResponse;
-  const guids = childEntitiesAsArray.map(entity => entity.metadata.guid);
+  const guids = childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity);
   const entities = pick(newEntities[childRelation.entityKey], guids as [string]) ||
     pick(allEntities[childRelation.entityKey], guids as [string]);
   response = {
@@ -262,10 +267,10 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
   let results = [];
   if (childEntities) {
     // The values exist do we want to put them anywhere else?
-    console.log(childRelation);
     if (!allEntities || !childRelation.isArray || !populateExisting || childRelation.entity.populateExisting === false) {
       return results;
     }
+    console.log(childRelation);
     results = [].concat(results, createActionsForExistingEntities(config));
   } else if (!childEntities && populateMissing) {
     // The values are missing and we want them, go fetch
@@ -320,7 +325,6 @@ function handleValidationLoopResults(store, results) {
   const paginationFinished = new Array<Promise<boolean>>();
 
   results.forEach(newActions => {
-    // console.log('Dispatching: ', newActions.action);
     store.dispatch(newActions.action);
     if (newActions.fetchingState$) {
       const obs = newActions.fetchingState$.pipe(
@@ -403,4 +407,59 @@ export function listEntityRelations(action: EntityInlineParentAction) {
     maxDepth: tree.maxDepth,
     relations: tree.requiredParamNames
   };
+}
+
+/**
+ * Check to see if we already have the result of the action in a parent entity (we've previously fetched it inline). If so create an action
+ * that can be used to populate the pagination section with a list of those entities.
+ * @export
+ * @param {Store<AppState>} store
+ * @param {PaginatedAction} action
+ * @returns {Observable<boolean>}
+ */
+export function populatePaginationFromExistingEntity(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+  if (!isEntityInlineChildAction(action) || !action.flattenPagination) {
+    return Observable.of(null);
+  }
+  const parentEntitySchema = action['parentEntitySchema'] as EntitySchema;
+  const parentGuid = action['parentGuid'];
+  return store.select(selectEntity(parentEntitySchema.key, parentGuid)).pipe(
+    first(),
+    withLatestFrom(store.select(getAPIRequestDataState)),
+    map(([entity, allEntities]) => {
+      if (!entity) {
+        return null;
+      }
+      // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
+      const entities = parentEntitySchema.schema['entity'] || {};
+      const params = Object.keys(entities);
+      for (let i = 0; i < params.length; i++) {
+        const paramName = params[i];
+        const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
+        const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
+        if (arraySafeEntitySchema.key === action.entityKey) {
+          const config: HandleRelationsConfig = {
+            store,
+            action: null,
+            allEntities,
+            newEntities: {},
+            parentEntities: null,
+            entities: entity.entity[paramName],
+            childEntities: entity.entity[paramName],
+            cfGuid: action.endpointGuid,
+            parentRelation: new EntityTreeRelation(parentEntitySchema, false, null, null, []),
+            includeRelations: [createEntityRelationKey(parentEntitySchema.key, action.entityKey)],
+            parentEntity: entity,
+            childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
+            childEntitiesUrl: '',
+            populateMissing: false,
+            populateExisting: true,
+          };
+          return createActionsForExistingEntities(config)[0].action;
+        }
+      }
+      return null;
+    },
+    )
+  );
 }

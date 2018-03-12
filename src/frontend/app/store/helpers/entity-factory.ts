@@ -37,12 +37,13 @@ const entityCache: {
 
 /**
  * Mostly a wrapper around schema.Entity. Allows a lot of uniformity of types through console. Includes some minor per entity type config
- * 
+ *
  * @export
  * @class EntitySchema
  * @extends {schema.Entity}
  */
 export class EntitySchema extends schema.Entity {
+  schema: Schema;
   /**
    * @param {string} entityKey As per schema.Entity ctor
    * @param {Schema} [definition] As per schema.Entity ctor
@@ -59,6 +60,7 @@ export class EntitySchema extends schema.Entity {
     public populateExisting?: boolean
   ) {
     super(entityKey, definition, options);
+    this.schema = definition || {};
   }
 }
 
@@ -158,7 +160,6 @@ const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
   {
     idAttribute: getAPIResourceGuid
   },
-
 );
 entityCache[applicationSchemaKey] = ApplicationWithoutSpaceEntitySchema;
 

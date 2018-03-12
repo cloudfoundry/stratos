@@ -25,7 +25,7 @@ import { createEntityRelationPaginationKey } from '../../store/helpers/entity-re
 @Injectable()
 export class CfUserService {
   public allUsersAction: GetAllUsers;
-  public allUsers$: PaginationObservables<APIResource<CfUser>>;
+  private allUsers$: PaginationObservables<APIResource<CfUser>>;
 
   constructor(
     private store: Store<AppState>,
@@ -34,18 +34,10 @@ export class CfUserService {
   ) {
     // FIXME: This action will fail if the CF user is not a CF admin
     this.allUsersAction = new GetAllUsers(createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid));
-    this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
-      store: this.store,
-      action: this.allUsersAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        this.allUsersAction.paginationKey,
-        entityFactory(cfUserSchemaKey)
-      )
-    });
   }
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
-    this.allUsers$.entities$.pipe(
+    this.getAllUsers().entities$.pipe(
       filter(p => !!p),
       map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
       filter(p => p.length > 0),
@@ -101,6 +93,20 @@ export class CfUserService {
         };
       })
     );
+  }
+
+  private getAllUsers(): PaginationObservables<APIResource<CfUser>> {
+    if (!this.allUsers$) {
+      this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
+        store: this.store,
+        action: this.allUsersAction,
+        paginationMonitor: this.paginationMonitorFactory.create(
+          this.allUsersAction.paginationKey,
+          entityFactory(cfUserSchemaKey)
+        )
+      });
+    }
+    return this.allUsers$;
   }
 
   private getUser(userGuid: string): (source: Observable<APIResource<CfUser>[]>) => Observable<APIResource<CfUser>> {

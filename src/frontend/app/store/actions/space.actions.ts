@@ -95,6 +95,7 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
   entityKey = routeSchemaKey;
   options: RequestOptions;
   flattenPagination = true;
+  parentEntitySchema = entityFactory(spaceSchemaKey);
 }
 
 export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -120,6 +121,7 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
     'results-per-page': 100,
   };
   parentGuid: string;
+  parentEntitySchema = entityFactory(spaceSchemaKey);
 }
 
 export class DeleteSpace extends CFStartAction implements ICFAction {
@@ -171,29 +173,4 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
   entityKey = spaceSchemaKey;
   options: RequestOptions;
   updatingKey = UpdateSpace.UpdateExistingSpace;
-}
-
-export class GetRoutesInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
-  constructor(
-    public spaceGuid: string,
-    public endpointGuid: string,
-    public paginationKey: string,
-    public includeRelations = [],
-    public populateMissing = true
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `spaces/${spaceGuid}/routes`;
-    this.options.method = 'get';
-    this.parentGuid = spaceGuid;
-  }
-  actions = getActions('Spaces', 'Get routes');
-  entity = [entityFactory(routeSchemaKey)];
-  entityKey = routeSchemaKey;
-  options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-  };
-  parentGuid: string;
 }

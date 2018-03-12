@@ -49,7 +49,7 @@ export class GetAllOrganisationSpaces extends CFStartAction implements Paginated
   constructor(
     public paginationKey: string,
     public orgGuid: string,
-    public cnsi: string,
+    public endpointGuid: string,
     public includeRelations = [],
     public populateMissing = true
   ) {
@@ -68,6 +68,7 @@ export class GetAllOrganisationSpaces extends CFStartAction implements Paginated
     'results-per-page': 100,
   };
   parentGuid: string;
+  parentEntitySchema = entityFactory(organisationSchemaKey);
 }
 
 export class GetAllOrganisations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
@@ -129,32 +130,6 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
   entityKey = organisationSchemaKey;
   options: RequestOptions;
   guid: string;
-}
-
-export class GetAllSpacesInOrg extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
-  constructor(
-    public endpointGuid: string,
-    public orgGuid: string,
-    public paginationKey: string,
-    public includeRelations: string[] = [],
-    public populateMissing = true
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `organizations/${orgGuid}/spaces`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.parentGuid = orgGuid;
-  }
-  actions = getActions('Organisations', 'Get Spaces');
-  entity = [entityFactory(spaceWithOrgKey)];
-  entityKey = spaceSchemaKey;
-  options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-  };
-  parentGuid: string;
 }
 
 export class UpdateOrganization extends CFStartAction implements ICFAction {

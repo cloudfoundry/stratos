@@ -1,13 +1,7 @@
 import { schema } from 'normalizr';
 
-import {
-  createEntityRelationPaginationKey,
-  EntityInlineParentAction,
-  EntityTreeRelation,
-  ValidationResult,
-  EntityTree,
-  createEntityRelationKey,
-} from './entity-relations.types';
+import { EntitySchema } from './entity-factory';
+import { createEntityRelationKey, EntityInlineParentAction, EntityTree, EntityTreeRelation } from './entity-relations.types';
 
 const entityTreeCache: {
   [entityKey: string]: EntityTree
@@ -30,8 +24,7 @@ export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
   let entityTree = entityTreeCache[cacheKey];
   if (!entityTree) {
     const rootEntityRelation = new EntityTreeRelation(
-      entityKey,
-      entity as schema.Entity,
+      entity as EntitySchema,
       isArray,
       null,
       '',
@@ -62,8 +55,7 @@ export function createEntityTree(tree: EntityTree, entityRelation: EntityTreeRel
     const newPath = path ? path + '.' + key : key;
     if (value instanceof schema.Entity) {
       const newEntityRelation = new EntityTreeRelation(
-        value.key,
-        value,
+        value as EntitySchema,
         isArray,
         key,
         newPath,

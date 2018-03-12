@@ -241,4 +241,5 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
   endpointGuid: string;
   flattenPagination = true;
   parentGuid: string;
+  parentEntitySchema = entityFactory(applicationSchemaKey);
 }

@@ -134,10 +134,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.applicationService.isUpdatingApp$.do(a => {
-      // console.log('sdsdfsd!!!!!!sfdsdsg!!!!!!!', a);
-    }).subscribe();
-
     this.isFetching$ = this.applicationService.isFetchingApp$;
 
     const initialFetch$ = Observable.combineLatest(

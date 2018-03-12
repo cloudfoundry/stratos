@@ -40,7 +40,7 @@ export class CloudFoundrySpaceService {
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
-  spaceEntitySchema: EntityService<APIResource<ISpace>>;
+  spaceEntityService: EntityService<APIResource<ISpace>>;
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -55,15 +55,16 @@ export class CloudFoundrySpaceService {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
 
-    this.spaceEntitySchema = this.entityServiceFactory.create(
+    this.spaceEntityService = this.entityServiceFactory.create(
       spaceSchemaKey,
       entityFactory(spaceWithOrgKey),
       this.spaceGuid,
       new GetSpace(this.spaceGuid, this.cfGuid, [
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+        createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
         // createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
         // createEntityRelationKey(org)
       ])
@@ -91,7 +92,7 @@ export class CloudFoundrySpaceService {
   }
 
   private initialiseSpaceObservables() {
-    this.space$ = this.spaceEntitySchema.entityObs$.pipe(filter(o => !!o && !!o.entity));
+    this.space$ = this.spaceEntityService.waitForEntity$.pipe(filter(o => !!o && !!o.entity));
     this.serviceInstances$ = this.space$.pipe(map(o => o.entity.entity.service_instances));
     this.routes$ = this.space$.pipe(map(o => o.entity.entity.routes));
     this.allowSsh$ = this.space$.pipe(map(o => o.entity.entity.allow_ssh ? 'true' : 'false'));
@@ -117,12 +118,17 @@ export class CloudFoundrySpaceService {
 
   private initialiseAppObservables() {
     this.apps$ = this.space$.pipe(
-      map(s => s.entity.entity.apps)
+      map(s => {
+        return s.entity.entity.apps;
+      }),
+      filter(apps => !!apps)
     );
 
-    this.appInstances$ = this.apps$.pipe(map(a => a
-      .map(app => app.entity.instances)
-      .reduce((i, x) => i + x, 0)));
+    this.appInstances$ = this.apps$.pipe(
+      map(a => {
+        return a.map(app => app.entity.instances).reduce((i, x) => i + x, 0);
+      })
+    );
 
     this.totalMem$ = this.apps$.pipe(
       map(a => this.cfEndpointService.getMetricFromApps(a, 'memory'))

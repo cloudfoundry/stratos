@@ -61,6 +61,9 @@ function shouldMerge(newState, baseState, entityKey) {
 
 export const pick = <O, K extends keyof O>(o: O, keys: [K]): Pick<O, K> => {
   const copy: any = {};
+  if (!o) {
+    return null;
+  }
   keys.forEach(k => {
     copy[k] = o[k];
   });

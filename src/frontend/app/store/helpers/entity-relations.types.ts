@@ -1,6 +1,7 @@
-import { EntitySchema } from './entity-factory';
-import { IRequestAction } from '../types/request.types';
 import { Action } from '@ngrx/store';
+
+import { IRequestAction } from '../types/request.types';
+import { EntitySchema } from './entity-factory';
 
 
 export class EntityTree {
@@ -16,9 +17,10 @@ export class EntityTree {
  * @class EntityTreeRelation
  */
 export class EntityTreeRelation {
+  entityKey: string;
+
   /**
  * Creates an instance of EntityTreeRelation.
- * @param {string} entityKey
  * @param {EntitySchema} entity
  * @param {boolean} [isArray=false] is this a collection of entities (should be paginationed) or not
  * @param {string} paramName parameter name of the entity within the schema. For example `space` may be `spaces` (entity.spaces)
@@ -27,14 +29,13 @@ export class EntityTreeRelation {
  * @memberof EntityTreeRelation
  */
   constructor(
-    public entityKey: string,
     public entity: EntitySchema,
     public isArray = false,
     public paramName: string, // space/spaces
     public path = '', // entity.space
     public childRelations: EntityTreeRelation[]
   ) {
-
+    this.entityKey = entity.key;
   }
 }
 
@@ -46,6 +47,11 @@ export class EntityTreeRelation {
  */
 export interface EntityInlineChildAction {
   parentGuid: string;
+  parentEntitySchema: EntitySchema;
+}
+
+export function isEntityInlineChildAction(action: Action) {
+  return action && !!action['parentGuid'] && !!action['parentEntitySchema'];
 }
 
 /**
@@ -58,6 +64,10 @@ export interface EntityInlineChildAction {
 export interface EntityInlineParentAction extends IRequestAction {
   includeRelations: string[];
   populateMissing: boolean;
+}
+
+export function isEntityInlineParentAction(action: Action) {
+  return action && !!action['includeRelations'] && action['populateMissing'] !== undefined;
 }
 
 export function createEntityRelationKey(parentKey: string, childKey) { return `${parentKey}-${childKey}`; }
@@ -73,10 +83,6 @@ export function createEntityRelationPaginationKey(schemaKey: string, guid: strin
   // 'organisation' section as 'user-<guid>-billing_managed_organisations')
   key += childSchemaRelation ? `-${childSchemaRelation}` : '';
   return key;
-}
-
-export function isEntityInlineParentAction(action: Action) {
-  return action && !!action['includeRelations'];
 }
 
 /**

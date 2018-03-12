@@ -1,12 +1,13 @@
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { filter, first, shareReplay, switchMap, tap, publishReplay, refCount } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
+import { populatePaginationFromExistingEntity } from '../../helpers/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
@@ -129,15 +130,23 @@ function getObservables<T = any>(
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
     tap(pagination => {
+      console.log('1', pagination);
       if (
         (!pagination && !hasDispatchedOnce) ||
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
+        console.log('1 - inner');
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        store.dispatch(action);
+        populatePaginationFromExistingEntity(store, action).pipe(
+          first(),
+          tap(newAction => {
+            store.dispatch(newAction || action);
+          })
+        ).subscribe();
       }
     }),
-    shareReplay(1)
+    publishReplay(1),
+    refCount(),
   );
 
   const entities$: Observable<T[]> =
@@ -147,6 +156,7 @@ function getObservables<T = any>(
     )
       .pipe(
         filter(([ent, pagination]) => {
+          console.log('2', pagination);
           return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
         }),
         shareReplay(1),

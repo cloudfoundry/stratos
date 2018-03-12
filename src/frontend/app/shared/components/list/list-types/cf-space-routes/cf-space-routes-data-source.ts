@@ -1,18 +1,23 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
-import { GetRoutesInSpace } from '../../../../../store/actions/space.actions';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
-import { entityFactory, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../store/helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../store/helpers/entity-relations.types';
+import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { SpaceRouteDataSourceHelper } from './cf-space-route-row-state.helper';
-import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
-import { spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
 
@@ -26,7 +31,7 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
   ) {
     // const paginationKey = getPaginationKey('cf-space-routes', cfGuid, spaceGuid);
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
-    const action = new GetRoutesInSpace(spaceGuid, cfGuid, paginationKey, [
+    const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
       createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
     ]);

@@ -3,6 +3,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../types/request.types';
+import { EntitySchema } from '../helpers/entity-factory';
 
 const relationActionId = 'FetchRelationAction';
 
@@ -22,6 +23,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     this.options.url = url.startsWith('/v2/') ? url.substring(4, url.length) : url;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
+    this.parentEntitySchema = parent.entity;
   }
   entity: IRequestActionEntity;
   entityKey: string;
@@ -32,6 +34,7 @@ export abstract class FetchRelationAction extends CFStartAction implements Entit
     '[Fetch Relations] Failed'
   ];
   options: RequestOptions;
+  parentEntitySchema: EntitySchema;
   static is(anything): FetchRelationAction {
     return (anything['isId'] === relationActionId) ? anything as FetchRelationAction : null;
   }
