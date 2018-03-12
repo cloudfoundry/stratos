@@ -129,7 +129,8 @@ export class CreateApplicationStep3Component implements OnInit {
           state.cloudFoundryDetails.org,
           new GetOrganisation(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
             createEntityRelationKey(organisationSchemaKey, domainSchemaKey)
-          ])
+          ]),
+          true
         );
         return orgEntService.waitForEntity$.pipe(
           map(({ entity, entityRequestInfo }) => {

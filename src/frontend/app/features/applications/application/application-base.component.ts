@@ -42,7 +42,8 @@ function entityServiceFactory(
     applicationSchemaKey,
     entityFactory(applicationSchemaKey),
     id,
-    createGetApplicationAction(id, cfId)
+    createGetApplicationAction(id, cfId),
+    true
   );
 }
 

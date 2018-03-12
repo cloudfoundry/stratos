@@ -67,7 +67,8 @@ export class CloudFoundrySpaceService {
         createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
         // createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
         // createEntityRelationKey(org)
-      ])
+      ]),
+      true
     );
 
     this.initialiseObservables();
