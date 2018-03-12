@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { Logout } from '../../../store/actions/auth.actions';
-import { IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
+import { IHeaderBreadcrumb, IHeaderBreadcrumbLink, BREADCRUMB_URL_PARAM } from './page-header.types';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -12,7 +12,7 @@ import { ActivatedRoute } from '@angular/router';
   templateUrl: './page-header.component.html',
   styleUrls: ['./page-header.component.scss']
 })
-export class PageHeaderComponent implements OnInit {
+export class PageHeaderComponent {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
 
@@ -39,22 +39,16 @@ export class PageHeaderComponent implements OnInit {
     }) || breadcrumbs[0];
   }
 
-  constructor(private store: Store<AppState>, private route: ActivatedRoute) {
-    this.breadcrumbKey = route.snapshot.queryParams['breadcrumbKey'] || null;
-  }
-
-
-
-  ngOnInit() {
-
-  }
-
   toggleSidenav() {
     this.store.dispatch(new ToggleSideNav());
   }
 
   logout() {
     this.store.dispatch(new Logout());
+  }
+
+  constructor(private store: Store<AppState>, private route: ActivatedRoute) {
+    this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
   }
 
 }

@@ -22,8 +22,21 @@ export class ServiceCataloguePageComponent implements OnInit {
             routerLink: '/applications'
           }
         ]
+      },
+      {
+        key: 'test',
+        breadcrumbs: [
+          {
+            value: 'Param1',
+            routerLink: '/applications'
+          },
+          {
+            value: 'Param2',
+            routerLink: '/applications'
+          }
+        ]
       }
-    ]
+    ];
   }
 
   ngOnInit() {
