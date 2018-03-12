@@ -1,17 +1,12 @@
+@import '../../base-cf/base-cf-cards';
 .org-card {
   &__title {
     width: 100%;
     &-link {
       cursor: pointer;
     }
-  }
-  &__button {
-    justify-content: flex-end;
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    button {
-      min-width: 5px;
+    &__button {
+      @extend .action-button
     }
   }
 }
