@@ -19,8 +19,8 @@ import { GetAllApplications } from '../../../../store/actions/application.action
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/actions/action-types';
-import { Http } from '@angular/http';
 import { DiscoverAppHelper } from './discover-app-helper';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -46,10 +46,10 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private http: Http,
+    private http: HttpClient,
   ) { }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     // Unsubscribe from the websocket stream
     if (!this.connect$) {
       this.connect$.unsubscribe();
