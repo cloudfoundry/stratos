@@ -1,18 +1,12 @@
+@import '../../base-cf/base-cf-cards';
 .space-card {
-  width: 100%;
   &__title {
     width: 100%;
     &-link {
       cursor: pointer;
     }
-  }
-  &__button {
-    justify-content: flex-end;
-    position: absolute;
-    right: 0;
-    top: 0;
-    button {
-      min-width: 5px;
+    &__button {
+      @extend %action-button;
     }
   }
 }
