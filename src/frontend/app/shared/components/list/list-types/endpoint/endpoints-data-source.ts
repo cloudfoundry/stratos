@@ -54,7 +54,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       schema: EndpointSchema,
       getRowUniqueId: object => object.guid,
       getEmptyType: () => ({
-        name: ''
+        name: '',
+        metricsAvailable: false
       }),
       paginationKey: GetAllEndpoints.storeKey,
       isLocal: true,

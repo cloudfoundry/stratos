@@ -31,11 +31,11 @@ export interface EndpointModel {
   user?: EndpointUser;
   metadata?: {
     metrics: string
-  }
+  };
   // These are generated client side when we login
   registered?: boolean;
   connectionStatus?: endpointConnectionStatus;
-  metricsAvaliable: boolean;
+  metricsAvailable: boolean;
   //
 
 }

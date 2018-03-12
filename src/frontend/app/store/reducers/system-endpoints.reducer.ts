@@ -52,7 +52,7 @@ function succeedEndpointInfo(state, action) {
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
   Object.keys(payload.endpoints).forEach(type => {
     getAllEnpointIds(newState[type], payload.endpoints[type]).forEach(guid => {
-      const endpointInfo = payload.endpoints[type][guid] as EndpointModel;]
+      const endpointInfo = payload.endpoints[type][guid] as EndpointModel;
       newState[guid] = {
         ...newState[guid],
         ...endpointInfo,

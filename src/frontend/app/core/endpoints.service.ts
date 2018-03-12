@@ -67,7 +67,7 @@ export class EndpointsService implements CanActivate {
 
   hasMetrics(endpointId: string) {
     return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
-      map(endpoint => endpoint.metricsAvaliable),
+      map(endpoint => endpoint.metricsAvailable),
       first()
     )
   }

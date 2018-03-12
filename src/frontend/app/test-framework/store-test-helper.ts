@@ -21554,7 +21554,8 @@ const testInitialStoreState: AppState = {
               admin: true
             },
             connectionStatus: 'connected',
-            registered: true
+            registered: true,
+            metricsAvailable: false
           }
         },
         system: {}
