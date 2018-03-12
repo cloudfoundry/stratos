@@ -32,41 +32,47 @@ export class DiscoverAppHelper {
 
   // Start the poller
   startDetection() {
-    if (this.alive) {
-      return;
-    }
-
-    TimerObservable.create(0, DETECT_INTERVAL).takeWhile(() => this.alive)
-    .subscribe(() => {
-      const headers = new Headers({ 'x-cap-cnsi-list': this.cfGuid });
-      const requestArgs = {
-        headers: headers
-      };
-      return this.http
-        .get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` + this.spaceGuid + '&q=name:' + this.name, requestArgs)
-        .pipe(
-          mergeMap(response => {
-            const info = response.json();
-            console.log(info);
-            if (info && info[this.cfGuid]) {
-              const apps = info[this.cfGuid];
-              if (apps.total_results === 1) {
-                console.log('FOUND APP !!!!');
-                console.log(apps.resources[0]);
-                this.app$.next(apps.resources[0]);
+    if (!this.alive) {
+      TimerObservable.create(0, DETECT_INTERVAL).takeWhile(() => this.alive)
+      .subscribe(() => {
+        return this.http
+          .get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` + this.spaceGuid + '&q=name:' + this.name, this.getRequestArgs())
+          .pipe(
+            mergeMap(response => {
+              const info = response.json();
+              console.log(info);
+              if (info && info[this.cfGuid]) {
+                const apps = info[this.cfGuid];
+                if (apps.total_results === 1) {
+                  console.log('FOUND APP !!!!');
+                  console.log(apps.resources[0]);
+                  this.app$.next(apps.resources[0]);
+                }
               }
-            }
-            return [];
-          }),
-          catchError(err => [
-            // ignore
-          ])
-        ).subscribe();
-      });
+              return [];
+            }),
+            catchError(err => [
+              // ignore
+            ])
+          ).subscribe();
+        }
+      );
+    }
   }
 
   // Stop looking for an app
   stopDetection() {
     this.alive = false;
   }
+
+  // Helper to get the request args with the CNSI
+  getRequestArgs() {
+    const headers = new Headers({ 'x-cap-cnsi-list': this.cfGuid });
+    const requestArgs = {
+      headers: headers
+    };
+    return requestArgs;
+  }
+
+
 }
