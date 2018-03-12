@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { take } from 'rxjs/operators';
+import { take, map, first } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { EntityService } from '../../../../core/entity-service';
@@ -14,6 +14,7 @@ import { AppState } from '../../../../store/app-state';
 import { ApplicationService } from '../../application.service';
 import { APIResource } from '../../../../store/types/api.types';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
+import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -60,6 +61,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
   autoRefreshString = 'auto-refresh';
+  public breadcrumbs: Observable<IHeaderBreadcrumb[]> = this.applicationService.app$.pipe(
+    map(app => this.getBreadcrumbs(app)),
+    first()
+  );
 
   autoRefreshing$ = this.entityService.updatingSection$.map(
     update => update[this.autoRefreshString] || { busy: false }
@@ -73,6 +78,30 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     { link: 'variables', label: 'Variables' },
     { link: 'events', label: 'Events' }
   ];
+
+  private getBreadcrumbs(application) {
+    return [
+      {
+        breadcrumbs: [{
+          value: 'Applications',
+          routerLink: '/applications'
+        }]
+      },
+      {
+        key: 'space',
+        breadcrumbs: [
+          {
+            value: application.entity,
+            routerLink: '/applications'
+          },
+          {
+            value: 'Apps',
+            routerLink: '/applications'
+          }
+        ]
+      }
+    ];
+  }
 
   stopApplication() {
     this.confirmDialog.open(appStopConfirmation, () => {
