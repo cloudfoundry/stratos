@@ -1,8 +1,8 @@
 import { TimerObservable } from 'rxjs/observable/TimerObservable';
 import { Http, Headers } from '@angular/http';
 import { environment } from './../../../../../environments/environment';
-import { mergeMap, catchError } from 'rxjs/operators';
-import { BehaviorSubject } from 'rxjs';
+import { mergeMap, catchError  } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 // Check every 5 seconds
 const DETECT_INTERVAL = 5000;
