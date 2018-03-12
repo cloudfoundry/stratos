@@ -91,12 +91,6 @@ class ValidateEntityRelationsConfig {
    * @memberof ValidateEntityRelationsConfig
    */
   populateMissing = true;
-  /**
-   * If a child exists, should we raise an action to store it as a pagination list?
-   *
-   * @memberof ValidateEntityRelationsConfig
-   */
-  populateExisting = false;
 }
 
 class ValidateLoopConfig extends ValidateEntityRelationsConfig {
@@ -155,41 +149,6 @@ function createAction(config: HandleRelationsConfig) {
     populateMissing,
     childEntitiesUrl
   );
-}
-
-/**
- * Create actions required to populate parent entities with exist children
- *
- * @param {HandleRelationsConfig} config
- * @returns {ValidateEntityResult[]}
- */
-function createActionsForExistingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
-  const { allEntities, newEntities, childEntities, childRelation } = config;
-  const childEntitiesAsArray = childEntities as Array<any>;
-
-  const paramAction = createAction(config);
-  // We've got the value already, ensure we create a pagination section for them
-  let response: NormalizedResponse;
-  const guids = childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity);
-  const entities = pick(newEntities[childRelation.entityKey], guids as [string]) ||
-    pick(allEntities[childRelation.entityKey], guids as [string]);
-  response = {
-    entities: {
-      [childRelation.entityKey]: entities
-    },
-    result: guids
-  };
-
-  const paginationSuccess = new WrapperRequestActionSuccess(
-    response,
-    paramAction,
-    'fetch',
-    childEntitiesAsArray.length,
-    1
-  );
-  return [{
-    action: paginationSuccess,
-  }];
 }
 
 function createPaginationWatcher(store, paramAction, paramPaginationAction: FetchRelationPaginatedAction):
@@ -256,22 +215,16 @@ function createActionsForMissingEntities(config: HandleRelationsConfig): Validat
  * @returns {ValidateEntityResult[]}
  */
 function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
-  const { cfGuid, allEntities, parentRelation, parentEntity, childRelation, childEntities, populateExisting, populateMissing } = config;
+  const { cfGuid, allEntities, parentRelation, parentEntity, childRelation, childEntities, populateMissing } = config;
 
   if (!cfGuid) {
     throw Error(`No CF Guid provided when validating
      ${parentRelation.entityKey} ${parentEntity.metadata.guid}'s ${childRelation.entityKey}`);
   }
 
-  // Have we found some entities that need to go into the pagination store OR are some entities missing that are required?
+  // Have we failed to find some required missing entities?
   let results = [];
-  if (childEntities) {
-    // The values exist do we want to put them anywhere else?
-    if (!allEntities || !childRelation.isArray || !populateExisting || childRelation.entity.populateExisting === false) {
-      return results;
-    }
-    results = [].concat(results, createActionsForExistingEntities(config));
-  } else if (!childEntities && populateMissing) {
+  if (!childEntities && populateMissing) {
     // The values are missing and we want them, go fetch
     results = [].concat(results, createActionsForMissingEntities(config));
   }
@@ -409,6 +362,41 @@ export function listEntityRelations(action: EntityInlineParentAction) {
 }
 
 /**
+ * Create actions required to populate parent entities with exist children
+ *
+ * @param {HandleRelationsConfig} config
+ * @returns {ValidateEntityResult[]}
+ */
+function createActionsForExistingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
+  const { allEntities, newEntities, childEntities, childRelation } = config;
+  const childEntitiesAsArray = childEntities as Array<any>;
+
+  const paramAction = createAction(config);
+  // We've got the value already, ensure we create a pagination section for them
+  let response: NormalizedResponse;
+  const guids = childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity);
+  const entities = pick(newEntities[childRelation.entityKey], guids as [string]) ||
+    pick(allEntities[childRelation.entityKey], guids as [string]);
+  response = {
+    entities: {
+      [childRelation.entityKey]: entities
+    },
+    result: guids
+  };
+
+  const paginationSuccess = new WrapperRequestActionSuccess(
+    response,
+    paramAction,
+    'fetch',
+    childEntitiesAsArray.length,
+    1
+  );
+  return [{
+    action: paginationSuccess,
+  }];
+}
+
+/**
  * Check to see if we already have the result of the action in a parent entity (we've previously fetched it inline). If so create an action
  * that can be used to populate the pagination section with a list of those entities.
  * @export
@@ -451,14 +439,12 @@ export function populatePaginationFromExistingEntity(store: Store<AppState>, act
             parentEntity: entity,
             childRelation: new EntityTreeRelation(arraySafeEntitySchema, true, paramName, '', []),
             childEntitiesUrl: '',
-            populateMissing: false,
-            populateExisting: true,
+            populateMissing: true
           };
           return createActionsForExistingEntities(config)[0].action;
         }
       }
       return null;
-    },
-    )
+    })
   );
 }
