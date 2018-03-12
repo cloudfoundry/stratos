@@ -21528,6 +21528,7 @@ const testInitialStoreState: AppState = {
         organization: {},
         route: {},
         event: {},
+        metrics: {},
         endpoint: {
           '01ccda9d-8f40-4dd0-bc39-08eea68e364f': {
             guid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f',

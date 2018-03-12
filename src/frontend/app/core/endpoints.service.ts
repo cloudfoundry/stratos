@@ -8,7 +8,7 @@ import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angul
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
 import { RouterNav } from '../store/actions/router.actions';
-import { map, first } from 'rxjs/operators';
+import { map, first, filter } from 'rxjs/operators';
 
 
 @Injectable()
@@ -67,8 +67,9 @@ export class EndpointsService implements CanActivate {
 
   hasMetrics(endpointId: string) {
     return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
+      filter(endpoint => !!endpoint),
       map(endpoint => endpoint.metricsAvailable),
       first()
-    )
+    );
   }
 }

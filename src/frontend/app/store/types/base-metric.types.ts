@@ -1,32 +1,32 @@
 export enum MetricResultTypes {
-    MATRIX = 'matrix',
-    VECTOR = 'vector',
-    SCALAR = 'scalar',
-    STRING = 'string'
+  MATRIX = 'matrix',
+  VECTOR = 'vector',
+  SCALAR = 'scalar',
+  STRING = 'string'
 }
 
 export interface IMetricsResponse<T = any> {
-    status: string;
-    data: IMetrics<T>; BG
+  status: string;
+  data: IMetrics<T>;
 }
 
 export interface IMetrics<T = any> {
-    resultType: string;
-    result: [T];
+  resultType: string;
+  result: [T];
 }
 
-interface _IVectorResult<T> {
-    metric: T;
+interface IVectorResult<T> {
+  metric: T;
 }
-//[unixTimeStamp, sampleValue]
+// [unixTimeStamp, sampleValue]
 export type IMetricSample = [number, string];
 
-export interface IMetricMatrixResult<T = any> extends _IVectorResult<T> {
-    values: IMetricSample[];
+export interface IMetricMatrixResult<T = any> extends IVectorResult<T> {
+  values: IMetricSample[];
 }
 
-export interface IMetricVectorResult<T = any> extends _IVectorResult<T> {
-    value: IMetricSample;
+export interface IMetricVectorResult<T = any> extends IVectorResult<T> {
+  value: IMetricSample;
 }
 
 // They're the same interface but I'm going to keep both for continuity.
