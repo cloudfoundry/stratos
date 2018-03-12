@@ -13,7 +13,7 @@ import { getPaginationKey } from '../../../../../store/actions/pagination.action
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
     const paginationKey = getPaginationKey('cf-organizations', cfGuid);
-    const action = new GetAllOrganisations(paginationKey);
+    const action = new GetAllOrganisations(paginationKey, cfGuid);
     super({
       store,
       action,
