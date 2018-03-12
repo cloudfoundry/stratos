@@ -124,10 +124,6 @@ class HandleRelationsConfig extends ValidateLoopConfig {
   childEntitiesUrl: string;
 }
 
-function createEntityUrl(relation: EntityTreeRelation) {
-  return relation.path + '_url';
-}
-
 function createAction(config: HandleRelationsConfig) {
   const { cfGuid, parentRelation, parentEntity, childRelation, childEntitiesUrl, includeRelations, populateMissing } = config;
   return childRelation.isArray ? new FetchRelationPaginatedAction(
@@ -255,7 +251,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
         parentEntity: entity,
         childRelation,
         childEntities: childEntities,
-        childEntitiesUrl: pathGet(createEntityUrl(childRelation), entity),
+        childEntitiesUrl: pathGet(childRelation.path + '_url', entity),
       }
       ));
       if (childEntities && childRelation.childRelations.length) {
@@ -320,19 +316,14 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   }
 
   const startTime = new Date().getTime().toString();
-  // console.group(startTime);
-  // console.time(startTime);
 
   const relationAction = action as EntityInlineParentAction;
-  // console.time(startTime + 'fetch');
   const entityTree = fetchEntityTree(relationAction);
-  // console.timeEnd(startTime + 'fetch');
 
   if (parentEntities && parentEntities.length && typeof (parentEntities[0]) === 'string') {
     parentEntities = denormalize(parentEntities, [entityTree.rootRelation.entity], newEntities || allEntities);
   }
 
-  // console.time(startTime + 'validate');
   const results = validationLoop({
     ...config,
     includeRelations: relationAction.includeRelations,
@@ -340,21 +331,13 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
     entities: parentEntities,
     parentRelation: entityTree.rootRelation,
   });
-  // console.timeEnd(startTime + 'validate');
 
-  const result = handleValidationLoopResults(store, results);
-  // console.timeEnd(startTime);
-  // console.groupEnd();
-  return result;
+  return handleValidationLoopResults(store, results);
 
 }
 
 export function listEntityRelations(action: EntityInlineParentAction) {
-  // console.group('listRelations' + action.entityKey);
-  // console.time('adsdgdssgf' + action.entityKey);
   const tree = fetchEntityTree(action);
-  // console.timeEnd('adsdgdssgf' + action.entityKey);
-  // console.groupEnd();
   return {
     maxDepth: tree.maxDepth,
     relations: tree.requiredParamNames
@@ -367,7 +350,7 @@ export function listEntityRelations(action: EntityInlineParentAction) {
  * @param {HandleRelationsConfig} config
  * @returns {ValidateEntityResult[]}
  */
-function createActionsForExistingEntities(config: HandleRelationsConfig): ValidateEntityResult[] {
+function createPaginationSuccessAction(config: HandleRelationsConfig): WrapperRequestActionSuccess {
   const { allEntities, newEntities, childEntities, childRelation } = config;
   const childEntitiesAsArray = childEntities as Array<any>;
 
@@ -384,16 +367,13 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Valida
     result: guids
   };
 
-  const paginationSuccess = new WrapperRequestActionSuccess(
+  return new WrapperRequestActionSuccess(
     response,
     paramAction,
     'fetch',
     childEntitiesAsArray.length,
     1
   );
-  return [{
-    action: paginationSuccess,
-  }];
 }
 
 /**
@@ -404,7 +384,7 @@ function createActionsForExistingEntities(config: HandleRelationsConfig): Valida
  * @param {PaginatedAction} action
  * @returns {Observable<boolean>}
  */
-export function populatePaginationFromExistingEntity(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
+export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
   if (!isEntityInlineChildAction(action) || !action.flattenPagination) {
     return Observable.of(null);
   }
@@ -441,7 +421,7 @@ export function populatePaginationFromExistingEntity(store: Store<AppState>, act
             childEntitiesUrl: '',
             populateMissing: true
           };
-          return createActionsForExistingEntities(config)[0].action;
+          return createPaginationSuccessAction(config);
         }
       }
       return null;

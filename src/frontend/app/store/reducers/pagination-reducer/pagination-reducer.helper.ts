@@ -7,7 +7,7 @@ import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
 import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
-import { populatePaginationFromExistingEntity } from '../../helpers/entity-relations';
+import { populatePaginationFromParent } from '../../helpers/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
@@ -135,7 +135,7 @@ function getObservables<T = any>(
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        populatePaginationFromExistingEntity(store, action).pipe(
+        populatePaginationFromParent(store, action).pipe(
           first(),
           tap(newAction => {
             store.dispatch(newAction || action);
