@@ -36,7 +36,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatur
         return entity.metadata ? entity.metadata.guid : null;
       },
       paginationKey,
-      isLocal: true,
+      isLocal: false,
       transformEntities: [],
       listConfig
     });

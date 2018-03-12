@@ -14,6 +14,7 @@ import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-st
 @Injectable()
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResource<IFeatureFlag>> {
   dataSource: CfFeatureFlagsDataSource;
+  pageSizeOptions = [10, 25, 50];
 
   columns: Array<ITableColumn<APIResource<IFeatureFlag>>> = [
     {
