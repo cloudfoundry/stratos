@@ -1,38 +1,7 @@
-.summary {
+.app-page-header {
+  align-items: center;
   display: flex;
-
-  &__nav {
-    display: flex;
-    flex-direction: column;
-    height: 56px;
-    justify-content: flex-end;
-    margin: 0;
-    padding: 0 16px;
-  }
-
-  &__form {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    flex-wrap: wrap;
-
-    div {
-      display: flex;
-      flex: 1;
-      flex-direction: row;
-    }
-  }
-
-  &__card {
-    flex: 1;
-  }
-
-  mat-chip-list {
-
-    mat-chip {
-      margin-bottom: 5px;
-      margin-left: 0;
-      margin-right: 7px;
-    }
-  }
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
 }

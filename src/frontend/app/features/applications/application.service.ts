@@ -251,12 +251,11 @@ export class ApplicationService {
     */
     this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
 
-    this.isUpdatingApp$ =
-      this.app$.map(a => {
-        const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
-        const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
-        return updatingRoot.busy || updatingSection.busy || false;
-      });
+    this.isUpdatingApp$ = this.appEntityService.entityObs$.map(a => {
+      const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
+      const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
+      return !!updatingRoot.busy || !!updatingSection.busy;
+    });
 
     this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).shareReplay(1);
 

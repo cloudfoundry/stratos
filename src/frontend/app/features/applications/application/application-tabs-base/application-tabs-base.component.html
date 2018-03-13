@@ -1,27 +1,29 @@
-<app-page-header *ngIf="applicationService.application$ | async as application">
-  <!-- <h1>{{ application?.app | json }} </h1> -->
-  <h1>{{ application?.app?.entity?.name }} </h1>
-  <div class="page-header-right">
-    <a mat-icon-button *ngIf="application?.appUrl != null
-      && application?.app.entity.state === 'STARTED' " href="{{application?.appUrl}}" target="_blank">
-      <mat-icon>launch</mat-icon>
-    </a>
-    <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit">
-        <mat-icon>edit</mat-icon>
-      </button>
-    <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
-        <mat-icon>delete</mat-icon>
-      </button>
-    <span>
-        <button mat-icon-button name="stop" *ngIf="application?.app.entity.state === 'STARTED'" [disabled]="summaryDataChanging$ | async"
-          (click)="stopApplication()">
-          <mat-icon>stop</mat-icon>
-        </button>
-        <button mat-icon-button name="start" *ngIf="application?.app.entity.state === 'STOPPED'" [disabled]="summaryDataChanging$ | async"
-          (click)="startApplication()">
-          <mat-icon>play_arrow</mat-icon>
-        </button>
-      </span>
+<app-page-header>
+  <div *ngIf="applicationService.application$ | async as application" class="app-page-header">
+    <!-- <h1>{{ application?.app | json }} </h1> -->
+    <h1>{{ application?.app?.entity?.name }} </h1>
+    <div class="page-header-right">
+      <a mat-icon-button *ngIf="application?.appUrl != null
+     && application?.app.entity.state === 'STARTED' " href="{{application?.appUrl}}" target="_blank">
+        <mat-icon>launch</mat-icon>
+      </a>
+      <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" [disabled]="summaryDataChanging$ | async" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit">
+       <mat-icon>edit</mat-icon>
+     </button>
+      <button mat-icon-button name="delete" [disabled]="summaryDataChanging$ | async" (click)="deleteApplication()">
+       <mat-icon>delete</mat-icon>
+     </button>
+      <span>
+       <button mat-icon-button name="stop" *ngIf="application?.app.entity.state === 'STARTED'" [disabled]="summaryDataChanging$ | async"
+         (click)="stopApplication()">
+         <mat-icon>stop</mat-icon>
+       </button>
+       <button mat-icon-button name="start" *ngIf="application?.app.entity.state === 'STOPPED'" [disabled]="summaryDataChanging$ | async"
+         (click)="startApplication()">
+         <mat-icon>play_arrow</mat-icon>
+       </button>
+     </span>
+    </div>
   </div>
 </app-page-header>
 <app-page-subheader [tabs$]="tabs$">
