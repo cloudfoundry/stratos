@@ -7,7 +7,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
 import { EntityService } from '../../../../core/entity-service';
 import { selectEntity } from '../../../../store/selectors/api.selectors';
-import { getPreviousEvent } from '../../../../store/types/routing.type';
+import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { tap, filter, map } from 'rxjs/operators';
 import { RoutesRecognized } from '@angular/router';
 
@@ -38,7 +38,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     private store: Store<AppState>
   ) {
 
-    this.cancel$ = store.select(getPreviousEvent).pipe(
+    this.cancel$ = store.select(getPreviousRoutingState).pipe(
       map(e => !e ? this.cancel : e.url));
   }
 

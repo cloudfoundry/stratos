@@ -3,14 +3,14 @@ import { AppState } from '../app-state';
 
 export interface RoutingHistory {
   history: RoutesRecognized[];
-  currentEvent?: RoutesRecognized;
-  previousEvent?: RoutesRecognized;
+  currentState?: RoutesRecognized;
+  previousState?: RoutesRecognized;
 }
 
 export const defaultRoutingState: RoutingHistory = {
   history: []
 };
 
-export function getPreviousEvent(state: AppState) {
-  return state.routing.previousEvent;
+export function getPreviousRoutingState(state: AppState) {
+  return state.routing.previousState;
 }
