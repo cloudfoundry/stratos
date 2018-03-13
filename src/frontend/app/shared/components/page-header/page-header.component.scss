@@ -1,5 +1,6 @@
 .page-header {
   $breadcrumb-opacity: 0.7;
+  $breadcrumb-hover-opacity: 1;
   $breadcrumb-padding: 3px;
   left: 0;
   position: absolute;
@@ -22,6 +23,7 @@
   }
   &__breadcrumb-separator {
     font-size: 26px;
+    user-select: none;
     margin: 0 $breadcrumb-padding;
   }
   &__breadcrumbs {
@@ -31,6 +33,9 @@
   }
   &__breadcrumb-link {
     cursor: pointer;
+    &:hover {
+      opacity: $breadcrumb-hover-opacity;
+    }
   }
 }
 
