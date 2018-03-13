@@ -21580,7 +21580,10 @@ const testInitialStoreState: AppState = {
         system: {}
     },
     actionHistory: [],
-    lists: {}
+    lists: {},
+    routing: {
+      history: []
+    }
   };
   /* tslint:enable */
 
