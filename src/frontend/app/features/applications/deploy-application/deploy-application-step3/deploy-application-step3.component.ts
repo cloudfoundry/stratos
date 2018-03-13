@@ -19,6 +19,8 @@ import { GetAllApplications } from '../../../../store/actions/application.action
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/actions/action-types';
+import { DiscoverAppHelper } from './discover-app-helper';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -29,29 +31,37 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   connect$: Subscription;
   streamTitle: string;
-  apps$: Subscription;
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
   validate = Observable.of(false);
   appGuid: string;
 
-  ngOnDestroy(): void {
-    this.connect$.unsubscribe();
-    if (this.apps$) {
-      this.apps$.unsubscribe();
+  // Are we deploying?
+  deploying = false;
 
-    }
-  }
+  appDetectionHelper: DiscoverAppHelper;
 
   constructor(
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
-    public cfOrgSpaceService: CfOrgSpaceDataService
+    public cfOrgSpaceService: CfOrgSpaceDataService,
+    private http: HttpClient,
   ) { }
 
-  ngOnInit() {
+  ngOnDestroy() {
+    // Unsubscribe from the websocket stream
+    if (!this.connect$) {
+      this.connect$.unsubscribe();
+    }
 
+    // Shut down app detection helper if there is one
+    if (this.appDetectionHelper) {
+      this.appDetectionHelper.stopDetection();
+    }
+  }
+
+  ngOnInit() {
     this.connect$ = this.store.select(selectDeployAppState).pipe(
       filter(appDetail => !!appDetail.cloudFoundryDetails
         && !!appDetail.applicationSource
@@ -84,19 +94,13 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
           tap((log) => {
             // Deal with control messages
             if (log.type !== SocketEventTypes.DATA) {
-              this.updateTitle(log);
+              this.processWebSocketMessage(log);
             }
           }),
           filter((log) => log.type === SocketEventTypes.DATA),
-          map((log) => {
-            const timesString = moment(log.timestamp * 1000).format('DD/MM/YYYY hh:mm:ss A');
-            return (
-              `${timesString}: ${log.message}`
-            );
-          })
+          map((log) => log.message)
           );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
-
       })
     ).subscribe();
   }
@@ -143,8 +147,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     return JSON.stringify(msg);
   }
 
-  updateTitle = (log) => {
-
+  processWebSocketMessage = (log) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
@@ -156,24 +159,24 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
-        this.store.dispatch(new GetAllApplications('applicationWall'));
+        this.deploying = true;
+        this.appDetectionHelper = new DiscoverAppHelper(this.http, this.appData.cloudFoundry, this.appData.space, this.appData.Name);
+        this.validate = this.appDetectionHelper.app$.filter(a => !!a)
+        .do(v => {
+          this.appDetectionHelper.stopDetection();
+          this.appGuid = v.metadata.guid;
+          this.store.dispatch(new GetAllApplications('applicationWall'));
+        })
+        .map(v => !!v);
+        this.appDetectionHelper.startDetection();
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
+        // Done
         this.streamTitle = 'Deployed';
-        this.apps$ = this.store.select(selectEntities('application')).pipe(
-          tap(apps => {
-            Object.values(apps).forEach(app => {
-              if (
-                app.entity.space_guid === this.appData.space &&
-                app.entity.cfGuid === this.appData.cloudFoundry &&
-                app.entity.name === this.appData.Name
-              ) {
-                this.appGuid = app.entity.guid;
-                this.validate = Observable.of(true);
-              }
-            });
-          })
-        ).subscribe();
+        this.deploying = false;
+        if (this.appDetectionHelper) {
+          this.appDetectionHelper.stopDetection();
+        }
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
         this.close(log, null, null, true);
@@ -225,6 +228,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       error = `${error}\nReason: ${log.message}`;
       this.snackBar.open(error, 'Dismiss');
     }
+    this.deploying = false;
   }
 
   onNext: StepOnNextFunction = () => {
