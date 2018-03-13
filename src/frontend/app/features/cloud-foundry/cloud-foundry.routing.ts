@@ -53,15 +53,10 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
-import { NoConnectedEndpointsComponent } from './no-connected-endpoints/no-connected-endpoints.component';
 
 const cloudFoundry: Routes = [{
   path: '',
   component: CloudFoundryComponent
-},
-{
-  path: 'no-connected-endpoints',
-  component: NoConnectedEndpointsComponent
 },
 {
   path: ':cfId',
