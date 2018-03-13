@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { filter, map, pairwise, share, shareReplay, startWith, tap, withLatestFrom, refCount, publishReplay } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
@@ -21,6 +21,17 @@ import { ICFAction, IRequestAction } from '../store/types/request.types';
 import { composeFn } from './../store/helpers/reducer.helper';
 
 type PollUntil = (apiResource: APIResource, updatingState: ActionState) => boolean;
+
+export function isEntityBlocked(entityRequestInfo: RequestInfoState) {
+  if (!entityRequestInfo) {
+    return false;
+  }
+  return entityRequestInfo.fetching ||
+    entityRequestInfo.error ||
+    entityRequestInfo.deleting.busy ||
+    entityRequestInfo.deleting.deleted ||
+    entityRequestInfo.updating._root_.busy;
+}
 
 /**
  * Designed to be used in a service factory provider
@@ -59,7 +70,7 @@ export class EntityService<T = any> {
       refCount(),
       filter(entityInfo => !entityInfo || entityInfo.entity),
       tap((entityInfo: EntityInfo) => {
-        if (!validateRelations || validated || this.isEntityBlocked(entityInfo.entityRequestInfo) || !entityInfo.entity.metadata) {
+        if (!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo) || !entityInfo.entity.metadata) {
           return;
         }
         validated = true;
@@ -69,27 +80,6 @@ export class EntityService<T = any> {
           false
         ));
       })
-      // startWith({
-      //   entity: null,
-      //   entityRequestInfo: null
-      // }),
-      // pairwise(),
-      // tap(([prevResult, result]) => {
-      //   if (!validateRelations) {
-      //     return;
-      //   }
-      //   const firstTime = !prevResult.entity && !!result.entity;
-      //   if (!validated && firstTime && !this.isEntityBlocked(result.entityRequestInfo)) {
-      //     validated = true;
-      //     store.dispatch(new ValidateEntitiesStart(
-      //       action as ICFAction,
-      //       [result.entity.metadata.guid],
-      //       false
-      //     ));
-      //   }
-      // }),
-      // filter(([oldEntity, newEntity]) => !!newEntity),
-      // map(([oldEntity, newEntity]) => newEntity)
     );
 
     this.waitForEntity$ = this.entityObs$.pipe(
@@ -140,22 +130,11 @@ export class EntityService<T = any> {
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {
-    return entity && !this.isEntityBlocked(entityRequestInfo);
-  }
-
-  private isEntityBlocked(entityRequestInfo: RequestInfoState) {
-    if (!entityRequestInfo) {
-      return false;
-    }
-    return entityRequestInfo.fetching ||
-      entityRequestInfo.error ||
-      entityRequestInfo.deleting.busy ||
-      entityRequestInfo.deleting.deleted ||
-      entityRequestInfo.updating._root_.busy;
+    return entity && !isEntityBlocked(entityRequestInfo);
   }
 
   private shouldCallAction(entityRequestInfo: RequestInfoState, entity: T) {
-    return !entityRequestInfo || (!entity && !this.isEntityBlocked(entityRequestInfo));
+    return !entityRequestInfo || (!entity && !isEntityBlocked(entityRequestInfo));
   }
 
   /**

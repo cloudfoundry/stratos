@@ -208,7 +208,7 @@ export class DeleteApplicationInstance extends CFStartAction
 export class GetAppRoutes extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public guid: string,
-    public cfGuid: string,
+    public endpointGuid: string,
     public paginationKey: string = null,
     public includeRelations: string[] = [
       createEntityRelationKey(routeSchemaKey, domainSchemaKey)
@@ -220,9 +220,8 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
     this.options.url = `apps/${guid}/routes`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
-    this.endpointGuid = cfGuid;
     this.parentGuid = guid;
-    this.paginationKey = paginationKey || getPaginationKey(this.entityKey, cfGuid, guid);
+    this.paginationKey = paginationKey || getPaginationKey(this.entityKey, endpointGuid, guid);
   }
   actions = [
     '[Application Routes] Get all',
@@ -238,7 +237,6 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
   entity = [entityFactory(routeSchemaKey)];
   entityKey = routeSchemaKey;
   options: RequestOptions;
-  endpointGuid: string;
   flattenPagination = true;
   parentGuid: string;
   parentEntitySchema = entityFactory(applicationSchemaKey);

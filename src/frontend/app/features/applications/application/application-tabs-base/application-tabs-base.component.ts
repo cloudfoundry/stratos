@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { take, tap } from 'rxjs/operators';
+import { take, tap, map, startWith, pairwise } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { EntityService } from '../../../../core/entity-service';
@@ -114,6 +114,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const { cfGuid, appGuid } = this.applicationService;
+    // TODO: RC
     // Auto refresh
     // this.entityServiceAppRefresh$ = this.entityService
     //   .poll(10000, this.autoRefreshString)
@@ -134,7 +135,23 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.isFetching$ = this.applicationService.isFetchingApp$;
+    this.isFetching$ =
+      Observable.combineLatest(
+        this.applicationService.isFetchingApp$,
+        this.applicationService.isUpdatingApp$.pipe(
+          startWith(true),
+          pairwise(),
+          map((oldVal, newVal) => {
+            return oldVal && !newVal;
+          }),
+          map(val => !val)
+        )
+      ).pipe(
+        map(([isFetching, isUpdating]) => {
+          return isFetching || isUpdating;
+        })
+      );
+
 
     const initialFetch$ = Observable.combineLatest(
       this.applicationService.isFetchingApp$,

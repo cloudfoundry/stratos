@@ -1,13 +1,14 @@
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { first, map, pairwise, skipWhile, withLatestFrom, filter, mergeMap } from 'rxjs/operators';
+import { filter, first, map, mergeMap, pairwise, skipWhile, withLatestFrom } from 'rxjs/operators';
 
+import { isEntityBlocked } from '../../core/entity-service';
 import { pathGet } from '../../core/utils.service';
 import { SetInitialParams } from '../actions/pagination.actions';
 import { FetchRelationPaginatedAction, FetchRelationSingleAction } from '../actions/relation.actions';
 import { AppState } from '../app-state';
-import { ActionState, RequestInfoState, rootUpdatingKey } from '../reducers/api-request-reducer/types';
+import { ActionState, RequestInfoState } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../selectors/api.selectors';
 import { selectPaginationState } from '../selectors/pagination.selectors';
 import { APIResource, NormalizedResponse } from '../types/api.types';
@@ -24,9 +25,6 @@ import {
   ValidationResult,
 } from './entity-relations.types';
 import { pick } from './reducer.helper';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { EntityMonitor } from '../../shared/monitors/entity-monitor';
-import { getPaginationObservables } from '../reducers/pagination-reducer/pagination-reducer.helper';
 
 class AppStoreLayout {
   [entityKey: string]: {
@@ -426,8 +424,8 @@ function createPaginationSuccessAction(config: HandleRelationsConfig): WrapperRe
 }
 
 /**
- * Check to see if we already have the result of the action in a parent entity (we've previously fetched it inline). If so create an action
- * that can be used to populate the pagination section with a list of those entities.
+ * Check to see if we already have the result of the pagination action in a parent entity (we've previously fetched it inline). If so
+ * create an action that can be used to populate the pagination section with the list from the parent
  * @export
  * @param {Store<AppState>} store
  * @param {PaginatedAction} action
@@ -439,10 +437,26 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
   }
   const parentEntitySchema = action['parentEntitySchema'] as EntitySchema;
   const parentGuid = action['parentGuid'];
+
+  // What the hell is going on here hey? Well I'll tell you...
+  // Ensure that the parent is not blocked (fetching, updating, etc) before we check if it has the child param that we need
   return store.select(selectEntity(parentEntitySchema.key, parentGuid)).pipe(
     first(),
+    mergeMap(entity => {
+      if (!entity) {
+        return Observable.of(null);
+      }
+      return store.select(selectRequestInfo(parentEntitySchema.key, parentGuid));
+    }),
+    filter((entityInfo: RequestInfoState) => {
+      return !isEntityBlocked(entityInfo);
+    }),
+    first(),
+    // At this point we should know that the parent entity is ready to be checked
+    withLatestFrom(store.select(selectEntity(parentEntitySchema.key, parentGuid))),
     withLatestFrom(store.select(getAPIRequestDataState)),
-    map(([entity, allEntities]) => {
+    map(([entityState, allEntities]) => {
+      const [entityInfo, entity] = entityState;
       if (!entity) {
         return;
       }
