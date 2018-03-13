@@ -101,6 +101,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     org: APIResource<IOrganization>,
     space: APIResource<ISpace>
   ) {
+    const baseCFUrl = `/cloud-foundry/${application.cfGuid}`;
+    const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
     return [
       {
         breadcrumbs: [{
@@ -113,16 +115,16 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         breadcrumbs: [
           {
             value: endpoint.name,
-            routerLink: `/cloud-foundry/${application.cfGuid}`
-          },
-          {
-            value: space.entity.name,
-            routerLink: '/applications'
+            routerLink: baseCFUrl
           },
           {
             value: org.entity.name,
-            routerLink: '/applications'
-          }
+            routerLink: baseOrgUrl
+          },
+          {
+            value: space.entity.name,
+            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}`
+          },
         ]
       }
     ];

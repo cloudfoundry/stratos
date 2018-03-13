@@ -22,7 +22,7 @@ export class GetSpace extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string, private withInlineDepth: number) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `space/${guid}`;
+    this.options.url = `spaces/${guid}`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     if (withInlineDepth !== 0) {
