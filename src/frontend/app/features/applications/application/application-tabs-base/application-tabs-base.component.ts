@@ -56,7 +56,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private confirmDialog: ConfirmationDialogService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
-    debugger;
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
       withLatestFrom(
         endpoints$,
@@ -64,7 +63,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         applicationService.appSpace$
       ),
       map(([app, endpoints, org, space]) => {
-        debugger;
         return this.getBreadcrumbs(
           app.entity.entity,
           endpoints[app.entity.entity.cfGuid],
@@ -103,7 +101,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     org: APIResource<IOrganization>,
     space: APIResource<ISpace>
   ) {
-    debugger;
     return [
       {
         breadcrumbs: [{

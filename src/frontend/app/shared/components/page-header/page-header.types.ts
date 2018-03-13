@@ -1,6 +1,6 @@
 export interface IHeaderBreadcrumbLink {
   value: string;
-  routerLink: string;
+  routerLink?: string;
 }
 
 export interface IHeaderBreadcrumb {
