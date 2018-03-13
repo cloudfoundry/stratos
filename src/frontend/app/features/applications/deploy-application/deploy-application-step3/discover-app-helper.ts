@@ -41,12 +41,9 @@ export class DiscoverAppHelper {
           .get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` + this.spaceGuid + '&q=name:' + this.name, this.getRequestArgs())
           .pipe(
             mergeMap(info => {
-              console.log(info);
               if (info && info[this.cfGuid]) {
                 const apps = info[this.cfGuid];
                 if (apps.total_results === 1) {
-                  console.log('FOUND APP !!!!');
-                  console.log(apps.resources[0]);
                   this.app$.next(apps.resources[0]);
                 }
               }
