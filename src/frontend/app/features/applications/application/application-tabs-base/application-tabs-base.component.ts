@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { take, tap, map, startWith, pairwise } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
@@ -15,6 +16,7 @@ import { ApplicationService } from '../../application.service';
 import { APIResource } from '../../../../store/types/api.types';
 import { interval } from 'rxjs/observable/interval';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
+import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -48,7 +50,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
   ) { }
 
   public async: any;
@@ -66,14 +68,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     update => update[this.autoRefreshString] || { busy: false }
   );
 
-  tabLinks = [
+  tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'instances', label: 'Instances' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
+    { link: 'events', label: 'Events' },
+    { link: 'github', label: 'GitHub', hidden: true },
   ];
+
+  tabs$ = new BehaviorSubject<any>(this.tabLinks);
 
   stopApplication() {
     this.confirmDialog.open(appStopConfirmation, () => {
@@ -180,7 +185,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           stratProject.deploySource &&
           stratProject.deploySource.type === 'github'
         ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+          // Make the GitHub tab visible
+          const githubTab = this.tabLinks.find((tab) => tab.link === 'github');
+          githubTab.hidden = false;
+          this.tabs$.next(this.tabLinks);
         }
       });
   }

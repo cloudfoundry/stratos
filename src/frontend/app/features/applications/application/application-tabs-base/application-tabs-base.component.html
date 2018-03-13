@@ -24,7 +24,7 @@
       </span>
   </div>
 </app-page-header>
-<app-page-subheader [tabs]="tabLinks">
+<app-page-subheader [tabs$]="tabs$">
 </app-page-subheader>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving application'">
   <router-outlet></router-outlet>
