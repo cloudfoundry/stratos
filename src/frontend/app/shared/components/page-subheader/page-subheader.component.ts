@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Input, OnInit, OnDestroy, ChangeDet
 
 import { ISubHeaderTabs } from './page-subheader.types';
 import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-page-subheader',
