@@ -1,11 +1,8 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { schema } from 'normalizr';
 
-import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { domainSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
-import { entityFactory } from '../helpers/entity-factory';
-import { domainSchemaKey } from '../helpers/entity-factory';
 
 export const GET_DOMAIN = '[domain] Get domain ';
 export const GET_DOMAIN_SUCCESS = '[domain] Get domain success';

@@ -1,8 +1,18 @@
 import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IApp } from '../../core/cf-api.types';
-import { applicationSchemaKey, appStatsSchemaKey, entityFactory, routeSchemaKey, domainSchemaKey } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
+import {
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+} from '../helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  EntityInlineChildAction,
+  EntityInlineParentAction,
+} from '../helpers/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';

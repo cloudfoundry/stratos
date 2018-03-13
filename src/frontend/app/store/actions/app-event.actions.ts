@@ -1,12 +1,8 @@
-import { CFStartAction } from '../types/request.types';
-import { getAPIResourceGuid } from '../selectors/api.selectors';
-import { schema } from 'normalizr';
-
-import { ApiActionTypes } from './request.actions';
-import { PaginatedAction, QParam } from '../types/pagination.types';
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { appEventSchemaKey } from '../helpers/entity-factory';
-import { entityFactory } from '../helpers/entity-factory';
+
+import { appEventSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { PaginatedAction, QParam } from '../types/pagination.types';
+import { CFStartAction } from '../types/request.types';
 
 export const AppGetAllEvents = {
   GET_ALL: '[Application Event] Get all',

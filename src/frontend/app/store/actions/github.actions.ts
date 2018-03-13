@@ -1,9 +1,8 @@
-import { Action } from '@ngrx/store';
 import {
-  EnvVarStratosProject
+  EnvVarStratosProject,
 } from '../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-import { IRequestAction } from '../types/request.types';
 import { githubRepoSchemaKey } from '../helpers/entity-factory';
+import { IRequestAction } from '../types/request.types';
 
 export const FETCH_GITHUB_REPO = '[Github] Fetch Github repo details';
 

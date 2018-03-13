@@ -142,6 +142,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.isFetching$ =
       Observable.combineLatest(
         this.applicationService.isFetchingApp$,
+        // Include the first updating change to cover case where we have the app... but soon mark as updating due to missing entities
         this.applicationService.isUpdatingApp$.pipe(
           startWith(true),
           pairwise(),
