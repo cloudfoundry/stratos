@@ -26,6 +26,7 @@ import {
 import { pick } from './reducer.helper';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
+import { getPaginationObservables } from '../reducers/pagination-reducer/pagination-reducer.helper';
 
 class AppStoreLayout {
   [entityKey: string]: {
@@ -63,6 +64,14 @@ class ValidateEntityRelationsConfig {
    * @memberof ValidateEntityRelationsConfig
    */
   allEntities: AppStoreLayout;
+  /**
+   * Pagination store. Used to determine if we already have the entity/entites. This and allEntities make the inner loop code much easier
+   * and quicker
+   *
+   * @type {AppStoreLayout}
+   * @memberof ValidateEntityRelationsConfig
+   */
+  allPagination: AppStoreLayout;
   /**
    * New entities that have not yet made it into the store (as a result of being called mid-api handling). Used to determine if we already
    * have an entity/entities
@@ -185,6 +194,10 @@ function createActionsForMissingEntities(config: HandleRelationsConfig): Validat
 
   if (childRelation.isArray) {
     const paramPaginationAction = paramAction as FetchRelationPaginatedAction;
+    // Why do we add this? Strictly speaking we don't want to retain or care about the pagination section AFTER the validation process is
+    // finished (we want to track the result and handle the flatten whilst making the api/validation request). The only list we now care
+    // about wil be in the parent entity.
+    paramPaginationAction.paginationKey += '-relation';
     results = [].concat(results, [{
       action: new SetInitialParams(paramAction.entityKey, paramPaginationAction.paginationKey, paramPaginationAction.initialParams, true)
     },
@@ -211,7 +224,7 @@ function createActionsForMissingEntities(config: HandleRelationsConfig): Validat
  * @returns {ValidateEntityResult[]}
  */
 function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
-  const { cfGuid, allEntities, parentRelation, parentEntity, childRelation, childEntities, populateMissing } = config;
+  const { cfGuid, childEntities, parentEntity, parentRelation, childRelation, populateMissing } = config;
 
   if (!cfGuid) {
     throw Error(`No CF Guid provided when validating
@@ -235,7 +248,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
  * @returns {ValidateEntityResult[]}
  */
 function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
-  const { cfGuid, entities, parentRelation } = config;
+  const { store, cfGuid, entities, parentRelation, allEntities, allPagination, newEntities } = config;
 
   if (!entities) {
     return [];
@@ -244,7 +257,39 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   let results: ValidateEntityResult[] = [];
   parentRelation.childRelations.forEach(childRelation => {
     entities.forEach(entity => {
-      const childEntities = pathGet(childRelation.path, entity);
+      let childEntities = pathGet(childRelation.path, entity);
+      if (!childEntities) {
+        let childEntitiesAsArray;
+
+        if (childRelation.isArray) {
+          const paginationState: PaginationEntityState = pathGet(
+            `${childRelation.entityKey}.${createEntityRelationPaginationKey(parentRelation.entityKey, entity.metadata.guid)}`,
+            allPagination);
+          childEntitiesAsArray = paginationState ? paginationState.ids[paginationState.currentPage] : null;
+        } else {
+          const guid = pathGet(childRelation.path + '_guid', entity);
+          childEntitiesAsArray = [guid];
+        }
+
+        if (childEntitiesAsArray) {
+          const guids = childEntitiesAsGuids(childEntitiesAsArray);
+
+          childEntities = [];
+          const allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
+          const newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
+          for (let i = 0; i < guids.length; i++) {
+            const guid = guids[i];
+            const foundEntity = newEntitiesOfType[guid] || allEntitiesOfType[guid];
+            if (foundEntity) {
+              childEntities.push(foundEntity);
+            } else {
+              childEntities = null;
+              break;
+            }
+          }
+        }
+      }
+
       results = [].concat(results, handleRelation({
         ...config,
         cfGuid: cfGuid || entity.entity.cfGuid,
@@ -255,16 +300,16 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
       }
       ));
       if (childEntities && childRelation.childRelations.length) {
-        results = [].concat(results,
-          validationLoop({
-            ...config,
-            cfGuid: cfGuid || entity.entity.cfGuid,
-            entities: childRelation.isArray ? childEntities : [childEntities],
-            parentRelation: childRelation
-          }));
+        results = [].concat(results, validationLoop({
+          ...config,
+          cfGuid: cfGuid || entity.entity.cfGuid,
+          entities: childRelation.isArray ? childEntities : [childEntities],
+          parentRelation: childRelation
+        }));
       }
     });
   });
+
 
   return results;
 }
@@ -344,6 +389,10 @@ export function listEntityRelations(action: EntityInlineParentAction) {
   };
 }
 
+function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
+  return childEntitiesAsArray ? childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity) : null;
+}
+
 /**
  * Create actions required to populate parent entities with exist children
  *
@@ -357,7 +406,7 @@ function createPaginationSuccessAction(config: HandleRelationsConfig): WrapperRe
   const paramAction = createAction(config);
   // We've got the value already, ensure we create a pagination section for them
   let response: NormalizedResponse;
-  const guids = childEntitiesAsArray.map(entity => pathGet('metadata.guid', entity) || entity);
+  const guids = childEntitiesAsGuids(childEntitiesAsArray);
   const entities = pick(newEntities[childRelation.entityKey], guids as [string]) ||
     pick(allEntities[childRelation.entityKey], guids as [string]);
   response = {
@@ -395,7 +444,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     withLatestFrom(store.select(getAPIRequestDataState)),
     map(([entity, allEntities]) => {
       if (!entity) {
-        return null;
+        return;
       }
       // Find the property name (for instance a list of routes in a parent space would have param name `routes`)
       const entities = parentEntitySchema.schema['entity'] || {};
@@ -405,10 +454,14 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
         const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
         const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
         if (arraySafeEntitySchema.key === action.entityKey) {
+          if (!entity.entity[paramName]) {
+            return;
+          }
           const config: HandleRelationsConfig = {
             store,
             action: null,
             allEntities,
+            allPagination: {},
             newEntities: {},
             parentEntities: null,
             entities: entity.entity[paramName],
@@ -424,7 +477,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
           return createPaginationSuccessAction(config);
         }
       }
-      return null;
+      return;
     })
   );
 }

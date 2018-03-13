@@ -52,7 +52,7 @@ export class CloudFoundryEndpointService {
 
   getAllOrgsAction: GetAllOrganisations;
 
-  static createGetAllOrganisations(cfGuid) {
+  static createGetAllOrganisations(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey, 'all');

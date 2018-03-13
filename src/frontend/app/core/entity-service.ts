@@ -46,6 +46,8 @@ export class EntityService<T = any> {
       this.actionDispatch(this.refreshKey);
     };
 
+    let validated = false;
+
     this.updatingSection$ = entityMonitor.updatingSection$;
     this.isDeletingEntity$ = entityMonitor.isDeletingEntity$;
     this.isFetchingEntity$ = entityMonitor.isFetchingEntity$;
@@ -55,26 +57,39 @@ export class EntityService<T = any> {
     ).pipe(
       publishReplay(1),
       refCount(),
-      startWith({
-        entity: null,
-        entityRequestInfo: null
-      }),
-      pairwise(),
-      tap(([prevResult, result]) => {
-        if (!validateRelations) {
+      filter(entityInfo => !entityInfo || entityInfo.entity),
+      tap((entityInfo: EntityInfo) => {
+        if (!validateRelations || validated || this.isEntityBlocked(entityInfo.entityRequestInfo) || !entityInfo.entity.metadata) {
           return;
         }
-        const firstTime = !prevResult.entity && !!result.entity;
-        if (firstTime && !this.isEntityBlocked(result.entityRequestInfo)) {
-          store.dispatch(new ValidateEntitiesStart(
-            action as ICFAction,
-            [result.entity.metadata.guid],
-            false
-          ));
-        }
-      }),
-      filter(([oldEntity, newEntity]) => !!newEntity),
-      map(([oldEntity, newEntity]) => newEntity)
+        validated = true;
+        store.dispatch(new ValidateEntitiesStart(
+          action as ICFAction,
+          [entityInfo.entity.metadata.guid],
+          false
+        ));
+      })
+      // startWith({
+      //   entity: null,
+      //   entityRequestInfo: null
+      // }),
+      // pairwise(),
+      // tap(([prevResult, result]) => {
+      //   if (!validateRelations) {
+      //     return;
+      //   }
+      //   const firstTime = !prevResult.entity && !!result.entity;
+      //   if (!validated && firstTime && !this.isEntityBlocked(result.entityRequestInfo)) {
+      //     validated = true;
+      //     store.dispatch(new ValidateEntitiesStart(
+      //       action as ICFAction,
+      //       [result.entity.metadata.guid],
+      //       false
+      //     ));
+      //   }
+      // }),
+      // filter(([oldEntity, newEntity]) => !!newEntity),
+      // map(([oldEntity, newEntity]) => newEntity)
     );
 
     this.waitForEntity$ = this.entityObs$.pipe(

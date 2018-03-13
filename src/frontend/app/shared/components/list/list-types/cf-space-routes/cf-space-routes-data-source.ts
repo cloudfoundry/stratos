@@ -32,7 +32,7 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
     // const paginationKey = getPaginationKey('cf-space-routes', cfGuid, spaceGuid);
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
     const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
-      createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+      // createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
     ]);
     const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(

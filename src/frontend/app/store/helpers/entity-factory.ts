@@ -234,6 +234,8 @@ entityCache[securityGroupSchemaKey] = SecurityGroupSchema;
 const FeatureFlagSchema = new EntitySchema(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[featureFlagSchemaKey] = FeatureFlagSchema;
 
+const OrganisationUserSchema = new EntitySchema(
+  organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'users_organizations');
 const OrganisationAuditedSchema = new EntitySchema(
   organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_organizations');
 const OrganisationManagedSchema = new EntitySchema(
@@ -244,16 +246,17 @@ const OrganisationBillingSchema = new EntitySchema(
     idAttribute: getAPIResourceGuid
   },
   'billing_managed_organizations');
+const SpaceUserSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'users_spaces');
 const SpaceManagedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_spaces');
-const SpaceAuditedSchema = new EntitySchema(organisationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces');
+const SpaceAuditedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces');
 
 const CFUserSchema = new EntitySchema(cfUserSchemaKey, {
   entity: {
-    organizations: [OrganisationSchema],
+    organizations: [OrganisationUserSchema],
     audited_organizations: [OrganisationAuditedSchema],
     managed_organizations: [OrganisationManagedSchema],
     billing_managed_organizations: [OrganisationBillingSchema],
-    spaces: [SpaceSchema],
+    spaces: [SpaceUserSchema],
     managed_spaces: [SpaceManagedSchema],
     audited_spaces: [SpaceAuditedSchema],
   }

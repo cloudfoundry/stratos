@@ -3,7 +3,7 @@ import { schema } from 'normalizr';
 
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
-import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, entityFactory, spaceSchemaKey, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { first, map, mergeMap } from 'rxjs/operators';
+import { first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
@@ -19,6 +19,7 @@ import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
 import { UpdateCfAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, APISuccessOrFailedAction } from '../types/request.types';
 import { validateEntityRelations } from '../helpers/entity-relations';
+import { getPaginationState } from '../selectors/pagination.selectors';
 
 @Injectable()
 export class RequestEffect {
@@ -70,13 +71,15 @@ export class RequestEffect {
 
       const apiResponse = validateAction.apiResponse;
 
-      return this.store.select(getAPIRequestDataState).first().pipe(
+      return this.store.select(getAPIRequestDataState).pipe(
+        withLatestFrom(this.store.select(getPaginationState)),
         first(),
-        map(allEntities => {
+        map(([allEntities, allPagination]) => {
           return validateEntityRelations({
             cfGuid: validateAction.action.endpointGuid,
             store: this.store,
             allEntities,
+            allPagination,
             newEntities: apiResponse ? apiResponse.response.entities : null,
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
