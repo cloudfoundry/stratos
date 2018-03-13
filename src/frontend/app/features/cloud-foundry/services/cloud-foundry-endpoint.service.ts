@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, shareReplay } from 'rxjs/operators';
 
-import { IApp, IOrganization, ISpace, ICfV2Info } from '../../../core/cf-api.types';
+import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
@@ -23,7 +23,6 @@ import {
   quotaDefinitionSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
-  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -63,8 +62,6 @@ export class CloudFoundryEndpointService {
         createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
-        // Although space routes are not needed for this level, failing to fetch them here inline causes lots of spam if we go into a space
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       ]);
   }
 

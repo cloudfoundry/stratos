@@ -32,7 +32,6 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
     // const paginationKey = getPaginationKey('cf-space-routes', cfGuid, spaceGuid);
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
     const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
-      // createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
     ]);
     const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
@@ -45,7 +44,7 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
       schema: entityFactory(routeSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
-      isLocal: true,
+      isLocal: false,
       listConfig,
       rowsState: rowStateManager.observable,
       destroy: () => sub.unsubscribe()

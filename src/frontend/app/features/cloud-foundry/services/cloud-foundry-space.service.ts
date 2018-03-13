@@ -63,9 +63,9 @@ export class CloudFoundrySpaceService {
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+        createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
         createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
       ]),
       true
     );

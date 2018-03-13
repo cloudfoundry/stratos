@@ -35,7 +35,9 @@ export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResour
       schema: entityFactory(serviceInstancesSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey,
-      isLocal: true,
+      // This would normally be fetched inline, however some of the SI's children will be missing if the SI was fetched by the org
+      // request. This can lead to a new request per row and can grind the console to a halt
+      isLocal: false,
       transformEntities: [],
       listConfig
     });
