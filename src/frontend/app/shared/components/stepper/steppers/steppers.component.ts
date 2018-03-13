@@ -1,8 +1,15 @@
-import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation } from '@angular/core';
+import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { Observable, Subscription } from 'rxjs/Rx';
 
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../store/app-state';
+import { EntityService } from '../../../../core/entity-service';
+import { selectEntity } from '../../../../store/selectors/api.selectors';
+import { getPreviousEvent } from '../../../../store/types/routing.type';
+import { tap, filter, map } from 'rxjs/operators';
+import { RoutesRecognized } from '@angular/router';
 
 @Component({
   selector: 'app-steppers',
@@ -13,8 +20,7 @@ import { StepComponent } from './../step/step.component';
 })
 export class SteppersComponent implements OnInit, AfterContentInit {
 
-  constructor(
-    private steppersService: SteppersService) { }
+  cancel$: Observable<string>;
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
@@ -26,6 +32,15 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   stepValidateSub: Subscription = null;
 
   currentIndex = 0;
+
+  constructor(
+    private steppersService: SteppersService,
+    private store: Store<AppState>
+  ) {
+
+    this.cancel$ = store.select(getPreviousEvent).pipe(
+      map(e => !e ? this.cancel : e.url));
+  }
 
   ngOnInit() {
   }
