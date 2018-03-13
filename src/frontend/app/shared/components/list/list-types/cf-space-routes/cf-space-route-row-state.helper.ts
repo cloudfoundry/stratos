@@ -38,8 +38,8 @@ export class SpaceRouteDataSourceHelper {
     rowStateManager: TableRowStateManager
   ) {
     return paginationMonitor.currentPage$.pipe(
-      map(routes => routes
-        .map(route => {
+      map(routes => {
+        return routes.map(route => {
           const entityMonitor = new EntityMonitor(store, route.metadata.guid, routeSchemaKey, entityFactory(routeSchemaKey));
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
@@ -53,7 +53,8 @@ export class SpaceRouteDataSourceHelper {
             })
           );
           return request$;
-        })
+        });
+      }
       ),
       switchMap(endpointObs => combineLatest(endpointObs))
     ).subscribe();

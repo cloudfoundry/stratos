@@ -47,6 +47,7 @@ export class GetServicesInstancesInSpace
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);
+  flattenPagination = true;
 }
 
 export class DeleteServiceInstance extends CFStartAction implements ICFAction {

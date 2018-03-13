@@ -193,6 +193,7 @@ entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
 const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     apps: [ApplicationWithoutSpaceEntitySchema],
+    routes: [RouteSchema],
     organization: OrganisationSchema,
     domains: [DomainSchema],
     space_quota_definition: SpaceQuotaSchema,

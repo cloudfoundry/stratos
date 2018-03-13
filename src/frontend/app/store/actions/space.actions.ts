@@ -122,6 +122,7 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);
+  flattenPagination = true;
 }
 
 export class DeleteSpace extends CFStartAction implements ICFAction {

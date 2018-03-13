@@ -114,17 +114,16 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     const { cfGuid, appGuid } = this.applicationService;
-    // TODO: RC
     // Auto refresh
-    // this.entityServiceAppRefresh$ = this.entityService
-    //   .poll(10000, this.autoRefreshString)
-    //   .do(({ resource }) => {
-    //     this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
-    //     if (resource && resource.entity && resource.entity.state === 'STARTED') {
-    //       this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-    //     }
-    //   })
-    //   .subscribe();
+    this.entityServiceAppRefresh$ = this.entityService
+      .poll(10000, this.autoRefreshString)
+      .do(({ resource }) => {
+        this.store.dispatch(new GetAppSummaryAction(appGuid, cfGuid));
+        if (resource && resource.entity && resource.entity.state === 'STARTED') {
+          this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+        }
+      })
+      .subscribe();
 
     this.appSub$ = this.applicationService.app$.subscribe(app => {
       if (
@@ -188,6 +187,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.appSub$.unsubscribe();
-    // this.entityServiceAppRefresh$.unsubscribe();
+    this.entityServiceAppRefresh$.unsubscribe();
   }
 }

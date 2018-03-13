@@ -256,7 +256,9 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
   parentRelation.childRelations.forEach(childRelation => {
     entities.forEach(entity => {
       let childEntities = pathGet(childRelation.path, entity);
-      if (!childEntities) {
+      if (childEntities) {
+        childEntities = childRelation.isArray ? childEntities : [childEntities];
+      } else {
         let childEntitiesAsArray;
 
         if (childRelation.isArray) {
@@ -301,7 +303,7 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
         results = [].concat(results, validationLoop({
           ...config,
           cfGuid: cfGuid || entity.entity.cfGuid,
-          entities: childRelation.isArray ? childEntities : [childEntities],
+          entities: childEntities,
           parentRelation: childRelation
         }));
       }
