@@ -8,10 +8,9 @@ import {
   AppSummarySchema
 } from './app-metadata.types';
 import { SystemInfo } from './system.types';
-import { IRoute, IFeatureFlag } from '../../core/cf-api.types';
+import { IRoute, IFeatureFlag, IApp } from '../../core/cf-api.types';
 
 export interface IRequestDataInternal<T> extends IRequestTypeState {
-  application: IRequestEntityTypeState<T>;
   stack: IRequestEntityTypeState<T>;
   space: IRequestEntityTypeState<T>;
   organization: IRequestEntityTypeState<T>;
@@ -26,13 +25,13 @@ export interface IRequestDataInternal<T> extends IRequestTypeState {
   service: IRequestEntityTypeState<T>;
   serviceBinding: IRequestEntityTypeState<T>;
   securityGroup: IRequestEntityTypeState<T>;
-
 }
 
 export interface IRequestDataState extends IRequestDataInternal<APIResource> {
   endpoint: IRequestEntityTypeState<EndpointModel>;
   system: IRequestEntityTypeState<SystemInfo>;
   featureFlag: IRequestEntityTypeState<IFeatureFlag>;
+  application: IRequestEntityTypeState<APIResource<IApp>>;
 }
 
 export interface IRequestState extends IRequestDataInternal<RequestInfoState> {
