@@ -21582,7 +21582,7 @@ const testInitialStoreState: AppState = {
     actionHistory: [],
     lists: {},
     routing: {
-      history: []
+      currentState: null
     }
   };
   /* tslint:enable */

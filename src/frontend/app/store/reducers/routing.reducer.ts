@@ -6,8 +6,8 @@ export function routingReducer(state: RoutingHistory = defaultRoutingState, acti
   switch (action.type) {
     case ROUTER_NAVIGATION:
       return {
-        history: state.history.concat([action.payload.event]),
-        previousState: state.history.length > 0 ? state.history[state.history.length - 1] : null,
+        // history: state.history.concat([action.payload.event]),
+        previousState: state.currentState ? state.currentState : null,
         currentState: action.payload.event
 
       };
