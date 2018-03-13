@@ -6,20 +6,21 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, take, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, pairwise, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { pathGet } from '../../../../core/utils.service';
 import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { selectEntity, selectNestedEntity, selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { applicationSchemaKey, domainSchemaKey, routeSchemaKey } from '../../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
-import { routeSchemaKey, domainSchemaKey, applicationSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
 
 @Component({
   selector: 'app-add-routes',
@@ -80,6 +81,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     const space$ = this.appService.waitForAppEntity$
       .pipe(
+        filter(p => !!p.entity.entity.space),
         tap(p => {
           this.spaceGuid = p.entity.entity.space.metadata.guid;
           const domains = p.entity.entity.space.entity.domains;
@@ -158,14 +160,14 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         )
       )
     );
-    const associateRoute$ = this.store
-      .select(selectRequestInfo(routeSchemaKey, newRouteGuid))
+    const associateRoute$ = this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
         filter(route => !route.creating && !route.fetching),
-        map(route => {
+        mergeMap(route => {
           if (route.error) {
             this.submitted = false;
             this.displaySnackBar();
+            return Observable.of(null);
           } else {
             const routeAssignAction = new AssociateRouteWithAppApplication(
               this.appGuid,
@@ -173,10 +175,18 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               this.cfGuid
             );
             this.store.dispatch(routeAssignAction);
-            this.submitted = false;
-            this.store.dispatch(
-              new RouterNav({
-                path: ['/applications', this.cfGuid, this.appGuid]
+            return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
+              pairwise(),
+              filter(([oldApp, newApp]) => {
+                return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);
+              }),
+              tap(appState => {
+                this.submitted = false;
+                this.store.dispatch(
+                  new RouterNav({
+                    path: ['/applications', this.cfGuid, this.appGuid]
+                  })
+                );
               })
             );
           }

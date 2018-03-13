@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, shareReplay } from 'rxjs/operators';
+import { map, shareReplay, filter } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -113,7 +113,11 @@ export class CloudFoundryEndpointService {
 
     this.allApps$ = this.orgs$.pipe(
       map(p => {
-        return p.map(o => o.entity.spaces.map(space => space.entity.apps || []));
+        return p
+          .filter(o => !!o.entity.spaces)
+          .map(o => {
+            return o.entity.spaces.map(space => space.entity.apps || []);
+          });
       }),
       map(a => {
         let flatArray = [];

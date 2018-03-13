@@ -58,6 +58,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   deleteSpace = () => {
     this.cfOrgSpaceService.deleteSpace(
       this.cfSpaceService.spaceGuid,
+      this.cfSpaceService.orgGuid,
       this.cfSpaceService.cfGuid
     );
 

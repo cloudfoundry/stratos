@@ -170,7 +170,7 @@ export class CfOrgSpaceDataService {
     this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
   }
 
-  public deleteSpace(spaceGuid: string, endpointGuid: string) {
-    this.store.dispatch(new DeleteSpace(spaceGuid, endpointGuid));
+  public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
+    this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
   }
 }

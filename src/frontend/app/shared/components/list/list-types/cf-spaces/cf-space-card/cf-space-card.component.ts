@@ -139,6 +139,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   delete = () => {
     this.cfOrgSpaceDataService.deleteSpace(
       this.spaceGuid,
+      this.orgGuid,
       this.cfEndpointService.cfGuid
     );
   }

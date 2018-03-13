@@ -19,6 +19,8 @@ import {
   servicePlanSchemaKey,
   serviceSchemaKey,
   spaceQuotaSchemaKey,
+  applicationSchemaKey,
+  spaceSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -29,6 +31,8 @@ import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-appl
 import { routeReducer } from './routes.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer } from './users.reducer';
+import { updateApplicationRoutesReducer } from './application-route.reducer';
+import { updateOrganisationSpaceReducer } from './organisation-space.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -110,9 +114,15 @@ export function requestDataReducer(state, action) {
     [cfUserSchemaKey]: [userReducer],
     [routeSchemaKey]: [routeReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
-    application: [endpointDisconnectApplicationReducer('application')],
-    space: [endpointDisconnectApplicationReducer('space')],
-    organization: [endpointDisconnectApplicationReducer('organization')]
+    [applicationSchemaKey]: [
+      updateApplicationRoutesReducer(),
+      endpointDisconnectApplicationReducer('application')
+    ],
+    [spaceSchemaKey]: [endpointDisconnectApplicationReducer('space')],
+    [organisationSchemaKey]: [
+      updateOrganisationSpaceReducer(),
+      endpointDisconnectApplicationReducer('organization')
+    ]
   };
 
   return chainReducers(baseDataReducer, extraReducers)(state, action);

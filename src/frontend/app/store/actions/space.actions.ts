@@ -22,6 +22,14 @@ export const GET_SPACE = '[Space] Get one';
 export const GET_SPACE_SUCCESS = '[Space] Get one success';
 export const GET_SPACE_FAILED = '[Space] Get one failed';
 
+export const CREATE_SPACE = '[Space] Create';
+export const CREATE_SPACE_SUCCESS = '[Space] Create Success';
+export const CREATE_SPACE_FAILED = '[Space] Create Failed';
+
+export const DELETE_SPACE = '[Space] Create';
+export const DELETE_SPACE_SUCCESS = '[Space] Create Success';
+export const DELETE_SPACE_FAILED = '[Space] Create Failed';
+
 export class GetSpace extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(
     public guid: string,
@@ -125,9 +133,19 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
   flattenPagination = true;
 }
 
-export class DeleteSpace extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string) {
+export abstract class BaseSpaceAction extends CFStartAction implements ICFAction {
+  constructor(public guid: string, public orgGuid: string, public endpointGuid: string) {
     super();
+  }
+  actions: string[];
+  entity = [entityFactory(spaceSchemaKey)];
+  entityKey = spaceSchemaKey;
+  options: RequestOptions;
+}
+
+export class DeleteSpace extends BaseSpaceAction {
+  constructor(guid: string, orgGuid: string, endpointGuid: string) {
+    super(guid, orgGuid, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = `spaces/${guid}`;
     this.options.method = 'delete';
@@ -135,29 +153,21 @@ export class DeleteSpace extends CFStartAction implements ICFAction {
     this.options.params.append('recursive', 'true');
     this.options.params.append('async', 'false');
   }
-  actions = getActions('Spaces', 'Delete Space');
-  entity = [entityFactory(spaceSchemaKey)];
-  entityKey = spaceSchemaKey;
-  options: RequestOptions;
+  actions = [DELETE_SPACE, DELETE_SPACE_SUCCESS, DELETE_SPACE_FAILED];
 }
 
-export class CreateSpace extends CFStartAction implements ICFAction {
-  constructor(public name: string, public orgGuid: string, public endpointGuid: string) {
-    super();
+export class CreateSpace extends BaseSpaceAction {
+  constructor(public name: string, orgGuid: string, endpointGuid: string) {
+    super(`${orgGuid}-${name}`, orgGuid, endpointGuid);
     this.options = new RequestOptions();
     this.options.url = `spaces`;
     this.options.method = 'post';
-    this.guid = `${orgGuid}-${name}`;
     this.options.body = {
       name: name,
       organization_guid: orgGuid
     };
   }
-  actions = getActions('Spaces', 'Create Space');
-  entity = [entityFactory(spaceSchemaKey)];
-  entityKey = spaceSchemaKey;
-  options: RequestOptions;
-  guid: string;
+  actions = [CREATE_SPACE, CREATE_SPACE_SUCCESS, CREATE_SPACE_FAILED];
 }
 export class UpdateSpace extends CFStartAction implements ICFAction {
 

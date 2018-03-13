@@ -60,7 +60,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     this.store.dispatch(new CreateSpace(spaceName, this.orgGuid, this.cfGuid));
 
     this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(
-      filter(o => !!o && !o.creating),
+      filter(o => {
+        return !!o && !o.fetching && !o.creating;
+      }),
       this.map(
         ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces'],
         'Failed to create space! Please select a different name and try again!'
