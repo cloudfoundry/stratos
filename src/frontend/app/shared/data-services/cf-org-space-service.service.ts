@@ -139,7 +139,7 @@ export class CfOrgSpaceDataService {
     ).map(([selectedOrgGuid, data, orgs]) => {
       const [orgList, cfList] = data;
       const selectedOrg = orgs.find(org => {
-        return org.entity.guid === selectedOrgGuid;
+        return org.metadata.guid === selectedOrgGuid;
       });
       if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
         return selectedOrg.entity.spaces.map(space => {

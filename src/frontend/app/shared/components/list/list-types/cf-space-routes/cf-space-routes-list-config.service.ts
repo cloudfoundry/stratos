@@ -113,7 +113,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
-      new DeleteRoute(route.entity.guid, this.dataSource.cfGuid)
+      new DeleteRoute(route.metadata.guid, this.dataSource.cfGuid)
     );
   }
 
@@ -121,7 +121,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     return route.entity.apps.map(a => a.metadata.guid).forEach(
       p => this.store.dispatch(
         new UnmapRoute(
-          route.entity.guid,
+          route.metadata.guid,
           p,
           this.dataSource.cfGuid
         )

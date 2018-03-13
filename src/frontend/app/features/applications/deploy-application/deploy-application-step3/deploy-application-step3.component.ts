@@ -169,7 +169,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
                 app.entity.cfGuid === this.appData.cloudFoundry &&
                 app.entity.name === this.appData.Name
               ) {
-                this.appGuid = app.entity.guid;
+                this.appGuid = app.metadata.guid;
                 this.validate = Observable.of(true);
               }
             });

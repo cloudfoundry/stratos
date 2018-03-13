@@ -82,14 +82,14 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
-      new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
+      new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
     );
   }
 
   dispatchUnmapAction(route) {
     return this.store.dispatch(
       new UnmapRoute(
-        route.entity.guid,
+        route.metadata.guid,
         this.routesDataSource.appGuid,
         this.routesDataSource.cfGuid
       )

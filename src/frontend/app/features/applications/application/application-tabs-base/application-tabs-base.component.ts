@@ -146,7 +146,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         this.applicationService.isUpdatingApp$.pipe(
           startWith(true),
           pairwise(),
-          map((oldVal, newVal) => {
+          map(([oldVal, newVal]) => {
             return oldVal && !newVal;
           }),
           map(val => !val)

@@ -10,6 +10,7 @@ import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { PaginatedAction } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
   public cfGuid: string;
@@ -27,8 +28,7 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
       store,
       action,
       schema: entityFactory(routeSchemaKey),
-      getRowUniqueId: (object: EntityInfo) =>
-        object.entity ? object.entity.guid : null,
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       listConfig,

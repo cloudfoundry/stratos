@@ -161,7 +161,7 @@ export class CloudFoundryEndpointService {
   ): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       map(apps => {
-        return apps.filter(a => a.entity.space_guid === space.entity.guid);
+        return apps.filter(a => a.entity.space_guid === space.metadata.guid);
       })
     );
   }

@@ -111,7 +111,7 @@ export class CfUserService {
 
   private getUser(userGuid: string): (source: Observable<APIResource<CfUser>[]>) => Observable<APIResource<CfUser>> {
     return map(users => {
-      return users.filter(o => o.entity.guid === userGuid)[0];
+      return users.filter(o => o.metadata.guid === userGuid)[0];
     });
   }
 }
