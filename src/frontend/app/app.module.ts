@@ -15,7 +15,7 @@ import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
 import { LoggedInService } from './logged-in.service';
 import { Params, RouterStateSnapshot } from '@angular/router';
-// import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 
 // Create action for router navigation. See
@@ -23,28 +23,28 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
 // - https://github.com/ngrx/platform/issues/201 (https://github.com/ngrx/platform/pull/355)
 
 // https://github.com/ngrx/platform/blob/master/docs/router-store/api.md#custom-router-state-serializer
-// export interface RouterStateUrl {
-//   url: string;
-//   params: Params;
-//   queryParams: Params;
-// }
-// export class CustomRouterStateSerializer
-//   implements RouterStateSerializer<RouterStateUrl> {
-//   serialize(routerState: RouterStateSnapshot): RouterStateUrl {
-//     let route = routerState.root;
-//     while (route.firstChild) {
-//       route = route.firstChild;
-//     }
+export interface RouterStateUrl {
+  url: string;
+  params: Params;
+  queryParams: Params;
+}
+export class CustomRouterStateSerializer
+  implements RouterStateSerializer<RouterStateUrl> {
+  serialize(routerState: RouterStateSnapshot): RouterStateUrl {
+    let route = routerState.root;
+    while (route.firstChild) {
+      route = route.firstChild;
+    }
 
-//     const { url } = routerState;
-//     const queryParams = routerState.root.queryParams;
-//     const params = route.params;
+    const { url } = routerState;
+    const queryParams = routerState.root.queryParams;
+    const params = route.params;
 
-//     // Only return an object including the URL, params and query params
-//     // instead of the entire snapshot
-//     return { url, params, queryParams };
-//   }
-// }
+    // Only return an object including the URL, params and query params
+    // instead of the entire snapshot
+    return { url, params, queryParams };
+  }
+}
 
 @NgModule({
   declarations: [
@@ -63,12 +63,12 @@ import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/
     LoginModule,
     HomeModule,
     DashboardModule,
-    ServiceCatalogueModule
-    // StoreRouterConnectingModule // Create action for router navigation
+    ServiceCatalogueModule,
+    StoreRouterConnectingModule // Create action for router navigation
   ],
   providers: [
     LoggedInService,
-    // { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
+    { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
 })
