@@ -164,7 +164,7 @@ export class ApplicationService {
         switchMap(orgGuid => {
           return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
         })
-      ))
+      ));
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.shareReplay(1);
 
