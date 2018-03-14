@@ -1,12 +1,17 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { domainSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { domainSchemaKey, endpointSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 
 export const GET_DOMAIN = '[domain] Get domain ';
 export const GET_DOMAIN_SUCCESS = '[domain] Get domain success';
 export const GET_DOMAIN_FAILED = '[domain] Get domain failed';
+
+export const GET_ALL_DOMAIN = '[domain] Get all domain ';
+export const GET_ALL_DOMAIN_SUCCESS = '[domain] Get all domain success';
+export const GET_ALL_DOMAIN_FAILED = '[domain] Get all domain failed';
 
 export class FetchDomain extends CFStartAction implements ICFAction {
   constructor(public domainGuid: string, public endpointGuid: string) {
@@ -28,8 +33,9 @@ export class FetchAllDomains extends CFStartAction implements PaginatedAction {
     this.options.url = 'shared_domains';
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
+    this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid);
   }
-  actions = [GET_DOMAIN, GET_DOMAIN_SUCCESS, GET_DOMAIN_FAILED];
+  actions = [GET_ALL_DOMAIN, GET_ALL_DOMAIN_SUCCESS, GET_ALL_DOMAIN_FAILED];
   entity = [entityFactory(domainSchemaKey)];
   entityKey = domainSchemaKey;
   options: RequestOptions;

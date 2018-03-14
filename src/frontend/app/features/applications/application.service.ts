@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, mergeMap } from 'rxjs/operators';
+import { filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -57,7 +57,6 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
       createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
       createEntityRelationKey(applicationSchemaKey, stackSchemaKey),
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, domainSchemaKey),
       createEntityRelationKey(spaceSchemaKey, organisationSchemaKey),
     ]
   );
@@ -68,7 +67,6 @@ export interface ApplicationData {
   app: EntityInfo;
   stack: EntityInfo;
   cf: any;
-  appUrl: string;
 }
 
 @Injectable()
@@ -107,6 +105,9 @@ export class ApplicationService {
   }
 
   // NJ: This needs to be cleaned up. So much going on!
+  /**
+   * An observable based on the core application entity
+   */
   isFetchingApp$: Observable<boolean>;
   isUpdatingApp$: Observable<boolean>;
 
@@ -128,6 +129,7 @@ export class ApplicationService {
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
   applicationState$: Observable<ApplicationStateData>;
+  applicationUrl$: Observable<string>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -200,6 +202,7 @@ export class ApplicationService {
         entityFactory(appEnvVarsSchemaKey)
       )
     }, true);
+
   }
 
   private constructAmalgamatedObservables() {
@@ -230,7 +233,6 @@ export class ApplicationService {
           app: entity,
           stack: entity.entity.stack,
           cf: endpoints[entity.entity.cfGuid],
-          appUrl: this.getAppUrl(entity)
         };
       }).shareReplay(1);
 
@@ -243,12 +245,10 @@ export class ApplicationService {
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
     }).shareReplay(1);
+
   }
 
   private constructStatusObservables() {
-    /**
-     * An observable based on the core application entity
-    */
     this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
 
     this.isUpdatingApp$ = this.appEntityService.entityObs$.map(a => {
@@ -266,17 +266,35 @@ export class ApplicationService {
     this.isFetchingStats$ = this.appStatsFetching$.map(
       appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
     ).startWith(false).shareReplay(1);
-  }
 
-  getAppUrl(app: EntityInfo): string {
-    if (!app.entity.routes) {
-      return null;
-    }
-    const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
-    if (nonTCPRoutes.length > 0) {
-      return getRoute(nonTCPRoutes[0], true, false, nonTCPRoutes[0].entity.domain);
-    }
-    return null;
+    this.applicationUrl$ = this.app$.pipe(
+      map(({ entity }) => entity),
+      filter(app => app && app.entity.routes),
+      map(app => {
+        const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
+        if (nonTCPRoutes.length > 0) {
+          return nonTCPRoutes[0];
+        }
+        return null;
+      }),
+      filter(route => route),
+      switchMap(route => {
+        // The route can async update itself to contain the required domain... so we need to watch it for it's normalized content
+        return this.entityServiceFactory.create<APIResource>(
+          routeSchemaKey,
+          entityFactory(routeSchemaKey),
+          route.metadata.guid,
+          {
+            type: '',
+            entityKey: routeSchemaKey,
+            entity: entityFactory(routeSchemaKey)
+          },
+          false).entityObs$;
+      }),
+      map(route => route.entity),
+      filter(route => route.entity.domain),
+      map(route => getRoute(route, true, false, route.entity.domain))
+    ).shareReplay(1);
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {

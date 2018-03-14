@@ -14,12 +14,17 @@ import {
   ValidateEntitiesStart,
 } from '../actions/request.actions';
 import { AppState } from '../app-state';
+import { validateEntityRelations } from '../helpers/entity-relations';
 import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { getAPIRequestDataState } from '../selectors/api.selectors';
-import { UpdateCfAction, WrapperRequestActionFailed, WrapperRequestActionSuccess, APISuccessOrFailedAction } from '../types/request.types';
-import { validateEntityRelations } from '../helpers/entity-relations';
 import { getPaginationState } from '../selectors/pagination.selectors';
+import {
+  APISuccessOrFailedAction,
+  UpdateCfAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from '../types/request.types';
 
 @Injectable()
 export class RequestEffect {
@@ -84,8 +89,6 @@ export class RequestEffect {
             action: validateAction.action,
             parentEntities: validateAction.validateEntities,
             populateMissing: true,
-            // populateMissing: We only want to populate the store with missing entities if this is an api request. If this is a standard
-            // validation request any entity/entities we already have should already exist in the store
           });
         }),
         mergeMap(validation => {

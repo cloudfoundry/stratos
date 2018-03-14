@@ -70,7 +70,12 @@ export class EntityService<T = any> {
       refCount(),
       filter(entityInfo => !entityInfo || entityInfo.entity),
       tap((entityInfo: EntityInfo) => {
-        if (!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo) || !entityInfo.entity.metadata) {
+        if (!validateRelations || validated || isEntityBlocked(entityInfo.entityRequestInfo)) {
+          return;
+        }
+        // If we're not an 'official' object, go forth and fetch again. This will populate all the required '<entity>__guid' fields.
+        if (!entityInfo.entity.metadata) {
+          this.actionDispatch();
           return;
         }
         validated = true;

@@ -22,6 +22,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     const { paginationKey } = CfAppsDataSource;
     const action = new GetAllApplications(paginationKey, [
       createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
     ]);
 
     super({

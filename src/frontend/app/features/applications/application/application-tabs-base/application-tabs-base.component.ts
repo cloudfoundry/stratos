@@ -1,22 +1,21 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { take, tap, map, startWith, pairwise, filter, first } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { take } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Rx';
 
 import { EntityService } from '../../../../core/entity-service';
+import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { ApplicationService } from '../../application.service';
 import { APIResource } from '../../../../store/types/api.types';
-import { interval } from 'rxjs/observable/interval';
-import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
-import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
+import { ApplicationService } from '../../application.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -139,26 +138,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.isFetching$ =
-      Observable.combineLatest(
-        this.applicationService.isFetchingApp$,
-        // Include the first updating change to cover case where we have the app... but soon mark as updating due to missing entities
-        this.applicationService.isUpdatingApp$.pipe(
-          startWith(true),
-          pairwise(),
-          map(([oldVal, newVal]) => {
-            return oldVal && !newVal;
-          }),
-          map(finishedUpdating => !finishedUpdating),
-          filter(isUpdating => !isUpdating),
-          first()
-        )
-      ).pipe(
-        map(([isFetching, isUpdating]) => {
-          return isFetching || isUpdating;
-        })
-      );
-
+    this.isFetching$ = this.applicationService.isFetchingApp$;
 
     const initialFetch$ = Observable.combineLatest(
       this.applicationService.isFetchingApp$,

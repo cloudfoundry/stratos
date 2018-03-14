@@ -1,12 +1,16 @@
 import { Action } from '@ngrx/store';
 
 import { pathGet } from '../../../core/utils.service';
-import { EntityInlineChildAction, isEntityInlineChildAction, createEntityRelationKey } from '../../helpers/entity-relations.types';
+import { fetchEntityTree } from '../../helpers/entity-relations.tree';
+import {
+  createEntityRelationKey,
+  EntityInlineChildAction,
+  isEntityInlineChildAction,
+} from '../../helpers/entity-relations.types';
 import { deepMergeState } from '../../helpers/reducer.helper';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { IRequestArray } from '../api-request-reducer/types';
-import { fetchEntityTree } from '../../helpers/entity-relations.tree';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -74,7 +78,7 @@ function populateParentEntity(state, successAction) {
   const childRelation = parentEntityTree.rootRelation.childRelations.find(rel => rel.entityKey === successAction.apiAction.entityKey);
   const entityParamName = childRelation.paramName;
 
-  let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || { metadata: {} };
+  let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || {};
   newParentEntity = {
     ...newParentEntity,
     entity: {
