@@ -1,10 +1,10 @@
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { first, map, take, startWith, catchError } from 'rxjs/operators';
+import { first, map, take } from 'rxjs/operators';
+import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { Subscription } from 'rxjs/Rx';
 
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -12,10 +12,11 @@ import { EntityService } from '../../../../core/entity-service';
 import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
+import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { AppState, IRequestEntityTypeState } from '../../../../store/app-state';
+import { AppState } from '../../../../store/app-state';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
@@ -87,14 +88,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     update => update[this.autoRefreshString] || { busy: false }
   );
 
-  tabLinks = [
+  tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'instances', label: 'Instances' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
+    { link: 'events', label: 'Events' },
+    { link: 'github', label: 'GitHub', hidden: true },
   ];
+
+  tabs$ = new BehaviorSubject<any>(this.tabLinks);
 
   private getBreadcrumbs(
     application: IApp,
@@ -220,7 +224,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           stratProject.deploySource &&
           stratProject.deploySource.type === 'github'
         ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+          // Make the GitHub tab visible
+          const githubTab = this.tabLinks.find((tab) => tab.link === 'github');
+          githubTab.hidden = false;
+          this.tabs$.next(this.tabLinks);
         }
       });
   }
