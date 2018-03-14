@@ -46,3 +46,6 @@ export interface EndpointState {
   error: boolean;
   message: string;
 }
+
+// If we support more endpoint types in future, this type should be extended
+export type EndpointType = 'cloud-foundry';

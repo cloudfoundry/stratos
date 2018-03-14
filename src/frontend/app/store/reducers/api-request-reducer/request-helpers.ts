@@ -45,7 +45,7 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
   return newState;
 }
 
-export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
+export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete' | 'connect';
 
 export function getRequestTypeFromMethod(method): ApiRequestTypes {
   if (typeof method === 'string') {
