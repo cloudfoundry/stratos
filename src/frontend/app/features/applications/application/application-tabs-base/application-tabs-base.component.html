@@ -1,4 +1,4 @@
-<app-page-header>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
   <h1>{{ (applicationService.application$ | async)?.app.entity.name }} </h1>
   <div class="page-header-right">
     <a mat-icon-button *ngIf="(applicationService.application$ | async)?.appUrl != null

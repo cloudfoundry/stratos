@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, mergeMap } from 'rxjs/operators';
+import { map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -46,6 +46,7 @@ import {
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { spaceSchemaKey, organisationSchemaKey } from '../../store/actions/action-types';
+import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
 
 export interface ApplicationData {
   fetching: boolean;
@@ -71,7 +72,7 @@ export class ApplicationService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
-    this.appEntityService = this.entityServiceFactory.create(
+    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
       ApplicationSchema.key,
       ApplicationSchema,
       appGuid,
@@ -98,14 +99,14 @@ export class ApplicationService {
   isUpdatingEnvVars$: Observable<boolean>;
   isFetchingStats$: Observable<boolean>;
 
-  app$: Observable<EntityInfo>;
-  waitForAppEntity$: Observable<EntityInfo>;
+  app$: Observable<EntityInfo<APIResource<IApp>>>;
+  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
   appSummary$: Observable<EntityInfo<AppSummary>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
-  appOrg$: Observable<APIResource<any>>;
-  appSpace$: Observable<APIResource<any>>;
+  appOrg$: Observable<APIResource<IOrganization>>;
+  appSpace$: Observable<APIResource<ISpace>>;
 
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
@@ -126,7 +127,7 @@ export class ApplicationService {
   static getApplicationState(
     store: Store<AppState>,
     appStateService: ApplicationStateService,
-    app,
+    app: APIResource<IApp>,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
     const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
@@ -150,22 +151,20 @@ export class ApplicationService {
   private constructCoreObservables() {
     // First set up all the base observables
     this.app$ = this.appEntityService.waitForEntity$;
-
-    // App org and space
-    this.app$
-      .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
-      .map(entityInfo => entityInfo.entity.entity)
-      .do(app => {
-        this.appSpace$ = this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
-        this.appOrg$ = this.appSpace$.pipe(
-          map(space => space.entity.organization_guid),
-          mergeMap(orgGuid => {
-            return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
-          })
-        );
-      })
-      .take(1)
-      .subscribe();
+    const moreWaiting$ = this.app$
+      .filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid))
+      .map(entityInfo => entityInfo.entity.entity);
+    this.appSpace$ = moreWaiting$
+      .first()
+      .switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid)));
+    this.appOrg$ = moreWaiting$
+      .first()
+      .switchMap(app => this.appSpace$.pipe(
+        map(space => space.entity.organization_guid),
+        switchMap(orgGuid => {
+          return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
+        })
+      ));
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.shareReplay(1);
 
