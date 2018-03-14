@@ -1,5 +1,5 @@
 .page-header {
-  $breadcrumb-opacity: 0.7;
+  $breadcrumb-opacity: .7;
   $breadcrumb-hover-opacity: 1;
   $breadcrumb-padding: 3px;
   left: 0;
@@ -23,8 +23,8 @@
   }
   &__breadcrumb-separator {
     font-size: 26px;
-    user-select: none;
     margin: 0 $breadcrumb-padding;
+    user-select: none;
   }
   &__breadcrumbs {
     align-items: center;

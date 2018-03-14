@@ -125,7 +125,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           {
             value: space.entity.name,
             routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}`
-          },
+          }
         ]
       }
     ];

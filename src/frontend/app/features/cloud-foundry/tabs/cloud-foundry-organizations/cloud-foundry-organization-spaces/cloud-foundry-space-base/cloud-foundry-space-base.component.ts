@@ -72,6 +72,13 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       map(space => space.entity.entity.name),
       first()
     );
+    this.setUpBreadcrumbs(cfEndpointService, cfOrgService);
+  }
+
+  private setUpBreadcrumbs(
+    cfEndpointService: CloudFoundryEndpointService,
+    cfOrgService: CloudFoundryOrganisationService
+  ) {
     this.breadcrumbs$ = combineLatest(
       cfEndpointService.endpoint$,
       cfOrgService.org$
