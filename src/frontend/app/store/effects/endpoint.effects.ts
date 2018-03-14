@@ -28,7 +28,7 @@ import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
-import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
+import { EndpointModel, endpointStoreNames, EndpointType } from '../types/endpoint.types';
 import {
   StartRequestAction,
   WrapperRequestActionFailed,
@@ -40,7 +40,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { SystemInfo } from '../types/system.types';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 import { GetSystemInfo, GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
-import { ClearPaginationOfType, ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { ClearPaginationOfType, ClearPaginationOfEntity, ClearPages } from '../actions/pagination.actions';
 
 @Injectable()
 export class EndpointsEffect {
@@ -104,7 +104,7 @@ export class EndpointsEffect {
         apiAction,
         '/pp/v1/auth/login/cnsi',
         params,
-        null,
+        'connect',
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED]
       );
     });
@@ -191,7 +191,8 @@ export class EndpointsEffect {
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
-    actionStrings: [string, string] = [null, null]
+    actionStrings: [string, string] = [null, null],
+    endpointType: EndpointType = 'cloud-foundry'
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
@@ -202,6 +203,9 @@ export class EndpointsEffect {
     }).map(endpoint => {
       if (actionStrings[0]) {
         this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
+      }
+      if (endpointType === 'cloud-foundry' && apiActionType === 'connect') {
+        this.store.dispatch(new ClearPages('application', 'applicationWall'));
       }
       if (apiActionType === 'delete') {
         this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
