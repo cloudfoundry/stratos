@@ -45,10 +45,11 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganisationService) {
     this.isFetching$ = cfOrgService.org$.pipe(
       map(org => org.entityRequestInfo.fetching)
-    )
+    );
     this.name$ = cfOrgService.org$.pipe(
-      map(org => org.entity.entity.name)
-    )
+      map(org => org.entity.entity.name),
+      first()
+    );
     this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
       map(endpoint => ([
         {
@@ -61,7 +62,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
         }
       ])),
       first()
-    )
+    );
   }
 
   ngOnInit() {

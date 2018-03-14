@@ -67,10 +67,11 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   ) {
     this.isFetching$ = cfSpaceService.space$.pipe(
       map(space => space.entityRequestInfo.fetching)
-    )
+    );
     this.name$ = cfSpaceService.space$.pipe(
-      map(space => space.entity.entity.name)
-    )
+      map(space => space.entity.entity.name),
+      first()
+    );
     this.breadcrumbs$ = combineLatest(
       cfEndpointService.endpoint$,
       cfOrgService.org$
@@ -90,7 +91,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
         }
       ])),
       first()
-    )
+    );
   }
 
 

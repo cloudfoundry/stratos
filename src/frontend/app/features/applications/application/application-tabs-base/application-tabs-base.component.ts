@@ -68,8 +68,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           endpoints[app.entity.entity.cfGuid],
           org,
           space
-        )
-      })
+        );
+      }),
+      first()
     );
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
