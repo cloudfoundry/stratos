@@ -132,23 +132,32 @@ class HandleRelationsConfig extends ValidateLoopConfig {
 }
 
 function createAction(config: HandleRelationsConfig) {
+  return config.childRelation.isArray ? createPaginationAction(config) : createSingleAction(config);
+}
+
+function createSingleAction(config: HandleRelationsConfig) {
   const { cfGuid, parentRelation, parentEntity, childRelation, childEntitiesUrl, includeRelations, populateMissing } = config;
-  return childRelation.isArray ? new FetchRelationPaginatedAction(
-    cfGuid,
-    parentEntity.metadata.guid,
-    parentRelation,
-    childRelation,
-    includeRelations,
-    createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid, childRelation.entity.relationKey),
-    populateMissing,
-    childEntitiesUrl
-  ) : new FetchRelationSingleAction(
+  return new FetchRelationSingleAction(
     cfGuid,
     parentEntity.metadata.guid,
     parentRelation,
     childEntitiesUrl.substring(childEntitiesUrl.lastIndexOf('/') + 1),
     childRelation,
     includeRelations,
+    populateMissing,
+    childEntitiesUrl
+  );
+}
+
+function createPaginationAction(config: HandleRelationsConfig) {
+  const { cfGuid, parentRelation, parentEntity, childRelation, childEntitiesUrl, includeRelations, populateMissing } = config;
+  return new FetchRelationPaginatedAction(
+    cfGuid,
+    parentEntity.metadata.guid,
+    parentRelation,
+    childRelation,
+    includeRelations,
+    createEntityRelationPaginationKey(parentRelation.entityKey, parentEntity.metadata.guid, childRelation.entity.relationKey),
     populateMissing,
     childEntitiesUrl
   );
@@ -360,8 +369,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
     };
   }
 
-  const startTime = new Date().getTime().toString();
-
   const relationAction = action as EntityInlineParentAction;
   const entityTree = fetchEntityTree(relationAction);
 
@@ -378,7 +385,6 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
   });
 
   return handleValidationLoopResults(store, results);
-
 }
 
 export function listEntityRelations(action: EntityInlineParentAction) {

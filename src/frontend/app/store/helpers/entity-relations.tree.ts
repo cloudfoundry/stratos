@@ -21,28 +21,30 @@ export function fetchEntityTree(action: EntityInlineParentAction): EntityTree {
   entity = isArray ? entity[0] : entity;
   const entityKey = entity['key'];
   const cacheKey = generateCacheKey(entityKey, action);
-  let entityTree = entityTreeCache[cacheKey];
-  if (!entityTree) {
-    const rootEntityRelation = new EntityTreeRelation(
-      entity as EntitySchema,
-      isArray,
-      null,
-      '',
-      new Array<EntityTreeRelation>()
-    );
-    entityTree = {
-      rootRelation: rootEntityRelation,
-      requiredParamNames: new Array<string>(),
-    };
-    createEntityTree(entityTree, rootEntityRelation);
-    entityTreeCache[cacheKey] = entityTree;
-  }
+  const entityTree = entityTreeCache[cacheKey] || createEntityTree(entity as EntitySchema, isArray);
+  entityTreeCache[cacheKey] = entityTree;
   // Calc max depth and exclude not needed
   entityTree.rootRelation.childRelations = parseEntityTree(entityTree, entityTree.rootRelation, action.includeRelations);
   return entityTree;
 }
 
-export function createEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
+function createEntityTree(entity: EntitySchema, isArray: boolean) {
+  const rootEntityRelation = new EntityTreeRelation(
+    entity as EntitySchema,
+    isArray,
+    null,
+    '',
+    new Array<EntityTreeRelation>()
+  );
+  const entityTree = {
+    rootRelation: rootEntityRelation,
+    requiredParamNames: new Array<string>(),
+  };
+  buildEntityTree(entityTree, rootEntityRelation);
+  return entityTree;
+}
+
+function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, schemaObj?, path: string = '') {
   const rootEntitySchema = schemaObj || entityRelation.entity['schema'];
   Object.keys(rootEntitySchema).forEach(key => {
     let value = rootEntitySchema[key];
@@ -59,9 +61,9 @@ export function createEntityTree(tree: EntityTree, entityRelation: EntityTreeRel
         new Array<EntityTreeRelation>()
       );
       entityRelation.childRelations.push(newEntityRelation);
-      createEntityTree(tree, newEntityRelation, null, '');
+      buildEntityTree(tree, newEntityRelation, null, '');
     } else if (value instanceof Object) {
-      createEntityTree(tree, entityRelation, value, newPath);
+      buildEntityTree(tree, entityRelation, value, newPath);
     }
   });
 }
@@ -69,7 +71,7 @@ export function createEntityTree(tree: EntityTree, entityRelation: EntityTreeRel
 export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [])
   : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
-  entityRelation.childRelations.forEach((relation, index, array) => {
+  entityRelation.childRelations.forEach((relation) => {
     const parentChildKey = createEntityRelationKey(entityRelation.entityKey, relation.entityKey);
     if (includeRelations.indexOf(parentChildKey) >= 0) {
       const clone = { ...relation };
