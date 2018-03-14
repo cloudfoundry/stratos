@@ -1,20 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
 
+import { EndpointsService } from '../../../../../core/endpoints.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { AppState, IRequestEntityTypeState } from '../../../../../store/app-state';
+import { AppState } from '../../../../../store/app-state';
+import { endpointsRegisteredEntitiesSelector } from '../../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../../store/types/api.types';
-import { IListConfig, ListViewTypes, IListMultiFilterConfig } from '../../list.component.types';
+import { CfOrgSpaceItem } from '../../../../data-services/cf-org-space-service.service';
+import { IListConfig, IListMultiFilterConfig, ListViewTypes } from '../../list.component.types';
+import { createListFilterConfig } from '../../list.helper';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
-import { EndpointsService } from '../../../../../core/endpoints.service';
-import { CfOrgSpaceItem } from '../../../../data-services/cf-org-space-service.service';
-import { tap } from 'rxjs/operators';
-import { EndpointModel } from '../../../../../store/types/endpoint.types';
-import { endpointsRegisteredEntitiesSelector } from '../../../../../store/selectors/endpoint.selectors';
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
 export class CfServicesListConfigService implements IListConfig<APIResource> {
@@ -46,7 +45,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     };
 
     this.multiFilterConfigs = [
-      this.createConfig('cf', 'Cloud Foundry', this.cf),
+      createListFilterConfig('cf', 'Cloud Foundry', this.cf),
     ];
 
   }
@@ -57,18 +56,5 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
   getDataSource = () => this.dataSource;
 
-  private createConfig(key: string, label: string, cfOrgSpaceItem: CfOrgSpaceItem) {
-    return {
-      key: key,
-      label: label,
-      ...cfOrgSpaceItem,
-      list$: cfOrgSpaceItem.list$.map((entities: any[]) => {
-        return entities.map(entity => ({
-          label: entity.name,
-          item: entity,
-          value: entity.guid
-        }));
-      }),
-    };
-  }
+
 }
