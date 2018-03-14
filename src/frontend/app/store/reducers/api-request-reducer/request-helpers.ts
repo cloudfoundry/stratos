@@ -49,7 +49,7 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
 export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
 export function getRequestTypeFromMethod(action): ApiRequestTypes {
-  let method = pathGet('option.method', action);
+  let method = pathGet('options.method', action);
   if (typeof method === 'string') {
     method = method.toString().toLowerCase();
     if (method === 'post') {

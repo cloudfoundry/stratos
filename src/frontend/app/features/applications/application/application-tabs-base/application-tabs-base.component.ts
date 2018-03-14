@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { take, tap, map, startWith, pairwise } from 'rxjs/operators';
+import { take, tap, map, startWith, pairwise, filter, first } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
@@ -149,7 +149,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           map(([oldVal, newVal]) => {
             return oldVal && !newVal;
           }),
-          map(val => !val)
+          map(finishedUpdating => !finishedUpdating),
+          filter(isUpdating => !isUpdating),
+          first()
         )
       ).pipe(
         map(([isFetching, isUpdating]) => {
