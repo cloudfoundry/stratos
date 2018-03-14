@@ -20,6 +20,7 @@ import { getPaginationObservables } from '../../store/reducers/pagination-reduce
 import { APIResource } from '../../store/types/api.types';
 import { CfUser, UserRoleInOrg, UserSchema, UserRoleInSpace, IUserPermissionInOrg } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { IOrganization, ISpace } from '../../core/cf-api.types';
 @Injectable()
 export class CfUserService {
   public allUsersAction: GetAllUsers;
@@ -50,7 +51,8 @@ export class CfUserService {
     )
 
   getRolesFromUser(user: CfUser, type: 'organizations' | 'spaces' = 'organizations'): IUserPermissionInOrg[] {
-    return user[type].map(org => {
+    const role = user[type] as APIResource<IOrganization | ISpace>[];
+    return role.map(org => {
       const orgGuid = org.metadata.guid;
       return {
         orgName: org.entity.name as string,
