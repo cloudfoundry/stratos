@@ -28,7 +28,7 @@ import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
 import { Action, Store } from '@ngrx/store';
 import { Actions, Effect } from '@ngrx/effects';
-import { EndpointModel, endpointStoreNames, EndpointType } from '../types/endpoint.types';
+import { EndpointModel, endpointStoreNames, EndpointType, StateUpdateAction } from '../types/endpoint.types';
 import {
   StartRequestAction,
   WrapperRequestActionFailed,
@@ -38,7 +38,7 @@ import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers
 import { PaginatedAction } from '../types/pagination.types';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { SystemInfo } from '../types/system.types';
-import { map, mergeMap, catchError } from 'rxjs/operators';
+import { map, mergeMap, catchError, tap, switchMap } from 'rxjs/operators';
 import { GetSystemInfo, GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 import { ClearPaginationOfType, ClearPaginationOfEntity, ClearPages } from '../actions/pagination.actions';
 
@@ -104,7 +104,7 @@ export class EndpointsEffect {
         apiAction,
         '/pp/v1/auth/login/cnsi',
         params,
-        'connect',
+        null,
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED]
       );
     });
@@ -127,6 +127,17 @@ export class EndpointsEffect {
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED]
       );
     });
+
+  @Effect() connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
+    .pipe(
+      switchMap(action => {
+        if (action.endpointType === 'cloud-foundry') {
+          return [new ClearPages('application', 'applicationWall')];
+        }
+        return [];
+      })
+    );
+
 
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
@@ -202,10 +213,7 @@ export class EndpointsEffect {
       params
     }).map(endpoint => {
       if (actionStrings[0]) {
-        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
-      }
-      if (endpointType === 'cloud-foundry' && apiActionType === 'connect') {
-        this.store.dispatch(new ClearPages('application', 'applicationWall'));
+        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType });
       }
       if (apiActionType === 'delete') {
         this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
@@ -214,7 +222,7 @@ export class EndpointsEffect {
     })
       .catch(e => {
         if (actionStrings[1]) {
-          this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
+          this.store.dispatch({ type: actionStrings[1], guid: apiAction.guid });
         }
         return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
       });

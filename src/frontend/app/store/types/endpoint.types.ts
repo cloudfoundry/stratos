@@ -49,3 +49,9 @@ export interface EndpointState {
 
 // If we support more endpoint types in future, this type should be extended
 export type EndpointType = 'cloud-foundry';
+
+export interface StateUpdateAction {
+  type: string;
+  guid: string;
+  endpointType?: EndpointType;
+}
