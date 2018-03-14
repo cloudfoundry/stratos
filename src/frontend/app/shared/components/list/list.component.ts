@@ -71,6 +71,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   isAddingOrSelecting$: Observable<boolean>;
   hasRows$: Observable<boolean>;
 
+  // Observable which allows you to determine if the top control bar should be shown
+  hasControls$: Observable<boolean>;
+
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
@@ -109,6 +112,18 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       if (!listView) {
         this.updateListView(this.getDefaultListView(this.config));
       }
+    });
+
+    // Determine if this list view needs the control header bar at the top
+    this.hasControls$ = combineLatest(this.view$, this.dataSource.isLoadingPage$).map(([viewType, isLoading]) => {
+      return !!(isLoading ||
+        this.config.viewType === 'both' ||
+        this.addForm ||
+        this.globalActions && this.globalActions.length ||
+        this.multiActions && this.multiActions.length ||
+        viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
+        this.multiFilterConfigs && this.multiFilterConfigs.length ||
+        this.config.enableTextFilter);
     });
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
