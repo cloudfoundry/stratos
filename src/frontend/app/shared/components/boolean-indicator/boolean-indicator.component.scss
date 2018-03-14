@@ -4,7 +4,8 @@
     display: flex;
     flex-direction: row;
 
-    &__icon-true, &__icon-false {
+    &__icon-true,
+    &__icon-false {
       margin-right: 4px;
     }
   }
