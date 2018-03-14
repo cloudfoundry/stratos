@@ -128,13 +128,12 @@ export class EndpointsEffect {
       );
     });
 
-  @Effect() connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
+  @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
     .pipe(
-      switchMap(action => {
+      map(action => {
         if (action.endpointType === 'cloud-foundry') {
-          return [new ClearPages('application', 'applicationWall')];
+          this.store.dispatch(new ClearPages('application', 'applicationWall'));
         }
-        return [];
       })
     );
 
