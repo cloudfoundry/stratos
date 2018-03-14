@@ -115,9 +115,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     // Determine if this list view needs the control header bar at the top
-    this.hasControls$ = combineLatest(this.view$, this.dataSource.isLoadingPage$).map(([viewType, isLoading]) => {
-      return !!(isLoading ||
+    this.hasControls$ = this.view$.map((viewType) => {
+      return !!(
         this.config.viewType === 'both' ||
+        this.config.text && this.config.text.title ||
         this.addForm ||
         this.globalActions && this.globalActions.length ||
         this.multiActions && this.multiActions.length ||

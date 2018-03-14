@@ -1,4 +1,5 @@
 <div class="list-component" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
+  <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async)" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
   <div class="list-component__header" [hidden]="!(hasControls$ | async)">
     <mat-progress-bar color="primary" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
     <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
