@@ -9,7 +9,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-fdescribe('PageHeaderComponent', () => {
+describe('PageHeaderComponent', () => {
   let component: PageHeaderComponent;
   let fixture: ComponentFixture<PageHeaderComponent>;
   const URL_KEY = 'key';
