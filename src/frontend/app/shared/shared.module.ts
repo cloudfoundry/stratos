@@ -86,7 +86,6 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 
-
 @NgModule({
   imports: [
     CommonModule,

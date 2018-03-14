@@ -2,10 +2,13 @@ import { ServiceCataloguePageComponent } from './service-catalogue-page/service-
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
+import { ServiceCatalogueBaseComponent } from './service-catalogue-base/service-catalogue-base.component';
 
 const serviceCatalogue: Routes = [
-  { path: '', component: ServiceCataloguePageComponent, },
-];
+  {
+    path: '',
+    component: ServiceCataloguePageComponent,
+  }];
 
 @NgModule({
   imports: [
