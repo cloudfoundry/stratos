@@ -32,7 +32,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
         getValue: (row) => FeatureFlagDescriptions[row.entity.name]
       },
       class: 'table-column-select',
-      cellFlex: '3'
+      cellFlex: '4'
     },
     {
       columnId: 'state',
