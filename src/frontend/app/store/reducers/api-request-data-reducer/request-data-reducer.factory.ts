@@ -1,11 +1,12 @@
 import { Action } from '@ngrx/store';
 
 import { pathGet } from '../../../core/utils.service';
-import { FetchRelationAction } from '../../actions/relation.actions';
+import { EntityInlineChildAction, isEntityInlineChildAction, createEntityRelationKey } from '../../helpers/entity-relations.types';
 import { deepMergeState } from '../../helpers/reducer.helper';
 import { ISuccessRequestAction } from '../../types/request.types';
 import { generateDefaultState } from '../api-request-reducer/request-helpers';
 import { IRequestArray } from '../api-request-reducer/types';
+import { fetchEntityTree } from '../../helpers/entity-relations.tree';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -47,11 +48,11 @@ function deleteEntity(state, entityKey, guid) {
 }
 
 function populateParentEntity(state, successAction) {
-  const fetchRelationAction: FetchRelationAction = FetchRelationAction.is(successAction.apiAction);
-  if (!fetchRelationAction) {
+  if (!isEntityInlineChildAction(successAction.apiAction)) {
     return;
   }
-  // Do we actually have any entities to store in a parent?
+
+  const action: EntityInlineChildAction = successAction.apiAction as EntityInlineChildAction;
   const response = successAction.response;
   const entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
   if (!Object.values(entities)) {
@@ -59,16 +60,26 @@ function populateParentEntity(state, successAction) {
   }
 
   // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
-  const parentGuid = fetchRelationAction.parentGuid;
-  const parentEntityKey = fetchRelationAction.parent.entityKey;
-  const entityParamName = fetchRelationAction.child.paramName;
+  // First create the required consts
+  const parentGuid = action.parentGuid;
+  const parentEntityKey = action.parentEntitySchema.key;
+  // We need to find out the entity param name. For instance an org with spaces in will store them in a `spaces` property
+  const parentEntityTree = fetchEntityTree({
+    type: '',
+    entity: action.parentEntitySchema,
+    entityKey: parentEntityKey,
+    includeRelations: [createEntityRelationKey(parentEntityKey, successAction.apiAction.entityKey)],
+    populateMissing: null,
+  });
+  const childRelation = parentEntityTree.rootRelation.childRelations.find(rel => rel.entityKey === successAction.apiAction.entityKey);
+  const entityParamName = childRelation.paramName;
 
   let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || { metadata: {} };
   newParentEntity = {
     ...newParentEntity,
     entity: {
       ...newParentEntity.entity,
-      [entityParamName]: fetchRelationAction.child.isArray ? successAction.response.result : successAction.response.result[0]
+      [entityParamName]: childRelation.isArray ? successAction.response.result : successAction.response.result[0]
     }
   };
 

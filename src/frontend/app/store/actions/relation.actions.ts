@@ -1,9 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import { EntitySchema } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction, EntityTreeRelation } from '../helpers/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestActionEntity, RequestEntityLocation } from '../types/request.types';
-import { EntitySchema } from '../helpers/entity-factory';
 
 const relationActionId = 'FetchRelationAction';
 
