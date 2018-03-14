@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { IService, IServiceExtra } from '../../../../../../core/cf-api.types';
+import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 interface Tag {

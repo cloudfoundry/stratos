@@ -199,54 +199,6 @@ export interface IFeatureFlag {
   url?: string;
   error_message?: string;
 }
-export interface IServiceInstance {
-  guid: string;
-  cfGuid: string;
-}
-
-export interface IServicePlan {
-  name: string;
-  free: boolean;
-  description: string;
-  service_guid: string;
-  extra: string;
-  unique_id: string;
-  public: boolean;
-  bindable: number;
-  active: boolean;
-  service_url: string;
-  service_instances_url: string;
-}
-export interface IService {
-  label: string;
-  provider?: any;
-  url?: any;
-  description: string;
-  long_description?: any;
-  version?: any;
-  info_url?: any;
-  active: number;
-  bindable: number;
-  unique_id: string;
-  extra: string; // stringified IServiceExtra object
-  tags: string[];
-  requires: string[];
-  documentation_url?: any;
-  service_broker_guid: string;
-  plan_updateable: number;
-  service_plans_url: string;
-  service_plans: IServicePlan[];
-}
-
-export interface IServiceExtra {
-  displayName: string;
-  imageUrl: string;
-  longDescription: string;
-  providerDisplayName: string;
-  documentationUrl: string;
-  supportUrl: string;
-}
-
 export interface IPrivateDomain {
   guid: string;
   cfGuid: string;
@@ -262,7 +214,6 @@ export interface IQuotaDefinition {
   total_routes?: number;
   total_private_domains?: number;
 }
-
 
 export interface IUpdateSpace {
   name?: string;
