@@ -267,6 +267,7 @@ const testInitialStoreState: AppState = {
     },
     stack: {},
     space: {},
+    service: {},
     organization: {
       endpointOrgSpaceService: {
         pageCount: 1,
