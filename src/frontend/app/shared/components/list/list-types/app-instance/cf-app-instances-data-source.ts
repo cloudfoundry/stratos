@@ -6,9 +6,11 @@ import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.act
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { AppStat, AppStatSchema } from '../../../../../store/types/app-metadata.types';
+import { AppStat } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { appStatsSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export interface ListAppInstanceUsage {
   mem: number;
@@ -31,14 +33,14 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
     _appGuid: string,
     listConfig: IListConfig<ListAppInstance>
   ) {
-    const paginationKey = getPaginationKey(AppStatSchema.key, _cfGuid, _appGuid);
+    const paginationKey = getPaginationKey(appStatsSchemaKey, _cfGuid, _appGuid);
     const action = new GetAppStatsAction(_appGuid, _cfGuid);
 
     super(
       {
         store,
         action,
-        schema: AppStatSchema,
+        schema: entityFactory(appStatsSchemaKey),
         getRowUniqueId: (row: ListAppInstance) => row.index.toString(),
         paginationKey,
         transformEntity: map(instances => {

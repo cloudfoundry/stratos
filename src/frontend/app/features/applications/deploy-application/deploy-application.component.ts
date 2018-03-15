@@ -8,12 +8,12 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { ApplicationSchema } from '../../../store/actions/application.actions';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { selectCfDetails } from '../../../store/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
+import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-deploy-application',
@@ -65,7 +65,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
         })
       ).subscribe());
     } else {
-      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey)).pipe(
+      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey)).pipe(
         filter((pag) => !!pag),
         tap(pag => {
           this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);

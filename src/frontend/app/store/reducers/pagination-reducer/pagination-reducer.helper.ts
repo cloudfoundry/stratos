@@ -1,11 +1,13 @@
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { filter, first, publishReplay, refCount, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
+import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
+import { populatePaginationFromParent } from '../../helpers/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
@@ -120,6 +122,7 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
+  let lastValidationFootprint: string;
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
@@ -132,10 +135,16 @@ function getObservables<T = any>(
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        store.dispatch(action);
+        populatePaginationFromParent(store, action).pipe(
+          first(),
+          tap(newAction => {
+            store.dispatch(newAction || action);
+          })
+        ).subscribe();
       }
     }),
-    shareReplay(1)
+    publishReplay(1),
+    refCount(),
   );
 
   const entities$: Observable<T[]> =
@@ -147,9 +156,20 @@ function getObservables<T = any>(
         filter(([ent, pagination]) => {
           return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
         }),
+        shareReplay(1),
+        tap(([ent, pagination]) => {
+          const newValidationFootprint = getPaginationCompareString(pagination);
+          if (lastValidationFootprint !== newValidationFootprint) {
+            lastValidationFootprint = newValidationFootprint;
+            store.dispatch(new ValidateEntitiesStart(
+              action,
+              pagination.ids[pagination.currentPage],
+              false
+            ));
+          }
+        }),
         switchMap(() => paginationMonitor.currentPage$),
-        shareReplay(1)
-      );
+    );
 
   return {
     pagination$,
@@ -173,7 +193,16 @@ export function isPageReady(pagination: PaginationEntityState) {
   return !!pagination && !!pagination.ids[pagination.currentPage];
 }
 
-export function hasValidOrGettingPage(pagination: PaginationEntityState) {
+export function isFetchingPage(pagination: PaginationEntityState): boolean {
+  if (pagination) {
+    const currentPageRequest = getCurrentPageRequestInfo(pagination);
+    return currentPageRequest.busy;
+  } else {
+    return false;
+  }
+}
+
+export function hasValidOrGettingPage(pagination: PaginationEntityState): boolean {
   if (pagination && Object.keys(pagination).length) {
     const hasPage = !!pagination.ids[pagination.currentPage];
     const currentPageRequest = getCurrentPageRequestInfo(pagination);
@@ -183,7 +212,7 @@ export function hasValidOrGettingPage(pagination: PaginationEntityState) {
   }
 }
 
-export function hasError(pagination: PaginationEntityState) {
+export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 

@@ -1,29 +1,43 @@
-import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/app-state';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
-import { APIResource } from '../../../../../store/types/api.types';
-import { IListConfig } from '../../list.component.types';
-import { AppReducersModule } from '../../../../../store/reducers.module';
-import { GetAllOrganisations } from '../../../../../store/actions/organisation.actions';
-import { OrganisationSchema, OrganisationWithSpaceSchema, ServiceInstancesSchema } from '../../../../../store/actions/action-types';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetServicesInstancesInSpace } from '../../../../../store/actions/service-instances.actions';
-import { CfServiceInstance } from '../../../../../store/types/service.types';
+import { AppState } from '../../../../../store/app-state';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../store/helpers/entity-factory';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../../store/helpers/entity-relations.types';
+import { APIResource } from '../../../../../store/types/api.types';
+import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { IListConfig } from '../../list.component.types';
 
 export class CfSpacesServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = getPaginationKey('cf-spaces-service-instances', cfGuid, spaceGuid);
-    const action = new GetServicesInstancesInSpace(cfGuid, spaceGuid, paginationKey);
+    const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
+    const action = new GetServicesInstancesInSpace(cfGuid, spaceGuid, paginationKey, [
+      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
+    ]);
     super({
       store,
       action,
-      schema: ServiceInstancesSchema,
-      getRowUniqueId: (entity: APIResource<CfServiceInstance>) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      schema: entityFactory(serviceInstancesSchemaKey),
+      getRowUniqueId: getRowMetadata,
       paginationKey,
-      isLocal: true,
+      // This would normally be fetched inline, however some of the SI's children will be missing if the SI was fetched by the org
+      // request. This can lead to a new request per row and can grind the console to a halt
+      isLocal: false,
       transformEntities: [],
       listConfig
     });

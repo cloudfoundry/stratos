@@ -7,9 +7,11 @@ import { AppVariablesAdd, AppVariablesEdit } from '../../../../../store/actions/
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { AppEnvVarSchema, AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { appEnvVarsSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export interface ListAppEnvVar {
   name: string;
@@ -29,10 +31,10 @@ export class CfAppVariablesDataSource extends ListDataSource<ListAppEnvVar, APIR
     super({
       store,
       action: new GetAppEnvVarsAction(_appService.appGuid, _appService.cfGuid),
-      schema: AppEnvVarSchema,
+      schema: entityFactory(appEnvVarsSchemaKey),
       getRowUniqueId: object => object.name,
       getEmptyType: () => ({ name: '', value: '', }),
-      paginationKey: getPaginationKey(AppEnvVarSchema.key, _appService.cfGuid, _appService.appGuid, ),
+      paginationKey: getPaginationKey(appEnvVarsSchemaKey, _appService.cfGuid, _appService.appGuid, ),
       transformEntity: map(variables => {
         if (!variables || variables.length === 0) {
           return [];

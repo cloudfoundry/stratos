@@ -1,12 +1,12 @@
-import { EndpointSchema } from '../actions/endpoint.actions';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 
 export const endpointStoreNames: {
   section: TRequestTypeKeys,
   type: string
 } = {
     section: RequestSectionKeys.Other,
-    type: EndpointSchema.key
+    type: endpointSchemaKey
   };
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
 export interface EndpointModel {

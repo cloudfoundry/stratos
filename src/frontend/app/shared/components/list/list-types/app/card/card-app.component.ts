@@ -39,11 +39,11 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
       this.store,
       this.appStateService,
       this.row.entity,
-      this.row.entity.guid,
+      this.row.metadata.guid,
       this.row.entity.cfGuid
     ).pipe(
       startWith(initState)
-      );
+    );
     this.appStatus$ = this.applicationState$.pipe(
       map(state => state.indicator),
     );
