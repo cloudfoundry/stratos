@@ -121,7 +121,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     // Determine if we should hide the paginator
     this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)
       .map(([hasRows, pagination]) => {
-        const minPageSize = this.paginator.pageSizeOptions && this.paginator.pageSizeOptions.length ? this.paginator.pageSizeOptions[0] : -1;
+        const minPageSize = (
+          this.paginator.pageSizeOptions && this.paginator.pageSizeOptions.length ? this.paginator.pageSizeOptions[0] : -1
+        );
         return !hasRows ||
           pagination && (pagination.totalResults <= minPageSize);
       });
