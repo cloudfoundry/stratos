@@ -1,5 +1,5 @@
 import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { Observable, Subscription, BehaviorSubject } from 'rxjs/Rx';
 
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
@@ -32,14 +32,23 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   stepValidateSub: Subscription = null;
 
   currentIndex = 0;
-
+  cancelQueryParams$ = new BehaviorSubject<any>(null);
   constructor(
     private steppersService: SteppersService,
     private store: Store<AppState>
   ) {
 
     this.cancel$ = store.select(getPreviousRoutingState).pipe(
-      map(e => !e ? this.cancel : e.url));
+      map(previousState => {
+        let url = this.cancel;
+        if (previousState) {
+          url = previousState.url.split('?')[0];
+          if (Object.values(previousState.state.queryParams).length > 0) {
+            this.cancelQueryParams$.next(previousState.state.queryParams);
+          }
+        }
+        return url;
+      }));
   }
 
   ngOnInit() {
