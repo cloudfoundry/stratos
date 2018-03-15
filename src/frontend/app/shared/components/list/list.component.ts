@@ -71,6 +71,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   isAddingOrSelecting$: Observable<boolean>;
   hasRows$: Observable<boolean>;
 
+  // Observable which allows you to determine if the paginator control should be hidden
+  hidePaginator$: Observable<boolean>;
   listViewKey: string;
 
   public safeAddForm() {
@@ -115,6 +117,16 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
+
+    // Determine if we should hide the paginator
+    this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)
+      .map(([hasRows, pagination]) => {
+        const minPageSize = (
+          this.paginator.pageSizeOptions && this.paginator.pageSizeOptions.length ? this.paginator.pageSizeOptions[0] : -1
+        );
+        return !hasRows ||
+          pagination && (pagination.totalResults <= minPageSize);
+      });
 
     this.paginator.pageSizeOptions = this.config.pageSizeOptions ||
       (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
