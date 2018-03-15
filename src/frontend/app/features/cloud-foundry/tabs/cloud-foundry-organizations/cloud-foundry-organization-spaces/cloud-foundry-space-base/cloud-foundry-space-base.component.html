@@ -1,5 +1,5 @@
-<app-page-header>
-  <h1> {{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1> {{ name$ | async }}</h1>
   <div class="page-header-right">
     <button mat-icon-button name="rename" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/edit-space">
         <mat-icon>edit</mat-icon>
@@ -14,4 +14,6 @@
 </app-page-header>
 <app-page-subheader [tabs]="tabLinks">
 </app-page-subheader>
-<router-outlet></router-outlet>
+<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving space'">
+  <router-outlet></router-outlet>
+</app-loading-page>

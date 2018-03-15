@@ -1,4 +1,3 @@
-import { ApplicationSchema } from '../../../../../../store/actions/application.actions';
 import {
   getEntityById,
   selectEntity
@@ -15,6 +14,7 @@ import websocketConnect from 'rxjs-websockets';
 import { MatInput } from '@angular/material';
 import * as moment from 'moment';
 import { LoggerService } from '../../../../../../core/logger.service';
+import { applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 import { AnsiColorizer} from '../../../../../../shared/components/log-viewer/ansi-colorizer';
 
 export interface LogItem {
@@ -54,7 +54,7 @@ export class LogStreamTabComponent implements OnInit {
       const host = window.location.host;
       const streamUrl = `wss://${host}/pp/v1/${
         this.applicationService.cfGuid
-      }/apps/${this.applicationService.appGuid}/stream`;
+        }/apps/${this.applicationService.appGuid}/stream`;
 
       const { messages, connectionStatus } = websocketConnect(streamUrl, new QueueingSubject<string>());
       messages.catch(e => {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 import {
   CloudFoundryOrganisationService,
@@ -9,11 +9,6 @@ import {
   templateUrl: './card-cf-org-usage.component.html',
   styleUrls: ['./card-cf-org-usage.component.scss']
 })
-export class CardCfOrgUsageComponent implements OnInit {
-
+export class CardCfOrgUsageComponent {
   constructor(private cfOrganizationService: CloudFoundryOrganisationService) { }
-
-  ngOnInit() {
-  }
-
 }

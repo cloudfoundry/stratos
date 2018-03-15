@@ -1,12 +1,12 @@
-import { EndpointSchema } from '../actions/endpoint.actions';
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 
 export const endpointStoreNames: {
   section: TRequestTypeKeys,
   type: string
 } = {
     section: RequestSectionKeys.Other,
-    type: EndpointSchema.key
+    type: endpointSchemaKey
   };
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
 export interface EndpointModel {
@@ -45,4 +45,13 @@ export interface EndpointState {
   loading: boolean;
   error: boolean;
   message: string;
+}
+
+// If we support more endpoint types in future, this type should be extended
+export type EndpointType = 'cloud-foundry';
+
+export interface StateUpdateAction {
+  type: string;
+  guid: string;
+  endpointType?: EndpointType;
 }

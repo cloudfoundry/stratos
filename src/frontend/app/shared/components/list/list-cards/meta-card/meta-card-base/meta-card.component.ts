@@ -1,12 +1,15 @@
-import { Component, ContentChild, ContentChildren, OnInit, QueryList } from '@angular/core';
-import { Input } from '@angular/core';
+import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
+import { CardStatus } from '../../../../application-state/application-state.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
-import { CardStatus } from '../../../../application-state/application-state.service';
-import { Observable } from 'rxjs/Observable';
-import { tap } from 'rxjs/operators';
 
+export interface MetaCardMenuItem {
+  icon?: string;
+  label: string;
+  action: Function;
+}
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
@@ -23,6 +26,17 @@ export class MetaCardComponent {
   @Input('status$')
   status$: Observable<CardStatus>;
 
+  @Input('actionMenu')
+  actionMenu: MetaCardMenuItem[] = null;
+
+  @Input('clickAction')
+  clickAction: Function = null;
+
   constructor() { }
+
+  cancelPropagation = (event) => {
+    event.cancelBubble = true;
+    event.stopPropagation();
+  }
 
 }

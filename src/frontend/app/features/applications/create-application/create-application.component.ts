@@ -5,9 +5,9 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { ApplicationSchema } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
+import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-create-application',
@@ -22,7 +22,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     // We will auto select endpoint/org/space that have been selected on the app wall.
-    const appWallPaginationState = this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey));
+    const appWallPaginationState = this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey));
     this.paginationStateSub = appWallPaginationState.filter(pag => !!pag).first().do(pag => {
       this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
       this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
