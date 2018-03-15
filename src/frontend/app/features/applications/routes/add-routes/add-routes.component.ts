@@ -21,6 +21,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
+import { ISpace } from '../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-add-routes',
@@ -83,8 +84,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       .pipe(
         filter(p => !!p.entity.entity.space),
         tap(p => {
-          this.spaceGuid = p.entity.entity.space.metadata.guid;
-          const domains = p.entity.entity.space.entity.domains;
+          const space = p.entity.entity.space as APIResource<ISpace>;
+          this.spaceGuid = space.metadata.guid;
+          const domains = space.entity.domains;
           domains.forEach(domain => {
             this.domains[domain.metadata.guid] = domain;
           });

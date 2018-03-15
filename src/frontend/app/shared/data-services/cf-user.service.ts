@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, shareReplay } from 'rxjs/operators';
 
+import { IOrganization, ISpace } from '../../core/cf-api.types';
 import {
   isOrgAuditor,
   isOrgBillingManager,
@@ -14,13 +15,16 @@ import {
 } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import { cfUserSchemaKey, entityFactory, endpointSchemaKey } from '../../store/helpers/entity-factory';
-import { getPaginationObservables, PaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { cfUserSchemaKey, endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 
 @Injectable()
 export class CfUserService {
@@ -45,7 +49,8 @@ export class CfUserService {
     )
 
   getRolesFromUser(user: CfUser, type: 'organizations' | 'spaces' = 'organizations'): IUserPermissionInOrg[] {
-    return user[type].map(org => {
+    const role = user[type] as APIResource<IOrganization | ISpace>[];
+    return role.map(org => {
       const orgGuid = org.metadata.guid;
       return {
         orgName: org.entity.name as string,

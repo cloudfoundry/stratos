@@ -48,6 +48,7 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
+import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -85,7 +86,7 @@ export class ApplicationService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
-    this.appEntityService = this.entityServiceFactory.create(
+    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
       applicationSchemaKey,
       entityFactory(applicationSchemaKey),
       appGuid,
@@ -97,7 +98,8 @@ export class ApplicationService {
       entityFactory(appSummarySchemaKey),
       appGuid,
       new GetAppSummaryAction(appGuid, cfGuid),
-      false);
+      false
+    );
 
     this.constructCoreObservables();
     this.constructAmalgamatedObservables();
@@ -117,14 +119,14 @@ export class ApplicationService {
   isUpdatingEnvVars$: Observable<boolean>;
   isFetchingStats$: Observable<boolean>;
 
-  app$: Observable<EntityInfo>;
-  waitForAppEntity$: Observable<EntityInfo>;
+  app$: Observable<EntityInfo<APIResource<IApp>>>;
+  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
   appSummary$: Observable<EntityInfo<AppSummary>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
-  appOrg$: Observable<APIResource<any>>;
-  appSpace$: Observable<APIResource<any>>;
+  appOrg$: Observable<APIResource<IOrganization>>;
+  appSpace$: Observable<APIResource<ISpace>>;
 
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
@@ -146,7 +148,7 @@ export class ApplicationService {
   static getApplicationState(
     store: Store<AppState>,
     appStateService: ApplicationStateService,
-    app,
+    app: APIResource<IApp>,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
     const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
@@ -170,23 +172,20 @@ export class ApplicationService {
   private constructCoreObservables() {
     // First set up all the base observables
     this.app$ = this.appEntityService.waitForEntity$;
-
-    // App org and space
-    this.app$
-      .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
-      .map(entityInfo => entityInfo.entity.entity)
-      .do(app => {
-        this.appSpace$ = this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
-        this.appOrg$ = this.appSpace$.pipe(
-          filter(space => !!space),
-          map(space => space.entity.organization_guid),
-          mergeMap(orgGuid => {
-            return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
-          })
-        );
-      })
-      .take(1)
-      .subscribe();
+    const moreWaiting$ = this.app$
+      .filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid))
+      .map(entityInfo => entityInfo.entity.entity);
+    this.appSpace$ = moreWaiting$
+      .first()
+      .switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid)));
+    this.appOrg$ = moreWaiting$
+      .first()
+      .switchMap(app => this.appSpace$.pipe(
+        map(space => space.entity.organization_guid),
+        switchMap(orgGuid => {
+          return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
+        })
+      ));
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.shareReplay(1);
 
@@ -269,7 +268,7 @@ export class ApplicationService {
 
     this.applicationUrl$ = this.app$.pipe(
       map(({ entity }) => entity),
-      filter(app => app && app.entity.routes),
+      filter((app) => !!app && !!app.entity.routes),
       map(app => {
         const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
         if (nonTCPRoutes.length > 0) {
@@ -277,7 +276,7 @@ export class ApplicationService {
         }
         return null;
       }),
-      filter(route => route),
+      filter(route => !!route),
       switchMap(route => {
         // The route can async update itself to contain the required domain... so we need to watch it for it's normalized content
         return this.entityServiceFactory.create<APIResource>(

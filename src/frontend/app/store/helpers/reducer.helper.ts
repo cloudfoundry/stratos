@@ -59,7 +59,7 @@ function shouldMerge(newState, baseState, entityKey) {
   return typeof newState[entityKey] !== 'string' && baseState[entityKey] && Object.keys(baseState[entityKey]);
 }
 
-export const pick = <O, K extends keyof O>(o: O, keys: [K]): Pick<O, K> => {
+export const pick = <O, K extends keyof O>(o: O, keys: string[]): Pick<O, K> => {
   const copy: any = {};
   if (!o) {
     return null;

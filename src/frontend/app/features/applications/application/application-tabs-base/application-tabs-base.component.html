@@ -1,4 +1,4 @@
-<app-page-header>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
   <div *ngIf="applicationService.application$ | async as application" class="app-page-header">
     <h1>{{ application?.app?.entity?.name }} </h1>
     <div class="page-header-right">

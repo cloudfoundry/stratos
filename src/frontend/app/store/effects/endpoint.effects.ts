@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import {
   CONNECT_ENDPOINTS,
@@ -24,12 +24,12 @@ import {
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
 } from '../actions/endpoint.actions';
-import { ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { ClearPages, ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointStoreNames } from '../types/endpoint.types';
+import { endpointStoreNames, EndpointType, StateUpdateAction } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
@@ -123,6 +123,16 @@ export class EndpointsEffect {
       );
     });
 
+  @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
+    .pipe(
+      map(action => {
+        if (action.endpointType === 'cloud-foundry') {
+          this.store.dispatch(new ClearPages('application', 'applicationWall'));
+        }
+      })
+    );
+
+
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
 
@@ -186,7 +196,8 @@ export class EndpointsEffect {
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
-    actionStrings: [string, string] = [null, null]
+    actionStrings: [string, string] = [null, null],
+    endpointType: EndpointType = 'cloud-foundry'
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
@@ -196,7 +207,7 @@ export class EndpointsEffect {
       params
     }).map(endpoint => {
       if (actionStrings[0]) {
-        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
+        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType });
       }
       if (apiActionType === 'delete') {
         this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
@@ -205,7 +216,7 @@ export class EndpointsEffect {
     })
       .catch(e => {
         if (actionStrings[1]) {
-          this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
+          this.store.dispatch({ type: actionStrings[1], guid: apiAction.guid });
         }
         return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
       });
