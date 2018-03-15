@@ -7,16 +7,15 @@
   $status-colors: map-get($app-theme, status);
   $message-text: map-get($status-colors, text);
 
-  @function ansi-colour($colourName, $intense) {
-    @if map-has-key($ansi-colours, $colourName) {
+  @function ansi-colour($colour-name, $intense) {
+    @if map-has-key($ansi-colours, $colour-name) {
       @if $intense {
-        @return map-get(map-get($ansi-colours, $colourName), intense);
-      }
-      @else {
-        @return map-get(map-get($ansi-colours, $colourName), normal);
+        @return map-get(map-get($ansi-colours, $colour-name), intense);
+      } @else {
+        @return map-get(map-get($ansi-colours, $colour-name), normal);
       }
     }
-    @warn "Unknown `#{$colourName}` in $ansi-colours.";
+    @warn 'Unknown "#{$colour-name}" in $ansi-colours.';
     @return null;
   }
 
@@ -31,17 +30,16 @@
     color: $message-text;
   }
   
-  @each $colourName, $colour in $ansi-colours {
-    .ansi-#{$colourName} {
+  @each $colour-name, $colour in $ansi-colours {
+    .ansi-#{$colour-name} {
       color: map-get($colour, normal);
       &.intense {
         color: map-get($colour, intense);
         font-weight: bold;
       }
     }
-    .ansi-background-#{$colourName} {
+    .ansi-background-#{$colour-name} {
       background-color: map-get($colour, normal);
     }
   }
 }
-

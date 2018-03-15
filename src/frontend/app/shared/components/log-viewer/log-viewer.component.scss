@@ -5,7 +5,8 @@
   overflow: visible;
   position: relative;
   width: 100%;
-  &__scrollToBotttom, &__message {
+  &__scrollToBotttom,
+  &__message {
     align-items: flex-end;
     display: flex;
     height: 100%;
@@ -39,7 +40,7 @@
   line-height: 20px;
   overflow-x: hidden;
   overflow-y: scroll;
-  padding: 10px 10px 20px 10px;
+  padding: 10px 10px 20px;
   position: relative;
   transform: translateZ(0);
   white-space: pre-wrap;
@@ -47,7 +48,7 @@
   word-wrap: break-word;
 
   &__content {
-    left: 0;  
+    left: 0;
     position: absolute;
     top: 0;
   }
