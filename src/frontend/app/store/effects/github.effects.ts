@@ -6,8 +6,8 @@ import { Store } from '@ngrx/store';
 import { FETCH_GITHUB_REPO, FetchGitHubRepoInfo } from '../actions/github.actions';
 import { AppState } from '../app-state';
 import { NormalizedResponse } from '../types/api.types';
-import { GITHUB_REPO_ENTITY_KEY } from '../types/github.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
+import { githubRepoSchemaKey } from '../helpers/entity-factory';
 
 @Injectable()
 export class GithubEffects {
@@ -15,14 +15,14 @@ export class GithubEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
-  ) {}
+  ) { }
   @Effect()
   fetchCommit$ = this.actions$
     .ofType<FetchGitHubRepoInfo>(FETCH_GITHUB_REPO)
     .flatMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityKey: GITHUB_REPO_ENTITY_KEY,
+        entityKey: githubRepoSchemaKey,
         type: action.type,
         guid: action.stProject.deploySource.project
       };
@@ -30,7 +30,7 @@ export class GithubEffects {
       return this.http
         .get(
           `https://api.github.com/repos/${
-            action.stProject.deploySource.project
+          action.stProject.deploySource.project
           }`
         )
         .mergeMap(response => {

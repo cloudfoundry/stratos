@@ -3,10 +3,6 @@ import { schema } from 'normalizr';
 import { getAPIResourceGuid } from '../selectors/api.selectors';
 import { ISpace, IOrganization } from '../../core/cf-api.types';
 
-export const UserSchema = new schema.Entity('user', {}, {
-  idAttribute: getAPIResourceGuid
-});
-
 export interface CfUser {
   organizations?: APIResource<IOrganization>[];
   managed_organizations: APIResource<IOrganization>[];

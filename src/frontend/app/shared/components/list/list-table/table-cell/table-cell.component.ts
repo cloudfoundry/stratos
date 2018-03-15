@@ -76,7 +76,6 @@ import { ICellDefinition } from '../table.types';
 import { TableCellCustom } from './table-cell-custom';
 import { CfSpacePermissionCellComponent } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 
-
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,

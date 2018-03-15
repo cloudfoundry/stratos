@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, ValidatorFn, AbstractControl } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -8,15 +8,15 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { OrganisationSchema, organisationSchemaKey } from '../../../../store/actions/action-types';
-import { GetAllOrganisations, UpdateOrganization } from '../../../../store/actions/organisation.actions';
-import { getPaginationKey } from '../../../../store/actions/pagination.actions';
+import { UpdateOrganization } from '../../../../store/actions/organisation.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
+import { entityFactory, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
 
 const enum OrgStatus {
@@ -82,15 +82,14 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const paginationKey = getPaginationKey('cf-org', this.cfGuid);
-    const action = new GetAllOrganisations(paginationKey, this.cfGuid);
+    const action = CloudFoundryEndpointService.createGetAllOrganisations(this.cfGuid);
     this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          OrganisationSchema
+          entityFactory(organisationSchemaKey)
         )
       },
       true

@@ -9,9 +9,20 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { organisationSchemaKey, OrganisationWithSpaceSchema } from '../../../store/actions/action-types';
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  organisationSchemaKey,
+  privateDomainsSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  serviceInstancesSchemaKey,
+  spaceSchemaKey,
+} from '../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
@@ -26,12 +37,12 @@ export class CloudFoundryOrganisationService {
   totalMem$: Observable<number>;
   privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
-  serivceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   spaces$: Observable<APIResource<ISpace>[]>;
   appInstances$: Observable<number>;
   apps$: Observable<APIResource<IApp>[]>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
-  organisationEntityService: EntityService<APIResource<IOrganization>>;
+  orgEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -43,18 +54,27 @@ export class CloudFoundryOrganisationService {
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.organisationEntityService = this.entityServiceFactory.create(
+    this.orgEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
-      OrganisationWithSpaceSchema,
+      entityFactory(organisationSchemaKey),
       this.orgGuid,
-      new GetOrganisation(this.orgGuid, this.cfGuid, 2)
+      new GetOrganisation(this.orgGuid, this.cfGuid, [
+        createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, domainSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, privateDomainsSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+      ]),
+      true
     );
 
     this.initialiseObservables();
   }
 
   private initialiseObservables() {
-    this.org$ = this.organisationEntityService.entityObs$.pipe(
+    this.org$ = this.orgEntityService.entityObs$.pipe(
       filter(o => !!o && !!o.entity)
     );
 
@@ -72,7 +92,7 @@ export class CloudFoundryOrganisationService {
   }
 
   private initialiseSpaceObservables() {
-    this.serivceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
+    this.serviceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
     this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
   }
 

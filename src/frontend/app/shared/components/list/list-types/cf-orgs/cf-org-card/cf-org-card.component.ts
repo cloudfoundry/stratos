@@ -52,11 +52,16 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
   ngOnInit() {
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => {
-        return this.cfUserService.getUserRoleInOrg(
-          u.guid,
-          this.row.entity.guid,
-          this.row.entity.cfGuid
-        );
+        // This is null if the endpoint is disconnected. Probably related to https://github.com/cloudfoundry-incubator/stratos/issues/1727
+        if (!u) {
+          return Observable.of({
+            orgManager: false,
+            billingManager: false,
+            auditor: false,
+            user: false
+          });
+        }
+        return this.cfUserService.getUserRoleInOrg(u.guid, this.row.metadata.guid, this.row.entity.cfGuid);
       }),
       map(u => getOrgRolesString(u))
     );
@@ -71,7 +76,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
     );
 
     this.subscriptions.push(fetchData$.subscribe());
-    this.orgGuid = this.row.entity.guid;
+    this.orgGuid = this.row.metadata.guid;
 
   }
 
@@ -110,7 +115,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
 
   delete = () => {
     this.cfOrgSpaceDataService.deleteOrg(
-      this.row.entity.guid,
+      this.row.metadata.guid,
       this.cfEndpointService.cfGuid
     );
   }
