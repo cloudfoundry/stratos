@@ -3,6 +3,7 @@ import { environment } from './../../../../../environments/environment';
 import { mergeMap, catchError  } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 
 // Check every 5 seconds
 const DETECT_INTERVAL = 5000;
@@ -16,9 +17,11 @@ const DETECT_INTERVAL = 5000;
 export class DiscoverAppHelper {
 
   // Are we polling?
-  alive = false;
+  pollSub: Subscription;
 
   proxyAPIVersion = environment.proxyAPIVersion;
+
+  app;
 
   constructor(
     private http: HttpClient,
@@ -27,15 +30,10 @@ export class DiscoverAppHelper {
     private name: string
   ) { }
 
-  // Observable that will emit the app when we find it
-  app$ = new BehaviorSubject(undefined);
-
   // Start the poller
-  startDetection() {
-
-    if (!this.alive) {
-      this.alive = true;
-      TimerObservable.create(0, DETECT_INTERVAL).takeWhile(() => this.alive)
+  startDetection(app$: BehaviorSubject<boolean>) {
+    if (!this.pollSub) {
+      this.pollSub = TimerObservable.create(0, DETECT_INTERVAL)
       .subscribe(() => {
         return this.http
           .get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` + this.spaceGuid + '&q=name:' + this.name, this.getRequestArgs())
@@ -44,7 +42,9 @@ export class DiscoverAppHelper {
               if (info && info[this.cfGuid]) {
                 const apps = info[this.cfGuid];
                 if (apps.total_results === 1) {
-                  this.app$.next(apps.resources[0]);
+                  this.stopDetection();
+                  this.app = apps.resources[0];
+                  app$.next(true);
                 }
               }
               return [];
@@ -60,7 +60,10 @@ export class DiscoverAppHelper {
 
   // Stop looking for an app
   stopDetection() {
-    this.alive = false;
+    if (this.pollSub) {
+      this.pollSub.unsubscribe();
+      this.pollSub = undefined;
+    }
   }
 
   // Helper to get the request args with the CNSI

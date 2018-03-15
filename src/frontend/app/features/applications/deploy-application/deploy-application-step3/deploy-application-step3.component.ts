@@ -21,6 +21,7 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
 import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/actions/action-types';
 import { DiscoverAppHelper } from './discover-app-helper';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -34,7 +35,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  validate = Observable.of(false);
+  validate = new BehaviorSubject<boolean>(false);
   appGuid: string;
 
   // Are we deploying?
@@ -160,15 +161,10 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
         this.deploying = true;
-        this.appDetectionHelper = new DiscoverAppHelper(this.http, this.appData.cloudFoundry, this.appData.space, this.appData.Name);
-        this.validate = this.appDetectionHelper.app$.filter(a => !!a)
-        .do(v => {
-          this.appDetectionHelper.stopDetection();
-          this.appGuid = v.metadata.guid;
-          this.store.dispatch(new GetAllApplications('applicationWall'));
-        })
-        .map(v => !!v);
-        this.appDetectionHelper.startDetection();
+        if (!this.appDetectionHelper) {
+          this.appDetectionHelper = new DiscoverAppHelper(this.http, this.appData.cloudFoundry, this.appData.space, this.appData.Name);
+          this.appDetectionHelper.startDetection(this.validate);
+        }
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
@@ -232,11 +228,15 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   onNext: StepOnNextFunction = () => {
+    this.appDetectionHelper.stopDetection();
+    this.appGuid = this.appDetectionHelper.app.metadata.guid;
+    this.store.dispatch(new GetAllApplications('applicationWall'));
+
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
     // Take user to applications
     this.store.dispatch(new RouterNav({ path: ['applications', this.appData.cloudFoundry, this.appGuid] }));
-    return Observable.create(true);
+    return Observable.of({ success: true });
   }
 
 }
