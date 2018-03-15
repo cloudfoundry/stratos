@@ -8,14 +8,16 @@ import { AppState } from '../../../../../store/app-state';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { IBuildpack } from '../../../../../core/cf-api.types';
 
 @Injectable()
-export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource> {
+export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<IBuildpack>> {
+  cardComponent = CfBuildpackCardComponent;
   dataSource: CfBuildpacksDataSource;
+  isLocal = false;
   constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfBuildpacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
-    this.cardComponent = CfBuildpackCardComponent;
   }
   getDataSource = () => this.dataSource;
 }

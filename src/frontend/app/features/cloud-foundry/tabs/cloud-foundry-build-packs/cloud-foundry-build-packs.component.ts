@@ -13,22 +13,16 @@ import { APIResource } from '../../../../store/types/api.types';
 @Component({
   selector: 'app-cloud-foundry-build-packs',
   templateUrl: './cloud-foundry-build-packs.component.html',
-  styleUrls: ['./cloud-foundry-build-packs.component.scss']
-  , providers: [
+  styleUrls: ['./cloud-foundry-build-packs.component.scss'],
+  providers: [
     {
       provide: ListConfig,
       useClass: CfBuildpacksListConfigService
     }
   ]
 })
-export class CloudFoundryBuildPacksComponent implements OnInit {
-  cardComponent = CfBuildpackCardComponent;
-
+export class CloudFoundryBuildPacksComponent {
   constructor(private listConfig: ListConfig<APIResource>) {
     const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
   }
-
-  ngOnInit() {
-  }
-
 }

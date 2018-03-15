@@ -16,6 +16,7 @@ import {
   SET_CLIENT_PAGE_SIZE,
   SET_INITIAL_PARAMS,
   SET_PAGE,
+  SET_PAGE_BUSY,
   SET_PARAMS,
   SET_RESULT_COUNT,
 } from '../../actions/pagination.actions';
@@ -38,6 +39,7 @@ import { paginationSetParams } from './pagination-reducer-set-params';
 import { paginationSetResultCount } from './pagination-reducer-set-result-count';
 import { paginationStart } from './pagination-reducer-start';
 import { paginationSuccess } from './pagination-reducer-success';
+import { paginationPageBusy } from './pagination-reducer-update';
 import { paginationFailure } from './pagination-reducer.failure';
 import { getActionKey, getActionType, getPaginationKeyFromAction } from './pagination-reducer.helper';
 
@@ -73,7 +75,7 @@ export const defaultPaginationState = { ...defaultCfEntitiesState };
 
 const getPaginationUpdater = function (types: [string, string, string]) {
   const [requestType, successType, failureType] = types;
-  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actsionType): PaginationEntityState {
+  return function (state: PaginationEntityState = getDefaultPaginationEntityState(), action, actionType): PaginationEntityState {
     switch (action.type) {
       case requestType:
         return paginationStart(state, action);
@@ -98,6 +100,8 @@ const getPaginationUpdater = function (types: [string, string, string]) {
         return paginationSetClientPage(state, action);
       case SET_CLIENT_FILTER:
         return paginationSetClientFilter(state, action);
+      case SET_PAGE_BUSY:
+        return paginationPageBusy(state, action);
       default:
         return state;
     }
@@ -142,14 +146,14 @@ function paginate(action, state, updatePagination) {
     return paginationClearOfEntity(state, action);
   }
 
-  if (isEnDpointAction(action)) {
+  if (isEndpointAction(action)) {
     return clearEndpointEntities(state, getDefaultPaginationEntityState());
   }
 
   return enterPaginationReducer(state, action, updatePagination);
 }
 
-function isEnDpointAction(action) {
+function isEndpointAction(action) {
   // ... that we care about.
   return action.type === DISCONNECT_ENDPOINTS_SUCCESS ||
     action.type === CONNECT_ENDPOINTS_SUCCESS ||

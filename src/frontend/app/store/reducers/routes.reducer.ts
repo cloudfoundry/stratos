@@ -25,9 +25,9 @@ export function routeReducer(state: IRequestEntityTypeState<APIResource<IRoute>>
 }
 
 function removeAppFromRoute(entity: IRoute, appGuid: string) {
-  return {
+  return entity.apps ? {
     ...entity,
     apps: entity.apps.filter(app => app.metadata.guid !== appGuid)
-  };
+  } : entity;
 }
 

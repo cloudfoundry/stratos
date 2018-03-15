@@ -116,7 +116,7 @@ function hasRole(user: CfUser, guid: string, roleType: string) {
   return user[roleType] && user[roleType].find(o => o.metadata.guid === guid) != null;
 }
 
-export const getRowUniqueId = (entity: APIResource) => entity.metadata ? entity.metadata.guid : null;
+export const getRowMetadata = (entity: APIResource) => entity.metadata ? entity.metadata.guid : null;
 
 export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   if (activatedRoute.snapshot.params[id]) {

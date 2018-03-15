@@ -20,7 +20,7 @@
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Memory Info</app-meta-card-key>
-    <app-meta-card-value>{{ this.memoryTotal | MbToHumanSize }} / {{ this.memoryLimit | MbToHumanSize }}
+    <app-meta-card-value>{{ memoryTotal | MbToHumanSize }} / {{ memoryLimit | MbToHumanSize }}
     </app-meta-card-value>
     <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
   </app-meta-card-item>
