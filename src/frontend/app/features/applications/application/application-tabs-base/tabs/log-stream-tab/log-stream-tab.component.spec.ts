@@ -17,7 +17,6 @@ import { generateTestEntityServiceProvider } from '../../../../../../test-framew
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
 import { LogStreamTabComponent } from './log-stream-tab.component';
-import { LogStreamViewerComponent } from '../../../../../../shared/components/logstream-viewer/logstream-viewer.component';
 
 
 describe('LogStreamTabComponent', () => {
@@ -38,7 +37,7 @@ describe('LogStreamTabComponent', () => {
         createBasicStoreModule()
       ],
       declarations: [
-        LogStreamViewerComponent,
+        LogViewerComponent,
         LogStreamTabComponent
       ],
       providers: [
