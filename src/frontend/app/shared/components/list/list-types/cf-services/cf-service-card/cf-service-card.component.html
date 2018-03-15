@@ -4,7 +4,7 @@
       <div class="service-card__title__link">{{ getDisplayName() }}</div>
       <div class="service-card__title__img">
         <mat-icon *ngIf="!hasImage()">cloud_circle</mat-icon>
-        <img [src]="getImageUrl()" *ngIf="hasImage()">
+        <img [src]="getImageUrl() | safeImg" *ngIf="hasImage()">
       </div>
     </div>
   </app-meta-card-title>

@@ -12,6 +12,7 @@ import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component
 import { LoggerService } from './logger.service';
 import { MDAppModule } from './md.module';
 import { PageHeaderService } from './page-header-service/page-header.service';
+import { SafeImgPipe } from './safe-img.pipe';
 import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
@@ -30,7 +31,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     TruncatePipe,
     InfinityPipe,
     BytesToHumanSize,
-    MegaBytesToHumanSize
+    MegaBytesToHumanSize,
+    SafeImgPipe
   ],
   providers: [
     AuthGuardService,
@@ -48,7 +50,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     TruncatePipe,
     InfinityPipe,
     BytesToHumanSize,
-    MegaBytesToHumanSize
+    MegaBytesToHumanSize,
+    SafeImgPipe
   ],
   entryComponents: [
     LogOutDialogComponent
