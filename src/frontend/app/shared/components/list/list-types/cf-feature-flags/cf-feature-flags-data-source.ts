@@ -1,9 +1,11 @@
 import { Store } from '@ngrx/store';
 
 import { IFeatureFlag } from '../../../../../core/cf-api.types';
-import { FeatureFlagSchema, GetAllFeatureFlags } from '../../../../../store/actions/feature-flags.actions';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { GetAllFeatureFlags } from '../../../../../store/actions/feature-flags.actions';
 import { AppState } from '../../../../../store/app-state';
+import { endpointSchemaKey, entityFactory, featureFlagSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
@@ -25,16 +27,14 @@ export const FeatureFlagDescriptions = {
     'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables'
 };
 export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatureFlag>> {
-  constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
-    const paginationKey = getPaginationKey('featureFlags', endpointGuid);
-    const action = new GetAllFeatureFlags(endpointGuid, paginationKey);
+  constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
+    const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+    const action = new GetAllFeatureFlags(cfGuid, paginationKey);
     super({
       store,
       action,
-      schema: FeatureFlagSchema,
-      getRowUniqueId: (entity: APIResource<IFeatureFlag>) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      schema: entityFactory(featureFlagSchemaKey),
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       transformEntities: [],

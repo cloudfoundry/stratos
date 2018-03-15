@@ -6,6 +6,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NoEndpointsNonAdminComponent } from './no-endpoints-non-admin.component';
 import { createBasicStoreModule } from '../../test-framework/store-test-helper';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('NoEndpointsNonAdminComponent', () => {
   let component: NoEndpointsNonAdminComponent;
@@ -16,6 +17,7 @@ describe('NoEndpointsNonAdminComponent', () => {
       declarations: [NoEndpointsNonAdminComponent],
       imports: [
         CoreModule,
+        RouterTestingModule,
         SharedModule,
         createBasicStoreModule(),
       ]

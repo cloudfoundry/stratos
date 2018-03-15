@@ -45,7 +45,7 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
       this.store,
       this.appStateService,
       this.row.entity,
-      this.row.entity.guid,
+      this.row.metadata.guid,
       this.row.entity.cfGuid)
       .pipe(
         startWith(applicationState)

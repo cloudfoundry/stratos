@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 
+import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
   CfServicesListConfigService,
 } from '../../../shared/components/list/list-types/cf-services/cf-services-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { APIResource } from '../../../store/types/api.types';
-import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
 
 @Component({

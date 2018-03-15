@@ -1,11 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { schema } from 'normalizr';
 
-import { getAPIResourceGuid } from '../selectors/api.selectors';
+import { entityFactory, serviceSchemaKey } from '../helpers/entity-factory';
 import { PaginationAction } from '../types/pagination.types';
-import { CFStartAction, ICFAction } from '../types/request.types';
+import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { ServiceInstancesSchema, ServiceSchema } from './action-types';
 
 export class GetAllServices extends CFStartAction implements PaginationAction {
   constructor(public paginationKey: string) {
@@ -16,8 +14,8 @@ export class GetAllServices extends CFStartAction implements PaginationAction {
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service', 'Get all Services');
-  entity = [ServiceSchema];
-  entityKey = ServiceSchema.key;
+  entity = entityFactory(serviceSchemaKey);
+  entityKey = serviceSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,
