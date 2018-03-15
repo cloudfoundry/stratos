@@ -94,7 +94,7 @@
       <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)">
       </app-table>
     </div>
-    <mat-card class="list-component__paginator" [hidden]="!(hasRows$ | async) || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
+    <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
       <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
       </mat-paginator>
     </mat-card>

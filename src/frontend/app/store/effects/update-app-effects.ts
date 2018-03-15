@@ -1,15 +1,17 @@
-import { GetAppEnvVarsAction, GetAppStatsAction, AppMetadataTypes, GetAppSummaryAction } from './../actions/app-metadata.actions';
-import { WrapperRequestActionSuccess } from '../types/request.types';
 import { Injectable } from '@angular/core';
-import { Headers, Http } from '@angular/http';
+import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
-import { environment } from '../../../environments/environment';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../actions/application.actions';
+import { WrapperRequestActionSuccess } from '../types/request.types';
+import {
+  AppMetadataTypes,
+  GetAppEnvVarsAction,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from './../actions/app-metadata.actions';
 import { AppState } from './../app-state';
-import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
-import { ApiActionTypes } from '../actions/request.actions';
 
 
 @Injectable()

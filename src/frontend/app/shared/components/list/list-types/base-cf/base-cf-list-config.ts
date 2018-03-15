@@ -12,11 +12,13 @@ import {
 } from '../../list.component.types';
 
 
-export class BaseCfListConfig<T> extends ListConfig<T> implements IListConfig<T> {
+export class BaseCfListConfig<T> implements IListConfig<T> {
   getDataSource: () => IListDataSource<T>;
   isLocal = true;
   viewType = ListViewTypes.CARD_ONLY;
   defaultView = 'cards' as ListView;
+  cardComponent;
+  enableTextFilter = false;
   getColumns = () => [];
   getGlobalActions = () => [];
   getMultiActions = () => [];

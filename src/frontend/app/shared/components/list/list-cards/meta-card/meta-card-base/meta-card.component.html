@@ -1,8 +1,17 @@
-<mat-card>
+<mat-card class="meta-card" [ngClass]="clickAction ? 'meta-card-pointer' : ''" (click)="clickAction ? clickAction() : null">
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
-  <mat-card-header *ngIf="title">
+  <mat-card-header class="meta-card__header" *ngIf="title">
     <ng-container *ngTemplateOutlet="title.content"></ng-container>
+    <div *ngIf="actionMenu" appClickStopPropagation>
+      <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
+      <mat-menu #menu="matMenu">
+        <button *ngFor="let menuItem of actionMenu" mat-menu-item (click)="menuItem.action()">
+            <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>
+            <span>{{menuItem.label}}</span>
+          </button>
+      </mat-menu>
+    </div>
     <app-application-state-icon *ngIf="status$" [status]="status$ | async"></app-application-state-icon>
   </mat-card-header>
   <mat-card-content>

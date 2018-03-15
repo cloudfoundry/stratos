@@ -37,7 +37,7 @@ export const deepMergeState = (state, newState) => {
   return baseState;
 };
 
-function mergeEntity(baseEntity, newEntity) {
+export function mergeEntity(baseEntity, newEntity) {
   if (baseEntity && baseEntity.entity && baseEntity.metadata) {
     return {
       entity: merge(baseEntity.entity, newEntity.entity),
@@ -59,8 +59,11 @@ function shouldMerge(newState, baseState, entityKey) {
   return typeof newState[entityKey] !== 'string' && baseState[entityKey] && Object.keys(baseState[entityKey]);
 }
 
-export const pick = <O, K extends keyof O>(o: O, keys: [K]): Pick<O, K> => {
+export const pick = <O, K extends keyof O>(o: O, keys: string[]): Pick<O, K> => {
   const copy: any = {};
+  if (!o) {
+    return null;
+  }
   keys.forEach(k => {
     copy[k] = o[k];
   });
