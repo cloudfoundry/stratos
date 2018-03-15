@@ -8,10 +8,11 @@ import { getOrgRoles, IOrgUserRole } from '../../../../../../features/cloud-foun
 import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg, UserSchema } from '../../../../../../store/types/user.types';
+import { CfUser, IUserPermissionInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { IAppChip, AppChip } from '../../../../chips/chips.component';
+import { cfUserSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 
 interface ICellPermissionList extends IOrgUserRole {
   busy: Observable<boolean>;
@@ -79,8 +80,8 @@ export class TableCellCfUserPermissionComponent {
         busy: new EntityMonitor(
           this.store,
           row.metadata.guid,
-          UserSchema.key,
-          UserSchema
+          cfUserSchemaKey,
+          entityFactory(cfUserSchemaKey)
         ).getUpdatingSection(updatingKey).pipe(
           map(update => update.busy)
         )

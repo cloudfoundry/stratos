@@ -1,11 +1,12 @@
-import { IRequestArray } from '../reducers/api-request-reducer/types';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { Schema } from 'normalizr';
-import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
-import { PaginatedAction } from './pagination.types';
-import { NormalizedResponse } from './api.types';
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
+import { Schema } from 'normalizr';
+
+import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from './api.types';
+import { PaginatedAction } from './pagination.types';
+import { EntitySchema } from '../helpers/entity-factory';
 
 export interface SingleEntityAction {
   entityKey: string;
@@ -29,8 +30,9 @@ export enum RequestEntityLocation {
   OBJECT, // The response is the entity
 }
 
+export type IRequestActionEntity = EntitySchema | EntitySchema[];
 export interface IRequestAction extends RequestAction {
-  entity?: Schema;
+  entity?: IRequestActionEntity;
   entityKey: string;
   endpointGuid?: string;
   updatingKey?: string;
@@ -40,6 +42,11 @@ export interface IRequestAction extends RequestAction {
   // For delete requests we clear the pagination sections (include all pages) of all list matching the same entity type. In some cases,
   // like local lists, we want to immediately remove that entry instead of clearing the table and refetching all data. This flag allows that
   removeEntityOnDelete?: boolean;
+}
+
+export interface IUpdateRequestAction {
+  apiAction: IRequestAction | PaginatedAction;
+  error: string;
 }
 
 export interface IStartRequestAction {
@@ -73,6 +80,18 @@ export abstract class RequestSuccessAction implements Action {
 }
 export abstract class RequestFailedAction implements Action {
   type = RequestTypes.FAILED;
+}
+export abstract class RequestUpdateAction implements Action {
+  type = RequestTypes.UPDATE;
+}
+
+export class UpdateCfAction extends RequestUpdateAction implements IUpdateRequestAction {
+  constructor(
+    public apiAction: ICFAction | PaginatedAction,
+    public error: string,
+  ) {
+    super();
+  }
 }
 
 export interface ICFAction extends IRequestAction {

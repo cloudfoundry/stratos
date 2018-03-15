@@ -14,6 +14,7 @@ import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
 import { isFulfilled } from 'q';
 import { Subscription } from 'rxjs/Subscription';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -43,7 +44,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     {
       text: 'Dashboard',
       matIcon: 'assessment',
-      link: '/dashboard'
+      link: '/dashboard',
+      // Experimental - only show in development
+      hidden: environment.production,
     },
     {
       text: 'Applications',

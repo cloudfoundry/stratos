@@ -1,24 +1,23 @@
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
-import { AppState } from '../../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { Component, OnInit, ViewChild, AfterContentInit } from '@angular/core';
+import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { Observable } from 'rxjs/Observable';
-import { EndpointModel, EndpointState, endpointStoreNames } from '../../../../store/types/endpoint.types';
-import { UtilsService } from '../../../../core/utils.service';
-import { StepOnNextFunction, IStepperStep } from '../../../../shared/components/stepper/step/step.component';
-import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
-import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { selectEntity, selectUpdateInfo, selectRequestInfo, getAPIRequestDataState } from '../../../../store/selectors/api.selectors';
-import { shareReplay, withLatestFrom, map } from 'rxjs/operators';
-import { tag } from 'rxjs-spy/operator/tag';
-import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
-import { EndpointsDataSource } from '../../../../shared/components/list/list-types/endpoint/endpoints-data-source';
+import { Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
-import { EndpointSchema, GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/endpoint.actions';
+import { Observable } from 'rxjs/Observable';
+import { map, withLatestFrom } from 'rxjs/operators';
+
+import { UtilsService } from '../../../../core/utils.service';
+import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/endpoint.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppState } from '../../../../store/app-state';
 import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
+import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
+import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
+import { endpointStoreNames } from '../../../../store/types/endpoint.types';
 import { getFullEndpointApiUrl } from '../../endpoint-helpers';
+import { entityFactory } from '../../../../store/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
@@ -43,16 +42,16 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
-      withLatestFrom(store.select(getAPIRequestDataState)),
-      map(([pagination, entities]) => {
-        const pages = Object.values(pagination.ids);
-        const page = [].concat.apply([], pages);
-        const endpoints = page.length ? denormalize(page, [EndpointSchema], entities) : [];
-        return {
-          names: endpoints.map(ep => ep.name),
-          urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
-        };
-      })
+        withLatestFrom(store.select(getAPIRequestDataState)),
+        map(([pagination, entities]) => {
+          const pages = Object.values(pagination.ids);
+          const page = [].concat.apply([], pages);
+          const endpoints = page.length ? denormalize(page, [entityFactory(endpointSchemaKey)], entities) : [];
+          return {
+            names: endpoints.map(ep => ep.name),
+            urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
+          };
+        })
       );
   }
 

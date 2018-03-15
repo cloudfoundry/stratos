@@ -1,7 +1,6 @@
-<app-meta-card class="org-card">
+<app-meta-card class="org-card" [clickAction]="goToSummary" [actionMenu]="cardMenu">
   <app-meta-card-title class="org-card__title">
-    <div class="org-card__title-link" (click)="goToSummary()">{{ row.entity.name }}</div>
-    <button mat-icon-button class="org-card__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
+    <div class="org-card__title-link">{{ row.entity.name }}</div>
   </app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>Role</app-meta-card-key>
@@ -21,14 +20,4 @@
     </app-meta-card-value>
     <mat-progress-bar mode="determinate" [value]="normalisedMemoryUsage"></mat-progress-bar>
   </app-meta-card-item>
-  <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="edit()">
-            <mat-icon>mode_edit</mat-icon>
-            <span>Edit</span>
-          </button>
-    <button mat-menu-item (click)="delete()">
-            <mat-icon>delete</mat-icon>
-            <span>Delete</span>
-          </button>
-  </mat-menu>
 </app-meta-card>

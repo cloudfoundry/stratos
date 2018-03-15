@@ -8,15 +8,6 @@ import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry
   styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
 
 })
-export class CloudFoundryOrganizationSummaryComponent implements OnInit {
-
-
-  constructor(private cfOrgService: CloudFoundryOrganisationService) {
-
-  }
-
-  ngOnInit() {
-
-  }
-
+export class CloudFoundryOrganizationSummaryComponent {
+  constructor(private cfOrgService: CloudFoundryOrganisationService) { }
 }
