@@ -2,24 +2,18 @@
  * Formats log messages from the Cloud Foundry firehose
  */
 
-import { AnsiColorizer} from '../../../../shared/components/logstream-viewer/ansi-colorizer';
+import { AnsiColorizer} from '../../../../shared/components/log-viewer/ansi-colorizer';
 import { LoggerService } from '../../../../core/logger.service';
+import { UtilsService } from '../../../../core/utils.service';
 import * as moment from 'moment';
 import { Injectable } from '@angular/core';
+import { HTTP_METHODS, FireHoseItem } from './cloud-foundry-firehose.types';
 
 /* eslint-disable no-control-regex */
 const ANSI_ESCAPE_MATCHER = new RegExp('\x1B\\[([0-9;]*)m', 'g');
 /* eslint-enable no-control-regex */
 
-// Methods for HttpStartStop Events
-const HTTP_METHODS = [
-  'GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'ACL', 'BASELINE_CONTROL', 'BIND', 'CHECKIN', 'CHECKOUT', 'CONNECT',
-  'COPY', 'DEBUG', 'LABEL', 'LINK', 'LOCK', 'MERGE', 'MKACTIVITY', 'MKCALENDAR', 'MKCOL', 'MKREDIRECTREF',
-  'MKWORKSPACE', 'MOVE', 'OPTIONS', 'ORDERPATCH', 'PATCH', 'PRI', 'PROPFIND', 'PROPPATCH', 'REBIND', 'REPORT',
-  'SEARCH', 'SHOWMETHOD', 'SPACEJUMP', 'TEXTSEARCH', 'TRACE', 'TRACK', 'UNBIND', 'UNCHECKOUT', 'UNLINK', 'UNLOCK',
-  'UPDATE', 'UPDATEREDIRECTREF', 'VERSION_CONTROL'
-];
-
+// Format the messages from the Cloud Foundry firehose
 export class CloudFoundryFirehoseFormatter {
 
   // Current filters
@@ -35,12 +29,9 @@ export class CloudFoundryFirehoseFormatter {
 
   private colorizer = new AnsiColorizer();
 
-  constructor(private logService: LoggerService) {}
+  constructor(private logService: LoggerService, private utils: UtilsService) {}
 
-  public setFilter(name: string, value: boolean) {
-    this.hoseFilters[name] = value;
-  }
-
+  // Enable or disable all filters
   public showAll(all: boolean) {
     Object.keys(this.hoseFilters).forEach(filter => this.hoseFilters[filter] = all);
   }
@@ -51,7 +42,7 @@ export class CloudFoundryFirehoseFormatter {
   public jsonFilter(jsonString: string): string {
     let filtered = jsonString;
     try {
-      const cfEvent = JSON.parse(jsonString);
+      const cfEvent: FireHoseItem = JSON.parse(jsonString);
       switch (cfEvent.eventType) {
         case 4:
           filtered = this.handleApiEvent(cfEvent);
@@ -88,7 +79,7 @@ export class CloudFoundryFirehoseFormatter {
   }
 
   private buildTimestampString(cfEvent) {
-    // CF timestamps are in nanoseconds
+    // CF time stamps are in nanoseconds
     const msStamp = Math.round(cfEvent.timestamp / 1000000);
     return moment(msStamp).format('HH:mm:ss.SSS');
   }
@@ -120,7 +111,7 @@ export class CloudFoundryFirehoseFormatter {
     const httpEventString = peerType + ' ' + this.colorizer.colorize(method, 'magenta', true) + ' ' +
       this.colorizer.colorize(httpStartStop.uri, null, true) +
       ', Status-Code: ' + this.colorizer.colorize(httpStartStop.statusCode, 'green') +
-      ', Content-Length: ' + this.colorizer.colorize(this.bytesToHumanSize(httpStartStop.contentLength), 'green') +
+      ', Content-Length: ' + this.colorizer.colorize(this.utils.bytesToHumanSize(httpStartStop.contentLength), 'green') +
       ', User-Agent: ' + this.colorizer.colorize(httpStartStop.userAgent, 'green') +
       ', Remote-Address: ' + this.colorizer.colorize(httpStartStop.remoteAddress, 'green') + '\n';
     return this.buildOriginString(cfEvent, 'magenta') + ' ' + httpEventString;
@@ -157,8 +148,8 @@ export class CloudFoundryFirehoseFormatter {
     const counterEvent = cfEvent.counterEvent;
     let delta, total;
     if (counterEvent.name.indexOf('ByteCount') !== -1) {
-      delta = this.bytesToHumanSize(counterEvent.delta);
-      total = this.bytesToHumanSize(counterEvent.total);
+      delta = this.utils.bytesToHumanSize(counterEvent.delta);
+      total = this.utils.bytesToHumanSize(counterEvent.total);
     } else {
       delta = counterEvent.delta;
       total = counterEvent.total;
@@ -178,9 +169,10 @@ export class CloudFoundryFirehoseFormatter {
       ' ' + this.colorizer.colorize('[', 'cyan', true) + this.colorizer.colorize('CPU: ', 'cyan', true) +
       this.colorizer.colorize(Math.round(containerMetric.cpuPercentage * 100) + '%', 'green', true) +
       ', ' + this.colorizer.colorize('Memory: ', 'cyan', true) +
-      this.colorizer.colorize(this.bytesToHumanSize(containerMetric.memoryBytes), 'green', true) +
+      this.colorizer.colorize(this.utils.bytesToHumanSize(containerMetric.memoryBytes), 'green', true) +
       ', ' + this.colorizer.colorize('Disk: ', 'cyan', true) +
-      this.colorizer.colorize(this.bytesToHumanSize(containerMetric.diskBytes), 'green', true) + this.colorizer.colorize(']', 'cyan', true);
+      this.colorizer.colorize(this.utils.bytesToHumanSize(containerMetric.diskBytes), 'green', true) +
+      this.colorizer.colorize(']', 'cyan', true);
     return this.buildOriginString(cfEvent, 'cyan') + ' ' + metricString + '\n';
   }
 
@@ -250,37 +242,5 @@ export class CloudFoundryFirehoseFormatter {
       bold: boldOn,
       colour: prevColour
     };
-  }
-
-  private bytesToHumanSize(value: string): string {
-    const bytes = parseInt(value, 10);
-    let retBytes = '';
-    if (!bytes && bytes !== 0) {
-      return '';
-    }
-    if (bytes === -1) {
-      retBytes = '∞';
-    }
-    if (bytes >= 1099511627776) {
-      retBytes = this.precisionIfUseful(bytes / 1099511627776) + ' TB';
-    } else if (bytes >= 1073741824) {
-      retBytes = this.precisionIfUseful(bytes / 1073741824) + ' GB';
-    } else if (bytes >= 1048576) {
-      retBytes = this.precisionIfUseful(bytes / 1048576) + ' MB';
-    } else if (bytes >= 1024) {
-      retBytes = this.precisionIfUseful(bytes / 1024) + ' kB';
-    } else if (bytes >= 0) {
-      retBytes = this.precisionIfUseful(bytes) + ' B';
-    }
-    return retBytes;
-  }
-
-  private precisionIfUseful(size, precision = 1) {
-    const floored = Math.floor(size);
-    const fixed = Number(size.toFixed(precision));
-    if (floored === fixed) {
-      return floored;
-    }
-    return fixed;
   }
 }

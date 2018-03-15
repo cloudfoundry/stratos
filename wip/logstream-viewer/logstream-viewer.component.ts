@@ -118,16 +118,16 @@ export class LogStreamViewerComponent implements OnInit, OnDestroy, AfterViewIni
     console.log(this.logContainer);
 
     // Resize when window
-    this.resizeSub = Observable.fromEvent(window, 'resize')
-    .debounceTime(200)
-    .subscribe((event) => {
-      this.getMeasures();
-      this.resizeAllDivs();
-      this.paused = false;
-      if (this.deferredAppend) {
-        this.append();
-      }
-    });
+    // this.resizeSub = Observable.fromEvent(window, 'resize')
+    // .debounceTime(200)
+    // .subscribe((event) => {
+    //   this.getMeasures();
+    //   this.resizeAllDivs();
+    //   this.paused = false;
+    //   if (this.deferredAppend) {
+    //     this.append();
+    //   }
+    // });
 
     // Refresh when the visibility changes
     this.visibilitySub = Observable.fromEvent(window, 'visibilitychange')
@@ -171,7 +171,7 @@ export class LogStreamViewerComponent implements OnInit, OnDestroy, AfterViewIni
     if (this.messageSub) {
       this.messageSub.unsubscribe();
     }
-    this.resizeSub.unsubscribe();
+    // this.resizeSub.unsubscribe();
     this.visibilitySub.unsubscribe();
 
     if (this.statusSub) {
@@ -307,9 +307,9 @@ export class LogStreamViewerComponent implements OnInit, OnDestroy, AfterViewIni
 
     const el = this.renderer.createElement('div');
     this.renderer.setAttribute(el, 'id', 'logDiv-' + this.logDivId);
-    if (this.currentWidth) {
-      this.renderer.setStyle(el, 'width', this.currentWidth + 'px');
-    }
+    // if (this.currentWidth) {
+    //   this.renderer.setStyle(el, 'width', this.currentWidth + 'px');
+    // }
     this.renderer.appendChild(this.logContainer, el);
     this.logTextArea = el;
     this.currentLog = '';

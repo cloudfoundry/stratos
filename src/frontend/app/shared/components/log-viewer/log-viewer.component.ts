@@ -1,7 +1,7 @@
 import { throttle } from 'rxjs/operator/throttle';
 import { Element } from '@angular/compiler';
 import { ApplicationService } from '../../../features/applications/application.service';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { Observable, Subscription, BehaviorSubject } from 'rxjs/Rx';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,6 +13,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { MatButton } from '@angular/material';
+import { AnsiColors } from './ansi-colors';
 
 @Component({
   selector: 'app-log-viewer',
@@ -21,18 +22,10 @@ import { MatButton } from '@angular/material';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LogViewerComponent implements OnInit, OnDestroy {
-  static colors = {
-    red: '#CC6666',
-    green: '#B5BD68',
-    yellow: '#F0C674',
-    blue: '#81A2BE',
-    purple: '#B294BB',
-    teal: '#8ABEB7',
-    grey: '#C5C8C6',
-    magenta: '#FF00FF'
-  };
 
-  @Input('title') title: string;
+  @Input('filter') filter: Function;
+
+  @Input('status') status: Observable<number>;
 
   @Input('logStream') logStream: Observable<any>;
 
@@ -40,17 +33,11 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @ViewChild('content') content: ElementRef;
 
-  @ViewChild('pauseButton') pauseButton: MatButton;
-
-  @ViewChild('followLogButton') followLogButton: MatButton;
-
   currentLog = '';
 
   logLinesCount = 0;
 
   maxLogLines = 1000;
-
-  stickToBottom = true;
 
   highThroughputTimeMS = 300; // If the time interval between log emits is less then we're in high throughput mode
   highThroughputBufferIntervalMS = 100; // Buffer time for high through mode
@@ -59,34 +46,47 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   estimatedCount = 0;
 
   listeningSub: Subscription;
+  statusSub: Subscription;
+  resizeSub: Subscription;
 
-  stopped$: Observable<boolean>;
+  stopped$: BehaviorSubject<boolean>;
   isLocked$: Observable<boolean>;
   isHighThroughput$: Observable<boolean>;
+
+  colorizer = new AnsiColors();
+
+  message: string;
 
   ngOnInit() {
     const contentElement = this.content.nativeElement;
     const containerElement = this.container.nativeElement;
 
-    this.stopped$ = Observable.fromEvent<boolean>(
-      this.pauseButton._elementRef.nativeElement,
-      'click'
-    )
-      .scan((acc, x) => {
-        return !acc;
-      }, false)
-      .startWith(false);
+    this.stopped$ = new BehaviorSubject<boolean>(false);
 
     const stoppableLogStream$ = this.stopped$.switchMap(
       stopped => (stopped ? Observable.never() : this.logStream)
     );
 
+    // Locked indicates auto-scroll - scroll position is "locked" to the bottom
+    // If the user scrolls off the bottom then disable auto-scroll
     this.isLocked$ = Observable.fromEvent<MouseEvent>(
-      this.followLogButton._elementRef.nativeElement,
-      'click'
+      containerElement,
+      'scroll'
     )
-      .scan((acc, event) => !acc, true)
+      .scan(() => {
+        return containerElement.scrollTop + containerElement.clientHeight >= contentElement.clientHeight;
+      })
       .startWith(true);
+
+    // When we resize the window, we need to re-enable auto-scroll - if the height changes
+    // we will determine that the user scrolled off the bottom, when in fact this si due to the resize event
+    this.resizeSub = Observable.fromEvent(window, 'resize')
+    .combineLatest(this.isLocked$)
+    .subscribe(([event, locked]) => {
+      if (locked) {
+        this.scrollToBottom();
+      }
+    });
 
     this.isHighThroughput$ = stoppableLogStream$
       .timeInterval()
@@ -113,7 +113,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         this.logLinesCount += logs.length;
         const elementString = logs
           .map(log => {
-            return `<div style="padding: 5px 0; color: #C5C8C6;">${log}</div>`;
+            let formatted = this.filter ? this.filter(log) : log;
+            formatted = this.colorizer.ansiColorsToHtml(formatted);
+            return `<div>${formatted}</div>`;
           })
           .join('');
         let removedElement;
@@ -136,6 +138,29 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         }
       })
       .subscribe();
+
+    if (this.status) {
+      this.statusSub = this.status.subscribe((wsStatus => {
+        switch (wsStatus) {
+          case 0:
+            this.message = 'Connecting....';
+            break;
+            default:
+            this.message = undefined;
+            break;
+        }
+      }));
+    }
+  }
+
+  scrollToBottom() {
+    const contentElement = this.content.nativeElement;
+    const containerElement = this.container.nativeElement;
+    containerElement.scrollTop = contentElement.clientHeight;
+  }
+
+  pause(pause) {
+    this.stopped$.next(pause);
   }
 
   binElement() {
@@ -151,6 +176,12 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.listeningSub) {
       this.listeningSub.unsubscribe();
+    }
+    if (this.statusSub) {
+      this.statusSub.unsubscribe();
+    }
+    if (this.resizeSub) {
+      this.resizeSub.unsubscribe();
     }
   }
 }

@@ -85,8 +85,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
-import { LogStreamViewerComponent } from './components/logstream-viewer/logstream-viewer.component';
-
 
 @NgModule({
   imports: [
@@ -144,7 +142,6 @@ import { LogStreamViewerComponent } from './components/logstream-viewer/logstrea
     CardCfInfoComponent,
     CardCfUserInfoComponent,
     EndpointCardComponent,
-    LogStreamViewerComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -200,7 +197,6 @@ import { LogStreamViewerComponent } from './components/logstream-viewer/logstrea
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    LogStreamViewerComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,

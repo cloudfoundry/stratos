@@ -2,4 +2,4 @@
   <div class="deploy-app__title">{{ streamTitle }}</div>
   <mat-progress-spinner *ngIf="deploying" diameter="20" mode="indeterminate"></mat-progress-spinner>
 </div>
-<app-logstream-viewer *ngIf="messages" [logStream]="messages"></app-logstream-viewer>
+<app-log-viewer *ngIf="messages" [logStream]="messages"></app-log-viewer>

@@ -15,7 +15,7 @@ import websocketConnect from 'rxjs-websockets';
 import { MatInput } from '@angular/material';
 import * as moment from 'moment';
 import { LoggerService } from '../../../../../../core/logger.service';
-import { AnsiColorizer} from '../../../../../../shared/components/logstream-viewer/ansi-colorizer';
+import { AnsiColorizer} from '../../../../../../shared/components/log-viewer/ansi-colorizer';
 
 export interface LogItem {
   message: string;
