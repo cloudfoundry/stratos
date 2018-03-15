@@ -1,4 +1,4 @@
-<mat-card class="meta-card" [ngClass]="(clickAction !== null)?'meta-card-pointer':''" (click)="clickAction ? clickAction() : null">
+<mat-card class="meta-card" [ngClass]="clickAction ? 'meta-card-pointer' : ''" (click)="clickAction ? clickAction() : null">
   <app-card-status *ngIf="status$" [status$]="status$">
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
