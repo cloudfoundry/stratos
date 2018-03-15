@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { LoggerInfoAction, LoggerDebugAction, LoggerWarnAction, LoggerErrorAction, LogLevel } from '../store/actions/log.actions';
 import { environment } from '../../environments/environment';
@@ -16,42 +16,54 @@ export class LoggerService {
 
   constructor(private store: Store<AppState>) { }
 
-  debug(message) {
-    if (LogLevelStringToNumber[LogLevel.DEBUG] >= LogLevelStringToNumber[environment.logLevel]) {
-      this.store.dispatch(new LoggerDebugAction(message));
-      if (environment.logToConsole) {
-        // tslint:disable-next-line:no-console
-        console.debug(message);
-      }
+  private log(level: LogLevel, message: string, arg: any) {
+    if (LogLevelStringToNumber[level] < LogLevelStringToNumber[environment.logLevel] || !environment.logToConsole) {
+      return;
+    }
+    const date = new Date();
+    message = `${date.toUTCString()}- ${message}`;
+
+    let func = console.log;
+    switch (level) {
+      case LogLevel.ERROR:
+        func = console.error;
+        this.store.dispatch(new LoggerErrorAction(message));
+        break;
+      case LogLevel.WARN:
+        func = console.warn;
+        this.store.dispatch(new LoggerWarnAction(message));
+        break;
+      case LogLevel.INFO:
+        func = console.info;
+        this.store.dispatch(new LoggerInfoAction(message));
+        break;
+      case LogLevel.DEBUG:
+        func = console.log;
+        this.store.dispatch(new LoggerDebugAction(message));
+        break;
+    }
+
+    if (arg) {
+      func(message, arg);
+    } else {
+      func(message);
     }
   }
 
-  info(message) {
-    if (LogLevelStringToNumber[LogLevel.INFO] >= LogLevelStringToNumber[environment.logLevel]) {
-      this.store.dispatch(new LoggerInfoAction(message));
-      if (environment.logToConsole) {
-        // tslint:disable-next-line:no-console
-        console.info(message);
-      }
-    }
+  debug(message: string, arg?: any) {
+    this.log(LogLevel.DEBUG, message, arg);
   }
 
-  warn(message) {
-    if (LogLevelStringToNumber[LogLevel.WARN] >= LogLevelStringToNumber[environment.logLevel]) {
-      this.store.dispatch(new LoggerWarnAction(message));
-      if (environment.logToConsole) {
-        console.warn(message);
-      }
-    }
+  info(message: string, arg?: any) {
+    this.log(LogLevel.INFO, message, arg);
   }
 
-  error(message) {
-    if (LogLevelStringToNumber[LogLevel.ERROR] >= LogLevelStringToNumber[environment.logLevel]) {
-      this.store.dispatch(new LoggerErrorAction(message));
-      if (environment.logToConsole) {
-        console.error(message);
-      }
-    }
+  warn(message: string, arg?: any) {
+    this.log(LogLevel.WARN, message, arg);
+  }
+
+  error(message: string, arg?: any) {
+    this.log(LogLevel.ERROR, message, arg);
   }
 
 }

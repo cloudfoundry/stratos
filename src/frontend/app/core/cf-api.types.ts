@@ -211,6 +211,18 @@ export interface IServiceInstance {
   guid?: string;
   cfGuid?: string;
 }
+export interface IStack {
+  name: string;
+  description: string;
+}
+
+export interface IBuildpack {
+  name: string;
+  position: number;
+  enabled: boolean;
+  locked: boolean;
+  filename: string;
+}
 
 export interface IPrivateDomain {
   guid?: string;

@@ -1,20 +1,19 @@
-import {
-  RequestInfoState,
-  rootUpdatingKey,
-  UpdatingSection,
-  getDefaultActionState,
-  ActionState,
-  getDefaultRequestState
-} from './../../store/reducers/api-request-reducer/types';
-import { Observable } from 'rxjs/Rx';
-import { schema, denormalize } from 'normalizr';
-import { AppState } from './../../store/app-state';
 import { Store } from '@ngrx/store';
-import { selectEntity, selectRequestInfo, getAPIRequestDataState } from '../../store/selectors/api.selectors';
-import { shareReplay, distinctUntilChanged, map, filter, withLatestFrom, startWith } from 'rxjs/operators';
-import { EntityInfo } from '../../store/types/api.types';
-import { IRequestDataState } from '../../store/types/entity.types';
+import { denormalize, schema } from 'normalizr';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { distinctUntilChanged, filter, map, shareReplay, startWith, withLatestFrom } from 'rxjs/operators';
+import { Observable } from 'rxjs/Rx';
+
+import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
+import { IRequestDataState } from '../../store/types/entity.types';
+import { AppState } from './../../store/app-state';
+import {
+  ActionState,
+  getDefaultActionState,
+  getDefaultRequestState,
+  RequestInfoState,
+  UpdatingSection,
+} from './../../store/reducers/api-request-reducer/types';
 
 export class EntityMonitor<T = any> {
   constructor(
@@ -108,7 +107,9 @@ export class EntityMonitor<T = any> {
       map(([
         [entity, entityRequestInfo],
         entities
-      ]) => entity ? denormalize(entity, schema, entities) : null),
+      ]) => {
+        return entity ? denormalize(entity, schema, entities) : null;
+      }),
       shareReplay(1),
       startWith(null)
     );

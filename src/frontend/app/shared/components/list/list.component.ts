@@ -73,6 +73,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
+  listViewKey: string;
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -104,7 +105,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.hasRows$ = this.dataSource.pagination$.map(pag => pag.totalResults > 0);
 
     // Set up an observable containing the current view (card/table)
-    const { view, } = getListStateObservables(this.store, this.dataSource.paginationKey);
+    this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
+    const { view, } = getListStateObservables(this.store, this.listViewKey);
     this.view$ = view;
 
     // If this is the first time the user has used this list then set the view to the default
@@ -118,11 +120,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     // Determine if we should hide the paginator
     this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)
-    .map(([hasRows, pagination]) => {
-      const minPageSize = this.paginator.pageSizeOptions && this.paginator.pageSizeOptions.length ? this.paginator.pageSizeOptions[0] : -1;
-      return !hasRows ||
-      pagination && (pagination.totalResults <= minPageSize);
-    });
+      .map(([hasRows, pagination]) => {
+        const minPageSize = this.paginator.pageSizeOptions && this.paginator.pageSizeOptions.length ? this.paginator.pageSizeOptions[0] : -1;
+        return !hasRows ||
+          pagination && (pagination.totalResults <= minPageSize);
+      });
 
     this.paginator.pageSizeOptions = this.config.pageSizeOptions ||
       (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
@@ -214,7 +216,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateListView(listView: ListView) {
-    this.store.dispatch(new SetListViewAction(this.dataSource.paginationKey, listView));
+    this.store.dispatch(new SetListViewAction(this.listViewKey, listView));
   }
 
   updateListSort(field: string, direction: SortDirection) {

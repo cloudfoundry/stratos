@@ -22,7 +22,7 @@ import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-
 import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgCardComponent } from '../../cf-orgs/cf-org-card/cf-org-card.component';
 
-describe('CfOrgCardComponent', () => {
+describe('CfSpaceCardComponent', () => {
   let component: CfOrgCardComponent;
   let fixture: ComponentFixture<CfOrgCardComponent>;
 
@@ -56,7 +56,12 @@ describe('CfOrgCardComponent', () => {
           metadata: null
         }
       },
-      metadata: null
+      metadata: {
+        guid: '',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
     };
     fixture.detectChanges();
   });

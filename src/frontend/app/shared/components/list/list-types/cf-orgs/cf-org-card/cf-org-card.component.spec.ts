@@ -66,7 +66,12 @@ describe('CfOrgCardComponent', () => {
           metadata: null
         }
       },
-      metadata: null
+      metadata: {
+        guid: '',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
     };
     fixture.detectChanges();
   });

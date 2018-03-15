@@ -17,10 +17,4 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
     ApplicationMonitorService
   ]
 })
-export class InstancesTabComponent implements OnInit {
-
-  constructor(private appMonitor: ApplicationMonitorService) { }
-
-  ngOnInit() { }
-
-}
+export class InstancesTabComponent { }
