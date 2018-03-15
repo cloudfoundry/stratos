@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -15,8 +16,8 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
+import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import { IOrganization, IApp } from '../../../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-cf-org-card',
@@ -25,6 +26,7 @@ import { IOrganization, IApp } from '../../../../../../core/cf-api.types';
 })
 export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganization>>
   implements OnInit, OnDestroy {
+  cardMenu: MetaCardMenuItem[];
   orgGuid: string;
   normalisedMemoryUsage: number;
   memoryLimit: number;
@@ -47,6 +49,19 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
     private cfOrgSpaceDataService: CfOrgSpaceDataService
   ) {
     super();
+
+    this.cardMenu = [
+      {
+        icon: 'mode_edit',
+        label: 'Edit',
+        action: this.edit
+      },
+      {
+        icon: 'delete',
+        label: 'Delete',
+        action: this.delete
+      }
+    ];
   }
 
   ngOnInit() {
