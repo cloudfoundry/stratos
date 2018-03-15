@@ -1,0 +1,8 @@
+@import '~@angular/material/theming';
+@mixin app-deploy-app-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
+
+  .deploy-app {
+    background-color: #fff;
+  }
+}

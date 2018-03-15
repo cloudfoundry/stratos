@@ -1,5 +1,5 @@
-<mat-card>
-  <div *ngIf="messages">
-    <app-log-viewer [title]="streamTitle" [logStream]="messages"></app-log-viewer>
-  </div>
-</mat-card>
+<div class="deploy-app">
+  <div class="deploy-app__title">{{ streamTitle }}</div>
+  <mat-progress-spinner *ngIf="deploying" diameter="20" mode="indeterminate"></mat-progress-spinner>
+</div>
+<app-logstream-viewer *ngIf="messages" [logStream]="messages"></app-logstream-viewer>

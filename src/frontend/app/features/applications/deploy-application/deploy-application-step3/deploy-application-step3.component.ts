@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError } from 'rxjs/operators';
+import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError, take } from 'rxjs/operators';
 import { getEntityById, selectEntity, selectEntities } from '../../../../store/selectors/api.selectors';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import websocketConnect from 'rxjs-websockets';
@@ -21,6 +21,7 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
 import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/actions/action-types';
 import { DiscoverAppHelper } from './discover-app-helper';
 import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -30,11 +31,11 @@ import { HttpClient } from '@angular/common/http';
 export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   connect$: Subscription;
-  streamTitle: string;
+  streamTitle = 'Preparing...';
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  validate = Observable.of(false);
+  validate: Observable<boolean>;
   appGuid: string;
 
   // Are we deploying?
@@ -51,7 +52,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Unsubscribe from the websocket stream
-    if (!this.connect$) {
+    if (this.connect$ && !this.connect$.closed) {
       this.connect$.unsubscribe();
     }
 
@@ -72,6 +73,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         return Observable.of(p).combineLatest(orgSubscription, spaceSubscription);
       }),
       tap(p => {
+        this.connect$.unsubscribe();
         const host = window.location.host;
         const streamUrl = (
           `wss://${host}/pp/${this.proxyAPIVersion}/${p[0].cloudFoundryDetails.cloudFoundry}/` +
@@ -98,7 +100,9 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
             }
           }),
           filter((log) => log.type === SocketEventTypes.DATA),
-          map((log) => log.message)
+          map((log) => {
+            return log.message;
+          })
           );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
       })

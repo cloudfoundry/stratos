@@ -9,6 +9,8 @@ import { environment } from '../../../../../environments/environment';
 import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
+import { CloudFoundryFirehoseFormatter} from './cloud-foundry-firehose-formatter';
+import { LoggerService } from '../../../../core/logger.service';
 
 @Component({
   selector: 'app-cloud-foundry-firehose',
@@ -17,36 +19,61 @@ import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
 })
 export class CloudFoundryFirehoseComponent implements OnInit {
   messages: Observable<string>;
-  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
+  connectionStatus: Observable<number>;
+
+  filter;
+
+  formatter;
+
+  constructor(private cfEndpointService: CloudFoundryEndpointService, private logService: LoggerService) {
+    this.formatter = new CloudFoundryFirehoseFormatter(logService);
+  }
 
   ngOnInit() {
     const host = window.location.host;
     const streamUrl = `wss://${host}/pp/${environment.proxyAPIVersion}/${
       this.cfEndpointService.cfGuid
       }/firehose`;
-    this.messages = this.setupFirehoseStream(streamUrl);
+
+    this.setupFirehoseStream(streamUrl);
+    this.filter = this.formatter.jsonFilter.bind(this.formatter);
   }
 
   private setupFirehoseStream(streamUrl: string) {
-    return websocketConnect(
+    const { messages, connectionStatus } = websocketConnect(
       streamUrl,
       new QueueingSubject<string>()
-    ).messages.pipe(
+    );
+
+    this.messages = messages;
+    this.connectionStatus = connectionStatus;
+    messages.pipe(
       catchError(e => {
         return [];
       }),
       share(),
-      filter(l => !!l),
-      map(log => {
-        const fireHoseItem = JSON.parse(log) as FireHoseItem;
-        const timesString = moment(fireHoseItem.timestamp / 1000000).format(
-          'hh:mm:ss A'
-        );
-        const component = this.getComponent(fireHoseItem);
-        const message = this.showMessage(fireHoseItem);
-        return `${timesString}: ${component} ${message}`;
-      })
+      filter(l => !!l)
+      // map(log => {
+      //   const fireHoseItem = JSON.parse(log) as FireHoseItem;
+      //   const timesString = moment(fireHoseItem.timestamp / 1000000).format(
+      //     'hh:mm:ss A'
+      //   );
+      //   const component = this.getComponent(fireHoseItem);
+      //   const message = this.showMessage(fireHoseItem);
+      //   return `${timesString}: ${component} ${message}`;
+      // })
       );
+  }
+
+  private messageFilter(log: string): string {
+    const fireHoseItem = JSON.parse(log) as FireHoseItem;
+    const timesString = moment(fireHoseItem.timestamp / 1000000).format(
+      'hh:mm:ss A'
+    );
+    const component = this.getComponent(fireHoseItem);
+    const message = this.showMessage(fireHoseItem);
+    console.log(message);
+    return `${timesString}: ${component} ${message}`;
   }
 
   private getComponent(fireHoseItem: FireHoseItem) {

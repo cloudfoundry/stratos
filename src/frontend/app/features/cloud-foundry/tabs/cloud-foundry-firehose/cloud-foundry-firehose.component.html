@@ -1,5 +1,35 @@
-<div class="firehose-tab">
+<!--<div class="firehose-tab">
   <mat-card>
     <app-log-viewer title="Firehose Stream" [logStream]="messages"></app-log-viewer>
   </mat-card>
 </div>
+-->
+<div class="firehose-filter-panel">
+  <div class="firehose-filter-panel__controls">
+    <span class="controls-label">Select:</span>
+    <a class="firehose-filter-panel__link" (click)="formatter.showAll(true)">All</a>
+    <span>|</span>
+    <a class="firehose-filter-panel__link" (click)="formatter.showAll(false)">None</a>
+  </div>
+
+  <div class="firehose-filter-panel__filters">
+    <mat-checkbox class="firehose-filter-panel__apps-filter"
+      [(ngModel)]="formatter.hoseFilters.apps">Apps</mat-checkbox>
+    <mat-checkbox class="firehose-filter-panel__api-filter"
+      [(ngModel)]="formatter.hoseFilters.api">Api</mat-checkbox>
+    <mat-checkbox class="firehose-filter-panel__metrics-filter"
+      [(ngModel)]="formatter.hoseFilters.metrics">Metrics</mat-checkbox>
+    <mat-checkbox class="firehose-filter-panel__counters-filter"
+      [(ngModel)]="formatter.hoseFilters.counters">Counters</mat-checkbox>
+    <mat-checkbox class="firehose-filter-panel__container-metrics-filter"
+      [(ngModel)]="formatter.hoseFilters.containerMetrics">Container Metrics</mat-checkbox>
+    <mat-checkbox class="firehose-filter-panel__errors-filter"
+      [(ngModel)]="formatter.hoseFilters.errors">Errors</mat-checkbox>
+  </div>
+</div>
+
+<app-logstream-viewer
+  [filter]="filter"
+  class="app-logstream-viewer"
+  [logStream]="messages"
+  [status]="connectionStatus"></app-logstream-viewer>

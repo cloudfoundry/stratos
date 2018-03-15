@@ -54,9 +54,10 @@
     }
   }
   &__contents {
-    flex: 1;
+    display: flex;
+    flex: 1 1 0;
     height: 100%;
-    margin: 30px 80px;
+    margin: 24px 64px;
   }
   &__wrapper {
     display: flex;

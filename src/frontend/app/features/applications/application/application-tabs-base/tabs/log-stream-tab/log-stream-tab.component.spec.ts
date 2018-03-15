@@ -4,7 +4,6 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { MDAppModule } from '../../../../../../core/md.module';
-import { LogViewerComponent } from '../../../../../../shared/components/log-viewer/log-viewer.component';
 import { ApplicationSchema, GetApplication } from '../../../../../../store/actions/application.actions';
 import { appReducers } from '../../../../../../store/reducers.module';
 import { AppStoreModule } from '../../../../../../store/store.module';
@@ -17,6 +16,7 @@ import { LogStreamTabComponent } from './log-stream-tab.component';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { EntityMonitorFactory } from '../../../../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { LogStreamViewerComponent } from '../../../../../../shared/components/logstream-viewer/logstream-viewer.component';
 
 
 describe('LogStreamTabComponent', () => {
@@ -37,7 +37,7 @@ describe('LogStreamTabComponent', () => {
         createBasicStoreModule()
       ],
       declarations: [
-        LogViewerComponent,
+        LogStreamViewerComponent,
         LogStreamTabComponent
       ],
       providers: [

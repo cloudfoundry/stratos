@@ -1,6 +1,8 @@
 @import '../app/features/dashboard/side-nav/side-nav.component.theme';
 @import '../app/features/dashboard/dashboard-base/dashboard-base.component.theme';
 @import '../app/features/login/login-page/login-page.component.theme';
+@import '../app/features/applications/deploy-application/deploy-application.component.theme';
+@import '../app/features/cloud-foundry/tabs/cloud-foundry-firehose/cloud-foundry-firehose.component.theme';
 @import '../app/shared/components/display-value/display-value.component.theme';
 @import '../app/shared/components/stepper/steppers/steppers.component.theme';
 @import '../app/shared/components/list/list.component.theme';
@@ -16,10 +18,14 @@
 @import '../app/shared/components/no-content-message/no-content-message.component.theme';
 @import '../app/shared/components/boolean-indicator/boolean-indicator.component.theme';
 @import '../app/shared/components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component.theme';
+@import '../app/shared/components/logstream-viewer/logstream-viewer.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
 @import './mat-themes';
+@import './fonts';
+@import './ansi-colors';
+
 // Defaults
 $side-nav-light-text: #fff;
 $side-nav-light-bg: #333;
@@ -49,8 +55,19 @@ $side-nav-light-active: #484848;
   }
   html {
     background-color: $app-background-color;
-  } // App Theme defines a set of colors used by stratos components
-  $app-theme: (app-background-color: $app-background-color, app-background-text-color: rgba(mat-color($foreground-colors, base), .65), side-nav: app-generate-nav-theme($theme, $nav-theme), status: app-generate-status-theme($theme, $status-theme), subdued-color: $subdued); // Pass the Material theme and the App Theme to components that need to be themed
+  }
+  
+  // App Theme defines a set of colors used by stratos components
+  $app-theme: (
+    app-background-color: $app-background-color,
+    app-background-text-color: rgba(mat-color($foreground-colors, base), .65),
+    side-nav: app-generate-nav-theme($theme, $nav-theme),
+    status: app-generate-status-theme($theme, $status-theme),
+    subdued-color: $subdued,
+    ansi-colors: $ansi-color-palette
+  );
+  
+  // Pass the Material theme and the App Theme to components that need to be themed
   @include dialog-error-theme($theme, $app-theme);
   @include login-page-theme($theme, $app-theme);
   @include side-nav-theme($theme, $app-theme);
@@ -70,6 +87,9 @@ $side-nav-light-active: #484848;
   @include app-no-content-message-theme($theme, $app-theme);
   @include app-boolean-indicator-theme($theme);
   @include cf-security-group-theme($theme);
+  @include app-logstream-viewer-theme($theme, $app-theme);
+  @include app-deploy-app-theme($theme, $app-theme);
+  @include app-cloud-foundry-firehose-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
