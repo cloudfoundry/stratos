@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServiceIconComponent } from './service-icon.component';
-import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('ServiceIconComponent', () => {
   let component: ServiceIconComponent;
@@ -10,7 +10,7 @@ describe('ServiceIconComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ServiceIconComponent],
-      imports: [...BaseTestModules]
+      imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
   }));

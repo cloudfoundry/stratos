@@ -563,7 +563,8 @@ const testInitialStoreState: AppState = {
         }
       }
     },
-    serviceInstance: {}
+    serviceInstance: {},
+    serviceBinding: {}
   },
   dashboard: {
     sidenavOpen: true,
