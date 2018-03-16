@@ -221,7 +221,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           stratProject.deploySource &&
           stratProject.deploySource.type === 'github'
         ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' }, )
+          this.tabLinks.push({ link: 'github', label: 'GitHub' });
         }
       });
   }
