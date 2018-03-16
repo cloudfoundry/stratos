@@ -1,8 +1,19 @@
-<div class="page-subheader" [ngClass]="{'page-subheader__tabs': !!tabs}">
-  <nav *ngIf="tabs" backgroundColor="primary" mat-tab-nav-bar class="summary__nav">
-    <a mat-tab-link [ngClass]="{'page-subheader__tab-hidden': tab.hidden}" class="mat-tab-fit" *ngFor="let tab of tabs" [routerLink]="[tab.link]" routerLinkActive="active-link" #rla="routerLinkActive" [active]="rla.isActive">
+<div class="page-subheader" [ngClass]="{'page-subheader__tabs': !!tabs, 'page-subheader__tabs-overflowing': (navOverflowing$ | async)}">
+  <div class="tab-nav__outer" #navOuter *ngIf="tabs">
+    <button mat-icon-button (click)="scrollNav('left')" class="tab-nav__scroll-button tab-nav__scroll-button-left" *ngIf="navOverflowing$ | async">
+      <mat-icon aria-label="Scroll tab navigation left">chevron_left</mat-icon>
+    </button>
+    <div class="tab-nav__inner" #navScroller>
+      <nav *ngIf="tabs" #nav backgroundColor="primary" mat-tab-nav-bar class="tab-nav">
+        <a mat-tab-link [ngClass]="{'page-subheader__tab-hidden': tab.hidden}" class="mat-tab-fit" *ngFor="let tab of tabs" [routerLink]="[tab.link]" routerLinkActive="active-link" #rla="routerLinkActive" [active]="rla.isActive">
       {{tab.label}}
-    </a>
-  </nav>
+      </a>
+      </nav>
+    </div>
+
+    <button (click)="scrollNav('right')" mat-icon-button class="tab-nav__scroll-button tab-nav__scroll-button-right" *ngIf="navOverflowing$ | async">
+      <mat-icon aria-label="Scroll tab navigation right">chevron_right</mat-icon>
+    </button>
+  </div>
   <ng-content *ngIf="!tabs"></ng-content>
 </div>
