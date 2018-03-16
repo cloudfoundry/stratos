@@ -1,10 +1,10 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
-import { entityFactory, serviceSchemaKey, servicePlanSchemaKey } from '../helpers/entity-factory';
+import { entityFactory, servicePlanSchemaKey, serviceSchemaKey } from '../helpers/entity-factory';
+import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
 
 export class GetAllServices extends CFStartAction implements PaginationAction, EntityInlineParentAction {
   constructor(

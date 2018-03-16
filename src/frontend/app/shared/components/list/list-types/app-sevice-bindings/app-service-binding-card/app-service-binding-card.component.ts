@@ -1,24 +1,27 @@
-import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { ListDataSource } from '../../../data-sources-controllers/list-data-source';
-import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
-import { IService, IServiceInstance, IServiceBinding } from '../../../../../../core/cf-api-svc.types';
-import { AppState } from '../../../../../../store/app-state';
-import { IListConfig } from '../../../list.component.types';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { entityFactory, serviceSchemaKey, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { GetServiceInstance, DeleteServiceBinding } from '../../../../../../store/actions/service-instances.actions';
-import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { EntityService } from '../../../../../../core/entity-service';
-import { tap, filter } from 'rxjs/operators';
-import { GetService } from '../../../../../../store/actions/service.actions';
-import { Subscription } from 'rxjs/Subscription';
-import { Observable } from 'rxjs/Observable';
-import { AppChip } from '../../../../chips/chips.component';
 import { BehaviorSubject } from 'rxjs';
-import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { Observable } from 'rxjs/Observable';
+import { map, tap, withLatestFrom } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import { ApplicationService } from '../../../../../../features/applications/application.service';
+import {
+  EnvVarViewComponent,
+} from '../../../../../../features/applications/application/application-tabs-base/tabs/services-tab/env-var-view/env-var-view.component';
 import { DeleteAppServiceBinding } from '../../../../../../store/actions/application.actions';
+import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
+import { GetService } from '../../../../../../store/actions/service.actions';
+import { AppState } from '../../../../../../store/app-state';
+import { entityFactory, serviceInstancesSchemaKey, serviceSchemaKey } from '../../../../../../store/helpers/entity-factory';
+import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
+import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
+import { AppChip } from '../../../../chips/chips.component';
+import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 
 @Component({
   selector: 'app-app-service-binding-card',
@@ -27,6 +30,7 @@ import { DeleteAppServiceBinding } from '../../../../../../store/actions/applica
 })
 export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<IServiceBinding>> implements OnInit, OnDestroy {
 
+  envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance>>>;
@@ -34,7 +38,12 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
   tags$ = new BehaviorSubject<AppChip<IServiceInstance>[]>([]);
   @Input('row') row: APIResource<IServiceBinding>;
 
-  constructor(private store: Store<AppState>, private entityServiceFactory: EntityServiceFactory, private appService: ApplicationService) {
+  constructor(
+    private store: Store<AppState>,
+    private entityServiceFactory: EntityServiceFactory,
+    private appService: ApplicationService,
+    private dialog: MatDialog,
+  ) {
     super();
     this.cardMenu = [
       {
@@ -73,12 +82,41 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
 
       })
     ).subscribe();
+    this.envVarUrl = `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/service-bindings/${this.row.metadata.guid}/vars`;
   }
 
   ngOnDestroy(): void {
     if (this.serviceSubscription) {
       this.serviceSubscription.unsubscribe();
     }
+  }
+
+  showEnvVars = () => {
+
+    Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
+      .pipe(
+        withLatestFrom(),
+        map(([[service, serviceInstance, allEnvVars]]) => {
+          const systemEnvJson = (allEnvVars as APIResource<AppEnvVarsState>[])[0].entity.system_env_json;
+          const serviceInstanceName = (serviceInstance as EntityInfo<APIResource<IServiceInstance>>).entity.entity.name;
+          const serviceLabel = (service as EntityInfo<APIResource<IService>>).entity.entity.label;
+          if (systemEnvJson['VCAP_SERVICES'][serviceLabel]) {
+            return {
+              key: serviceInstanceName,
+              value: systemEnvJson['VCAP_SERVICES'][serviceLabel].find(s => s.name === serviceInstanceName)
+            };
+          }
+        }),
+        tap(data => {
+          this.dialog.open(EnvVarViewComponent, {
+            data: data,
+            disableClose: false
+          });
+        })
+
+
+      ).subscribe();
+
   }
 
   detach = () => {

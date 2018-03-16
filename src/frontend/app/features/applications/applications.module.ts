@@ -23,6 +23,7 @@ import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
+import { EnvVarViewComponent } from './application/application-tabs-base/tabs/services-tab/env-var-view/env-var-view.component';
 
 @NgModule({
   imports: [
@@ -48,6 +49,7 @@ import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-s
     GithubTabComponent,
     MapRoutesComponent,
     AddRouteStepperComponent,
+    EnvVarViewComponent,
   ],
   providers: [
     ApplicationService,
