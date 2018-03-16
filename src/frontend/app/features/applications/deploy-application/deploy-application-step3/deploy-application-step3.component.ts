@@ -22,7 +22,7 @@ import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/helpers
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { DiscoverAppHelper } from './discover-app-helper';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -170,7 +170,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         .do(v => {
           this.appDetectionHelper.stopDetection();
           this.appGuid = v.metadata.guid;
-	  this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
+          this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
         })
         .map(v => !!v);
         this.appDetectionHelper.startDetection();
@@ -239,7 +239,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   onNext: StepOnNextFunction = () => {
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
-    
+
     // Take user to applications
     this.store.dispatch(new RouterNav({ path: ['applications', this.appData.cloudFoundry, this.appGuid] }));
     return Observable.create(true);
