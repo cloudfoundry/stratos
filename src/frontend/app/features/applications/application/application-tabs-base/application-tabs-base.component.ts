@@ -94,11 +94,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' },
-    { link: 'github', label: 'GitHub', hidden: true },
+    { link: 'events', label: 'Events' }
   ];
-
-  tabs$ = new BehaviorSubject<any>(this.tabLinks);
 
   private getBreadcrumbs(
     application: IApp,
@@ -224,10 +221,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           stratProject.deploySource &&
           stratProject.deploySource.type === 'github'
         ) {
-          // Make the GitHub tab visible
-          const githubTab = this.tabLinks.find((tab) => tab.link === 'github');
-          githubTab.hidden = false;
-          this.tabs$.next(this.tabLinks);
+          this.tabLinks.push({ link: 'github', label: 'GitHub' }, )
         }
       });
   }
