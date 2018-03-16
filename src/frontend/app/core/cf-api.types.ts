@@ -1,3 +1,4 @@
+import { IRoute } from './cf-api.types';
 import { APIResource } from '../store/types/api.types';
 
 export interface IRoute {
@@ -8,14 +9,14 @@ export interface IRoute {
   service_instance_guid?: any;
   port?: any;
   domain_url: string;
-  domain: IDomain;
+  domain?: APIResource<IDomain>;
   space_url: string;
-  space: APIResource<ISpace>;
+  space?: APIResource<ISpace>;
   apps_url: string;
-  apps: APIResource<IApp>[];
+  apps?: APIResource<IApp>[];
   route_mappings_url: string;
-  guid: string;
-  cfGuid: string;
+  guid?: string;
+  cfGuid?: string;
 }
 
 export interface ISpace {
@@ -25,30 +26,30 @@ export interface ISpace {
   isolation_segment_guid?: any;
   allow_ssh: boolean;
   organization_url: string;
-  organization: IOrganization;
+  organization?: APIResource<IOrganization>;
   developers_url: string;
-  developers: IDeveloper[];
+  developers?: APIResource<IDeveloper>[];
   managers_url: string;
-  managers: IDeveloper[];
+  managers?: APIResource<IDeveloper>[];
   auditors_url: string;
-  auditors: any[];
+  auditors?: any[];
   apps_url: string;
-  apps: APIResource<IApp>[];
+  apps?: APIResource<IApp>[];
   routes_url: string;
   domains_url: string;
-  domains: IDomain[];
+  domains?: APIResource<IDomain>[];
   service_instances_url: string;
-  service_instances: any[];
+  service_instances?: any[];
   app_events_url: string;
-  events_url: string;
+  events_url?: string;
   security_groups_url: string;
-  security_groups: ISecurityGroup[];
+  security_groups?: APIResource<ISecurityGroup>[];
   staging_security_groups_url: string;
-  staging_security_groups: ISecurityGroup[];
+  staging_security_groups?: APIResource<ISecurityGroup>[];
   space_quota_definition?: APIResource<IQuotaDefinition>;
   routes?: APIResource<IRoute>[];
-  guid: string;
-  cfGuid: string;
+  cfGuid?: string;
+  guid?: string;
 }
 
 export interface ISecurityGroup {
@@ -81,6 +82,7 @@ export interface IApp {
   detected_buildpack?: string;
   detected_buildpack_guid?: string;
   environment_json?: IEnvironmentjson;
+  enable_ssh?: boolean;
   memory?: number;
   instances?: number;
   disk_quota?: number;
@@ -103,12 +105,18 @@ export interface IApp {
   detected_start_command?: string;
   allow_ssh?: boolean;
   ports?: number[];
+  service_bindings?: APIResource[];
+  routes?: APIResource<IRoute>[];
+  stack?: string | APIResource<IStack>;
+  space?: string | APIResource<ISpace>;
   space_url?: string;
   stack_url?: string;
   routes_url?: string;
   events_url?: string;
   service_bindings_url?: string;
   route_mappings_url?: string;
+  cfGuid?: string;
+  guid?: string;
 }
 
 export interface IDockercredentials {
@@ -149,8 +157,8 @@ export interface IOrganization {
   auditors_url?: string;
   app_events_url?: string;
   space_quota_definitions_url?: string;
-  guid: string;
-  cfGuid: string;
+  guid?: string;
+  cfGuid?: string;
   spaces?: APIResource<ISpace>[];
   private_domains?: APIResource<IPrivateDomain>[];
   quota_definition?: APIResource<IQuotaDefinition>;
@@ -200,13 +208,25 @@ export interface IFeatureFlag {
   error_message?: string;
 }
 export interface IServiceInstance {
-  guid: string;
-  cfGuid: string;
+  guid?: string;
+  cfGuid?: string;
+}
+export interface IStack {
+  name: string;
+  description: string;
+}
+
+export interface IBuildpack {
+  name: string;
+  position: number;
+  enabled: boolean;
+  locked: boolean;
+  filename: string;
 }
 
 export interface IPrivateDomain {
-  guid: string;
-  cfGuid: string;
+  guid?: string;
+  cfGuid?: string;
 }
 
 export interface IQuotaDefinition {

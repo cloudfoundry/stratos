@@ -1,8 +1,11 @@
 .page-header {
-  position: absolute;
-  top: 0;
+  $breadcrumb-opacity: .7;
+  $breadcrumb-hover-opacity: 1;
+  $breadcrumb-padding: 3px;
   left: 0;
+  position: absolute;
   right: 0;
+  top: 0;
   transform: translate3d(0, 0, 0);
   &__nav-toggle-wrapper {
     margin-right: 20px;
@@ -13,6 +16,26 @@
   }
   &__filler {
     flex: 1 1 auto;
+  }
+  &__breadcrumb,
+  &__breadcrumb-separator {
+    opacity: $breadcrumb-opacity;
+  }
+  &__breadcrumb-separator {
+    font-size: 26px;
+    margin: 0 $breadcrumb-padding;
+    user-select: none;
+  }
+  &__breadcrumbs {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+  }
+  &__breadcrumb-link {
+    cursor: pointer;
+    &:hover {
+      opacity: $breadcrumb-hover-opacity;
+    }
   }
 }
 
