@@ -37,7 +37,7 @@ export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatur
       schema: entityFactory(featureFlagSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey,
-      isLocal: false,
+      isLocal: true,
       transformEntities: [],
       listConfig
     });
