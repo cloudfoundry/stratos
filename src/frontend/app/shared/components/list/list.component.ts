@@ -74,7 +74,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
   listViewKey: string;
-  
   // Observable which allows you to determine if the top control bar should be shown
   hasControls$: Observable<boolean>;
 
