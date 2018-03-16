@@ -130,7 +130,7 @@ fi
 
 mkdir -p ${STRATOS_UI_PATH}/.dist
 # Copy in the page to tell the user that the UI is being built
-cp ./docker-compose/index.html ${STRATOS_UI_PATH}/.dist
+cp ./docker-compose/building.html ${STRATOS_UI_PATH}/.dist
 
 pushd "$PROG_DIR"
 env_vars
