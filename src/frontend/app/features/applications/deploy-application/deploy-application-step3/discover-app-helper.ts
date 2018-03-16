@@ -3,7 +3,7 @@ import { environment } from './../../../../../environments/environment';
 import { mergeMap, catchError  } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs/Subscription';
 
 // Check every 5 seconds
 const DETECT_INTERVAL = 5000;

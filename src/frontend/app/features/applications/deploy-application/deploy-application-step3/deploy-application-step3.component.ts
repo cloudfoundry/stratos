@@ -22,7 +22,7 @@ import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/helpers
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { DiscoverAppHelper } from './discover-app-helper';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Component({
   selector: 'app-deploy-application-step3',
