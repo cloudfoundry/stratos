@@ -1,11 +1,8 @@
-<app-meta-card class="app-app-service-card">
+<app-meta-card class="app-service-card">
   <app-meta-card-title>
     <div class="app-service-card__title">
       <div class="app-service-card__title__link">{{ (serviceInstance$ | async)?.entity.entity.name}}</div>
-      <!-- <div class="app-service-card__title__img"> -->
-      <!-- <mat-icon *ngIf="!hasImage()">cloud_circle</mat-icon> -->
-      <!-- <img [src]="getImageUrl() | safeImg" *ngIf="hasImage()"> -->
-      <!-- </div> -->
+      <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>
   <app-meta-card-item style="long-text">

@@ -1,0 +1,10 @@
+.service-icon {
+  align-self: flex-end;
+  display: flex;
+  img,
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+  }
+}

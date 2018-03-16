@@ -37,18 +37,7 @@ export class CfServiceCardComponent implements OnInit {
     return this.row.entity.label;
   }
 
-  hasImage() {
-    return !!(this.getImageUrl());
-  }
 
-  getImageUrl() {
-
-    let image = '';
-    if (this.extraInfo && this.extraInfo.imageUrl) {
-      image = this.extraInfo.imageUrl;
-    }
-    return image;
-  }
 
   hasDocumentationUrl() {
     return !!(this.getDocumentationUrl());

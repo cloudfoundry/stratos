@@ -80,6 +80,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 
 @NgModule({
   imports: [
@@ -149,7 +150,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     BooleanIndicatorComponent,
-    AppChipsComponent
+    AppChipsComponent,
+    ServiceIconComponent
   ],
   exports: [
     FormsModule,
