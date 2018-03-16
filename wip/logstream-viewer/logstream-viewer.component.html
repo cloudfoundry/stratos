@@ -1,9 +1,0 @@
-<div class="logstream-viewer">
-  <div #logContainer (mousewheel)="wheelHandler($event)" (scroll)="onScroll($event)" class="logstream-viewer__container"></div>
-  <div class="logstream-viewer__scrollToBotttom">
-    <button *ngIf="!autoScrollOn" (click)="enableAutoScroll()" class="logstream-viewer__scrollButton" mat-raised-button color="primary">Scroll to Bottom</button>
-  </div>
-  <div class="logstream-viewer__message" *ngIf="messageStatus !== 1">
-    <div class="logstream-viewer__messageText">{{ message }}</div>
-  </div>
-</div>
