@@ -103,7 +103,6 @@ const testInitialStoreState: AppState = {
     featureFlag: {},
     securityGroup: {},
     buildpack: {},
-    service: {},
     application: {
       applicationWall: {
         pageCount: 1,

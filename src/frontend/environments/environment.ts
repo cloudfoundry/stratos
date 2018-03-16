@@ -14,5 +14,5 @@ export const environment = {
   logToConsole: true,
   logEnableConsoleActions: false,
   showObsDebug: false,
-  disablePolling: false
+  disablePolling: true
 };

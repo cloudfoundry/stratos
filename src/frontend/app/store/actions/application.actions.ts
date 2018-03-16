@@ -7,6 +7,8 @@ import {
   domainSchemaKey,
   entityFactory,
   routeSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -20,6 +22,7 @@ import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { getPaginationKey } from './pagination.actions';
+import { getActions } from './action.helper';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -250,4 +253,33 @@ export class GetAppRoutes extends CFStartAction implements EntityInlineParentAct
   flattenPagination = true;
   parentGuid: string;
   parentEntitySchema = entityFactory(applicationSchemaKey);
+}
+
+export class GetAppServiceBindings extends CFStartAction implements EntityInlineParentAction {
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public paginationKey: string = null,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `apps/${guid}/service_bindings`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+    this.paginationKey = paginationKey || getPaginationKey(this.entityKey, endpointGuid, guid);
+  }
+  actions = getActions('Application Service Bindings', 'Get All');
+  initialParams = {
+    'results-per-page': 100,
+    page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'name',
+  };
+  entity = [entityFactory(serviceBindingSchemaKey)];
+  entityKey = serviceBindingSchemaKey;
+  options: RequestOptions;
 }
