@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellCfUserPermissionComponent } from './cf-user-permission-cell.component';
 import {
-  getBaseTestModules,
+  BaseTestModules,
   generateTestCfEndpointServiceProvider
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { SharedModule } from '../../../../../shared.module';

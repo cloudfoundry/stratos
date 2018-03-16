@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AddSpaceComponent } from './add-space.component';
-import { getBaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CreateSpaceStepComponent } from './create-space-step/create-space-step.component';
 
 describe('AddSpaceComponent', () => {
@@ -11,7 +11,7 @@ describe('AddSpaceComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [AddSpaceComponent, CreateSpaceStepComponent],
-      imports: [...getBaseTestModules]
+      imports: [...BaseTestModules]
     })
       .compileComponents();
   }));

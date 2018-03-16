@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
-  getBaseTestModulesNoShared,
+  BaseTestModulesNoShared,
   getMetadataCardComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfStacksCardComponent } from './cf-stacks-card.component';
@@ -13,7 +13,7 @@ describe('CfStacksCardComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CfStacksCardComponent, getMetadataCardComponents],
-      imports: [...getBaseTestModulesNoShared],
+      imports: [...BaseTestModulesNoShared],
     })
       .compileComponents();
   }));

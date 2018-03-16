@@ -5,8 +5,8 @@ export interface ILastOperation {
   type: string;
   state: string;
   description: string;
-  updated_at: Date;
-  created_at: Date;
+  updated_at: string;
+  created_at: string;
 }
 
 export interface IServiceBinding {
@@ -19,15 +19,16 @@ export interface IServiceBinding {
   syslog_drain_url?: any;
   volume_mounts: any[];
   app_url: string;
-  app: APIResource<IApp>;
+  app?: APIResource<IApp>;
   service_instance_url: string;
+  service_instance?: APIResource<IServiceInstance>;
   guid?: string;
   cfGuid?: string;
 }
 
 export interface IServiceInstance {
-  guid: string;
-  cfGuid: string;
+  guid?: string;
+  cfGuid?: string;
   name?: string;
   credentials?: any;
   service_plan_guid: string;
@@ -42,7 +43,7 @@ export interface IServiceInstance {
   service_plan_url: string;
   service_plan?: APIResource<IServicePlan>;
   service_bindings_url: string;
-  service_bindings: APIResource<IServiceBinding>[];
+  service_binding?: APIResource<IServiceBinding>[];
   service_keys_url: string;
   routes_url: string;
   service_url: string;

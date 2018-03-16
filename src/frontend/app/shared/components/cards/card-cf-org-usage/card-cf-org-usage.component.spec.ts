@@ -6,7 +6,7 @@ import {
 } from '../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModulesNoShared,
+  BaseTestModulesNoShared,
   getMetadataCardComponents,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganisationServiceMock } from '../../../../test-framework/cloud-foundry-organisation.service.mock';
@@ -15,7 +15,7 @@ import { CfUserService } from '../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CardCfOrgUsageComponent } from './card-cf-org-usage.component';
-import { getBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('CardCfOrgUsageComponent', () => {
   let component: CardCfOrgUsageComponent;
@@ -24,7 +24,7 @@ describe('CardCfOrgUsageComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CardCfOrgUsageComponent, ...getMetadataCardComponents],
-      imports: [...getBaseTestModulesNoShared],
+      imports: [...BaseTestModulesNoShared],
       providers: [
         { provide: CloudFoundryOrganisationService, useClass: CloudFoundryOrganisationServiceMock },
         generateTestCfEndpointServiceProvider(),
