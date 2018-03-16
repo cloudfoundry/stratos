@@ -29,7 +29,7 @@
     background-color: mat-color($primary);
     color: $message-text;
   }
-  
+
   @each $colour-name, $colour in $ansi-colours {
     .ansi-#{$colour-name} {
       color: map-get($colour, normal);

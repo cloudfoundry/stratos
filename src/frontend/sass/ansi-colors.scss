@@ -2,42 +2,42 @@
 // Default ansi color palette
 $ansi-color-palette: (
   'default-foreground': (
-    normal: #CCCCCC,
-    intense: #F6F6F6
+    normal: #ccc,
+    intense: #f6f6f6
   ),
   'default-background': (
-    normal: #333333,
+    normal: #333,
   ),
   'black': (
-    normal: #333333,
+    normal: #333,
     intense: #767676
   ),
   'red': (
-    normal: #AE202A,
-    intense: #FF454F
+    normal: #ae202a,
+    intense: #ff454f
   ),
   'green': (
-    normal: #01A982,
-    intense: #69CFB4
+    normal: #01a982,
+    intense: #69cfb4
   ),
   'yellow': (
-    normal: #BF9C32,
-    intense: #FFD042
+    normal: #bf9c32,
+    intense: #ffd042
   ),
   'blue': (
-    normal: #638FB0,
-    intense: #50A6E6
+    normal: #638fb0,
+    intense: #50a6e6
   ),
   'magenta': (
-    normal: #982FB3,
-    intense: #9E51B3
+    normal: #982fb3,
+    intense: #9e51b3
   ),
   'cyan': (
-    normal: #268F88,
-    intense: #668F89
+    normal: #268f88,
+    intense: #668f89
   ),
   'white': (
-    normal: #CCCCCC,
-    intense: #F6F6F6
+    normal: #ccc,
+    intense: #f6f6f6
   )
 );
