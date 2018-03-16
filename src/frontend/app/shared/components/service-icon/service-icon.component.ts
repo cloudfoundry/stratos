@@ -14,7 +14,9 @@ export class ServiceIconComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.extraInfo = this.service.entity.extra ? JSON.parse(this.service.entity.extra) : null;
+    if (this.service) {
+      this.extraInfo = this.service.entity.extra ? JSON.parse(this.service.entity.extra) : null;
+    }
   }
 
   hasImage() {

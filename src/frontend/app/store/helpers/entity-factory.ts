@@ -152,7 +152,8 @@ const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
   {
     entity: {
       stack: StackSchema,
-      routes: [RouteSchema]
+      routes: [RouteSchema],
+      service_bindings: [ServiceBindingsSchema]
     }
   },
   {
@@ -211,7 +212,8 @@ const ApplicationEntitySchema = new EntitySchema(
     entity: {
       stack: StackSchema,
       space: SpaceWithOrgsEntitySchema,
-      routes: [RouteSchema]
+      routes: [RouteSchema],
+      service_bindings: [ServiceBindingsSchema]
     }
   },
   {

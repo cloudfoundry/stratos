@@ -1,3 +1,7 @@
 <div class="app-service-bindings">
-  <app-list></app-list>
+  <app-no-content-message *ngIf="(serviceBindings$ | async)?.length === 0" [icon]="'cloud_circle'" [firstLine]="'This application has no bound service instances'" [secondLine]="{
+      text: 'To bind this application to services please visit the Service Catalogue'
+    }"></app-no-content-message>
+
+  <app-list *ngIf="(serviceBindings$ | async)?.length > 0"></app-list>
 </div>

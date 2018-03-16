@@ -8,15 +8,17 @@ import { Store } from '@ngrx/store';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { entityFactory, serviceSchemaKey, serviceInstancesSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
+import { GetServiceInstance, DeleteServiceBinding } from '../../../../../../store/actions/service-instances.actions';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { EntityService } from '../../../../../../core/entity-service';
-import { tap } from 'rxjs/operators';
+import { tap, filter } from 'rxjs/operators';
 import { GetService } from '../../../../../../store/actions/service.actions';
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
 import { AppChip } from '../../../../chips/chips.component';
 import { BehaviorSubject } from 'rxjs';
+import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
+import { DeleteAppServiceBinding } from '../../../../../../store/actions/application.actions';
 
 @Component({
   selector: 'app-app-service-binding-card',
@@ -25,14 +27,22 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<IServiceBinding>> implements OnInit, OnDestroy {
 
+  cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance>>>;
   serviceSubscription: Subscription;
   tags$ = new BehaviorSubject<AppChip<IServiceInstance>[]>([]);
   @Input('row') row: APIResource<IServiceBinding>;
 
-  constructor(private entityServiceFactory: EntityServiceFactory, private appService: ApplicationService) {
+  constructor(private store: Store<AppState>, private entityServiceFactory: EntityServiceFactory, private appService: ApplicationService) {
     super();
+    this.cardMenu = [
+      {
+        icon: 'settings',
+        label: 'Detach',
+        action: this.detach
+      }
+    ];
   }
   ngOnInit(): void {
     this.serviceInstance$ = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
@@ -71,4 +81,7 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
     }
   }
 
+  detach = () => {
+    this.store.dispatch(new DeleteAppServiceBinding(this.appService.appGuid, this.row.metadata.guid, this.appService.cfGuid));
+  }
 }

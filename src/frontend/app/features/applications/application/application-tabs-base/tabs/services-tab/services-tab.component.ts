@@ -6,6 +6,10 @@ import {
 } from '../../../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { APIResource } from '../../../../../../store/types/api.types';
+import { ApplicationService } from '../../../../application.service';
+import { tap, map } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
+import { IServiceBinding } from '../../../../../../core/cf-api-svc.types';
 
 @Component({
   selector: 'app-services-tab',
@@ -20,8 +24,10 @@ import { APIResource } from '../../../../../../store/types/api.types';
 })
 export class ServicesTabComponent implements OnInit {
 
-  constructor(private listConfig: ListConfig<APIResource>) {
+  serviceBindings$: Observable<APIResource<IServiceBinding>[]>;
+  constructor(private listConfig: ListConfig<APIResource>, private appService: ApplicationService) {
     const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
+    this.serviceBindings$ = this.appService.application$.pipe(map(app => app.app.entity.service_bindings));
   }
   ngOnInit() {
   }
