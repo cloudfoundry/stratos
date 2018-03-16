@@ -74,6 +74,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
   listViewKey: string;
+  // Observable which allows you to determine if the top control bar should be shown
+  hasControls$: Observable<boolean>;
+
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -114,6 +117,19 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       if (!listView) {
         this.updateListView(this.getDefaultListView(this.config));
       }
+    });
+
+    // Determine if this list view needs the control header bar at the top
+    this.hasControls$ = this.view$.map((viewType) => {
+      return !!(
+        this.config.viewType === 'both' ||
+        this.config.text && this.config.text.title ||
+        this.addForm ||
+        this.globalActions && this.globalActions.length ||
+        this.multiActions && this.multiActions.length ||
+        viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
+        this.multiFilterConfigs && this.multiFilterConfigs.length ||
+        this.config.enableTextFilter);
     });
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);

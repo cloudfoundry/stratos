@@ -240,7 +240,6 @@ export interface IQuotaDefinition {
   total_private_domains?: number;
 }
 
-
 export interface IUpdateSpace {
   name?: string;
   organization_guid?: string;

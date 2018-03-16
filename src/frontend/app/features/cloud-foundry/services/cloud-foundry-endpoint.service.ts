@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, shareReplay, filter } from 'rxjs/operators';
+import { map, shareReplay, filter, first } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -145,7 +145,7 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), shareReplay(1));
 
   }
 

@@ -7,10 +7,11 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 50px;
+    padding: 24px;
   }
   &__headers {
     display: flex;
+    height: 72px;
   }
   &__header {
     align-items: center;
@@ -39,17 +40,28 @@
         content: none;
       }
     }
+    &--active .steppers__header-text {
+      font-weight: 600;
+    }
+    &-complete {
+      font-size: 20px;
+      line-height: 24px;
+      text-align: center;
+    }
     &-icon {
       align-items: center;
       border-radius: 50%;
       display: flex;
-      height: 15px;
+      font-size: 14px;
+      height: 24px;
       justify-content: center;
-      padding: 15px;
-      width: 15px;
+      line-height: 24px;
+      padding: 0;
+      width: 24px;
     }
     &-text {
-      padding-left: 10px;
+      line-height: 24px;
+      padding-left: 8px;
       white-space: nowrap;
     }
   }

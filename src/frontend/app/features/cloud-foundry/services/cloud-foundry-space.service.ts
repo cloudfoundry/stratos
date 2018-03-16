@@ -3,7 +3,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, switchMap } from 'rxjs/operators';
 
-import { IApp, IQuotaDefinition, IRoute, IServiceInstance, ISpace } from '../../../core/cf-api.types';
+import { IServiceInstance } from '../../../core/cf-api-svc.types';
+import { IApp, IQuotaDefinition, IRoute, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
