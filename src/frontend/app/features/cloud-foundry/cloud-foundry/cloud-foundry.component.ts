@@ -22,12 +22,12 @@ import { CloudFoundryService } from '../services/cloud-foundry.service';
     }]
 })
 export class CloudFoundryComponent {
-  hasOneCf$: Observable<boolean>;
+  connectedEndpoints$: Observable<number>;
   constructor(
     private store: Store<AppState>,
     private cfService: CloudFoundryService
   ) {
-    this.hasOneCf$ = cfService.cFEndpoints$.pipe(
+    this.connectedEndpoints$ = cfService.cFEndpoints$.pipe(
       map(cfEndpoints => {
         const connectedEndpoints = cfEndpoints.filter(
           c => c.connectionStatus === 'connected'
@@ -38,9 +38,8 @@ export class CloudFoundryComponent {
             path: ['cloud-foundry', connectedEndpoints[0].guid]
           }));
         }
-        return connectedEndpoints.length === 1;
+        return connectedEndpoints.length;
       }),
-      filter(hasOne => !hasOne),
       first()
     );
 

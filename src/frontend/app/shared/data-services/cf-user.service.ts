@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, shareReplay } from 'rxjs/operators';
+import { filter, map, shareReplay, first } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import {
@@ -79,7 +79,8 @@ export class CfUserService {
           auditor: isOrgAuditor(user.entity, orgGuid),
           user: isOrgUser(user.entity, orgGuid)
         };
-      })
+      }),
+      first()
     );
   }
 
