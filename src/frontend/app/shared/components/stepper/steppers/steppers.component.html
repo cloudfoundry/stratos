@@ -6,7 +6,7 @@
           class="steppers__header">
           <div class="steppers__header-inner" *ngIf="steps.length !== 1">
             <div class="steppers__header-icon">
-              <mat-icon *ngIf="step.complete">{{ this.getIconLigature() }}</mat-icon>
+              <mat-icon class="steppers__header-complete" *ngIf="step.complete">{{ this.getIconLigature() }}</mat-icon>
               <div *ngIf="!step.complete">{{ i + 1 }}</div>
             </div>
             <span class="steppers__header-text">{{ step.title }}</span>
