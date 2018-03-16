@@ -1,3 +1,4 @@
+import { combineLatest } from 'rxjs/observable/combineLatest';
 import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation, OnDestroy } from '@angular/core';
 import { Observable, Subscription, BehaviorSubject } from 'rxjs/Rx';
 
@@ -8,8 +9,11 @@ import { AppState } from '../../../../store/app-state';
 import { EntityService } from '../../../../core/entity-service';
 import { selectEntity } from '../../../../store/selectors/api.selectors';
 import { getPreviousRoutingState } from '../../../../store/types/routing.type';
-import { tap, filter, map } from 'rxjs/operators';
+import { tap, filter, map, first, mergeMap } from 'rxjs/operators';
 import { RoutesRecognized } from '@angular/router';
+import { EmptyObservable } from 'rxjs/observable/EmptyObservable';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { empty } from 'rxjs/observable/empty';
 
 @Component({
   selector: 'app-steppers',
@@ -24,7 +28,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
-  @Input()
+  @Input('cancel')
   cancel = null;
 
   steps: StepComponent[] = [];
@@ -32,23 +36,22 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   stepValidateSub: Subscription = null;
 
   currentIndex = 0;
-  cancelQueryParams$ = new BehaviorSubject<any>(null);
+  cancelQueryParams$: Observable<{
+    [key: string]: string;
+  }>;
   constructor(
     private steppersService: SteppersService,
     private store: Store<AppState>
   ) {
-
-    this.cancel$ = store.select(getPreviousRoutingState).pipe(
+    const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
+    this.cancel$ = previousRoute$.pipe(
       map(previousState => {
-        let url = this.cancel;
-        if (previousState) {
-          url = previousState.url.split('?')[0];
-          if (Object.values(previousState.state.queryParams).length > 0) {
-            this.cancelQueryParams$.next(previousState.state.queryParams);
-          }
-        }
-        return url;
-      }));
+        return previousState ? previousState.url.split('?')[0] : this.cancel;
+      })
+    );
+    this.cancelQueryParams$ = previousRoute$.pipe(
+      map(previousState => previousState ? previousState.state.queryParams : {})
+    )
   }
 
   ngOnInit() {
@@ -65,15 +68,31 @@ export class SteppersComponent implements OnInit, AfterContentInit {
       step.busy = true;
       step.onNext()
         .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed' }))
-        .subscribe(({ success, message }) => {
+        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false }))
+        .switchMap(({ success, message, redirect }) => {
           step.error = !success;
           step.busy = false;
           if (success) {
-            this.setActive(this.currentIndex + 1);
+            if (redirect) {
+              return this.redirect();
+            } else {
+              this.setActive(this.currentIndex + 1);
+            }
           }
-        });
+          return [];
+        }).subscribe();
     }
+  }
+
+  redirect() {
+    return combineLatest(
+      this.cancel$,
+      this.cancelQueryParams$
+    ).pipe(
+      map(([path, params]) => {
+        this.store.dispatch(new RouterNav({ path: path, query: params }));
+      })
+    )
   }
 
   setActive(index: number) {
