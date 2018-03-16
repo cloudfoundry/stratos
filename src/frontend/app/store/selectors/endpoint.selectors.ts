@@ -27,4 +27,4 @@ export const endpointsRegisteredEntitiesSelector = createSelector(
 // Single endpoint request information
 export const endpointsEntityRequestSelector = (guid) => selectRequestInfo(endpointStoreNames.type, guid);
 // Single endpoint request data
-export const endpointsEntityRequestDataSelector = (guid) => selectEntity(endpointStoreNames.type, guid);
+export const endpointsEntityRequestDataSelector = (guid) => selectEntity<EndpointModel>(endpointStoreNames.type, guid);

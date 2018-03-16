@@ -1,19 +1,26 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { take } from 'rxjs/operators';
+import { first, map, take } from 'rxjs/operators';
+import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { Subscription } from 'rxjs/Rx';
 
+import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { EntityService } from '../../../../core/entity-service';
+import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
+import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { ApplicationService } from '../../application.service';
+import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { ConfirmationDialogConfig } from '../../../../shared/components/confirmation-dialog.config';
+import { EndpointModel } from '../../../../store/types/endpoint.types';
+import { ApplicationService } from '../../application.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -48,10 +55,26 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService
-  ) { }
-
-  public async: any;
-
+  ) {
+    const endpoints$ = store.select(endpointEntitiesSelector);
+    this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
+      withLatestFrom(
+        endpoints$,
+        applicationService.appOrg$,
+        applicationService.appSpace$
+      ),
+      map(([app, endpoints, org, space]) => {
+        return this.getBreadcrumbs(
+          app.entity.entity,
+          endpoints[app.entity.entity.cfGuid],
+          org,
+          space
+        );
+      }),
+      first()
+    );
+  }
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   application;
   applicationActions$: Observable<string[]>;
@@ -65,14 +88,52 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     update => update[this.autoRefreshString] || { busy: false }
   );
 
-  tabLinks = [
+  tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'instances', label: 'Instances' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
-    { link: 'events', label: 'Events' }
+    { link: 'events', label: 'Events' },
+    { link: 'github', label: 'GitHub', hidden: true },
   ];
+
+  tabs$ = new BehaviorSubject<any>(this.tabLinks);
+
+  private getBreadcrumbs(
+    application: IApp,
+    endpoint: EndpointModel,
+    org: APIResource<IOrganization>,
+    space: APIResource<ISpace>
+  ) {
+    const baseCFUrl = `/cloud-foundry/${application.cfGuid}`;
+    const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
+    return [
+      {
+        breadcrumbs: [{
+          value: 'Applications',
+          routerLink: '/applications'
+        }]
+      },
+      {
+        key: 'space',
+        breadcrumbs: [
+          {
+            value: endpoint.name,
+            routerLink: baseCFUrl
+          },
+          {
+            value: org.entity.name,
+            routerLink: baseOrgUrl
+          },
+          {
+            value: space.entity.name,
+            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}`
+          }
+        ]
+      }
+    ];
+  }
 
   stopApplication() {
     this.confirmDialog.open(appStopConfirmation, () => {
@@ -163,7 +224,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           stratProject.deploySource &&
           stratProject.deploySource.type === 'github'
         ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+          // Make the GitHub tab visible
+          const githubTab = this.tabLinks.find((tab) => tab.link === 'github');
+          githubTab.hidden = false;
+          this.tabs$.next(this.tabLinks);
         }
       });
   }

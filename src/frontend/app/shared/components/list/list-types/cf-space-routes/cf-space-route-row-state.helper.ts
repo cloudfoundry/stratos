@@ -1,17 +1,13 @@
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
-import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
-import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
-import { EndpointModel } from '../../../../../store/types/endpoint.types';
-import { EndpointSchema } from '../../../../../store/actions/endpoint.actions';
-import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { map, tap, mergeMap, switchMap } from 'rxjs/operators';
-import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { RouteSchema } from '../../../../../store/actions/route.actions';
-import { AppState } from '../../../../../store/app-state';
 import { Store } from '@ngrx/store';
-import { EntityMonitor } from '../../../../monitors/entity-monitor';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { map, switchMap, tap } from 'rxjs/operators';
+
+import { AppState } from '../../../../../store/app-state';
+import { entityFactory, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
+import { EntityMonitor } from '../../../../monitors/entity-monitor';
+import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
+import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 
 export class SpaceRouteDataSourceHelper {
   static getRowStateManager(
@@ -22,7 +18,7 @@ export class SpaceRouteDataSourceHelper {
     const paginationMonitor = new PaginationMonitor(
       store,
       paginationKey,
-      RouteSchema
+      entityFactory(routeSchemaKey)
     );
 
     const sub = this.setUpManager(
@@ -42,9 +38,9 @@ export class SpaceRouteDataSourceHelper {
     rowStateManager: TableRowStateManager
   ) {
     return paginationMonitor.currentPage$.pipe(
-      map(routes => routes
-        .map(route => {
-          const entityMonitor = new EntityMonitor(store, route.metadata.guid, RouteSchema.key, RouteSchema);
+      map(routes => {
+        return routes.map(route => {
+          const entityMonitor = new EntityMonitor(store, route.metadata.guid, routeSchemaKey, entityFactory(routeSchemaKey));
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const unmapping = request.updating['unmapping'] || { busy: false };
@@ -57,7 +53,8 @@ export class SpaceRouteDataSourceHelper {
             })
           );
           return request$;
-        })
+        });
+      }
       ),
       switchMap(endpointObs => combineLatest(endpointObs))
     ).subscribe();

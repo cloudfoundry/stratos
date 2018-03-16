@@ -1,12 +1,13 @@
 import { Store } from '@ngrx/store';
 
-import { EndpointSchema, GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
+import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
+import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { PaginationState } from '../../../../../store/types/pagination.types';
-import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 
 function syncPaginationSection(
   store: Store<AppState>,
@@ -34,7 +35,7 @@ export class CFEndpointsDataSource extends ListDataSource<EndpointModel> {
     super({
       store,
       action,
-      schema: EndpointSchema,
+      schema: entityFactory(endpointSchemaKey),
       getRowUniqueId: object => object.guid,
       paginationKey,
       isLocal: true,

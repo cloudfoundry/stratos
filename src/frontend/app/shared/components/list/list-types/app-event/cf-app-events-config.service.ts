@@ -31,9 +31,6 @@ export class CfAppEventsConfigService extends ListConfig<EntityInfo> implements 
     },
   ];
   viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Events',
-  };
 
   constructor(private store: Store<AppState>, private appService: ApplicationService) {
     super();

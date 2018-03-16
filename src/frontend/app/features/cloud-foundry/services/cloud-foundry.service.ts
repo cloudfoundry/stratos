@@ -3,13 +3,14 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { EntityService } from '../../../core/entity-service';
-import { EndpointSchema } from '../../../store/actions/endpoint.actions';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo, APIResource } from '../../../store/types/api.types';
 import { switchMap, shareReplay, tap, filter, map } from 'rxjs/operators';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { EndpointModel } from '../../../store/types/endpoint.types';
+import { entityFactory } from '../../../store/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundryService {
@@ -23,7 +24,7 @@ export class CloudFoundryService {
   ) {
     this.cfEndpointsMonitor = this.paginationMonitorFactory.create(
       'endpoint-list',
-      EndpointSchema
+      entityFactory(endpointSchemaKey)
     );
 
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(

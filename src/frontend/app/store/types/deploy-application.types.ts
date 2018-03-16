@@ -77,8 +77,7 @@ export interface AppData {
   space: string;
 }
 
-export const GITHUB_BRANCHES_ENTITY_KEY = 'githubBranches';
+
 export const GITHUB_COMMIT_ENTITY_KEY = 'githubCommits';
 
-export const BranchSchema = new schema.Entity(GITHUB_BRANCHES_ENTITY_KEY, {}, { idAttribute: 'entityId' });
-export const BranchesSchema = new schema.Array(BranchSchema);
+

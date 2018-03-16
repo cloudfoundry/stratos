@@ -10,7 +10,7 @@ export interface IAppChip<T = string> {
   color?: string;
 }
 export class AppChip<T = string> {
-  key: T;
+  key?: T;
   value: string;
   clearAction?: (chip: IAppChip<T>) => void;
   hideClearButton?: boolean;

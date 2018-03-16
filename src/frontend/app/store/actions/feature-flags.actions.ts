@@ -1,12 +1,9 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
-import { schema } from 'normalizr';
 
+import { entityFactory, featureFlagSchemaKey } from '../helpers/entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, RequestEntityLocation } from '../types/request.types';
 import { getActions } from './action.helper';
-import { getAPIResourceGuid } from '../selectors/api.selectors';
-
-export const FeatureFlagSchema = new schema.Entity('featureFlag', {}, { idAttribute: getAPIResourceGuid });
 
 export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction {
   constructor(public endpointGuid: string, public paginationKey: string) {
@@ -16,11 +13,10 @@ export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     this.guid = endpointGuid;
-
   }
   guid: string;
-  entityKey = FeatureFlagSchema.key;
-  entity = [FeatureFlagSchema];
+  entityKey = featureFlagSchemaKey;
+  entity = [entityFactory(featureFlagSchemaKey)];
   actions = getActions('Feature Flags', 'Fetch all');
   options: RequestOptions;
   flattenPagination: false;

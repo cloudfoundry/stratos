@@ -1,4 +1,3 @@
-import { ApplicationSchema } from '../../../../../../store/actions/application.actions';
 import {
   getEntityById,
   selectEntity
@@ -15,6 +14,7 @@ import websocketConnect from 'rxjs-websockets';
 import { MatInput } from '@angular/material';
 import * as moment from 'moment';
 import { LoggerService } from '../../../../../../core/logger.service';
+import { applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 export interface LogItem {
   message: string;
@@ -42,7 +42,7 @@ export class LogStreamTabComponent implements OnInit {
     private logService: LoggerService
   ) {
     this.streamTitle$ = store
-      .select(selectEntity(ApplicationSchema.key, applicationService.appGuid))
+      .select(selectEntity(applicationSchemaKey, applicationService.appGuid))
       .filter(app => !!app && !!app.entity)
       .map(app => {
         return `${app.entity.name} log`;
@@ -74,7 +74,7 @@ export class LogStreamTabComponent implements OnInit {
       const host = window.location.host;
       const streamUrl = `wss://${host}/pp/v1/${
         this.applicationService.cfGuid
-      }/apps/${this.applicationService.appGuid}/stream`;
+        }/apps/${this.applicationService.appGuid}/stream`;
       this.messages = websocketConnect(streamUrl, new QueueingSubject<string>())
         .messages.catch(e => {
           this.logService.error(
@@ -139,7 +139,7 @@ export class LogStreamTabComponent implements OnInit {
           ).format('HH:mm:ss.SSS');
           return `[${timesString}]: <span style="${styles}">[${
             log.source_type
-          }.${log.source_instance}]</span> ${message}`;
+            }.${log.source_instance}]</span> ${message}`;
         });
     }
   }

@@ -1,5 +1,3 @@
-import { AppStoreModule } from '../../../../store/store.module';
-import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -7,16 +5,15 @@ import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
-import { SharedModule } from '../../../../shared/shared.module';
-import { appReducers } from '../../../../store/reducers.module';
-import { getInitialTestStoreState, createBasicStoreModule } from '../../../../test-framework/store-test-helper';
-import { ApplicationEnvVarsService } from './../application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { ApplicationStateService } from '../../../../shared/components/application-state/application-state.service';
-import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
-import { ApplicationService } from '../../application.service';
+import { SharedModule } from '../../../../shared/shared.module';
+import { GetApplication } from '../../../../store/actions/application.actions';
+import { applicationSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
 import { generateTestApplicationServiceProvider } from '../../../../test-framework/application-service-helper';
 import { generateTestEntityServiceProvider } from '../../../../test-framework/entity-service.helper';
-import { ApplicationSchema, GetApplication } from '../../../../store/actions/application.actions';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
+import { ApplicationEnvVarsService } from './../application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
 
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
@@ -42,7 +39,7 @@ describe('ApplicationTabsBaseComponent', () => {
       providers: [
         generateTestEntityServiceProvider(
           appId,
-          ApplicationSchema,
+          entityFactory(applicationSchemaKey),
           new GetApplication(appId, cfId)
         ),
         generateTestApplicationServiceProvider(cfId, appId),

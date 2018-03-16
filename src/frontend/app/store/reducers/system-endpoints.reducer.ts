@@ -1,15 +1,15 @@
-import { IRequestEntityTypeState } from '../app-state';
-import { APIResource } from '../types/api.types';
-import { EndpointModel, endpointConnectionStatus } from '../types/endpoint.types';
-import { GetSystemSuccess, GET_SYSTEM_INFO_SUCCESS, GET_SYSTEM_INFO } from './../actions/system.actions';
-import { VERIFY_SESSION, SESSION_VERIFIED } from '../actions/auth.actions';
+import { SESSION_VERIFIED, VERIFY_SESSION } from '../actions/auth.actions';
 import {
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  CONNECT_ENDPOINTS_SUCCESS,
   CONNECT_ENDPOINTS,
-  DISCONNECT_ENDPOINTS
+  CONNECT_ENDPOINTS_FAILED,
+  CONNECT_ENDPOINTS_SUCCESS,
+  DISCONNECT_ENDPOINTS,
+  DISCONNECT_ENDPOINTS_FAILED,
+  DISCONNECT_ENDPOINTS_SUCCESS,
 } from '../actions/endpoint.actions';
-import { ICFAction } from '../types/request.types';
+import { IRequestEntityTypeState } from '../app-state';
+import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
+import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
   switch (action.type) {
@@ -19,8 +19,10 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case SESSION_VERIFIED:
     case GET_SYSTEM_INFO_SUCCESS:
       return succeedEndpointInfo(state, action);
+    case CONNECT_ENDPOINTS_FAILED:
     case DISCONNECT_ENDPOINTS_SUCCESS:
       return changeEndpointConnectionStatus(state, action, 'disconnected');
+    case DISCONNECT_ENDPOINTS_FAILED:
     case CONNECT_ENDPOINTS_SUCCESS:
       return changeEndpointConnectionStatus(state, action, 'connected');
     case CONNECT_ENDPOINTS:

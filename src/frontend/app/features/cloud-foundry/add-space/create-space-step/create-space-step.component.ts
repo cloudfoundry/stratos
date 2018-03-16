@@ -7,11 +7,11 @@ import { Observable } from 'rxjs/Observable';
 import { filter } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { spaceSchemaKey } from '../../../../store/actions/action-types';
 import { CreateSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
+import { spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 @Component({
@@ -60,7 +60,9 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     this.store.dispatch(new CreateSpace(spaceName, this.orgGuid, this.cfGuid));
 
     this.submitSubscription = this.store.select(selectRequestInfo(spaceSchemaKey, `${this.orgGuid}-${spaceName}`)).pipe(
-      filter(o => !!o && !o.creating),
+      filter(o => {
+        return !!o && !o.fetching && !o.creating;
+      }),
       this.map(
         ['/cloud-foundry', this.cfGuid, 'organizations', this.orgGuid, 'spaces'],
         'Failed to create space! Please select a different name and try again!'
