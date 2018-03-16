@@ -208,7 +208,8 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     CardCfSpaceDetailsComponent,
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    ServiceIconComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

@@ -5,7 +5,7 @@ import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
   BaseTestModulesNoShared,
-  getMetadataCardComponents,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
@@ -28,7 +28,7 @@ describe('CfSpaceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfOrgCardComponent, ...getMetadataCardComponents],
+      declarations: [CfOrgCardComponent, ...MetadataCardTestComponents],
       imports: [...BaseTestModulesNoShared],
       providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
         CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]

@@ -115,6 +115,6 @@ export const getCfSpaceServiceMock = {
   useClass: CloudFoundrySpaceServiceMock
 };
 
-export const getMetadataCardComponents = [MetaCardComponent, MetaCardItemComponent,
+export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent];

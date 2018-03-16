@@ -4,7 +4,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/
 import {
   generateTestCfEndpointService,
   BaseTestModulesNoShared,
-  getMetadataCardComponents,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../chips/chips.component';
@@ -16,7 +16,7 @@ describe('CfSecurityGroupsCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfSecurityGroupsCardComponent, getMetadataCardComponents, BooleanIndicatorComponent, AppChipsComponent],
+      declarations: [CfSecurityGroupsCardComponent, MetadataCardTestComponents, BooleanIndicatorComponent, AppChipsComponent],
       imports: [...BaseTestModulesNoShared],
       providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointService()]
     })

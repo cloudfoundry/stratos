@@ -7,7 +7,7 @@ import {
 import {
   generateTestCfEndpointServiceProvider,
   BaseTestModulesNoShared,
-  getMetadataCardComponents,
+  MetadataCardTestComponents,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganisationServiceMock } from '../../../../test-framework/cloud-foundry-organisation.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -23,7 +23,7 @@ describe('CardCfOrgUsageComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CardCfOrgUsageComponent, ...getMetadataCardComponents],
+      declarations: [CardCfOrgUsageComponent, ...MetadataCardTestComponents],
       imports: [...BaseTestModulesNoShared],
       providers: [
         { provide: CloudFoundryOrganisationService, useClass: CloudFoundryOrganisationServiceMock },

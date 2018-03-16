@@ -1,5 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import {
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
+} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
 
 describe('AppServiceBindingCardComponent', () => {
@@ -8,9 +12,10 @@ describe('AppServiceBindingCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ AppServiceBindingCardComponent ]
+      declarations: [AppServiceBindingCardComponent, MetadataCardTestComponents],
+      imports: [...BaseTestModulesNoShared]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
