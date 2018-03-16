@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap, tap, first } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
@@ -78,7 +78,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
         }
         return this.cfUserService.getUserRoleInOrg(u.guid, this.row.metadata.guid, this.row.entity.cfGuid);
       }),
-      map(u => getOrgRolesString(u))
+      map(u => getOrgRolesString(u)),
     );
 
     const fetchData$ = Observable.combineLatest(
