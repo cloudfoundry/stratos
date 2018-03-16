@@ -81,7 +81,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 
-
 @NgModule({
   imports: [
     CommonModule,

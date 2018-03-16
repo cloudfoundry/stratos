@@ -4,8 +4,10 @@ import { CommonModule } from '@angular/common';
 import { Routes, RouterModule } from '@angular/router';
 
 const serviceCatalogue: Routes = [
-  { path: '', component: ServiceCataloguePageComponent, },
-];
+  {
+    path: '',
+    component: ServiceCataloguePageComponent,
+  }];
 
 @NgModule({
   imports: [
