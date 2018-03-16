@@ -7,18 +7,15 @@ import { MAT_DIALOG_DATA } from '@angular/material';
   templateUrl: './env-var-view.component.html',
   styleUrls: ['./env-var-view.component.scss']
 })
-export class EnvVarViewComponent implements OnInit {
+export class EnvVarViewComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: {
       key: string,
       value: any
     }
-  ) {
-  }
+  ) { }
 
-  ngOnInit() {
-  }
   isObject(test: any): boolean {
     return typeof test === 'object';
   }

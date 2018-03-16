@@ -9,9 +9,6 @@ import { Subscription } from 'rxjs/Subscription';
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import {
-  EnvVarViewComponent,
-} from '../../../../../../features/applications/application/application-tabs-base/tabs/services-tab/env-var-view/env-var-view.component';
 import { DeleteAppServiceBinding } from '../../../../../../store/actions/application.actions';
 import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { GetService } from '../../../../../../store/actions/service.actions';
@@ -22,6 +19,7 @@ import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.type
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 
 @Component({
   selector: 'app-app-service-binding-card',
@@ -113,8 +111,6 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
             disableClose: false
           });
         })
-
-
       ).subscribe();
 
   }

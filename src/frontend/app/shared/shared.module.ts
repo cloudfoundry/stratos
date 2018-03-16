@@ -81,6 +81,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
+import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 
 @NgModule({
   imports: [
@@ -151,7 +152,8 @@ import { ServiceIconComponent } from './components/service-icon/service-icon.com
     CardCfSpaceDetailsComponent,
     BooleanIndicatorComponent,
     AppChipsComponent,
-    ServiceIconComponent
+    ServiceIconComponent,
+    EnvVarViewComponent
   ],
   exports: [
     FormsModule,
@@ -205,11 +207,13 @@ import { ServiceIconComponent } from './components/service-icon/service-icon.com
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     CardCfOrgUserDetailsComponent,
-    AppChipsComponent
+    AppChipsComponent,
+    EnvVarViewComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
-    DialogConfirmComponent
+    DialogConfirmComponent,
+    EnvVarViewComponent
   ],
   providers: [
     ListConfig,
