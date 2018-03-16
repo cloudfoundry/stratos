@@ -1,20 +1,19 @@
-import { GetSystemInfo } from '../../../store/actions/system.actions';
-import { SystemEffects } from '../../../store/effects/system.effects';
-import { systemStoreNames } from '../../../store/types/system.types';
-import { endpointStoreNames, EndpointModel } from '../../../store/types/endpoint.types';
-import { ActionState, RequestSectionKeys } from '../../../store/reducers/api-request-reducer/types';
-import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
-import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { Observable } from 'rxjs/Rx';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ConnectEndpoint, EndpointSchema } from '../../../store/actions/endpoint.actions';
+import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
-import { AppState } from '../../../store/app-state';
-import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
+
+import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
+import { GetSystemInfo } from '../../../store/actions/system.actions';
+import { AppState } from '../../../store/app-state';
+import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
+import { SystemEffects } from '../../../store/effects/system.effects';
+import { ActionState } from '../../../store/reducers/api-request-reducer/types';
+import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
+import { EndpointModel, endpointStoreNames } from '../../../store/types/endpoint.types';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',

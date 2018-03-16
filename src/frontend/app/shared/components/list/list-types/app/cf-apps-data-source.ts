@@ -1,13 +1,15 @@
 import { Store } from '@ngrx/store';
+import { schema } from 'normalizr';
 
-import { ApplicationSchema, GetAllApplications } from '../../../../../store/actions/application.actions';
+import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
+import { applicationSchemaKey, entityFactory, spaceSchemaKey, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-
-
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
@@ -18,15 +20,16 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     listConfig?: IListConfig<APIResource>
   ) {
     const { paginationKey } = CfAppsDataSource;
-    const action = new GetAllApplications(paginationKey);
+    const action = new GetAllApplications(paginationKey, [
+      createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+    ]);
 
     super({
       store,
       action,
-      schema: ApplicationSchema,
-      getRowUniqueId: (entity: APIResource) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      schema: entityFactory(applicationSchemaKey),
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       transformEntities: [

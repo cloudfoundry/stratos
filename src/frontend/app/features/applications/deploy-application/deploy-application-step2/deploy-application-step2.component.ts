@@ -28,15 +28,15 @@ import {
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
-import { BranchSchema, GITHUB_BRANCHES_ENTITY_KEY, SourceType } from '../../../../store/types/deploy-application.types';
+import { SourceType } from '../../../../store/types/deploy-application.types';
 import {
   GitBranch,
-  GithubBranchSchema,
   GithubCommit,
-  GithubCommitSchema,
   GithubRepo,
 } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
+import { entityFactory } from '../../../../store/helpers/entity-factory';
+import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -107,31 +107,31 @@ export class DeployApplicationStep2Component
     const fetchBranches = this.store
       .select(selectProjectExists)
       .pipe(
-      filter(state => state && !state.checking && state.exists),
-      tap(p => {
-        if (this.branchesSubscription) {
-          this.branchesSubscription.unsubscribe();
-        }
-        const action = new FetchBranchesForProject(p.name);
-        this.branchesSubscription = getPaginationObservables<APIResource>(
-          {
-            store: this.store,
-            action,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              action.paginationKey,
-              GithubBranchSchema
-            )
-          },
-          true
-        ).entities$.subscribe();
-      })
+        filter(state => state && !state.checking && state.exists),
+        tap(p => {
+          if (this.branchesSubscription) {
+            this.branchesSubscription.unsubscribe();
+          }
+          const action = new FetchBranchesForProject(p.name);
+          this.branchesSubscription = getPaginationObservables<APIResource>(
+            {
+              store: this.store,
+              action,
+              paginationMonitor: this.paginationMonitorFactory.create(
+                action.paginationKey,
+                entityFactory(githubBranchesSchemaKey)
+              )
+            },
+            true
+          ).entities$.subscribe();
+        })
       )
       .subscribe();
 
     this.subscriptions.push(fetchBranches);
 
     const action = {
-      entityKey: GITHUB_BRANCHES_ENTITY_KEY,
+      entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
@@ -150,7 +150,7 @@ export class DeployApplicationStep2Component
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
       action.paginationKey,
-      BranchSchema
+      entityFactory(githubBranchesSchemaKey)
     );
 
     this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(
@@ -176,10 +176,11 @@ export class DeployApplicationStep2Component
           this.store.dispatch(new SetBranch(branch));
 
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
-            GithubCommitSchema.key,
-            GithubCommitSchema,
+            githubCommitSchemaKey,
+            entityFactory(githubCommitSchemaKey),
             branch.commit.sha,
-            new FetchCommit(branch.commit.sha, projectInfo.full_name)
+            new FetchCommit(branch.commit.sha, projectInfo.full_name),
+            false
           );
 
           if (this.commitSubscription) {
@@ -187,15 +188,15 @@ export class DeployApplicationStep2Component
           }
           this.commitSubscription = commitEntityService.waitForEntity$
             .pipe(
-            map(p => p.entity.entity),
-            tap(p => {
-              this.commitInfo = p;
-            })
+              map(p => p.entity.entity),
+              tap(p => {
+                this.commitInfo = p;
+              })
             )
             .subscribe();
         }
       })
-      );
+    );
 
     this.subscriptions.push(updateBranchAndCommit.subscribe());
 

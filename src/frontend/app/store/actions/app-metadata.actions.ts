@@ -1,11 +1,10 @@
-import { getPaginationKey } from './pagination.actions';
-import { schema } from 'normalizr';
-import { PaginatedAction, PaginationParam } from '../types/pagination.types';
-import { ICFAction, CFStartAction, RequestEntityLocation } from '../types/request.types';
 import { RequestOptions } from '@angular/http';
-import { AppEnvVarSchema, AppStatsSchema, AppSummarySchema, AppStatSchema } from '../types/app-metadata.types';
 
-// export type AppMetadataEntities = AppStatsSchema | AppEnvVarSchema | AppSummarySchema;
+import { appEnvVarsSchemaKey, appStatsSchemaKey, appSummarySchemaKey, entityFactory } from '../helpers/entity-factory';
+import { PaginatedAction } from '../types/pagination.types';
+import { CFStartAction, ICFAction, RequestEntityLocation } from '../types/request.types';
+import { getPaginationKey } from './pagination.actions';
+
 export enum AppMetadataTypes {
   STATS,
   ENV_VARS,
@@ -26,8 +25,8 @@ export class GetAppStatsAction extends CFStartAction implements PaginatedAction,
     });
     this.paginationKey = getPaginationKey(this.entityKey, endpointGuid, guid);
   }
-  entity = [AppStatSchema];
-  entityKey = AppStatSchema.key;
+  entity = [entityFactory(appStatsSchemaKey)];
+  entityKey = appStatsSchemaKey;
   actions = [
     '[App Metadata] Stats start',
     '[App Metadata] Stats success',
@@ -55,8 +54,8 @@ export class GetAppEnvVarsAction extends CFStartAction implements PaginatedActio
     });
     this.paginationKey = getPaginationKey(this.entityKey, endpointGuid, guid);
   }
-  entity = [AppEnvVarSchema];
-  entityKey = AppEnvVarSchema.key;
+  entity = [entityFactory(appEnvVarsSchemaKey)];
+  entityKey = appEnvVarsSchemaKey;
   actions = [
     '[App Metadata] EnvVars start',
     '[App Metadata] EnvVars success',
@@ -81,8 +80,8 @@ export class GetAppSummaryAction extends CFStartAction implements ICFAction {
       method: 'get'
     });
   }
-  entity = [AppSummarySchema];
-  entityKey = AppSummarySchema.key;
+  entity = [entityFactory(appSummarySchemaKey)];
+  entityKey = appSummarySchemaKey;
   paginationKey: string;
   actions = [
     '[App Metadata] Summary start',

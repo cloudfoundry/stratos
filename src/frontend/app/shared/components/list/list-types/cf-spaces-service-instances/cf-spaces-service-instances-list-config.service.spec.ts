@@ -6,7 +6,10 @@ import { getBaseTestModules, getCfSpaceServiceMock } from '../../../../../test-f
 describe('CfSpacesServiceInstancesListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CfSpacesServiceInstancesListConfigService, getCfSpaceServiceMock],
+      providers: [
+        CfSpacesServiceInstancesListConfigService,
+        getCfSpaceServiceMock
+      ],
       imports: [...getBaseTestModules]
     });
   });

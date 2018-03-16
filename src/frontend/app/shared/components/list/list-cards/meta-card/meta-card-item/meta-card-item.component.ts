@@ -13,7 +13,8 @@ export class MetaCardItemComponent implements OnInit {
 
   styles = {
     'row': 'meta-card-item-row',
-    'column': 'meta-card-item-column'
+    'column': 'meta-card-item-column',
+    'long-text': 'meta-card-item-long-text'
   };
   itemStyle = 'meta-card-item-row';
   @ContentChild(MetaCardKeyComponent)

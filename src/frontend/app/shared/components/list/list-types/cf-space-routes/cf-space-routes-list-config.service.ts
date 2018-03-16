@@ -2,22 +2,22 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { take, tap } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
-import { DeleteRoute, GetAppRoutes, UnmapRoute } from '../../../../../store/actions/route.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
+import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { AppState } from '../../../../../store/app-state';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IGlobalListAction, IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
-import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
+import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { TableCellRouteComponent } from '../app-route/table-cell-route/table-cell-route.component';
-import { TableCellRouteAppsAttachedComponent } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
-import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
+import {
+  TableCellRouteAppsAttachedComponent,
+} from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+
 @Injectable()
 export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {
   dataSource: CfSpaceRoutesDataSource;
@@ -107,11 +107,13 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
 
   pageSizeOptions = [5, 15, 30];
   viewType = ListViewTypes.TABLE_ONLY;
-  isLocal = true;
+  // This would normally be fetched inline, however some of the route's children will be missing if the route was fetched by the org request
+  // This can lead to a new request per row and can grind the console to a halt
+  isLocal = false;
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
-      new DeleteRoute(route.entity.guid, this.dataSource.cfGuid)
+      new DeleteRoute(route.metadata.guid, this.dataSource.cfGuid)
     );
   }
 
@@ -119,7 +121,7 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     return route.entity.apps.map(a => a.metadata.guid).forEach(
       p => this.store.dispatch(
         new UnmapRoute(
-          route.entity.guid,
+          route.metadata.guid,
           p,
           this.dataSource.cfGuid
         )

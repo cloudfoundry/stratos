@@ -1,0 +1,17 @@
+.service-card {
+  &__title {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    &__img {
+      align-self: flex-end;
+      img,
+      mat-icon {
+        font-size: 48px;
+        height: 48px;
+        width: 48px;
+      }
+    }
+  }
+}

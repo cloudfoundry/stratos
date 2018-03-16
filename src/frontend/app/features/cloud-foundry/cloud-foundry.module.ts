@@ -65,6 +65,10 @@ import { CreateSpaceStepComponent } from './add-space/create-space-step/create-s
 import { CreateOrganizationStepComponent } from './add-organisation/create-organization-step/create-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
+import { CloudFoundryOrganisationService } from './services/cloud-foundry-organisation.service';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from './cf.helpers';
+import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
@@ -104,6 +108,12 @@ import { EditOrganizationStepComponent } from './edit-organization/edit-organiza
     CloudFoundryService,
     CFEndpointsListConfigService,
     EndpointsListConfigService,
+    {
+      provide: ActiveRouteCfOrgSpace,
+      useValue: {}
+    },
+    CloudFoundryOrganisationService,
+    CloudFoundryEndpointService
   ]
 })
 export class CloudFoundryModule { }
