@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { AuthGuardService } from './auth-guard.service';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
+import { ClickStopPropagationDirective } from './click-stop-propagation';
 import { EndpointsService } from './endpoints.service';
 import { EntityServiceFactory } from './entity-service-factory.service';
 import { EventWatcherService } from './event-watcher/event-watcher.service';
@@ -32,7 +33,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     InfinityPipe,
     BytesToHumanSize,
     MegaBytesToHumanSize,
-    SafeImgPipe
+    SafeImgPipe,
+    ClickStopPropagationDirective
   ],
   providers: [
     AuthGuardService,
@@ -51,7 +53,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     InfinityPipe,
     BytesToHumanSize,
     MegaBytesToHumanSize,
-    SafeImgPipe
+    SafeImgPipe,
+    ClickStopPropagationDirective
   ],
   entryComponents: [
     LogOutDialogComponent

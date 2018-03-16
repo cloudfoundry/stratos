@@ -52,6 +52,7 @@ export interface IListDataSource<T> {
   addItem: T;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
+  isLoadingPage$: Observable<boolean>;
 
   editRow: T; // Edit items - remove once ng-content can exist in md-table
 
