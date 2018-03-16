@@ -116,7 +116,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       return {
         success: res.success,
         redirect: res.success
-      }
+      };
     });
   }
 

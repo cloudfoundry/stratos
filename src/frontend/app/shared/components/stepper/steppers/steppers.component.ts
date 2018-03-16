@@ -51,7 +51,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     );
     this.cancelQueryParams$ = previousRoute$.pipe(
       map(previousState => previousState ? previousState.state.queryParams : {})
-    )
+    );
   }
 
   ngOnInit() {
@@ -92,7 +92,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
       map(([path, params]) => {
         this.store.dispatch(new RouterNav({ path: path, query: params }));
       })
-    )
+    );
   }
 
   setActive(index: number) {

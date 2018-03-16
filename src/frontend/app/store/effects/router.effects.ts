@@ -22,6 +22,6 @@ export class RouterEffect {
       if (typeof path === 'string') {
         path = path.split('/');
       }
-      this.router.navigate(path, extraParams)
+      this.router.navigate(path, extraParams);
     });
 }
