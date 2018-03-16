@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ServiceCataloguePageComponent } from './service-catalogue-page.component';
+import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 
 describe('ServiceCataloguePageComponent', () => {
   let component: ServiceCataloguePageComponent;
@@ -21,9 +22,7 @@ describe('ServiceCataloguePageComponent', () => {
         SharedModule,
         RouterTestingModule,
         BrowserAnimationsModule,
-        StoreModule.forRoot(
-          appReducers
-        )
+        createBasicStoreModule()
       ],
       declarations: [ServiceCataloguePageComponent]
     })

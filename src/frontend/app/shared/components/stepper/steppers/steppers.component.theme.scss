@@ -8,8 +8,8 @@
     color: map-get($foreground-colors, base);
     &__header {
       &-icon {
-        background-color: map-get($app-theme, app-background-color);
-        color: map-get($app-theme, app-background-text-color);
+        background-color: map-get($foreground-colors, slider-off-active);
+        color: mat-contrast($primary, 500);
       }
       &--active {
         .steppers__header-icon {

@@ -35,7 +35,8 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       }
     },
     {
-      columnId: 'status', headerCell: () => 'Status',
+      columnId: 'status',
+      headerCell: () => 'Status',
       cellFlex: '2',
       cellConfig: {
         hideIcon: true,

@@ -12,7 +12,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   tabLinks = [
     { link: 'summary', label: 'Summary' },
     { link: 'organizations', label: 'Organizations' },
-    { link: 'users', label: 'users' },
+    { link: 'users', label: 'Users' },
     { link: 'firehose', label: 'Firehose' },
     { link: 'feature-flags', label: 'Feature Flags' },
     { link: 'build-packs', label: 'Build Packs' },

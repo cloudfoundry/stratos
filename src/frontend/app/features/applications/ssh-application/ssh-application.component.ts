@@ -1,19 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-
-import { Observable } from 'rxjs/Observable';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription, Subject } from 'rxjs/Rx';
-import websocketConnect from 'rxjs-websockets';
-
-import { ApplicationService } from '../application.service';
 import { QueueingSubject } from 'queueing-subject';
-import { LoggerService } from '../../../core/logger.service';
+import websocketConnect from 'rxjs-websockets';
+import { Observable } from 'rxjs/Observable';
+import { Subscription } from 'rxjs/Rx';
+
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';
-import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
 import { AppState } from '../../../store/app-state';
-import { EntityService } from '../../../core/entity-service';
-import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
+import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-ssh-application',

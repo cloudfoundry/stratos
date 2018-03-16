@@ -18,7 +18,8 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetAllApplications } from '../../../../store/actions/application.actions';
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/actions/action-types';
+import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -72,28 +73,28 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         const inputStream = new QueueingSubject<string>();
         this.messages = websocketConnect(streamUrl, inputStream)
           .messages.pipe(
-          catchError(e => {
-            return [];
-          }),
-          share(),
-          map(message => {
-            const json = JSON.parse(message);
-            return json;
-          }),
-          filter(l => !!l),
-          tap((log) => {
-            // Deal with control messages
-            if (log.type !== SocketEventTypes.DATA) {
-              this.updateTitle(log);
-            }
-          }),
-          filter((log) => log.type === SocketEventTypes.DATA),
-          map((log) => {
-            const timesString = moment(log.timestamp * 1000).format('DD/MM/YYYY hh:mm:ss A');
-            return (
-              `${timesString}: ${log.message}`
-            );
-          })
+            catchError(e => {
+              return [];
+            }),
+            share(),
+            map(message => {
+              const json = JSON.parse(message);
+              return json;
+            }),
+            filter(l => !!l),
+            tap((log) => {
+              // Deal with control messages
+              if (log.type !== SocketEventTypes.DATA) {
+                this.updateTitle(log);
+              }
+            }),
+            filter((log) => log.type === SocketEventTypes.DATA),
+            map((log) => {
+              const timesString = moment(log.timestamp * 1000).format('DD/MM/YYYY hh:mm:ss A');
+              return (
+                `${timesString}: ${log.message}`
+              );
+            })
           );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
 
@@ -156,7 +157,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
-        this.store.dispatch(new GetAllApplications('applicationWall'));
+        this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         this.streamTitle = 'Deployed';
@@ -168,7 +169,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
                 app.entity.cfGuid === this.appData.cloudFoundry &&
                 app.entity.name === this.appData.Name
               ) {
-                this.appGuid = app.entity.guid;
+                this.appGuid = app.metadata.guid;
                 this.validate = Observable.of(true);
               }
             });

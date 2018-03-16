@@ -1,27 +1,40 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, shareReplay } from 'rxjs/operators';
+import { first, map, shareReplay } from 'rxjs/operators';
 
-import { ICfV2Info } from '../../../core/cf-api.types';
+import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { CF_INFO_ENTITY_KEY, CFInfoSchema, GetEndpointInfo } from '../../../store/actions/cloud-foundry.actions';
-import { DomainSchema, FetchAllDomains } from '../../../store/actions/domains.actions';
-import { EndpointSchema, GetAllEndpoints } from '../../../store/actions/endpoint.actions';
+import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
+import { FetchAllDomains } from '../../../store/actions/domains.actions';
+import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
+import { GetAllOrganisations } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
+import {
+  applicationSchemaKey,
+  cfInfoSchemaKey,
+  domainSchemaKey,
+  endpointSchemaKey,
+  entityFactory,
+  organisationSchemaKey,
+  quotaDefinitionSchemaKey,
+  serviceInstancesSchemaKey,
+  spaceSchemaKey,
+} from '../../../store/helpers/entity-factory';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { CfApplicationState } from '../../../store/types/application.types';
 import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types';
 import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { IOrganization, ISpace, IApp } from '../../../core/cf-api.types';
+
 @Injectable()
 export class CloudFoundryEndpointService {
+
   hasSSHAccess$: Observable<boolean>;
   totalMem$: Observable<number>;
   paginationSubscription: any;
@@ -36,50 +49,75 @@ export class CloudFoundryEndpointService {
   currentUser$: Observable<EndpointUser>;
   cfGuid: string;
 
+  getAllOrgsAction: GetAllOrganisations;
+
+  static createGetAllOrganisations(cfGuid: string) {
+    const paginationKey = cfGuid ?
+      createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
+      : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
+    return new GetAllOrganisations(
+      paginationKey,
+      cfGuid, [
+        createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+      ]);
+  }
+
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
-    private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfUserService: CfUserService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganisations(this.cfGuid);
+
     this.cfEndpointEntityService = this.entityServiceFactory.create(
-      EndpointSchema.key,
-      EndpointSchema,
+      endpointSchemaKey,
+      entityFactory(endpointSchemaKey),
       this.cfGuid,
-      new GetAllEndpoints()
+      new GetAllEndpoints(),
+      false
     );
 
     this.cfInfoEntityService = this.entityServiceFactory.create<APIResource<ICfV2Info>>(
-      CF_INFO_ENTITY_KEY,
-      CFInfoSchema,
+      cfInfoSchemaKey,
+      entityFactory(cfInfoSchemaKey),
       this.cfGuid,
-      new GetEndpointInfo(this.cfGuid)
+      new GetCFInfo(this.cfGuid),
+      false
     );
     this.constructCoreObservables();
     this.constructSecondaryObservable();
+
   }
 
   constructCoreObservables() {
     this.endpoint$ = this.cfEndpointEntityService.waitForEntity$;
 
-    this.orgs$ = this.cfOrgSpaceDataService.getEndpointOrgs(this.cfGuid);
+    this.orgs$ = getPaginationObservables<APIResource<IOrganization>>({
+      store: this.store,
+      action: this.getAllOrgsAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.getAllOrgsAction.paginationKey,
+        entityFactory(organisationSchemaKey)
+      )
+    }, true).entities$;
 
     this.users$ = this.cfUserService.getUsers(this.cfGuid);
 
     this.info$ = this.cfInfoEntityService.waitForEntity$;
 
     this.allApps$ = this.orgs$.pipe(
-      // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
-      map(orgs => orgs.filter(org => org.entity.spaces)),
       map(p => {
-        return p.map(o => {
-          return o.entity.spaces
-            .map(space => space.entity.apps)
-            .filter(apps => !!apps);
-        });
+        return p
+          .filter(o => !!o.entity.spaces)
+          .map(o => {
+            return o.entity.spaces.map(space => space.entity.apps || []);
+          });
       }),
       map(a => {
         let flatArray = [];
@@ -107,21 +145,17 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), shareReplay(1));
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), shareReplay(1));
 
   }
 
   getAppsInOrg(
     org: APIResource<IOrganization>
   ): Observable<APIResource<IApp>[]> {
-    // This should go away once https://github.com/cloudfoundry-incubator/stratos/issues/1619 is fixed
-    if (!org.entity.spaces) {
-      return Observable.of([]);
-    }
     return this.allApps$.pipe(
-      map(apps => {
+      map(allApps => {
         const orgSpaces = org.entity.spaces.map(s => s.metadata.guid);
-        return apps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
+        return allApps.filter(a => orgSpaces.indexOf(a.entity.space_guid) !== -1);
       })
     );
   }
@@ -131,7 +165,7 @@ export class CloudFoundryEndpointService {
   ): Observable<APIResource<IApp>[]> {
     return this.allApps$.pipe(
       map(apps => {
-        return apps.filter(a => a.entity.space_guid === space.entity.guid);
+        return apps.filter(a => a.entity.space_guid === space.metadata.guid);
       })
     );
   }
@@ -162,7 +196,7 @@ export class CloudFoundryEndpointService {
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          DomainSchema
+          entityFactory(domainSchemaKey)
         )
       },
       true
