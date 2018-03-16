@@ -12,12 +12,7 @@ import { IListConfig } from '../../list.component.types';
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
 
   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource>) {
-<<<<<<< HEAD
-    const paginationKey = getPaginationKey('cf-organizations', cfGuid);
-    const action = new GetAllOrganisations(paginationKey, cfGuid);
-=======
     const action = CloudFoundryEndpointService.createGetAllOrganisations(cfGuid);
->>>>>>> v2-master
     super({
       store,
       action,
