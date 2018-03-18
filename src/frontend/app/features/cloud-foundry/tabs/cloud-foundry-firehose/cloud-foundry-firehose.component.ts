@@ -31,9 +31,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
     private cfEndpointService: CloudFoundryEndpointService,
     private logService: LoggerService,
     private utilsService: UtilsService
-  ) {
-    this.formatter = new CloudFoundryFirehoseFormatter(logService, utilsService);
-  }
+  ) {}
 
   ngOnInit() {
     const host = window.location.host;
@@ -42,6 +40,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
       }/firehose`;
 
     this.setupFirehoseStream(streamUrl);
+    this.formatter = new CloudFoundryFirehoseFormatter(this.logService, this.utilsService);
     this.filter = this.formatter.jsonFilter.bind(this.formatter);
   }
 
