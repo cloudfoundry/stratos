@@ -7,6 +7,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  TemplateRef,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, MatSelect, SortDirection } from '@angular/material';
@@ -33,6 +34,7 @@ import {
 } from './list.component.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { map } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 
 @Component({
@@ -53,6 +55,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   filterString = '';
   multiFilters = {};
 
+  @Input()
+  noEntries: TemplateRef<any>;
+
+  @Input()
+  noEntriesForCurrentFilter: TemplateRef<any>;
+
   sortColumns: ITableColumn<T>[];
   @ViewChild('headerSortField') headerSortField: MatSelect;
   headerSortDirection: SortDirection = 'asc';
@@ -64,6 +72,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterConfigs: IListMultiFilterConfig[];
+  filtersApplied$ = new BehaviorSubject<boolean>(false);
 
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
@@ -201,6 +210,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
+      const filters = Object.values(filter.items);
+      this.filtersApplied$.next(
+        filter.string !== '' || (filters.length !== 0 && filters.filter(s => !!s).length !== 0));
       this.filterString = filter.string;
       this.multiFilters = filter.items;
     });
