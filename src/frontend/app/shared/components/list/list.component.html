@@ -100,7 +100,7 @@
     </mat-card>
     <mat-card class="list-component__empty" [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
       <mat-card-content>
-        <div class="no-rows">There are no entries.</div>
+        <div class="no-rows">{{config.text?.noEntries || 'There are no entries.'}}</div>
       </mat-card-content>
     </mat-card>
   </div>

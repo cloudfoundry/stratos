@@ -13,21 +13,22 @@ import { CfSpacesDataSourceService } from './cf-spaces-data-source.service';
 
 @Injectable()
 export class CfSpacesListConfigService implements IListConfig<APIResource> {
-  isLocal?: boolean;
   viewType = ListViewTypes.CARD_ONLY;
   enableTextFilter = false;
-  tableFixedRowHeight?: boolean;
   dataSource: CfSpacesDataSourceService;
-  pageSizeOptions = [9, 45, 90];
   cardComponent = CfSpaceCardComponent;
   defaultView = 'cards' as ListView;
-  getColumns = () => [];
+  text = {
+    title: null,
+    noEntries: 'There are no spaces'
+  };
 
   constructor(private store: Store<AppState>, private cfOrgService: CloudFoundryOrganisationService) {
 
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }
 
+  getColumns = () => [];
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];
