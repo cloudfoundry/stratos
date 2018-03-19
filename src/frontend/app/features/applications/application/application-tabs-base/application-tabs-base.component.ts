@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { first, map, take } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
@@ -15,8 +14,10 @@ import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/pag
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
+import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
+import { appStatsSchemaKey } from '../../../../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
@@ -136,7 +137,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.confirmDialog.open(appStopConfirmation, () => {
       const stoppedString = 'STOPPED';
       this.applicationService.updateApplication({ state: stoppedString }, []);
-      this.pollEntityService('stopping', stoppedString).subscribe();
+      this.pollEntityService('stopping', stoppedString).subscribe(() => { }, () => { },
+        () => {
+          // On app reaching the 'STOPPED' state clear the app's stats pagination section
+          const { cfGuid, appGuid } = this.applicationService;
+          this.store.dispatch(new ResetPagination(appStatsSchemaKey, new GetAppStatsAction(appGuid, cfGuid).paginationKey));
+        },
+      );
     });
   }
 
@@ -152,9 +159,13 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     this.confirmDialog.open(appStartConfirmation, () => {
       const startedString = 'STARTED';
       this.applicationService.updateApplication({ state: startedString }, []);
-      this.pollEntityService('starting', startedString)
-        .delay(1)
-        .subscribe();
+      this.pollEntityService('starting', startedString).delay(1).subscribe(() => { }, () => { },
+        () => {
+          // On app reaching the 'STARTED' state immediately go fetch the app stats instead of waiting for the normal poll to kick in
+          const { cfGuid, appGuid } = this.applicationService;
+          this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+        },
+      );
     });
   }
 
