@@ -1,6 +1,6 @@
-<div class="page-subheader" [ngClass]="{'page-subheader__tabs': !!tabs, 'page-subheader__tabs-overflowing': (navOverflowing$ | async)}">
+<div class="page-subheader" [ngClass]="{'page-subheader__tabs': !!tabs, 'page-subheader__tabs-overflowing': isOverflowing}">
   <div class="tab-nav__outer" #navOuter *ngIf="tabs">
-    <button mat-icon-button (click)="scrollNavClick('left', $event)" (touchstart)="scrollNav('left', $event)" (touchend)="endScrollNav()" class="tab-nav__scroll-button tab-nav__scroll-button-left" *ngIf="navOverflowing$ | async">
+    <button mat-icon-button (mousedown)="scrollNav('left', $event)" (touchstart)="scrollNav('left', $event)" (mouseup)="endScrollNav()" (touchend)="endScrollNav()" class="tab-nav__scroll-button tab-nav__scroll-button-left">
       <mat-icon aria-label="Scroll tab navigation left">chevron_left</mat-icon>
     </button>
     <div class="tab-nav__inner" #navScroller>
@@ -11,7 +11,7 @@
       </nav>
     </div>
 
-    <button (click)="scrollNavClick('right', $event)" (touchstart)="scrollNav('right', $event)" (touchend)="endScrollNav()" mat-icon-button class="tab-nav__scroll-button tab-nav__scroll-button-right" *ngIf="navOverflowing$ | async">
+    <button (mousedown)="scrollNav('right', $event)" (touchstart)="scrollNav('right', $event)" (mouseup)="endScrollNav()" (touchend)="endScrollNav()" mat-icon-button class="tab-nav__scroll-button tab-nav__scroll-button-right">
       <mat-icon aria-label="Scroll tab navigation right">chevron_right</mat-icon>
     </button>
   </div>

@@ -1,20 +1,22 @@
 import { startWith } from 'rxjs/operators/startWith';
-import { AfterViewInit, Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { AfterViewInit, Component, Input, ViewChild, ElementRef, OnDestroy, AfterViewChecked } from '@angular/core';
 import { MatTabNav } from '@angular/material';
 import { Observable } from 'rxjs/Observable';
 import { fromEvent } from 'rxjs/observable/fromEvent';
-import { debounceTime, map, distinctUntilChanged, timeInterval, tap, switchMap } from 'rxjs/operators';
+import { debounceTime, map, distinctUntilChanged, timeInterval, tap, switchMap, delay } from 'rxjs/operators';
 
 import { ISubHeaderTabs } from './page-subheader.types';
 import { interval } from 'rxjs/observable/interval';
-import { Subscription } from 'rxjs';
+import { Subscription } from 'rxjs/Subscription';
+import { empty } from 'rxjs/observable/empty';
 
 @Component({
   selector: 'app-page-subheader',
   templateUrl: './page-subheader.component.html',
   styleUrls: ['./page-subheader.component.scss']
 })
-export class PageSubheaderComponent {
+export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
+  resizeSub: Subscription;
   cssClass: string;
 
   @ViewChild('nav')
@@ -32,32 +34,41 @@ export class PageSubheaderComponent {
   @Input('nested')
   nested: boolean;
 
-  public navOverflowing$: Observable<boolean>;
+  public isOverflowing = false;
 
   className: string;
 
   scrollSub: Subscription;
 
-  private scrollSpeed = 10;
+  private scrollSpeed = 5;
 
   constructor() {
     this.className = this.nested ? 'nested-tab' : 'page-subheader';
     if (!!this.tabs) {
       this.cssClass = this.nested ? 'nested-tab__tabs' : 'page-subheader__tabs';
     }
-    this.navOverflowing$ = fromEvent(window, 'resize').pipe(
-      debounceTime(100),
-      map(this.navIsOverflowing),
-      startWith(this.navIsOverflowing()),
-      distinctUntilChanged()
-    );
   }
 
-  private navIsOverflowing = () => {
+  ngAfterViewInit() {
+    this.resizeSub = fromEvent(window, 'resize').pipe(
+      debounceTime(100),
+      tap(this.setNavOverflow),
+    ).subscribe();
+    // Had to do this to ensure the check got the correct size.
+    // We should try to fix this at some point
+    setTimeout(() => {
+      this.setNavOverflow();
+    });
+  }
+
+  private setNavOverflow = () => {
+    this.isOverflowing = this.navIsOverflowing();
+  }
+
+  private navIsOverflowing() {
     if (this.navOuter) {
       const { offsetWidth } = this.navOuter.nativeElement;
       const navWith = this.nav._elementRef.nativeElement.offsetWidth;
-      console.log(navWith, offsetWidth);
       return navWith > offsetWidth;
     }
     return false;
@@ -65,8 +76,8 @@ export class PageSubheaderComponent {
 
   public scrollNav(direction: 'left' | 'right', event: Event) {
     event.preventDefault();
-    const initialScrollTime = 81;
-    let scrollTime = 80;
+    const initialScrollTime = 51;
+    let scrollTime = 50;
     this._scrollNav(direction);
     this.scrollSub = interval(initialScrollTime)
       .pipe(
@@ -74,18 +85,13 @@ export class PageSubheaderComponent {
           return interval(scrollTime).pipe(
             tap(() => {
               this._scrollNav(direction);
-              if (scrollTime >= 20) {
-                scrollTime -= 5;
+              if (scrollTime >= 8) {
+                scrollTime -= 2;
               }
             })
           );
         })
       ).subscribe();
-  }
-
-  public scrollNavClick(direction: 'left' | 'right', event: Event) {
-    event.preventDefault();
-    this._scrollNav(direction);
   }
 
   private _scrollNav(direction: 'left' | 'right') {
@@ -97,8 +103,17 @@ export class PageSubheaderComponent {
   }
 
   endScrollNav() {
+    this.stopScroll();
+  }
+
+  private stopScroll() {
     if (this.scrollSub) {
       this.scrollSub.unsubscribe();
     }
+  }
+
+  ngOnDestroy() {
+    this.resizeSub.unsubscribe();
+    this.stopScroll();
   }
 }
