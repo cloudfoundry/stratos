@@ -6,8 +6,8 @@ import {
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../chips/chips.component';
-import { CfServiceCardComponent } from './cf-service-card.component';
 import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
+import { CfServiceCardComponent } from './cf-service-card.component';
 
 describe('CfServiceCardComponent', () => {
   let component: CfServiceCardComponent;
@@ -15,7 +15,13 @@ describe('CfServiceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfServiceCardComponent, MetadataCardTestComponents, BooleanIndicatorComponent, AppChipsComponent, ServiceIconComponent],
+      declarations: [
+        CfServiceCardComponent,
+        MetadataCardTestComponents,
+        BooleanIndicatorComponent,
+        AppChipsComponent,
+        ServiceIconComponent
+      ],
       imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();

@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { GetAppServiceBindings } from '../../../../../store/actions/application.actions';
+import { GetAppServiceBindings } from '../../../../../store/actions/application-service-routes.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,

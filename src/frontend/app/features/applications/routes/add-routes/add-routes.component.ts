@@ -10,7 +10,7 @@ import { filter, map, mergeMap, pairwise, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { pathGet } from '../../../../core/utils.service';
-import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application.actions';
+import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application-service-routes.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';

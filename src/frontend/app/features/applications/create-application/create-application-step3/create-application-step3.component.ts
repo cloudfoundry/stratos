@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Rx';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { AssociateRouteWithAppApplication, CreateNewApplication } from '../../../../store/actions/application.actions';
+import { CreateNewApplication } from '../../../../store/actions/application.actions';
 import { GetOrganisation } from '../../../../store/actions/organisation.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -26,6 +26,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
 import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import { AssociateRouteWithAppApplication } from '../../../../store/actions/application-service-routes.actions';
 
 @Component({
   selector: 'app-create-application-step3',
