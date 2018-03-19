@@ -98,10 +98,24 @@
       <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
       </mat-paginator>
     </mat-card>
-    <mat-card class="list-component__empty" [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
-      <mat-card-content>
-        <div class="no-rows">There are no entries.</div>
-      </mat-card-content>
-    </mat-card>
+
+    <ng-template #defaultNoEntries>
+      <mat-card class="list-component__empty">
+        <mat-card-content>
+          <div class="no-rows">There are no entries.</div>
+        </mat-card-content>
+      </mat-card>
+    </ng-template>
+
+    <div [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
+      <ng-container *ngIf="!(filtersApplied$ | async)">
+        <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
+        </ng-container>
+      </ng-container>
+      <ng-container *ngIf="(filtersApplied$ | async)">
+        <ng-container *ngTemplateOutlet="noEntriesForCurrentFilter ? noEntriesForCurrentFilter : defaultNoEntries">
+        </ng-container>
+      </ng-container>
+    </div>
   </div>
 </div>
