@@ -17,8 +17,8 @@
 }
 
 .tab-nav {
-  white-space: nowrap;
   display: inline-block;
+  white-space: nowrap;
   &__inner {
     flex: 1;
     overflow: hidden;
@@ -35,6 +35,6 @@
 
 .page-subheader__tabs-overflowing {
   .tab-nav__scroll-button {
-    display: inline-block
+    display: inline-block;
   }
 }

@@ -1,7 +1,7 @@
 @mixin app-page-subheader-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   .page-subheader {
-    color: mat-contrast($primary, 500);
     background-color: mat-color($primary);
+    color: mat-contrast($primary, 500);
   }
 }
