@@ -564,7 +564,8 @@ const testInitialStoreState: AppState = {
       }
     },
     serviceInstance: {},
-    serviceBinding: {}
+    serviceBinding: {},
+    service: {}
   },
   dashboard: {
     sidenavOpen: true,
