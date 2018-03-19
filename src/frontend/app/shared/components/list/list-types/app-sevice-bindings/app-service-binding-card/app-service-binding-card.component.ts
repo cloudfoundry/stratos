@@ -69,14 +69,7 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
           new GetService(o.entity.entity.service_guid, this.appService.cfGuid),
           true
         ).entityObs$;
-        const tags = [];
-        o.entity.entity.tags.forEach(t => {
-          tags.push({
-            value: t,
-          });
-        });
-        this.tags$.next(tags);
-
+        this.tags$.next(o.entity.entity.tags.map(t => ({ value: t })));
       })
     ).subscribe();
     this.envVarUrl = `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/service-bindings/${this.row.metadata.guid}/vars`;
