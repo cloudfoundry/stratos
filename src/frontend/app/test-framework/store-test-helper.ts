@@ -21578,12 +21578,13 @@ const testInitialStoreState: AppState = {
         registered: true
       }
     },
-    system: {},
-    private_domains: {},
-    space_quota_definition: {}
+    system: {}
   },
   actionHistory: [],
-  lists: {}
+  lists: {},
+  routing: {
+    currentState: null
+  }
 };
 /* tslint:enable */
 

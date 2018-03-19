@@ -22,7 +22,7 @@ import { SetNewAppName, SetCFDetails } from '../../../store/actions/create-appli
   templateUrl: './edit-application.component.html',
   styleUrls: ['./edit-application.component.scss'],
   providers: [
-    {provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher}
+    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher }
   ]
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
@@ -111,12 +111,12 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       obs$ = Observable.of({ success: true });
     }
 
-    return obs$.take(1).do(res => {
+    return obs$.take(1).map(res => {
       this.error = !res.success;
-      if (res.success) {
-        // Navigate back to the application page
-        this.store.dispatch(new RouterNav({ path: ['applications', this.applicationService.cfGuid, this.applicationService.appGuid] }));
-      }
+      return {
+        success: res.success,
+        redirect: res.success
+      };
     });
   }
 

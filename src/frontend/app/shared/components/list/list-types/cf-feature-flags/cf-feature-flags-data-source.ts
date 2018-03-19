@@ -24,7 +24,8 @@ export const FeatureFlagDescriptions = {
   env_var_visibility: ' All users can view environment variables',
   space_scoped_private_broker_creation: 'Space Developers can create space-scoped private service brokers',
   space_developer_env_var_visibility:
-    'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables'
+    'Space Developers can view their v2 environment variables. Org Managers and Space Managers can view their v3 environment variables',
+  service_instance_sharing: 'Org and Space Managers can allow service instances to be shared across different spaces.'
 };
 export class CfFeatureFlagsDataSource extends ListDataSource<APIResource<IFeatureFlag>> {
   constructor(store: Store<AppState>, cfGuid: string, listConfig?: IListConfig<APIResource<IFeatureFlag>>) {
