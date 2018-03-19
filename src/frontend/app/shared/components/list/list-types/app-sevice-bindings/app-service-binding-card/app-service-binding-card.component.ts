@@ -28,6 +28,7 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
 })
 export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<IServiceBinding>> implements OnInit, OnDestroy {
 
+  envVarSubscription: Subscription;
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
@@ -79,11 +80,14 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
     if (this.serviceSubscription) {
       this.serviceSubscription.unsubscribe();
     }
+    if (this.envVarSubscription) {
+      this.envVarSubscription.unsubscribe();
+    }
   }
 
   showEnvVars = () => {
 
-    Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
+    this.envVarSubscription = Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
       .pipe(
         withLatestFrom(),
         map(([[service, serviceInstance, allEnvVars]]) => {
