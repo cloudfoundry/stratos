@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import {
   CloudFoundryOrganizationService,
-} from '../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
+} from '../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 
 @Component({
   selector: 'app-card-cf-org-usage',

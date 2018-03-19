@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',

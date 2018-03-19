@@ -5,7 +5,7 @@ import { first, map } from 'rxjs/operators';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 
 @Component({

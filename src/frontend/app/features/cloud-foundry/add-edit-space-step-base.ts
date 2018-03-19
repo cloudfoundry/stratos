@@ -16,7 +16,7 @@ import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { getIdFromRoute } from './cf.helpers';
 import { ValidatorFn, AbstractControl } from '@angular/forms';
 import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
-import { GetAllOrganizationSpaces } from '../../store/actions/organisation.actions';
+import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 
 export class AddEditSpaceStepBase {

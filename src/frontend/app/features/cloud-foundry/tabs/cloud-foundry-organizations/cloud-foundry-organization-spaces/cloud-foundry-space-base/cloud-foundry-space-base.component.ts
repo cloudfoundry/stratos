@@ -14,7 +14,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { Observable } from 'rxjs/Observable';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { map, first } from 'rxjs/operators';
-import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
 @Component({

@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { AddOrganizationComponent } from './add-organisation/add-organisation.component';
+import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';

@@ -10,7 +10,7 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetOrganization } from '../../../store/actions/organisation.actions';
+import { GetOrganization } from '../../../store/actions/organization.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,

@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
-import { DeleteOrganization, GetAllOrganizations } from '../../store/actions/organisation.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../store/actions/organization.actions';
 import { DeleteSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';

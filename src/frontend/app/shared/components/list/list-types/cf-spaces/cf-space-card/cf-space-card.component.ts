@@ -12,7 +12,7 @@ import {
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
   CloudFoundryOrganizationService,
-} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
+} from '../../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';

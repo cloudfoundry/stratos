@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { UpdateOrganization } from '../../../../store/actions/organisation.actions';
+import { UpdateOrganization } from '../../../../store/actions/organization.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../store/helpers/entity-factory';
@@ -17,7 +17,7 @@ import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
 
 const enum OrgStatus {
   ACTIVE = 'active',

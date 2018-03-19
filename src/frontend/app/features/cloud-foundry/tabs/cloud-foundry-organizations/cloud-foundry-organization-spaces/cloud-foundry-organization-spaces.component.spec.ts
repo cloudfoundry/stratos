@@ -4,8 +4,8 @@ import {
   getBaseTestModules,
   generateTestCfEndpointServiceProvider
 } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organisation.service.mock';
-import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationServiceMock } from '../../../../../test-framework/cloud-foundry-organization.service.mock';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryOrganizationSpacesComponent } from './cloud-foundry-organization-spaces.component';
 import { SharedModule } from '../../../../../shared/shared.module';
 import { CoreModule } from '../../../../../core/core.module';

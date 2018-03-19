@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import {
   CloudFoundryOrganizationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
+} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';

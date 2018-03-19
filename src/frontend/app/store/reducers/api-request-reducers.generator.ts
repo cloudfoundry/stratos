@@ -32,7 +32,7 @@ import { routeReducer } from './routes.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer } from './users.reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
-import { updateOrganizationSpaceReducer } from './organisation-space.reducer';
+import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create

@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { CreateOrganization } from '../../../../store/actions/organisation.actions';
+import { CreateOrganization } from '../../../../store/actions/organization.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../store/helpers/entity-factory';
