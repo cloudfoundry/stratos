@@ -61,7 +61,7 @@ export class ApplicationWallComponent implements OnDestroy {
         }
         page.forEach(app => {
           const appState = app.entity.state;
-          const appGuid = app.entity.guid;
+          const appGuid = app.metadata.guid;
           const cfGuid = app.entity.cfGuid;
           const dispatching = false;
           if (appState === 'STARTED') {

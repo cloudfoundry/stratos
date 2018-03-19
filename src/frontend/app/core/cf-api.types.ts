@@ -1,3 +1,4 @@
+import { IRoute } from './cf-api.types';
 import { APIResource } from '../store/types/api.types';
 
 export interface IRoute {
@@ -8,14 +9,14 @@ export interface IRoute {
   service_instance_guid?: any;
   port?: any;
   domain_url: string;
-  domain: IDomain;
+  domain?: APIResource<IDomain>;
   space_url: string;
-  space: APIResource<ISpace>;
+  space?: APIResource<ISpace>;
   apps_url: string;
-  apps: APIResource<IApp>[];
+  apps?: APIResource<IApp>[];
   route_mappings_url: string;
-  guid: string;
-  cfGuid: string;
+  guid?: string;
+  cfGuid?: string;
 }
 
 export interface ISpace {
@@ -25,26 +26,30 @@ export interface ISpace {
   isolation_segment_guid?: any;
   allow_ssh: boolean;
   organization_url: string;
-  organization: IOrganization;
+  organization?: APIResource<IOrganization>;
   developers_url: string;
-  developers: IDeveloper[];
+  developers?: APIResource<IDeveloper>[];
   managers_url: string;
-  managers: IDeveloper[];
+  managers?: APIResource<IDeveloper>[];
   auditors_url: string;
-  auditors: any[];
+  auditors?: any[];
   apps_url: string;
-  apps: APIResource<IApp[]>;
+  apps?: APIResource<IApp>[];
   routes_url: string;
   domains_url: string;
-  domains: IDomain[];
+  domains?: APIResource<IDomain>[];
   service_instances_url: string;
-  service_instances: any[];
+  service_instances?: any[];
   app_events_url: string;
-  events_url: string;
+  events_url?: string;
   security_groups_url: string;
-  security_groups: ISecurityGroup[];
+  security_groups?: APIResource<ISecurityGroup>[];
   staging_security_groups_url: string;
-  staging_security_groups: ISecurityGroup[];
+  staging_security_groups?: APIResource<ISecurityGroup>[];
+  space_quota_definition?: APIResource<IQuotaDefinition>;
+  routes?: APIResource<IRoute>[];
+  cfGuid?: string;
+  guid?: string;
 }
 
 export interface ISecurityGroup {
@@ -53,9 +58,15 @@ export interface ISecurityGroup {
   running_default: boolean;
   staging_default: boolean;
   spaces_url: string;
+  spaces?: APIResource<ISpace>[];
   staging_spaces_url: string;
 }
 
+export enum IRuleType {
+  all = 'all',
+  tcp = 'tcp',
+  udp = 'udp'
+}
 export interface IRule {
   destination: string;
   protocol: string;
@@ -64,41 +75,48 @@ export interface IRule {
 
 export interface IApp {
   name: string;
-  production: boolean;
+  production?: boolean;
   space_guid: string;
-  stack_guid: string;
+  stack_guid?: string;
   buildpack?: any;
-  detected_buildpack: string;
-  detected_buildpack_guid: string;
-  environment_json: IEnvironmentjson;
-  memory: number;
-  instances: number;
-  disk_quota: number;
-  state: string;
-  version: string;
+  detected_buildpack?: string;
+  detected_buildpack_guid?: string;
+  environment_json?: IEnvironmentjson;
+  enable_ssh?: boolean;
+  memory?: number;
+  instances?: number;
+  disk_quota?: number;
+  state?: string;
+  version?: string;
   command?: any;
-  console: boolean;
+  console?: boolean;
   debug?: any;
-  staging_task_id: string;
-  package_state: string;
-  health_check_type: string;
+  staging_task_id?: string;
+  package_state?: string;
+  health_check_type?: string;
   health_check_timeout?: any;
   health_check_http_endpoint?: any;
   staging_failed_reason?: any;
   staging_failed_description?: any;
-  diego: boolean;
+  diego?: boolean;
   docker_image?: any;
-  docker_credentials: IDockercredentials;
-  package_updated_at: string;
-  detected_start_command: string;
-  enable_ssh: boolean;
-  ports: number[];
-  space_url: string;
-  stack_url: string;
-  routes_url: string;
-  events_url: string;
-  service_bindings_url: string;
-  route_mappings_url: string;
+  docker_credentials?: IDockercredentials;
+  package_updated_at?: string;
+  detected_start_command?: string;
+  allow_ssh?: boolean;
+  ports?: number[];
+  service_bindings?: APIResource[];
+  routes?: APIResource<IRoute>[];
+  stack?: string | APIResource<IStack>;
+  space?: string | APIResource<ISpace>;
+  space_url?: string;
+  stack_url?: string;
+  routes_url?: string;
+  events_url?: string;
+  service_bindings_url?: string;
+  route_mappings_url?: string;
+  cfGuid?: string;
+  guid?: string;
 }
 
 export interface IDockercredentials {
@@ -125,26 +143,118 @@ export interface IDeveloper {
 
 export interface IOrganization {
   name: string;
-  billing_enabled: boolean;
-  quota_definition_guid: string;
-  status: string;
+  billing_enabled?: boolean;
+  quota_definition_guid?: string;
+  status?: string;
   default_isolation_segment_guid?: any;
-  quota_definition_url: string;
-  spaces_url: string;
-  domains_url: string;
-  private_domains_url: string;
-  users_url: string;
-  managers_url: string;
-  billing_managers_url: string;
-  auditors_url: string;
-  app_events_url: string;
-  space_quota_definitions_url: string;
-  guid: string;
-  cfGuid: string;
+  quota_definition_url?: string;
+  spaces_url?: string;
+  domains_url?: string;
+  private_domains_url?: string;
+  users_url?: string;
+  managers_url?: string;
+  billing_managers_url?: string;
+  auditors_url?: string;
+  app_events_url?: string;
+  space_quota_definitions_url?: string;
+  guid?: string;
+  cfGuid?: string;
+  spaces?: APIResource<ISpace>[];
+  private_domains?: APIResource<IPrivateDomain>[];
+  quota_definition?: APIResource<IQuotaDefinition>;
 }
 
 export interface IDomain {
   name: string;
   router_group_guid?: any;
   router_group_type?: any;
+}
+
+export interface ICfV2Info {
+  name: string;
+  build: string;
+  support: string;
+  version: number;
+  description: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  min_cli_version?: any;
+  min_recommended_cli_version?: any;
+  api_version: string;
+  app_ssh_endpoint: string;
+  app_ssh_host_key_fingerprint: string;
+  app_ssh_oauth_client: string;
+  routing_endpoint: string;
+  doppler_logging_endpoint: string;
+}
+
+export interface IStack {
+  name: string;
+  description: string;
+}
+
+export interface IBuildpack {
+  name: string;
+  position: number;
+  enabled: boolean;
+  locked: boolean;
+  filename: string;
+}
+
+export interface IFeatureFlag {
+  name: string;
+  enabled: boolean;
+  url?: string;
+  error_message?: string;
+}
+export interface IServiceInstance {
+  guid?: string;
+  cfGuid?: string;
+}
+export interface IStack {
+  name: string;
+  description: string;
+}
+
+export interface IBuildpack {
+  name: string;
+  position: number;
+  enabled: boolean;
+  locked: boolean;
+  filename: string;
+}
+
+export interface IPrivateDomain {
+  guid?: string;
+  cfGuid?: string;
+}
+
+export interface IQuotaDefinition {
+  memory_limit: number;
+  app_instance_limit: number;
+  instance_memory_limit: number;
+  name: string;
+  organization_guid?: string;
+  total_services?: number;
+  total_routes?: number;
+  total_private_domains?: number;
+}
+
+export interface IUpdateSpace {
+  name?: string;
+  organization_guid?: string;
+  developer_guids?: string[];
+  manager_guids?: string[];
+  auditor_guids?: string[];
+  domain_guids?: string[];
+  security_group_guids?: string[];
+  allow_ssh?: boolean;
+  isolation_segment_guid?: string;
+}
+
+export interface IUpdateOrganization {
+  name?: string;
+  status?: string;
+  quota_definition_guid?: string;
+  default_isolation_segment_guid?: string;
 }

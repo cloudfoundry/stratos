@@ -5,6 +5,13 @@
         <mat-icon class="page-header__nav-toggle">menu</mat-icon>
       </button>
     </div>
+    <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
+      <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
+        <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink" [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+        <span class="page-header__breadcrumb" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+        <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
+      </ng-container>
+    </div>
     <ng-content></ng-content>
     <div class="page-header__filler"></div>
     <ng-content select=".page-header-right"></ng-content>

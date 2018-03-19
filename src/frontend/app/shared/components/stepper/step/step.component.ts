@@ -11,7 +11,9 @@ export interface IStepperStep {
 
 export type StepOnNextFunction = () => Observable<{
   success: boolean,
-  message?: string
+  message?: string,
+  // Should we redirect to the store previous state?
+  redirect?: boolean
 }>;
 
 @Component({

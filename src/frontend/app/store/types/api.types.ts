@@ -27,7 +27,7 @@ export interface APIResourceMetadata {
 
 export interface NormalizedResponse {
   entities: IRequestEntityTypeState<any>;
-  result: any[];
+  result: string[];
 }
 
 export type ActionMergeFunction = (oldEntities: IRequestDataState, newEntities: NormalizedResponseEntities)

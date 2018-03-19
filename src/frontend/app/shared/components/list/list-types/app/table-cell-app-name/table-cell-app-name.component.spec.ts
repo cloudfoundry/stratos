@@ -22,7 +22,7 @@ describe('TableCellAppNameComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppNameComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {} };
+    component.row = { entity: {}, metadata: {} };
     fixture.detectChanges();
   });
 

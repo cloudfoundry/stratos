@@ -71,6 +71,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   isAddingOrSelecting$: Observable<boolean>;
   hasRows$: Observable<boolean>;
 
+  // Observable which allows you to determine if the paginator control should be hidden
+  hidePaginator$: Observable<boolean>;
+  listViewKey: string;
+  // Observable which allows you to determine if the top control bar should be shown
+  hasControls$: Observable<boolean>;
+
+
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
     // When applying the question mark (addForm?) it's value is ignored by [disabled]
@@ -101,7 +108,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.hasRows$ = this.dataSource.pagination$.map(pag => pag.totalResults > 0);
 
     // Set up an observable containing the current view (card/table)
-    const { view, } = getListStateObservables(this.store, this.dataSource.paginationKey);
+    this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
+    const { view, } = getListStateObservables(this.store, this.listViewKey);
     this.view$ = view;
 
     // If this is the first time the user has used this list then set the view to the default
@@ -111,7 +119,30 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
+    // Determine if this list view needs the control header bar at the top
+    this.hasControls$ = this.view$.map((viewType) => {
+      return !!(
+        this.config.viewType === 'both' ||
+        this.config.text && this.config.text.title ||
+        this.addForm ||
+        this.globalActions && this.globalActions.length ||
+        this.multiActions && this.multiActions.length ||
+        viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
+        this.multiFilterConfigs && this.multiFilterConfigs.length ||
+        this.config.enableTextFilter);
+    });
+
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
+
+    // Determine if we should hide the paginator
+    this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)
+      .map(([hasRows, pagination]) => {
+        const minPageSize = (
+          this.paginator.pageSizeOptions && this.paginator.pageSizeOptions.length ? this.paginator.pageSizeOptions[0] : -1
+        );
+        return !hasRows ||
+          pagination && (pagination.totalResults <= minPageSize);
+      });
 
     this.paginator.pageSizeOptions = this.config.pageSizeOptions ||
       (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
@@ -216,7 +247,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateListView(listView: ListView) {
-    this.store.dispatch(new SetListViewAction(this.dataSource.paginationKey, listView));
+    this.store.dispatch(new SetListViewAction(this.listViewKey, listView));
   }
 
   updateListSort(field: string, direction: SortDirection) {

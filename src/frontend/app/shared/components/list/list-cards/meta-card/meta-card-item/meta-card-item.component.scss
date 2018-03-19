@@ -1,18 +1,40 @@
-.meta-card-item {
+.meta-card-item-row {
   $text-color: rgba(0, 0, 0, .60);
+  align-items: center;
   display: flex;
+  height: 30px;
   justify-content: space-between;
   padding: 2px 0;
-  &__value {
-    overflow: hidden;
-    text-align: end;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+}
+
+.meta-card-item__value {
+  overflow: hidden;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta-card-item__key {
+  $text-color: rgba(0, 0, 0, .60);
+  color: $text-color;
+  flex: none;
+  font-weight: 300;
+  padding-right: 10px;
+}
+
+.meta-card-item-column {
+  padding-top: 10px;
+}
+
+.meta-card-item-long-text {
+  padding-top: 10px;
+  .meta-card-item__value {
+    padding-bottom: 10px;
+    text-align: start;
+    white-space: unset;
+    word-wrap: break-word;
   }
-  &__key {
-    color: $text-color;
-    flex: none;
-    font-weight: 300;
-    padding-right: 10px;
+  .meta-card-item__key {
+    display: none;
   }
 }

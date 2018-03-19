@@ -1,6 +1,9 @@
-import { IRequestAction, StartCFAction } from '../types/request.types';
-import { APIResource, NormalizedResponse } from '../types/api.types';
-import { Observable } from 'rxjs/Rx';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { map, mergeMap } from 'rxjs/operators';
+
 import {
   CONNECT_ENDPOINTS,
   CONNECT_ENDPOINTS_FAILED,
@@ -10,37 +13,29 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
-  EndpointSchema,
-  GET_ENDPOINTS,
   GetAllEndpoints,
-  GetAllEndpointsFailed,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
+  REGISTER_ENDPOINTS_FAILED,
+  REGISTER_ENDPOINTS_SUCCESS,
   RegisterEndpoint,
   UNREGISTER_ENDPOINTS,
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
-  REGISTER_ENDPOINTS_SUCCESS,
-  REGISTER_ENDPOINTS_FAILED,
 } from '../actions/endpoint.actions';
+import { ClearPages, ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
-import { Injectable } from '@angular/core';
-import { Action, Store } from '@ngrx/store';
-import { Actions, Effect } from '@ngrx/effects';
-import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../types/api.types';
+import { endpointStoreNames, EndpointType, StateUpdateAction } from '../types/endpoint.types';
 import {
+  IRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { PaginatedAction } from '../types/pagination.types';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { SystemInfo } from '../types/system.types';
-import { map, mergeMap, catchError } from 'rxjs/operators';
-import { GetSystemInfo, GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
-import { ClearPaginationOfType, ClearPaginationOfEntity } from '../actions/pagination.actions';
 
 @Injectable()
 export class EndpointsEffect {
@@ -128,6 +123,16 @@ export class EndpointsEffect {
       );
     });
 
+  @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
+    .pipe(
+      map(action => {
+        if (action.endpointType === 'cloud-foundry') {
+          this.store.dispatch(new ClearPages('application', 'applicationWall'));
+        }
+      })
+    );
+
+
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
 
@@ -191,7 +196,8 @@ export class EndpointsEffect {
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
-    actionStrings: [string, string] = [null, null]
+    actionStrings: [string, string] = [null, null],
+    endpointType: EndpointType = 'cloud-foundry'
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
@@ -201,7 +207,7 @@ export class EndpointsEffect {
       params
     }).map(endpoint => {
       if (actionStrings[0]) {
-        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
+        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType });
       }
       if (apiActionType === 'delete') {
         this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
@@ -210,7 +216,7 @@ export class EndpointsEffect {
     })
       .catch(e => {
         if (actionStrings[1]) {
-          this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid });
+          this.store.dispatch({ type: actionStrings[1], guid: apiAction.guid });
         }
         return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
       });

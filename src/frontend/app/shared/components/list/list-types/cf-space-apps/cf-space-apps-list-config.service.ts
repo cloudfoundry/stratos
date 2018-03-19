@@ -6,13 +6,13 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfSpaceAppsDataSource } from './cf-space-apps-data-source.service';
-import { CfApplication } from '../../../../../store/types/application.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { TableCellAppNameComponent } from '../app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../app/table-cell-app-status/table-cell-app-status.component';
 import { DatePipe } from '@angular/common';
 import { TableCellAppInstancesComponent } from '../app/table-cell-app-instances/table-cell-app-instances.component';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { IApp } from '../../../../../core/cf-api.types';
 
 @Injectable()
 export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
@@ -23,7 +23,7 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   dataSource: CfSpaceAppsDataSource;
   pageSizeOptions = [9, 45, 90];
   defaultView = 'table' as ListView;
-  getColumns = (): ITableColumn<APIResource<CfApplication>>[] => [
+  getColumns = (): ITableColumn<APIResource<IApp>>[] => [
     {
       columnId: 'apps', headerCell: () => 'Applications',
       cellComponent: TableCellAppNameComponent,
@@ -35,7 +35,8 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
       }
     },
     {
-      columnId: 'status', headerCell: () => 'Status',
+      columnId: 'status',
+      headerCell: () => 'Status',
       cellFlex: '2',
       cellConfig: {
         hideIcon: true,

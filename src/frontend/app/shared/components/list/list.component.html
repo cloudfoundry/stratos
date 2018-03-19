@@ -1,5 +1,6 @@
 <div class="list-component" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
-  <div class="list-component__header">
+  <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async)" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
+  <div class="list-component__header" [hidden]="!(hasControls$ | async)">
     <mat-progress-bar color="primary" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
     <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
       <div class="list-component__header__left">
@@ -93,14 +94,15 @@
       <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)">
       </app-table>
     </div>
-    <mat-card class="list-component__paginator" [hidden]="!(hasRows$ | async) || (dataSource.pagination$ | async)?.totalResults < (dataSource.pagination$ | async)?.pageSize">
-      <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSize" [pageIndex]="paginator.pageIndex" showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)">
-      </mat-paginator>
-    </mat-card>
-    <mat-card class="list-component__empty" [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
-      <mat-card-content>
-        <div class="no-rows">There are no entries.</div>
-      </mat-card-content>
-    </mat-card>
+    <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSize" [pageIndex]="paginator.pageIndex" showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)">
+      <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
+        <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSize" [pageIndex]="paginator.pageIndex" showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)">
+        </mat-paginator>
+      </mat-card>
+      <mat-card class="list-component__empty" [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
+        <mat-card-content>
+          <div class="no-rows">There are no entries.</div>
+        </mat-card-content>
+      </mat-card>
   </div>
 </div>

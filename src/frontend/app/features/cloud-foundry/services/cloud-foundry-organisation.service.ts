@@ -4,42 +4,48 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, switchMap } from 'rxjs/operators';
 
+import { IServiceInstance } from '../../../core/cf-api-svc.types';
+import { IApp, IOrganization, IPrivateDomain, IQuotaDefinition, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { organisationSchemaKey, OrganisationWithSpaceSchema } from '../../../store/actions/action-types';
 import { GetOrganisation } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
-import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { CfApplication } from '../../../store/types/application.types';
 import {
-  CfOrg,
-  CfPrivateDomain,
-  CfQuotaDefinition,
-  CfServiceInstance,
-  CfSpace,
-} from '../../../store/types/org-and-space.types';
+  applicationSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  organisationSchemaKey,
+  privateDomainsSchemaKey,
+  quotaDefinitionSchemaKey,
+  routeSchemaKey,
+  serviceInstancesSchemaKey,
+  spaceSchemaKey,
+} from '../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { APIResource, EntityInfo } from '../../../store/types/api.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
 @Injectable()
 export class CloudFoundryOrganisationService {
-
+  orgGuid: string;
+  cfGuid: string;
   userOrgRole$: Observable<string>;
-  quotaDefinition$: Observable<CfQuotaDefinition>;
+  quotaDefinition$: Observable<IQuotaDefinition>;
   totalMem$: Observable<number>;
-  privateDomains$: Observable<APIResource<CfPrivateDomain>[]>;
+  privateDomains$: Observable<APIResource<IPrivateDomain>[]>;
   routes$: Observable<APIResource<Route>[]>;
-  serivceInstances$: Observable<APIResource<CfServiceInstance>[]>;
-  spaces$: Observable<APIResource<CfSpace>[]>;
+  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  spaces$: Observable<APIResource<ISpace>[]>;
   appInstances$: Observable<number>;
-  apps$: Observable<APIResource<CfApplication>[]>;
-  org$: Observable<EntityInfo<APIResource<CfOrg>>>;
-  organisationEntityService: EntityService<APIResource<CfOrg>>;
+  apps$: Observable<APIResource<IApp>[]>;
+  org$: Observable<EntityInfo<APIResource<IOrganization>>>;
+  orgEntityService: EntityService<APIResource<IOrganization>>;
   constructor(
-    public cfGuid: string,
-    public orgGuid: string,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cfUserService: CfUserService,
@@ -47,19 +53,29 @@ export class CloudFoundryOrganisationService {
     private cfEndpointService: CloudFoundryEndpointService
 
   ) {
-
-    this.organisationEntityService = this.entityServiceFactory.create(
+    this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+    this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.orgEntityService = this.entityServiceFactory.create(
       organisationSchemaKey,
-      OrganisationWithSpaceSchema,
-      orgGuid,
-      new GetOrganisation(orgGuid, cfGuid, 2)
+      entityFactory(organisationSchemaKey),
+      this.orgGuid,
+      new GetOrganisation(this.orgGuid, this.cfGuid, [
+        createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, domainSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organisationSchemaKey, privateDomainsSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+      ]),
+      true
     );
 
     this.initialiseObservables();
   }
 
   private initialiseObservables() {
-    this.org$ = this.organisationEntityService.entityObs$.pipe(
+    this.org$ = this.orgEntityService.entityObs$.pipe(
       filter(o => !!o && !!o.entity)
     );
 
@@ -77,14 +93,18 @@ export class CloudFoundryOrganisationService {
   }
 
   private initialiseSpaceObservables() {
-    this.serivceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
+    this.serviceInstances$ = this.spaces$.pipe(this.getFlattenedList('service_instances'));
     this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
   }
 
   private initialiseAppObservables() {
     this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
-    this.appInstances$ = this.apps$.pipe(map(a => a.map(app => app.entity.instances)
-      .reduce((x, sum) => x + sum, 0)));
+    this.appInstances$ = this.apps$.pipe(
+      map(a => {
+        return a ? a.map(app => app.entity.instances).reduce((x, sum) => x + sum, 0) : 0;
+      })
+    );
+
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
   }
 
@@ -94,9 +114,11 @@ export class CloudFoundryOrganisationService {
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
   }
 
-  private getFlattenedList(property: string): (source: Observable<APIResource<CfSpace>[]>) => Observable<any> {
+  private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {
     return map(entities => {
-      const allInstances = entities.map(s => s.entity[property]);
+      const allInstances = entities
+        .map(s => s.entity[property])
+        .filter(s => !!s);
       return [].concat.apply([], allInstances);
     });
   }

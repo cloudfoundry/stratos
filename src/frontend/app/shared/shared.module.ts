@@ -1,5 +1,4 @@
 /* tslint:disable:max-line-length */
-
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
@@ -14,6 +13,7 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
@@ -53,13 +53,6 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
-import {
-  TableCellRouteAppsAttachedComponent,
-} from './components/list/list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-import {
-  CfSpacePermissionCellComponent,
-} from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
@@ -87,10 +80,6 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-
-/* tslint:enable:max-line-length */
-
-
 
 @NgModule({
   imports: [
@@ -153,15 +142,14 @@ import { ValuesPipe } from './pipes/values.pipe';
     MetaCardItemComponent,
     MetaCardKeyComponent,
     MetaCardValueComponent,
-    CfOrgCardComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
-    AppChipsComponent,
-    CfSpacePermissionCellComponent,
+    BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    TableCellRouteAppsAttachedComponent,
+    BooleanIndicatorComponent,
+    AppChipsComponent
   ],
   exports: [
     FormsModule,
@@ -214,7 +202,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-
+    CardCfOrgUserDetailsComponent,
+    AppChipsComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

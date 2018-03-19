@@ -17,5 +17,11 @@ export class RouterEffect {
   @Effect({ dispatch: false })
   routerGoUrl$ = this.actions$.ofType<RouterNav>(RouterActions.GO)
     .map((action: RouterNav) => action.payload)
-    .do(({ path, query: queryParams, extras }) => this.router.navigate(path, { queryParams, ...extras }));
+    .do(({ path, query: queryParams, extras = {} }) => {
+      const extraParams = { ...extras, queryParams };
+      if (typeof path === 'string') {
+        path = path.split('/');
+      }
+      this.router.navigate(path, extraParams);
+    });
 }

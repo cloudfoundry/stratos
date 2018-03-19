@@ -9,50 +9,22 @@ import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagi
 import { AppState } from '../../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-import { CfOrg } from '../../../../../../store/types/org-and-space.types';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
-
-const cfSpaceServiceFactory = (
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory,
-  cfEndpointService: CloudFoundryEndpointService
-) => {
-  const { orgId, spaceId } = activatedRoute.snapshot.params;
-  const { cfGuid } = cfEndpointService;
-  return new CloudFoundrySpaceService(
-    cfGuid,
-    orgId,
-    spaceId,
-    store,
-    entityServiceFactory,
-    cfUserService,
-    paginationMonitorFactory,
-    cfEndpointService
-  );
-};
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
+import { Observable } from 'rxjs/Observable';
+import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
+import { map, first } from 'rxjs/operators';
+import { CloudFoundryOrganisationService } from '../../../../services/cloud-foundry-organisation.service';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
   templateUrl: './cloud-foundry-space-base.component.html',
   styleUrls: ['./cloud-foundry-space-base.component.scss'],
   providers: [
-    {
-      provide: CloudFoundrySpaceService,
-      useFactory: cfSpaceServiceFactory,
-      deps: [
-        Store,
-        ActivatedRoute,
-        EntityServiceFactory,
-        CfOrgSpaceDataService,
-        CfUserService,
-        PaginationMonitorFactory,
-        CloudFoundryEndpointService
-      ]
-    }
+    getActiveRouteCfOrgSpaceProvider,
+    CloudFoundrySpaceService,
+    CloudFoundryOrganisationService
   ]
 })
 export class CloudFoundrySpaceBaseComponent implements OnInit {
@@ -80,18 +52,62 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     }
   ];
 
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+
+  public name$: Observable<string>;
+
+  public isFetching$: Observable<boolean>;
+
   constructor(
-    private cfEndpointService: CloudFoundryEndpointService,
+    public cfEndpointService: CloudFoundryEndpointService,
     private cfSpaceService: CloudFoundrySpaceService,
     private cfOrgSpaceService: CfOrgSpaceDataService,
+    private cfOrgService: CloudFoundryOrganisationService,
     private store: Store<AppState>
-  ) { }
+  ) {
+    this.isFetching$ = cfSpaceService.space$.pipe(
+      map(space => space.entityRequestInfo.fetching)
+    );
+    this.name$ = cfSpaceService.space$.pipe(
+      map(space => space.entity.entity.name),
+      first()
+    );
+    this.setUpBreadcrumbs(cfEndpointService, cfOrgService);
+  }
+
+  private setUpBreadcrumbs(
+    cfEndpointService: CloudFoundryEndpointService,
+    cfOrgService: CloudFoundryOrganisationService
+  ) {
+    this.breadcrumbs$ = combineLatest(
+      cfEndpointService.endpoint$,
+      cfOrgService.org$
+    ).pipe(
+      map(([endpoint, org]) => ([
+        {
+          breadcrumbs: [
+            {
+              value: endpoint.entity.name,
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/summary`
+            },
+            {
+              value: org.entity.entity.name,
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}`
+            }
+          ]
+        }
+      ])),
+      first()
+    );
+  }
+
 
   ngOnInit() { }
 
   deleteSpace = () => {
     this.cfOrgSpaceService.deleteSpace(
       this.cfSpaceService.spaceGuid,
+      this.cfSpaceService.orgGuid,
       this.cfSpaceService.cfGuid
     );
 

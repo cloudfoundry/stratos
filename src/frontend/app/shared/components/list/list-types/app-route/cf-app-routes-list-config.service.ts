@@ -4,10 +4,12 @@ import { take, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
-import { DeleteRoute, GetAppRoutes, UnmapRoute } from '../../../../../store/actions/route.actions';
+import { GetAppRoutes } from '../../../../../store/actions/application.actions';
+import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
+import { applicationSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
 import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource, EntityInfo } from '../../../../../store/types/api.types';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
@@ -155,14 +157,14 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
-      new DeleteRoute(route.entity.guid, this.routesDataSource.cfGuid)
+      new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
     );
   }
 
   dispatchUnmapAction(route) {
     return this.store.dispatch(
       new UnmapRoute(
-        route.entity.guid,
+        route.metadata.guid,
         this.routesDataSource.appGuid,
         this.routesDataSource.cfGuid
       )
@@ -187,8 +189,12 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetAppRoutes(appService.appGuid, appService.cfGuid),
-      getPaginationKey('route', appService.cfGuid, appService.appGuid),
+      new GetAppRoutes(
+        appService.appGuid,
+        appService.cfGuid,
+        createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
+      ),
+      createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
       this
     );
   }
