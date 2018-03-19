@@ -97,9 +97,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
             entityFactory(spaceSchemaKey),
             this.spaceGuid,
-            new GetSpace(this.spaceGuid, this.cfGuid, [
-              createEntityRelationKey(spaceSchemaKey, domainSchemaKey)
-            ]),
+            new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
             true
           );
           return spaceService.waitForEntity$;
@@ -113,7 +111,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           this.selectedDomain = Object.values(this.domains)[0];
         })
       );
-
     this.subscriptions.push(space$.subscribe());
 
     const selRoute$ = this.selectedRoute$.subscribe(x => {
@@ -191,12 +188,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             this.displaySnackBar();
             return Observable.of(null);
           } else {
-            const routeAssignAction = new AssociateRouteWithAppApplication(
+            this.store.dispatch(new AssociateRouteWithAppApplication(
               this.appGuid,
               route.response.result[0],
               this.cfGuid
-            );
-            this.store.dispatch(routeAssignAction);
+            ));
             return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
               pairwise(),
               filter(([oldApp, newApp]) => {
@@ -204,11 +200,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               }),
               tap(appState => {
                 this.submitted = false;
-                this.store.dispatch(
-                  new RouterNav({
-                    path: ['/applications', this.cfGuid, this.appGuid]
-                  })
-                );
+                this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid] }));
               })
             );
           }
@@ -221,15 +213,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private displaySnackBar() {
     if (this.createTCPRoute) {
-      this.snackBar.open(
-        'Failed to create route! Please ensure the domain has a TCP routing group associated',
-        'Dismiss'
-      );
+      this.snackBar.open('Failed to create route! Please ensure the domain has a TCP routing group associated', 'Dismiss');
     } else {
-      this.snackBar.open(
-        'Failed to create route! The hostname may have been taken, please try again with a different name',
-        'Dismiss'
-      );
+      this.snackBar.open('Failed to create route! The hostname may have been taken, please try again with a different name', 'Dismiss');
     }
   }
 
