@@ -1,2 +1,2 @@
-export class CloudFoundryOrganisationServiceMock {
+export class CloudFoundryOrganizationServiceMock {
 }

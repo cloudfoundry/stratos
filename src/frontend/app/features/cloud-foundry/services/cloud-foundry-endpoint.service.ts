@@ -11,7 +11,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../store/actions/domains.actions';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { GetAllOrganisations } from '../../../store/actions/organisation.actions';
+import { GetAllOrganizations } from '../../../store/actions/organisation.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -19,7 +19,7 @@ import {
   domainSchemaKey,
   endpointSchemaKey,
   entityFactory,
-  organisationSchemaKey,
+  organizationSchemaKey,
   quotaDefinitionSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
@@ -49,17 +49,17 @@ export class CloudFoundryEndpointService {
   currentUser$: Observable<EndpointUser>;
   cfGuid: string;
 
-  getAllOrgsAction: GetAllOrganisations;
+  getAllOrgsAction: GetAllOrganizations;
 
-  static createGetAllOrganisations(cfGuid: string) {
+  static createGetAllOrganizations(cfGuid: string) {
     const paginationKey = cfGuid ?
       createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
       : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
-    return new GetAllOrganisations(
+    return new GetAllOrganizations(
       paginationKey,
       cfGuid, [
-        createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
-        createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
       ]);
@@ -73,7 +73,7 @@ export class CloudFoundryEndpointService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-    this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganisations(this.cfGuid);
+    this.getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
 
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       endpointSchemaKey,
@@ -103,7 +103,7 @@ export class CloudFoundryEndpointService {
       action: this.getAllOrgsAction,
       paginationMonitor: this.paginationMonitorFactory.create(
         this.getAllOrgsAction.paginationKey,
-        entityFactory(organisationSchemaKey)
+        entityFactory(organizationSchemaKey)
       )
     }, true).entities$;
 

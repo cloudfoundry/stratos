@@ -11,7 +11,7 @@ import {
   CloudFoundryEndpointService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
-  CloudFoundryOrganisationService,
+  CloudFoundryOrganizationService,
 } from '../../../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
@@ -54,7 +54,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private cfOrgSpaceDataService: CfOrgSpaceDataService,
-    private cfOrgService: CloudFoundryOrganisationService,
+    private cfOrgService: CloudFoundryOrganizationService,
   ) {
     super();
 

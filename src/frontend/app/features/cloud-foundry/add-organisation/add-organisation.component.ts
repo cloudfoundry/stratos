@@ -11,7 +11,7 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
     getActiveRouteCfOrgSpaceProvider
   ]
 })
-export class AddOrganisationComponent implements OnInit {
+export class AddOrganizationComponent implements OnInit {
 
   cfUrl: string;
   constructor(

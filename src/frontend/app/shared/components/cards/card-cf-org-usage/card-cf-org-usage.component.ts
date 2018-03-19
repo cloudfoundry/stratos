@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import {
-  CloudFoundryOrganisationService,
+  CloudFoundryOrganizationService,
 } from '../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
 
 @Component({
@@ -10,5 +10,5 @@ import {
   styleUrls: ['./card-cf-org-usage.component.scss']
 })
 export class CardCfOrgUsageComponent {
-  constructor(private cfOrganizationService: CloudFoundryOrganisationService) { }
+  constructor(private cfOrganizationService: CloudFoundryOrganizationService) { }
 }

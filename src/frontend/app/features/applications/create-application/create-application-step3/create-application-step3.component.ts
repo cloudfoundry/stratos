@@ -8,7 +8,7 @@ import { Observable } from 'rxjs/Rx';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { AssociateRouteWithAppApplication, CreateNewApplication } from '../../../../store/actions/application.actions';
-import { GetOrganisation } from '../../../../store/actions/organisation.actions';
+import { GetOrganization } from '../../../../store/actions/organisation.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
@@ -17,7 +17,7 @@ import {
   applicationSchemaKey,
   domainSchemaKey,
   entityFactory,
-  organisationSchemaKey,
+  organizationSchemaKey,
   routeSchemaKey,
 } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
@@ -124,11 +124,11 @@ export class CreateApplicationStep3Component implements OnInit {
         this.hostName = state.name.split(' ').join('-').toLowerCase();
         this.newAppData = state;
         const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
-          organisationSchemaKey,
-          entityFactory(organisationSchemaKey),
+          organizationSchemaKey,
+          entityFactory(organizationSchemaKey),
           state.cloudFoundryDetails.org,
-          new GetOrganisation(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
-            createEntityRelationKey(organisationSchemaKey, domainSchemaKey)
+          new GetOrganization(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
+            createEntityRelationKey(organizationSchemaKey, domainSchemaKey)
           ]),
           true
         );

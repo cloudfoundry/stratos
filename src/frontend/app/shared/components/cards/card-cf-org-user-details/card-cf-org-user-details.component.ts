@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import {
-  CloudFoundryOrganisationService,
+  CloudFoundryOrganizationService,
 } from '../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 
@@ -15,7 +15,7 @@ export class CardCfOrgUserDetailsComponent implements OnInit {
 
 
   constructor(
-    private cfOrgService: CloudFoundryOrganisationService,
+    private cfOrgService: CloudFoundryOrganizationService,
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService
   ) {

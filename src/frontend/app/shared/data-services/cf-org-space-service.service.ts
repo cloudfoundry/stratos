@@ -4,10 +4,10 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
-import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../store/actions/organisation.actions';
 import { DeleteSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, spaceSchemaKey, organisationSchemaKey } from '../../store/helpers/entity-factory';
+import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
@@ -31,8 +31,8 @@ export class CfOrgSpaceDataService {
   public org: CfOrgSpaceItem;
   public space: CfOrgSpaceItem;
 
-  public paginationAction = new GetAllOrganisations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
-    createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
+  public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
+    createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
   ]);
 
   // TODO: We should optimise this to only fetch the orgs for the current endpoint
@@ -167,7 +167,7 @@ export class CfOrgSpaceDataService {
   }
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {
-    this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
+    this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
   }
 
   public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {

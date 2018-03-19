@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../store/app-state';
 import {
   applicationSchemaKey,
-  organisationSchemaKey,
+  organizationSchemaKey,
   serviceInstancesSchemaKey,
   spaceQuotaSchemaKey,
   spaceSchemaKey,
@@ -18,12 +18,12 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { GetAllOrganisationSpaces } from '../../../../../store/actions/organisation.actions';
+import { GetAllOrganizationSpaces } from '../../../../../store/actions/organisation.actions';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(organisationSchemaKey, orgGuid);
-    const action = new GetAllOrganisationSpaces(paginationKey, orgGuid, cfGuid, [
+    const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, orgGuid);
+    const action = new GetAllOrganizationSpaces(paginationKey, orgGuid, cfGuid, [
       createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
       createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
       createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),

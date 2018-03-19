@@ -11,13 +11,13 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { UpdateOrganization } from '../../../../store/actions/organisation.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory, organizationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganisationService } from '../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organisation.service';
 
 const enum OrgStatus {
   ACTIVE = 'active',
@@ -29,7 +29,7 @@ const enum OrgStatus {
   styleUrls: ['./edit-organization-step.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
-    CloudFoundryOrganisationService
+    CloudFoundryOrganizationService
   ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
@@ -51,7 +51,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar,
-    private cfOrgService: CloudFoundryOrganisationService
+    private cfOrgService: CloudFoundryOrganizationService
   ) {
     this.orgGuid = cfOrgService.orgGuid;
     this.cfGuid = cfOrgService.cfGuid;
@@ -82,14 +82,14 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const action = CloudFoundryEndpointService.createGetAllOrganisations(this.cfGuid);
+    const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(organisationSchemaKey)
+          entityFactory(organizationSchemaKey)
         )
       },
       true
@@ -117,7 +117,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     }));
 
     // Update action
-    this.submitSubscription = this.store.select(selectRequestInfo(organisationSchemaKey, this.orgGuid)).pipe(
+    this.submitSubscription = this.store.select(selectRequestInfo(organizationSchemaKey, this.orgGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
       map(o => {
         if (o.error) {

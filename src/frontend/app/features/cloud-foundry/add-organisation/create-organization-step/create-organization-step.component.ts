@@ -12,7 +12,7 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import { CreateOrganization } from '../../../../store/actions/organisation.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, organisationSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory, organizationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
@@ -46,14 +46,14 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     this.addOrg = new FormGroup({
       orgName: new FormControl('', [<any>Validators.required]),
     });
-    const action = CloudFoundryEndpointService.createGetAllOrganisations(this.cfGuid);
+    const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
         action,
         paginationMonitor: this.paginationMonitorFactory.create(
           action.paginationKey,
-          entityFactory(organisationSchemaKey)
+          entityFactory(organizationSchemaKey)
         )
       },
       true
@@ -78,7 +78,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     const orgName = this.addOrg.value['orgName'];
     this.store.dispatch(new CreateOrganization(orgName, this.cfGuid));
 
-    this.submitSubscription = this.store.select(selectRequestInfo(organisationSchemaKey, orgName)).pipe(
+    this.submitSubscription = this.store.select(selectRequestInfo(organizationSchemaKey, orgName)).pipe(
       filter(o => !!o && !o.creating),
       map(o => {
         if (o.error) {

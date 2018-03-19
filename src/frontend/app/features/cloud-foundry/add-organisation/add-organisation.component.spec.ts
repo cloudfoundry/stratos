@@ -1,23 +1,23 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AddOrganisationComponent } from './add-organisation.component';
+import { AddOrganizationComponent } from './add-organisation.component';
 import { getBaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CreateOrganizationStepComponent } from './create-organization-step/create-organization-step.component';
 
-describe('AddOrganisationComponent', () => {
-  let component: AddOrganisationComponent;
-  let fixture: ComponentFixture<AddOrganisationComponent>;
+describe('AddOrganizationComponent', () => {
+  let component: AddOrganizationComponent;
+  let fixture: ComponentFixture<AddOrganizationComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [AddOrganisationComponent, CreateOrganizationStepComponent],
+      declarations: [AddOrganizationComponent, CreateOrganizationStepComponent],
       imports: [...getBaseTestModules]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AddOrganisationComponent);
+    fixture = TestBed.createComponent(AddOrganizationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

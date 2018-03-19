@@ -14,7 +14,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { Observable } from 'rxjs/Observable';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { map, first } from 'rxjs/operators';
-import { CloudFoundryOrganisationService } from '../../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organisation.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
 @Component({
@@ -24,7 +24,7 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundrySpaceService,
-    CloudFoundryOrganisationService
+    CloudFoundryOrganizationService
   ]
 })
 export class CloudFoundrySpaceBaseComponent implements OnInit {
@@ -62,7 +62,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     public cfEndpointService: CloudFoundryEndpointService,
     private cfSpaceService: CloudFoundrySpaceService,
     private cfOrgSpaceService: CfOrgSpaceDataService,
-    private cfOrgService: CloudFoundryOrganisationService,
+    private cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>
   ) {
     this.isFetching$ = cfSpaceService.space$.pipe(
@@ -77,7 +77,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   private setUpBreadcrumbs(
     cfEndpointService: CloudFoundryEndpointService,
-    cfOrgService: CloudFoundryOrganisationService
+    cfOrgService: CloudFoundryOrganizationService
   ) {
     this.breadcrumbs$ = combineLatest(
       cfEndpointService.endpoint$,

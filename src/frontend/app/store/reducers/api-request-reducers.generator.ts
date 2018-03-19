@@ -9,7 +9,7 @@ import {
   githubBranchesSchemaKey,
   githubCommitSchemaKey,
   githubRepoSchemaKey,
-  organisationSchemaKey,
+  organizationSchemaKey,
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
@@ -32,7 +32,7 @@ import { routeReducer } from './routes.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer } from './users.reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
-import { updateOrganisationSpaceReducer } from './organisation-space.reducer';
+import { updateOrganizationSpaceReducer } from './organisation-space.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -71,7 +71,7 @@ const entities = [
   'application',
   'stack',
   'space',
-  organisationSchemaKey,
+  organizationSchemaKey,
   routeSchemaKey,
   'event',
   endpointStoreNames.type,
@@ -119,8 +119,8 @@ export function requestDataReducer(state, action) {
       endpointDisconnectApplicationReducer('application')
     ],
     [spaceSchemaKey]: [endpointDisconnectApplicationReducer('space')],
-    [organisationSchemaKey]: [
-      updateOrganisationSpaceReducer(),
+    [organizationSchemaKey]: [
+      updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer('organization')
     ]
   };
