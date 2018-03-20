@@ -79,6 +79,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   isAddingOrSelecting$: Observable<boolean>;
   hasRows$: Observable<boolean>;
+  noRowsHaveFilter$: Observable<boolean>;
+  disableActions$: Observable<boolean>;
+  hasRowsOrIsFiltering$: Observable<boolean>;
+  isFiltering$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -212,6 +216,34 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.filterString = filter.string;
       this.multiFilters = filter.items;
     });
+
+    this.isFiltering$ = this.paginationController.filter$.pipe(
+      map((filter: ListFilter) => {
+        const isFilteringByString = filter.string ? !!filter.string.length : false;
+        const isFilteringByItems = Object.keys(filter.items).map(key => {
+          return !!filter.items[key];
+        }).length > 0;
+        return isFilteringByString || isFilteringByItems;
+      })
+    );
+
+    this.noRowsHaveFilter$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+      map(([hasRows, isFiltering]) => {
+        return !hasRows && isFiltering;
+      })
+    );
+
+    this.hasRowsOrIsFiltering$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+      map(([hasRows, isFiltering]) => {
+        return hasRows || isFiltering;
+      })
+    );
+
+    this.disableActions$ = combineLatest(this.dataSource.isLoadingPage$, this.noRowsHaveFilter$).pipe(
+      map(([isLoading, noRowsHaveFilter]) => {
+        return isLoading || noRowsHaveFilter;
+      })
+    );
 
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,

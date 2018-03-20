@@ -7,7 +7,7 @@ import {
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
 import { EndpointsListConfigService } from '../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../shared/shared.module';
-import { AddOrganisationComponent } from './add-organisation/add-organisation.component';
+import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
@@ -62,10 +62,10 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
-import { CreateOrganizationStepComponent } from './add-organisation/create-organization-step/create-organization-step.component';
+import { CreateOrganizationStepComponent } from './add-organization/create-organization-step/create-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
 import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
-import { CloudFoundryOrganisationService } from './services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from './cf.helpers';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
@@ -84,7 +84,7 @@ import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.s
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
     CloudFoundrySecurityGroupsComponent,
-    AddOrganisationComponent,
+    AddOrganizationComponent,
     ManageUsersComponent,
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,
@@ -112,7 +112,7 @@ import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.s
       provide: ActiveRouteCfOrgSpace,
       useValue: {}
     },
-    CloudFoundryOrganisationService,
+    CloudFoundryOrganizationService,
     CloudFoundryEndpointService
   ]
 })

@@ -3,7 +3,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 import { IUpdateOrganization } from '../../core/cf-api.types';
 import {
   entityFactory,
-  organisationSchemaKey,
+  organizationSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
 } from '../helpers/entity-factory';
@@ -12,19 +12,19 @@ import { PaginatedAction, PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
-export const GET_ORGANISATION = '[Organisation] Get one';
-export const GET_ORGANISATION_SUCCESS = '[Organisation] Get one success';
-export const GET_ORGANISATION_FAILED = '[Organisation] Get one failed';
+export const GET_ORGANIZATION = '[Organization] Get one';
+export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
+export const GET_ORGANIZATION_FAILED = '[Organization] Get one failed';
 
-export const GET_ORGANISATIONS = '[Organisation] Get all';
-export const GET_ORGANISATIONS_SUCCESS = '[Organisation] Get all success';
-export const GET_ORGANISATIONS_FAILED = '[Organisation] Get all failed';
+export const GET_ORGANIZATIONS = '[Organization] Get all';
+export const GET_ORGANIZATIONS_SUCCESS = '[Organization] Get all success';
+export const GET_ORGANIZATIONS_FAILED = '[Organization] Get all failed';
 
-export const GET_ORGANISATION_SPACES = '[Space] Get all org spaces';
-export const GET_ORGANISATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
-export const GET_ORGANISATION_SPACES_FAILED = '[Space] Get all org spaces failed';
+export const GET_ORGANIZATION_SPACES = '[Space] Get all org spaces';
+export const GET_ORGANIZATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
+export const GET_ORGANIZATION_SPACES_FAILED = '[Space] Get all org spaces failed';
 
-export class GetOrganisation extends CFStartAction implements ICFAction, EntityInlineParentAction {
+export class GetOrganization extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string,
     public endpointGuid: string,
     public includeRelations: string[] = [],
@@ -36,16 +36,16 @@ export class GetOrganisation extends CFStartAction implements ICFAction, EntityI
     this.options.params = new URLSearchParams();
   }
   actions = [
-    GET_ORGANISATION,
-    GET_ORGANISATION_SUCCESS,
-    GET_ORGANISATION_FAILED
+    GET_ORGANIZATION,
+    GET_ORGANIZATION_SUCCESS,
+    GET_ORGANIZATION_FAILED
   ];
-  entity = [entityFactory(organisationSchemaKey)];
-  entityKey = organisationSchemaKey;
+  entity = [entityFactory(organizationSchemaKey)];
+  entityKey = organizationSchemaKey;
   options: RequestOptions;
 }
 
-export class GetAllOrganisationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
+export class GetAllOrganizationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
   constructor(
     public paginationKey: string,
     public orgGuid: string,
@@ -59,7 +59,7 @@ export class GetAllOrganisationSpaces extends CFStartAction implements Paginated
     this.options.method = 'get';
     this.parentGuid = orgGuid;
   }
-  actions = [GET_ORGANISATION_SPACES, GET_ORGANISATION_SPACES_SUCCESS, GET_ORGANISATION_SPACES_FAILED];
+  actions = [GET_ORGANIZATION_SPACES, GET_ORGANIZATION_SPACES_SUCCESS, GET_ORGANIZATION_SPACES_FAILED];
   entity = entityFactory(spaceSchemaKey);
   entityKey = spaceSchemaKey;
   options: RequestOptions;
@@ -68,10 +68,10 @@ export class GetAllOrganisationSpaces extends CFStartAction implements Paginated
     'results-per-page': 100,
   };
   parentGuid: string;
-  parentEntitySchema = entityFactory(organisationSchemaKey);
+  parentEntitySchema = entityFactory(organizationSchemaKey);
 }
 
-export class GetAllOrganisations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+export class GetAllOrganizations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
     public endpointGuid: string = null,
@@ -84,12 +84,12 @@ export class GetAllOrganisations extends CFStartAction implements PaginatedActio
     this.options.method = 'get';
   }
   actions = [
-    GET_ORGANISATIONS,
-    GET_ORGANISATIONS_SUCCESS,
-    GET_ORGANISATIONS_FAILED
+    GET_ORGANIZATIONS,
+    GET_ORGANIZATIONS_SUCCESS,
+    GET_ORGANIZATIONS_FAILED
   ];
-  entity = [entityFactory(organisationSchemaKey)];
-  entityKey = organisationSchemaKey;
+  entity = [entityFactory(organizationSchemaKey)];
+  entityKey = organizationSchemaKey;
   options: RequestOptions;
   initialParams = {
     page: 1,
@@ -98,7 +98,7 @@ export class GetAllOrganisations extends CFStartAction implements PaginatedActio
   flattenPagination = true;
 }
 
-export class DeleteOrganisation extends CFStartAction implements ICFAction {
+export class DeleteOrganization extends CFStartAction implements ICFAction {
   constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
@@ -108,9 +108,9 @@ export class DeleteOrganisation extends CFStartAction implements ICFAction {
     this.options.params.append('recursive', 'true');
     this.options.params.append('async', 'false');
   }
-  actions = getActions('Organisations', 'Delete Org');
-  entity = [entityFactory(organisationSchemaKey)];
-  entityKey = organisationSchemaKey;
+  actions = getActions('Organizations', 'Delete Org');
+  entity = [entityFactory(organizationSchemaKey)];
+  entityKey = organizationSchemaKey;
   options: RequestOptions;
 }
 
@@ -125,9 +125,9 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
       name: name
     };
   }
-  actions = getActions('Organisations', 'Create Org');
-  entity = [entityFactory(organisationSchemaKey)];
-  entityKey = organisationSchemaKey;
+  actions = getActions('Organizations', 'Create Org');
+  entity = [entityFactory(organizationSchemaKey)];
+  entityKey = organizationSchemaKey;
   options: RequestOptions;
   guid: string;
 }
@@ -143,8 +143,8 @@ export class UpdateOrganization extends CFStartAction implements ICFAction {
     this.options.body = updateOrg;
   }
   actions = getActions('Spaces', 'Update Space');
-  entity = [entityFactory(organisationSchemaKey)];
-  entityKey = organisationSchemaKey;
+  entity = [entityFactory(organizationSchemaKey)];
+  entityKey = organizationSchemaKey;
   options: RequestOptions;
   updatingKey = UpdateOrganization.UpdateExistingOrg;
 }
