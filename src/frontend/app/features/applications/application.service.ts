@@ -26,7 +26,7 @@ import {
   appSummarySchemaKey,
   domainSchemaKey,
   entityFactory,
-  organisationSchemaKey,
+  organizationSchemaKey,
   routeSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
@@ -61,7 +61,7 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
       createEntityRelationKey(applicationSchemaKey, stackSchemaKey),
       createEntityRelationKey(applicationSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organisationSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
     ]
   );
 }
@@ -186,7 +186,7 @@ export class ApplicationService {
       .switchMap(app => this.appSpace$.pipe(
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
-          return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
+          return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
         })
       ));
 

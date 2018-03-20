@@ -86,7 +86,7 @@ class ValidateEntityRelationsConfig {
    */
   action: IRequestAction;
   /**
-   * Collection of parent entities whose children may be missing. for example a list of organisations that have missing spaces
+   * Collection of parent entities whose children may be missing. for example a list of organizations that have missing spaces
    *
    * @type {any[]}
    * @memberof ValidateEntityRelationsConfig

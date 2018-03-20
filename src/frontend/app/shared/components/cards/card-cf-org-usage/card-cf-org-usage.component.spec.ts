@@ -2,14 +2,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import {
-  CloudFoundryOrganisationService,
-} from '../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
+  CloudFoundryOrganizationService,
+} from '../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import {
   generateTestCfEndpointServiceProvider,
   BaseTestModulesNoShared,
   MetadataCardTestComponents,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryOrganisationServiceMock } from '../../../../test-framework/cloud-foundry-organisation.service.mock';
+import { CloudFoundryOrganizationServiceMock } from '../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
@@ -26,7 +26,7 @@ describe('CardCfOrgUsageComponent', () => {
       declarations: [CardCfOrgUsageComponent, ...MetadataCardTestComponents],
       imports: [...BaseTestModulesNoShared],
       providers: [
-        { provide: CloudFoundryOrganisationService, useClass: CloudFoundryOrganisationServiceMock },
+        { provide: CloudFoundryOrganizationService, useClass: CloudFoundryOrganizationServiceMock },
         generateTestCfEndpointServiceProvider(),
         EntityServiceFactory,
         CfOrgSpaceDataService,
