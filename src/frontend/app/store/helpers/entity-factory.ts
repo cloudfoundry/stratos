@@ -159,7 +159,7 @@ const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
     idAttribute: getAPIResourceGuid
   },
 );
-entityCache[applicationSchemaKey] = ApplicationWithoutSpaceEntitySchema;
+// entityCache[applicationSchemaKey] = ApplicationWithoutSpaceEntitySchema;
 
 const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;

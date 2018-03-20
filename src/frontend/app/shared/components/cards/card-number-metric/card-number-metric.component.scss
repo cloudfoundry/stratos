@@ -1,0 +1,26 @@
+.number-metric-card {
+  height: 100%;
+  &__container {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    > div {
+      flex: 1;
+    }
+  }
+  &__icon {
+    flex: 0 0 48px;
+    font-size: 48px;
+    height: 48px;
+    margin-right: 12px;
+    width: 48px;
+  }
+  &__label {
+  }
+  &__value {
+    font-size: 28px;
+  }
+  &__limit {
+    font-size: 22px;
+  }
+}

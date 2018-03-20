@@ -3,7 +3,8 @@ import { schema } from 'normalizr';
 
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
-import { applicationSchemaKey, entityFactory, spaceSchemaKey, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, entityFactory, spaceSchemaKey, routeSchemaKey, organizationSchemaKey
+ } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
@@ -17,22 +18,22 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   constructor(
     store: Store<AppState>,
-    listConfig?: IListConfig<APIResource>
+    listConfig?: IListConfig<APIResource>,
+    transformEntities?: any[],
+    paginationKey?: string
   ) {
-    const { paginationKey } = CfAppsDataSource;
+    if (!paginationKey) {
+      paginationKey = CfAppsDataSource.paginationKey;
+    }
+
     const action = new GetAllApplications(paginationKey, [
       createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
       createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
     ]);
 
-    super({
-      store,
-      action,
-      schema: entityFactory(applicationSchemaKey),
-      getRowUniqueId: getRowMetadata,
-      paginationKey,
-      isLocal: true,
-      transformEntities: [
+    if (!transformEntities)  {
+      transformEntities = [
         {
           type: 'filter',
           field: 'entity.name'
@@ -49,7 +50,22 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
             return validCF && validOrg && validSpace;
           });
         }
-      ],
+      ];
+    }
+
+    console.log('-- --');
+
+    console.log(transformEntities);
+    console.log(paginationKey);
+
+    super({
+      store,
+      action,
+      schema: entityFactory(applicationSchemaKey),
+      getRowUniqueId: getRowMetadata,
+      paginationKey,
+      isLocal: true,
+      transformEntities: transformEntities,
       listConfig
     }
     );

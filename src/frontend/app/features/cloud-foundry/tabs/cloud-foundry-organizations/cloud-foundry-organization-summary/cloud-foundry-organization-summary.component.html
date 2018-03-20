@@ -2,13 +2,39 @@
   <app-tile-grid>
     <app-tile-group>
       <app-tile>
-        <app-card-cf-org-usage>
-        </app-card-cf-org-usage>
-      </app-tile>
-      <app-tile>
         <app-card-cf-org-user-details>
         </app-card-cf-org-user-details>
       </app-tile>
     </app-tile-group>
+
+
+    <app-tile-group>
+        <app-tile>
+          <app-card-number-metric icon="apps" label="Applications" value="6"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric icon="domain" label="App Instances"
+          value="{{ (cfOrgService.appInstances$ | async) }}"
+          limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"
+          ></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric icon="person" label="Users" value="3"></app-card-number-metric>
+        </app-tile>
+        <app-tile>
+          <app-card-number-metric label="Memory Usage"
+          units="mb"
+          value="{{ (cfOrgService.totalMem$ | async) }}"
+          limit="{{ (cfOrgService.quotaDefinition$ | async)?.memory_limit }}"
+          ></app-card-number-metric>
+        </app-tile>
+      </app-tile-group>
+  
+      <app-tile-group>
+        <app-tile>
+          <app-card-cf-recent-apps></app-card-cf-recent-apps>
+        </app-tile>
+      </app-tile-group>
+    
   </app-tile-grid>
 </div>

@@ -7,11 +7,35 @@
     </app-tile-group>
     <app-tile-group>
       <app-tile>
+        <app-card-number-metric icon="apps" label="Applications" value="{{ (cfEndpointService.allApps$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="domain" label="Orgs" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="person" label="Users" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
+      </app-tile>
+    </app-tile-group>
+    <app-tile-group>
+      <app-tile>
+        <app-card-cf-recent-apps></app-card-cf-recent-apps>
+      </app-tile>
+      <app-tile>
+        <mat-card></mat-card>
+      </app-tile>
+    </app-tile-group>
+    <!--
+    <app-tile-group>
+      <app-tile>
         <app-card-cf-usage></app-card-cf-usage>
       </app-tile>
       <app-tile *ngIf="(cfEndpointService.endpoint$ | async )?.entity.user">
         <app-card-cf-user-info></app-card-cf-user-info>
       </app-tile>
     </app-tile-group>
+  -->
   </app-tile-grid>
 </div>

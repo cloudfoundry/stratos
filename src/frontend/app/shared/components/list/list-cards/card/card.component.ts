@@ -23,6 +23,7 @@ import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/c
 import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
 import { EndpointCardComponent } from '../custom-cards/endpoint-card/endpoint-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
+import { CompactAppCardComponent } from '../../list-types/cf-recent-apps/compact-app-card/compact-app-card.component';
 
 export const listCards = [
   CardAppComponent,
@@ -32,7 +33,8 @@ export const listCards = [
   CfBuildpackCardComponent,
   CfSecurityGroupsCardComponent,
   CfStacksCardComponent,
-  CfServiceCardComponent
+  CfServiceCardComponent,
+  CompactAppCardComponent,
 ];
 
 @Component({
