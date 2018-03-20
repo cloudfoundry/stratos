@@ -27,7 +27,7 @@
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./build/protractor.conf.js",
     "pretest": "gulp unit:prepare",
     "test": "karma start build/karma.conf.js",
-    "update-webdriver": "webdriver-manager update",
+    "update-webdriver": "webdriver-manager update --gecko false",
     "watch": "gulp watch",
     "watch:test": "karma start tools/karma.conf.js",
     "list-e2e": "node ./test/e2e/list-tests.js ./build/protractor.conf.js"
@@ -79,7 +79,7 @@
     "gulp-sourcemaps": "^2.6.1",
     "http-proxy": "^1.16.2",
     "imagemin": "^5.3.1",
-    "imagemin-pngquant": "^5.0.1",
+    "imagemin-pngquant": "5.0.1",
     "istanbul-combine": "^0.3.0",
     "jasmine-core": "^2.7.0",
     "jasmine-jquery": "^2.1.1",
