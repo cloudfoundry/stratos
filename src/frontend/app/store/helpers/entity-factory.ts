@@ -196,6 +196,8 @@ const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   });
 entityCache[organizationSchemaKey] = OrganizationSchema;
 
+const SpaceWithOnlyOrg = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+
 const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,
@@ -217,7 +219,7 @@ const ApplicationEntitySchema = new EntitySchema(
   {
     entity: {
       stack: StackSchema,
-      space: SpaceWithOrgsEntitySchema,
+      space: SpaceWithOnlyOrg,
       routes: [RouteSchema]
     }
   },
