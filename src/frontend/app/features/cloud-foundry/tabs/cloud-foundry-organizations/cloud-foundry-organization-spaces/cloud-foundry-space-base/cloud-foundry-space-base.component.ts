@@ -88,11 +88,11 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
           breadcrumbs: [
             {
               value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/summary`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
             },
             {
               value: org.entity.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}/spaces`
             }
           ]
         }

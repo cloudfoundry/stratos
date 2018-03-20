@@ -56,7 +56,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
           breadcrumbs: [
             {
               value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/summary`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
             }
           ]
         }
