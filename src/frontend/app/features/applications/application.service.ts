@@ -307,11 +307,15 @@ export class ApplicationService {
   /*
   * Update an application
   */
-  updateApplication(updatedApplication: UpdateApplication, updateEntities?: AppMetadataTypes[]): Observable<ActionState> {
+  updateApplication(
+    updatedApplication: UpdateApplication,
+    updateEntities?: AppMetadataTypes[],
+    existingApplication?: IApp): Observable<ActionState> {
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
       { ...updatedApplication },
+      existingApplication,
       updateEntities
     ));
 

@@ -33,6 +33,7 @@ import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer } from './users.reducer';
 import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { updateOrganisationSpaceReducer } from './organisation-space.reducer';
+import { appStatsReducer } from './app-stats-request.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -101,10 +102,13 @@ const entities = [
 ];
 
 
-const _requestReducer = requestReducerFactory(entities, requestActions);
 
 export function requestReducer(state, action) {
-  return _requestReducer(state, action);
+  const baseRequestReducer = requestReducerFactory(entities, requestActions);
+  const extraReducers = {
+    [appStatsSchemaKey]: [appStatsReducer]
+  };
+  return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
 export function requestDataReducer(state, action) {

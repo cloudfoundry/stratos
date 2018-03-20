@@ -139,21 +139,30 @@ export interface UpdateApplication {
   state?: string;
 }
 
-export class UpdateExistingApplication extends CFStartAction
-  implements ICFAction {
+export class UpdateExistingApplication extends CFStartAction implements ICFAction {
   static updateKey = 'Updating-Existing-Application';
 
+  /**
+   * Creates an instance of UpdateExistingApplication.
+   * @param {string} guid
+   * @param {string} endpointGuid
+   * @param {UpdateApplication} newApplication Sparsely populated application containing updated settings
+   * @param {IApp} [existingApplication] Existing application. Used in a few specific cases
+   * @param {AppMetadataTypes[]} [updateEntities] List of metadata calls to make if we successfully update the application
+   * @memberof UpdateExistingApplication
+   */
   constructor(
     public guid: string,
     public endpointGuid: string,
-    private application: UpdateApplication,
+    public newApplication: UpdateApplication,
+    public existingApplication?: IApp,
     public updateEntities?: AppMetadataTypes[]
   ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'put';
-    this.options.body = application;
+    this.options.body = newApplication;
   }
   actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
   entity = [applicationEntitySchema];

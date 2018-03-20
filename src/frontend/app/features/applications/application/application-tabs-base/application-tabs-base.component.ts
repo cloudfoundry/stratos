@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, take } from 'rxjs/operators';
+import { first, map, take, tap } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { Subscription } from 'rxjs/Rx';
 
@@ -77,7 +77,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
-  application;
   applicationActions$: Observable<string[]>;
   addedGitHubTab = false;
   summaryDataChanging$: Observable<boolean>;
@@ -133,17 +132,23 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ];
   }
 
+  private startStopApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
+    this.applicationService.application$.pipe(
+      first(),
+      tap(appData => {
+        this.confirmDialog.open(confirmConfig, () => {
+          this.applicationService.updateApplication({ state: requiredAppState }, [], appData.app.entity);
+          this.pollEntityService(updateKey, requiredAppState).delay(1).subscribe(() => { }, () => { }, onSuccess);
+        });
+      })
+    ).subscribe();
+  }
+
   stopApplication() {
-    this.confirmDialog.open(appStopConfirmation, () => {
-      const stoppedString = 'STOPPED';
-      this.applicationService.updateApplication({ state: stoppedString }, []);
-      this.pollEntityService('stopping', stoppedString).subscribe(() => { }, () => { },
-        () => {
-          // On app reaching the 'STOPPED' state clear the app's stats pagination section
-          const { cfGuid, appGuid } = this.applicationService;
-          this.store.dispatch(new ResetPagination(appStatsSchemaKey, new GetAppStatsAction(appGuid, cfGuid).paginationKey));
-        },
-      );
+    this.startStopApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
+      // On app reaching the 'STOPPED' state clear the app's stats pagination section
+      const { cfGuid, appGuid } = this.applicationService;
+      this.store.dispatch(new ResetPagination(appStatsSchemaKey, new GetAppStatsAction(appGuid, cfGuid).paginationKey));
     });
   }
 
@@ -156,16 +161,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   startApplication() {
-    this.confirmDialog.open(appStartConfirmation, () => {
-      const startedString = 'STARTED';
-      this.applicationService.updateApplication({ state: startedString }, []);
-      this.pollEntityService('starting', startedString).delay(1).subscribe(() => { }, () => { },
-        () => {
-          // On app reaching the 'STARTED' state immediately go fetch the app stats instead of waiting for the normal poll to kick in
-          const { cfGuid, appGuid } = this.applicationService;
-          this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
-        },
-      );
+    this.startStopApp(appStartConfirmation, 'starting', 'STARTED', () => {
+      // On app reaching the 'STARTED' state immediately go fetch the app stats instead of waiting for the normal poll to kick in
+      const { cfGuid, appGuid } = this.applicationService;
+      this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
     });
   }
 
