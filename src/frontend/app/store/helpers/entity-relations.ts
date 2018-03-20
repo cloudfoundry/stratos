@@ -327,8 +327,11 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
           const guids = childEntitiesAsGuids(childEntitiesAsArray);
 
           childEntities = [];
-          const allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
-          const newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
+          let allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
+          let newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
+          allEntitiesOfType = allEntities || {};
+          newEntitiesOfType = newEntities || {};
+
           for (let i = 0; i < guids.length; i++) {
             const guid = guids[i];
             const foundEntity = newEntitiesOfType[guid] || allEntitiesOfType[guid];
