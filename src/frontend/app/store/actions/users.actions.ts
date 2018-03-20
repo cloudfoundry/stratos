@@ -5,7 +5,7 @@ import { schema } from 'normalizr';
 
 import { ApiActionTypes } from './request.actions';
 import { PaginatedAction } from '../types/pagination.types';
-import { entityFactory, organisationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
+import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { cfUserSchemaKey } from '../helpers/entity-factory';
 import { OrgUserRoles } from '../../features/cloud-foundry/cf.helpers';
 import { EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
@@ -22,7 +22,7 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction, Entit
   constructor(
     public paginationKey: string,
     public includeRelations: string[] = [
-      createEntityRelationKey(cfUserSchemaKey, organisationSchemaKey),
+      createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
       createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
       createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
       createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
