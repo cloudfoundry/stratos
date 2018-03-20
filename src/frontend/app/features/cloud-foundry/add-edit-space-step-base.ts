@@ -15,8 +15,8 @@ import { RouterNav } from '../../store/actions/router.actions';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { getIdFromRoute } from './cf.helpers';
 import { ValidatorFn, AbstractControl } from '@angular/forms';
-import { entityFactory, spaceSchemaKey, organisationSchemaKey } from '../../store/helpers/entity-factory';
-import { GetAllOrganisationSpaces } from '../../store/actions/organisation.actions';
+import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
+import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 
 export class AddEditSpaceStepBase {
@@ -38,7 +38,7 @@ export class AddEditSpaceStepBase {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     const paginationKey = getPaginationKey('cf-space', this.cfGuid, this.orgGuid);
 
-    const action = new GetAllOrganisationSpaces(paginationKey, this.orgGuid, this.cfGuid);
+    const action = new GetAllOrganizationSpaces(paginationKey, this.orgGuid, this.cfGuid);
 
     this.allSpacesInSpace$ = getPaginationObservables<APIResource>(
       {

@@ -23,7 +23,7 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
           // Does the entity associated with the action have a parent property that requires the result to be stored with it?
-          // For example we have fetched a list of spaces that need to be stored in an organisation's entity?
+          // For example we have fetched a list of spaces that need to be stored in an organization's entity?
           const entities = populateParentEntity(state, success) || success.response.entities;
           return deepMergeState(state, entities);
         }
@@ -63,7 +63,7 @@ function populateParentEntity(state, successAction) {
     return;
   }
 
-  // Create a new entity with the inline result. For instance an new organisation containing a list of spaces
+  // Create a new entity with the inline result. For instance an new organization containing a list of spaces
   // First create the required consts
   const parentGuid = action.parentGuid;
   const parentEntityKey = action.parentEntitySchema.key;
