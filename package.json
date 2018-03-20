@@ -79,7 +79,7 @@
     "gulp-sourcemaps": "^2.6.1",
     "http-proxy": "^1.16.2",
     "imagemin": "^5.3.1",
-    "imagemin-pngquant": "^5.0.1",
+    "imagemin-pngquant": "5.0.1",
     "istanbul-combine": "^0.3.0",
     "jasmine-core": "^2.7.0",
     "jasmine-jquery": "^2.1.1",
