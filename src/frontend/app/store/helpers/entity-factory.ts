@@ -161,11 +161,20 @@ const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
 );
 entityCache[applicationSchemaKey] = ApplicationWithoutSpaceEntitySchema;
 
+const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
+
+const coreSpaceSchemaParams = {
+  apps: [ApplicationWithoutSpaceEntitySchema],
+  routes: [RouteSchema],
+  domains: [DomainSchema],
+  space_quota_definition: SpaceQuotaSchema,
+  service_instances: [ServiceInstancesSchema],
+};
+
 const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
-    apps: [ApplicationWithoutSpaceEntitySchema],
-    routes: [RouteSchema],
-    service_instances: [ServiceInstancesSchema]
+    ...coreSpaceSchemaParams
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -187,11 +196,9 @@ const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   });
 entityCache[organizationSchemaKey] = OrganizationSchema;
 
-const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
-
 const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
+    ...coreSpaceSchemaParams,
     apps: [ApplicationWithoutSpaceEntitySchema],
     routes: [RouteSchema],
     organization: OrganizationSchema,

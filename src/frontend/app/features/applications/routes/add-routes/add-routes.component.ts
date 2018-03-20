@@ -6,22 +6,30 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, mergeMap, pairwise, take, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { ISpace } from '../../../../core/cf-api.types';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { pathGet } from '../../../../core/utils.service';
 import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
+import { GetSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
-import { applicationSchemaKey, domainSchemaKey, routeSchemaKey } from '../../../../store/helpers/entity-factory';
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
-import { ISpace } from '../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-add-routes',
@@ -55,7 +63,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private applicationService: ApplicationService,
     private store: Store<AppState>,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private entityServiceFactory: EntityServiceFactory
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
@@ -82,18 +91,26 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     const space$ = this.appService.waitForAppEntity$
       .pipe(
-        filter(p => !!p.entity.entity.space),
-        tap(p => {
-          const space = p.entity.entity.space as APIResource<ISpace>;
+        switchMap(app => {
+          const space = app.entity.entity.space as APIResource<ISpace>;
           this.spaceGuid = space.metadata.guid;
-          const domains = space.entity.domains;
+          const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
+            entityFactory(spaceSchemaKey),
+            this.spaceGuid,
+            new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
+            true
+          );
+          return spaceService.waitForEntity$;
+        }),
+        filter(({ entity, entityRequestInfo }) => !!entity.entity.domains),
+        tap(({ entity, entityRequestInfo }) => {
+          const domains = entity.entity.domains;
           domains.forEach(domain => {
             this.domains[domain.metadata.guid] = domain;
           });
           this.selectedDomain = Object.values(this.domains)[0];
         })
       );
-
     this.subscriptions.push(space$.subscribe());
 
     const selRoute$ = this.selectedRoute$.subscribe(x => {
@@ -171,12 +188,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
             this.displaySnackBar();
             return Observable.of(null);
           } else {
-            const routeAssignAction = new AssociateRouteWithAppApplication(
+            this.store.dispatch(new AssociateRouteWithAppApplication(
               this.appGuid,
               route.response.result[0],
               this.cfGuid
-            );
-            this.store.dispatch(routeAssignAction);
+            ));
             return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
               pairwise(),
               filter(([oldApp, newApp]) => {
@@ -184,11 +200,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               }),
               tap(appState => {
                 this.submitted = false;
-                this.store.dispatch(
-                  new RouterNav({
-                    path: ['/applications', this.cfGuid, this.appGuid]
-                  })
-                );
+                this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid] }));
               })
             );
           }
@@ -201,15 +213,9 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
   private displaySnackBar() {
     if (this.createTCPRoute) {
-      this.snackBar.open(
-        'Failed to create route! Please ensure the domain has a TCP routing group associated',
-        'Dismiss'
-      );
+      this.snackBar.open('Failed to create route! Please ensure the domain has a TCP routing group associated', 'Dismiss');
     } else {
-      this.snackBar.open(
-        'Failed to create route! The hostname may have been taken, please try again with a different name',
-        'Dismiss'
-      );
+      this.snackBar.open('Failed to create route! The hostname may have been taken, please try again with a different name', 'Dismiss');
     }
   }
 
