@@ -1,0 +1,45 @@
+{
+  "user-info": {
+    "user-info": "用户个人资料",
+    "labels": {
+      "username": "用户名",
+      "fullname": "全名",
+      "email": "Email 地址",
+      "created": "账户已创建",
+      "modified": "账户最后修改",
+      "password-modified": "密码最后修改",
+      "groups": "组"
+    },
+
+    "edit": {
+      "edit": "编辑个人资料",
+      "introduction": "请在下面提供配置文件更新 - 忽略一个字段不会更新它。",
+      "note": "更改您的电子邮件地址时，您必须提供您当前的密码。",
+      "success": "用户个人资料更新成功",
+      "given-name": "名",
+      "family-name": "姓",
+      "email": "Email地址",
+      "current-password": "当前密码",
+      "error-need-password": "需要当前密码"
+    },
+
+    "update": "更新",
+
+    "password-change": {
+      "change": "更改",
+      "password-change": "更改密码",
+      "introduction": "请提供您现有的密码以及您的新密码。",
+      "old": "旧密码",
+      "new": "新密码",
+      "confirm": "确认新密码",
+      "error-confirm": "密码不匹配",
+      "error-not-changed": "新密码不能与旧密码相同",
+      "placeholders": {
+        "old": "输入你现在的密码",
+        "new": "输入你的新密码",
+        "confirm": "重新输入新密码"
+      },
+      "success": "密码更新成功"
+    }
+  }
+}

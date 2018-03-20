@@ -1,0 +1,16 @@
+{
+  "errors": {
+    "server_comms": "控制台遇到与服务器通信的问题。请再试一次。",
+    "needs-registration": "为了使用[[@:product.console]]您必须连接到已注册过的服务端点。此端点由系统管理员提供。请联系您的管理员注册端点。",
+    "unexpected": "[[@:product.name]]发生意外错误。",
+    "upgrading": "[[@:product.console]]正在升级。",
+    "contact-admin": "请联系管理员。",
+    "upgrade-wait": "请等待升级完成，刷新或联系您的管理员以获取更多信息。",
+    "nothing-registered": "没有已注册的端点。",
+    "setup-required": "[[@:product.console]]没有被设置。",
+    "nothing-connected": "没有已连接的端点。",
+    "endpoint-retrieval": "[[@:product.console]]无法检索端点信息。",
+    "generic-async-failure": "执行该操作时出现问题。请再试一次。如果此错误仍然存在，请联系管理员。"
+  },
+  "error-format": "{{errorMsg}}, 错误代码:{{errorCode}}"
+}

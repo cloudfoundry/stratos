@@ -1,0 +1,75 @@
+{
+  "applications": "应用",
+  "console": "控制台",
+  "endpoints": "端点",
+  "privacy": "隐私",
+  "terms": "使用条款",
+  "endpoint": "端点",
+
+  "preparing.console": "正在准备控制台...",
+
+  "buttons": {
+    "ok": "确定",
+    "cancel": "取消",
+    "next": "下一项",
+    "previous": "前一项",
+    "back": "返回",
+    "done": "完成",
+    "add": "添加",
+    "set": "设置",
+    "save": "保存",
+    "delete": "删除",
+    "rename": "重命名",
+    "yes": "是",
+    "no": "否",
+    "close": "关闭"
+  },
+  "auth": {
+    "username": "用户名",
+    "password": "密码"
+  },
+  "navbar": {
+    "title": "@:product.name",
+    "logo": "首页",
+    "copyright": "&copy; SUSE 2017"
+  },
+  "menu": {
+    "applications": "@:applications",
+    "endpoints": "@:endpoints",
+    "about": "@:about",
+    "language": "语言 ({{current}})",
+    "logout": "退出",
+    "profile": "个人资料"
+  },
+  "language": {
+    "select": "选择语言"
+  },
+  "footer": {
+    "title": "[[@:product.name]] [[@:product.version]]",
+    "copyright": "&copy; 2017 [[@:company.name]]",
+    "logo": "@:company.logo",
+    "company.logo": "@:company.logo",
+    "product.logo": "@:product.logo",
+    "company.www-link": "@:company.www-link",
+    "product.www-link": "@:product.www-link"
+  },
+  "dateTime": {
+    "singular": {
+      "day": "d",
+      "hour": "h",
+      "minute": "m",
+      "second": "s",
+      "format": "{{value}}{{unit}}"
+    },
+    "plural": {
+      "days": "d",
+      "hours": "h",
+      "minutes": "m",
+      "seconds": "s",
+      "format": "{{value}}{{unit}}"
+    }
+  },
+  "memory": {
+    "megabyte": "MB"
+  }
+}

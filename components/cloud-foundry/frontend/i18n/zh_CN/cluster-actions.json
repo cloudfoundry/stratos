@@ -1,0 +1,33 @@
+{
+  "cf.cluster-actions": {
+    "create-org": {
+      "action-name": "创建组织",
+      "dialog": {
+        "title": "创建组织",
+        "org-label": "组织名称",
+        "org-error-required": "需要设置名称",
+        "org-error-unique": "名称必须唯一",
+        "submit-button": "创建",
+        "success-notification": "组织'{{name}}'被成功创建"
+      }
+    },
+    "create-space": {
+      "action-name": "创建空间",
+      "dialog": {
+        "title": "创建空间",
+        "org-label": "组织",
+        "space-label": "空间名称{{index}}",
+        "space-error-required": "需要设置名称",
+        "space-error-unique": "名称必须唯一",
+        "remove-button": "移除",
+        "create-another-button": "创建另一个空间",
+        "submit-button": "创建",
+        "success-notification-plural": "空间'{{ names }}' 被成功创建",
+        "success-notification-singular": "空间'{{ name }}' 被成功创建"
+      }
+    },
+    "assign-users": {
+      "action-name": "分配用户"
+    }
+  }
+}

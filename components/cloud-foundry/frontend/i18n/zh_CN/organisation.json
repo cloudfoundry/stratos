@@ -1,0 +1,54 @@
+{
+  "cf": {
+    "organisations": {
+      "organisations": "组织"
+    },
+    "org-list": {
+      "error": "调用组织时出现了一个错误",
+      "no-orgs": "您现在没有组织"
+    },
+    "org-info": {
+      "title": "组织: {{name}}",
+      "summary": {
+        "title": "简介",
+        "label": {
+          "apps": "应用",
+          "instances": "应用实例",
+          "services": "服务",
+          "service-instances": "服务实例",
+          "routes": "路由",
+          "private-domains": "私有域",
+          "memory": "内存使用情况",
+          "orgRole": "cf组织角色",
+          "address": "实例地址",
+          "cli": "cf交互",
+          "username": "账户用户名",
+          "status": "账户状态"
+        }
+      },
+      "edit-action": "编辑组织",
+      "edit-dialog": {
+        "title": "编辑组织",
+        "org-label": "组织名称",
+        "org-error-required": "需要设置名称",
+        "org-error-unique": "名称必须唯一",
+        "success-notification": "组织'{{name}}'被成功更新"
+      },
+      "delete-action": "删除组织",
+      "delete-dialog": {
+        "title": "删除组织",
+        "description": "您确定要删除组织'{{name}}'?",
+        "success-notification": "组织'{{name}}'被成功删除",
+        "error-message": "无法删除组织"
+      },
+      "space-tab-title": "空间",
+      "users-tab-title": "用户"
+    },
+    "org-tile": {
+      "role-label": "角色",
+      "applications-label": "应用",
+      "instances-label": "实例",
+      "memory-label": "内存使用"
+    }
+  }
+}

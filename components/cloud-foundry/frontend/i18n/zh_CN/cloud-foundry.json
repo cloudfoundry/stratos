@@ -1,0 +1,143 @@
+{
+  "cloud-foundry": "Cloud Foundry",
+  "cf.busy": "正在收集 Cloud Foundry 元数据",
+  "cf.endpoints.busy": "正在检查 Cloud Foundry 端点",
+  "org": "组织",
+  "space": "空间",
+  "menu": {
+    "cloud-foundry": "@:cloud-foundry"
+  },
+  "product": {
+    "cf": "@:cloud-foundry"
+  },
+  "cf": {
+    "registration": {
+      "name": "@:cloud-foundry",
+      "title": "注册 [[@:cf.registration.name]] 端点",
+      "p1": "[[@:cf.registration.name]]支持完整应用生命周期，从初始化到测试再到部署。",
+      "p2": "注册一个已有的[[@:cf.registration.name]]端点可以让您的开发团队能够创建和管理他们的应用。",
+      "p3": "当注册端点的时候，请选择一个唯一的，可辨识的名称，这样您的开发者们就可以清楚地知道他们正在使用哪个[[@:cf.registration.name]]端点。",
+      "tagline": "[[@:cf.registration.name]]支持完整应用生命周期，从初始化到测试再到部署。",
+      "urlHint": "[[@:cf.registration.name]]API端点"
+    },
+    "tile": {
+      "token-expired": "Token已过期",
+      "uncontactable": "无法联系端点"
+    },
+    "cli-common": {
+      "title": "命令行控制台命令",
+      "button-text": "命令行控制台命令",
+      "intro": "使用 Cloud Foundry 命令行控制台来对 Cloud Foundry 直接执行命令。",
+      "get-started": "开始",
+      "get-started-intro": "开始前请按照以下步骤:",
+      "step1": "1. 下载并安装命令行控制台 - ",
+      "step1-link-text": "请看这里",
+      "step2": "2. 设置 api 端点",
+      "step3": "3. 登录",
+      "step4": "4. 指定一个组织和空间"
+    },
+    "summary": {
+      "title": "集群 : {{name}}",
+      "panel": {
+        "title": "简介",
+        "label": {
+          "apps": "应用",
+          "memory": "内存使用情况",
+          "orgs": "组织",
+          "users": "用户",
+          "address": "实例地址",
+          "cli": "cf 交互",
+          "username": "帐户用户名",
+          "status": "帐户状态",
+          "api-version": "cf api 版本"
+        },
+        "cli-dialog-cluster": {
+          "title": "@:cf.cli-common.title",
+          "intro": "@:cf.cli-common.intro",
+          "get-started": "@:cf.cli-common.get-started",
+          "get-started-intro": "@:cf.cli-common.get-started-intro",
+          "step1": "@:cf.cli-common.step1",
+          "step1-link-text": "@:cf.cli-common.step1-link-text",
+          "step2": "@:cf.cli-common.step2",
+          "step3": "@:cf.cli-common.step3",
+          "step4": "@:cf.cli-common.step4",
+          "org-commands": {
+            "title": "组织命令",
+            "list": "列表",
+            "list-intro": "列出所有组织",
+            "rename": "重命名",
+            "rename-intro": "重命名组织",
+            "info": "信息",
+            "info-intro": "获取组织信息",
+            "users": "用户",
+            "users-intro": "列出每个组织角色的用户"
+          },
+          "space-commands": {
+            "title": "空间命令",
+            "list": "列表",
+            "list-intro": "列出目标组织中的空间",
+            "rename": "重命名",
+            "rename-intro": "重命名空间",
+            "info": "信息",
+            "info-intro": "获取空间信息",
+            "users": "用户",
+            "users-intro": "列出每个空间角色的用户"
+          }
+        }
+      }
+    },
+    "cf-tabs": {
+      "buildpacks": {
+        "buildpacks": "构建包",
+        "labels": {
+          "position": "位置",
+          "locked": "锁定",
+          "unlocked": "解锁",
+          "enabled": "开启",
+          "disabled": "关闭",
+          "created": "已创建",
+          "updated": "已更新",
+          "filename": "文件名"
+        },
+        "error": "调用构建包元数据时出现了一个错误",
+        "empty": "没有可用构建包"
+      },
+      "stacks": {
+        "stacks": "栈",
+        "labels":{
+          "name": "名称",
+          "description": "描述",
+          "created": "已创建",
+          "updated": "已更新"
+        },
+        "error": "调用栈元数据时出现了一个错误",
+        "empty": "没有可用栈"
+      },
+      "security-groups": {
+        "security-groups": "安全组",
+        "labels":{
+          "created": "已创建",
+          "updated": "已更新",
+          "spaces": "空间",
+          "staging-default": "默认执行中",
+          "running-default": "默认运行中",
+          "rules": "规则",
+          "yes": "是",
+          "no": "否"
+        },
+        "error": "调用安全组元数据时出现了一个错误",
+        "empty": "没有可用安全组"
+      }
+    },
+    "ssh": {
+      "access": "SSH登录",
+      "enabled": "开启",
+      "disabled": "关闭",
+      "allowed": "允许",
+      "disallowed": "禁用",
+      "available": "可用",
+      "unavailable": "不可用",
+      "space-disallowed": "被空间禁止"
+    }
+  }
+}
