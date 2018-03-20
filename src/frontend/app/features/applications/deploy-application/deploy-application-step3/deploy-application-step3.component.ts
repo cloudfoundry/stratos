@@ -18,7 +18,7 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetAllApplications } from '../../../../store/actions/application.actions';
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { DiscoverAppHelper } from './discover-app-helper';
 import { HttpClient } from '@angular/common/http';
@@ -69,7 +69,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         && !!appDetail.applicationSource
         && !!appDetail.applicationSource.projectName),
       mergeMap(p => {
-        const orgSubscription = this.store.select(selectEntity(organisationSchemaKey, p.cloudFoundryDetails.org));
+        const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, p.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, p.cloudFoundryDetails.space));
         return Observable.of(p).combineLatest(orgSubscription, spaceSubscription);
       }),

@@ -18,15 +18,16 @@ import {
 import { FetchGitHubRepoInfo } from '../../../../../../store/actions/github.actions';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
-import { selectEntities } from '../../../../../../store/selectors/api.selectors';
 import {
-  GithubCommit,
-  GithubRepo,
-} from '../../../../../../store/types/github.types';
+  entityFactory,
+  githubBranchesSchemaKey,
+  githubCommitSchemaKey,
+  githubRepoSchemaKey,
+} from '../../../../../../store/helpers/entity-factory';
+import { selectEntities } from '../../../../../../store/selectors/api.selectors';
+import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
-import { entityFactory } from '../../../../../../store/helpers/entity-factory';
-import { githubCommitSchemaKey, githubRepoSchemaKey, githubBranchesSchemaKey } from '../../../../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-github-tab',

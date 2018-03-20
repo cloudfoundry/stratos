@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import {
-  CloudFoundryOrganisationService,
-} from '../../../../../features/cloud-foundry/services/cloud-foundry-organisation.service';
+  CloudFoundryOrganizationService,
+} from '../../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -23,7 +23,7 @@ export class CfSpacesListConfigService implements IListConfig<APIResource> {
   defaultView = 'cards' as ListView;
   getColumns = () => [];
 
-  constructor(private store: Store<AppState>, private cfOrgService: CloudFoundryOrganisationService) {
+  constructor(private store: Store<AppState>, private cfOrgService: CloudFoundryOrganizationService) {
 
     this.dataSource = new CfSpacesDataSourceService(cfOrgService.cfGuid, cfOrgService.orgGuid, this.store, this);
   }

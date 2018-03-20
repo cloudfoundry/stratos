@@ -4,14 +4,14 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 @Component({
-  selector: 'app-add-organisation',
-  templateUrl: './add-organisation.component.html',
-  styleUrls: ['./add-organisation.component.scss'],
+  selector: 'app-add-organization',
+  templateUrl: './add-organization.component.html',
+  styleUrls: ['./add-organization.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ]
 })
-export class AddOrganisationComponent implements OnInit {
+export class AddOrganizationComponent implements OnInit {
 
   cfUrl: string;
   constructor(

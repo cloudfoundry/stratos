@@ -41,7 +41,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
 
     this.multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
-      createListFilterConfig('org', 'Organisation', this.cfOrgSpaceService.org),
+      createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
       createListFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
     ];
   }
