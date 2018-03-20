@@ -20,9 +20,11 @@ import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
-import { DiscoverAppHelper } from './discover-app-helper';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { interval } from 'rxjs/observable/interval';
+
+// Interval to check for new application
+const APP_CHECK_INTERVAL = 3000;
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -36,13 +38,13 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  validate = new BehaviorSubject<boolean>(false);
   appGuid: string;
+
+  // Validation poller
+  validate = this.createValidationPoller();
 
   // Are we deploying?
   deploying = false;
-
-  appDetectionHelper: DiscoverAppHelper;
 
   constructor(
     private store: Store<AppState>,
@@ -55,11 +57,6 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     // Unsubscribe from the websocket stream
     if (!this.connect$) {
       this.connect$.unsubscribe();
-    }
-
-    // Shut down app detection helper if there is one
-    if (this.appDetectionHelper) {
-      this.appDetectionHelper.stopDetection();
     }
   }
 
@@ -162,18 +159,11 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
         this.deploying = true;
-        if (!this.appDetectionHelper) {
-          this.appDetectionHelper = new DiscoverAppHelper(this.http, this.appData.cloudFoundry, this.appData.space, this.appData.Name);
-          this.appDetectionHelper.startDetection(this.validate);
-        }
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
         this.streamTitle = 'Deployed';
         this.deploying = false;
-        if (this.appDetectionHelper) {
-          this.appDetectionHelper.stopDetection();
-        }
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
         this.close(log, null, null, true);
@@ -229,10 +219,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   onNext: StepOnNextFunction = () => {
-    this.appDetectionHelper.stopDetection();
-    this.appGuid = this.appDetectionHelper.app.metadata.guid;
+    this.deploying = false;
     this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
-
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
     // Take user to applications
@@ -240,4 +228,30 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     return Observable.of({ success: true });
   }
 
+  /**
+   * Create a poller that will be used to periodically check for the new application.
+   */
+  private createValidationPoller() {
+    return interval(APP_CHECK_INTERVAL).takeWhile(() => !this.appGuid).filter(() => this.deploying).switchMap(() => {
+      const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.appData.cloudFoundry });
+      return this.http
+      .get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` +
+        this.appData.space + '&q=name:' + this.appData.Name, { headers: headers })
+      .pipe(
+        mergeMap(info => {
+          if (info && info[this.appData.cloudFoundry]) {
+            const apps = info[this.appData.cloudFoundry];
+            if (apps.total_results === 1) {
+              this.appGuid = apps.resources[0].metadata.guid;
+              return Observable.of(true);
+            }
+          }
+          return Observable.of(false);
+        }),
+        catchError(err => [
+          // ignore
+        ])
+      );
+    });
+  }
 }
