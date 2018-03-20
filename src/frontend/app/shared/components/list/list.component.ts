@@ -72,7 +72,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterConfigs: IListMultiFilterConfig[];
-  filtersApplied$ = new BehaviorSubject<boolean>(false);
 
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
@@ -83,6 +82,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   disableActions$: Observable<boolean>;
   hasRowsOrIsFiltering$: Observable<boolean>;
   isFiltering$: Observable<boolean>;
+  noRowsNotFiltering$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -210,9 +210,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
-      const filters = Object.values(filter.items);
-      this.filtersApplied$.next(
-        filter.string !== '' || (filters.length !== 0 && filters.filter(s => !!s).length !== 0));
       this.filterString = filter.string;
       this.multiFilters = filter.items;
     });
@@ -220,9 +217,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.isFiltering$ = this.paginationController.filter$.pipe(
       map((filter: ListFilter) => {
         const isFilteringByString = filter.string ? !!filter.string.length : false;
-        const isFilteringByItems = Object.keys(filter.items).map(key => {
-          return !!filter.items[key];
-        }).length > 0;
+        const isFilteringByItems = Object.values(filter.items).filter(value => !!value).length > 0;
         return isFilteringByString || isFilteringByItems;
       })
     );
@@ -230,6 +225,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.noRowsHaveFilter$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
       map(([hasRows, isFiltering]) => {
         return !hasRows && isFiltering;
+      })
+    );
+    this.noRowsNotFiltering$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+      map(([hasRows, isFiltering]) => {
+        return !hasRows && !isFiltering;
       })
     );
 
