@@ -86,7 +86,7 @@ class ValidateEntityRelationsConfig {
    */
   action: IRequestAction;
   /**
-   * Collection of parent entities whose children may be missing. for example a list of organisations that have missing spaces
+   * Collection of parent entities whose children may be missing. for example a list of organizations that have missing spaces
    *
    * @type {any[]}
    * @memberof ValidateEntityRelationsConfig
@@ -327,8 +327,11 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
           const guids = childEntitiesAsGuids(childEntitiesAsArray);
 
           childEntities = [];
-          const allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
-          const newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
+          let allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
+          let newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
+          allEntitiesOfType = allEntities || {};
+          newEntitiesOfType = newEntities || {};
+
           for (let i = 0; i < guids.length; i++) {
             const guid = guids[i];
             const foundEntity = newEntitiesOfType[guid] || allEntitiesOfType[guid];

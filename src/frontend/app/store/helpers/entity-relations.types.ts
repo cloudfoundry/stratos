@@ -78,9 +78,9 @@ export function createEntityRelationPaginationKey(schemaKey: string, guid: strin
   // expand this to include this child relation text
   // For instance
   // Fine - Space with a collection of routes (stored in pagination 'route' section as 'space-<guid>)
-  // Fine - User with a collection of organisations (i.e is an org user of) (stored in pagination 'organisation' section as 'user-<guid>')
-  // Needs additional childSchemaRelation - User with a collection of organisations that they're billing manager of (stored in pagination
-  // 'organisation' section as 'user-<guid>-billing_managed_organisations')
+  // Fine - User with a collection of organizations (i.e is an org user of) (stored in pagination 'organization' section as 'user-<guid>')
+  // Needs additional childSchemaRelation - User with a collection of organizations that they're billing manager of (stored in pagination
+  // 'organization' section as 'user-<guid>-billing_managed_organizations')
   key += childSchemaRelation ? `-${childSchemaRelation}` : '';
   return key;
 }

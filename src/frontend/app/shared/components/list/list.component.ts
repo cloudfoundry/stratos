@@ -6,12 +6,15 @@ import {
   Input,
   OnDestroy,
   OnInit,
+  TemplateRef,
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, MatSelect, SortDirection, PageEvent } from '@angular/material';
+import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { map, pairwise, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
@@ -21,18 +24,16 @@ import { IListDataSource } from './data-sources-controllers/list-data-source-typ
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
+  defaultPaginationPageSizeOptionsCards,
+  defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
   IListAction,
+  IListConfig,
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
-  IListConfig,
   ListViewTypes,
-  defaultPaginationPageSizeOptionsCards,
-  defaultPaginationPageSizeOptionsTable,
 } from './list.component.types';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map, pairwise, tap, distinctUntilChanged } from 'rxjs/operators';
 
 
 @Component({
@@ -53,6 +54,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   filterString = '';
   multiFilters = {};
 
+  @Input()
+  noEntries: TemplateRef<any>;
+
+  @Input()
+  noEntriesForCurrentFilter: TemplateRef<any>;
+
   sortColumns: ITableColumn<T>[];
   @ViewChild('headerSortField') headerSortField: MatSelect;
   headerSortDirection: SortDirection = 'asc';
@@ -70,6 +77,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   isAddingOrSelecting$: Observable<boolean>;
   hasRows$: Observable<boolean>;
+  noRowsHaveFilter$: Observable<boolean>;
+  disableActions$: Observable<boolean>;
+  hasRowsOrIsFiltering$: Observable<boolean>;
+  isFiltering$: Observable<boolean>;
+  noRowsNotFiltering$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -214,6 +226,37 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.filterString = filter.string;
       this.multiFilters = filter.items;
     });
+
+    this.isFiltering$ = this.paginationController.filter$.pipe(
+      map((filter: ListFilter) => {
+        const isFilteringByString = filter.string ? !!filter.string.length : false;
+        const isFilteringByItems = Object.values(filter.items).filter(value => !!value).length > 0;
+        return isFilteringByString || isFilteringByItems;
+      })
+    );
+
+    this.noRowsHaveFilter$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+      map(([hasRows, isFiltering]) => {
+        return !hasRows && isFiltering;
+      })
+    );
+    this.noRowsNotFiltering$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+      map(([hasRows, isFiltering]) => {
+        return !hasRows && !isFiltering;
+      })
+    );
+
+    this.hasRowsOrIsFiltering$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+      map(([hasRows, isFiltering]) => {
+        return hasRows || isFiltering;
+      })
+    );
+
+    this.disableActions$ = combineLatest(this.dataSource.isLoadingPage$, this.noRowsHaveFilter$).pipe(
+      map(([isLoading, noRowsHaveFilter]) => {
+        return isLoading || noRowsHaveFilter;
+      })
+    );
 
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,

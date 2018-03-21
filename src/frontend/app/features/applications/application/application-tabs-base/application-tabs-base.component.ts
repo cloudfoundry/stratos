@@ -117,15 +117,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         breadcrumbs: [
           {
             value: endpoint.name,
-            routerLink: baseCFUrl
+            routerLink: `${baseCFUrl}/organizations`
           },
           {
             value: org.entity.name,
-            routerLink: baseOrgUrl
+            routerLink: `${baseOrgUrl}/spaces`
           },
           {
             value: space.entity.name,
-            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}`
+            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/apps`
           }
         ]
       }

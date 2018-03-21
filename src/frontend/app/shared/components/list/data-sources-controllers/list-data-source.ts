@@ -280,16 +280,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         if (entities && !entities.length) {
           return [];
         }
-        const entitiesPreFilter = entities.length;
+
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
           }, entities);
         }
-        const entitiesPostFilter = entities.length;
 
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-        const validPagesCountChange = entitiesPreFilter !== entitiesPostFilter || this.transformEntity;
+        const validPagesCountChange = this.transformEntity;
         if (
           validPagesCountChange &&
           (paginationEntity.totalResults !== entities.length ||

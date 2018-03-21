@@ -2,7 +2,7 @@ import { BaseSpaceAction, CREATE_SPACE_SUCCESS, DELETE_SPACE_SUCCESS } from '../
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
-export function updateOrganisationSpaceReducer() {
+export function updateOrganizationSpaceReducer() {
   return function (state: APIResource, action: APISuccessOrFailedAction) {
     switch (action.type) {
       case DELETE_SPACE_SUCCESS:
