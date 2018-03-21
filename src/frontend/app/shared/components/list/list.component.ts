@@ -303,8 +303,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
-    listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
-    this.dataSource.selectClear();
+    if (listActionConfig.action(Array.from(this.dataSource.selectedRows.values()))) {
+      this.dataSource.selectClear();
+    }
   }
 
   executeActionGlobal(listActionConfig: IGlobalListAction<T>) {

@@ -118,7 +118,12 @@ export interface IListAction<T> extends IBaseListAction<T> {
 }
 
 export interface IMultiListAction<T> extends IBaseListAction<T> {
-  action: (items: T[]) => void;
+  /**
+   * Return true if the selection should be cleared
+   *
+   * @memberof IMultiListAction
+   */
+  action: (items: T[]) => boolean;
 }
 
 export interface IGlobalListAction<T> extends IBaseListAction<T> {

@@ -30,12 +30,14 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         const confirmation = new ConfirmationDialogConfig(
           'Delete Routes from Application',
           `Are you sure you want to delete ${items.length} routes?`,
-          'Delete All'
+          `Delete ${items.length}`
         );
-        this.confirmDialog.open(confirmation, () =>
-          items.forEach(item => this.dispatchDeleteAction(item))
-        );
+        this.confirmDialog.open(confirmation, () => {
+          items.forEach(item => this.dispatchDeleteAction(item));
+          this.getDataSource().selectClear();
+        });
       }
+      return false;
     },
     icon: 'delete',
     label: 'Delete',
@@ -52,13 +54,15 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         const confirmation = new ConfirmationDialogConfig(
           'Unmap Routes from Application',
           `Are you sure you want to unmap ${items.length} routes?`,
-          'Unmap All',
+          `Unmap ${items.length}`,
           true
         );
-        this.confirmDialog.open(confirmation, () =>
-          items.forEach(item => this.dispatchUnmapAction(item))
-        );
+        this.confirmDialog.open(confirmation, () => {
+          items.forEach(item => this.dispatchUnmapAction(item));
+          this.getDataSource().selectClear();
+        });
       }
+      return false;
     },
     icon: 'block',
     label: 'Unmap',
@@ -165,9 +169,10 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
             'Delete',
             true
           );
-          this.confirmDialog.open(confirmation, () =>
-            this.dispatchDeleteAction(item)
-          );
+          this.confirmDialog.open(confirmation, () => {
+            this.dispatchDeleteAction(item);
+            this.getDataSource().selectClear();
+          });
         })
       )
       .subscribe();
@@ -186,9 +191,10 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
             'Unmap',
             true
           );
-          this.confirmDialog.open(confirmation, () =>
-            this.dispatchUnmapAction(item)
-          );
+          this.confirmDialog.open(confirmation, () => {
+            this.dispatchUnmapAction(item);
+            this.getDataSource().selectClear();
+          });
         })
       )
       .subscribe();
