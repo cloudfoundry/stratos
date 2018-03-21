@@ -2,25 +2,20 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, startWith } from 'rxjs/operators';
+import { ApplicationStateData, CardStatus, ApplicationStateService } from '../../../application-state/application-state.service';
+import { AppState } from '../../../../../store/app-state';
+import { ApplicationService } from '../../../../../features/applications/application.service';
 
-import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { AppState } from '../../../../../../store/app-state';
-import { APIResource } from '../../../../../../store/types/api.types';
-import {
-  ApplicationStateData,
-  ApplicationStateService,
-  CardStatus,
-} from '../../../../application-state/application-state.service';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 
 @Component({
   selector: 'app-compact-app-card',
   templateUrl: './compact-app-card.component.html',
   styleUrls: ['./compact-app-card.component.scss']
 })
-export class CompactAppCardComponent extends TableCellCustom<APIResource> implements OnInit {
+export class CompactAppCardComponent implements OnInit {
 
   @Input('row') row;
+
   applicationState$: Observable<ApplicationStateData>;
 
   appStatus$: Observable<CardStatus>;
@@ -28,11 +23,10 @@ export class CompactAppCardComponent extends TableCellCustom<APIResource> implem
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService
-  ) {
-    super();
-
-  }
+  ) { }
   ngOnInit() {
+
+    console.log(this.row);
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.store,

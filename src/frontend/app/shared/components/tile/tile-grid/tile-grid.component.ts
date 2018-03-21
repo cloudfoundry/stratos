@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, HostBinding, Input } from '@angular/core';
 
 @Component({
   selector: 'app-tile-grid',
@@ -7,6 +7,9 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
   encapsulation: ViewEncapsulation.None,
 })
 export class TileGridComponent implements OnInit {
+
+  @HostBinding('class.app-tile-grid-fit')
+  @Input('fit') private fit = false;
 
   constructor() { }
 

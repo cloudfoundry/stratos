@@ -11,6 +11,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
@@ -20,17 +21,26 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     store: Store<AppState>,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
-    paginationKey?: string
+    paginationKey =  CfAppsDataSource.paginationKey,
+    seedPaginationKey =  CfAppsDataSource.paginationKey,
   ) {
-    if (!paginationKey) {
-      paginationKey = CfAppsDataSource.paginationKey;
-    }
-
+    const syncNeeded = paginationKey !== seedPaginationKey;
     const action = new GetAllApplications(paginationKey, [
       createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
       createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
       createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
     ]);
+
+    console.log('syncNeeded: ' + syncNeeded);
+
+    if (syncNeeded) {
+      // We do this here to ensure we sync up with main endpoint table data.
+      store.dispatch(new CreatePagination(
+        action.entityKey,
+        paginationKey,
+        seedPaginationKey
+      ));
+    }
 
     if (!transformEntities)  {
       transformEntities = [
@@ -53,11 +63,6 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       ];
     }
 
-    console.log('-- --');
-
-    console.log(transformEntities);
-    console.log(paginationKey);
-
     super({
       store,
       action,
@@ -67,8 +72,6 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       isLocal: true,
       transformEntities: transformEntities,
       listConfig
-    }
-    );
-
+    });
   }
 }

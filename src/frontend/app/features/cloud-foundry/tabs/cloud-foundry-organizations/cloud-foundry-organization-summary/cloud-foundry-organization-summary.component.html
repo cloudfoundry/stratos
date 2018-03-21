@@ -1,5 +1,5 @@
 <div class="org-summary">
-  <app-tile-grid>
+  <app-tile-grid fit="true">
     <app-tile-group>
       <app-tile>
         <app-card-cf-org-user-details>
@@ -7,34 +7,42 @@
       </app-tile>
     </app-tile-group>
 
+    <app-tile-group>
+      <app-tile>
+        <app-card-number-metric icon="apps" label="Spaces" value="{{ (cfOrgService.spaces$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="apps" label="Applications" value="{{ (cfOrgService.apps$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="content_copy" label="App Instances" value="{{ (cfOrgService.appInstances$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="person" label="Users" value="{{ (cfOrgService.userOrgRole$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+    </app-tile-group>
 
     <app-tile-group>
-        <app-tile>
-          <app-card-number-metric icon="apps" label="Applications" value="6"></app-card-number-metric>
-        </app-tile>
-        <app-tile>
-          <app-card-number-metric icon="domain" label="App Instances"
-          value="{{ (cfOrgService.appInstances$ | async) }}"
-          limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"
-          ></app-card-number-metric>
-        </app-tile>
-        <app-tile>
-          <app-card-number-metric icon="person" label="Users" value="3"></app-card-number-metric>
-        </app-tile>
-        <app-tile>
-          <app-card-number-metric label="Memory Usage"
-          units="mb"
-          value="{{ (cfOrgService.totalMem$ | async) }}"
-          limit="{{ (cfOrgService.quotaDefinition$ | async)?.memory_limit }}"
-          ></app-card-number-metric>
-        </app-tile>
-      </app-tile-group>
-  
-      <app-tile-group>
-        <app-tile>
-          <app-card-cf-recent-apps></app-card-cf-recent-apps>
-        </app-tile>
-      </app-tile-group>
-    
+      <app-tile>
+        <app-card-number-metric label="Memory Usage" units="mb" value="{{ (cfOrgService.totalMem$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="language" label="Routes" value="{{ (cfOrgService.routes$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="domain" label="Private Domains" value="{{ (cfOrgService.privateDomains$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_private_domain}}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="extension" label="Service Instances" value="{{ (cfOrgService.serviceInstances$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
+      </app-tile>
+    </app-tile-group>
+
+
+    <app-tile-group>
+      <app-tile>
+        <app-card-cf-recent-apps></app-card-cf-recent-apps>
+      </app-tile>
+    </app-tile-group>
+
   </app-tile-grid>
 </div>

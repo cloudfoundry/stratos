@@ -82,7 +82,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
-import { CompactAppCardComponent } from './components/list/list-types/cf-recent-apps/compact-app-card/compact-app-card.component';
+import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 
 @NgModule({
   imports: [
@@ -212,6 +212,7 @@ import { CompactAppCardComponent } from './components/list/list-types/cf-recent-
     AppChipsComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
+    CompactAppCardComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

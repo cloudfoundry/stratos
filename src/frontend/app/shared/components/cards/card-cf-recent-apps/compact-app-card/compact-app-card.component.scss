@@ -1,0 +1,13 @@
+:host {
+  border: 1px solid #ccc;
+  display: flex;
+  padding: 0 12px;
+
+  &:not(:first-child) {
+    border-top: 0;
+  }
+}
+
+.compact-app-card {
+  font-size: 14px;
+}
