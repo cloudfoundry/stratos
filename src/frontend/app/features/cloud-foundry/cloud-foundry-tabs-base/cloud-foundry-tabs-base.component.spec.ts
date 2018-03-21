@@ -7,7 +7,7 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModules
+  BaseTestModules
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   createBasicStoreModule,
@@ -22,7 +22,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryTabsBaseComponent],
-        imports: [...getBaseTestModules],
+        imports: [...BaseTestModules],
         providers: [
           CloudFoundryEndpointService,
           generateTestCfEndpointServiceProvider(),

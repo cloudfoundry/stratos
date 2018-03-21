@@ -6,6 +6,7 @@ import {
   serviceInstancesSchemaKey,
   servicePlanSchemaKey,
   spaceSchemaKey,
+  serviceSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -49,12 +50,34 @@ export class GetServicesInstancesInSpace
   parentEntitySchema = entityFactory(spaceSchemaKey);
   flattenPagination = true;
 }
-
-export class DeleteServiceInstance extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public serviceInstanceGuid: string) {
+export class GetServiceInstance
+  extends CFStartAction implements EntityInlineParentAction {
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `service_instances/${serviceInstanceGuid}`;
+    this.options.url = `service_instances/${guid}`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Service Instances', 'Get particular instance');
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
+  options: RequestOptions;
+}
+
+export class DeleteServiceInstance extends CFStartAction implements ICFAction {
+  constructor(public endpointGuid: string, public guid: string) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_instances/${guid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
     this.options.params.set('async', 'false');

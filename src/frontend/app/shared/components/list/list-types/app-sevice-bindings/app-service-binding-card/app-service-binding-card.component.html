@@ -1,0 +1,40 @@
+<app-meta-card class="app-service-card">
+  <app-meta-card-title>
+    <div class="app-service-card__title">
+      <div class="app-service-card__title__text">
+        <p>{{ (serviceInstance$ | async)?.entity.entity.name}}</p>
+      </div>
+      <app-service-icon [service]="service$ | async"></app-service-icon>
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item style="long-text">
+    <app-meta-card-key></app-meta-card-key>
+    <app-meta-card-value>
+      {{ (service$ | async)?.entity.entity.description}}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Name</app-meta-card-key>
+    <app-meta-card-value>{{ (service$ | async)?.entity.entity.label}} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Plan</app-meta-card-key>
+    <app-meta-card-value>{{ (serviceInstance$ | async)?.entity.entity.service_plan.entity.name}} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Date Created On</app-meta-card-key>
+    <app-meta-card-value>{{ row.metadata.created_at | date:'medium'}} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Environment Variables</app-meta-card-key>
+    <app-meta-card-value>
+      <a class="app-service-card__env-link" (click)="showEnvVars()">View</a>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item style="column">
+    <app-meta-card-key>Tags</app-meta-card-key>
+    <app-meta-card-value>
+      <app-chips [chips]="tags$ | async"></app-chips>
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

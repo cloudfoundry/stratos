@@ -1,11 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
-  getBaseTestModulesNoShared,
-  getMetadataCardComponents,
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../chips/chips.component';
+import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
 import { CfServiceCardComponent } from './cf-service-card.component';
 
 describe('CfServiceCardComponent', () => {
@@ -14,8 +15,14 @@ describe('CfServiceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfServiceCardComponent, getMetadataCardComponents, BooleanIndicatorComponent, AppChipsComponent],
-      imports: [...getBaseTestModulesNoShared]
+      declarations: [
+        CfServiceCardComponent,
+        MetadataCardTestComponents,
+        BooleanIndicatorComponent,
+        AppChipsComponent,
+        ServiceIconComponent
+      ],
+      imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
   }));

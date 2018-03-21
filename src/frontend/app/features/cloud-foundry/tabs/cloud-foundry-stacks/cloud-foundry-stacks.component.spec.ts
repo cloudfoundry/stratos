@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloudFoundryStacksComponent } from './cloud-foundry-stacks.component';
-import { getBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('CloudFoundryStacksComponent', () => {
@@ -11,7 +11,7 @@ describe('CloudFoundryStacksComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryStacksComponent],
-      imports: [...getBaseTestModules],
+      imports: [...BaseTestModules],
       providers: [ActiveRouteCfOrgSpace]
     })
       .compileComponents();
