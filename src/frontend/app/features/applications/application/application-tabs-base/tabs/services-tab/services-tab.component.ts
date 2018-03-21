@@ -26,7 +26,6 @@ export class ServicesTabComponent implements OnInit {
 
   serviceBindings$: Observable<APIResource<IServiceBinding>[]>;
   constructor(private listConfig: ListConfig<APIResource>, private appService: ApplicationService) {
-    const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
     this.serviceBindings$ = this.appService.application$.pipe(map(app => app.app.entity.service_bindings));
   }
   ngOnInit() {

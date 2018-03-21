@@ -1,7 +1,9 @@
-<app-meta-card class="app-service-card" [actionMenu]="cardMenu">
+<app-meta-card class="app-service-card">
   <app-meta-card-title>
     <div class="app-service-card__title">
-      <div class="app-service-card__title__link">{{ (serviceInstance$ | async)?.entity.entity.name}}</div>
+      <div class="app-service-card__title__text">
+        <p>{{ (serviceInstance$ | async)?.entity.entity.name}}</p>
+      </div>
       <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>

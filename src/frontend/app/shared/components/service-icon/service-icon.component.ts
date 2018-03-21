@@ -11,6 +11,8 @@ export class ServiceIconComponent implements OnInit {
 
   extraInfo: IServiceExtra;
   @Input('service') service: APIResource<IService>;
+
+  @Input('addMenuPadding') addMenuPadding = false;
   constructor() { }
 
   ngOnInit() {

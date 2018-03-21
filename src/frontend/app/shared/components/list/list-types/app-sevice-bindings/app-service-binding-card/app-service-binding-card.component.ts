@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { map, tap, withLatestFrom } from 'rxjs/operators';
+import { map, tap, withLatestFrom, first, switchMap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
@@ -20,6 +20,8 @@ import { AppChip } from '../../../../chips/chips.component';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 @Component({
   selector: 'app-app-service-binding-card',
@@ -28,13 +30,12 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
 })
 export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<IServiceBinding>> implements OnInit, OnDestroy {
 
-  envVarSubscription: Subscription;
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance>>>;
-  serviceSubscription: Subscription;
-  tags$ = new BehaviorSubject<AppChip<IServiceInstance>[]>([]);
+  tagsSubscription: Subscription;
+  tags$: Observable<AppChip<IServiceInstance>[]>;
   @Input('row') row: APIResource<IServiceBinding>;
 
   constructor(
@@ -42,6 +43,7 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
     private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
     private dialog: MatDialog,
+    private confirmDialog: ConfirmationDialogService
   ) {
     super();
     this.cardMenu = [
@@ -61,33 +63,31 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
       true
     ).entityObs$;
 
-    this.serviceSubscription = this.serviceInstance$.pipe(
-      tap(o => {
-        this.service$ = this.entityServiceFactory.create<APIResource<IService>>(
-          serviceSchemaKey,
-          entityFactory(serviceSchemaKey),
-          o.entity.entity.service_guid,
-          new GetService(o.entity.entity.service_guid, this.appService.cfGuid),
-          true
-        ).entityObs$;
-        this.tags$.next(o.entity.entity.tags.map(t => ({ value: t })));
-      })
-    ).subscribe();
+    this.service$ = this.serviceInstance$.pipe(
+      switchMap(o => this.entityServiceFactory.create<APIResource<IService>>(
+        serviceSchemaKey,
+        entityFactory(serviceSchemaKey),
+        o.entity.entity.service_guid,
+        new GetService(o.entity.entity.service_guid, this.appService.cfGuid),
+        true
+      ).entityObs$)
+    );
+
+    this.tags$ = this.serviceInstance$.pipe(
+      map(o => o.entity.entity.tags.map(t => ({ value: t })))
+    );
     this.envVarUrl = `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/service-bindings/${this.row.metadata.guid}/vars`;
   }
 
   ngOnDestroy(): void {
-    if (this.serviceSubscription) {
-      this.serviceSubscription.unsubscribe();
-    }
-    if (this.envVarSubscription) {
-      this.envVarSubscription.unsubscribe();
+    if (this.tagsSubscription) {
+      this.tagsSubscription.unsubscribe();
     }
   }
 
   showEnvVars = () => {
 
-    this.envVarSubscription = Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
+    Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
       .pipe(
         withLatestFrom(),
         map(([[service, serviceInstance, allEnvVars]]) => {
@@ -106,12 +106,21 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
             data: data,
             disableClose: false
           });
-        })
+        }),
+        first()
       ).subscribe();
 
   }
 
   detach = () => {
-    this.store.dispatch(new DeleteAppServiceBinding(this.appService.appGuid, this.row.metadata.guid, this.appService.cfGuid));
+    const confirmation = new ConfirmationDialogConfig(
+      'Detach Service Instance',
+      `Are you sure you want to detach the application from the service'?`,
+      'Detach',
+      true
+    );
+    this.confirmDialog.open(confirmation, () =>
+      this.store.dispatch(new DeleteAppServiceBinding(this.appService.appGuid, this.row.metadata.guid, this.appService.cfGuid))
+    );
   }
 }

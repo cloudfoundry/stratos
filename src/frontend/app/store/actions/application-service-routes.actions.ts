@@ -15,12 +15,12 @@ import {
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { getPaginationKey } from './pagination.actions';
-import { applicationEntitySchema } from './application.actions';
 
 export const ASSIGN_ROUTE = '[Application] Assign route';
 export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
 export const ASSIGN_ROUTE_FAILED = '[Application] Assign route failed';
 
+const applicationEntitySchema = entityFactory(applicationSchemaKey);
 
 export class GetAppRoutes extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
   constructor(

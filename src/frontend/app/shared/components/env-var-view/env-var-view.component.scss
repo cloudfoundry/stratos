@@ -1,0 +1,16 @@
+.env-var-view {
+  display: flex;
+  flex-direction: column;
+  &__content {
+    &__code-block-line {
+      pre {
+        white-space: pre-wrap;
+      }
+    }
+  }
+  &__actions {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-self: flex-start;
+  }
+}
