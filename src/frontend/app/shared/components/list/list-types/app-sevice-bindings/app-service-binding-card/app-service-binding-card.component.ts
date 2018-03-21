@@ -1,10 +1,8 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { map, tap, withLatestFrom, first, switchMap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
@@ -17,24 +15,23 @@ import { entityFactory, serviceInstancesSchemaKey, serviceSchemaKey } from '../.
 import { APIResource, EntityInfo } from '../../../../../../store/types/api.types';
 import { AppEnvVarsState } from '../../../../../../store/types/app-metadata.types';
 import { AppChip } from '../../../../chips/chips.component';
+import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
   styleUrls: ['./app-service-binding-card.component.scss']
 })
-export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<IServiceBinding>> implements OnInit, OnDestroy {
+export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<IServiceBinding>> implements OnInit {
 
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance>>>;
-  tagsSubscription: Subscription;
   tags$: Observable<AppChip<IServiceInstance>[]>;
   @Input('row') row: APIResource<IServiceBinding>;
 
@@ -79,12 +76,6 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
     this.envVarUrl = `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/service-bindings/${this.row.metadata.guid}/vars`;
   }
 
-  ngOnDestroy(): void {
-    if (this.tagsSubscription) {
-      this.tagsSubscription.unsubscribe();
-    }
-  }
-
   showEnvVars = () => {
 
     Observable.combineLatest(this.service$, this.serviceInstance$, this.appService.appEnvVars.entities$)
@@ -115,7 +106,7 @@ export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<
   detach = () => {
     const confirmation = new ConfirmationDialogConfig(
       'Detach Service Instance',
-      `Are you sure you want to detach the application from the service'?`,
+      'Are you sure you want to detach the application from the service?',
       'Detach',
       true
     );
