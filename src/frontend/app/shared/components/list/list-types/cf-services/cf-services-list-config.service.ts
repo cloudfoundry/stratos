@@ -27,7 +27,10 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
   cardComponent = CfServiceCardComponent;
   defaultView = 'cards' as ListView;
   multiFilterConfigs: IListMultiFilterConfig[] = [];
-  getColumns = () => [];
+  text = {
+    title: null,
+    noEntries: 'There are no services'
+  };
 
   constructor(
     private store: Store<AppState>,
@@ -50,11 +53,10 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
 
   }
 
+  getColumns = () => [];
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => this.multiFilterConfigs;
   getDataSource = () => this.dataSource;
-
-
 }

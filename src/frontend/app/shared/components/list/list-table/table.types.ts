@@ -30,6 +30,7 @@ export interface ITableColumn<T> {
 export interface ITableText {
   title: string;
   filter?: string;
+  noEntries?: string;
 }
 
 export const listTableComponents = [

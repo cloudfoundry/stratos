@@ -26,7 +26,8 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   cardComponent = EndpointCardComponent;
   text = {
     title: '',
-    filter: 'Filter Endpoints'
+    filter: 'Filter Endpoints',
+    noEntries: 'There are no endpoints'
   };
   enableTextFilter = true;
   tableFixedRowHeight = true;

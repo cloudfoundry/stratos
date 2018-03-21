@@ -102,7 +102,7 @@
     <ng-template #defaultNoEntries>
       <mat-card class="list-component__empty">
         <mat-card-content>
-          <div class="no-rows">There are no entries.</div>
+          <div class="no-rows">{{config.text?.noEntries || 'There are no entries.'}}</div>
         </mat-card-content>
       </mat-card>
     </ng-template>

@@ -18,6 +18,10 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
   defaultView = 'table' as ListView;
   pageSizeOptions = [10, 25, 50];
   viewType = ListViewTypes.TABLE_ONLY;
+  text = {
+    title: null,
+    noEntries: 'There are no feature flags'
+  };
 
   columns: Array<ITableColumn<APIResource<IFeatureFlag>>> = [
     {

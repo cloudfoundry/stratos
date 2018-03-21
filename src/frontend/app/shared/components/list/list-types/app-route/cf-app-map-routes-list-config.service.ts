@@ -76,7 +76,8 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
 
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Available Routes'
+    title: 'Available Routes',
+    noEntries: 'There are no routes'
   };
   isLocal = true;
 

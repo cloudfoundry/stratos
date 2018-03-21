@@ -104,7 +104,8 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
   viewType = ListViewTypes.BOTH;
   text = {
     title: '',
-    filter: 'Search by name'
+    filter: 'Search by name',
+    noEntries: 'There are no applications'
   };
   enableTextFilter = true;
   cardComponent = CardAppComponent;
