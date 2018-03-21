@@ -37,7 +37,10 @@ export class CfUserService {
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     // See issue #1741
-    this.allUsersAction = new GetAllUsers(createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid));
+    this.allUsersAction = new GetAllUsers(
+      createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid),
+      activeRouteCfOrgSpace.cfGuid
+    );
   }
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>

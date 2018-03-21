@@ -10,13 +10,13 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetOrganisation } from '../../../store/actions/organisation.actions';
+import { GetOrganization } from '../../../store/actions/organization.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
   domainSchemaKey,
   entityFactory,
-  organisationSchemaKey,
+  organizationSchemaKey,
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
@@ -30,7 +30,7 @@ import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 
 @Injectable()
-export class CloudFoundryOrganisationService {
+export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;
   userOrgRole$: Observable<string>;
@@ -56,14 +56,14 @@ export class CloudFoundryOrganisationService {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
     this.orgEntityService = this.entityServiceFactory.create(
-      organisationSchemaKey,
-      entityFactory(organisationSchemaKey),
+      organizationSchemaKey,
+      entityFactory(organizationSchemaKey),
       this.orgGuid,
-      new GetOrganisation(this.orgGuid, this.cfGuid, [
-        createEntityRelationKey(organisationSchemaKey, spaceSchemaKey),
-        createEntityRelationKey(organisationSchemaKey, domainSchemaKey),
-        createEntityRelationKey(organisationSchemaKey, quotaDefinitionSchemaKey),
-        createEntityRelationKey(organisationSchemaKey, privateDomainsSchemaKey),
+      new GetOrganization(this.orgGuid, this.cfGuid, [
+        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),

@@ -37,7 +37,7 @@ export interface IListConfig<T> {
   getDataSource: () => IListDataSource<T>;
   /**
    * Collection of configuration objects to support multiple drops downs for filtering local lists. For example the application wall filters
-   * by cloud foundry, organisation and space. This mechanism supports only the showing and storing of such filters. An additional function
+   * by cloud foundry, organization and space. This mechanism supports only the showing and storing of such filters. An additional function
    * to the data sources transformEntities collection should be used to apply these custom settings to the data.
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
