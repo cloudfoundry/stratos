@@ -14,13 +14,13 @@
 
 <ng-template #noEntriesForCurrentFilter>
   <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications for the current filter'" [secondLine]="{
-  text: 'Please change the filters or deploy an application that matches them.'
+  text: ''
 }"></app-no-content-message>
 </ng-template>
 
 <ng-template #noEntries>
   <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications'" [secondLine]="{
-  text: 'Please deploy applications to a connected Cloud Foundry instance or contact your system administrator.'
+  text: ''
 }"></app-no-content-message>
 </ng-template>
 <app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" [hidden]="!(endpointsService.haveRegistered$ | async) || !(endpointsService.haveConnected$ | async)">
