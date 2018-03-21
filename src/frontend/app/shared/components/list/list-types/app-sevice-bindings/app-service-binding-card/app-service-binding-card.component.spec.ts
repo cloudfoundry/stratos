@@ -14,6 +14,7 @@ import { ServiceIconComponent } from '../../../../service-icon/service-icon.comp
 import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
 import { ApplicationStateService } from '../../../../application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 describe('AppServiceBindingCardComponent', () => {
   let component: AppServiceBindingCardComponent;
@@ -33,7 +34,8 @@ describe('AppServiceBindingCardComponent', () => {
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsService,
         ApplicationStateService,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        ConfirmationDialogService
       ]
     })
       .compileComponents();
