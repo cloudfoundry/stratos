@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError } from 'rxjs/operators';
+import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError, takeWhile } from 'rxjs/operators';
 import { getEntityById, selectEntity, selectEntities } from '../../../../store/selectors/api.selectors';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import websocketConnect from 'rxjs-websockets';
@@ -55,7 +55,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Unsubscribe from the websocket stream
-    if (!this.connect$) {
+    if (this.connect$) {
       this.connect$.unsubscribe();
     }
   }
@@ -93,11 +93,11 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
             tap((log) => {
               // Deal with control messages
               if (log.type !== SocketEventTypes.DATA) {
-              this.processWebSocketMessage(log);
+                this.processWebSocketMessage(log);
               }
             }),
             filter((log) => log.type === SocketEventTypes.DATA),
-          map((log) => log.message)
+            map((log) => log.message)
           );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
       })
@@ -232,26 +232,29 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
    * Create a poller that will be used to periodically check for the new application.
    */
   private createValidationPoller() {
-    return interval(APP_CHECK_INTERVAL).takeWhile(() => !this.appGuid).filter(() => this.deploying).switchMap(() => {
-      const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.appData.cloudFoundry });
-      return this.http
-      .get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` +
-        this.appData.space + '&q=name:' + this.appData.Name, { headers: headers })
-      .pipe(
-        mergeMap(info => {
-          if (info && info[this.appData.cloudFoundry]) {
-            const apps = info[this.appData.cloudFoundry];
-            if (apps.total_results === 1) {
-              this.appGuid = apps.resources[0].metadata.guid;
-              return Observable.of(true);
-            }
-          }
-          return Observable.of(false);
-        }),
-        catchError(err => [
-          // ignore
-        ])
-      );
-    });
+    return interval(APP_CHECK_INTERVAL).pipe(
+      takeWhile(() => !this.appGuid),
+      filter(() => this.deploying),
+      switchMap(() => {
+        const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.appData.cloudFoundry });
+        return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` +
+          this.appData.space + '&q=name:' + this.appData.Name, { headers: headers })
+          .pipe(
+            mergeMap(info => {
+              if (info && info[this.appData.cloudFoundry]) {
+                const apps = info[this.appData.cloudFoundry];
+                if (apps.total_results === 1) {
+                  this.appGuid = apps.resources[0].metadata.guid;
+                  return Observable.of(true);
+                }
+              }
+              return Observable.of(false);
+            }),
+            catchError(err => [
+              // ignore
+            ])
+          );
+      })
+    );
   }
 }
