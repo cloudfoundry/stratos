@@ -1,10 +1,10 @@
 .app-service-card {
   &__title {
+    align-content: center;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     width: 100%;
-    align-content: center;
   }
   &__env-link {
     cursor: pointer;
