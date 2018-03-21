@@ -18,7 +18,7 @@
         <app-card-number-metric icon="content_copy" label="App Instances" value="{{ (cfOrgService.appInstances$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric icon="person" label="Users" value="{{ (cfOrgService.userOrgRole$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric icon="person" label="Users" value="-"></app-card-number-metric>
       </app-tile>
     </app-tile-group>
 
@@ -30,7 +30,7 @@
         <app-card-number-metric icon="language" label="Routes" value="{{ (cfOrgService.routes$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric icon="domain" label="Private Domains" value="{{ (cfOrgService.privateDomains$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_private_domain}}"></app-card-number-metric>
+        <app-card-number-metric icon="domain" label="Private Domains" value="{{ (cfOrgService.privateDomains$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_private_domains}}"></app-card-number-metric>
       </app-tile>
       <app-tile>
         <app-card-number-metric icon="extension" label="Service Instances" value="{{ (cfOrgService.serviceInstances$ | async)?.length }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>

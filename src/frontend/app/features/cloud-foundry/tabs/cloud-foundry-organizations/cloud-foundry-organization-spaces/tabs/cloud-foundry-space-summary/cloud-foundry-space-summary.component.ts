@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 
 @Component({
   selector: 'app-cloud-foundry-space-summary',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CloudFoundrySpaceSummaryComponent implements OnInit {
 
-  constructor() { }
+  constructor(private cfSpaceService: CloudFoundrySpaceService) { }
 
   ngOnInit() {
   }

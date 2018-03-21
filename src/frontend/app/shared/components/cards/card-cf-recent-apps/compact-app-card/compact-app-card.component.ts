@@ -1,10 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, startWith } from 'rxjs/operators';
+import { map, startWith, tap } from 'rxjs/operators';
 import { ApplicationStateData, CardStatus, ApplicationStateService } from '../../../application-state/application-state.service';
 import { AppState } from '../../../../../store/app-state';
 import { ApplicationService } from '../../../../../features/applications/application.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 
 
 @Component({
@@ -22,23 +23,22 @@ export class CompactAppCardComponent implements OnInit {
 
   constructor(
     private store: Store<AppState>,
-    private appStateService: ApplicationStateService
+    private appStateService: ApplicationStateService,
+    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) { }
   ngOnInit() {
-
-    console.log(this.row);
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.store,
       this.appStateService,
       this.row.entity,
       this.row.metadata.guid,
-      this.row.entity.cfGuid
+      this.activeRouteCfOrgSpace.cfGuid
     ).pipe(
       startWith(initState)
     );
     this.appStatus$ = this.applicationState$.pipe(
-      map(state => state.indicator),
+      map(state => state.indicator)
     );
   }
 }

@@ -6,18 +6,17 @@
     <mat-card-content>
       <div class="app-metadata">
         <div class="app-metadata__two-cols">
-          <app-metadata-item icon="title" label="Description">{{ (cfEndpointService.info$ | async)?.entity.entity.description }}</app-metadata-item>
+          <app-metadata-item icon="title" label="Description">{{ (cfEndpointService.info$ | async)?.entity.entity.description }} ({{ (cfEndpointService.info$ | async)?.entity.entity.build }})</app-metadata-item>
           <app-metadata-item icon="link" label="Instance Address">{{ apiUrl }}</app-metadata-item>
           <!--
           <app-metadata-item icon="developer_mode" label="CF Interactions">N/A</app-metadata-item>
           -->
-          <app-metadata-item icon="build" label="Build">{{ (cfEndpointService.info$ | async)?.entity.entity.build }}</app-metadata-item>
           <app-metadata-item icon="memory" label="CF API Version">{{ (cfEndpointService.info$ | async)?.entity.entity.api_version }}</app-metadata-item>
-          <app-metadata-item icon="developer_mode" label="SSH Access">{{ (cfEndpointService.hasSSHAccess$ | async) ? 'Available' : 'Not available'}}</app-metadata-item>
         </div>
         <div class="app-metadata__two-cols">
           <app-metadata-item icon="person" label="Account Username">{{ (cfEndpointService.endpoint$ | async )?.entity.user.name }}</app-metadata-item>
           <app-metadata-item icon="person" label="Administrator">{{ isAdmin((cfEndpointService.endpoint$ | async )?.entity.user)}}</app-metadata-item>
+          <app-metadata-item icon="developer_mode" label="SSH Access">{{ (cfEndpointService.hasSSHAccess$ | async) ? 'Available' : 'Not available'}}</app-metadata-item>
         </div>
       </div>
     </mat-card-content>

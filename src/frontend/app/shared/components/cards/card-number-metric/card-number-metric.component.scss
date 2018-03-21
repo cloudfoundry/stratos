@@ -7,20 +7,22 @@
     > div {
       flex: 1;
     }
+    padding: 12px 24px;
   }
   &__icon {
-    flex: 0 0 48px;
-    font-size: 48px;
-    height: 48px;
+    flex: 0 0 42px;
+    font-size: 42px;
+    height: 42px;
     margin-right: 12px;
-    width: 48px;
+    width: 42px;
   }
   &__label {
+    font-size: 16px;
   }
   &__value {
-    font-size: 28px;
+    font-size: 24px;
   }
   &__limit {
-    font-size: 22px;
+    font-size: 20px;
   }
 }

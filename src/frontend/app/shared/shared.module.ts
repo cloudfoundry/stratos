@@ -155,6 +155,8 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     AppChipsComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
+    ServiceIconComponent,
+    EnvVarViewComponent,
     CompactAppCardComponent,
   ],
   exports: [
@@ -212,11 +214,14 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     AppChipsComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
+    EnvVarViewComponent,
+    ServiceIconComponent,
     CompactAppCardComponent,
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
-    DialogConfirmComponent
+    DialogConfirmComponent,
+    EnvVarViewComponent
   ],
   providers: [
     ListConfig,

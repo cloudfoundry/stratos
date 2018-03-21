@@ -31,8 +31,6 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
     ]);
 
-    console.log('syncNeeded: ' + syncNeeded);
-
     if (syncNeeded) {
       // We do this here to ensure we sync up with main endpoint table data.
       store.dispatch(new CreatePagination(
