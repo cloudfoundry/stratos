@@ -88,7 +88,7 @@
     </mat-card>
   </div>
   <div class="list-component__body">
-    <div class="list-component__body-inner">
+    <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)">
       <div *ngIf="dataSource.isLoadingPage$ | async" class="list-component__blocker"></div>
       <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)"></app-cards>
       <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)">
@@ -98,24 +98,23 @@
       <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSizeOptions[0]">
       </mat-paginator>
     </mat-card>
+  </div>
+  <ng-template #defaultNoEntries>
+    <mat-card class="list-component__default-no-entries">
+      <mat-card-content>
+        <div class="no-rows">{{config.text?.noEntries || 'There are no entries.'}}</div>
+      </mat-card-content>
+    </mat-card>
+  </ng-template>
 
-    <ng-template #defaultNoEntries>
-      <mat-card class="list-component__empty">
-        <mat-card-content>
-          <div class="no-rows">{{config.text?.noEntries || 'There are no entries.'}}</div>
-        </mat-card-content>
-      </mat-card>
-    </ng-template>
-
-    <div [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)">
-      <ng-container *ngIf="(noRowsNotFiltering$ | async)">
-        <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
-        </ng-container>
+  <div [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)" class="list-component__no-entries">
+    <ng-container *ngIf="(noRowsNotFiltering$ | async)">
+      <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
       </ng-container>
-      <ng-container *ngIf="(noRowsHaveFilter$ | async)">
-        <ng-container *ngTemplateOutlet="noEntriesForCurrentFilter ? noEntriesForCurrentFilter : defaultNoEntries">
-        </ng-container>
+    </ng-container>
+    <ng-container *ngIf="(noRowsHaveFilter$ | async)">
+      <ng-container *ngTemplateOutlet="noEntriesForCurrentFilter ? noEntriesForCurrentFilter : defaultNoEntries">
       </ng-container>
-    </div>
+    </ng-container>
   </div>
 </div>
