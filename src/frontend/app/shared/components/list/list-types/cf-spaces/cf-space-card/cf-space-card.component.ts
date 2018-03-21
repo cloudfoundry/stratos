@@ -20,7 +20,7 @@ import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-cf-space-card',

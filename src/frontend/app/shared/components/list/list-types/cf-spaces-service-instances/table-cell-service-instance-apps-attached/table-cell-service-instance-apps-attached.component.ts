@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 import { StringLiteral } from 'typescript';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { ActivatedRoute } from '@angular/router';

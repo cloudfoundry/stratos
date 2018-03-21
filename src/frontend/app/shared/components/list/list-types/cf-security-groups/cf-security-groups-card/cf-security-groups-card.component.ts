@@ -3,7 +3,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { ISecurityGroup, ISpace, IRule, IRuleType } from '../../../../../../core/cf-api.types';
 import { CloudFoundryEndpointService } from '../../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { AppChip } from '../../../../chips/chips.component';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-cf-security-groups-card',

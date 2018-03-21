@@ -1,7 +1,7 @@
 import { objectHelper } from './../../../../../core/helper-classes/object.helpers';
 import { ICellDefinition } from './../table.types';
 import { Component, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
-import { TableCellCustom } from '../table-cell/table-cell-custom';
+import { TableCellCustom } from '../../list.types';
 
 @Component({
   moduleId: module.id,

@@ -7,7 +7,7 @@ import { ApplicationService } from '../../../../../../features/applications/appl
 import { AppState } from '../../../../../../store/app-state';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ApplicationStateData, ApplicationStateService } from '../../../../application-state/application-state.service';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-app-status',

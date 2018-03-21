@@ -19,7 +19,7 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-app-service-binding-card',
