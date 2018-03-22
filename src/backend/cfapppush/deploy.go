@@ -617,7 +617,7 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 		return "", err
 	}
 
-	return head, nil
+	return strings.TrimSpace(head), nil
 
 }
 
