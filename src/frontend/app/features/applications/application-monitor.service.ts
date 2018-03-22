@@ -115,6 +115,6 @@ export class ApplicationMonitorService {
   }
 
   roundTwoPlaces(num: number): number {
-    return Math.round(num * 100) / 100;
+    return Math.round(num * 10000) / 10000;
   }
 }
