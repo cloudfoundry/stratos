@@ -21,7 +21,7 @@ export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVa
   showPopup = () => {
     let value = this.row.value;
     if (this.row.name === 'STRATOS_PROJECT') {
-      value = JSON.parse(this.row.value)
+      value = JSON.parse(this.row.value);
     }
     this.dialog.open(EnvVarViewComponent, {
       data: {
