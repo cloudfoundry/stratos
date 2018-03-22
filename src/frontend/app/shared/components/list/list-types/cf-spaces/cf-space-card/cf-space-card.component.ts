@@ -20,15 +20,14 @@ import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { TableCellCustom } from '../../../list.types';
+import { CardCell } from '../../../list.types';
 
 @Component({
   selector: 'app-cf-space-card',
   templateUrl: './cf-space-card.component.html',
   styleUrls: ['./cf-space-card.component.scss']
 })
-export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
-  implements OnInit, OnDestroy {
+export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
   cardMenu: MetaCardMenuItem[];
   spaceGuid: string;
   serviceInstancesCount: number;
@@ -45,8 +44,6 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   appCount: number;
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
-
-  @Input('row') row: APIResource<ISpace>;
 
   constructor(
     private cfUserService: CfUserService,

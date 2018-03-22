@@ -1,7 +1,7 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, switchMap, tap, first } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
@@ -17,15 +17,14 @@ import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { TableCellCustom } from '../../../list.types';
+import { CardCell } from '../../../list.types';
 
 @Component({
   selector: 'app-cf-org-card',
   templateUrl: './cf-org-card.component.html',
   styleUrls: ['./cf-org-card.component.scss']
 })
-export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganization>>
-  implements OnInit, OnDestroy {
+export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> implements OnInit, OnDestroy {
   cardMenu: MetaCardMenuItem[];
   orgGuid: string;
   normalisedMemoryUsage: number;
@@ -38,8 +37,6 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
   appCount: number;
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
-
-  @Input('row') row: APIResource<IOrganization>;
 
   constructor(
     private cfUserService: CfUserService,
