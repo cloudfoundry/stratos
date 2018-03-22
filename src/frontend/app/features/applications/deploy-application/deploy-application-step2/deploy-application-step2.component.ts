@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, Input } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -45,6 +45,9 @@ import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../stor
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
+
+  @Input('isRedeploy') isRedeploy = false;
+
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
   sourceTypes: SourceType[] = [{ name: 'Git', id: 'git' }];
@@ -60,16 +63,16 @@ export class DeployApplicationStep2Component
   validate: Observable<boolean>;
   projectInfo$: Observable<GithubRepo>;
   commitSubscription: Subscription;
-
+  nextButtonText = 'Deploy';
   // ngModel Properties
   sourceType: SourceType;
   sourceSubType: SourceType;
   repositoryBranch: GitBranch = { name: null, commit: null };
   repository: string;
+  stepperText = 'Please specify the source';
 
   @ViewChild('sourceSelectionForm') sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
-  isReDeploy = false;
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -99,7 +102,10 @@ export class DeployApplicationStep2Component
   }
 
   ngOnInit() {
-    this.isReDeploy = this.route.snapshot.queryParams['redeploy'];
+    if (this.isRedeploy) {
+      this.stepperText = 'Review source details';
+      this.nextButtonText = 'Redeploy';
+    }
 
     this.sourceType$ = this.store.select(selectSourceType);
     this.sourceSubType$ = this.store.select(selectSourceSubType);
@@ -140,7 +146,7 @@ export class DeployApplicationStep2Component
       }),
       map(p => p.data),
       tap(p => {
-        if (!this.isReDeploy) {
+        if (!this.isRedeploy) {
           this.store.dispatch(new SetDeployBranch(p.default_branch));
         }
       })
@@ -241,7 +247,7 @@ export class DeployApplicationStep2Component
 
   ngAfterContentInit() {
     this.validate = this.sourceSelectionForm.statusChanges.map(() => {
-      return this.sourceSelectionForm.valid || this.isReDeploy;
+      return this.sourceSelectionForm.valid || this.isRedeploy;
     });
   }
 }

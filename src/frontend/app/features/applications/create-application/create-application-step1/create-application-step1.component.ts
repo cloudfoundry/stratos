@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnInit, ViewChild, Input } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
@@ -22,7 +22,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @ViewChild('cfForm')
   cfForm: NgForm;
 
+  @Input('isRedeploy') isRedeploy = false;
+
   validate: Observable<boolean>;
+
+  stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
   onNext = () => {
     this.store.dispatch(new SetCFDetails({
@@ -35,13 +39,20 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   ngOnInit() {
 
+    if (this.isRedeploy) {
+      this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
+    }
   }
 
   ngAfterContentInit() {
-    this.validate = this.cfForm.statusChanges
-      .map(() => {
-        return this.cfForm.valid;
-      });
+    if (this.isRedeploy) {
+      this.validate = Observable.of(true);
+    } else {
+      this.validate = this.cfForm.statusChanges
+        .map(() => {
+          return this.cfForm.valid;
+        });
+    }
   }
 
 }
