@@ -16,6 +16,7 @@ import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-head
 import { map, first } from 'rxjs/operators';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { environment } from '../../../../../../../environments/environment';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -49,6 +50,8 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     {
       link: 'users',
       label: 'Users',
+      // Hide the users tab unless we are in development
+      hidden: environment.production
     }
   ];
 
