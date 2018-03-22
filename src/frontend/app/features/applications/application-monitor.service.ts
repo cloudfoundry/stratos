@@ -100,9 +100,9 @@ export class ApplicationMonitorService {
       });
 
       // Average
-      res.avg.disk = this.roundTwoPlaces(res.avg.disk / validStatsCount);
-      res.avg.mem = this.roundTwoPlaces(res.avg.mem / validStatsCount);
-      res.avg.cpu = this.roundTwoPlaces(res.avg.cpu / validStatsCount);
+      res.avg.disk = this.roundFourPlaces(res.avg.disk / validStatsCount);
+      res.avg.mem = this.roundFourPlaces(res.avg.mem / validStatsCount);
+      res.avg.cpu = this.roundFourPlaces(res.avg.cpu / validStatsCount);
       res.avg.uptime = Math.round(res.avg.uptime / validStatsCount);
 
       res.updateStatuses();
@@ -114,7 +114,7 @@ export class ApplicationMonitorService {
     }).share();
   }
 
-  roundTwoPlaces(num: number): number {
+  roundFourPlaces(num: number): number {
     return Math.round(num * 10000) / 10000;
   }
 }
