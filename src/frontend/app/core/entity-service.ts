@@ -144,9 +144,9 @@ export class EntityService<T = any> {
 
   /**
    * @param interval - The polling interval in ms.
-   * @param key - The store updating key for the poll
+   * @param updateKey - The store updating key for the poll
    */
-  poll(interval = 10000, key = this.refreshKey) {
+  poll(interval = 10000, updateKey = this.refreshKey) {
     return Observable.interval(interval)
       .pipe(
         tag('poll'),
@@ -154,17 +154,17 @@ export class EntityService<T = any> {
           this.entityMonitor.entity$,
           this.entityMonitor.entityRequest$
         ),
-        map(a => ({
-          resource: a[1],
+        map(([poll, resource, requestState]) => ({
+          resource,
           updatingSection: composeFn(
-            getUpdateSectionById(key),
+            getUpdateSectionById(updateKey),
             getEntityUpdateSections,
-            () => a[2]
+            () => requestState
           )
         })),
         tap(({ resource, updatingSection }) => {
           if (!updatingSection || !updatingSection.busy) {
-            this.actionDispatch(key);
+            this.actionDispatch(updateKey);
           }
         }),
         filter(({ resource, updatingSection }) => {

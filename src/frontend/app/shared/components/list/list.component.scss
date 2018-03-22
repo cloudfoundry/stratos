@@ -1,4 +1,9 @@
 .list-component {
+  position: relative;
+  mat-progress-bar {
+    position: absolute;
+    top: -5px;
+  }
   *,
   .sort,
   .filter,
@@ -36,11 +41,6 @@
   $title-left-padding: 25px;
   $title-content-padding: 10px;
   &__header {
-    position: relative;
-    mat-progress-bar {
-      position: absolute;
-      top: -5px;
-    }
     mat-card {
       display: flex;
     }

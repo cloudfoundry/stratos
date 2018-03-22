@@ -1,7 +1,8 @@
+import { Component, Input } from '@angular/core';
+
+import { TableCellCustom } from '../table-cell/table-cell-custom';
 import { objectHelper } from './../../../../../core/helper-classes/object.helpers';
 import { ICellDefinition } from './../table.types';
-import { Component, OnChanges, SimpleChanges, SimpleChange } from '@angular/core';
-import { TableCellCustom } from '../table-cell/table-cell-custom';
 
 @Component({
   moduleId: module.id,
@@ -9,9 +10,19 @@ import { TableCellCustom } from '../table-cell/table-cell-custom';
   templateUrl: 'app-table-cell-default.component.html',
   styleUrls: ['app-table-cell-default.component.scss']
 })
-export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements OnChanges {
+export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
   public cellDefinition: ICellDefinition<T>;
-  public row: T;
+
+  private _row: T;
+  @Input('row')
+  get row() { return this._row; }
+  set row(row: T) {
+    this._row = row;
+    if (row) {
+      this.setValue(row);
+    }
+  }
+
   public valueContext = { value: null };
   public isLink = false;
   public isExternalLink = false;
@@ -27,7 +38,7 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
 
   private setValue(row: T) {
     if (this.valueGenerator) {
-      this.valueContext.value = this.valueGenerator(this.row);
+      this.valueContext.value = this.valueGenerator(row);
     }
   }
 
@@ -48,10 +59,4 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> implements 
     return null;
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.row;
-    if (row) {
-      this.setValue(row.currentValue);
-    }
-  }
 }
