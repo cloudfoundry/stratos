@@ -11,7 +11,7 @@ import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endp
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss']
 })
-export class EndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
+export class CfEndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
 
   static columns = 2;
 
