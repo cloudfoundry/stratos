@@ -79,16 +79,6 @@ function dev_certs {
 }
 
 function build {
-    echo "===== Building the portal proxy"
-    export USER_ID=$(id -u)
-    export GROUP_ID=$(id -g)
-    export USER_NAME=$(id -nu)
-    echo "==== User set to ${USER_NAME} with IDs ${USER_ID}:${GROUP_ID}"
-
-    pushd ${PROXY_PATH}/deploy/
-    ./build_portal_proxy.sh
-    popd
-
     if [ "$NO_UI" = true ]; then
         echo "===== Standing up the Stratos UI Console without the UI"
     else

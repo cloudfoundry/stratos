@@ -1,0 +1,24 @@
+FROM splatform/stratos-bk-build-base:opensuse as builder
+
+RUN mkdir -p /go/src/github.com/cloudfoundry-incubator/stratos
+WORKDIR /go/src/github.com/cloudfoundry-incubator/stratos
+COPY . /go/src/github.com/cloudfoundry-incubator/stratos
+ENV GLIDE_HOME /.glide
+COPY deploy/compile.sh /
+RUN /compile.sh
+
+FROM splatform/stratos-bk-base:opensuse as dev-build
+COPY --from=builder /go/src/github.com/cloudfoundry-incubator/stratos/outputs/* /srv/
+COPY dev-certs dev-certs
+RUN chmod +x portal-proxy
+EXPOSE 443
+ENTRYPOINT ["/srv/portal-proxy"]
+
+FROM splatform/stratos-bk-base:opensuse as kubernetes-build
+COPY --from=builder /go/src/github.com/cloudfoundry-incubator/stratos/outputs/* /srv/
+COPY deploy/containers/proxy/entrypoint.sh /entrypoint.sh
+COPY /deploy/db/scripts/run-preflight-job.sh /run-preflight-job.sh
+COPY /deploy/tools/generate_cert.sh /generate_cert.sh
+RUN chmod +x portal-proxy
+EXPOSE 443
+ENTRYPOINT ["/entrypoint.sh"]

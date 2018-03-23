@@ -1,9 +1,0 @@
-FROM splatform/stratos-bk-build-base:opensuse
-
-RUN mkdir -p /go/src/github.com/SUSE/stratos-ui
-WORKDIR /go/src/github.com/SUSE/stratos-ui
-ENV GLIDE_HOME /.glide
-COPY glide-cache /.glide
-COPY npm-cache/ /root/.npm
-COPY compile.sh /
-CMD ["/compile.sh"]

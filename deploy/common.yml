@@ -48,11 +48,13 @@ services:
     extends: buildCommon
     build:
       context: ../
-      dockerfile: deploy/Dockerfile.bk.dev
+      dockerfile: deploy/Dockerfile.bk
+      target: dev-build
     ports:
       - "3003:3003"
     env_file:
       ./proxy.env
+     
   nginx:
     extends: buildCommon
     build:
