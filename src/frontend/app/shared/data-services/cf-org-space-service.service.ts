@@ -30,8 +30,8 @@ export const enum CfOrgSpaceSelectMode {
    */
   FIRST_ONLY = 1,
   /**
- * When a parent selection changes and it contains any children automatically select the first one, otherwise clear child selection
- */
+   * When a parent selection changes and it contains any children automatically select the first one, otherwise clear child selection
+   */
   ANY = 2
 }
 
