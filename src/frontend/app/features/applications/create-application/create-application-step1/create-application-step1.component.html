@@ -1,6 +1,7 @@
 <b>Select a Cloud Foundry instance, organization and space for the app.</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
   <mat-form-field>
+    ¬¬{{(cfOrgSpaceService.cf.select.asObservable() | async)}}¬¬
     <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf">
       <mat-option *ngFor="let cf of cfOrgSpaceService.cf.list$ | async" [value]="cf.guid">
         <span>{{ cf.name }}</span>

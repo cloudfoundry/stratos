@@ -199,7 +199,7 @@ export class CfOrgSpaceDataService {
 
     // Clear or automatically select org/space given cf
     const orgResetSub = this.cf.select.asObservable().pipe(
-      startWith('a'),
+      startWith(undefined),
       distinctUntilChanged(),
       withLatestFrom(this.org.list$),
       tap(([selectedCF, orgs]) => {
