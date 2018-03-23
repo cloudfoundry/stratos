@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, switchMap, tap, first } from 'rxjs/operators';
+import { map, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
@@ -14,7 +14,6 @@ import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
-import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
@@ -46,7 +45,6 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
     private cfEndpointService: CloudFoundryEndpointService,
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
-    private cfOrgSpaceDataService: CfOrgSpaceDataService
   ) {
     super();
 
@@ -129,7 +127,7 @@ export class CfOrgCardComponent extends TableCellCustom<APIResource<IOrganizatio
   }
 
   delete = () => {
-    this.cfOrgSpaceDataService.deleteOrg(
+    this.cfEndpointService.deleteOrg(
       this.row.metadata.guid,
       this.cfEndpointService.cfGuid
     );

@@ -4,10 +4,9 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
-import { DeleteOrganization, GetAllOrganizations } from '../../store/actions/organization.actions';
-import { DeleteSpace } from '../../store/actions/space.actions';
+import { GetAllOrganizations } from '../../store/actions/organization.actions';
 import { AppState } from '../../store/app-state';
-import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
+import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
@@ -35,9 +34,6 @@ export class CfOrgSpaceDataService {
     createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
   ]);
 
-  // TODO: We should optimise this to only fetch the orgs for the current endpoint
-  // (if we inline depth the get orgs request it could be hefty... or we could use a different action to only fetch required data..
-  // which might mean inline data missing from entity when we need it)
   private allOrgs$ = getPaginationObservables({
     store: this.store,
     action: this.paginationAction,
@@ -164,13 +160,5 @@ export class CfOrgSpaceDataService {
         return orgs.filter(o => o.entity.cfGuid === endpointGuid);
       })
     );
-  }
-
-  public deleteOrg(orgGuid: string, endpointGuid: string) {
-    this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
-  }
-
-  public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
-    this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
   }
 }
