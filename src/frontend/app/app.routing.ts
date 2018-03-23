@@ -25,7 +25,7 @@ const appRoutes: Routes = [
       { path: 'applications', loadChildren: 'app/features/applications/applications.module#ApplicationsModule' },
       { path: 'endpoints', loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule' },
       { path: 'service-catalog', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
-      { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' }
+      { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'metrics', loadChildren: 'app/features/metrics/metrics.module#MetricsModule' },
     ]
   },

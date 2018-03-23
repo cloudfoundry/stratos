@@ -201,7 +201,7 @@ export class EndpointsEffect {
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
     actionStrings: [string, string] = [null, null],
-    endpointType: EndpointType = 'cloud-foundry'
+    endpointType: EndpointType = 'cloud-foundry',
     body?: string,
   ) {
     const headers = new HttpHeaders();
