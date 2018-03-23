@@ -1,7 +1,8 @@
-import { AfterContentInit, Component, OnInit, ViewChild, Input } from '@angular/core';
+import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
 
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
@@ -15,7 +16,10 @@ import { AppState } from '../../../../store/app-state';
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  constructor(private store: Store<AppState>, public cfOrgSpaceService: CfOrgSpaceDataService) { }
+  constructor(
+    private store: Store<AppState>,
+    public cfOrgSpaceService: CfOrgSpaceDataService
+  ) { }
 
   cfValid$: Observable<boolean>;
 
@@ -45,14 +49,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngAfterContentInit() {
-    if (this.isRedeploy) {
-      this.validate = Observable.of(true);
-    } else {
-      this.validate = this.cfForm.statusChanges
-        .map(() => {
-          return this.cfForm.valid;
-        });
-    }
+    this.validate = this.cfForm.statusChanges.pipe(
+      map(() => {
+        return this.cfForm.valid || this.isRedeploy;
+      })
+    );
   }
 
 }

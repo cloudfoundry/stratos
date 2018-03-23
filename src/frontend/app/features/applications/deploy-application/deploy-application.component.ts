@@ -25,6 +25,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   isRedeploy: boolean;
   initCfOrgSpaceService: Subscription[] = [];
+  deployButtonText = 'Deploy';
 
   constructor(
     private store: Store<AppState>,
@@ -51,6 +52,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
 
     if (this.isRedeploy) {
+      this.deployButtonText = 'Redeploy';
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !!p),
         tap(p => {
