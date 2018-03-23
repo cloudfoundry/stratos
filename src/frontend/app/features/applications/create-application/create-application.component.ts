@@ -35,16 +35,18 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     this.paginationStateSub = appWallPaginationState.filter(pag => !!pag).first().do(pag => {
       let cf, org, space;
       cf = pag.clientPagination.filter.items.cf;
-      if (cf) {
-        this.cfOrgSpaceService.cf.select.next(cf);
-        org = pag.clientPagination.filter.items.org;
-        if (org) {
-          this.cfOrgSpaceService.org.select.next(org);
-          space = pag.clientPagination.filter.items.space;
-          if (space) {
-            this.cfOrgSpaceService.space.select.next(space);
-          }
-        }
+      if (!cf) {
+        return;
+      }
+      this.cfOrgSpaceService.cf.select.next(cf);
+      org = pag.clientPagination.filter.items.org;
+      if (!org) {
+        return;
+      }
+      this.cfOrgSpaceService.org.select.next(org);
+      space = pag.clientPagination.filter.items.space;
+      if (space) {
+        this.cfOrgSpaceService.space.select.next(space);
       }
     }).subscribe();
   }
