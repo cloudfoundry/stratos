@@ -16,12 +16,13 @@
       </mat-form-field>
       <input type="hidden" *ngIf="authTypesForEndpoint.length === 1" name="authType" formControlName="authType">
       <div *ngIf="endpointForm.value.authType === 'creds'" formGroupName="authValues" class="connection-dialog__auth">
-      <mat-form-field>
-        <input matInput placeholder="Username" formControlName="username">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput placeholder="Password" type="password" formControlName="password">
-      </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Username" formControlName="username">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Password" type="password" formControlName="password">
+        </mat-form-field>
+      </div>
     </mat-dialog-content>
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>
     <mat-dialog-actions class="connection-dialog__actions">

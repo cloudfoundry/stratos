@@ -104,6 +104,7 @@ export class EndpointsEffect {
         params,
         null,
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
+        action.type,
         action.body,
       );
     });

@@ -53,9 +53,9 @@ export class SideNavComponent implements OnInit, OnDestroy {
       let index = 0;
       this.tabs.forEach(tab => {
         if (tab.endpointType) {
-          tab.hidden = connectedTypes[tab.endpointType];
+          tab.hidden = !connectedTypes[tab.endpointType];
         } else {
-          tab.hidden = true;
+          tab.hidden = false;
         }
       });
     }).subscribe();
