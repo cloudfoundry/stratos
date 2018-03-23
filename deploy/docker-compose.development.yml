@@ -1,23 +1,15 @@
 version: '2.3'
 services:
 
-  # The development docker-compose file.
-  # Use this to have things like "gulp watch" running in the UI.
-
-  ui:
-    extends:
-      file: common.yml
-      service: ui
-
   mariadb:
     extends:
       file: common.yml
       service: mariadb
 
-  goose:
+  db-migrator:
     extends:
       file: common.yml
-      service: goose
+      service: db-migrator
     links:
       - mariadb:mariadb
 
@@ -26,9 +18,8 @@ services:
       file: common.yml
       service: proxy
     links:
-      - goose:goose
+      - db-migrator:db-migrator
       - uaa:uaa
-
 
   nginx:
     extends:
@@ -36,7 +27,6 @@ services:
       service: nginx
     links:
       - proxy:proxy
-
 
   uaa:
     extends:

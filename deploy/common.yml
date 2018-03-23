@@ -35,7 +35,7 @@ services:
       - "3306:3306"
 
 
-  goose:
+  db-migrator:
     extends: buildCommon
     build:
       context: ../
@@ -59,26 +59,12 @@ services:
   nginx:
     extends: buildCommon
     build:
-      context: ../deploy/containers/nginx
-      dockerfile: Dockerfile.dev
+      context: ../
+      dockerfile: deploy/Dockerfile.ui
+      target: dev-build
     ports:
       - 80:80
       - 443:443
-    volumes:
-      - ../.dist:/usr/share/nginx/html:ro
-
-
-  ui:
-    extends: buildCommon
-    build:
-      context: ../
-      dockerfile: deploy/Dockerfile.ui.dev
-      args:
-        - USER_ID
-        - GROUP_ID
-        - USER_NAME
-    volumes:
-      - ../.dist:/usr/dist
 
   uaa:
     extends: imageCommon
