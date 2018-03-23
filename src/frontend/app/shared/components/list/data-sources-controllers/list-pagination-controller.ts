@@ -21,7 +21,7 @@ import { withLatestFrom } from 'rxjs/operators';
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
   filterByString: (filterString: string) => void;
-  multiFilter: (filterConfig: IListMultiFilterConfig, filterValue: string) => void;
+  multiFilter: (filterConfig: IListMultiFilterConfig, filterValue: string | string[]) => void;
   filter$: Observable<ListFilter>;
   sort: (listSort: ListSort) => void;
   sort$: Observable<ListSort>;

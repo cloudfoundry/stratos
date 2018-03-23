@@ -108,7 +108,7 @@ export class CfOrgSpaceDataService {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
         }),
       loading$: this.allOrgsLoading$,
-      select: new BehaviorSubject(null)
+      select: new BehaviorSubject(undefined)
     };
   }
 
@@ -153,7 +153,7 @@ export class CfOrgSpaceDataService {
       }
 
       const selectedOrgs = orgs.map(org => {
-        if (!this.valueFilter(selectedOrg, (compareOrg: IOrganization) => compareOrg.guid)(org)) {
+        if (!this.valueFilter(selectedOrg, (compareOrg: APIResource<IOrganization>) => compareOrg.metadata.guid)(org)) {
           return [];
         }
         if (!org || !org.entity || !org.entity.spaces) {
@@ -185,21 +185,21 @@ export class CfOrgSpaceDataService {
 
   private setupAutoSelectors() {
     // Automatically select the cf on first load given the select mode setting
-    // this.cf.list$.pipe(
-    //   first(),
-    //   tap(cfs => {
-    //     if (!!cfs.length &&
-    //       ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
-    //         (this.selectMode === CfOrgSpaceSelectMode.ANY))
-    //     ) {
-    //       this.cf.select.next(this.multiMode ? [cfs[0].guid] : cfs[0].guid);
-    //     }
-    //   })
-    // ).subscribe();
+    this.cf.list$.pipe(
+      first(),
+      tap(cfs => {
+        if (!!cfs.length &&
+          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
+            (this.selectMode === CfOrgSpaceSelectMode.ANY))
+        ) {
+          this.cf.select.next(this.multiMode ? [cfs[0].guid] : cfs[0].guid);
+        }
+      })
+    ).subscribe();
 
     // Clear or automatically select org/space given cf
     const orgResetSub = this.cf.select.asObservable().pipe(
-      startWith(undefined),
+      startWith('a'),
       distinctUntilChanged(),
       withLatestFrom(this.org.list$),
       tap(([selectedCF, orgs]) => {
@@ -210,8 +210,8 @@ export class CfOrgSpaceDataService {
         ) {
           this.org.select.next(this.multiMode ? [orgs[0].guid] : orgs[0].guid);
         } else {
-          this.org.select.next(undefined);
-          this.space.select.next(undefined);
+          this.org.select.next(this.multiMode ? [] : '');
+          this.space.select.next(this.multiMode ? [] : '');
         }
       }),
     ).subscribe();
@@ -231,7 +231,7 @@ export class CfOrgSpaceDataService {
         ) {
           this.space.select.next(this.multiMode ? [spaces[0].guid] : spaces[0].guid);
         } else {
-          this.space.select.next(undefined);
+          this.space.select.next(this.multiMode ? [] : '');
         }
       })
     ).subscribe();

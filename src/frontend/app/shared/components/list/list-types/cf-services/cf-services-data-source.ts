@@ -24,9 +24,9 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
       isLocal: true,
       transformEntities: [
         (entities: APIResource[], paginationState: PaginationEntityState) => {
-          const cfGuid = paginationState.clientPagination.filter.items['cf'];
+          const cfGuids = paginationState.clientPagination.filter.items['cf'];
           return entities.filter(e => {
-            const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+            const validCF = !(cfGuids && cfGuids.length && !cfGuids.find(cfGuid => cfGuid === e.entity.cfGuid));
             return validCF;
           });
         }
