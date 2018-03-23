@@ -25,7 +25,13 @@ export interface CfOrgSpaceItem<T = any> {
 }
 
 export const enum CfOrgSpaceSelectMode {
+  /**
+   * When a parent selection changes and it contains only one child automatically select it, otherwise clear child selection
+   */
   FIRST_ONLY = 1,
+  /**
+   * When a parent selection changes and it contains any children automatically select the first one, otherwise clear child selection
+   */
   ANY = 2
 }
 
@@ -41,6 +47,9 @@ export class CfOrgSpaceDataService {
     createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
   ]);
 
+  /**
+   * This will contain all org and space data
+   */
   private allOrgs = getPaginationObservables<APIResource<IOrganization>>({
     store: this.store,
     action: this.paginationAction,
@@ -68,7 +77,6 @@ export class CfOrgSpaceDataService {
     this.init();
     this.createOrg();
     this.createSpace();
-
 
     // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
     this.org.list$.pipe(
