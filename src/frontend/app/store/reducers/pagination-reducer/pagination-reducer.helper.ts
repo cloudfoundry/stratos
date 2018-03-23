@@ -154,7 +154,7 @@ function getObservables<T = any>(
     )
       .pipe(
         filter(([ent, pagination]) => {
-          return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
+          return !!pagination && isPageReady(pagination);
         }),
         shareReplay(1),
         tap(([ent, pagination]) => {
@@ -190,7 +190,7 @@ function getPaginationCompareString(paginationEntity: PaginationEntityState) {
 }
 
 export function isPageReady(pagination: PaginationEntityState) {
-  return !!pagination && !!pagination.ids[pagination.currentPage];
+  return !!pagination && !!pagination.ids[pagination.currentPage] && !isFetchingPage(pagination);
 }
 
 export function isFetchingPage(pagination: PaginationEntityState): boolean {

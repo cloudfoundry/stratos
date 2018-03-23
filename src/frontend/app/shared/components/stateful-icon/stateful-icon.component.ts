@@ -52,10 +52,15 @@ export class StatefulIconComponent implements OnInit, OnChanges {
         template: this.spinnerTemplate
       }
     };
+    this.onChange(this.state);
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.selectedState = this.stateDefinitions[changes.state.currentValue] || null;
+    this.onChange(changes.state.currentValue);
+  }
+
+  private onChange(state) {
+    this.selectedState = this.stateDefinitions[state] || null;
   }
 
 }

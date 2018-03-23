@@ -15,6 +15,10 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
 
+  private isValidFilter<T>(list: T[], value: T): boolean {
+    return !(list && list.length && !list.find(item => item === value));
+  }
+
   constructor(
     store: Store<AppState>,
     listConfig?: IListConfig<APIResource>
@@ -39,14 +43,13 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
         },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           // Filter by cf/org/space
-          const cfGuid = paginationState.clientPagination.filter.items['cf'];
-          const orgGuid = paginationState.clientPagination.filter.items['org'];
-          const spaceGuid = paginationState.clientPagination.filter.items['space'];
+          const cfGuids: string[] = paginationState.clientPagination.filter.items['cf'];
+          const orgGuids: string[] = paginationState.clientPagination.filter.items['org'];
+          const spaceGuids: string[] = paginationState.clientPagination.filter.items['space'];
           return entities.filter(e => {
-            const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
-            const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
-            const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
-            return validCF && validOrg && validSpace;
+            return this.isValidFilter(cfGuids, e.entity.cfGuid) &&
+              this.isValidFilter(orgGuids, e.entity.space.entity.organization_guid) &&
+              this.isValidFilter(spaceGuids, e.entity.space_guid);
           });
         }
       ],

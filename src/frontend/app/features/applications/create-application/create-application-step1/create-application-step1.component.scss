@@ -1,0 +1,9 @@
+.create-app-step-1 {
+  &__placeholder-loading {
+    align-items: flex-start;
+    display: flex;
+  }
+  app-stateful-icon {
+    padding-left: 5px;
+  }
+}

@@ -33,7 +33,7 @@ import {
   defaultPaginationPageSizeOptionsTable,
 } from './list.component.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map } from 'rxjs/operators';
+import { map, filter, tap } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 
@@ -53,7 +53,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
   filterString = '';
-  multiFilters = {};
+  multiFilters;
 
   @Input()
   noEntries: TemplateRef<any>;
@@ -194,9 +194,14 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.multiFilterWidgetObservables = new Array<Subscription>();
     Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
-      const sub = filterConfig.select.asObservable().do((filterItem: string) => {
-        this.paginationController.multiFilter(filterConfig, filterItem);
-      });
+      const sub = filterConfig.select.asObservable().pipe(
+        // This gets us around some initial emits when the services underneath set up.
+        // Note - When we clear a multi selection it'll be an empty array.
+        filter((filter => !!filter)),
+        tap((filterItem: any) => {
+          this.paginationController.multiFilter(filterConfig, filterItem);
+        })
+      );
       this.multiFilterWidgetObservables.push(sub.subscribe());
     });
 
