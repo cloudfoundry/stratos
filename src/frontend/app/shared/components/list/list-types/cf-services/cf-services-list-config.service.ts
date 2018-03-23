@@ -43,7 +43,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
         .select(endpointsRegisteredEntitiesSelector)
         .first()
         .map(endpoints => Object.values(endpoints)),
-      loading$: Observable.of(false),
+      disabled$: Observable.of(false),
       select: new BehaviorSubject(undefined)
     };
 

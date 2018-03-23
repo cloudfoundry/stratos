@@ -2,7 +2,7 @@ import { Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { distinctUntilChanged, map, tap, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap, withLatestFrom, first } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
@@ -20,7 +20,7 @@ import { APIResource } from '../../store/types/api.types';
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
-  loading$: Observable<boolean>;
+  disabled$: Observable<boolean>;
   select: BehaviorSubject<string>;
 }
 
@@ -58,12 +58,26 @@ export class CfOrgSpaceDataService {
     public paginationMonitorFactory: PaginationMonitorFactory,
     @Optional() private _selectMode: CfOrgSpaceSelectMode
   ) {
-    // Note - optional parameter notation' won't work with injectable
+    // Note - normal optional parameter notation won't work with injectable
     this.selectMode = _selectMode || this.selectMode;
     this.createCf();
     this.init();
     this.createOrg();
     this.createSpace();
+
+    // Automatically select the cf on first load given the select mode setting
+    this.cf.list$.pipe(
+      first(),
+      tap(cfs => {
+        if (
+          !!cfs.length &&
+          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
+            (this.selectMode === CfOrgSpaceSelectMode.ANY))
+        ) {
+          this.cf.select.next(cfs[0].guid);
+        }
+      })
+    ).subscribe();
 
     const orgResetSub = this.cf.select.asObservable().pipe(
       distinctUntilChanged(),
@@ -121,8 +135,10 @@ export class CfOrgSpaceDataService {
       list$: this.store
         .select(endpointsRegisteredEntitiesSelector)
         .first()
-        .map(endpoints => Object.values(endpoints)),
-      loading$: Observable.of(false),
+        .map((endpoints: EndpointModel[]) => {
+          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
+        }),
+      disabled$: Observable.of(false),
       select: new BehaviorSubject(undefined)
     };
   }
@@ -138,7 +154,8 @@ export class CfOrgSpaceDataService {
         if (selectedCF && entities) {
           return entities
             .map(org => org.entity)
-            .filter(org => org.cfGuid === selectedCF);
+            .filter(org => org.cfGuid === selectedCF)
+            .sort((a, b) => a.name.localeCompare(b.name));
         }
         return [];
       }
@@ -146,7 +163,7 @@ export class CfOrgSpaceDataService {
 
     this.org = {
       list$: orgList$,
-      loading$: this.allOrgs$.pagination$.map(
+      disabled$: this.allOrgs$.pagination$.map(
         pag => getCurrentPageRequestInfo(pag).busy
       ),
       select: new BehaviorSubject(undefined)
@@ -167,14 +184,14 @@ export class CfOrgSpaceDataService {
           const entity = { ...space.entity };
           entity.guid = space.metadata.guid;
           return entity;
-        });
+        }).sort((a, b) => a.name.localeCompare(b.name));
       }
       return [];
     });
 
     this.space = {
       list$: spaceList$,
-      loading$: this.org.loading$,
+      disabled$: this.org.disabled$,
       select: new BehaviorSubject(undefined)
     };
   }

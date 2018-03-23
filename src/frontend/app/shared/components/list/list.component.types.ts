@@ -80,7 +80,7 @@ export interface IListMultiFilterConfig {
   key: string;
   label: string;
   list$: Observable<IListMultiFilterConfigItem[]>;
-  loading$: Observable<boolean>;
+  disabled$: Observable<boolean>;
   select: BehaviorSubject<any>;
 }
 

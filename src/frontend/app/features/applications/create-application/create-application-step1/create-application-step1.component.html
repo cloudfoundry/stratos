@@ -17,6 +17,9 @@
       <!-- Copied from original version of these widgets.. doesn't seem to work -->
       <app-stateful-icon *ngIf="(cfOrgSpaceService.org.loading$ | async)" [state]="'busy'"></app-stateful-icon>
     </mat-select>
+    <mat-error *ngIf="!(cfOrgSpaceService.space.list$ | async)?.length">
+      There are no organizations in this cloud foundry
+    </mat-error>
   </mat-form-field>
   <mat-form-field>
     <mat-select #spaceSelect="ngModel" [ngModel]="cfOrgSpaceService.space.select.getValue()" (change)="cfOrgSpaceService.space.select.next($event.value)" [disabled]="!cfOrgSpaceService.org.select.getValue()" required placeholder="Space" name="space">
@@ -24,5 +27,8 @@
         <span>{{ space.name }}</span>
       </mat-option>
     </mat-select>
+    <mat-error *ngIf="!(cfOrgSpaceService.space.list$ | async)?.length">
+      There are no spaces in this organization
+    </mat-error>
   </mat-form-field>
 </form>
