@@ -1,13 +1,16 @@
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
-import { MatTabNav } from '@angular/material';
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, AfterContentInit } from '@angular/core';
+import { MatTabNav, MatButton } from '@angular/material';
 import { fromEvent } from 'rxjs/observable/fromEvent';
 import { interval } from 'rxjs/observable/interval';
-import { debounceTime, filter, tap } from 'rxjs/operators';
+import { debounceTime, filter, tap, distinctUntilChanged, delay } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ISubHeaderTabs } from './page-subheader.types';
 
 import { getScrollBarWidth } from '../../../core/helper-classes/dom-helpers';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../store/app-state';
+import { selectSideNavState } from '../../../store/selectors/dashboard.selectors';
 
 @Component({
   selector: 'app-page-subheader',
@@ -26,6 +29,12 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
   @ViewChild('navScroller')
   navScroller: ElementRef;
 
+  @ViewChild('leftButton')
+  leftButton: MatButton;
+
+  @ViewChild('rightButton')
+  rightButton: MatButton;
+
   @Input('tabs')
   tabs: ISubHeaderTabs[];
 
@@ -36,13 +45,15 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
 
   // Nav scroll related properties.
 
+  public scrollBarWidth: number;
+
   public isOverflowing = false;
 
   public disableLeft = false;
 
   public disableRight = false;
 
-  readonly maxScrollSpeed = 45;
+  readonly maxScrollSpeed = 40;
 
   readonly minScrollSpeed = 1;
 
@@ -52,11 +63,11 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
 
   private resizeSub: Subscription;
 
-  public scrollBarWidth: number;
+  private sidebarStateChangeSub: Subscription;
 
   // ***
 
-  constructor() {
+  constructor(private store: Store<AppState>) {
     // We use this to hide the navbar.
     this.scrollBarWidth = getScrollBarWidth();
     this.className = this.nested ? 'nested-tab' : 'page-subheader';
@@ -65,34 +76,39 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  ngAfterViewInit() {
+  public ngAfterViewInit() {
+    this.checkNavOverflow(false);
+    // I had to do this to ensure the initial check got the correct size.
+    // We should try to fix this at some point - NJ
+    // setTimeout(() => {
+    //   this.checkScrollBounds();
+    // });
     this.resizeSub = fromEvent(window, 'resize').pipe(
       debounceTime(100),
       tap(this.checkNavOverflow),
     ).subscribe();
 
-    this.boundCheckSub = fromEvent(this.navScroller.nativeElement, 'scroll').pipe(
-      tap(this.checkScrollBounds),
+    // We do an overflow check when the navbar state changes as this
+    // can effect the whole page layout.
+    this.sidebarStateChangeSub = this.store.select(selectSideNavState).pipe(
+      delay(250),
+      tap(this.checkNavOverflow)
     ).subscribe();
-    // Had to do this to ensure the check got the correct size.
-    // We should try to fix this at some point
-    setTimeout(() => {
-      this.checkNavOverflow();
-    });
-  }
 
-  private checkNavOverflow = () => {
-    this.isOverflowing = this.navIsOverflowing();
-    this.checkScrollBounds();
-  }
-
-  private navIsOverflowing() {
-    if (this.navOuter) {
-      const { offsetWidth } = this.navOuter.nativeElement;
-      const navWith = this.nav._elementRef.nativeElement.offsetWidth;
-      return navWith > offsetWidth;
+    if (this.navScroller) {
+      this.boundCheckSub = fromEvent(this.navScroller.nativeElement, 'scroll').pipe(
+        tap(this.checkScrollBounds),
+      ).subscribe();
     }
-    return false;
+  }
+
+  public ngOnDestroy() {
+    this.resizeSub.unsubscribe();
+    this.sidebarStateChangeSub.unsubscribe();
+    if (this.boundCheckSub) {
+      this.boundCheckSub.unsubscribe();
+    }
+    this.stopScroll();
   }
 
   public startScroll(direction: 'left' | 'right', event: Event) {
@@ -103,7 +119,7 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
     this.scrollSub = interval(50)
       .pipe(
         tap(() => {
-          const easing = this.easeInCubic(speedModifier);
+          const easing = this.easeInQuad(speedModifier);
           const speed = this.normalizeSpeed(easing);
           this.scrollNav(direction, speed);
         }),
@@ -117,6 +133,23 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
       this.scrollSub.unsubscribe();
     }
   }
+
+  private checkNavOverflow = (checkBounds = true) => {
+    this.isOverflowing = this.navIsOverflowing();
+    if (checkBounds === true) {
+      this.checkScrollBounds();
+    }
+  }
+
+  private navIsOverflowing() {
+    if (this.navOuter) {
+      const avaliableWidth = this.navOuter.nativeElement.offsetWidth;
+      const navFullWidth = this.nav._elementRef.nativeElement.offsetWidth;
+      return avaliableWidth < navFullWidth;
+    }
+    return false;
+  }
+
 
   private scrollNav(direction: 'left' | 'right', speed: number = 1) {
     if (direction === 'left') {
@@ -156,13 +189,7 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
     return scrollLeft === 0;
   }
 
-  private easeInCubic = (t) => t * t * t;
+  private easeInQuad = (t) => t * t;
 
   private normalizeSpeed = speed => (speed * (this.maxScrollSpeed - this.minScrollSpeed)) + this.minScrollSpeed;
-
-  ngOnDestroy() {
-    this.resizeSub.unsubscribe();
-    this.boundCheckSub.unsubscribe();
-    this.stopScroll();
-  }
 }

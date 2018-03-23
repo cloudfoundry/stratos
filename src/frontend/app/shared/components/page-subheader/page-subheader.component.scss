@@ -22,7 +22,6 @@
   white-space: nowrap;
   &__inner {
     flex: 1;
-    overflow: auto;
     @include breakpoint(laptop) {
       overflow: hidden;
     }
@@ -38,7 +37,14 @@
 }
 
 .page-subheader__tabs-overflowing {
-  .tab-nav__scroll-button {
-    display: inline-block;
+  .tab-nav {
+    &__scroll-button {
+      display: inline-block;
+    } // We do this only when we're 'programmatically' sure we're overflowing
+    // to stop the ui from jumping while we programmatically
+    // apply margin-bottom
+    &__inner {
+      overflow: auto;
+    }
   }
 }
