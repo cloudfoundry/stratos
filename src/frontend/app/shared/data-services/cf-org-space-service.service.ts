@@ -2,7 +2,7 @@ import { Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { distinctUntilChanged, map, tap, withLatestFrom, first } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap, withLatestFrom, first, startWith, combineLatest } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
@@ -20,7 +20,7 @@ import { APIResource } from '../../store/types/api.types';
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
-  disabled$: Observable<boolean>;
+  loading$: Observable<boolean>;
   select: BehaviorSubject<string>;
 }
 
@@ -41,7 +41,7 @@ export class CfOrgSpaceDataService {
     createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
   ]);
 
-  private allOrgs$ = getPaginationObservables<APIResource<IOrganization>>({
+  private allOrgs = getPaginationObservables<APIResource<IOrganization>>({
     store: this.store,
     action: this.paginationAction,
     paginationMonitor: this.paginationMonitorFactory.create(
@@ -49,6 +49,9 @@ export class CfOrgSpaceDataService {
       entityFactory(this.paginationAction.entityKey)
     )
   });
+  private allOrgsLoading$ = this.allOrgs.pagination$.map(
+    pag => getCurrentPageRequestInfo(pag).busy
+  );
 
   private getEndpointsAndOrgs$: Observable<any>;
   private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
@@ -65,63 +68,74 @@ export class CfOrgSpaceDataService {
     this.createOrg();
     this.createSpace();
 
-    // Automatically select the cf on first load given the select mode setting
-    this.cf.list$.pipe(
+
+    // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
+    this.org.list$.pipe(
       first(),
-      tap(cfs => {
-        if (
-          !!cfs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.cf.select.next(cfs[0].guid);
-        }
+      tap(() => {
+        // Automatically select the cf on first load given the select mode setting
+        this.cf.list$.pipe(
+          first(),
+          tap(cfs => {
+            if (
+              !!cfs.length &&
+              ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
+                (this.selectMode === CfOrgSpaceSelectMode.ANY))
+            ) {
+              this.cf.select.next(cfs[0].guid);
+            }
+          })
+        ).subscribe();
+
+        // Clear or automatically select org/space given cf
+        const orgResetSub = this.cf.select.asObservable().pipe(
+          startWith(undefined),
+          distinctUntilChanged(),
+          withLatestFrom(this.org.list$),
+          tap(([selectedCF, orgs]) => {
+            if (
+              !!orgs.length &&
+              ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
+                (this.selectMode === CfOrgSpaceSelectMode.ANY))
+            ) {
+              this.org.select.next(orgs[0].guid);
+            } else {
+              this.org.select.next(undefined);
+              this.space.select.next(undefined);
+            }
+          }),
+        ).subscribe();
+        this.cf.select.asObservable().finally(() => {
+          orgResetSub.unsubscribe();
+        });
+
+        // Clear or automatically select space given org
+        const spaceResetSub = this.org.select.asObservable().pipe(
+          distinctUntilChanged(),
+          withLatestFrom(this.space.list$),
+          tap(([selectedOrg, spaces]) => {
+            if (
+              !!spaces.length &&
+              ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
+                (this.selectMode === CfOrgSpaceSelectMode.ANY))
+            ) {
+              this.space.select.next(spaces[0].guid);
+            } else {
+              this.space.select.next(undefined);
+            }
+          })
+        ).subscribe();
+        this.org.select.asObservable().finally(() => {
+          spaceResetSub.unsubscribe();
+        });
       })
     ).subscribe();
 
-    const orgResetSub = this.cf.select.asObservable().pipe(
-      distinctUntilChanged(),
-      withLatestFrom(this.org.list$),
-      tap(([selectedCF, orgs]) => {
-        if (
-          !!orgs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.org.select.next(orgs[0].guid);
-        } else {
-          this.org.select.next(undefined);
-          this.space.select.next(undefined);
-        }
-      }),
-    ).subscribe();
-    this.cf.select.asObservable().finally(() => {
-      orgResetSub.unsubscribe();
-    });
-
-    const spaceResetSub = this.org.select.asObservable().pipe(
-      distinctUntilChanged(),
-      withLatestFrom(this.space.list$),
-      tap(([selectedOrg, spaces]) => {
-        if (
-          !!spaces.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.space.select.next(spaces[0].guid);
-        } else {
-          this.space.select.next(undefined);
-        }
-      })
-    ).subscribe();
-    this.org.select.asObservable().finally(() => {
-      spaceResetSub.unsubscribe();
-    });
   }
 
   private init() {
     this.getEndpointsAndOrgs$ = Observable.combineLatest(
-      this.allOrgs$.pagination$
+      this.allOrgs.pagination$
         .filter(paginationEntity => {
           return !getCurrentPageRequestInfo(paginationEntity).busy;
         })
@@ -138,7 +152,7 @@ export class CfOrgSpaceDataService {
         .map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
         }),
-      disabled$: Observable.of(false),
+      loading$: this.allOrgsLoading$,
       select: new BehaviorSubject(undefined)
     };
   }
@@ -147,7 +161,7 @@ export class CfOrgSpaceDataService {
     const orgList$ = Observable.combineLatest(
       this.cf.select.asObservable(),
       this.getEndpointsAndOrgs$,
-      this.allOrgs$.entities$
+      this.allOrgs.entities$
     ).map(
       ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
         const [pag, cfList] = endpointsAndOrgs;
@@ -163,9 +177,7 @@ export class CfOrgSpaceDataService {
 
     this.org = {
       list$: orgList$,
-      disabled$: this.allOrgs$.pagination$.map(
-        pag => getCurrentPageRequestInfo(pag).busy
-      ),
+      loading$: this.allOrgsLoading$,
       select: new BehaviorSubject(undefined)
     };
   }
@@ -173,7 +185,7 @@ export class CfOrgSpaceDataService {
     const spaceList$ = Observable.combineLatest(
       this.org.select.asObservable(),
       this.getEndpointsAndOrgs$,
-      this.allOrgs$.entities$
+      this.allOrgs.entities$
     ).map(([selectedOrgGuid, data, orgs]) => {
       const [orgList, cfList] = data;
       const selectedOrg = orgs.find(org => {
@@ -191,13 +203,13 @@ export class CfOrgSpaceDataService {
 
     this.space = {
       list$: spaceList$,
-      disabled$: this.org.disabled$,
+      loading$: this.org.loading$,
       select: new BehaviorSubject(undefined)
     };
   }
 
   public getEndpointOrgs(endpointGuid: string) {
-    return this.allOrgs$.entities$.pipe(
+    return this.allOrgs.entities$.pipe(
       map(orgs => {
         return orgs.filter(o => o.entity.cfGuid === endpointGuid);
       })
