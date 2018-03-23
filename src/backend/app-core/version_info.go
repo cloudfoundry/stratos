@@ -5,17 +5,12 @@ import (
 	"net/http"
 
 	"github.com/SUSE/stratos-ui/repository/goose-db-version"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 
-// Versions - response returned to caller from a getVersions action
-type Versions struct {
-	ProxyVersion    string `json:"proxy_version"`
-	DatabaseVersion int64  `json:"database_version"`
-}
-
-func (p *portalProxy) getVersionsData() (*Versions, error) {
+func (p *portalProxy) getVersionsData() (*interfaces.Versions, error) {
 	proxyVersion := p.Config.ConsoleVersion
 	if proxyVersion == "" {
 		proxyVersion = "dev"
@@ -24,12 +19,12 @@ func (p *portalProxy) getVersionsData() (*Versions, error) {
 	dbVersionRepo, _ := goosedbversion.NewPostgresGooseDBVersionRepository(p.DatabaseConnectionPool)
 	databaseVersionRec, err := dbVersionRepo.GetCurrentVersion()
 	if err != nil {
-		return &Versions{}, errors.New("Error trying to get current database version")
+		return &interfaces.Versions{}, errors.New("Error trying to get current database version")
 	}
 
 	databaseVersion := databaseVersionRec.VersionID
 
-	resp := &Versions{
+	resp := &interfaces.Versions{
 		ProxyVersion:    proxyVersion,
 		DatabaseVersion: databaseVersion,
 	}

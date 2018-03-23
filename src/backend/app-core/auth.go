@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -29,6 +30,7 @@ type UAAResponse struct {
 	ExpiresIn    int    `json:"expires_in"`
 	Scope        string `json:"scope"`
 	JTI          string `json:"jti"`
+	IDToken      string `json:"id_token"`
 }
 
 // LoginHookFunc - function that can be hooked into a successful user login
@@ -68,7 +70,7 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 		return "", err
 	}
 
-	u, userTokenErr := getUserTokenInfo(tr.AuthToken)
+	u, userTokenErr := p.GetUserTokenInfo(tr.AuthToken)
 	if userTokenErr != nil {
 		return "", userTokenErr
 	}
@@ -135,9 +137,17 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	return nil
 }
 
+// Connect to the given Endpoint
 func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	log.Debug("loginToCNSI")
 	cnsiGuid := c.FormValue("cnsi_guid")
+
+	if len(cnsiGuid) == 0 {
+		return interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Missing target endpoint",
+			"Need Endpoint GUID passed as form param")
+	}
 
 	resp, err := p.DoLoginToCNSI(c, cnsiGuid)
 	if err != nil {
@@ -155,86 +165,74 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 }
 
 func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interfaces.LoginRes, error) {
-	uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
 
+	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
-		return nil, err
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Requested endpoint not registered",
+			"No Endpoint registered with GUID %s: %s", cnsiGUID, err)
 	}
 
-	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
+	// Get ther User ID since we save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
 	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
-	u.UserGUID = userID
 
-	p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, false)
-
-	cfAdmin := strings.Contains(uaaRes.Scope, p.Config.CFAdminIdentifier)
-
-	resp := &interfaces.LoginRes{
-		Account:     u.UserGUID,
-		TokenExpiry: u.TokenExpiry,
-		APIEndpoint: cnsiRecord.APIEndpoint,
-		Admin:       cfAdmin,
+	// Ask the endpoint type to connect
+	for _, plugin := range p.Plugins {
+		endpointPlugin, err := plugin.GetEndpointPlugin()
+		if err != nil {
+			// Plugin doesn't implement an Endpoint Plugin interface, skip
+			continue
 	}
 
-	return resp, nil
-}
-
-func (p *portalProxy) verifyLoginToCNSI(c echo.Context) error {
-	log.Debug("verifyLoginToCNSI")
-
-	cnsiGUID := c.FormValue("cnsi_guid")
-	_, _, _, err := p.fetchToken(cnsiGUID, c)
+		endpointType := endpointPlugin.GetType()
+		if cnsiRecord.CNSIType == endpointType {
+			tokenRecord, isAdmin, err := endpointPlugin.Connect(c, cnsiRecord, userID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "Invalid credentials")
-	}
-	return c.NoContent(http.StatusOK)
-}
-
-func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
-
-	if len(cnsiGUID) == 0 {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
+				return nil, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
-			"Missing target endpoint",
-			"Need CNSI GUID passed as form param")
+					"Could not connect to the endpoint endpoint",
+					"Could not connect to the endpoint endpoint: %s", err)
 	}
 
-	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
-
+			err = p.setCNSITokenRecord(cnsiGUID, userID, *tokenRecord)
 	if err != nil {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
+				return nil, interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
-			"Requested endpoint not registered",
-			"No CNSI registered with GUID %s: %s", cnsiGUID, err)
+					"Failed to save Token for endpoint",
+					"Error occurred: %s", err)
 	}
 
-	authTypeStr := c.FormValue("auth")
-	authType := interfaces.AuthTypeOAuth2
-	switch authTypeStr {
-	case "http":
-		authType = interfaces.AuthTypeHttpBasic
-	default:
-		authType = interfaces.AuthTypeOAuth2
+			resp := &interfaces.LoginRes{
+				Account:     userID,
+				TokenExpiry: tokenRecord.TokenExpiry,
+				APIEndpoint: cnsiRecord.APIEndpoint,
+				Admin:       isAdmin,
 	}
 
-	if authType == interfaces.AuthTypeOAuth2 {
-		return p.fetchOAuth2Token(cnsiRecord, c)
+			return resp, nil
+		}
 	}
 
-	if authType == interfaces.AuthTypeHttpBasic {
-		return p.fetchHttpBasicToken(cnsiRecord, c)
-	}
-
-	return nil, nil, nil, interfaces.NewHTTPShadowError(
+	return nil, interfaces.NewHTTPShadowError(
 		http.StatusBadRequest,
-		"Unknown Auth Type",
-		"Unkown Auth Type for CNSI %s: %s", cnsiGUID, authTypeStr)
+		"Endpoint connection not supported",
+		"Endpoint connection not supported")
+	}
+
+func (p *portalProxy) ConnectOAuth2(c echo.Context, cnsiRecord interfaces.CNSIRecord) (*interfaces.TokenRecord, error) {
+	uaaRes, u, _, err := p.FetchOAuth2Token(cnsiRecord, c)
+	if err != nil {
+		return nil, err
+	}
+	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, false)
+	return &tokenRecord, nil
 }
 
-func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 
 	uaaRes, u, err := p.loginHttpBasic(c)
 
@@ -247,7 +245,7 @@ func (p *portalProxy) fetchHttpBasicToken(cnsiRecord interfaces.CNSIRecord, c ec
 	return uaaRes, u, &cnsiRecord, nil
 }
 
-func (p *portalProxy) fetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *userTokenInfo, *interfaces.CNSIRecord, error) {
+func (p *portalProxy) FetchOAuth2Token(cnsiRecord interfaces.CNSIRecord, c echo.Context) (*UAAResponse, *interfaces.JWTUserTokenInfo, *interfaces.CNSIRecord, error) {
 	endpoint := cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
@@ -305,11 +303,8 @@ func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
 		log.Debug("Setting token record as disconnected")
 
-		userTokenInfo := userTokenInfo{
-			UserGUID: userGUID,
-		}
-
-		if _, err := p.saveCNSIToken(cnsiGUID, userTokenInfo, "cleared_token", "cleared_token", true); err != nil {
+		tokenRecord := p.InitEndpointTokenRecord(0, "cleared_token", "cleared_token", true)
+		if err := p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord); err != nil {
 			return fmt.Errorf("Unable to clear token: %s", err)
 		}
 	} else {
@@ -329,7 +324,7 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 		return err
 	}
 
-	u, err := getUserTokenInfo(uaaRes.AccessToken)
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -344,7 +339,7 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 	return nil
 }
 
-func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -358,7 +353,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 		return uaaRes, u, err
 	}
 
-	u, err = getUserTokenInfo(uaaRes.AccessToken)
+	u, err = p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
 		return uaaRes, u, err
 	}
@@ -366,7 +361,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 	return uaaRes, u, nil
 }
 
-func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
+func (p *portalProxy) loginHttpBasic(c echo.Context) (uaaRes *UAAResponse, u *interfaces.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -407,13 +402,17 @@ func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, pas
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
-func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refreshToken, client, clientSecret, authEndpoint string, scopes string) (*UAAResponse, error) {
 	log.Debug("getUAATokenWithRefreshToken")
 
 	body := url.Values{}
 	body.Set("grant_type", "refresh_token")
 	body.Set("refresh_token", refreshToken)
 	body.Set("response_type", "token")
+
+	if len(scopes) > 0 {
+		body.Set("scope", scopes)
+	}
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
@@ -456,7 +455,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 	return &response, nil
 }
 
-func (p *portalProxy) saveAuthToken(u userTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
+func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok string, refreshTok string) (interfaces.TokenRecord, error) {
 	log.Debug("saveAuthToken")
 
 	key := u.UserGUID
@@ -464,6 +463,7 @@ func (p *portalProxy) saveAuthToken(u userTokenInfo, authTok string, refreshTok 
 		AuthToken:    authTok,
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
+		AuthType:     interfaces.AuthTypeOAuth2,
 	}
 
 	err := p.setUAATokenRecord(key, tokenRecord)
@@ -474,7 +474,20 @@ func (p *portalProxy) saveAuthToken(u userTokenInfo, authTok string, refreshTok 
 	return tokenRecord, nil
 }
 
-func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
+// Helper to initialzie a token record using the specified parameters
+func (p *portalProxy) InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) interfaces.TokenRecord {
+	tokenRecord := interfaces.TokenRecord{
+		AuthToken:    authTok,
+		RefreshToken: refreshTok,
+		TokenExpiry:  expiry,
+		Disconnected: disconnect,
+		AuthType:     interfaces.AuthTypeOAuth2,
+	}
+
+	return tokenRecord
+}
+
+func (p *portalProxy) removed_saveCNSIToken(cnsiID string, u interfaces.JWTUserTokenInfo, authTok string, refreshTok string, disconnect bool) (interfaces.TokenRecord, error) {
 	log.Debug("saveCNSIToken")
 
 	tokenRecord := interfaces.TokenRecord{
@@ -482,6 +495,7 @@ func (p *portalProxy) saveCNSIToken(cnsiID string, u userTokenInfo, authTok stri
 		RefreshToken: refreshTok,
 		TokenExpiry:  u.TokenExpiry,
 		Disconnected: disconnect,
+		AuthType:     interfaces.AuthTypeOAuth2,
 	}
 
 	err := p.setCNSITokenRecord(cnsiID, u.UserGUID, tokenRecord)
@@ -567,14 +581,14 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 	if time.Now().After(time.Unix(sessionExpireTime, 0)) {
 
 		// UAA Token has expired, refresh the token, if that fails, fail the request
-		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, tr.RefreshToken, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+		uaaRes, tokenErr := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, tr.RefreshToken, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
 		if tokenErr != nil {
 			msg := "Could not refresh UAA token"
 			log.Error(msg, tokenErr)
 			return echo.NewHTTPError(http.StatusForbidden, msg)
 		}
 
-		u, userTokenErr := getUserTokenInfo(uaaRes.AccessToken)
+		u, userTokenErr := p.GetUserTokenInfo(uaaRes.AccessToken)
 		if userTokenErr != nil {
 			return userTokenErr
 		}
@@ -654,7 +668,7 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 	}
 
 	// get the scope out of the JWT token data
-	userTokenInfo, err := getUserTokenInfo(uaaTokenRecord.AuthToken)
+	userTokenInfo, err := p.GetUserTokenInfo(uaaTokenRecord.AuthToken)
 	if err != nil {
 		msg := "Unable to find scope information in the UAA Auth Token: %s"
 		log.Errorf(msg, err)
@@ -675,6 +689,11 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 }
 
 func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, bool) {
+	user, _, ok := p.GetCNSIUserAndToken(cnsiGUID, userGUID)
+	return user, ok
+}
+
+func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, *interfaces.TokenRecord, bool) {
 	log.Debug("GetCNSIUser")
 
 	// get the uaa token record
@@ -682,21 +701,32 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	if !ok {
 		msg := "Unable to retrieve CNSI token record."
 		log.Error(msg)
-		return nil, false
+		return nil, nil, false
 	}
 
+	var cnsiUser *interfaces.ConnectedUser
+	var scope = []string{}
+
+	if cfTokenRecord.AuthType == interfaces.AuthTypeHttpBasic {
+		cnsiUser = &interfaces.ConnectedUser{
+			GUID: cfTokenRecord.RefreshToken,
+			Name: cfTokenRecord.RefreshToken,
+		}
+	} else {
 	// get the scope out of the JWT token data
-	userTokenInfo, err := getUserTokenInfo(cfTokenRecord.AuthToken)
+		userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
 	if err != nil {
 		msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
 		log.Errorf(msg, err)
-		return nil, false
+			return nil, nil, false
 	}
 
 	// add the uaa entry to the output
-	cnsiUser := &interfaces.ConnectedUser{
+		cnsiUser = &interfaces.ConnectedUser{
 		GUID: userTokenInfo.UserGUID,
 		Name: userTokenInfo.UserName,
+	}
+		scope = userTokenInfo.Scope
 	}
 
 	// is the user an CF admin?
@@ -704,15 +734,15 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 	if err != nil {
 		msg := "Unable to load CNSI record: %s"
 		log.Errorf(msg, err)
-		return nil, false
+		return nil, nil, false
 	}
 	// TODO should be an extension point
 	if cnsiRecord.CNSIType == "cf" {
-		cnsiAdmin := strings.Contains(strings.Join(userTokenInfo.Scope, ""), p.Config.CFAdminIdentifier)
+		cnsiAdmin := strings.Contains(strings.Join(scope, ""), p.Config.CFAdminIdentifier)
 		cnsiUser.Admin = cnsiAdmin
 	}
 
-	return cnsiUser, true
+	return cnsiUser, &cfTokenRecord, true
 }
 
 // Refresh the UAA Token for the user
@@ -725,12 +755,12 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t interfaces.TokenRecord
 	}
 
 	uaaRes, err := p.getUAATokenWithRefreshToken(p.Config.ConsoleConfig.SkipSSLValidation, userToken.RefreshToken,
-		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
+		p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint(), "")
 	if err != nil {
 		return t, fmt.Errorf("UAA Token refresh request failed: %v", err)
 	}
 
-	u, err := getUserTokenInfo(uaaRes.AccessToken)
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
 		return t, fmt.Errorf("Could not get user token info from access token")
 	}

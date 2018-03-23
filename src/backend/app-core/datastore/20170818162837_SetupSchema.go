@@ -3,13 +3,13 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"os"
+	"strings"
+
+	"bitbucket.org/liamstask/goose/lib/goose"
 )
 
 // Up is executed when this migration is applied
-func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
-	databaseProvider := os.Getenv("DATABASE_PROVIDER")
-	fmt.Printf("ENV is: %s", databaseProvider)
+func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx, conf *goose.DBConf) {
 
 	consoleConfigTable := "CREATE TABLE IF NOT EXISTS console_config ("
 	consoleConfigTable += "  uaa_endpoint              VARCHAR(255)              NOT NULL, "
@@ -26,16 +26,14 @@ func (s *StratosMigrations) Up_20170818162837(txn *sql.Tx) {
 	}
 
 	// Find a way to ensure this in Mysql
-	if databaseProvider == "pgsql" {
+	if strings.Contains(conf.Driver.Name, "postgres") {
 		createIndex := "CREATE UNIQUE INDEX console_config_one_row"
 		createIndex += "  ON console_config((uaa_endpoint IS NOT NULL));"
 		_, err = txn.Exec(createIndex)
 		if err != nil {
 			fmt.Printf("Failed to migrate due to: %v", err)
 		}
-
 	}
-
 }
 
 // Down is executed when this migration is rolled back

@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo"
@@ -15,6 +16,10 @@ type PortalProxy interface {
 
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
+	// Auth
+	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
+	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
+
 	// Session
 	GetSession(c echo.Context) (*sessions.Session, error)
 	GetSessionValue(c echo.Context, key string) (interface{}, error)
@@ -24,7 +29,7 @@ type PortalProxy interface {
 
 	SaveConsoleConfig(consoleConfig *ConsoleConfig, consoleRepoInterface interface{}) error
 
-	RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
+	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
 	DoLoginToCNSI(c echo.Context, cnsiGUID string) (*LoginRes, error)
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)
@@ -33,6 +38,7 @@ type PortalProxy interface {
 	GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (TokenRecord, bool)
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
+	ListEndpointsByUser(userGUID string) ([]*ConnectedEndpoint, error)
 
 	GetClientId(cnsiType string) (string, error)
 
@@ -42,4 +48,10 @@ type PortalProxy interface {
 
 	GetUsername(userid string) (string, error)
 	RefreshUAALogin(username, password string, store bool) error
+	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
+
+	// Proxy API requests
+	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
+	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
+	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
 }

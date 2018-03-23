@@ -17,21 +17,6 @@ type Endpoint struct {
 	CNSIType string                    `json:"type"`
 }
 
-// Info - this represents user specific info
-type Info struct {
-	Versions     *Versions                             `json:"version"`
-	User         *interfaces.ConnectedUser             `json:"user"`
-	Endpoints    map[string]map[string]*EndpointDetail `json:"endpoints"`
-	CloudFoundry *interfaces.CFInfo                    `json:"cloud-foundry,omitempty"`
-	PluginConfig map[string]string                     `json:"plugin-config,omitempty"`
-}
-
-// Extends CNSI Record and adds the user
-type EndpointDetail struct {
-	*interfaces.CNSIRecord
-	User *interfaces.ConnectedUser `json:"user"`
-}
-
 func (p *portalProxy) info(c echo.Context) error {
 
 	s, err := p.getInfo(c)
@@ -42,7 +27,7 @@ func (p *portalProxy) info(c echo.Context) error {
 	return c.JSON(http.StatusOK, s)
 }
 
-func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
+func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 	// get the version
 	versions, err := p.getVersionsData()
 	if err != nil {
@@ -61,10 +46,10 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 	}
 
 	// create initial info struct
-	s := &Info{
+	s := &interfaces.Info{
 		Versions:     versions,
 		User:         uaaUser,
-		Endpoints:    make(map[string]map[string]*EndpointDetail),
+		Endpoints:    make(map[string]map[string]*interfaces.EndpointDetail),
 		CloudFoundry: p.Config.CloudFoundryInfo,
 		PluginConfig: p.Config.PluginConfig,
 	}
@@ -75,21 +60,33 @@ func (p *portalProxy) getInfo(c echo.Context) (*Info, error) {
 			// Plugin doesn't implement an Endpoint Plugin interface, skip
 			continue
 		}
-		s.Endpoints[endpointPlugin.GetType()] = make(map[string]*EndpointDetail)
+		s.Endpoints[endpointPlugin.GetType()] = make(map[string]*interfaces.EndpointDetail)
 	}
 
 	// get the CNSI Endpoints
 	cnsiList, _ := p.buildCNSIList(c)
 	for _, cnsi := range cnsiList {
 		// Extend the CNSI record
-		endpoint := &EndpointDetail{CNSIRecord: cnsi}
+		endpoint := &interfaces.EndpointDetail{
+			CNSIRecord: cnsi,
+			Metadata:   make(map[string]string),
+		}
 		// try to get the user info for this cnsi for the user
-		cnsiUser, ok := p.GetCNSIUser(cnsi.GUID, userGUID)
+		cnsiUser, token, ok := p.GetCNSIUserAndToken(cnsi.GUID, userGUID)
 		if ok {
 			endpoint.User = cnsiUser
+			endpoint.TokenMetadata = token.Metadata
 		}
 		cnsiType := cnsi.CNSIType
 		s.Endpoints[cnsiType][cnsi.GUID] = endpoint
+	}
+
+	// Allow plugin to modyf the info data
+	for _, plugin := range p.Plugins {
+		endpointPlugin, err := plugin.GetEndpointPlugin()
+		if err == nil {
+			endpointPlugin.UpdateMetadata(s, userGUID, c)
+		}
 	}
 
 	return s, nil

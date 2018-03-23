@@ -3,18 +3,19 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"os"
+	"strings"
+
+	"bitbucket.org/liamstask/goose/lib/goose"
 )
 
 // Up is executed when this migration is applied
-func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
+func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx, conf *goose.DBConf) {
 
-	databaseProvider := os.Getenv("DATABASE_PROVIDER")
-	fmt.Printf("ENV is: %s, %s", databaseProvider, os.Getenv("MYSQL_ROOT_PASSWORD"))
 	binaryDataType := "BYTEA"
-	if databaseProvider == "mysql" {
+	if strings.Contains(conf.Driver.Name, "mysql") {
 		binaryDataType = "BLOB"
 	}
+
 	createTokens := "CREATE TABLE IF NOT EXISTS tokens ("
 	createTokens += "user_guid     VARCHAR(36) NOT NULL, "
 	createTokens += "cnsi_guid     VARCHAR(36), "
@@ -24,7 +25,7 @@ func (s *StratosMigrations) Up_20170818120003(txn *sql.Tx) {
 	createTokens += "token_expiry  BIGINT      NOT NULL, "
 	createTokens += "last_updated  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP)"
 
-	if databaseProvider == "pgsql" {
+	if strings.Contains(conf.Driver.Name, "postgres") {
 		createTokens += " WITH (OIDS=FALSE);"
 	} else {
 		createTokens += ";"
