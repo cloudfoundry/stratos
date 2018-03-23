@@ -53,7 +53,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('filter') filter: NgModel;
   filterString = '';
-  multiFilters = {};
+  multiFilters;
 
   @Input()
   noEntries: TemplateRef<any>;

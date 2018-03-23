@@ -108,7 +108,7 @@ export class CfOrgSpaceDataService {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
         }),
       loading$: this.allOrgsLoading$,
-      select: new BehaviorSubject(undefined)
+      select: new BehaviorSubject(null)
     };
   }
 
@@ -146,20 +146,20 @@ export class CfOrgSpaceDataService {
     const spaceList$ = Observable.combineLatest(
       this.org.select.asObservable(),
       this.getEndpointsAndOrgs$,
-      this.org.list$
-    ).map(([selectedOrg, data, orgs]: [string | string[], any, any]) => {
+      this.allOrgs.entities$
+    ).map(([selectedOrg, data, orgs]: [string | string[], any, APIResource<IOrganization>[]]) => {
       if (!this.validValue(selectedOrg)) {
         return [];
       }
-      const [orgList, cfList] = data;
+
       const selectedOrgs = orgs.map(org => {
         if (!this.valueFilter(selectedOrg, (compareOrg: IOrganization) => compareOrg.guid)(org)) {
           return [];
         }
-        if (!org || !org.spaces) {
+        if (!org || !org.entity || !org.entity.spaces) {
           return [];
         }
-        return org.spaces.map(space => {
+        return org.entity.spaces.map(space => {
           const entity = { ...space.entity };
           entity.guid = space.metadata.guid;
           return entity;
@@ -185,17 +185,17 @@ export class CfOrgSpaceDataService {
 
   private setupAutoSelectors() {
     // Automatically select the cf on first load given the select mode setting
-    this.cf.list$.pipe(
-      first(),
-      tap(cfs => {
-        if (!!cfs.length &&
-          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
-            (this.selectMode === CfOrgSpaceSelectMode.ANY))
-        ) {
-          this.cf.select.next(this.multiMode ? [cfs[0].guid] : cfs[0].guid);
-        }
-      })
-    ).subscribe();
+    // this.cf.list$.pipe(
+    //   first(),
+    //   tap(cfs => {
+    //     if (!!cfs.length &&
+    //       ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
+    //         (this.selectMode === CfOrgSpaceSelectMode.ANY))
+    //     ) {
+    //       this.cf.select.next(this.multiMode ? [cfs[0].guid] : cfs[0].guid);
+    //     }
+    //   })
+    // ).subscribe();
 
     // Clear or automatically select org/space given cf
     const orgResetSub = this.cf.select.asObservable().pipe(
