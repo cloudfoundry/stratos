@@ -28,7 +28,7 @@ import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/t
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
-  return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
+  return getNameForEndpointType(endpoint.cnsi_type);
 }
 
 export const endpointColumns: ITableColumn<EndpointModel>[] = [
@@ -132,7 +132,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
           name: item.name,
-          guid: item.guid
+          guid: item.guid,
+          type: item.cnsi_type,
         },
         disableClose: true
       });

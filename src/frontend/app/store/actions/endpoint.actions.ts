@@ -25,6 +25,19 @@ export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
 
+// Different Auth Type support for connecting to Endpoints
+export type AuthParamsUsernamePassword = {
+  username: string,
+  password: string,
+}
+
+export type AuthParamsToken = {
+  token: string,
+}
+
+// All supported auth params types
+export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
+
 export class GetAllEndpoints implements PaginatedAction {
   public static storeKey = 'endpoint-list';
   constructor(public login = false) { }
@@ -57,8 +70,9 @@ export class GetAllEndpointsFailed implements Action {
 export class ConnectEndpoint implements Action {
   constructor(
     public guid: string,
-    public username: string,
-    public password: string,
+    public authType: string,
+    public authValues: AuthParams,
+    public body: string,
   ) { }
   type = CONNECT_ENDPOINTS;
 }
@@ -79,6 +93,7 @@ export class UnregisterEndpoint implements Action {
 
 export class RegisterEndpoint implements Action {
   constructor(
+    public endpointType: string,
     public name: string,
     public endpoint: string,
     public skipSslValidation: boolean,

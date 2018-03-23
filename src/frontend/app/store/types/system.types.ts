@@ -7,7 +7,7 @@ export interface SystemInfo {
   };
   user: EndpointUser;
   endpoints: {
-    cf: {
+    [type: string]: {
       [key: string]: EndpointModel
     }
   };

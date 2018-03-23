@@ -1,0 +1,18 @@
+.metrics-url {
+  font-size: 14px;
+}
+
+.metrics-info {
+	display: flex;
+	align-items: center;
+  mat-icon {
+		font-size: 48px;
+		width: 48px;
+		height: 48px;
+    margin-right: 8px;
+  }
+}
+
+.metrics-detail {
+	margin-left: 56px;
+}

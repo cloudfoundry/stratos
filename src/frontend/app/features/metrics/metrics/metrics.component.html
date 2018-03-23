@@ -1,0 +1,32 @@
+<app-page-header>
+    <h1>Metrics</h1>
+</app-page-header>
+
+<mat-card *ngFor="let ep of (metricsService.metricsEndpoints$ | async)" >
+  <mat-card-content>
+    <div class="metrics-info">
+      <mat-icon>equalizer</mat-icon>
+      <div>
+        <div>{{ ep.provider.name }}</div>
+        <h2 class="metrics-url">
+					<a target="metrics" href="{{ ep.provider.token_endpoint }}">{{ ep.provider.token_endpoint }}</a>
+				</h2>
+      </div>
+    </div>
+    <div class="metrics-detail">
+			<P>Provides metrics for the following endpoints:</P>
+			<div>
+				<div *ngFor="let svc of ep.endpoints" class="metric-endpoint">
+					<div class="metrics-info">
+						<mat-icon>settings_ethernet</mat-icon>
+						<div>
+								<div>{{ svc.name }}</div>
+								<div>{{ getNameForEndpointType(svc.cnsi_type) }}</div>
+								<div>{{ svc.url }}</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</mat-card-content>
+</mat-card>

@@ -82,7 +82,13 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
-
+import { FileInputComponent } from './components/file-input/file-input.component';
+import { RingChartComponent } from './components/ring-chart/ring-chart.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { KubernetesNodeCapacityComponent } from './components/list/list-types/kubernetes-nodes/kubernetes-node-capacity/kubernetes-node-capacity.component';
+import { SvgIconComponent } from './components/svg-icon/svg-icon.component';
+import { KubernetesNodeStatusComponent } from './components/list/list-types/kubernetes-nodes/kubernetes-node-status/kubernetes-node-status.component';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 @NgModule({
   imports: [
     CommonModule,
@@ -92,7 +98,8 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule
+    CdkTableModule,
+    NgxChartsModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -153,7 +160,8 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     BooleanIndicatorComponent,
     AppChipsComponent,
     ServiceIconComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+	RingChartComponent,
   ],
   exports: [
     FormsModule,
@@ -206,6 +214,7 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
+	RingChartComponent,
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
     EnvVarViewComponent,

@@ -26,6 +26,7 @@ const appRoutes: Routes = [
       { path: 'endpoints', loadChildren: 'app/features/endpoints/endpoints.module#EndpointsModule' },
       { path: 'service-catalog', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' }
+      { path: 'metrics', loadChildren: 'app/features/metrics/metrics.module#MetricsModule' },
     ]
   },
   {

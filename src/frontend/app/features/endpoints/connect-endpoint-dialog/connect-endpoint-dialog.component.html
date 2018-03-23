@@ -9,6 +9,13 @@
   </h2>
   <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
     <mat-dialog-content class="connection-dialog__content">
+      <mat-form-field *ngIf="authTypesForEndpoint.length > 1">
+        <mat-select (change)="authChanged($event)" id="authType" name="authType" formControlName="authType" placeholder="Auth Type">
+          <mat-option *ngFor="let auth of authTypesForEndpoint" [value]="auth">{{ auth.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <input type="hidden" *ngIf="authTypesForEndpoint.length === 1" name="authType" formControlName="authType">
+      <div *ngIf="endpointForm.value.authType === 'creds'" formGroupName="authValues" class="connection-dialog__auth">
       <mat-form-field>
         <input matInput placeholder="Username" formControlName="username">
       </mat-form-field>

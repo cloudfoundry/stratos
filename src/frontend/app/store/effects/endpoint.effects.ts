@@ -56,7 +56,7 @@ export class EndpointsEffect {
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
 
-      const endpoints = action.payload.endpoints.cf; // We're only storing cf's??
+      const endpoints = action.payload.endpoints;
 
       // Data is an array of endpoints
       const mappedData = {
@@ -66,13 +66,16 @@ export class EndpointsEffect {
         result: []
       } as NormalizedResponse;
 
-      const data = Object.values(endpoints).forEach(endpointInfo => {
+      Object.keys(endpoints).forEach((type: string) => {
+        const endpointsForType = endpoints[type];
+        Object.values(endpointsForType).forEach(endpointInfo => {
         mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
           ...endpointInfo,
           connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
           registered: !!endpointInfo.user,
         };
         mappedData.result.push(endpointInfo.guid);
+      });
       });
 
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
@@ -89,9 +92,9 @@ export class EndpointsEffect {
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
+          ...<any>action.authValues,
           'cnsi_guid': action.guid,
-          'username': action.username,
-          'password': action.password,
+          'connect_type': action.authType,
         }
       });
 
@@ -100,7 +103,8 @@ export class EndpointsEffect {
         '/pp/v1/auth/login/cnsi',
         params,
         null,
-        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED]
+        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
+        action.body,
       );
     });
 
@@ -166,7 +170,7 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         apiAction,
-        '/pp/v1/register/cf',
+        '/pp/v1/register/' + action.endpointType,
         params,
         'create',
         [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED]
@@ -198,11 +202,12 @@ export class EndpointsEffect {
     apiActionType: ApiRequestTypes = 'update',
     actionStrings: [string, string] = [null, null],
     endpointType: EndpointType = 'cloud-foundry'
+    body?: string,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
-    return this.http.post(url, {}, {
+    return this.http.post(url, body || {}, {
       headers,
       params
     }).map(endpoint => {

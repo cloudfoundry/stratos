@@ -240,7 +240,7 @@ export class APIEffect {
       const registeredEndpointGuids = [];
       Object.keys(endpoints).forEach(endpointGuid => {
         const endpoint = endpoints[endpointGuid];
-        if (endpoint.registered) {
+        if (endpoint.registered && endpoint.cnsi_type === 'cf') {
           registeredEndpointGuids.push(endpoint.guid);
         }
       });

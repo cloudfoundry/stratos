@@ -34,11 +34,23 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   connectingSub: Subscription;
   fetchSub: Subscription;
-  public endpointForm = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required]
-  });
+  public endpointForm;
 
+  private bodyContent = '';
+   
+  private authTypes = [
+    {
+      name: "Username and Password",
+      value: "creds",
+      form: {
+    username: ['', Validators.required],
+        password: ['', Validators.required],
+      },
+      types: [ 'cf', 'metrics']
+    },
+  ];
+
+  private authTypesForEndpoint = [];
 
   constructor(
     public store: Store<AppState>,
@@ -47,11 +59,47 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     public snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: {
       name: string,
-      guid: string
+      guid: string,
+      type: string,
     }
   ) {
+    // Populate the valid auth types for the endpoint that we want to connect to
+    this.authTypes.forEach(authType => {
+      if (authType.types.find(t => t=== this.data.type)) {
+        this.authTypesForEndpoint.push(authType);
+      }
+    })
+
+    // Create the endpoint form
+    const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+    this.endpointForm = this.fb.group({
+      authType: [autoSelected.value || '', Validators.required],
+      authValues: this.fb.group(autoSelected.form || {})
+    });
+
     this.setupObservables();
     this.setupSubscriptions();
+  }
+
+  onFileSelect(event) {
+    const file = event[0];
+    var reader = new FileReader();
+    reader.onload = (e) => {
+      var text = reader.result;
+      this.bodyContent = text;
+      this.endpointForm.controls.authValues.patchValue({
+        config: file.name,
+      });
+    }
+
+    reader.readAsText(file);
+  }
+
+  authChanged(e) {
+    const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
+    this.endpointForm.removeControl('authValues');
+    this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+    this.bodyContent = '';
   }
 
   setupSubscriptions() {
@@ -137,11 +185,12 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   submit(event) {
-    const { guid, username, password } = this.endpointForm.value;
+    const { guid, authType, authValues } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
-      username,
-      password
+      authType,
+      authValues,
+      this.bodyContent,
     ));
   }
 
