@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap, withLatestFrom } from 'rxjs/operators';
 
+import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../store/helpers/entity-factory';
@@ -15,26 +16,32 @@ import {
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { APIResource } from '../../store/types/api.types';
 
-export interface CfOrgSpaceItem {
-  list$: Observable<EndpointModel[] | any[]>;
+export interface CfOrgSpaceItem<T = any> {
+  list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  select: BehaviorSubject<EndpointModel | any>;
+  select: BehaviorSubject<string>;
+}
+
+export const enum CfOrgSpaceSelectMode {
+  FIRST_ONLY = 1,
+  ANY = 2
 }
 
 @Injectable()
 export class CfOrgSpaceDataService {
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
-  public cf: CfOrgSpaceItem;
-  public org: CfOrgSpaceItem;
-  public space: CfOrgSpaceItem;
+  public cf: CfOrgSpaceItem<EndpointModel>;
+  public org: CfOrgSpaceItem<IOrganization>;
+  public space: CfOrgSpaceItem<ISpace>;
 
   public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
     createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
   ]);
 
-  private allOrgs$ = getPaginationObservables({
+  private allOrgs$ = getPaginationObservables<APIResource<IOrganization>>({
     store: this.store,
     action: this.paginationAction,
     paginationMonitor: this.paginationMonitorFactory.create(
@@ -44,37 +51,55 @@ export class CfOrgSpaceDataService {
   });
 
   private getEndpointsAndOrgs$: Observable<any>;
+  private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
 
   constructor(
     private store: Store<AppState>,
-    public paginationMonitorFactory: PaginationMonitorFactory
+    public paginationMonitorFactory: PaginationMonitorFactory,
+    @Optional() private _selectMode: CfOrgSpaceSelectMode
   ) {
+    // Note - optional parameter notation' won't work with injectable
+    this.selectMode = _selectMode || this.selectMode;
     this.createCf();
     this.init();
     this.createOrg();
     this.createSpace();
 
-    const orgResetSub = this.cf.select
-      .asObservable()
-      .distinctUntilChanged()
-      .do(() => {
-        // When this service is refactored we need to update these at the same time as the cf select change occurs
-        this.org.select.next(undefined);
-        this.space.select.next(undefined);
-      })
-      .subscribe();
+    const orgResetSub = this.cf.select.asObservable().pipe(
+      distinctUntilChanged(),
+      withLatestFrom(this.org.list$),
+      tap(([selectedCF, orgs]) => {
+        if (
+          !!orgs.length &&
+          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
+            (this.selectMode === CfOrgSpaceSelectMode.ANY))
+        ) {
+          this.org.select.next(orgs[0].guid);
+        } else {
+          this.org.select.next(undefined);
+          this.space.select.next(undefined);
+        }
+      }),
+    ).subscribe();
     this.cf.select.asObservable().finally(() => {
       orgResetSub.unsubscribe();
     });
 
-    const spaceResetSub = this.org.select
-      .asObservable()
-      .distinctUntilChanged()
-      .do(() => {
-        // When this service is refactored we need to update these at the same time as the cf select change occurs
-        this.space.select.next(undefined);
+    const spaceResetSub = this.org.select.asObservable().pipe(
+      distinctUntilChanged(),
+      withLatestFrom(this.space.list$),
+      tap(([selectedOrg, spaces]) => {
+        if (
+          !!spaces.length &&
+          ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
+            (this.selectMode === CfOrgSpaceSelectMode.ANY))
+        ) {
+          this.space.select.next(spaces[0].guid);
+        } else {
+          this.space.select.next(undefined);
+        }
       })
-      .subscribe();
+    ).subscribe();
     this.org.select.asObservable().finally(() => {
       spaceResetSub.unsubscribe();
     });
@@ -108,7 +133,7 @@ export class CfOrgSpaceDataService {
       this.getEndpointsAndOrgs$,
       this.allOrgs$.entities$
     ).map(
-      ([selectedCF, endpointsAndOrgs, entities]: [EndpointModel, any, any]) => {
+      ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
         const [pag, cfList] = endpointsAndOrgs;
         if (selectedCF && entities) {
           return entities
