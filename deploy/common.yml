@@ -1,4 +1,4 @@
-version: '2'
+version: '2.3'
 services:
 
   ##############################################################################
@@ -39,7 +39,8 @@ services:
     extends: buildCommon
     build:
       context: ../
-      dockerfile: deploy/db/Dockerfile.goose.dev
+      dockerfile: deploy/Dockerfile.bk
+      target: db-migrator
     environment:
       - DATABASE_PROVIDER=mysql
 
