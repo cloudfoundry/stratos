@@ -21,7 +21,7 @@ import { APIResource } from '../../store/types/api.types';
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  select: BehaviorSubject<string>;
+  select: BehaviorSubject<any>;
 }
 
 export const enum CfOrgSpaceSelectMode {
@@ -59,7 +59,8 @@ export class CfOrgSpaceDataService {
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
-    @Optional() private _selectMode: CfOrgSpaceSelectMode
+    @Optional() private _selectMode: CfOrgSpaceSelectMode,
+    @Optional() public multiMode: boolean
   ) {
     // Note - normal optional parameter notation won't work with injectable
     this.selectMode = _selectMode || this.selectMode;
@@ -82,7 +83,7 @@ export class CfOrgSpaceDataService {
               ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
                 (this.selectMode === CfOrgSpaceSelectMode.ANY))
             ) {
-              this.cf.select.next(cfs[0].guid);
+              this.cf.select.next(multiMode ? [cfs[0].guid] : cfs[0].guid);
             }
           })
         ).subscribe();
@@ -98,7 +99,7 @@ export class CfOrgSpaceDataService {
               ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
                 (this.selectMode === CfOrgSpaceSelectMode.ANY))
             ) {
-              this.org.select.next(orgs[0].guid);
+              this.org.select.next(multiMode ? [orgs[0].guid] : orgs[0].guid);
             } else {
               this.org.select.next(undefined);
               this.space.select.next(undefined);
@@ -119,7 +120,7 @@ export class CfOrgSpaceDataService {
               ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
                 (this.selectMode === CfOrgSpaceSelectMode.ANY))
             ) {
-              this.space.select.next(spaces[0].guid);
+              this.space.select.next(multiMode ? [spaces[0].guid] : spaces[0].guid);
             } else {
               this.space.select.next(undefined);
             }
@@ -157,21 +158,27 @@ export class CfOrgSpaceDataService {
     };
   }
 
+  private validValue = (stringOrArray) => this.multiMode ? stringOrArray && stringOrArray.length : stringOrArray;
+  private valueFilter = (stringOrArray, getId) => {
+    return this.multiMode ?
+      (entity) => stringOrArray.find(guid => guid === getId(entity)) :
+      (entity) => stringOrArray = getId(entity);
+  }
+
   private createOrg() {
     const orgList$ = Observable.combineLatest(
       this.cf.select.asObservable(),
       this.getEndpointsAndOrgs$,
       this.allOrgs.entities$
     ).map(
-      ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
-        const [pag, cfList] = endpointsAndOrgs;
-        if (selectedCF && entities) {
-          return entities
-            .map(org => org.entity)
-            .filter(org => org.cfGuid === selectedCF)
-            .sort((a, b) => a.name.localeCompare(b.name));
+      ([selectedCF, endpointsAndOrgs, entities]: [string[], any, APIResource<IOrganization>[]]) => {
+        if (!this.validValue(selectedCF) && entities) {
+          return [];
         }
-        return [];
+        return entities
+          .map(org => org.entity)
+          .filter(org => this.valueFilter(selectedCF, (compareOrg: IOrganization) => compareOrg.cfGuid)(org))
+          .sort((a, b) => a.name.localeCompare(b.name));
       }
     );
 
@@ -185,20 +192,26 @@ export class CfOrgSpaceDataService {
     const spaceList$ = Observable.combineLatest(
       this.org.select.asObservable(),
       this.getEndpointsAndOrgs$,
-      this.allOrgs.entities$
-    ).map(([selectedOrgGuid, data, orgs]) => {
+      this.org.list$
+    ).map(([selectedOrg, data, orgs]: [string | string[], any, any]) => {
+      if (!this.validValue(selectedOrg)) {
+        return [];
+      }
       const [orgList, cfList] = data;
-      const selectedOrg = orgs.find(org => {
-        return org.metadata.guid === selectedOrgGuid;
-      });
-      if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
-        return selectedOrg.entity.spaces.map(space => {
+      const selectedOrgs = orgs.map(org => {
+        if (!this.valueFilter(selectedOrg, (compareOrg: IOrganization) => compareOrg.guid)(org)) {
+          return [];
+        }
+        if (!org || !org.spaces) {
+          return [];
+        }
+        return org.spaces.map(space => {
           const entity = { ...space.entity };
           entity.guid = space.metadata.guid;
           return entity;
-        }).sort((a, b) => a.name.localeCompare(b.name));
-      }
-      return [];
+        });
+      });
+      return [].concat(...selectedOrgs);
     });
 
     this.space = {

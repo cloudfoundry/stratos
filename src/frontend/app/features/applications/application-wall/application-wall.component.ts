@@ -16,6 +16,8 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
 import { APIResource } from '../../../store/types/api.types';
+import { CfOrgSpaceDataService, CfOrgSpaceSelectMode } from '../../../shared/data-services/cf-org-space-service.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-application-wall',
@@ -36,6 +38,13 @@ import { APIResource } from '../../../store/types/api.types';
   providers: [{
     provide: ListConfig,
     useClass: CfAppConfigService
+  },
+  {
+    provide: CfOrgSpaceDataService,
+    useFactory: (store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
+      return new CfOrgSpaceDataService(store, paginationMonitorFactory, CfOrgSpaceSelectMode.FIRST_ONLY, true);
+    },
+    deps: [Store, PaginationMonitorFactory]
   }]
 })
 export class ApplicationWallComponent implements OnDestroy {
