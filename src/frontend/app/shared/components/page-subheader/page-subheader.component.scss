@@ -1,4 +1,5 @@
 // Page sub-header
+@import '../../../../sass/mixins';
 .page-subheader {
   display: flex;
   flex-direction: column;
@@ -9,7 +10,7 @@
   right: 0;
   top: 56px;
   &__tabs {
-    height: 48px;
+    height: 46px;
   }
   &__tab-hidden {
     display: none;
@@ -21,7 +22,10 @@
   white-space: nowrap;
   &__inner {
     flex: 1;
-    overflow: hidden;
+    overflow: auto;
+    @include breakpoint(laptop) {
+      overflow: hidden;
+    }
   }
   &__outer {
     align-items: center;
