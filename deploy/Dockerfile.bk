@@ -19,11 +19,8 @@ EXPOSE 443
 ENTRYPOINT ["/entrypoint.sh"]
 
 # use --target=dev-build to build backend image for docker-compose
-FROM splatform/stratos-bk-base:opensuse as dev-build
-COPY --from=common-build /srv /srv
+FROM prod-build as dev-build
 COPY dev-certs dev-certs
-EXPOSE 443
-ENTRYPOINT ["/srv/portal-proxy"]
 
 # use --target=db-migrator to build db-migrator image
 FROM splatform/stratos-bk-base:opensuse as db-migrator
