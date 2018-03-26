@@ -77,12 +77,11 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit() {
-    this.checkNavOverflow(false);
-    // I had to do this to ensure the initial check got the correct size.
-    // We should try to fix this at some point - NJ
-    // setTimeout(() => {
-    //   this.checkScrollBounds();
-    // });
+    // TODO: Doing this timeout to fix https://github.com/angular/angular/issues/21788
+    // Remove this when we're happy with the fix - NJ
+    setTimeout(() => {
+      this.checkNavOverflow(false);
+    });
     this.resizeSub = fromEvent(window, 'resize').pipe(
       debounceTime(100),
       tap(this.checkNavOverflow),
