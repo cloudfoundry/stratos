@@ -710,29 +710,6 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 
 	var cnsiUser *interfaces.ConnectedUser
 	var scope = []string{}
-<<<<<<< HEAD
-
-	if cfTokenRecord.AuthType == interfaces.AuthTypeHttpBasic {
-		cnsiUser = &interfaces.ConnectedUser{
-			GUID: cfTokenRecord.RefreshToken,
-			Name: cfTokenRecord.RefreshToken,
-		}
-	} else {
-		// get the scope out of the JWT token data
-		userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
-		if err != nil {
-			msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
-			log.Errorf(msg, err)
-			return nil, nil, false
-		}
-
-		// add the uaa entry to the output
-		cnsiUser = &interfaces.ConnectedUser{
-			GUID: userTokenInfo.UserGUID,
-			Name: userTokenInfo.UserName,
-		}
-		scope = userTokenInfo.Scope
-=======
 
 	if cfTokenRecord.AuthType == interfaces.AuthTypeHttpBasic {
 		cnsiUser = &interfaces.ConnectedUser{
@@ -752,7 +729,6 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 		cnsiUser = &interfaces.ConnectedUser{
 		GUID: userTokenInfo.UserGUID,
 		Name: userTokenInfo.UserName,
->>>>>>> metrics-frontend
 	}
 		scope = userTokenInfo.Scope
 	}
