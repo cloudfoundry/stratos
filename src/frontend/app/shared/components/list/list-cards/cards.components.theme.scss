@@ -1,7 +1,7 @@
 @import '../../../../../sass/mixins';
 .cards {
-  $space: 15px;
-  $space-row: $space + 10px;
+  $space: 12px;
+  $space-row: 12px;
   app-card {
     margin-bottom: $space;
     width: 100%;
@@ -27,6 +27,9 @@
       } // @include breakpoint(desktop) {
       //   width: calc(25% - #{$space-row});
       // }
+    }
+    &:focus {
+      outline: 0;
     }
   }
 }
