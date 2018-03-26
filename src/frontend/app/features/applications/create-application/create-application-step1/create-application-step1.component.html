@@ -1,14 +1,11 @@
 <b>{{ stepperText }}</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
   <mat-form-field>
-    <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy">
+    <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy" placeholder="Cloud Foundry">
       <mat-option *ngFor="let cf of cfOrgSpaceService.cf.list$ | async" [value]="cf.guid">
         <span>{{ cf.name }}</span>
       </mat-option>
     </mat-select>
-    <mat-placeholder [ngClass]="{'create-app-step-1__placeholder-loading': (cfOrgSpaceService.cf.loading$ | async)}">Cloud Foundry
-      <app-stateful-icon *ngIf="(cfOrgSpaceService.cf.loading$ | async)" [state]="'busy'"></app-stateful-icon>
-    </mat-placeholder>
   </mat-form-field>
   <mat-form-field>
     <mat-select #orgSelect="ngModel" [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy" [ngModel]="cfOrgSpaceService.org.select.getValue()" (change)="cfOrgSpaceService.org.select.next($event.value)"
@@ -18,7 +15,7 @@
       </mat-option>
     </mat-select>
     <mat-error *ngIf="!(cfOrgSpaceService.space.list$ | async)?.length">
-      There are no organizations in this cloud foundry
+      There are no organizations in this Cloud Foundry
     </mat-error>
   </mat-form-field>
   <mat-form-field>

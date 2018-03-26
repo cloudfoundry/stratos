@@ -2,7 +2,8 @@ import { Injectable, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { distinctUntilChanged, map, tap, withLatestFrom, first, startWith, combineLatest } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap, withLatestFrom, first, startWith } from 'rxjs/operators';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
@@ -42,6 +43,7 @@ export class CfOrgSpaceDataService {
   public cf: CfOrgSpaceItem<EndpointModel>;
   public org: CfOrgSpaceItem<IOrganization>;
   public space: CfOrgSpaceItem<ISpace>;
+  public isLoading$: Observable<boolean>;
 
   public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
     createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
@@ -85,10 +87,18 @@ export class CfOrgSpaceDataService {
       })
     ).subscribe();
 
+    this.isLoading$ = combineLatest(
+      this.cf.loading$,
+      this.org.loading$,
+      this.space.loading$
+    ).pipe(
+      map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
+    );
+
   }
 
   private init() {
-    this.getEndpointsAndOrgs$ = Observable.combineLatest(
+    this.getEndpointsAndOrgs$ = combineLatest(
       this.allOrgs.pagination$
         .filter(paginationEntity => {
           return !getCurrentPageRequestInfo(paginationEntity).busy;
@@ -112,7 +122,7 @@ export class CfOrgSpaceDataService {
   }
 
   private createOrg() {
-    const orgList$ = Observable.combineLatest(
+    const orgList$ = combineLatest(
       this.cf.select.asObservable(),
       this.getEndpointsAndOrgs$,
       this.allOrgs.entities$
@@ -136,7 +146,7 @@ export class CfOrgSpaceDataService {
     };
   }
   private createSpace() {
-    const spaceList$ = Observable.combineLatest(
+    const spaceList$ = combineLatest(
       this.org.select.asObservable(),
       this.getEndpointsAndOrgs$,
       this.allOrgs.entities$

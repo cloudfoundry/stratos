@@ -19,9 +19,6 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
 
 export class StatefulIconComponent implements OnInit, OnChanges {
 
-  constructor() {
-  }
-
   @Input('state')
   state: string;
 
