@@ -22,6 +22,7 @@ import { AppReducersModule } from './reducers.module';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { CaaspEffects } from './effects/caasp.effects';
 import { MetricsEffect } from './effects/metrics.effects';
+import { RequestEffect } from './effects/request.effects';
 
 @NgModule({
   imports: [
@@ -46,7 +47,8 @@ import { MetricsEffect } from './effects/metrics.effects';
       GithubEffects,
       CloudFoundryEffects,
       CaaspEffects,
-      MetricsEffect
+      MetricsEffect,
+      RequestEffect
     ])
   ]
 })

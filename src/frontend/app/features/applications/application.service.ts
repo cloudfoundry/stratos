@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, mergeMap } from 'rxjs/operators';
+import { filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -9,6 +9,7 @@ import {
   ApplicationStateData,
   ApplicationStateService,
 } from '../../shared/components/application-state/application-state.service';
+import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import {
   AppMetadataTypes,
@@ -17,26 +18,30 @@ import {
   GetAppSummaryAction,
 } from '../../store/actions/app-metadata.actions';
 import { GetApplication, UpdateApplication, UpdateExistingApplication } from '../../store/actions/application.actions';
-import { ApplicationSchema } from '../../store/actions/application.actions';
 import { AppState } from '../../store/app-state';
-import { ActionState } from '../../store/reducers/api-request-reducer/types';
-import { selectEntity } from '../../store/selectors/api.selectors';
-import { selectUpdateInfo } from '../../store/selectors/api.selectors';
+import {
+  appEnvVarsSchemaKey,
+  applicationSchemaKey,
+  appStatsSchemaKey,
+  appSummarySchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+  stackSchemaKey,
+  serviceBindingSchemaKey,
+} from '../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
+import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
+import { selectEntity, selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { endpointEntitiesSelector } from '../../store/selectors/endpoint.selectors';
 import { APIResource, EntityInfo } from '../../store/types/api.types';
-import {
-  AppEnvVarSchema,
-  AppStat,
-  AppStatSchema,
-  AppStatsSchema,
-  AppSummary,
-  AppSummarySchema,
-} from '../../store/types/app-metadata.types';
+import { AppStat, AppSummary } from '../../store/types/app-metadata.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
-
   PaginationObservables,
 } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
@@ -44,15 +49,28 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { PaginationMonitor } from '../../shared/monitors/pagination-monitor';
-import { spaceSchemaKey, organisationSchemaKey } from '../../store/actions/action-types';
+import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
+import { IServiceBinding } from '../../core/cf-api-svc.types';
+
+export function createGetApplicationAction(guid: string, endpointGuid: string) {
+  return new GetApplication(
+    guid,
+    endpointGuid, [
+      createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, stackSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, serviceBindingSchemaKey),
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+    ]
+  );
+}
 
 export interface ApplicationData {
   fetching: boolean;
   app: EntityInfo;
   stack: EntityInfo;
   cf: any;
-  appUrl: string;
 }
 
 @Injectable()
@@ -71,17 +89,20 @@ export class ApplicationService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
-    this.appEntityService = this.entityServiceFactory.create(
-      ApplicationSchema.key,
-      ApplicationSchema,
+    this.appEntityService = this.entityServiceFactory.create<APIResource<IApp>>(
+      applicationSchemaKey,
+      entityFactory(applicationSchemaKey),
       appGuid,
-      new GetApplication(appGuid, cfGuid));
+      createGetApplicationAction(appGuid, cfGuid)
+    );
 
     this.appSummaryEntityService = this.entityServiceFactory.create(
-      AppSummarySchema.key,
-      AppSummarySchema,
+      appSummarySchemaKey,
+      entityFactory(appSummarySchemaKey),
       appGuid,
-      new GetAppSummaryAction(appGuid, cfGuid));
+      new GetAppSummaryAction(appGuid, cfGuid),
+      false
+    );
 
     this.constructCoreObservables();
     this.constructAmalgamatedObservables();
@@ -89,6 +110,9 @@ export class ApplicationService {
   }
 
   // NJ: This needs to be cleaned up. So much going on!
+  /**
+   * An observable based on the core application entity
+   */
   isFetchingApp$: Observable<boolean>;
   isUpdatingApp$: Observable<boolean>;
 
@@ -98,18 +122,19 @@ export class ApplicationService {
   isUpdatingEnvVars$: Observable<boolean>;
   isFetchingStats$: Observable<boolean>;
 
-  app$: Observable<EntityInfo>;
-  waitForAppEntity$: Observable<EntityInfo>;
+  app$: Observable<EntityInfo<APIResource<IApp>>>;
+  waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>>;
   appSummary$: Observable<EntityInfo<AppSummary>>;
   appStats$: Observable<APIResource<AppStat>[]>;
   private appStatsFetching$: Observable<PaginationEntityState>; // Use isFetchingStats$ which is properly gated
   appEnvVars: PaginationObservables<APIResource>;
-  appOrg$: Observable<APIResource<any>>;
-  appSpace$: Observable<APIResource<any>>;
+  appOrg$: Observable<APIResource<IOrganization>>;
+  appSpace$: Observable<APIResource<ISpace>>;
 
   application$: Observable<ApplicationData>;
   applicationStratProject$: Observable<EnvVarStratosProject>;
   applicationState$: Observable<ApplicationStateData>;
+  applicationUrl$: Observable<string>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -126,14 +151,14 @@ export class ApplicationService {
   static getApplicationState(
     store: Store<AppState>,
     appStateService: ApplicationStateService,
-    app,
+    app: APIResource<IApp>,
     appGuid: string,
     cfGuid: string): Observable<ApplicationStateData> {
     const dummyAction = new GetAppStatsAction(appGuid, cfGuid);
     const paginationMonitor = new PaginationMonitor(
       store,
       dummyAction.paginationKey,
-      AppStatSchema
+      entityFactory(appStatsSchemaKey)
     );
     return paginationMonitor.currentPage$.pipe(
       map(appInstancesPages => {
@@ -150,22 +175,20 @@ export class ApplicationService {
   private constructCoreObservables() {
     // First set up all the base observables
     this.app$ = this.appEntityService.waitForEntity$;
-
-    // App org and space
-    this.app$
-      .filter(entityInfo => entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)
-      .map(entityInfo => entityInfo.entity.entity)
-      .do(app => {
-        this.appSpace$ = this.store.select(selectEntity(spaceSchemaKey, app.space_guid));
-        this.appOrg$ = this.appSpace$.pipe(
-          map(space => space.entity.organization_guid),
-          mergeMap(orgGuid => {
-            return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
-          })
-        );
-      })
-      .take(1)
-      .subscribe();
+    const moreWaiting$ = this.app$
+      .filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid))
+      .map(entityInfo => entityInfo.entity.entity);
+    this.appSpace$ = moreWaiting$
+      .first()
+      .switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid)));
+    this.appOrg$ = moreWaiting$
+      .first()
+      .switchMap(app => this.appSpace$.pipe(
+        map(space => space.entity.organization_guid),
+        switchMap(orgGuid => {
+          return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
+        })
+      ));
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.shareReplay(1);
 
@@ -178,9 +201,10 @@ export class ApplicationService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        AppEnvVarSchema
+        entityFactory(appEnvVarsSchemaKey)
       )
     }, true);
+
   }
 
   private constructAmalgamatedObservables() {
@@ -191,7 +215,7 @@ export class ApplicationService {
       action,
       paginationMonitor: this.paginationMonitorFactory.create(
         action.paginationKey,
-        AppStatSchema
+        entityFactory(appStatsSchemaKey)
       )
     }, true);
     // This will fail to fetch the app stats if the current app is not running but we're
@@ -201,9 +225,7 @@ export class ApplicationService {
     this.appStatsFetching$ = appStats.pagination$.shareReplay(1);
 
     this.application$ = this.waitForAppEntity$
-      .combineLatest(
-        this.store.select(endpointEntitiesSelector),
-    )
+      .combineLatest(this.store.select(endpointEntitiesSelector))
       .filter(([{ entity, entityRequestInfo }, endpoints]: [EntityInfo, any]) => {
         return entity && entity.entity && entity.entity.cfGuid;
       })
@@ -213,7 +235,6 @@ export class ApplicationService {
           app: entity,
           stack: entity.entity.stack,
           cf: endpoints[entity.entity.cfGuid],
-          appUrl: this.getAppUrl(entity)
         };
       }).shareReplay(1);
 
@@ -226,22 +247,17 @@ export class ApplicationService {
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
     }).shareReplay(1);
+
   }
 
   private constructStatusObservables() {
-    /**
-     * An observable based on the core application entity
-    */
     this.isFetchingApp$ = this.appEntityService.isFetchingEntity$;
 
-
-    this.isUpdatingApp$ =
-      this.app$.map(a => {
-        const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || {
-          busy: false
-        };
-        return updatingSection.busy || false;
-      });
+    this.isUpdatingApp$ = this.appEntityService.entityObs$.map(a => {
+      const updatingRoot = a.entityRequestInfo.updating[rootUpdatingKey] || { busy: false };
+      const updatingSection = a.entityRequestInfo.updating[UpdateExistingApplication.updateKey] || { busy: false };
+      return !!updatingRoot.busy || !!updatingSection.busy;
+    });
 
     this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).shareReplay(1);
 
@@ -252,22 +268,35 @@ export class ApplicationService {
     this.isFetchingStats$ = this.appStatsFetching$.map(
       appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
     ).startWith(false).shareReplay(1);
-  }
 
-  getAppUrl(app: EntityInfo): string {
-    if (!app.entity.routes) {
-      return null;
-    }
-    const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
-    if (nonTCPRoutes.length > 0) {
-      return getRoute(
-        nonTCPRoutes[0],
-        true,
-        false,
-        nonTCPRoutes[0].entity.domain
-      );
-    }
-    return null;
+    this.applicationUrl$ = this.app$.pipe(
+      map(({ entity }) => entity),
+      filter((app) => !!app && !!app.entity.routes),
+      map(app => {
+        const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
+        if (nonTCPRoutes.length > 0) {
+          return nonTCPRoutes[0];
+        }
+        return null;
+      }),
+      filter(route => !!route),
+      switchMap(route => {
+        // The route can async update itself to contain the required domain... so we need to watch it for it's normalized content
+        return this.entityServiceFactory.create<APIResource>(
+          routeSchemaKey,
+          entityFactory(routeSchemaKey),
+          route.metadata.guid,
+          {
+            type: '',
+            entityKey: routeSchemaKey,
+            entity: entityFactory(routeSchemaKey)
+          },
+          false).entityObs$;
+      }),
+      map(route => route.entity),
+      filter(route => route.entity.domain),
+      map(route => getRoute(route, true, false, route.entity.domain))
+    ).shareReplay(1);
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {
@@ -281,16 +310,20 @@ export class ApplicationService {
   /*
   * Update an application
   */
-  updateApplication(updatedApplication: UpdateApplication, updateEntities?: AppMetadataTypes[]): Observable<ActionState> {
+  updateApplication(
+    updatedApplication: UpdateApplication,
+    updateEntities?: AppMetadataTypes[],
+    existingApplication?: IApp): Observable<ActionState> {
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
       { ...updatedApplication },
+      existingApplication,
       updateEntities
     ));
 
     // Create an Observable that can be used to determine when the update completed
-    const actionState = selectUpdateInfo(ApplicationSchema.key,
+    const actionState = selectUpdateInfo(applicationSchemaKey,
       this.appGuid,
       UpdateExistingApplication.updateKey);
     return this.store.select(actionState).filter(item => !item.busy);

@@ -5,11 +5,11 @@
     </mat-card-header>
     <mat-card-content>
       <div class="app-metadata">
-        <app-metadata-item icon="apps" label="Applications">N/A</app-metadata-item>
-        <app-metadata-item icon="memory" label="Memory Usage">N/A</app-metadata-item>
-        <app-metadata-item icon="memory" label="Organizations">{{ (cfEndpointService.orgs$ | async)?.length}}</app-metadata-item>
-        <app-metadata-item icon="memory" label="Users">{{ (cfEndpointService.users$ | async)?.length}}</app-metadata-item>
-        <app-metadata-item icon="memory" label="SSH Access">N/A</app-metadata-item>
+        <app-metadata-item icon="apps" label="Applications">{{ (cfEndpointService.allApps$ | async)?.length }}</app-metadata-item>
+        <app-metadata-item icon="memory" label="Memory Usage">{{ (cfEndpointService.totalMem$ | async) | MbToHumanSize }}</app-metadata-item>
+        <app-metadata-item icon="domain" label="Organizations">{{ (cfEndpointService.orgs$ | async)?.length }}</app-metadata-item>
+        <app-metadata-item icon="people" label="Users">{{ (cfEndpointService.users$ | async)?.length }}</app-metadata-item>
+        <app-metadata-item icon="developer_mode" label="SSH Access">{{ cfEndpointService.hasSSHAccess$ | async}}</app-metadata-item>
       </div>
     </mat-card-content>
   </mat-card>

@@ -1,8 +1,10 @@
+/* tslint:disable:max-line-length */
 import { CdkTableModule } from '@angular/cdk/table';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
@@ -12,6 +14,7 @@ import {
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
 import { ApplicationStateComponent } from './components/application-state/application-state.component';
 import { ApplicationStateService } from './components/application-state/application-state.service';
+import { BooleanIndicatorComponent } from './components/boolean-indicator/boolean-indicator.component';
 import { CardAppInstancesComponent } from './components/cards/card-app-instances/card-app-instances.component';
 import { CardAppStatusComponent } from './components/cards/card-app-status/card-app-status.component';
 import { CardAppUptimeComponent } from './components/cards/card-app-uptime/card-app-uptime.component';
@@ -36,13 +39,13 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
-/* tslint:disable:max-line-length */
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-/* tslint:enable:max-line-length */
 import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
@@ -53,17 +56,19 @@ import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
 } from './components/list/list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
-import { CfOrgCardComponent } from './components/list/list-types/cf-orgs/cf-org-card/cf-org-card.component';
 import { ListComponent } from './components/list/list.component';
 import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
+import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
+import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
@@ -81,14 +86,6 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-/* tslint:disable:max-line-length */
-import { CfSpacePermissionCellComponent } from './components/list/list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
-import { FileInputComponent } from './components/file-input/file-input.component';
-import { RingChartComponent } from './components/ring-chart/ring-chart.component';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
-/* tslint:enable:max-line-length */
-
 
 @NgModule({
   imports: [
@@ -153,16 +150,17 @@ import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.
     MetaCardItemComponent,
     MetaCardKeyComponent,
     MetaCardValueComponent,
-    CfOrgCardComponent,
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
-    AppChipsComponent,
-    CfSpacePermissionCellComponent,
+    BooleanIndicatorComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
+    AppChipsComponent,
+    ServiceIconComponent,
+    EnvVarViewComponent,
     RingChartComponent,
-    MetricsChartComponent,
+    MetricsChartComponent
   ],
   exports: [
     FormsModule,
@@ -217,11 +215,15 @@ import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     RingChartComponent,
+    AppChipsComponent,
+    EnvVarViewComponent,
+    ServiceIconComponent,
     MetricsChartComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
-    DialogConfirmComponent
+    DialogConfirmComponent,
+    EnvVarViewComponent
   ],
   providers: [
     ListConfig,

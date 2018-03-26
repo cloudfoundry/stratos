@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell.component';
 import {
-  getBaseTestModules,
+  BaseTestModules,
   generateTestCfEndpointServiceProvider
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
@@ -13,7 +13,7 @@ describe('CfSpacePermissionCellComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...getBaseTestModules
+        ...BaseTestModules
       ],
       providers: [...generateTestCfEndpointServiceProvider()]
     })

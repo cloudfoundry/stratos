@@ -134,9 +134,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
-    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => {
-      return getCurrentPageRequestInfo(pag).busy && !pag.ids[pag.currentPage];
-    });
+    this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
   }
 
   init(config: IListDataSourceConfig<A, T>) {
@@ -277,20 +275,17 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         if (entities && !entities.length) {
           return [];
         }
-        const entitiesPreFilter = entities.length;
+
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
           }, entities);
         }
-        const entitiesPostFilter = entities.length;
 
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-        if (
-          entitiesPreFilter !== entitiesPostFilter &&
-          (paginationEntity.totalResults !== entities.length ||
-            paginationEntity.clientPagination.totalResults !== entities.length)
-        ) {
+        // Note - ensure we don't also include the entities count pre/post reduce (fails for local pagination - specifically when a filter
+        // resets to include all entities)
+        if (paginationEntity.totalResults !== entities.length || paginationEntity.clientPagination.totalResults !== entities.length) {
           this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
 

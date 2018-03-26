@@ -1,11 +1,7 @@
-import { RequestAction } from '../types/request.types';
-import { RequestOptions } from '@angular/http';
-import { Schema, schema } from 'normalizr';
-import { Action, createSelector } from '@ngrx/store';
+import { Action } from '@ngrx/store';
 
-import { AppState } from '../app-state';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
-import { UserSchema } from '../types/user.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -29,20 +25,14 @@ export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
 
-export const EndpointSchema = new schema.Entity('endpoint', {
-  users: [UserSchema]
-}, {
-    idAttribute: 'guid'
-  });
-
 // Different Auth Type support for connecting to Endpoints
-export type AuthParamsUsernamePassword = {
-  username: string,
-  password: string,
+export interface AuthParamsUsernamePassword {
+  username: string;
+  password: string;
 }
 
-export type AuthParamsToken = {
-  token: string,
+export interface AuthParamsToken {
+  token: string;
 }
 
 // All supported auth params types
@@ -51,7 +41,7 @@ export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 export class GetAllEndpoints implements PaginatedAction {
   public static storeKey = 'endpoint-list';
   constructor(public login = false) { }
-  entityKey = EndpointSchema.key;
+  entityKey = endpointSchemaKey;
   paginationKey = GetAllEndpoints.storeKey;
   type = GET_ENDPOINTS;
   actions = [

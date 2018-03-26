@@ -1,57 +1,24 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { first, map } from 'rxjs/operators';
 
-import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
+import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
-import { CfOrgSpaceDataService } from '../../../../../shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../../../store/app-state';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
-
-function cfOrganisationServiceFactory(
-  store: Store<AppState>,
-  activatedRoute: ActivatedRoute,
-  entityServiceFactory: EntityServiceFactory,
-  cfOrgSpaceDataService: CfOrgSpaceDataService,
-  cfUserService: CfUserService,
-  paginationMonitorFactory: PaginationMonitorFactory,
-  cfEndpointService: CloudFoundryEndpointService
-) {
-  const { orgId } = activatedRoute.snapshot.params;
-  const { cfGuid } = cfEndpointService;
-  return new CloudFoundryOrganisationService(
-    cfGuid,
-    orgId,
-    store,
-    entityServiceFactory,
-    cfUserService,
-    paginationMonitorFactory,
-    cfEndpointService
-  );
-}
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
   templateUrl: './cloud-foundry-organization-base.component.html',
   styleUrls: ['./cloud-foundry-organization-base.component.scss'],
-  providers: [{
-    provide: CloudFoundryOrganisationService,
-    useFactory: cfOrganisationServiceFactory,
-    deps: [
-      Store,
-      ActivatedRoute,
-      EntityServiceFactory,
-      CfOrgSpaceDataService,
-      CfUserService,
-      PaginationMonitorFactory,
-      CloudFoundryEndpointService
-    ]
-  }]
+  providers: [
+    getActiveRouteCfOrgSpaceProvider,
+    CloudFoundryEndpointService,
+    CloudFoundryOrganizationService
+  ]
 })
-
 
 export class CloudFoundryOrganizationBaseComponent implements OnInit {
 
@@ -63,13 +30,43 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
     {
       link: 'spaces',
       label: 'Spaces'
-    }, {
+    },
+    {
       link: 'users',
-      label: 'Users'
+      label: 'Users',
+      // Hide the users tab unless we are in development
+      hidden: environment.production
     }
   ];
 
-  constructor(private cfEndpointService: CloudFoundryEndpointService, private cfOrgService: CloudFoundryOrganisationService) { }
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+
+  public name$: Observable<string>;
+
+  public isFetching$: Observable<boolean>;
+
+  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService) {
+    this.isFetching$ = cfOrgService.org$.pipe(
+      map(org => org.entityRequestInfo.fetching)
+    );
+    this.name$ = cfOrgService.org$.pipe(
+      map(org => org.entity.entity.name),
+      first()
+    );
+    this.breadcrumbs$ = cfEndpointService.endpoint$.pipe(
+      map(endpoint => ([
+        {
+          breadcrumbs: [
+            {
+              value: endpoint.entity.name,
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
+            }
+          ]
+        }
+      ])),
+      first()
+    );
+  }
 
   ngOnInit() {
   }

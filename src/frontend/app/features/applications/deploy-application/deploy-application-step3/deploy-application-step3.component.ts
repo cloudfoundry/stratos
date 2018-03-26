@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError } from 'rxjs/operators';
+import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError, takeWhile } from 'rxjs/operators';
 import { getEntityById, selectEntity, selectEntities } from '../../../../store/selectors/api.selectors';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import websocketConnect from 'rxjs-websockets';
@@ -18,7 +18,13 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetAllApplications } from '../../../../store/actions/application.actions';
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/actions/action-types';
+import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { interval } from 'rxjs/observable/interval';
+
+// Interval to check for new application
+const APP_CHECK_INTERVAL = 3000;
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -29,35 +35,38 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   connect$: Subscription;
   streamTitle: string;
-  apps$: Subscription;
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  validate = Observable.of(false);
   appGuid: string;
 
-  ngOnDestroy(): void {
-    this.connect$.unsubscribe();
-    if (this.apps$) {
-      this.apps$.unsubscribe();
+  // Validation poller
+  validate = this.createValidationPoller();
 
-    }
-  }
+  // Are we deploying?
+  deploying = false;
 
   constructor(
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
-    public cfOrgSpaceService: CfOrgSpaceDataService
+    public cfOrgSpaceService: CfOrgSpaceDataService,
+    private http: HttpClient,
   ) { }
 
-  ngOnInit() {
+  ngOnDestroy() {
+    // Unsubscribe from the websocket stream
+    if (this.connect$) {
+      this.connect$.unsubscribe();
+    }
+  }
 
+  ngOnInit() {
     this.connect$ = this.store.select(selectDeployAppState).pipe(
       filter(appDetail => !!appDetail.cloudFoundryDetails
         && !!appDetail.applicationSource
         && !!appDetail.applicationSource.projectName),
       mergeMap(p => {
-        const orgSubscription = this.store.select(selectEntity(organisationSchemaKey, p.cloudFoundryDetails.org));
+        const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, p.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, p.cloudFoundryDetails.space));
         return Observable.of(p).combineLatest(orgSubscription, spaceSubscription);
       }),
@@ -72,31 +81,25 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         const inputStream = new QueueingSubject<string>();
         this.messages = websocketConnect(streamUrl, inputStream)
           .messages.pipe(
-          catchError(e => {
-            return [];
-          }),
-          share(),
-          map(message => {
-            const json = JSON.parse(message);
-            return json;
-          }),
-          filter(l => !!l),
-          tap((log) => {
-            // Deal with control messages
-            if (log.type !== SocketEventTypes.DATA) {
-              this.updateTitle(log);
-            }
-          }),
-          filter((log) => log.type === SocketEventTypes.DATA),
-          map((log) => {
-            const timesString = moment(log.timestamp * 1000).format('DD/MM/YYYY hh:mm:ss A');
-            return (
-              `${timesString}: ${log.message}`
-            );
-          })
+            catchError(e => {
+              return [];
+            }),
+            share(),
+            map(message => {
+              const json = JSON.parse(message);
+              return json;
+            }),
+            filter(l => !!l),
+            tap((log) => {
+              // Deal with control messages
+              if (log.type !== SocketEventTypes.DATA) {
+                this.processWebSocketMessage(log);
+              }
+            }),
+            filter((log) => log.type === SocketEventTypes.DATA),
+            map((log) => log.message)
           );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
-
       })
     ).subscribe();
   }
@@ -143,8 +146,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     return JSON.stringify(msg);
   }
 
-  updateTitle = (log) => {
-
+  processWebSocketMessage = (log) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle = 'Starting deployment...';
@@ -156,24 +158,12 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
-        this.store.dispatch(new GetAllApplications('applicationWall'));
+        this.deploying = true;
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
+        // Done
         this.streamTitle = 'Deployed';
-        this.apps$ = this.store.select(selectEntities('application')).pipe(
-          tap(apps => {
-            Object.values(apps).forEach(app => {
-              if (
-                app.entity.space_guid === this.appData.space &&
-                app.entity.cfGuid === this.appData.cloudFoundry &&
-                app.entity.name === this.appData.Name
-              ) {
-                this.appGuid = app.entity.guid;
-                this.validate = Observable.of(true);
-              }
-            });
-          })
-        ).subscribe();
+        this.deploying = false;
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
         this.close(log, null, null, true);
@@ -225,14 +215,46 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       error = `${error}\nReason: ${log.message}`;
       this.snackBar.open(error, 'Dismiss');
     }
+    this.deploying = false;
   }
 
   onNext: StepOnNextFunction = () => {
+    this.deploying = false;
+    this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
     // Take user to applications
     this.store.dispatch(new RouterNav({ path: ['applications', this.appData.cloudFoundry, this.appGuid] }));
-    return Observable.create(true);
+    return Observable.of({ success: true });
   }
 
+  /**
+   * Create a poller that will be used to periodically check for the new application.
+   */
+  private createValidationPoller() {
+    return interval(APP_CHECK_INTERVAL).pipe(
+      takeWhile(() => !this.appGuid),
+      filter(() => this.deploying),
+      switchMap(() => {
+        const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.appData.cloudFoundry });
+        return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` +
+          this.appData.space + '&q=name:' + this.appData.Name, { headers: headers })
+          .pipe(
+            mergeMap(info => {
+              if (info && info[this.appData.cloudFoundry]) {
+                const apps = info[this.appData.cloudFoundry];
+                if (apps.total_results === 1) {
+                  this.appGuid = apps.resources[0].metadata.guid;
+                  return Observable.of(true);
+                }
+              }
+              return Observable.of(false);
+            }),
+            catchError(err => [
+              // ignore
+            ])
+          );
+      })
+    );
+  }
 }

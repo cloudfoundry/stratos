@@ -1,6 +1,5 @@
 import { IMetricMatrixResult, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
 import { map, filter } from 'rxjs/operators';
-import { metricSchema } from './../../../store/actions/metrics.actions';
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -9,6 +8,7 @@ import { MetricsAction, FetchApplicationMetricsAction } from '../../../store/act
 import { ApplicationService } from '../../../features/applications/application.service';
 import { MeticsChartManager } from './metrics.component.manager';
 import { MetricsChartTypes } from './metrics-chart.types';
+import { metricSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -47,15 +47,15 @@ export class MetricsChartComponent implements OnInit {
     this.store.dispatch(this.metricsConfig.metricsAction);
     const metrics$ = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.metricId,
-      metricSchema.key,
-      metricSchema
-    )
+      metricSchemaKey,
+      entityFactory(metricSchemaKey)
+    );
     this.results$ = metrics$.entity$.pipe(
       filter(metrics => !!metrics),
       map(metrics => {
         return this.mapMetricsToChartData(metrics, this.metricsConfig);
       })
-    )
+    );
   }
 
   private mapMetricsToChartData(metrics: IMetrics, metricsConfig: MetricsConfig) {
@@ -66,7 +66,7 @@ export class MetricsChartComponent implements OnInit {
       case MetricResultTypes.STRING:
       case MetricResultTypes.VECTOR:
       default:
-        throw `Counld not find chart data mapper for metrics type ${metrics.resultType}`;
+        throw new Error(`Counld not find chart data mapper for metrics type ${metrics.resultType}`);
     }
 
   }

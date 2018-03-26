@@ -4,8 +4,8 @@ import { EntityServiceFactory } from '../../../../../../core/entity-service-fact
 import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-  getBaseTestModulesNoShared,
-  getMetadataCardComponents,
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
@@ -22,14 +22,14 @@ import { MetaCardTitleComponent } from '../../../list-cards/meta-card/meta-card-
 import { MetaCardValueComponent } from '../../../list-cards/meta-card/meta-card-value/meta-card-value.component';
 import { CfOrgCardComponent } from '../../cf-orgs/cf-org-card/cf-org-card.component';
 
-describe('CfOrgCardComponent', () => {
+describe('CfSpaceCardComponent', () => {
   let component: CfOrgCardComponent;
   let fixture: ComponentFixture<CfOrgCardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfOrgCardComponent, ...getMetadataCardComponents],
-      imports: [...getBaseTestModulesNoShared],
+      declarations: [CfOrgCardComponent, ...MetadataCardTestComponents],
+      imports: [...BaseTestModulesNoShared],
       providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
         CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]
     })
@@ -56,7 +56,12 @@ describe('CfOrgCardComponent', () => {
           metadata: null
         }
       },
-      metadata: null
+      metadata: {
+        guid: '',
+        created_at: '',
+        updated_at: '',
+        url: ''
+      }
     };
     fixture.detectChanges();
   });

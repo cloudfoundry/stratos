@@ -1,10 +1,9 @@
-import { PaginationObservables } from './../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { BaseCF } from './../../features/cloud-foundry/cf-page.types';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, shareReplay } from 'rxjs/operators';
+import { filter, map, shareReplay, first } from 'rxjs/operators';
 
+import { IOrganization, ISpace } from '../../core/cf-api.types';
 import {
   isOrgAuditor,
   isOrgBillingManager,
@@ -16,33 +15,36 @@ import {
 } from '../../features/cloud-foundry/cf.helpers';
 import { GetAllUsers } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { cfUserSchemaKey, endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import {
+  getPaginationObservables,
+  PaginationObservables,
+} from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { CfUser, UserRoleInOrg, UserSchema, UserRoleInSpace, IUserPermissionInOrg } from '../../store/types/user.types';
+import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
+import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
+
 @Injectable()
 export class CfUserService {
   public allUsersAction: GetAllUsers;
-  public allUsers$: PaginationObservables<APIResource<CfUser>>;
+  private allUsers$: PaginationObservables<APIResource<CfUser>>;
 
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
-    public baseCF: BaseCF
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
-    this.allUsersAction = new GetAllUsers(baseCF.guid);
-    this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
-      store: this.store,
-      action: this.allUsersAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        this.allUsersAction.paginationKey,
-        UserSchema
-      )
-    });
+    // See issue #1741
+    this.allUsersAction = new GetAllUsers(
+      createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid),
+      activeRouteCfOrgSpace.cfGuid
+    );
   }
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
-    this.allUsers$.entities$.pipe(
+    this.getAllUsers().entities$.pipe(
       filter(p => !!p),
       map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
       filter(p => p.length > 0),
@@ -50,7 +52,8 @@ export class CfUserService {
     )
 
   getRolesFromUser(user: CfUser, type: 'organizations' | 'spaces' = 'organizations'): IUserPermissionInOrg[] {
-    return user[type].map(org => {
+    const role = user[type] as APIResource<IOrganization | ISpace>[];
+    return role.map(org => {
       const orgGuid = org.metadata.guid;
       return {
         orgName: org.entity.name as string,
@@ -79,7 +82,8 @@ export class CfUserService {
           auditor: isOrgAuditor(user.entity, orgGuid),
           user: isOrgUser(user.entity, orgGuid)
         };
-      })
+      }),
+      first()
     );
   }
 
@@ -100,9 +104,23 @@ export class CfUserService {
     );
   }
 
+  private getAllUsers(): PaginationObservables<APIResource<CfUser>> {
+    if (!this.allUsers$) {
+      this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
+        store: this.store,
+        action: this.allUsersAction,
+        paginationMonitor: this.paginationMonitorFactory.create(
+          this.allUsersAction.paginationKey,
+          entityFactory(cfUserSchemaKey)
+        )
+      });
+    }
+    return this.allUsers$;
+  }
+
   private getUser(userGuid: string): (source: Observable<APIResource<CfUser>[]>) => Observable<APIResource<CfUser>> {
     return map(users => {
-      return users.filter(o => o.entity.guid === userGuid)[0];
+      return users.filter(o => o.metadata.guid === userGuid)[0];
     });
   }
 }

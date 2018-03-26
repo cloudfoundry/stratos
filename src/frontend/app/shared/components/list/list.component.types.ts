@@ -5,6 +5,7 @@ import { IListDataSource } from './data-sources-controllers/list-data-source-typ
 import { ITableColumn, ITableText } from './list-table/table.types';
 import { Type } from '@angular/core';
 import { ListView } from '../../../store/actions/list.actions';
+import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -36,7 +37,7 @@ export interface IListConfig<T> {
   getDataSource: () => IListDataSource<T>;
   /**
    * Collection of configuration objects to support multiple drops downs for filtering local lists. For example the application wall filters
-   * by cloud foundry, organisation and space. This mechanism supports only the showing and storing of such filters. An additional function
+   * by cloud foundry, organization and space. This mechanism supports only the showing and storing of such filters. An additional function
    * to the data sources transformEntities collection should be used to apply these custom settings to the data.
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
@@ -46,9 +47,9 @@ export interface IListConfig<T> {
    */
   isLocal?: boolean;
   /**
-   * A collection of numbers used to define how many entries per page should be shown
+   * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
-  pageSizeOptions: Number[];
+  pageSizeOptions?: Number[];
   /**
    * What different views the user can select (table/cards)
    */
@@ -89,9 +90,12 @@ export interface IListMultiFilterConfigItem {
   value: string;
 }
 
+export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
+export const defaultPaginationPageSizeOptionsTable = [5, 20, 80];
+
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
   text = null;
   enableTextFilter = false;

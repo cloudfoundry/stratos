@@ -186,32 +186,32 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 		if err != nil {
 			// Plugin doesn't implement an Endpoint Plugin interface, skip
 			continue
-		}
+	}
 
 		endpointType := endpointPlugin.GetType()
 		if cnsiRecord.CNSIType == endpointType {
 			tokenRecord, isAdmin, err := endpointPlugin.Connect(c, cnsiRecord, userID)
-			if err != nil {
+	if err != nil {
 				return nil, interfaces.NewHTTPShadowError(
-					http.StatusBadRequest,
+			http.StatusBadRequest,
 					"Could not connect to the endpoint endpoint",
 					"Could not connect to the endpoint endpoint: %s", err)
-			}
+	}
 
 			err = p.setCNSITokenRecord(cnsiGUID, userID, *tokenRecord)
-			if err != nil {
+	if err != nil {
 				return nil, interfaces.NewHTTPShadowError(
-					http.StatusBadRequest,
+			http.StatusBadRequest,
 					"Failed to save Token for endpoint",
 					"Error occurred: %s", err)
-			}
+	}
 
 			resp := &interfaces.LoginRes{
 				Account:     userID,
 				TokenExpiry: tokenRecord.TokenExpiry,
 				APIEndpoint: cnsiRecord.APIEndpoint,
 				Admin:       isAdmin,
-			}
+	}
 
 			return resp, nil
 		}
@@ -221,7 +221,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 		http.StatusBadRequest,
 		"Endpoint connection not supported",
 		"Endpoint connection not supported")
-}
+	}
 
 func (p *portalProxy) ConnectOAuth2(c echo.Context, cnsiRecord interfaces.CNSIRecord) (*interfaces.TokenRecord, error) {
 	uaaRes, u, _, err := p.FetchOAuth2Token(cnsiRecord, c)
@@ -710,6 +710,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 
 	var cnsiUser *interfaces.ConnectedUser
 	var scope = []string{}
+<<<<<<< HEAD
 
 	if cfTokenRecord.AuthType == interfaces.AuthTypeHttpBasic {
 		cnsiUser = &interfaces.ConnectedUser{
@@ -730,6 +731,29 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 			GUID: userTokenInfo.UserGUID,
 			Name: userTokenInfo.UserName,
 		}
+		scope = userTokenInfo.Scope
+=======
+
+	if cfTokenRecord.AuthType == interfaces.AuthTypeHttpBasic {
+		cnsiUser = &interfaces.ConnectedUser{
+			GUID: cfTokenRecord.RefreshToken,
+			Name: cfTokenRecord.RefreshToken,
+		}
+	} else {
+	// get the scope out of the JWT token data
+		userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
+	if err != nil {
+		msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
+		log.Errorf(msg, err)
+			return nil, nil, false
+	}
+
+	// add the uaa entry to the output
+		cnsiUser = &interfaces.ConnectedUser{
+		GUID: userTokenInfo.UserGUID,
+		Name: userTokenInfo.UserName,
+>>>>>>> metrics-frontend
+	}
 		scope = userTokenInfo.Scope
 	}
 

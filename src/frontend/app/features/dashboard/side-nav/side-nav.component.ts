@@ -5,7 +5,6 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { ActionHistoryDump } from '../../../store/actions/action-history.actions';
 import { EndpointsService } from '../../../core/endpoints.service';
-import { TableCellAppNameComponent } from '../../../shared/components/list/list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { Subscription } from 'rxjs/Subscription';
 
 export interface SideNavItem {
@@ -14,6 +13,7 @@ export interface SideNavItem {
   link: string;
   endpointType?: string;
   visible?: boolean;
+  hidden?: boolean;
 }
 
 @Component({
@@ -45,18 +45,17 @@ export class SideNavComponent implements OnInit, OnDestroy {
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
 
     this.sub = this.endpointsService.endpoints$.map(ep => {
-      var connectedTypes = {};
+      const connectedTypes = {};
       Object.values(ep).forEach(epData => {
         connectedTypes[epData.cnsi_type] = connectedTypes[epData.cnsi_type] || (epData.connectionStatus === 'connected');
       });
       return connectedTypes;
     }).do(connectedTypes => {
-      let index = 0;
       this.tabs.forEach(tab => {
         if (tab.endpointType) {
-          tab.visible = connectedTypes[tab.endpointType];
+          tab.hidden = !connectedTypes[tab.endpointType];
         } else {
-          tab.visible = true;
+          tab.hidden = false;
         }
       });
     }).subscribe();

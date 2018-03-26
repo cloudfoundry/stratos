@@ -19,6 +19,9 @@ export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
   appGuid = 'mockAppGuid';
   application$: Observable<ApplicationData> = Observable.of(({
+    cf: {
+      guid: 'mockCfGuid'
+    },
     app: {
       metadata: {},
       entity: {
@@ -39,9 +42,15 @@ export class ApplicationServiceMock {
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
   waitForAppEntity$: Observable<EntityInfo> = Observable.of({
     entity: {
+      metadata: {},
       entity: {
-
-      }
+        space: {
+          metadata: {},
+          entity: {
+            domains: []
+          }
+        }
+      },
     }
   } as EntityInfo);
   appEnvVars = {

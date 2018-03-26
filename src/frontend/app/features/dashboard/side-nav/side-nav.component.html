@@ -7,8 +7,8 @@
     </div>
   </div>
   <ul class="side-nav__items">
-    <li *ngFor="let tab of tabs" class="side-nav__itemContainer" [ngClass]="{'side-nav__itemContainer-hidden': !tab.visible}">
-      <a class="side-nav__item" [routerLink]="[tab.link]" [routerLinkActive]="['side-nav__item--active']">
+    <li *ngFor="let tab of tabs">
+      <a *ngIf="!tab.hidden" class="side-nav__item" [routerLink]="[tab.link]" [routerLinkActive]="['side-nav__item--active']">
         <mat-icon>{{ tab.matIcon }}</mat-icon> {{ tab.text }}
       </a>
     </li>

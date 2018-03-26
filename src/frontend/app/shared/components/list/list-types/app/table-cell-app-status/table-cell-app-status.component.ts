@@ -18,8 +18,19 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
 
   @Input('row') row;
   applicationState: ApplicationStateData;
-  fetchAppState$: Observable<ApplicationStateData>;
-
+  @Input('config')
+  set config(value: { hideIcon: boolean, initialStateOnly: boolean }) {
+    value = value || {
+      hideIcon: false,
+      initialStateOnly: false
+    };
+    this.hideIcon = value.hideIcon || false;
+    this.initialStateOnly = value.initialStateOnly || false;
+  }
+  public fetchAppState$: Observable<ApplicationStateData>;
+  public hideIcon = false;
+  public initialStateOnly = false
+    ;
   constructor(
     private store: Store<AppState>,
     private appStateService: ApplicationStateService,
@@ -34,10 +45,10 @@ export class TableCellAppStatusComponent<T> extends TableCellCustom<T> implement
       this.store,
       this.appStateService,
       this.row.entity,
-      this.row.entity.guid,
+      this.row.metadata.guid,
       this.row.entity.cfGuid)
       .pipe(
-      startWith(applicationState)
+        startWith(applicationState)
       );
   }
 

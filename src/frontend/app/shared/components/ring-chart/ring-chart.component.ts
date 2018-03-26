@@ -10,32 +10,33 @@ import { ColorHelper } from '@swimlane/ngx-charts';
 export class RingChartComponent implements OnInit {
 
   @Input() data: any;
-  @Input() label: string = 'Total';
+  @Input() label = 'Total';
+  @Input() scheme = 'cool';
+  domain: any[];
+  colors: ColorHelper;
 
   @Input() valueFormatting: (value: number) => any = value => value;
   @Input() nameFormatting: (value: string) => any = label => label;
-  @Input() percentageFormatting: (value: number) => any = percentage => percentage;  
-  @Input() scheme: any = 'cool';
+  @Input() percentageFormatting: (value: number) => any = percentage => percentage;
 
-  domain: any[];
-  colors: ColorHelper;
-  roundedTotal: number;
 
   constructor() { }
 
   ngOnInit() {
+    if (!this.data) {
+      this.data = [];
+    }
     this.domain = this.getDomain();
     this.setColors();
-    this.roundedTotal = this.getTotal();
   }
 
   setColors(): void {
     this.colors = new ColorHelper(this.scheme, 'ordinal', this.domain, []);
-  } 
-  
+  }
+
   getDomain(): any[] {
     return this.data.map(d => d.name);
-  }  
+  }
 
   getTotal(): number {
     return this.data

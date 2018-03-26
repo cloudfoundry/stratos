@@ -1,3 +1,11 @@
-<p>
-  services-tab works!
-</p>
+<div class="app-service-bindings">
+  <app-no-content-message *ngIf="(serviceBindings$ | async)?.length === 0" [icon]="'cloud_circle'" [firstLine]="'This application has no bound service instances'" [secondLine]="{
+      text: ''
+    }"></app-no-content-message>
+  <!-- 
+    Set text to once we can bind services in the app:
+      text: 'To bind this application to services please visit the Service Catalog'
+   -->
+
+  <app-list *ngIf="(serviceBindings$ | async)?.length > 0"></app-list>
+</div>

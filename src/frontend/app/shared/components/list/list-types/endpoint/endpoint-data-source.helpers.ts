@@ -2,11 +2,12 @@ import { PaginationMonitorFactory } from '../../../../monitors/pagination-monito
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
-import { EndpointSchema } from '../../../../../store/actions/endpoint.actions';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
 import { map, tap, mergeMap } from 'rxjs/operators';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export class ListRowSateHelper {
   public getRowStateManager(
@@ -17,7 +18,7 @@ export class ListRowSateHelper {
     const rowStateManager = new TableRowStateManager();
     const paginationMonitor = paginationMonitorFactory.create<EndpointModel>(
       paginationKey,
-      EndpointSchema
+      entityFactory(endpointSchemaKey)
     );
 
     const sub = this.setUpManager(
@@ -40,7 +41,7 @@ export class ListRowSateHelper {
       map(endpoints => endpoints
         .map(endpoint => {
           const entityMonitor = entityMonitorFactory
-            .create(endpoint.guid, EndpointSchema.key, EndpointSchema);
+            .create(endpoint.guid, endpointSchemaKey, entityFactory(endpointSchemaKey));
           const request$ = entityMonitor.entityRequest$.pipe(
             tap(request => {
               const disconnect = request.updating[EndpointsEffect.disconnectingKey] || { busy: false };

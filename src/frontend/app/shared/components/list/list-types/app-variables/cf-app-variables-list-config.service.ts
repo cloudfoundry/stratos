@@ -4,11 +4,17 @@ import { Store } from '@ngrx/store';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';
 import { AppState } from '../../../../../store/app-state';
+import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
+import {
+  defaultPaginationPageSizeOptionsTable,
+  IListAction,
+  IListConfig,
+  IMultiListAction,
+  ListViewTypes,
+} from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
-import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 
 @Injectable()
 export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVar> {
@@ -61,10 +67,9 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     },
   ];
 
-  pageSizeOptions = [9, 45, 90];
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Environment Variables', filter: 'Search by name'
+    title: 'Environment Variables', filter: 'Search by name', noEntries: 'There are no variables'
   };
   enableTextFilter = true;
 

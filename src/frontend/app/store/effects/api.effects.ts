@@ -1,39 +1,30 @@
-import { endpointEntitiesSelector } from '../selectors/endpoint.selectors';
-import {
-  WrapperRequestActionSuccess,
-  WrapperRequestActionFailed,
-  StartRequestAction,
-  APISuccessOrFailedAction
-} from './../types/request.types';
-import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
-import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
-import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
-import {
-  CFStartAction,
-  IRequestAction,
-  ICFAction,
-  StartCFAction,
-  RequestEntityLocation,
-} from '../types/request.types';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mergeMap';
 
 import { Injectable } from '@angular/core';
-import { Headers, Http, Request, RequestMethod, Response, URLSearchParams } from '@angular/http';
+import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { normalize } from 'normalizr';
+import { normalize, Schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
-import { ClearPaginationOfType, ClearPaginationOfEntity } from '../actions/pagination.actions';
-import { environment } from './../../../environments/environment';
-import { ApiActionTypes } from './../actions/request.actions';
-import { APIResource, NormalizedResponse } from './../types/api.types';
-import { AppState, IRequestEntityTypeState } from './../app-state';
-import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
-import { selectPaginationState } from '../selectors/pagination.selectors';
-import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
-import { map, mergeMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs/observable/forkJoin';
+import { map, mergeMap } from 'rxjs/operators';
+
+import { LoggerService } from '../../core/logger.service';
+import { getRequestTypeFromMethod } from '../reducers/api-request-reducer/request-helpers';
+import { qParamsToString } from '../reducers/pagination-reducer/pagination-reducer.helper';
+import { resultPerPageParam, resultPerPageParamDefault } from '../reducers/pagination-reducer/pagination-reducer.types';
+import { selectPaginationState } from '../selectors/pagination.selectors';
+import { EndpointModel } from '../types/endpoint.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam } from '../types/pagination.types';
+import { ICFAction, IRequestAction, RequestEntityLocation, APISuccessOrFailedAction } from '../types/request.types';
+import { environment } from './../../../environments/environment';
+import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
+import { AppState, IRequestEntityTypeState } from './../app-state';
+import { APIResource, NormalizedResponse } from './../types/api.types';
+import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
+import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { listEntityRelations } from '../helpers/entity-relations';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -41,6 +32,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
 export class APIEffect {
 
   constructor(
+    private logger: LoggerService,
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
@@ -58,7 +50,7 @@ export class APIEffect {
     const apiAction = actionClone as ICFAction;
     const paginatedAction = actionClone as PaginatedAction;
     const options = { ...apiAction.options };
-    const requestType = getRequestTypeFromMethod(apiAction.options.method);
+    const requestType = getRequestTypeFromMethod(apiAction);
 
     this.store.dispatch(new StartRequestAction(actionClone, requestType));
     this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
@@ -99,6 +91,8 @@ export class APIEffect {
       options.params.set('page', '1');
     }
 
+    this.addRelationParams(options, apiAction);
+
     let request = this.makeRequest(options);
 
     // Should we flatten all pages into the first, thus fetching all entities?
@@ -106,43 +100,34 @@ export class APIEffect {
       request = this.flattenPagination(request, options);
     }
 
-    return request
-      .mergeMap(response => {
-        response = this.handleMultiEndpoints(response, paginatedAction);
+    return request.pipe(
+      map(response => {
+        return this.handleMultiEndpoints(response, actionClone);
+      }),
+      mergeMap(response => {
         const { entities, totalResults, totalPages } = response;
-        const actions = [];
-        actions.push(new APISuccessOrFailedAction(paginatedAction.actions[1], paginatedAction));
-        actions.push(new WrapperRequestActionSuccess(
-          entities,
-          paginatedAction,
-          requestType,
-          totalResults,
-          totalPages
-        ));
-        if (
-          !paginatedAction.updatingKey &&
-          (paginatedAction.options.method === 'post' || paginatedAction.options.method === RequestMethod.Post ||
-            paginatedAction.options.method === 'delete' || paginatedAction.options.method === RequestMethod.Delete)
-        ) {
-          if (paginatedAction.removeEntityOnDelete) {
-            actions.unshift(new ClearPaginationOfEntity(paginatedAction.entityKey, paginatedAction.guid));
-          } else {
-            actions.unshift(new ClearPaginationOfType(paginatedAction.entityKey));
+        return [new ValidateEntitiesStart(
+          actionClone,
+          entities.result,
+          true,
+          {
+            response: entities,
+            totalResults,
+            totalPages
           }
-        }
-
-        return actions;
-      })
-      .catch(err => {
-        return [
-          new APISuccessOrFailedAction(paginatedAction.actions[2], paginatedAction),
-          new WrapperRequestActionFailed(
-            err.message,
-            paginatedAction,
-            requestType
-          )
-        ];
-      });
+        )];
+      }),
+    ).catch(errObservable => {
+      this.logger.warn(`API request process failed`, errObservable.error);
+      return [
+        new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
+        new WrapperRequestActionFailed(
+          errObservable.message,
+          actionClone,
+          requestType
+        )
+      ];
+    });
   }
 
   private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
@@ -226,8 +211,17 @@ export class APIEffect {
         }
       });
     const flatEntities = [].concat(...allEntities).filter(e => !!e);
+
+    let entityArray;
+    if (apiAction.entity['length'] > 0) {
+      entityArray = apiAction.entity;
+    } else {
+      entityArray = new Array<Schema>();
+      entityArray.push(apiAction.entity);
+    }
+
     return {
-      entities: flatEntities.length ? normalize(flatEntities, apiAction.entity) : null,
+      entities: flatEntities.length ? normalize(flatEntities, entityArray) : null,
       totalResults,
       totalPages
     };
@@ -354,4 +348,18 @@ export class APIEffect {
       })
     );
   }
+
+  private addRelationParams(options, action: any) {
+    if (isEntityInlineParentAction(action)) {
+      const relationInfo = listEntityRelations(action as EntityInlineParentAction);
+      options.params = options.params || new URLSearchParams();
+      if (relationInfo.maxDepth > 0) {
+        options.params.set('inline-relations-depth', relationInfo.maxDepth > 2 ? 2 : relationInfo.maxDepth);
+      }
+      if (relationInfo.relations.length) {
+        options.params.set('include-relations', relationInfo.relations.join(','));
+      }
+    }
+  }
 }
+

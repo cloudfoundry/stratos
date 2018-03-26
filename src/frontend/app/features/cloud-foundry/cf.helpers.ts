@@ -1,4 +1,8 @@
+import { ActivatedRoute } from '@angular/router';
+
+import { APIResource } from '../../store/types/api.types';
 import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export enum OrgUserRoles {
   MANAGER = 'managers',
@@ -109,6 +113,36 @@ export function isSpaceDeveloper(user: CfUser, spaceGuid: string): boolean {
 }
 
 function hasRole(user: CfUser, guid: string, roleType: string) {
-  return user[roleType] && user[roleType].find(o => o.metadata.guid === guid) != null;
+  if (user[roleType]) {
+    const roles = user[roleType] as APIResource[];
+    return !!roles.find(o => o.metadata.guid === guid);
+  }
+  return false;
 }
 
+export const getRowMetadata = (entity: APIResource) => entity.metadata ? entity.metadata.guid : null;
+
+export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
+  if (activatedRoute.snapshot.params[id]) {
+    return activatedRoute.snapshot.params[id];
+  } else if (activatedRoute.parent) {
+    return getIdFromRoute(activatedRoute.parent, id);
+  }
+  return null;
+}
+
+export function getActiveRouteCfOrgSpace(activatedRoute: ActivatedRoute) {
+  return ({
+    cfGuid: getIdFromRoute(activatedRoute, 'cfId'),
+    orgGuid: getIdFromRoute(activatedRoute, 'orgId'),
+    spaceGuid: getIdFromRoute(activatedRoute, 'spaceId')
+  });
+}
+
+export const getActiveRouteCfOrgSpaceProvider = {
+  provide: ActiveRouteCfOrgSpace,
+  useFactory: getActiveRouteCfOrgSpace,
+  deps: [
+    ActivatedRoute,
+  ]
+};

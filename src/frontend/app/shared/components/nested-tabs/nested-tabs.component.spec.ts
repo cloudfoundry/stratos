@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { getBaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { NestedTabsComponent } from './nested-tabs.component';
 
 describe('NestedTabsComponent', () => {
@@ -10,7 +10,7 @@ describe('NestedTabsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [NestedTabsComponent],
-      imports: [...getBaseTestModulesNoShared]
+      imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
   }));

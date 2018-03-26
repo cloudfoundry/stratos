@@ -1,16 +1,14 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { first, map } from 'rxjs/operators';
 
 import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { ApplicationSchema, GetApplication } from '../../../store/actions/application.actions';
 import { AppState } from '../../../store/app-state';
-import { endpointsEntityRequestDataSelector } from '../../../store/selectors/endpoint.selectors';
-import { ApplicationService } from '../application.service';
+import { applicationSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { ApplicationService, createGetApplicationAction } from '../application.service';
 import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 
@@ -41,10 +39,11 @@ function entityServiceFactory(
   const { id, cfId } = activatedRoute.snapshot.params;
   // const entityMonitor = new en
   return _entityServiceFactory.create(
-    ApplicationSchema.key,
-    ApplicationSchema,
+    applicationSchemaKey,
+    entityFactory(applicationSchemaKey),
     id,
-    new GetApplication(id, cfId)
+    createGetApplicationAction(id, cfId),
+    true
   );
 }
 

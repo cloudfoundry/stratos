@@ -1,6 +1,5 @@
 <div class="connection-dialog__loading-wrapper">
-  <mat-progress-bar class="connection-dialog__loading" [color]="(connectingError$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'"
-    [mode]="(isBusy$ | async) ? 'query' : 'solid'">
+  <mat-progress-bar class="connection-dialog__loading" [color]="(connectingError$ | async) && !(isBusy$ | async) ? 'warn' : 'primary'" [mode]="(isBusy$ | async) ? 'query' : 'solid'">
   </mat-progress-bar>
 </div>
 <div class="connection-dialog">
@@ -22,12 +21,6 @@
         <mat-form-field>
           <input matInput placeholder="Password" type="password" formControlName="password">
         </mat-form-field>
-      </div>
-      <div *ngIf="endpointForm.value.authType === 'KubeConfig'" formGroupName="authValues" class="connection-dialog__auth">
-        <mat-form-field>
-          <input matInput placeholder="config" formControlName="config">
-        </mat-form-field>
-        <app-file-input (onFileSelect)="onFileSelect($event)"></app-file-input>
       </div>
     </mat-dialog-content>
     <app-dialog-error message="Could not connect, please try again." [show]="connectingError$ | async"></app-dialog-error>

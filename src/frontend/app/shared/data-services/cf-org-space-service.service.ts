@@ -4,10 +4,11 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
-import { OrganisationWithSpaceSchema } from '../../store/actions/action-types';
-import { DeleteOrganisation, GetAllOrganisations } from '../../store/actions/organisation.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../store/actions/organization.actions';
 import { DeleteSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
+import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import {
   getCurrentPageRequestInfo,
   getPaginationObservables,
@@ -30,9 +31,9 @@ export class CfOrgSpaceDataService {
   public org: CfOrgSpaceItem;
   public space: CfOrgSpaceItem;
 
-  public paginationAction = new GetAllOrganisations(
-    CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey
-  );
+  public paginationAction = new GetAllOrganizations(CfOrgSpaceDataService.CfOrgSpaceServicePaginationKey, null, [
+    createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+  ]);
 
   // TODO: We should optimise this to only fetch the orgs for the current endpoint
   // (if we inline depth the get orgs request it could be hefty... or we could use a different action to only fetch required data..
@@ -42,7 +43,7 @@ export class CfOrgSpaceDataService {
     action: this.paginationAction,
     paginationMonitor: this.paginationMonitorFactory.create(
       this.paginationAction.paginationKey,
-      OrganisationWithSpaceSchema
+      entityFactory(this.paginationAction.entityKey)
     )
   });
 
@@ -138,7 +139,7 @@ export class CfOrgSpaceDataService {
     ).map(([selectedOrgGuid, data, orgs]) => {
       const [orgList, cfList] = data;
       const selectedOrg = orgs.find(org => {
-        return org.entity.guid === selectedOrgGuid;
+        return org.metadata.guid === selectedOrgGuid;
       });
       if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
         return selectedOrg.entity.spaces.map(space => {
@@ -166,10 +167,10 @@ export class CfOrgSpaceDataService {
   }
 
   public deleteOrg(orgGuid: string, endpointGuid: string) {
-    return this.store.dispatch(new DeleteOrganisation(orgGuid, endpointGuid));
+    this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
   }
 
-  public deleteSpace(spaceGuid: string, endpointGuid: string) {
-    return this.store.dispatch(new DeleteSpace(spaceGuid, endpointGuid));
+  public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
+    this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
   }
 }

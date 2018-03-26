@@ -7,13 +7,13 @@ import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModules
+  BaseTestModules
 } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
   createBasicStoreModule,
   testSCFGuid
 } from '../../../test-framework/store-test-helper';
-import { BaseCF } from '../cf-page.types';
+import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
 describe('CloudFoundryTabsBaseComponent', () => {
   let component: CloudFoundryTabsBaseComponent;
@@ -22,11 +22,11 @@ describe('CloudFoundryTabsBaseComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryTabsBaseComponent],
-        imports: [...getBaseTestModules],
+        imports: [...BaseTestModules],
         providers: [
           CloudFoundryEndpointService,
           generateTestCfEndpointServiceProvider(),
-          BaseCF
+          ActiveRouteCfOrgSpace
         ]
       }).compileComponents();
     })

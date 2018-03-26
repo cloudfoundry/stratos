@@ -1,4 +1,4 @@
-<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.entity.guid]" [status$]="appStatus$">
+<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]" [status$]="appStatus$">
   <app-meta-card-title>{{ row.entity.name }}</app-meta-card-title>
   <app-meta-card-item>
     <app-meta-card-key>State</app-meta-card-key>

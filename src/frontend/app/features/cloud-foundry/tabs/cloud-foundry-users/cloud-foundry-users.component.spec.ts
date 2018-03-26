@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloudFoundryUsersComponent } from './cloud-foundry-users.component';
-import { getBaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { BaseCF } from '../../cf-page.types';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('CloudFoundryUsersComponent', () => {
   let component: CloudFoundryUsersComponent;
@@ -12,10 +12,10 @@ describe('CloudFoundryUsersComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundryUsersComponent],
       imports: [
-        ...getBaseTestModules
+        ...BaseTestModules
       ],
       providers: [
-        BaseCF
+        ActiveRouteCfOrgSpace
       ]
     })
       .compileComponents();

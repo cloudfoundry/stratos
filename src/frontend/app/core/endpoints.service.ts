@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
+import { AppState, IRequestEntityTypeState } from '../store/app-state';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
@@ -14,7 +14,7 @@ import { map, first, filter } from 'rxjs/operators';
 @Injectable()
 export class EndpointsService implements CanActivate {
 
-  endpoints$: any;
+  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
 
@@ -25,7 +25,7 @@ export class EndpointsService implements CanActivate {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.map(endpoints => !!Object.keys(endpoints).length);
     this.haveConnected$ = this.endpoints$.map(endpoints =>
-      Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking'));
+      !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking'));
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {

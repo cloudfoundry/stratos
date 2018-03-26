@@ -1,14 +1,19 @@
-<app-page-header>
-  <h1> {{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1> {{ name$ | async }}</h1>
   <div class="page-header-right">
-    <button mat-icon-button name="add-space" *ngIf="(this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/organizations/{{this.cfOrgService.orgGuid}}/add-space">
-        <mat-icon>library_add</mat-icon>
+    <button mat-icon-button name="edit-org" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org">
+        <mat-icon>mode_edit</mat-icon>
       </button>
-    <button mat-icon-button name="user-management" *ngIf="(this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/manage-users">
+    <button mat-icon-button name="add-space" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space">
+        <mat-icon>add_box</mat-icon>
+      </button>
+    <button mat-icon-button name="user-management" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/manage-users">
         <mat-icon>people</mat-icon>
       </button>
   </div>
 </app-page-header>
 <app-page-subheader [tabs]="tabLinks">
 </app-page-subheader>
-<router-outlet></router-outlet>
+<app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Organization'">
+  <router-outlet></router-outlet>
+</app-loading-page>

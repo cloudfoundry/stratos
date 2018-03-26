@@ -7,8 +7,7 @@ import {
 } from '../../shared/components/list/list-types/cf-endpoints/cf-endpoints-list-config.service';
 import { EndpointsListConfigService } from '../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { SharedModule } from '../../shared/shared.module';
-import { AddOrganisationComponent } from './add-organisation/add-organisation.component';
-import { BaseCF } from './cf-page.types';
+import { AddOrganizationComponent } from './add-organization/add-organization.component';
 import { CloudFoundryBaseComponent } from './cloud-foundry-base/cloud-foundry-base.component';
 import { CloudFoundryTabsBaseComponent } from './cloud-foundry-tabs-base/cloud-foundry-tabs-base.component';
 import { CloudFoundryRoutingModule } from './cloud-foundry.routing';
@@ -61,9 +60,19 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
+import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
+import { CreateOrganizationStepComponent } from './add-organization/create-organization-step/create-organization-step.component';
+import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
+import { EditOrganizationStepComponent } from './edit-organization/edit-organization-step/edit-organization-step.component';
+import { CloudFoundryOrganizationService } from './services/cloud-foundry-organization.service';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from './cf.helpers';
+import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 
 @NgModule({
-  imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
+  imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule, NgxChartsModule],
   declarations: [
     CloudFoundryBaseComponent,
     CloudFoundryTabsBaseComponent,
@@ -76,7 +85,7 @@ import { AddSpaceComponent } from './add-space/add-space.component';
     CloudFoundryBuildPacksComponent,
     CloudFoundryStacksComponent,
     CloudFoundrySecurityGroupsComponent,
-    AddOrganisationComponent,
+    AddOrganizationComponent,
     ManageUsersComponent,
     CloudFoundryOrganizationSummaryComponent,
     CloudFoundryOrganizationSpacesComponent,
@@ -89,13 +98,23 @@ import { AddSpaceComponent } from './add-space/add-space.component';
     CloudFoundrySpaceAppsComponent,
     CloudFoundrySpaceServiceInstancesComponent,
     CloudFoundrySpaceRoutesComponent,
-    CloudFoundrySpaceUsersComponent
+    CloudFoundrySpaceUsersComponent,
+    EditSpaceStepComponent,
+    CreateSpaceStepComponent,
+    CreateOrganizationStepComponent,
+    EditOrganizationComponent,
+    EditOrganizationStepComponent
   ],
   providers: [
     CloudFoundryService,
     CFEndpointsListConfigService,
     EndpointsListConfigService,
-    BaseCF
+    {
+      provide: ActiveRouteCfOrgSpace,
+      useValue: {}
+    },
+    CloudFoundryOrganizationService,
+    CloudFoundryEndpointService
   ]
 })
 export class CloudFoundryModule { }

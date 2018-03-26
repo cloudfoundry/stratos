@@ -91,6 +91,7 @@ export class PaginationMonitor<T = any> {
       schema
     );
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
+    this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
   }
 
   private createPaginationObservable(
@@ -125,6 +126,15 @@ export class PaginationMonitor<T = any> {
       map(pagination => {
         const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
         return !currentPageRequest.busy && currentPageRequest.error;
+      })
+    );
+  }
+
+  private createFetchingObservable(pagination$: Observable<PaginationEntityState>) {
+    return pagination$.pipe(
+      map(pagination => {
+        const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
+        return currentPageRequest.busy;
       })
     );
   }

@@ -324,7 +324,7 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	case interfaces.AuthTypeOIDC:
 		res, err = p.doOidcFlowRequest(cnsiRequest, req)
 	default:
-		res, err = p.doOauthFlowRequest(cnsiRequest, req)
+	res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {

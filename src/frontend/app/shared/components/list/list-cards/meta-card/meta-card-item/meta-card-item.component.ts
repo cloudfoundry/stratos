@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ContentChild, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, OnInit, TemplateRef, ViewChild, Input } from '@angular/core';
 
 import { MetaCardKeyComponent } from '../meta-card-key/meta-card-key.component';
 import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.component';
@@ -10,6 +10,13 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardItemComponent implements OnInit {
+
+  styles = {
+    'row': 'meta-card-item-row',
+    'column': 'meta-card-item-column',
+    'long-text': 'meta-card-item-long-text'
+  };
+  itemStyle = 'meta-card-item-row';
   @ContentChild(MetaCardKeyComponent)
   key: MetaCardKeyComponent;
 
@@ -18,9 +25,13 @@ export class MetaCardItemComponent implements OnInit {
 
   @ViewChild('content') content: TemplateRef<any>;
 
-  constructor() { }
+  @Input('style') style = 'row';
+
+  constructor() {
+  }
 
   ngOnInit() {
+    this.itemStyle = this.styles[this.style];
   }
 
 }

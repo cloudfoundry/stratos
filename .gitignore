@@ -86,3 +86,9 @@ src/backend/app-core/debug
 
 src/backend/*/vendor/
 src/backend/app-core/load_plugins.go
+.v8flags*
+
+src/backend/*/vendor/
+src/backend/app-core/load_plugins.go
+
+*.bak

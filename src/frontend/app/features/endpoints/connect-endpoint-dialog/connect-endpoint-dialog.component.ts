@@ -1,20 +1,19 @@
-import { GetSystemInfo } from '../../../store/actions/system.actions';
-import { SystemEffects } from '../../../store/effects/system.effects';
-import { systemStoreNames } from '../../../store/types/system.types';
-import { ActionState, RequestSectionKeys } from '../../../store/reducers/api-request-reducer/types';
-import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { Observable } from 'rxjs/Rx';
-import { FormBuilder, Validators, FormArray, FormGroup } from '@angular/forms';
+import { Component, Inject, OnDestroy } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Component, Inject, Input, OnDestroy } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
-import { AppState } from '../../../store/app-state';
-import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
+
+import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
-import { endpointStoreNames, EndpointModel } from '../../../store/types/endpoint.types';
+import { GetSystemInfo } from '../../../store/actions/system.actions';
+import { AppState } from '../../../store/app-state';
 import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
-import { ConnectEndpoint, EndpointSchema } from '../../../store/actions/endpoint.actions';
+import { SystemEffects } from '../../../store/effects/system.effects';
+import { ActionState } from '../../../store/reducers/api-request-reducer/types';
+import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
+import { EndpointModel, endpointStoreNames } from '../../../store/types/endpoint.types';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -38,26 +37,17 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   public endpointForm;
 
   private bodyContent = '';
-   
+
   private authTypes = [
     {
-      name: "Username and Password",
-      value: "creds",
+      name: 'Username and Password',
+      value: 'creds',
       form: {
         username: ['', Validators.required],
         password: ['', Validators.required],
       },
-      types: [ 'cf', 'metrics', 'caasp' ]
+      types: ['cf', 'metrics']
     },
-    {
-      name: "Kube Config",
-      value: "KubeConfig",
-      form: {
-        config: ['', Validators.required],
-      },
-      types: [ 'k8s' ],
-      body: 'config',
-    }
   ];
 
   private authTypesForEndpoint = [];
@@ -75,7 +65,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
     this.authTypes.forEach(authType => {
-      if (authType.types.find(t => t=== this.data.type)) {
+      if (authType.types.find(t => t === this.data.type)) {
         this.authTypesForEndpoint.push(authType);
       }
     })

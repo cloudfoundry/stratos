@@ -6,7 +6,8 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
-import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
@@ -97,16 +98,20 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       }, cellFlex: '5'
     }
   ];
-  pageSizeOptions = [5, 25, 50];
   viewType = ListViewTypes.TABLE_ONLY;
-
+  text = {
+    title: null,
+    noEntries: 'There are no applications'
+  };
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      const confirmation = new ConfirmationDialog(
+      const confirmation = new ConfirmationDialogConfig(
         'Terminate Instance?',
         `Are you sure you want to terminate instance ${item.index}?`,
-        'Terminate');
+        'Terminate',
+        true
+      );
       this.confirmDialog.open(
         confirmation,
         () => this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid))
@@ -118,7 +123,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     visible: row => true,
     enabled: row => true,
   };
-
 
   private listActionSsh: IListAction<any> = {
     action: (item) => {
@@ -134,8 +138,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     visible: row => true,
     enabled: row => !!(row.value && row.value.state === 'RUNNING'),
   };
-
-
 
   private singleActions = [
     this.listActionTerminate,

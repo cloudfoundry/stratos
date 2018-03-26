@@ -1,0 +1,56 @@
+<app-meta-card class="service-card">
+  <app-meta-card-title>
+    <div class="service-card__title">
+      <div class="service-card__title__link">{{ getDisplayName() }}</div>
+      <app-service-icon [service]="row"></app-service-icon>
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item style="long-text">
+    <app-meta-card-key></app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.entity.description}}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Active</app-meta-card-key>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="row.entity.active" type="yes-no">
+      </app-boolean-indicator>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Bindable</app-meta-card-key>
+    <app-meta-card-value>
+      <app-boolean-indicator [isTrue]="row.entity.bindable" type="yes-no">
+      </app-boolean-indicator>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="hasDocumentationUrl()">
+    <app-meta-card-key>Documentation Link</app-meta-card-key>
+    <app-meta-card-value>
+      <a [href]="getDocumentationUrl()" target="_blank">
+        <mat-icon>launch</mat-icon>
+      </a>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item *ngIf="hasSupportUrl()">
+    <app-meta-card-key>Support Link</app-meta-card-key>
+    <app-meta-card-value>
+      <a [href]="getSupportUrl()" target="_blank">
+        <mat-icon>launch</mat-icon>
+      </a>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Plans</app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.entity.service_plans.length }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item style="column">
+    <app-meta-card-key>Tags</app-meta-card-key>
+    <app-meta-card-value>
+      <app-chips [chips]="tags"></app-chips>
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>

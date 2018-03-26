@@ -1,25 +1,32 @@
-import { EntityInfo, APIResource } from '../../../../store/types/api.types';
-import { selectRequestInfo, selectUpdateInfo, selectEntity } from '../../../../store/selectors/api.selectors';
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { filter, map, mergeMap } from 'rxjs/operators';
+import { Observable } from 'rxjs/Rx';
 
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import {
-  ApplicationSchema,
-  AssociateRouteWithAppApplication,
-  CreateNewApplication,
-  GetApplication,
-} from '../../../../store/actions/application.actions';
-import { CreateRoute, RouteSchema } from '../../../../store/actions/route.actions';
+import { CreateNewApplication } from '../../../../store/actions/application.actions';
+import { GetOrganization } from '../../../../store/actions/organization.actions';
+import { CreateRoute } from '../../../../store/actions/route.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectNewAppState } from '../../../../store/effects/create-app-effects';
-import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
-import { RouterNav } from '../../../../store/actions/router.actions';
+import {
+  applicationSchemaKey,
+  domainSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  routeSchemaKey,
+} from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { organisationSchemaKey } from '../../../../store/actions/action-types';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { APIResource } from '../../../../store/types/api.types';
+import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
+import { createGetApplicationAction } from '../../application.service';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import { AssociateRouteWithAppApplication } from '../../../../store/actions/application-service-routes.actions';
 
 @Component({
   selector: 'app-create-application-step3',
@@ -28,7 +35,7 @@ import { organisationSchemaKey } from '../../../../store/actions/action-types';
 })
 export class CreateApplicationStep3Component implements OnInit {
 
-  constructor(private store: Store<AppState>, private router: Router) { }
+  constructor(private store: Store<AppState>, private router: Router, private entityServiceFactory: EntityServiceFactory) { }
 
   @ViewChild('form')
   form: NgForm;
@@ -65,10 +72,7 @@ export class CreateApplicationStep3Component implements OnInit {
             cloudFoundry
           ));
         }
-        this.store.dispatch(new GetApplication(
-          app.response.result[0],
-          cloudFoundry
-        ));
+        this.store.dispatch(createGetApplicationAction(app.response.result[0], cloudFoundry));
         this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'summary'] }));
         return { success: true };
       });
@@ -87,7 +91,7 @@ export class CreateApplicationStep3Component implements OnInit {
         space_guid: space
       }
     ));
-    return this.store.select(selectRequestInfo(ApplicationSchema.key, newAppGuid));
+    return this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid));
   }
 
   createRoute(): Observable<RequestInfoState> | Observable<string> {
@@ -111,23 +115,31 @@ export class CreateApplicationStep3Component implements OnInit {
         }
       ));
     }
-    return shouldCreate ? this.store.select(selectRequestInfo(RouteSchema.key, newRouteGuid)) : Observable.of('NO_ROUTE');
+    return shouldCreate ? this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)) : Observable.of('NO_ROUTE');
   }
 
   ngOnInit() {
-    const state$ = this.store.select(selectNewAppState);
-
-    this.domains = state$
-      .do(state => {
+    this.domains = this.store.select(selectNewAppState).pipe(
+      filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.cloudFoundry && state.cloudFoundryDetails.org),
+      mergeMap(state => {
         this.hostName = state.name.split(' ').join('-').toLowerCase();
         this.newAppData = state;
+        const orgEntService = this.entityServiceFactory.create<APIResource<any>>(
+          organizationSchemaKey,
+          entityFactory(organizationSchemaKey),
+          state.cloudFoundryDetails.org,
+          new GetOrganization(state.cloudFoundryDetails.org, state.cloudFoundryDetails.cloudFoundry, [
+            createEntityRelationKey(organizationSchemaKey, domainSchemaKey)
+          ]),
+          true
+        );
+        return orgEntService.waitForEntity$.pipe(
+          map(({ entity, entityRequestInfo }) => {
+            return entity.entity.domains;
+          })
+        );
       })
-      .filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.org)
-      .mergeMap(state => {
-        return this.store.select(selectEntity(organisationSchemaKey, state.cloudFoundryDetails.org))
-          .first()
-          .map(org => org.entity.domains);
-      });
+    );
   }
 
 }

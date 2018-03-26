@@ -1,16 +1,12 @@
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { GetAppEnvVarsAction } from '../../../../../store/actions/app-metadata.actions';
-import { AppVariablesAdd, AppVariablesEdit } from '../../../../../store/actions/app-variables.actions';
+import { GetCaaspInfo } from '../../../../../store/actions/caasp.actions';
 import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
-import { APIResource } from '../../../../../store/types/api.types';
-import { AppEnvVarSchema, AppEnvVarsState } from '../../../../../store/types/app-metadata.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { GetCaaspInfo, CaaspInfoSchema } from '../../../../../store/actions/caasp.actions';
+import { entityFactory, caaspInfoSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export interface CaaspNodeInfo {
   fqdn: string;
@@ -30,10 +26,10 @@ export class CaaspNodesDataSource extends ListDataSource<CaaspNodeInfo, any> {
     super({
       store,
       action: new GetCaaspInfo(caaspId),
-      schema: CaaspInfoSchema,
+      schema: entityFactory(caaspInfoSchemaKey),
       getRowUniqueId: object => object.name,
-    //   getEmptyType: () => ({ name: '', value: '', }),
-      paginationKey: getPaginationKey(CaaspInfoSchema.key, caaspId ),
+      //   getEmptyType: () => ({ name: '', value: '', }),
+      paginationKey: getPaginationKey(caaspInfoSchemaKey, caaspId),
       transformEntity: map(variables => {
         console.log('HERE');
         console.log(variables);

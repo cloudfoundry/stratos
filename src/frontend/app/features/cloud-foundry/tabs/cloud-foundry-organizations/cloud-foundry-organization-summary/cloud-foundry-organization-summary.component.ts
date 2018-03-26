@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
@@ -8,15 +8,6 @@ import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry
   styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
 
 })
-export class CloudFoundryOrganizationSummaryComponent implements OnInit {
-
-
-  constructor(private cfOrgService: CloudFoundryOrganisationService) {
-
-  }
-
-  ngOnInit() {
-
-  }
-
+export class CloudFoundryOrganizationSummaryComponent {
+  constructor(private cfOrgService: CloudFoundryOrganizationService) { }
 }

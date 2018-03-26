@@ -14,8 +14,9 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { SharedModule } from '../../../../shared.module';
 import { PercentagePipe } from '../../../../pipes/percentage.pipe';
 import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
-import { getBaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppChipsComponent } from '../../../chips/chips.component';
+import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -34,7 +35,8 @@ describe('TableCellComponent', () => {
         UsageGaugeComponent,
         PercentagePipe,
         RunningInstancesComponent,
-        AppChipsComponent
+        AppChipsComponent,
+        BooleanIndicatorComponent
       ],
       imports: [
         CoreModule

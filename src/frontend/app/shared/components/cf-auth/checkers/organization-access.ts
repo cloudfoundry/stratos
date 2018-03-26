@@ -1,7 +1,7 @@
 import { CfAuthPrinciple } from '../principal';
 import { CfAuthBaseAccess } from './base-access';
 import { CFAuthResource, CFAuthChecker, CFFeatureFlagTypes } from '../cf-auth.types';
-export class CFAuthCheckerOrganisation extends CfAuthBaseAccess implements CFAuthChecker {
+export class CFAuthCheckerOrganization extends CfAuthBaseAccess implements CFAuthChecker {
 
   /**
    *
@@ -12,7 +12,7 @@ export class CFAuthCheckerOrganisation extends CfAuthBaseAccess implements CFAut
 
   /**
     * @name create
-    * @description Users can create an organisation if:
+    * @description Users can create an organization if:
     * 1. User is and admin
     * 2. the `user_org_creation` feature flag is enabled
     */
@@ -29,7 +29,7 @@ export class CFAuthCheckerOrganisation extends CfAuthBaseAccess implements CFAut
 
   /**
    * @name update
-   * @description Users can update an organisation if:
+   * @description Users can update an organization if:
    * 1. User is and admin
    * 2. is Org Manager
    */
@@ -45,7 +45,7 @@ export class CFAuthCheckerOrganisation extends CfAuthBaseAccess implements CFAut
 
   /**
    * @name delete
-   * @description Users can delete an organisation if:
+   * @description Users can delete an organization if:
    * 1. User is and admin
    * 2. is Org Manager
    */

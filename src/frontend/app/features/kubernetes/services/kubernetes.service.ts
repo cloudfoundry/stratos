@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { EntityService } from '../../../core/entity-service';
-import { EndpointSchema } from '../../../store/actions/endpoint.actions';
 import { Observable } from 'rxjs/Observable';
-import { EntityInfo, APIResource } from '../../../store/types/api.types';
-import { switchMap, shareReplay, tap, filter, map } from 'rxjs/operators';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { map, shareReplay } from 'rxjs/operators';
+
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { AppState } from '../../../store/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 
 @Injectable()
@@ -23,7 +22,7 @@ export class KubernetesService {
   ) {
     this.kubeEndpointsMonitor = this.paginationMonitorFactory.create(
       'endpoint-list',
-      EndpointSchema
+      entityFactory(endpointSchemaKey)
     );
 
     this.kubeEndpoints$ = this.kubeEndpointsMonitor.currentPage$.pipe(

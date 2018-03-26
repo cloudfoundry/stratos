@@ -1,3 +1,6 @@
+import { APIResource } from './api.types';
+import { IApp } from '../../core/cf-api.types';
+
 export class Route {
   constructor(
     public domain_guid: string,
@@ -6,14 +9,20 @@ export class Route {
     public path?: string,
     public port?: number,
     public isTCP: boolean = false
-  ) {
-    if (this.path) {
-      this.path = '/' + this.path;
-    }
-  }
+  ) { }
 }
 
 export interface RouteMode {
   id: string;
   label: string;
+}
+
+
+export class CfRoute {
+  domain_guid: string;
+  space_guid: string;
+  path?: string;
+  host?: string;
+  port?: number;
+  apps?: APIResource<IApp>[];
 }

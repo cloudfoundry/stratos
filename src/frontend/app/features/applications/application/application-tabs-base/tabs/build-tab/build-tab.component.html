@@ -1,4 +1,4 @@
-<div class="summary" *ngIf="applicationService.application$| async as appSvc">
+<div class="summary" *ngIf="applicationService.application$ | async as appSvc">
   <app-tile-grid>
     <app-tile-group>
       <app-tile>
@@ -43,9 +43,15 @@
             <mat-card-title>Cloud Foundry</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <app-metadata-item icon="title" label="Name" tooltip="{{ getFullApiUrl(cf) }}">{{ appSvc.cf?.name}}</app-metadata-item>
-            <app-metadata-item icon="location_city" label="Organization">{{ (applicationService.appOrg$ | async)?.entity.name }}</app-metadata-item>
-            <app-metadata-item icon="language" label="Space">{{ (applicationService.appSpace$ | async)?.entity.name }}</app-metadata-item>
+            <app-metadata-item icon="title" label="Name" tooltip="{{ getFullApiUrl(appSvc.cf) }}"><a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid]">{{ appSvc.cf?.name}}</a></app-metadata-item>
+            <ng-container *ngIf="applicationService.appOrg$ | async as appOrg">
+              <app-metadata-item icon="location_city" label="Organization">
+                <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata.guid]">{{ appOrg.entity.name }}</a>
+              </app-metadata-item>
+              <app-metadata-item *ngIf="applicationService.appSpace$ | async as appSpace" icon="language" label="Space">
+                <a [routerLink]="['/cloud-foundry/' + appSvc.cf?.guid + '/organizations/' + appOrg.metadata?.guid + '/spaces/' + appSpace.metadata?.guid]">{{ appSpace.entity.name }}</a>
+              </app-metadata-item>
+            </ng-container>
           </mat-card-content>
         </mat-card>
       </app-tile>
@@ -67,7 +73,7 @@
           </mat-card-content>
         </mat-card>
       </app-tile>
-      <app-tile *ngIf="(appService.applicationStratProject$ | async)?.deploySource as deploySource; else notDeployedFromStratos">
+      <app-tile *ngIf="(applicationService.applicationStratProject$ | async)?.deploySource as deploySource; else notDeployedFromStratos">
         <mat-card>
           <mat-card-header>
             <mat-card-title>Deployment Info</mat-card-title>
@@ -77,7 +83,7 @@
                 <app-metadata-item *ngSwitchCase="'giturl'" icon="code" label="Git Url">
                     <div matTooltip="{{ deploySource.branch + ' ' + deploySource.commit | slice:0:8}}"
                     [matTooltipHideDelay]="1500">
-                    {{(appService.applicationStratProject$| async)?.deploySource.url}}
+		    {{(applicationService.applicationStratProject$| async)?.deploySource.url}}
                   </div>
                 </app-metadata-item>
                 <app-metadata-item *ngSwitchCase="'github'" icon="code" label="GitHub">
