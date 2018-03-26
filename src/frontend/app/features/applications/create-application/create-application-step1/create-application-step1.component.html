@@ -1,7 +1,7 @@
-<b>Select a Cloud Foundry instance, organization and space for the app.</b>
+<b>{{ stepperText }}</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
   <mat-form-field>
-    <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf">
+    <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy">
       <mat-option *ngFor="let cf of cfOrgSpaceService.cf.list$ | async" [value]="cf.guid">
         <span>{{ cf.name }}</span>
       </mat-option>
@@ -11,7 +11,8 @@
     </mat-placeholder>
   </mat-form-field>
   <mat-form-field>
-    <mat-select #orgSelect="ngModel" [disabled]="!cfOrgSpaceService.cf.select.getValue()" [ngModel]="cfOrgSpaceService.org.select.getValue()" (change)="cfOrgSpaceService.org.select.next($event.value)" required name="org" placeholder="Organization">
+    <mat-select #orgSelect="ngModel" [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy" [ngModel]="cfOrgSpaceService.org.select.getValue()" (change)="cfOrgSpaceService.org.select.next($event.value)"
+      required placeholder="Organization" name="org">
       <mat-option *ngFor="let org of cfOrgSpaceService.org.list$ | async" [value]="org.guid">
         <span>{{ org.name }}</span>
       </mat-option>
@@ -21,8 +22,8 @@
     </mat-error>
   </mat-form-field>
   <mat-form-field>
-    <mat-select #spaceSelect="ngModel" [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async)" [ngModel]="cfOrgSpaceService.space.select.getValue()" (change)="cfOrgSpaceService.space.select.next($event.value)" required
-      placeholder="Space" name="space" [errorStateMatcher]="matcher">
+    <mat-select #spaceSelect="ngModel" [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy" [ngModel]="cfOrgSpaceService.space.select.getValue()" (change)="cfOrgSpaceService.space.select.next($event.value)"
+      required placeholder="Space" name="space">
       <mat-option *ngFor="let space of cfOrgSpaceService.space.list$ | async" [value]="space.guid">
         <span>{{ space.name }}</span>
       </mat-option>
