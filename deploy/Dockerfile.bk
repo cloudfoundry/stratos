@@ -18,10 +18,6 @@ COPY --from=common-build /srv /srv
 EXPOSE 443
 ENTRYPOINT ["/entrypoint.sh"]
 
-# use --target=dev-build to build backend image for docker-compose
-FROM prod-build as dev-build
-COPY dev-certs dev-certs
-
 # use --target=db-migrator to build db-migrator image
 FROM splatform/stratos-bk-base:opensuse as db-migrator
 WORKDIR /src
@@ -40,3 +36,7 @@ COPY --from=common-build /srv/portal-proxy /usr/local/bin/portal-proxy
 COPY deploy/db/dbconf.yml db/dbconf.yml
 COPY deploy/db/scripts/run-postflight-job.k8s.sh /run-postflight-job.sh
 CMD ["/run-postflight-job.sh"]
+
+# use --target=dev-build to build backend image for docker-compose
+FROM prod-build as dev-build
+COPY dev-certs dev-certs
