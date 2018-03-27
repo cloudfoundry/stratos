@@ -44,9 +44,9 @@ resources:
 - name: image-tag
   type: s3
   source:
-    bucket: concourse-stratos
+    bucket: concourse-stratos-ui
     endpoint: ((minio-server-endpoint))
-    regexp: temp-artifacts/v2-alpha-tag
+    regexp: temp-artifacts/v(.*)-alpha-tag
     access_key_id: ((minio-access-key))
     secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
