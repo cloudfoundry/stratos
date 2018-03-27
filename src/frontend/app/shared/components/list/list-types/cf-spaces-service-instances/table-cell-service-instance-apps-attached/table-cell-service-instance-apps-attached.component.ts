@@ -1,8 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import { StringLiteral } from 'typescript';
-import { selectEntity } from '../../../../../../store/selectors/api.selectors';
+import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+
+import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
 
 interface BoundApp {
   appName: string;
@@ -20,21 +19,18 @@ export class TableCellServiceInstanceAppsAttachedComponent<T> extends TableCellC
 
   constructor(private activatedRoute: ActivatedRoute) {
     super();
-
   }
 
   ngOnInit() {
-
     const parentRoute = this.activatedRoute.pathFromRoot.filter(route => !!route.snapshot.params['cfId'])[0];
     const cfGuid = parentRoute && parentRoute.snapshot.params['cfId'];
     this.boundApps = this.row.entity.service_bindings
       .map(a => {
         return {
           appName: a.entity.app.entity.name,
-          url: `applications/${cfGuid}/${a.entity.app.metadata.guid}`
+          url: `/applications/${cfGuid}/${a.entity.app.metadata.guid}`
         };
       });
-
   }
 
 }
