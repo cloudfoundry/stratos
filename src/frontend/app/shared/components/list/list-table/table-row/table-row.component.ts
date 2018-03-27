@@ -1,12 +1,10 @@
-import { RowState } from '../../data-sources-controllers/list-data-source-types';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkRow } from '@angular/cdk/table';
-import { ChangeDetectionStrategy, Component, HostBinding, OnInit, ViewEncapsulation, ViewContainerRef, Directive } from '@angular/core';
-import { CdkCellDef } from '@angular/cdk/table';
-import { CdkCellOutlet } from '@angular/cdk/table';
-import { Input } from '@angular/core';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
+
+import { RowState } from '../../data-sources-controllers/list-data-source-types';
 
 
 @Component({
@@ -16,6 +14,14 @@ import { map } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   preserveWhitespaces: false,
+  animations: [
+    trigger('listChildAnimation', [
+      transition(':enter', [
+        style({ opacity: '0', transform: 'translateX(-10px)' }),
+        animate('.35s ease', style({ opacity: '1', transform: 'translateX(0)' })),
+      ])
+    ]),
+  ],
 })
 export class TableRowComponent extends CdkRow implements OnInit {
 

@@ -88,7 +88,7 @@
     </mat-card>
   </div>
   <div class="list-component__body">
-    <div class="list-component__body-inner">
+    <div class="list-component__body-inner" [@list]="(pageState$ | async)">
       <div *ngIf="dataSource.isLoadingPage$ | async" class="list-component__blocker"></div>
       <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)"></app-cards>
       <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)">

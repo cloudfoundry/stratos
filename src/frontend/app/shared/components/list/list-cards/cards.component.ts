@@ -1,13 +1,22 @@
-import { CfAppEventsDataSource } from '../list-types/app-event/cf-app-events-data-source';
-import { Component, Input, OnInit, Type, ViewContainerRef, ComponentFactoryResolver, ViewChild } from '@angular/core';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { Component, Input, OnInit } from '@angular/core';
+
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
-import { TableCellCustom, CardSize } from '../list-table/table-cell/table-cell-custom';
+import { CardSize, TableCellCustom } from '../list-table/table-cell/table-cell-custom';
 
 
 @Component({
   selector: 'app-cards',
   templateUrl: './cards.component.html',
-  styleUrls: ['./cards.component.scss']
+  styleUrls: ['./cards.component.scss'],
+  animations: [
+    trigger('listChildAnimation', [
+      transition(':enter', [
+        style({ opacity: '0', transform: 'translateX(-10px)' }),
+        animate('.25s ease', style({ opacity: '1', transform: 'translateX(0)' })),
+      ])
+    ])
+  ]
 })
 export class CardsComponent<T> implements OnInit {
 

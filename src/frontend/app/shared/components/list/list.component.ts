@@ -1,3 +1,4 @@
+import { animateChild, query, stagger, transition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -6,13 +7,15 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild,
   TemplateRef,
+  ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, MatSelect, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
@@ -22,27 +25,34 @@ import { IListDataSource } from './data-sources-controllers/list-data-source-typ
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
+  defaultPaginationPageSizeOptionsCards,
+  defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
   IListAction,
+  IListConfig,
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
-  IListConfig,
   ListViewTypes,
-  defaultPaginationPageSizeOptionsCards,
-  defaultPaginationPageSizeOptionsTable,
 } from './list.component.types';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map } from 'rxjs/operators';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
-  styleUrls: ['./list.component.scss']
+  styleUrls: ['./list.component.scss'],
+  animations: [
+    trigger('list', [
+      transition('* => *', [
+        query('@listChildAnimation', [
+          stagger(25, [
+            animateChild()
+          ])
+        ], { optional: true }),
+      ]),
+    ])
+  ]
 })
-
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
@@ -89,6 +99,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   listViewKey: string;
   // Observable which allows you to determine if the top control bar should be shown
   hasControls$: Observable<boolean>;
+
+  pageState$: Observable<number>;
 
 
   public safeAddForm() {
@@ -254,6 +266,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       sortStoreToWidget
     ).subscribe();
 
+    this.pageState$ = this.dataSource.pagination$.pipe(
+      tap(pagination => console.log(pagination)),
+      map(pagination => pagination.clientPagination.currentPage),
+    );
   }
 
   ngAfterViewInit() {

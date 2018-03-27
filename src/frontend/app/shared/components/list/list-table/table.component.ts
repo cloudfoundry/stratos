@@ -1,8 +1,6 @@
-import { IListConfig } from '../list.component.types';
-import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { MatSort, Sort, MatRow } from '@angular/material';
+import { MatSort, Sort } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -10,12 +8,12 @@ import { Subscription } from 'rxjs/Subscription';
 import { ListSort } from '../../../../store/actions/list.actions';
 import { AppState } from '../../../../store/app-state';
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
-import { ITableColumn, ITableText } from './table.types';
-import { TableRowComponent } from './table-row/table-row.component';
-import { CdkCellOutlet } from '@angular/cdk/table';
-import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
-import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
+import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
+import { IListConfig } from '../list.component.types';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
+import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
+import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
+import { ITableColumn, ITableText } from './table.types';
 
 const tableColumnSelect = {
   columnId: 'select',

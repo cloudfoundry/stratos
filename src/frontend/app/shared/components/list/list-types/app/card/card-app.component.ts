@@ -20,7 +20,6 @@ import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custo
 })
 export class CardAppComponent extends TableCellCustom<APIResource> implements OnInit {
 
-
   @Input('row') row;
   applicationState$: Observable<ApplicationStateData>;
 
@@ -31,8 +30,8 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
     private appStateService: ApplicationStateService
   ) {
     super();
-
   }
+
   ngOnInit() {
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
@@ -49,4 +48,3 @@ export class CardAppComponent extends TableCellCustom<APIResource> implements On
     );
   }
 }
-
