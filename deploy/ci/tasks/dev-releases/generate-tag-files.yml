@@ -7,17 +7,17 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.capbristol.com:5000/alpine
+   repository:  ci-registry.capbristol.com:5000/stratos-concourse
    tag: "latest"
    insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 run:
-  path: sh
+  path: bash
   args:
     - -exc
     - |
       cd stratos
-      LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format %\(tag\) refs/tags | grep alpha | tail -1)
+      LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | grep alpha | tail -1)
       ALPHA_RELEASE_NUMBER=$(echo $LATEST_ALPHA_TAG | grep -o '...$')
       let ALPHA_RELEASE_NUMBER++
       if [ -n $ALPHA_RELEASE_NUMBER ]; then
