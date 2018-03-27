@@ -17,7 +17,7 @@ run:
     - -exc
     - |
       cd stratos
-      LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | grep alpha | tail -1)
+      LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format %\(tag\) refs/tags | grep alpha | tail -1)
       ALPHA_RELEASE_NUMBER=$(echo $LATEST_ALPHA_TAG | grep -o '...$')
       let ALPHA_RELEASE_NUMBER++
       echo $ALPHA_RELEASE_NUMBER > image-tag/v2-alpha-tag
