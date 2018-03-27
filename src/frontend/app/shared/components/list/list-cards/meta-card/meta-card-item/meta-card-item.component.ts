@@ -13,6 +13,7 @@ export class MetaCardItemComponent implements OnInit {
 
   styles = {
     'row': 'meta-card-item-row',
+    'row-top': 'meta-card-item-row-top',
     'column': 'meta-card-item-column',
     'long-text': 'meta-card-item-long-text'
   };
@@ -25,13 +26,13 @@ export class MetaCardItemComponent implements OnInit {
 
   @ViewChild('content') content: TemplateRef<any>;
 
-  @Input('style') style = 'row';
+  @Input('customStyle') customStyle = 'row';
 
   constructor() {
   }
 
   ngOnInit() {
-    this.itemStyle = this.styles[this.style];
+    this.itemStyle = this.styles[this.customStyle];
   }
 
 }

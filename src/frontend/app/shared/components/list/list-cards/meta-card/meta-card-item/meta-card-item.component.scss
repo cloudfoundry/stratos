@@ -1,10 +1,15 @@
-.meta-card-item-row {
+.meta-card-item-row,
+.meta-card-item-row-top {
   $text-color: rgba(0, 0, 0, .60);
   align-items: center;
   display: flex;
-  height: 30px;
+  min-height: 30px;
   justify-content: space-between;
   padding: 2px 0;
+}
+
+.meta-card-item-row-top {
+  align-items: baseline;
 }
 
 .meta-card-item__value {

@@ -23,6 +23,7 @@ import {
   quotaDefinitionSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
+  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -62,6 +63,8 @@ export class CloudFoundryEndpointService {
         createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with
+        // lots of spaces it saves n x routes requests
       ]);
   }
 

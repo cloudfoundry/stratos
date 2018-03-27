@@ -31,10 +31,11 @@
       </div>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item style="column">
+  <app-meta-card-item customStyle="row-top">
+    <!-- style="align-items: baseline;" -->
     <app-meta-card-key>Rules</app-meta-card-key>
-    <app-meta-card-value>
-      <app-chips [chips]="tags"></app-chips>
+    <app-meta-card-value style="align-items: baseline;">
+      <app-chips [chips]="tags" [stacked]="true" [orientation]="'rtl'"></app-chips>
     </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

@@ -21,9 +21,20 @@
   }
 }
 
-// Overriding mat-chips overly specific styles.
-mat-chip.app-chip,
-mat-chip.app-chip + mat-chip.app-chip {
-  $chip-padding: 5px;
-  margin: $chip-padding $chip-padding $chip-padding 0;
+.mat-chip-list {
+  // Overriding mat-chips overly specific styles.
+  mat-chip.app-chip,
+  mat-chip.app-chip + mat-chip.app-chip {
+    $chip-padding: 5px;
+    margin: $chip-padding $chip-padding $chip-padding 0;
+  }
+  &__stacked,
+  &__rtl {
+    // Overriding mat-chips overly specific styles.
+    mat-chip.app-chip,
+    mat-chip.app-chip + mat-chip.app-chip {
+      $chip-padding: 5px;
+      margin: $chip-padding 0 $chip-padding $chip-padding;
+    }
+  }
 }
