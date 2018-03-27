@@ -266,9 +266,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       sortStoreToWidget
     ).subscribe();
 
-    this.pageState$ = this.dataSource.pagination$.pipe(
-      tap(pagination => console.log(pagination)),
-      map(pagination => pagination.clientPagination.currentPage),
+    this.pageState$ = this.paginationController.pagination$.pipe(
+      map(pagination => pagination.pageIndex + 1),
     );
   }
 
