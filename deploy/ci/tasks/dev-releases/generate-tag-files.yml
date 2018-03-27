@@ -14,7 +14,7 @@ image_resource:
 run:
   path: bash
   args:
-    - -ec
+    - -exc
     - |
       cd stratos
       LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | grep 'alpha' | tail -1)
