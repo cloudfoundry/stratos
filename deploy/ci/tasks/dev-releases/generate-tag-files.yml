@@ -24,4 +24,6 @@ run:
       let ALPHA_RELEASE_NUMBER++
       ALPHA_RELEASE_NUMBER=$(printf "%03d" $ALPHA_RELEASE_NUMBER)
       FILENAME="2.0.0-${ALPHA_RELEASE_NUMBER}"
-      echo "2.0.0-alpha-$ALPHA_RELEASE_NUMBER" > ../image-tag/v${FILENAME}-alpha-tag
+      cd ../image-tag
+      echo "2.0.0-alpha-$ALPHA_RELEASE_NUMBER" > v2-alpha-tag
+      tar -cf v${FILENAME}.tar v2-alpha-tag

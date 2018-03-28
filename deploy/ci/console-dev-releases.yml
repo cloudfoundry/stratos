@@ -52,10 +52,11 @@ resources:
   source:
     bucket: concourse-stratos-ui
     endpoint: ((minio-server-endpoint))
-    regexp: temp-artifacts/v(.*)-alpha-tag
+    regexp: temp-artifacts/v(.*).tar
     access_key_id: ((minio-access-key))
     secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
+    unpack: true
 - name: helm-chart-tarball
   type: s3
   source:
@@ -75,7 +76,7 @@ jobs:
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
     - put: image-tag
       params:
-        file: image-tag/*-alpha-tag
+        file: image-tag/*.tar
         acl: public-read
 - name: build-images
   plan:
@@ -90,24 +91,24 @@ jobs:
         dockerfile: stratos/deploy/Dockerfile.bk
         build: stratos/
         target_name:  prod-build
-        tag: image-tag/*-alpha-tag
+        tag: image-tag/v2-alpha-tag
     - put: postflight-image
       params:
         dockerfile: stratos/deploy/Dockerfile.bk
         build: stratos/
         target_name:  postflight-job
-        tag: image-tag/*-alpha-tag
+        tag: image-tag/v2-alpha-tag
     - put: mariadb-image
       params:
         dockerfile: stratos/deploy/db/Dockerfile.mariadb
         build: stratos/deploy/db
-        tag: image-tag/*-alpha-tag
+        tag: image-tag/v2-alpha-tag
     - put: ui-image
       params:
         dockerfile: stratos/deploy/Dockerfile.ui
         build: stratos/
         target_name: prod-build
-        tag: image-tag/*-alpha-tag
+        tag: image-tag/v2-alpha-tag
 - name: create-chart
   plan:
   - get: stratos
