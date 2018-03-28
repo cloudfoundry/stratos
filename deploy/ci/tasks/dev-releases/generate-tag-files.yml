@@ -7,9 +7,8 @@ outputs:
 image_resource:
   type: docker-image
   source:
-   repository:  ci-registry.capbristol.com:5000/stratos-concourse
+   repository:  splatform/ci-stratos-concourse
    tag: "latest"
-   insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
 run:
   path: bash

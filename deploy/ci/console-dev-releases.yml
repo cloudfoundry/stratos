@@ -137,7 +137,7 @@ jobs:
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos/deploy/ci/tasks/release/update-gh-release.yml
+      file: stratos/deploy/ci/tasks/dev-releases/update-gh-release.yml
       params:
         GITHUB_TOKEN: ((github-access-token))
         CHANDLER_GITHUB_API_TOKEN: ((github-access-token))
