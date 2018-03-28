@@ -55,7 +55,7 @@ resources:
   source:
     bucket: concourse-stratos-ui
     endpoint: {{minio-server-endpoint}}
-    regexp: temp-artifacts/console-v2-(?P<version>.*).tgz
+    regexp: temp-artifacts/console-v2-alpha-(?P<version>.*).tgz
     access_key_id: {{minio-access-key}}
     secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
@@ -67,10 +67,6 @@ jobs:
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
-      params:
-        DOCKER_USERNAME: ((docker-username))
-        DOCKER_PASSWORD: ((docker-password))
-        BASE_IMAGE: opensuse
     - put: image-tag
       params:
         file: image-tag/v2-alpha-tag
@@ -117,13 +113,15 @@ jobs:
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos/deploy/ci/tasks/release/create-chart.yml
+      file: stratos/deploy/ci/tasks/dev-releases/create-chart.yml
       params:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GITHUB_ORG: ((github-organization))
         GITHUB_REPO: ((github-repository))
         GIT_PRIVATE_KEY: ((github-private-key))
+        DOCKER_ORG: ((artifact-docker-organization))
+        DOCKER_REGISTRY: ((artifact-docker-registry))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
