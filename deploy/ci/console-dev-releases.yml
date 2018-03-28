@@ -140,6 +140,9 @@ jobs:
     trigger: true
   - get: helm-chart-tarball
     passed: [create-chart]
+  - get: image-tag
+    passed: [build-images] 
+ 
   - do:
     - task: build
       privileged: true
@@ -147,6 +150,5 @@ jobs:
       file: stratos/deploy/ci/tasks/dev-releases/update-gh-release.yml
       params:
         GITHUB_TOKEN: ((github-access-token))
-        CHANDLER_GITHUB_API_TOKEN: ((github-access-token))
         GITHUB_USER: ((github-organization))
         GITHUB_REPO: ((github-repository))
