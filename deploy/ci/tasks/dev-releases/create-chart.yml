@@ -41,7 +41,7 @@ run:
 
       # Update Helm Repository
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
-      cp index.yaml ${STRATOS}/
+      cp index.yaml ${STRATOS}/dev/
       cd ${STRATOS}
       git config --global user.name ${GIT_USER}
       git config --global user.email ${GIT_EMAIL}
