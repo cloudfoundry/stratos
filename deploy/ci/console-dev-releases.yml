@@ -87,29 +87,30 @@ jobs:
     params:
       unpack: true
   - aggregate:
-    - put: jetstream-image
-      params:
-        dockerfile: stratos/deploy/Dockerfile.bk
-        build: stratos/
-        target_name:  prod-build
-        tag: image-tag/v2-alpha-tag
-    - put: postflight-image
-      params:
-        dockerfile: stratos/deploy/Dockerfile.bk
-        build: stratos/
-        target_name:  postflight-job
-        tag: image-tag/v2-alpha-tag
-    - put: mariadb-image
-      params:
-        dockerfile: stratos/deploy/db/Dockerfile.mariadb
-        build: stratos/deploy/db
-        tag: image-tag/v2-alpha-tag
-    - put: ui-image
-      params:
-        dockerfile: stratos/deploy/Dockerfile.ui
-        build: stratos/
-        target_name: prod-build
-        tag: image-tag/v2-alpha-tag
+    - do:
+      - put: jetstream-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  prod-build
+          tag: image-tag/v2-alpha-tag
+      - put: postflight-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  postflight-job
+          tag: image-tag/v2-alpha-tag
+      - put: mariadb-image
+        params:
+          dockerfile: stratos/deploy/db/Dockerfile.mariadb
+          build: stratos/deploy/db
+          tag: image-tag/v2-alpha-tag
+      - put: ui-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.ui
+          build: stratos/
+          target_name: prod-build
+          tag: image-tag/v2-alpha-tag
 - name: create-chart
   plan:
   - get: stratos
