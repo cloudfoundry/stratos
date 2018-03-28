@@ -61,7 +61,7 @@ resources:
   source:
     bucket: concourse-stratos-ui
     endpoint: {{minio-server-endpoint}}
-    regexp: temp-artifacts/console-v2-alpha-(?P<version>.*).tgz
+    regexp: temp-artifacts/console-helm-chart-(?P<version>.*).tgz
     access_key_id: {{minio-access-key}}
     secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
