@@ -19,6 +19,12 @@ run:
       ROOT_DIR=${PWD}
       cd ${ROOT_DIR}/stratos
       GIT_TAG=$(cat ../image-tag/v2-alpha-tag)
+      git config --global user.name ${GIT_USER}
+      git config --global user.email ${GIT_EMAIL}
+      mkdir -p /root/.ssh/
+      echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
+      chmod 600 /root/.ssh/id_rsa
+      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       git tag -a ${GIT_TAG} -m "Alpha release of Stratos v2"
       git push --tags
       cd ${ROOT_DIR}/helm-chart-tarball

@@ -158,3 +158,6 @@ jobs:
         GITHUB_TOKEN: ((github-access-token))
         GITHUB_USER: ((github-organization))
         GITHUB_REPO: ((github-repository))
+        GIT_USER: ((concourse-user))
+        GIT_EMAIL: ((concourse-email))
+        GIT_PRIVATE_KEY: ((github-private-key))
