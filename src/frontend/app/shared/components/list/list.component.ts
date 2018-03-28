@@ -1,4 +1,5 @@
-import { animateChild, query, stagger, transition, trigger } from '@angular/animations';
+import { ListView } from './../../../store/actions/list.actions';
+import { animateChild, query, stagger, transition, trigger, style, animate } from '@angular/animations';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -15,10 +16,10 @@ import { MatPaginator, MatSelect, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, pairwise, distinctUntilChanged, filter, startWith } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
+import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
@@ -43,13 +44,18 @@ import {
   styleUrls: ['./list.component.scss'],
   animations: [
     trigger('list', [
-      transition('* => *', [
-        query('@listChildAnimation', [
-          stagger(25, [
-            animateChild()
-          ])
-        ], { optional: true }),
+      transition('* => in', [
+        style({ opacity: '0', transform: 'translateY(10px)' }),
+        animate('250ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
       ]),
+      transition('* => left', [
+        style({ opacity: '0', transform: 'translateX(-20%)' }),
+        animate('250ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+      ]),
+      transition('* => right', [
+        style({ opacity: '0', transform: 'translateX(20%)' }),
+        animate('250ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+      ])
     ])
   ]
 })
@@ -100,7 +106,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   // Observable which allows you to determine if the top control bar should be shown
   hasControls$: Observable<boolean>;
 
-  pageState$: Observable<number>;
+  pageState$: Observable<string>;
 
 
   public safeAddForm() {
@@ -266,9 +272,26 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       sortStoreToWidget
     ).subscribe();
 
-    this.pageState$ = this.paginationController.pagination$.pipe(
-      map(pagination => pagination.pageIndex + 1),
-    );
+    this.pageState$ = combineLatest(
+      this.paginationController.pagination$,
+      this.dataSource.page$,
+      this.view$
+    )
+      .pipe(
+        filter(([pagination, page, viewType]) => page.length > 0 && viewType !== 'table'),
+        map(values => values[0].pageIndex),
+        distinctUntilChanged(),
+        pairwise(),
+        map(([oldVal, newVal]) => {
+          console.log(oldVal, newVal);
+          if (oldVal > newVal) {
+            return 'left';
+          } else if (oldVal < newVal) {
+            return 'right';
+          }
+          return 'in';
+        })
+      );
   }
 
   ngAfterViewInit() {

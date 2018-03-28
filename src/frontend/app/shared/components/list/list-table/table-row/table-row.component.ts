@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import { CdkRow } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
@@ -13,15 +12,7 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
   styleUrls: ['./table-row.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  preserveWhitespaces: false,
-  animations: [
-    trigger('listChildAnimation', [
-      transition(':enter', [
-        style({ opacity: '0', transform: 'translateX(-10px)' }),
-        animate('.35s ease', style({ opacity: '1', transform: 'translateX(0)' })),
-      ])
-    ]),
-  ],
+  preserveWhitespaces: false
 })
 export class TableRowComponent extends CdkRow implements OnInit {
 

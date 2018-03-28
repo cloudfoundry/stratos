@@ -8,15 +8,7 @@ import { CardSize, TableCellCustom } from '../list-table/table-cell/table-cell-c
 @Component({
   selector: 'app-cards',
   templateUrl: './cards.component.html',
-  styleUrls: ['./cards.component.scss'],
-  animations: [
-    trigger('listChildAnimation', [
-      transition(':enter', [
-        style({ opacity: '0', transform: 'translateX(-10px)' }),
-        animate('.25s ease', style({ opacity: '1', transform: 'translateX(0)' })),
-      ])
-    ])
-  ]
+  styleUrls: ['./cards.component.scss']
 })
 export class CardsComponent<T> implements OnInit {
 
