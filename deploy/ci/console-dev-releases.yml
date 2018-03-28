@@ -75,7 +75,7 @@ jobs:
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
     - put: image-tag
       params:
-        file: image-tag/v2-alpha-tag
+        file: image-tag/*-alpha-tag
         acl: public-read
 - name: build-images
   plan:
@@ -90,24 +90,24 @@ jobs:
         dockerfile: stratos/deploy/Dockerfile.bk
         build: stratos/
         target_name:  prod-build
-        tag: image-tag/v2-alpha-tag
+        tag: image-tag/*-alpha-tag
     - put: postflight-image
       params:
         dockerfile: stratos/deploy/Dockerfile.bk
         build: stratos/
         target_name:  postflight-job
-        tag: image-tag/v2-alpha-tag
+        tag: image-tag/*-alpha-tag
     - put: mariadb-image
       params:
         dockerfile: stratos/deploy/db/Dockerfile.mariadb
         build: stratos/deploy/db
-        tag: image-tag/v2-alpha-tag
+        tag: image-tag/*-alpha-tag
     - put: ui-image
       params:
         dockerfile: stratos/deploy/Dockerfile.ui
         build: stratos/
         target_name: prod-build
-        tag: image-tag/v2-alpha-tag
+        tag: image-tag/*-alpha-tag
 - name: create-chart
   plan:
   - get: stratos
