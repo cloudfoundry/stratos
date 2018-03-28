@@ -124,8 +124,8 @@ function getObservables<T = any>(
   let hasDispatchedOnce = false;
   let lastValidationFootprint: string;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).publishReplay(1).refCount();
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).publishReplay(1).refCount();
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -156,7 +156,7 @@ function getObservables<T = any>(
         filter(([ent, pagination]) => {
           return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
         }),
-        shareReplay(1),
+        publishReplay(1), refCount(),
         tap(([ent, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {

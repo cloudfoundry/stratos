@@ -169,7 +169,7 @@ export class ApplicationService {
           });
         return appStateService.get(app, appInstances);
       })
-    ).shareReplay(1);
+    ).publishReplay(1).refCount();
   }
 
   private constructCoreObservables() {
@@ -190,11 +190,11 @@ export class ApplicationService {
         })
       ));
 
-    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.shareReplay(1);
+    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.publishReplay(1).refCount();
 
-    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.shareReplay(1);
+    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.publishReplay(1).refCount();
 
-    this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).shareReplay(1);
+    this.appSummary$ = this.waitForAppEntity$.switchMap(() => this.appSummaryEntityService.entityObs$).publishReplay(1).refCount();
     const action = new GetAppEnvVarsAction(this.appGuid, this.cfGuid);
     this.appEnvVars = getPaginationObservables<APIResource>({
       store: this.store,
@@ -222,7 +222,7 @@ export class ApplicationService {
     // willing to do this to speed up the initial fetch for a running application.
     this.appStats$ = appStats.entities$;
 
-    this.appStatsFetching$ = appStats.pagination$.shareReplay(1);
+    this.appStatsFetching$ = appStats.pagination$.publishReplay(1).refCount();
 
     this.application$ = this.waitForAppEntity$
       .combineLatest(this.store.select(endpointEntitiesSelector))
@@ -236,17 +236,17 @@ export class ApplicationService {
           stack: entity.entity.stack,
           cf: endpoints[entity.entity.cfGuid],
         };
-      }).shareReplay(1);
+      }).publishReplay(1).refCount();
 
     this.applicationState$ = this.waitForAppEntity$
       .combineLatest(this.appStats$.startWith(null))
       .map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStatsArray ? appStatsArray.map(apiResource => apiResource.entity) : null);
-      }).shareReplay(1);
+      }).publishReplay(1).refCount();
 
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
-    }).shareReplay(1);
+    }).publishReplay(1).refCount();
 
   }
 
@@ -259,15 +259,15 @@ export class ApplicationService {
       return !!updatingRoot.busy || !!updatingSection.busy;
     });
 
-    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).shareReplay(1);
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).publishReplay(1).refCount();
 
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(
       ev => getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]
-    ).startWith(false).shareReplay(1);
+    ).startWith(false).publishReplay(1).refCount();
 
     this.isFetchingStats$ = this.appStatsFetching$.map(
       appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
-    ).startWith(false).shareReplay(1);
+    ).startWith(false).publishReplay(1).refCount();
 
     this.applicationUrl$ = this.app$.pipe(
       map(({ entity }) => entity),
@@ -296,7 +296,7 @@ export class ApplicationService {
       map(route => route.entity),
       filter(route => route.entity.domain),
       map(route => getRoute(route, true, false, route.entity.domain))
-    ).shareReplay(1);
+    ).publishReplay(1).refCount();
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {

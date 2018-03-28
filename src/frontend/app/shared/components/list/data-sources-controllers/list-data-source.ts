@@ -130,7 +130,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
     this.page$ = this.isLocal ?
       this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions)
-      : transformedEntities$.pipe(shareReplay(1));
+      : transformedEntities$.pipe(publishReplay(1), refCount());
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
@@ -148,7 +148,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isLocal = config.isLocal || false;
     this.transformEntities = config.transformEntities;
     this.rowsState = config.rowsState ? config.rowsState.pipe(
-      shareReplay(1)
+      publishReplay(1), refCount()
     ) : Observable.of({}).first();
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
@@ -165,7 +165,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         ...(state[this.getRowUniqueId(row)] || {})
       })),
       distinctUntilChanged(),
-      shareReplay(1)
+      publishReplay(1), refCount()
     );
   }
 

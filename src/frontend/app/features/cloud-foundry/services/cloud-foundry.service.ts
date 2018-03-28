@@ -5,7 +5,7 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { EntityService } from '../../../core/entity-service';
 import { Observable } from 'rxjs/Observable';
 import { EntityInfo, APIResource } from '../../../store/types/api.types';
-import { switchMap, shareReplay, tap, filter, map } from 'rxjs/operators';
+import { switchMap, shareReplay, tap, filter, map, publishReplay, refCount } from 'rxjs/operators';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { EndpointModel } from '../../../store/types/endpoint.types';
@@ -29,7 +29,8 @@ export class CloudFoundryService {
 
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
       map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf')),
-      shareReplay(1)
+      publishReplay(1),
+      refCount()
     );
   }
 }

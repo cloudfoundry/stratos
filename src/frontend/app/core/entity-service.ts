@@ -92,7 +92,7 @@ export class EntityService<T = any> {
         const { entityRequestInfo, entity } = ent;
         return this.isEntityAvailable(entity, entityRequestInfo);
       }),
-      shareReplay(1)
+      publishReplay(1), refCount()
     );
   }
 
