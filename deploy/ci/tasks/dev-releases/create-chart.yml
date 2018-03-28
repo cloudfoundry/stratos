@@ -35,6 +35,7 @@ run:
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
+      mkdir -p ${STRATOS_MASTER}/dev
       if [ -f ${STRATOS_MASTER}/dev/index.yaml ]; then
         cp ${STRATOS_MASTER}/dev/index.yaml ${ROOT_DIR}/helm-chart/
         MERGE_INDEX="--merge index.yaml"
@@ -42,7 +43,6 @@ run:
 
       # Update Helm Repository
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
-      mkdir -p ${STARTOS_MASTER}/dev
       cp index.yaml ${STRATOS_MASTER}/dev/
       cd ${STRATOS_MASTER}
       git config --global user.name ${GIT_USER}
