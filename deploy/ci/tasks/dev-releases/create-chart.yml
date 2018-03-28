@@ -51,7 +51,9 @@ run:
       mkdir -p /root/.ssh/
       echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
       chmod 600 /root/.ssh/id_rsa
+      git stash
       git pull --rebase
+      git stash pop
       echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
       git add dev/index.yaml
       git commit -m "Dev releases Helm repository updated for tag: ${GIT_TAG}"
