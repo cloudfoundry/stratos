@@ -42,9 +42,7 @@ run:
 
       # Update Helm Repository
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
-      if [ -d "${STRATOS_MASTER}/dev" ]; then
-        mkdir ${STARTOS_MASTER}/dev
-      fi
+      mkdir -p ${STARTOS_MASTER}/dev
       cp index.yaml ${STRATOS_MASTER}/dev/
       cd ${STRATOS_MASTER}
       git config --global user.name ${GIT_USER}
