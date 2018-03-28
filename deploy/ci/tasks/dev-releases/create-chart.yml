@@ -3,6 +3,7 @@ platform: linux
 inputs:
 - name: stratos
 - name: image-tag
+- name: stratos-master
 outputs:
 - name: helm-chart
 image_resource:
@@ -21,6 +22,7 @@ run:
       helm init || true
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
+      STRATOS_MASTER=${ROOT_DIR}/stratos-master
       IMAGE_TAG=$(cat image-tag/v2-alpha-tag)
       cd ${STRATOS}/deploy/kubernetes/
       GIT_TAG="2.0.0-alpha-${IMAGE_TAG}"
@@ -34,24 +36,27 @@ run:
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${GIT_TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
-      if [ -f ${STRATOS}/dev/index.yaml ]; then
-        cp ${STRATOS}/dev/index.yaml ${ROOT_DIR}/helm-chart/
+      if [ -f ${STRATOS_MASTER}/dev/index.yaml ]; then
+        cp ${STRATOS_MASTER}/dev/index.yaml ${ROOT_DIR}/helm-chart/
         MERGE_INDEX="--merge index.yaml"
       fi
 
       # Update Helm Repository
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
-      cp index.yaml ${STRATOS}/dev/
-      cd ${STRATOS}
+      if [ -d "${STRATOS_MASTER}/dev" ]; then
+        mkdir ${STARTOS_MASTER}/dev
+      fi
+      cp index.yaml ${STRATOS_MASTER}/dev/
+      cd ${STRATOS_MASTER}
       git config --global user.name ${GIT_USER}
       git config --global user.email ${GIT_EMAIL}
 
       mkdir -p /root/.ssh/
       echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
       chmod 600 /root/.ssh/id_rsa
+      git pull --rebase
       echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-      # Commit Helm Repository change
       git add dev/index.yaml
-      git commit -m "Helm repository updated for tag: ${GIT_TAG}"
+      git commit -m "Dev releases Helm repository updated for tag: ${GIT_TAG}"
       git config --global push.default simple
       git push origin HEAD:master
