@@ -23,4 +23,4 @@ run:
       fi
       let ALPHA_RELEASE_NUMBER++
       ALPHA_RELEASE_NUMBER=$(printf "%03d" $ALPHA_RELEASE_NUMBER)
-      echo $ALPHA_RELEASE_NUMBER > ../image-tag/v2-alpha-tag
+      echo "2.0.0-alpha-$ALPHA_RELEASE_NUMBER" > ../image-tag/v2-alpha-tag

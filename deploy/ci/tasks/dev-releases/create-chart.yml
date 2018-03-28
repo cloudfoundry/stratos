@@ -23,9 +23,8 @@ run:
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
       STRATOS_MASTER=${ROOT_DIR}/stratos-master
-      IMAGE_TAG=$(cat image-tag/v2-alpha-tag)
+      GIT_TAG=$(cat image-tag/v2-alpha-tag)
       cd ${STRATOS}/deploy/kubernetes/
-      GIT_TAG="2.0.0-alpha-${IMAGE_TAG}"
       sed -i -e 's/consoleVersion: latest/consoleVersion: '"${GIT_TAG}"'/g' console/values.yaml
       sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' console/values.yaml
       sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
