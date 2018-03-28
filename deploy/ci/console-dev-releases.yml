@@ -17,7 +17,7 @@ resources:
 - name: stratos-master
   type: git
   source:
-    uri: ((stratos-uri))
+    uri: git@github.com:((github-organization))/((github-repository))
     branch: master
     private_key: ((github-private-key))
 # Docker Images
