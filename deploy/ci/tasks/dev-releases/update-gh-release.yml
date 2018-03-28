@@ -18,7 +18,7 @@ run:
       # Create Github release
       ROOT_DIR=${PWD}
       cd ${ROOT_DIR}/stratos
-      GIT_TAG=$(cat image-tag/v2-alpha-tag)
+      GIT_TAG=$(cat ../image-tag/v2-alpha-tag)
       git tag -a ${GIT_TAG} -m "Alpha release of Stratos v2"
       git push --tags
       cd ${ROOT_DIR}/helm-chart-tarball
