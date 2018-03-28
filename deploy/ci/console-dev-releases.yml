@@ -11,7 +11,7 @@ resources:
 - name: stratos
   type: git
   source:
-    uri: ((stratos-uri))
+    uri: git@github.com:((github-organization))/((github-repository))
     branch: ((stratos-branch))
     private_key: ((github-private-key))
 - name: stratos-master
