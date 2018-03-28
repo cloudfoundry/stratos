@@ -56,7 +56,6 @@ resources:
     access_key_id: ((minio-access-key))
     secret_access_key: ((minio-secret-access-key))
     region_name: eu-central-1
-    unpack: true
 - name: helm-chart-tarball
   type: s3
   source:
@@ -85,6 +84,8 @@ jobs:
     trigger: true
   - get: image-tag
     passed: [generate-tag-files]
+    params:
+      unpack: true
   - aggregate:
     - put: jetstream-image
       params:
@@ -117,6 +118,8 @@ jobs:
   - get: stratos-master
   - get: image-tag
     passed: [build-images]
+    params:
+      unpack: true
   - do:
     - task: build
       privileged: true
@@ -143,7 +146,8 @@ jobs:
     passed: [create-chart]
   - get: image-tag
     passed: [build-images] 
- 
+    params:
+     unpack: true
   - do:
     - task: build
       privileged: true
