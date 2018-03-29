@@ -23,7 +23,7 @@ run:
       STRATOS_MASTER=${ROOT_DIR}/stratos-master
       cd ${STRATOS}/deploy/kubernetes/
       TAG=$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)
-      sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"' console/values.yaml
+      sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' console/values.yaml
       sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' console/values.yaml
       sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
   
