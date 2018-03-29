@@ -22,14 +22,11 @@ run:
       helm init || true
       ROOT_DIR=$PWD
       STRATOS=${ROOT_DIR}/stratos
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
       STRATOS_MASTER=${ROOT_DIR}/stratos-master
       GIT_TAG=$(cat image-tag/v2-alpha-tag)
       cd ${STRATOS}/deploy/kubernetes/
-      sed -i -e 's/consoleVersion: latest/consoleVersion: '"${GIT_TAG}"'/g' console/values.yaml
-      sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' console/values.yaml
-      sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REGISTRY}"'/g' console/values.yaml
-  
-      sed -i -e 's/version: 0.1.0/version: '"${GIT_TAG}"'/g' console/Chart.yaml
+      patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
 
       # Generate Helm package
       helm package console
@@ -45,17 +42,4 @@ run:
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
       cp index.yaml ${STRATOS_MASTER}/dev/
       cd ${STRATOS_MASTER}
-      git config --global user.name ${GIT_USER}
-      git config --global user.email ${GIT_EMAIL}
-
-      mkdir -p /root/.ssh/
-      echo "${GIT_PRIVATE_KEY}" > /root/.ssh/id_rsa
-      chmod 600 /root/.ssh/id_rsa
-      git stash
-      git pull --rebase
-      git stash pop
-      echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-      git add dev/index.yaml
-      git commit -m "Dev releases Helm repository updated for tag: ${GIT_TAG}"
-      git config --global push.default simple
-      git push origin HEAD:master
+      setupAndPushChange

@@ -32,7 +32,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-postflight
+    repository: ((docker-org))/stratos-postflight-job
 - name: mariadb-image
   type: docker-image
   source:
@@ -69,7 +69,6 @@ jobs:
 - name: generate-tag-files
   plan:
   - get: stratos
-    trigger: true
   - do:
     - task: generate-tag
       file: stratos/deploy/ci/tasks/dev-releases/generate-tag-files.yml
@@ -146,7 +145,7 @@ jobs:
   - get: helm-chart-tarball
     passed: [create-chart]
   - get: image-tag
-    passed: [build-images] 
+    passed: [create-chart] 
     params:
      unpack: true
   - do:
