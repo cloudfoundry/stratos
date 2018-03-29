@@ -29,6 +29,9 @@ export class MetricsEffect {
         map(metrics => {
           const metric = metrics[action.cfGuid];
           const metricKey = MetricsAction.buildMetricKey(action.guid, action.query);
+          const metricObject = metric ? {
+            [metricKey]: metric.data
+          } : {};
           const apiAction = {
             guid: action.guid,
             entityKey: metricSchemaKey
@@ -36,9 +39,7 @@ export class MetricsEffect {
           return new WrapperRequestActionSuccess(
             {
               entities: {
-                [metricSchemaKey]: {
-                  [metricKey]: metric.data
-                }
+                [metricSchemaKey]: metricObject
               },
               result: [action.guid]
             },
