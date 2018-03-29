@@ -3,6 +3,7 @@ import { MetricsLineChartConfig } from '../../../../shared/components/metrics-ch
 import { MetricsConfig } from '../../../../shared/components/metrics-chart/metrics-chart.component';
 import { FetchApplicationMetricsAction } from '../../../../store/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../store/types/base-metric.types';
+import { MetricsChartHelpers } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
 
 @Component({
   selector: 'app-application-instance-memory-chart',
@@ -17,22 +18,25 @@ export class ApplicationInstanceMemoryChartComponent implements OnInit {
   @Input('endpointGuid')
   private endpointGuid: string;
 
+  public instanceChartConfig = this.buildChartConfig();
+
+  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
+
   constructor() { }
 
   private buildChartConfig() {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
-    lineChartConfig.yAxisLabel = 'Memory usage';
+    lineChartConfig.yAxisLabel = 'Memory Usage (MB)';
     return lineChartConfig;
   }
-
-  public instanceChartConfig = this.buildChartConfig();
-
-  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>
 
   ngOnInit() {
     this.instanceMetricConfig = {
       getSeriesName: result => `Instance ${result.metric.instance_index}`,
+      mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
+      sort: MetricsChartHelpers.sortBySeriesName,
+      mapSeriesItemValue: bytes => bytes / 1000000,
       metricsAction: new FetchApplicationMetricsAction(
         this.appGuid,
         this.endpointGuid,

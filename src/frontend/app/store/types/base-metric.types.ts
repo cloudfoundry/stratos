@@ -32,3 +32,8 @@ export interface IMetricVectorResult<T = any> extends IVectorResult<T> {
 // They're the same interface but I'm going to keep both for continuity.
 export type IMetricScalarResult = IMetricSample[];
 export type IMetricStringsResult = IMetricSample[];
+
+export interface ChartSeries<T = any> {
+  name: string;
+  series: T;
+}

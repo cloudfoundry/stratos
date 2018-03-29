@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Store, compose } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
 import { filter, map, publishReplay, refCount, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
@@ -147,31 +147,10 @@ export class EntityService<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, updateKey = this.refreshKey) {
-    return Observable.interval(interval)
-      .pipe(
-        tag('poll'),
-        withLatestFrom(
-          this.entityMonitor.entity$,
-          this.entityMonitor.entityRequest$
-        ),
-        map(([poll, resource, requestState]) => ({
-          resource,
-          updatingSection: composeFn(
-            getUpdateSectionById(updateKey),
-            getEntityUpdateSections,
-            () => requestState
-          )
-        })),
-        tap(({ resource, updatingSection }) => {
-          if (!updatingSection || !updatingSection.busy) {
-            this.actionDispatch(updateKey);
-          }
-        }),
-        filter(({ resource, updatingSection }) => {
-          return !!updatingSection;
-        }),
-        share(),
-    );
+    return this.entityMonitor.poll(interval, () => this.actionDispatch(updateKey), compose(
+      getUpdateSectionById(updateKey),
+      getEntityUpdateSections
+    ));
   }
 
 }

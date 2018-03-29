@@ -1,20 +1,24 @@
-import { IMetricMatrixResult, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
-import { map, filter } from 'rxjs/operators';
-import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { MetricsAction, FetchApplicationMetricsAction } from '../../../store/actions/metrics.actions';
+import { filter, map } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
 import { ApplicationService } from '../../../features/applications/application.service';
-import { MeticsChartManager } from './metrics.component.manager';
+import { MetricsAction } from '../../../store/actions/metrics.actions';
+import { AppState } from '../../../store/app-state';
+import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
+import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types/base-metric.types';
+import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
-import { metricSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { MetricsChartManager } from './metrics.component.manager';
+import { ChartComponent } from '@swimlane/ngx-charts';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
   getSeriesName: (T) => string;
-  mapSeriesItemName?: (any) => string;
-  mapSeriesItemValue?: (any) => any;
+  mapSeriesItemName?: (value) => string | Date;
+  mapSeriesItemValue?: (value) => any;
+  sort?: (a: ChartSeries<T>, b: ChartSeries<T>) => number;
 }
 export interface MetricsChartConfig {
   // Make an enum for this.
@@ -28,13 +32,20 @@ export interface MetricsChartConfig {
   templateUrl: './metrics-chart.component.html',
   styleUrls: ['./metrics-chart.component.scss']
 })
-export class MetricsChartComponent implements OnInit {
+export class MetricsChartComponent implements OnInit, OnDestroy {
   @Input('metricsConfig')
   public metricsConfig: MetricsConfig;
   @Input('chartConfig')
   public chartConfig: MetricsChartConfig;
+  @Input('title')
+  public title: string;
+
+  @ViewChild('chart')
+  public chart: ChartComponent;
 
   public chartTypes = MetricsChartTypes;
+
+  private pollSub: Subscription;
 
   public results$;
   constructor(
@@ -44,29 +55,36 @@ export class MetricsChartComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.store.dispatch(this.metricsConfig.metricsAction);
-    const metrics$ = this.entityMonitorFactory.create<IMetrics>(
+    const metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
       this.metricsConfig.metricsAction.metricId,
       metricSchemaKey,
       entityFactory(metricSchemaKey)
     );
-    this.results$ = metrics$.entity$.pipe(
+    this.results$ = metricsMonitor.entity$.pipe(
       filter(metrics => !!metrics),
-      map(metrics => {
-        return this.mapMetricsToChartData(metrics, this.metricsConfig);
-      })
+      map(metrics => this.mapMetricsToChartData(metrics, this.metricsConfig))
     );
+    this.store.dispatch(this.metricsConfig.metricsAction);
+    this.pollSub = metricsMonitor.poll(
+      5000,
+      () => this.store.dispatch(this.metricsConfig.metricsAction),
+      request => ({ busy: request.fetching, error: request.error, message: request.message }))
+      .subscribe();
+  }
+
+  ngOnDestroy() {
+    this.pollSub.unsubscribe();
   }
 
   private mapMetricsToChartData(metrics: IMetrics, metricsConfig: MetricsConfig) {
     switch (metrics.resultType) {
       case MetricResultTypes.MATRIX:
-        return MeticsChartManager.mapMatrix(metrics, metricsConfig);
+        return MetricsChartManager.mapMatrix(metrics, metricsConfig);
       case MetricResultTypes.SCALAR:
       case MetricResultTypes.STRING:
       case MetricResultTypes.VECTOR:
       default:
-        throw new Error(`Counld not find chart data mapper for metrics type ${metrics.resultType}`);
+        throw new Error(`Could not find chart data mapper for metrics type ${metrics.resultType}`);
     }
 
   }

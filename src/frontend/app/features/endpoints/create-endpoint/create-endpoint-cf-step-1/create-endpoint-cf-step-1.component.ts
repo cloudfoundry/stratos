@@ -68,8 +68,6 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       !!this.skipSllField.value
     );
 
-    console.log(this.typeField.value);
-
     this.store.dispatch(action);
 
     const update$ = this.store.select(
