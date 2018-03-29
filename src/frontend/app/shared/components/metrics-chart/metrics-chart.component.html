@@ -1,7 +1,9 @@
 <div class="metrics-chart__outer">
   <h2 class="metrics-chart__title" *ngIf="title">{{title}}</h2>
+  <mat-progress-bar *ngIf="!(results$ | async)" class="metrics-chart__loading" [color]="'primary'" [mode]="'query'">
+  </mat-progress-bar>
   <div class="metrics-chart" *ngIf="results$ | async as results" [ngSwitch]="chartConfig.chartType">
-    <ngx-charts-line-chart #chart *ngSwitchCase="chartTypes.LINE" [timeline]="true" [animations]="false" [results]="results" [legend]="true" [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true" [showYAxisLabel]="true"
+    <ngx-charts-line-chart *ngSwitchCase="chartTypes.LINE" [timeline]="true" [animations]="false" [results]="results" [legend]="true" [yAxisLabel]="chartConfig.yAxisLabel" [xAxisLabel]="chartConfig.xAxisLabel" [showXAxisLabel]="true" [showYAxisLabel]="true"
       [xAxis]="true" [yAxis]="true" [autoScale]="true">
     </ngx-charts-line-chart>
     <span *ngSwitchDefault> {{ chartConfig.chartType }} chart type not found </span>

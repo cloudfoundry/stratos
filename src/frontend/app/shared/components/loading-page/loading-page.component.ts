@@ -1,6 +1,9 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
+import { RouterState, Router, RouterStateSnapshot, ActivatedRoute } from '@angular/router';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-loading-page',
@@ -19,25 +22,20 @@ import { Observable } from 'rxjs/Rx';
 })
 export class LoadingPageComponent implements OnInit {
 
-  constructor() { }
+  constructor(private router: ActivatedRoute) { }
 
   @Input('isLoading')
-  isLoading: Observable<boolean> = Observable.of(false);
+  isLoading: Observable<boolean>;
 
   @Input('text')
   text = 'Retrieving your data';
 
-  done: boolean;
-
   ngOnInit() {
     this.isLoading
-      .mergeMap(loading => {
-        this.done = !loading;
-        return Observable.of(loading);
-      })
-      .filter(loading => !loading)
-      .take(1)
-      .subscribe();
+      .pipe(
+        filter(loading => !loading)
+      )
+      .first();
   }
 
 }

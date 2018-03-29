@@ -3,7 +3,7 @@ import { IMetrics, ChartSeries } from '../../../store/types/base-metric.types';
 
 export class MetricsChartManager {
   static mapMatrix<T = any>(metrics: IMetrics, metricsConfig: MetricsConfig): ChartSeries[] {
-    const metricsArray = metrics.result.map<ChartSeries<T>>(
+    return metrics.result.map<ChartSeries<T>>(
       result => ({
         name: metricsConfig.getSeriesName(result),
         series: result.values.map(val => ({
@@ -12,9 +12,16 @@ export class MetricsChartManager {
         }))
       })
     );
-    if (metricsConfig.sort) {
-      metricsArray.sort(metricsConfig.sort);
-    }
-    return metricsArray;
+  }
+  static mapVector<T = any>(metrics: IMetrics, metricsConfig: MetricsConfig): ChartSeries[] {
+    return metrics.result.map<ChartSeries<T>>(
+      result => ({
+        name: metricsConfig.getSeriesName(result),
+        series: [{
+          name: metricsConfig.mapSeriesItemName ? metricsConfig.mapSeriesItemName(result.value[0]) : result.value[0],
+          value: metricsConfig.mapSeriesItemValue ? metricsConfig.mapSeriesItemValue(result.value[1]) : result.value[1]
+        }]
+      })
+    );
   }
 }

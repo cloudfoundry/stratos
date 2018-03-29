@@ -35,5 +35,8 @@ export type IMetricStringsResult = IMetricSample[];
 
 export interface ChartSeries<T = any> {
   name: string;
-  series: T;
+  series: {
+    name: string;
+    value: T;
+  }[];
 }

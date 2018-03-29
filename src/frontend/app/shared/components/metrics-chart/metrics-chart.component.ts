@@ -1,6 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { filter, map } from 'rxjs/operators';
+import { ChartComponent } from '@swimlane/ngx-charts';
+import { filter, map, tap, delay, startWith } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ApplicationService } from '../../../features/applications/application.service';
@@ -11,7 +12,6 @@ import { ChartSeries, IMetrics, MetricResultTypes } from './../../../store/types
 import { EntityMonitorFactory } from './../../monitors/entity-monitor.factory.service';
 import { MetricsChartTypes } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
-import { ChartComponent } from '@swimlane/ngx-charts';
 
 export interface MetricsConfig<T = any> {
   metricsAction: MetricsAction;
@@ -40,9 +40,6 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   @Input('title')
   public title: string;
 
-  @ViewChild('chart')
-  public chart: ChartComponent;
-
   public chartTypes = MetricsChartTypes;
 
   private pollSub: Subscription;
@@ -62,13 +59,20 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     );
     this.results$ = metricsMonitor.entity$.pipe(
       filter(metrics => !!metrics),
-      map(metrics => this.mapMetricsToChartData(metrics, this.metricsConfig))
+      map(metrics => {
+        const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig)
+        if (this.metricsConfig.sort) {
+          metricsArray.sort(this.metricsConfig.sort);
+        }
+        return metricsArray;
+      })
     );
     this.store.dispatch(this.metricsConfig.metricsAction);
     this.pollSub = metricsMonitor.poll(
-      5000,
+      30000,
       () => this.store.dispatch(this.metricsConfig.metricsAction),
-      request => ({ busy: request.fetching, error: request.error, message: request.message }))
+      request => ({ busy: request.fetching, error: request.error, message: request.message })
+    )
       .subscribe();
   }
 
@@ -80,9 +84,10 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     switch (metrics.resultType) {
       case MetricResultTypes.MATRIX:
         return MetricsChartManager.mapMatrix(metrics, metricsConfig);
+      case MetricResultTypes.VECTOR:
+        return MetricsChartManager.mapVector(metrics, metricsConfig);
       case MetricResultTypes.SCALAR:
       case MetricResultTypes.STRING:
-      case MetricResultTypes.VECTOR:
       default:
         throw new Error(`Could not find chart data mapper for metrics type ${metrics.resultType}`);
     }
