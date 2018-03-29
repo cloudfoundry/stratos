@@ -213,9 +213,11 @@ const ApplicationEntitySchema = new EntitySchema(
     entity: {
       stack: StackSchema,
       space: new EntitySchema(spaceSchemaKey, {
-        ...coreSpaceSchemaParams,
-        routes: [RouteNoAppsSchema],
-        organization: OrganizationsWithoutSpaces,
+        entity: {
+          ...coreSpaceSchemaParams,
+          routes: [RouteNoAppsSchema],
+          organization: OrganizationsWithoutSpaces,
+        }
       }, { idAttribute: getAPIResourceGuid }),
       routes: [RouteNoAppsSchema],
       service_bindings: [ServiceBindingsSchema]
