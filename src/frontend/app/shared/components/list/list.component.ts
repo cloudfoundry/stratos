@@ -274,22 +274,26 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.pageState$ = combineLatest(
       this.paginationController.pagination$,
-      this.dataSource.page$,
+      this.dataSource.isLoadingPage$,
       this.view$
     )
       .pipe(
-        filter(([pagination, page, viewType]) => page.length > 0 && viewType !== 'table'),
-        map(values => values[0].pageIndex),
-        distinctUntilChanged(),
+        filter(([pagination, busy, viewType]) => viewType !== 'table'),
+        map(([pagination, busy, viewType]) => ({ pageIndex: pagination.pageIndex, busy, viewType })),
+        distinctUntilChanged((x, y) => x.pageIndex === y.pageIndex && x.busy === y.busy && x.viewType === y.viewType),
         pairwise(),
         map(([oldVal, newVal]) => {
-          console.log(oldVal, newVal);
-          if (oldVal > newVal) {
-            return 'left';
-          } else if (oldVal < newVal) {
-            return 'right';
+          if (oldVal.viewType !== oldVal.viewType) {
+            return 'none';
           }
-          return 'in';
+          if (oldVal.pageIndex > newVal.pageIndex) {
+            return 'left';
+          } else if (oldVal.pageIndex < newVal.pageIndex) {
+            return 'right';
+          } else if (oldVal.busy && !newVal.busy) {
+            return 'in';
+          }
+          return 'none';
         })
       );
   }
