@@ -15,7 +15,7 @@ image_resource:
 run:
   path: sh
   args:
-    - -exc
+    - -xc
     - |
       helm init || true
       ROOT_DIR=$PWD
