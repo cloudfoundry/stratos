@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	. "github.com/smartystreets/goconvey/convey"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 )
@@ -26,7 +26,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		uri, err := url.Parse(mockCFServer.URL + "/v2/info")
 		So(err, ShouldBeNil)
 
-		mockCNSIRequest := CNSIRequest{
+		mockCNSIRequest := interfaces.CNSIRequest{
 			GUID:     mockCFGUID,
 			UserGUID: mockUserGUID,
 			Method:   "GET",
@@ -65,7 +65,7 @@ func TestPassthroughDoRequest(t *testing.T) {
 		})
 
 		// TODO(wchrisjohnson): document what is happening here for the sake of Golang newcomers
-		done := make(chan *CNSIRequest)
+		done := make(chan *interfaces.CNSIRequest)
 
 		// Set up database expectation for pp.doOauthFlowRequest
 		//  p.getCNSIRequestRecords(cnsiRequest) ->
@@ -206,7 +206,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 	t.Parallel()
 
 	Convey("Passthrough request should succeed", t, func() {
-		expectedCNSIRequest := CNSIRequest{
+		expectedCNSIRequest := interfaces.CNSIRequest{
 			GUID:     mockCFGUID,
 			UserGUID: "user1",
 			Method:   "GET",
@@ -214,7 +214,7 @@ func TestPassthroughBuildCNSIRequest(t *testing.T) {
 			Header:   nil,
 		}
 
-		var cr CNSIRequest
+		var cr interfaces.CNSIRequest
 
 		req := setupMockReq("GET", "", nil)
 		_, _, ctx, pp, db, mock := setupHTTPTest(req)

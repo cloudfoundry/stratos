@@ -9,11 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-
 	"github.com/SUSE/stratos-ui/repository/crypto"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 // TODO(wchrisjohnson): check that Authorization header starts with "bearer "
@@ -111,7 +110,7 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		res, err := pp.doOauthFlowRequest(&CNSIRequest{
+		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -256,7 +255,7 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		//
-		res, err := pp.doOauthFlowRequest(&CNSIRequest{
+		res, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -387,7 +386,7 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 			WillReturnError(errors.New("Unknown Database Error"))
 
 		//
-		_, err := pp.doOauthFlowRequest(&CNSIRequest{
+		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
@@ -431,7 +430,7 @@ func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
 	}
 	pp.setCNSITokenRecord("not-the-right-guid", mockUserGUID, mockTokenRecord)
 
-	_, err := pp.doOauthFlowRequest(&CNSIRequest{
+	_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
 		GUID:     mockCNSIGUID,
 		UserGUID: mockUserGUID,
 	}, req)
@@ -472,7 +471,7 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 
 		pp := setupPortalProxy(nil)
 
-		invalidCNSIRequest := &CNSIRequest{
+		invalidCNSIRequest := &interfaces.CNSIRequest{
 			GUID:     "",
 			UserGUID: "",
 		}
@@ -517,7 +516,7 @@ func TestRefreshTokenWithInvalidRefreshToken(t *testing.T) {
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRow)
 
-		_, err := pp.RefreshToken(true, cnsiGUID, userGUID, client, clientSecret, invalidTokenEndpoint)
+		_, err := pp.RefreshOAuthToken(true, cnsiGUID, userGUID, client, clientSecret, invalidTokenEndpoint)
 		Convey("Oauth flow request erroneously succeeded", func() {
 			So(err, ShouldNotBeNil)
 		})
@@ -643,7 +642,7 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		mock.ExpectExec(updateTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 		//
-		_, err := pp.doOauthFlowRequest(&CNSIRequest{
+		_, err := pp.doOauthFlowRequest(&interfaces.CNSIRequest{
 			GUID:     mockCNSIGUID,
 			UserGUID: mockUserGUID,
 		}, req)
