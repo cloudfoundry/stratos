@@ -490,9 +490,11 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
         const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
         const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
         if (arraySafeEntitySchema.key === action.entityKey) {
+          // Found it! Does the entity contain a value for the property name?
           if (!entity.entity[paramName]) {
             return;
           }
+          // Yes? Let's create the action that will populate the pagination section with the value
           const config: HandleRelationsConfig = {
             store,
             action: null,
