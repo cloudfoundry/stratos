@@ -3,7 +3,6 @@ platform: linux
 inputs:
 - name: stratos
 - name: helm-chart-tarball
-- name: image-tag
 image_resource:
   type: docker-image
   source:
