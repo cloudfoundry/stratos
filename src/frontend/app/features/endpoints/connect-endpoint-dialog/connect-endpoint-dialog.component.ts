@@ -68,7 +68,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       if (authType.types.find(t => t === this.data.type)) {
         this.authTypesForEndpoint.push(authType);
       }
-    })
+    });
 
     // Create the endpoint form
     const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
@@ -83,9 +83,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   onFileSelect(event) {
     const file = event[0];
-    var reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = (e) => {
-      var text = reader.result;
+      const text = reader.result;
       this.bodyContent = text;
       this.endpointForm.controls.authValues.patchValue({
         config: file.name,

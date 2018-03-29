@@ -100,7 +100,7 @@ export class CfOrgSpaceDataService {
       list$: this.store
         .select(endpointsRegisteredEntitiesSelector)
         .first()
-        .map(endpoints => Object.values(endpoints)),
+        .map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
       loading$: Observable.of(false),
       select: new BehaviorSubject(undefined)
     };

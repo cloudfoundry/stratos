@@ -9,12 +9,3 @@
 
 <app-endpoints-missing [showToolbarHint]="true" [showSnackForNoneConnected]="true"></app-endpoints-missing>
 <app-list [hidden]="!(endpointsService.haveRegistered$ | async)"></app-list>
-
-<br>
-<button mat-button (click)="testKubernetes()">Test Kubernetes</button>
-
-<br>
-<button mat-button (click)="testCaaSP()">Test CaaSP</button>
-
-<br>
-<button mat-button (click)="testKubeConfig()">Test CaaSP Kube Config</button>

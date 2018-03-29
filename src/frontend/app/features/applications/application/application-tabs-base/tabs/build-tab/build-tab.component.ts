@@ -40,19 +40,4 @@ export class BuildTabComponent implements OnInit {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }).distinct();
   }
-
-  testMetrics() {
-    console.log('TESTING METRICS.....');
-
-    // this.store.dispatch(new FetchCFMetricsAction(
-    //   this.appService.cfGuid,
-    //   'firehose_container_metric_cpu_percentage{}[5m]')
-    // );
-    // this.store.dispatch(new FetchApplicationMetricsAction(
-    //   this.applicationService.appGuid,
-    //   this.applicationService.cfGuid,
-    //   'firehose_value_metric_rep_container_count{}'
-    // )
-    // );
-  }
 }
