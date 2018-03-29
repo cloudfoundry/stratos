@@ -1,0 +1,134 @@
+---
+resource_types:
+- name: docker-image
+  type: docker-image
+  privileged: true
+  source:
+    repository: ((docker-image-resource))
+    tag: ((docker-image-resource-tag))
+    
+resources:
+- name: stratos
+  type: git
+  source:
+    uri: git@github.com:((github-organization))/((github-repository))
+    branch: ((stratos-branch))
+    private_key: ((github-private-key))
+- name: stratos-master
+  type: git
+  source:
+    uri: git@github.com:((github-organization))/((github-repository))
+    branch: master
+    private_key: ((github-private-key))
+# Docker Images
+- name: jetstream-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-jetstream
+- name: postflight-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-postflight
+- name: mariadb-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-mariadb
+- name: ui-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-org))/stratos-mariadb
+
+- name: helm-chart-tarball
+  type: s3
+  source:
+    bucket: concourse-stratos-ui
+    endpoint: {{minio-server-endpoint}}
+    regexp: temp-artifacts/console-helm-chart-(?P<version>.*).tgz
+    access_key_id: {{minio-access-key}}
+    secret_access_key: {{minio-secret-access-key}}
+    region_name: eu-central-1
+jobs:
+- name: build-images
+  plan:
+  - get: stratos
+    passed: [generate-tag-files]
+    trigger: true
+  - aggregate:
+    - do:
+      - put: jetstream-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  prod-build
+          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+      - put: postflight-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.bk
+          build: stratos/
+          target_name:  postflight-job
+          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+      - put: mariadb-image
+        params:
+          dockerfile: stratos/deploy/db/Dockerfile.mariadb
+          build: stratos/deploy/db
+          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+      - put: ui-image
+        params:
+          dockerfile: stratos/deploy/Dockerfile.ui
+          build: stratos/
+          target_name: prod-build
+          tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+- name: create-chart
+  plan:
+  - get: stratos
+    passed: [build-images]
+    trigger: true
+  - get: stratos-master
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos/deploy/ci/tasks/dev-releases/create-nightly-chart.yml
+      params:
+        GIT_USER: ((concourse-user))
+        GIT_EMAIL: ((concourse-email))
+        GITHUB_ORG: ((github-organization))
+        GITHUB_REPO: ((github-repository))
+        GIT_PRIVATE_KEY: ((github-private-key))
+        DOCKER_ORG: ((artifact-docker-organization))
+        DOCKER_REGISTRY: ((artifact-docker-registry))
+    - put: helm-chart-tarball
+      params:
+       file: helm-chart/*.tgz
+       acl: public-read   
+- name: update-github
+  plan:
+  - get: stratos
+    passed: [create-chart]
+    trigger: true
+  - get: helm-chart-tarball
+    passed: [create-chart]
+  - get: image-tag
+    passed: [create-chart] 
+    params:
+     unpack: true
+  - do:
+    - task: build
+      privileged: true
+      timeout: 30m
+      file: stratos/deploy/ci/tasks/dev-releases/update-gh-release.yml
+      params:
+        GITHUB_TOKEN: ((github-access-token))
+        GITHUB_USER: ((github-organization))
+        GITHUB_REPO: ((github-repository))
+        GIT_USER: ((concourse-user))
+        GIT_EMAIL: ((concourse-email))
+        GIT_PRIVATE_KEY: ((github-private-key))

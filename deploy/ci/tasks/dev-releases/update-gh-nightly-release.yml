@@ -1,0 +1,33 @@
+---
+platform: linux
+inputs:
+- name: stratos
+- name: helm-chart-tarball
+- name: image-tag
+image_resource:
+  type: docker-image
+  source:
+   repository: splatform/ci-stratos-github-release
+   tag: "latest"
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Create Github release
+      ROOT_DIR=${PWD}
+      cd ${ROOT_DIR}/stratos
+      mkdir -p /root/.ssh/
+      TAG=$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)
+      github-release info -t $TAG
+      if [ $? -eq 0 ]; then
+        echo 'Release ${TAG} exists, deleting...'
+        github-release delete $TAG
+      fi
+      NAME=$(cat stratos/deploy/ci/tasks/dev-releases/nightly-release-name)
+      DESC=$(cat stratos/deploy/ci/tasks/dev-releases/nightly-release-description)
+      github-release release -t ${TAG} --pre-release --name ${NAME} --description ${DESC} 
+      cd ${ROOT_DIR}/helm-chart-tarball
+      CHART_PACKAGE=$(ls *.tgz)
+      github-release upload -t ${TAG} --file ${CHART_PACKAGE} --name "console-v2-helm-chart-${GIT_TAG}.tgz"
