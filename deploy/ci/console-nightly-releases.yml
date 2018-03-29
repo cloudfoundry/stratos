@@ -6,8 +6,13 @@ resource_types:
   source:
     repository: ((docker-image-resource))
     tag: ((docker-image-resource-tag))
-    
+
 resources:
+- name: midnight
+  type: time
+  source:
+    start: 12:00 AM
+    stop: 2:00 AM
 - name: stratos
   type: git
   source:
@@ -32,7 +37,7 @@ resources:
   source:
     username: ((docker-username))
     password: ((docker-password))
-    repository: ((docker-org))/stratos-postflight
+    repository: ((docker-org))/stratos-postflight-job
 - name: mariadb-image
   type: docker-image
   source:
@@ -59,6 +64,7 @@ jobs:
 - name: build-images
   plan:
   - get: stratos
+  - get: midnight
     trigger: true
   - aggregate:
     - do:
@@ -115,13 +121,11 @@ jobs:
     trigger: true
   - get: helm-chart-tarball
     passed: [create-chart]
-    params:
-     unpack: true
   - do:
     - task: build
       privileged: true
       timeout: 30m
-      file: stratos/deploy/ci/tasks/dev-releases/update-gh-release.yml
+      file: stratos/deploy/ci/tasks/dev-releases/update-gh-nightly-release.yml
       params:
         GITHUB_TOKEN: ((github-access-token))
         GITHUB_USER: ((github-organization))
