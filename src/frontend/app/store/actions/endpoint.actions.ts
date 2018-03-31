@@ -26,13 +26,13 @@ export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
 
 // Different Auth Type support for connecting to Endpoints
-export type AuthParamsUsernamePassword = {
-  username: string,
-  password: string,
+export interface AuthParamsUsernamePassword {
+  username: string;
+  password: string;
 }
 
-export type AuthParamsToken = {
-  token: string,
+export interface AuthParamsToken {
+  token: string;
 }
 
 // All supported auth params types

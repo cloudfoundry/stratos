@@ -9,11 +9,12 @@ import { getNameForEndpointType } from '../../endpoints/endpoint-helpers';
 })
 export class MetricsComponent implements OnInit {
 
+  getNameForEndpointType = getNameForEndpointType;
+
   constructor(private metricsService: MetricsService) { }
 
   ngOnInit() {
     console.log('metrics component');
   }
 
-  getNameForEndpointType = getNameForEndpointType;
 }

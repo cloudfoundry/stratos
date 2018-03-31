@@ -9,16 +9,16 @@ import { ColorHelper } from '@swimlane/ngx-charts';
 })
 export class RingChartComponent implements OnInit {
 
+  domain: any[];
+  colors: ColorHelper;
+
   @Input() data: any;
-  @Input() label: string = 'Total';
+  @Input() label  = 'Total';
+  @Input() scheme: any = 'cool';
 
   @Input() valueFormatting: (value: number) => any = value => value;
   @Input() nameFormatting: (value: string) => any = label => label;
-  @Input() percentageFormatting: (value: number) => any = percentage => percentage;  
-  @Input() scheme: any = 'cool';
-
-  domain: any[];
-  colors: ColorHelper;
+  @Input() percentageFormatting: (value: number) => any = percentage => percentage;
 
   constructor() { }
 
@@ -32,11 +32,11 @@ export class RingChartComponent implements OnInit {
 
   setColors(): void {
     this.colors = new ColorHelper(this.scheme, 'ordinal', this.domain, []);
-  } 
-  
+  }
+
   getDomain(): any[] {
     return this.data.map(d => d.name);
-  }  
+  }
 
   getTotal(): number {
     return this.data

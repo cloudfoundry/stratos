@@ -44,13 +44,12 @@ export class SideNavComponent implements OnInit, OnDestroy {
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
 
     this.sub = this.endpointsService.endpoints$.map(ep => {
-      var connectedTypes = {};
+      const connectedTypes = {};
       Object.values(ep).forEach(epData => {
         connectedTypes[epData.cnsi_type] = connectedTypes[epData.cnsi_type] || (epData.connectionStatus === 'connected');
       });
       return connectedTypes;
     }).do(connectedTypes => {
-      let index = 0;
       this.tabs.forEach(tab => {
         if (tab.endpointType) {
           tab.hidden = !connectedTypes[tab.endpointType];

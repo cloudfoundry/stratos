@@ -156,7 +156,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     AppChipsComponent,
     ServiceIconComponent,
     EnvVarViewComponent,
-	RingChartComponent,
+    RingChartComponent,
   ],
   exports: [
     FormsModule,
@@ -209,7 +209,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     CardCfOrgUserDetailsComponent,
     CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-	RingChartComponent,
+    RingChartComponent,
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
     EnvVarViewComponent,
