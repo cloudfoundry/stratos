@@ -97,13 +97,14 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 		//  p.getCNSIRequestRecords(cnsiRequest) ->
 		//     p.getCNSITokenRecord(r.GUID, r.UserGUID) ->
 		//        tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
-		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-			AddRow(encryptedToken, encryptedToken, tokenExpiration, false)
+		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+			AddRow(encryptedToken, encryptedToken, tokenExpiration, false, "OAuth2", "")
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRow)
 
 		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
+
 		expectedCNSIRecordRow := sqlmock.NewRows([]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation"}).
 			AddRow(mockCNSI.GUID, mockCNSI.Name, mockCNSI.CNSIType, mockURLasString, mockCNSI.AuthorizationEndpoint, mockCNSI.TokenEndpoint, mockCNSI.DopplerLoggingEndpoint, true)
 		mock.ExpectQuery(selectAnyFromCNSIs).
@@ -226,8 +227,8 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 		//   p.getCNSIRequestRecords(cnsiRequest) ->
 		//     p.getCNSITokenRecord(r.GUID, r.UserGUID) ->
 		//        tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
-		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-			AddRow(encryptedUAAToken, encryptedUAAToken, tokenExpiration, false)
+		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+			AddRow(encryptedUAAToken, encryptedUAAToken, tokenExpiration, false, "OAuth2", "")
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRow)
@@ -239,8 +240,8 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		expectedCNSITokenRecordRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-			AddRow(encryptedUAAToken, encryptedUAAToken, tokenExpiration, false)
+		expectedCNSITokenRecordRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+			AddRow(encryptedUAAToken, encryptedUAAToken, tokenExpiration, false, "OAuth2", "")
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRecordRow)
@@ -369,8 +370,8 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 		//   p.getCNSIRequestRecords(cnsiRequest) ->
 		//     p.getCNSITokenRecord(r.GUID, r.UserGUID) ->
 		//        tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
-		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-			AddRow(encryptedUAAToken, encryptedUAAToken, tokenExpiration, false)
+		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+			AddRow(encryptedUAAToken, encryptedUAAToken, tokenExpiration, false, "OAuth2", "")
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRow)
@@ -510,8 +511,8 @@ func TestRefreshTokenWithInvalidRefreshToken(t *testing.T) {
 
 		// Setup for getCNSITokenRecord
 		tokenExpiration := time.Now().AddDate(0, 0, 1).Unix()
-		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "skip_ssl_validation"}).
-			AddRow(mockUAAToken, mockUAAToken, tokenExpiration, true)
+		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+			AddRow(mockUAAToken, mockUAAToken, tokenExpiration, true, "OAuth2", "")
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRow)
@@ -613,8 +614,8 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 		//   p.getCNSIRequestRecords(cnsiRequest) ->
 		//     p.getCNSITokenRecord(r.GUID, r.UserGUID) ->
 		//        tokenRepo.FindCNSIToken(cnsiGUID, userGUID)
-		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-			AddRow(mockUAAToken, mockUAAToken, tokenExpiration, false)
+		expectedCNSITokenRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+			AddRow(mockUAAToken, mockUAAToken, tokenExpiration, false, "OAuth2", "")
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRow)
@@ -626,8 +627,8 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 			WithArgs(mockCNSIGUID).
 			WillReturnRows(expectedCNSIRecordRow)
 
-		expectedCNSITokenRecordRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-			AddRow(mockUAAToken, mockUAAToken, tokenExpiration, false)
+		expectedCNSITokenRecordRow := sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+			AddRow(mockUAAToken, mockUAAToken, tokenExpiration, false, "OAuth2", "")
 		mock.ExpectQuery(selectAnyFromTokens).
 			WithArgs(mockCNSIGUID, mockUserGUID).
 			WillReturnRows(expectedCNSITokenRecordRow)

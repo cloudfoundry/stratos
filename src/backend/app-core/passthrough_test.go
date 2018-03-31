@@ -80,6 +80,15 @@ func TestPassthroughDoRequest(t *testing.T) {
 			WithArgs(mockCFGUID).
 			WillReturnRows(expectCFRow())
 
+		mock.ExpectQuery(selectAnyFromTokens).
+			WithArgs(mockCFGUID, mockUserGUID).
+			WillReturnRows(expectEncryptedTokenRow(pp.Config.EncryptionKeyInBytes))
+
+		//  p.GetCNSIRecord(r.GUID) -> cnsiRepo.Find(guid)
+		mock.ExpectQuery(selectAnyFromCNSIs).
+			WithArgs(mockCFGUID).
+			WillReturnRows(expectCFRow())
+
 		go pp.doRequest(&mockCNSIRequest, done)
 
 		newCNSIRequest := <-done
