@@ -6,8 +6,8 @@ import { CoreModule } from '../../../../../../core/core.module';
 import { IListDataSource } from '../../../data-sources-controllers/list-data-source-types';
 
 describe('TableCellEditVariableComponent', () => {
-  let component: TableCellEditVariableComponent<ListAppEnvVar>;
-  let fixture: ComponentFixture<TableCellEditVariableComponent<ListAppEnvVar>>;
+  let component: TableCellEditVariableComponent;
+  let fixture: ComponentFixture<TableCellEditVariableComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

@@ -2,6 +2,7 @@ import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { filter, map } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -50,6 +51,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     },
   ];
 
+  private hasAttemptedConnect: boolean;
   private authTypesForEndpoint = [];
 
   constructor(
@@ -136,13 +138,13 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     )
       .map(request => !!(request && request.api_endpoint && request.user));
 
-    this.connecting$ =
-      this.update$
-        .map(update => update.busy);
-    this.connectingError$ = this.update$.map(update => update.error);
+    this.connecting$ = this.update$.map(update => update.busy);
+    this.connectingError$ = this.update$.pipe(
+      filter(() => this.hasAttemptedConnect),
+      map(update => update.error)
+    );
 
-    this.valid$ = this.endpointForm.valueChanges
-      .map(() => this.endpointForm.valid);
+    this.valid$ = this.endpointForm.valueChanges.map(() => this.endpointForm.valid);
 
     this.setupCombinedObservables();
   }
@@ -185,6 +187,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   submit(event) {
+    this.hasAttemptedConnect = true;
     const { guid, authType, authValues } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
