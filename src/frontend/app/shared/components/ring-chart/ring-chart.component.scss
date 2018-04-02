@@ -1,25 +1,25 @@
 .app-ring-chart {
-  display: flex;
   align-items: center;
+  display: flex;
 
   .legend {
-    display: flex;
     align-items: center;
+    display: flex;
   }
 
   .advanced-pie-legend {
     display: flex;
-    top:0;
-    transform: none;
     flex-direction: column;
     margin-right: 36px;
+    top:0;
+    transform: none;
 
     .item-percent {
       display: none;
     }
 
     .total-label {
-      margin: -8px 0 0 0;
+      margin: -8px 0 0;
     }
 
     .legend-items-container .legend-items .legend-item {
@@ -28,7 +28,7 @@
       }
     }
   }
-  
+
   ngx-charts-advanced-legend .advanced-pie-legend {
     .total-label, .total-value {
       display: none;
