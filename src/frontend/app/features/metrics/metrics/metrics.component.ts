@@ -13,8 +13,6 @@ export class MetricsComponent implements OnInit {
 
   constructor(private metricsService: MetricsService) { }
 
-  ngOnInit() {
-    console.log('metrics component');
-  }
+  ngOnInit() { }
 
 }
