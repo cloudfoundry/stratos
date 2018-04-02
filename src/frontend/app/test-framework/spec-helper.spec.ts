@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { APP_BASE_HREF } from '"@angular/common';
+import { APP_BASE_HREF } from '@angular/common';
 
 /**
  * The ngx Charts lobrary needs APP_BASE_HREF - so we will provide it through
