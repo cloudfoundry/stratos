@@ -6,12 +6,12 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } from '../../list.component.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
-import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -99,6 +99,10 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     }
   ];
   viewType = ListViewTypes.TABLE_ONLY;
+  text = {
+    title: null,
+    noEntries: 'There are no applications'
+  };
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {

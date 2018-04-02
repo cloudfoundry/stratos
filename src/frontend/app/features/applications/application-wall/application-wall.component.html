@@ -11,5 +11,17 @@
 </app-page-header>
 <app-endpoints-missing #appEndpointsMissing></app-endpoints-missing>
 <!-- <p *ngIf="error">We're sorry, we couldn't fetch all of your applications. Please try again later.</p> -->
-<app-list [hidden]="!(endpointsService.haveRegistered$ | async) || !(endpointsService.haveConnected$ | async)">
+
+<ng-template #noEntriesForCurrentFilter>
+  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications for the current filter'" [secondLine]="{
+  text: ''
+}"></app-no-content-message>
+</ng-template>
+
+<ng-template #noEntries>
+  <app-no-content-message [icon]="'apps'" [firstLine]="'There are no applications'" [secondLine]="{
+  text: ''
+}"></app-no-content-message>
+</ng-template>
+<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" [hidden]="!(endpointsService.haveRegistered$ | async) || !(endpointsService.haveConnected$ | async)">
 </app-list>

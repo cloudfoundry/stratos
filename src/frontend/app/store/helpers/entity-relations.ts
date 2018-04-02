@@ -86,7 +86,7 @@ class ValidateEntityRelationsConfig {
    */
   action: IRequestAction;
   /**
-   * Collection of parent entities whose children may be missing. for example a list of organisations that have missing spaces
+   * Collection of parent entities whose children may be missing. for example a list of organizations that have missing spaces
    *
    * @type {any[]}
    * @memberof ValidateEntityRelationsConfig
@@ -327,8 +327,11 @@ function validationLoop(config: ValidateLoopConfig): ValidateEntityResult[] {
           const guids = childEntitiesAsGuids(childEntitiesAsArray);
 
           childEntities = [];
-          const allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
-          const newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
+          let allEntitiesOfType = allEntities ? allEntities[childRelation.entityKey] : {};
+          let newEntitiesOfType = newEntities ? newEntities[childRelation.entityKey] : {};
+          allEntitiesOfType = allEntities || {};
+          newEntitiesOfType = newEntities || {};
+
           for (let i = 0; i < guids.length; i++) {
             const guid = guids[i];
             const foundEntity = newEntitiesOfType[guid] || allEntitiesOfType[guid];
@@ -487,9 +490,11 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
         const entitySchema: EntitySchema | [EntitySchema] = entities[paramName];
         const arraySafeEntitySchema: EntitySchema = entitySchema['length'] >= 0 ? entitySchema[0] : entitySchema;
         if (arraySafeEntitySchema.key === action.entityKey) {
+          // Found it! Does the entity contain a value for the property name?
           if (!entity.entity[paramName]) {
             return;
           }
+          // Yes? Let's create the action that will populate the pagination section with the value
           const config: HandleRelationsConfig = {
             store,
             action: null,

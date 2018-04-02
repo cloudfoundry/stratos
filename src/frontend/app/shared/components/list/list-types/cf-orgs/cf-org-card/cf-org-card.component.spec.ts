@@ -5,7 +5,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import {
   generateTestCfEndpointServiceProvider,
   generateTestCfUserServiceProvider,
-  getBaseTestModulesNoShared,
+  BaseTestModulesNoShared,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
@@ -33,7 +33,7 @@ describe('CfOrgCardComponent', () => {
       declarations: [CfOrgCardComponent, MetaCardComponent, MetaCardItemComponent,
         MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
         MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent],
-      imports: [...getBaseTestModulesNoShared],
+      imports: [...BaseTestModulesNoShared],
       providers: [PaginationMonitorFactory, EntityMonitorFactory, generateTestCfUserServiceProvider(),
         CfOrgSpaceDataService, generateTestCfEndpointServiceProvider(), EntityServiceFactory]
     })

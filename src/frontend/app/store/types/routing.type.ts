@@ -28,3 +28,6 @@ export const defaultRoutingState: RoutingHistory = {
 export function getPreviousRoutingState(state: AppState) {
   return state.routing.previousState;
 }
+export function getCurrentRoutingState(state: AppState) {
+  return state.routing.currentState;
+}

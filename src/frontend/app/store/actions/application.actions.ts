@@ -7,6 +7,8 @@ import {
   domainSchemaKey,
   entityFactory,
   routeSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -20,6 +22,7 @@ import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
 import { getPaginationKey } from './pagination.actions';
+import { getActions } from './action.helper';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';
@@ -40,10 +43,6 @@ export const CREATE_FAILED = '[Application] Create failed';
 export const UPDATE = '[Application] Update';
 export const UPDATE_SUCCESS = '[Application] Update success';
 export const UPDATE_FAILED = '[Application] Update failed';
-
-export const ASSIGN_ROUTE = '[Application] Assign route';
-export const ASSIGN_ROUTE_SUCCESS = '[Application] Assign route success';
-export const ASSIGN_ROUTE_FAILED = '[Application] Assign route failed';
 
 export const DELETE = '[Application] Delete';
 export const DELETE_SUCCESS = '[Application] Delete success';
@@ -111,25 +110,6 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
-export class AssociateRouteWithAppApplication extends CFStartAction
-  implements ICFAction {
-  constructor(
-    public guid: string,
-    public routeGuid: string,
-    public endpointGuid: string
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/routes/${routeGuid}`;
-    this.options.method = 'put';
-  }
-  actions = [ASSIGN_ROUTE, ASSIGN_ROUTE_SUCCESS, ASSIGN_ROUTE_FAILED];
-  entity = [applicationEntitySchema];
-  entityKey = applicationSchemaKey;
-  options: RequestOptions;
-  updatingKey = 'Assigning-Route';
-}
-
 export interface UpdateApplication {
   name?: string;
   instances?: number;
@@ -139,21 +119,30 @@ export interface UpdateApplication {
   state?: string;
 }
 
-export class UpdateExistingApplication extends CFStartAction
-  implements ICFAction {
+export class UpdateExistingApplication extends CFStartAction implements ICFAction {
   static updateKey = 'Updating-Existing-Application';
 
+  /**
+   * Creates an instance of UpdateExistingApplication.
+   * @param {string} guid
+   * @param {string} endpointGuid
+   * @param {UpdateApplication} newApplication Sparsely populated application containing updated settings
+   * @param {IApp} [existingApplication] Existing application. Used in a few specific cases
+   * @param {AppMetadataTypes[]} [updateEntities] List of metadata calls to make if we successfully update the application
+   * @memberof UpdateExistingApplication
+   */
   constructor(
     public guid: string,
     public endpointGuid: string,
-    private application: UpdateApplication,
+    public newApplication: UpdateApplication,
+    public existingApplication?: IApp,
     public updateEntities?: AppMetadataTypes[]
   ) {
     super();
     this.options = new RequestOptions();
     this.options.url = `apps/${guid}`;
     this.options.method = 'put';
-    this.options.body = application;
+    this.options.body = newApplication;
   }
   actions = [UPDATE, UPDATE_SUCCESS, UPDATE_FAILED];
   entity = [applicationEntitySchema];
@@ -213,41 +202,4 @@ export class DeleteApplicationInstance extends CFStartAction
   entityKey = appStatsSchemaKey;
   removeEntityOnDelete = true;
   options: RequestOptions;
-}
-
-export class GetAppRoutes extends CFStartAction implements EntityInlineParentAction, EntityInlineChildAction {
-  constructor(
-    public guid: string,
-    public endpointGuid: string,
-    public paginationKey: string = null,
-    public includeRelations: string[] = [
-      createEntityRelationKey(routeSchemaKey, domainSchemaKey)
-    ],
-    public populateMissing = true
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${guid}/routes`;
-    this.options.method = 'get';
-    this.options.params = new URLSearchParams();
-    this.parentGuid = guid;
-    this.paginationKey = paginationKey || getPaginationKey(this.entityKey, endpointGuid, guid);
-  }
-  actions = [
-    '[Application Routes] Get all',
-    '[Application Routes] Get all success',
-    '[Application Routes] Get all failed',
-  ];
-  initialParams = {
-    'results-per-page': 100,
-    page: 1,
-    'order-direction': 'desc',
-    'order-direction-field': 'route',
-  };
-  entity = [entityFactory(routeSchemaKey)];
-  entityKey = routeSchemaKey;
-  options: RequestOptions;
-  flattenPagination = true;
-  parentGuid: string;
-  parentEntitySchema = entityFactory(applicationSchemaKey);
 }

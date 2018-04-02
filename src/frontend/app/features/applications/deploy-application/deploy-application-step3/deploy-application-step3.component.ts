@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError, take } from 'rxjs/operators';
+import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError, takeWhile } from 'rxjs/operators';
 import { getEntityById, selectEntity, selectEntities } from '../../../../store/selectors/api.selectors';
 import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
 import websocketConnect from 'rxjs-websockets';
@@ -18,11 +18,13 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetAllApplications } from '../../../../store/actions/application.actions';
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { organisationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
-import { DiscoverAppHelper } from './discover-app-helper';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { interval } from 'rxjs/observable/interval';
+
+// Interval to check for new application
+const APP_CHECK_INTERVAL = 3000;
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -36,13 +38,13 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  validate: Observable<boolean>;
   appGuid: string;
+
+  // Validation poller
+  validate = this.createValidationPoller();
 
   // Are we deploying?
   deploying = false;
-
-  appDetectionHelper: DiscoverAppHelper;
 
   constructor(
     private store: Store<AppState>,
@@ -53,13 +55,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     // Unsubscribe from the websocket stream
-    if (this.connect$ && !this.connect$.closed) {
+    if (this.connect$) {
       this.connect$.unsubscribe();
-    }
-
-    // Shut down app detection helper if there is one
-    if (this.appDetectionHelper) {
-      this.appDetectionHelper.stopDetection();
     }
   }
 
@@ -69,7 +66,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         && !!appDetail.applicationSource
         && !!appDetail.applicationSource.projectName),
       mergeMap(p => {
-        const orgSubscription = this.store.select(selectEntity(organisationSchemaKey, p.cloudFoundryDetails.org));
+        const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, p.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, p.cloudFoundryDetails.space));
         return Observable.of(p).combineLatest(orgSubscription, spaceSubscription);
       }),
@@ -97,13 +94,11 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
             tap((log) => {
               // Deal with control messages
               if (log.type !== SocketEventTypes.DATA) {
-              this.processWebSocketMessage(log);
+                this.processWebSocketMessage(log);
               }
             }),
             filter((log) => log.type === SocketEventTypes.DATA),
-            map((log) => {
-            return log.message;
-            })
+            map((log) => log.message)
           );
         inputStream.next(this.sendProjectInfo(p[0].applicationSource));
       })
@@ -165,23 +160,11 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
         this.deploying = true;
-        this.appDetectionHelper = new DiscoverAppHelper(this.http, this.appData.cloudFoundry, this.appData.space, this.appData.Name);
-        this.validate = this.appDetectionHelper.app$.filter(a => !!a)
-        .do(v => {
-          this.appDetectionHelper.stopDetection();
-          this.appGuid = v.metadata.guid;
-          this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
-        })
-        .map(v => !!v);
-        this.appDetectionHelper.startDetection();
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
         this.streamTitle = 'Deployed';
         this.deploying = false;
-        if (this.appDetectionHelper) {
-          this.appDetectionHelper.stopDetection();
-        }
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
         this.close(log, null, null, true);
@@ -237,12 +220,42 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   onNext: StepOnNextFunction = () => {
+    this.deploying = false;
+    this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
-
     // Take user to applications
     this.store.dispatch(new RouterNav({ path: ['applications', this.appData.cloudFoundry, this.appGuid] }));
-    return Observable.create(true);
+    return Observable.of({ success: true });
   }
 
+  /**
+   * Create a poller that will be used to periodically check for the new application.
+   */
+  private createValidationPoller() {
+    return interval(APP_CHECK_INTERVAL).pipe(
+      takeWhile(() => !this.appGuid),
+      filter(() => this.deploying),
+      switchMap(() => {
+        const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.appData.cloudFoundry });
+        return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` +
+          this.appData.space + '&q=name:' + this.appData.Name, { headers: headers })
+          .pipe(
+            mergeMap(info => {
+              if (info && info[this.appData.cloudFoundry]) {
+                const apps = info[this.appData.cloudFoundry];
+                if (apps.total_results === 1) {
+                  this.appGuid = apps.resources[0].metadata.guid;
+                  return Observable.of(true);
+                }
+              }
+              return Observable.of(false);
+            }),
+            catchError(err => [
+              // ignore
+            ])
+          );
+      })
+    );
+  }
 }

@@ -1,5 +1,6 @@
 import {
   appEnvVarsSchemaKey,
+  applicationSchemaKey,
   appStatsSchemaKey,
   appSummarySchemaKey,
   buildpackSchemaKey,
@@ -9,7 +10,7 @@ import {
   githubBranchesSchemaKey,
   githubCommitSchemaKey,
   githubRepoSchemaKey,
-  organisationSchemaKey,
+  organizationSchemaKey,
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
@@ -19,7 +20,6 @@ import {
   servicePlanSchemaKey,
   serviceSchemaKey,
   spaceQuotaSchemaKey,
-  applicationSchemaKey,
   spaceSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
@@ -27,12 +27,13 @@ import { RequestTypes } from './../actions/request.actions';
 import { requestDataReducerFactory } from './api-request-data-reducer/request-data-reducer.factory';
 import { requestReducerFactory } from './api-request-reducer/request-reducer.factory';
 import { IRequestArray } from './api-request-reducer/types';
+import { appStatsReducer } from './app-stats-request.reducer';
+import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
+import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 import { routeReducer } from './routes.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
 import { userReducer } from './users.reducer';
-import { updateApplicationRoutesReducer } from './application-route.reducer';
-import { updateOrganisationSpaceReducer } from './organisation-space.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -71,7 +72,7 @@ const entities = [
   'application',
   'stack',
   'space',
-  organisationSchemaKey,
+  organizationSchemaKey,
   routeSchemaKey,
   'event',
   endpointStoreNames.type,
@@ -101,10 +102,13 @@ const entities = [
 ];
 
 
-const _requestReducer = requestReducerFactory(entities, requestActions);
 
 export function requestReducer(state, action) {
-  return _requestReducer(state, action);
+  const baseRequestReducer = requestReducerFactory(entities, requestActions);
+  const extraReducers = {
+    [appStatsSchemaKey]: [appStatsReducer]
+  };
+  return chainReducers(baseRequestReducer, extraReducers)(state, action);
 }
 
 export function requestDataReducer(state, action) {
@@ -119,8 +123,8 @@ export function requestDataReducer(state, action) {
       endpointDisconnectApplicationReducer('application')
     ],
     [spaceSchemaKey]: [endpointDisconnectApplicationReducer('space')],
-    [organisationSchemaKey]: [
-      updateOrganisationSpaceReducer(),
+    [organizationSchemaKey]: [
+      updateOrganizationSpaceReducer(),
       endpointDisconnectApplicationReducer('organization')
     ]
   };

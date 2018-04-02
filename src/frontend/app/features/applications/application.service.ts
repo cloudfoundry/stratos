@@ -26,10 +26,11 @@ import {
   appSummarySchemaKey,
   domainSchemaKey,
   entityFactory,
-  organisationSchemaKey,
+  organizationSchemaKey,
   routeSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
+  serviceBindingSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
@@ -49,6 +50,7 @@ import {
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
 import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
+import { IServiceBinding } from '../../core/cf-api-svc.types';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(
@@ -57,8 +59,9 @@ export function createGetApplicationAction(guid: string, endpointGuid: string) {
       createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
       createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
       createEntityRelationKey(applicationSchemaKey, stackSchemaKey),
+      createEntityRelationKey(applicationSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organisationSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
     ]
   );
 }
@@ -183,7 +186,7 @@ export class ApplicationService {
       .switchMap(app => this.appSpace$.pipe(
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
-          return this.store.select(selectEntity(organisationSchemaKey, orgGuid));
+          return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
         })
       ));
 
@@ -307,11 +310,15 @@ export class ApplicationService {
   /*
   * Update an application
   */
-  updateApplication(updatedApplication: UpdateApplication, updateEntities?: AppMetadataTypes[]): Observable<ActionState> {
+  updateApplication(
+    updatedApplication: UpdateApplication,
+    updateEntities?: AppMetadataTypes[],
+    existingApplication?: IApp): Observable<ActionState> {
     this.store.dispatch(new UpdateExistingApplication(
       this.appGuid,
       this.cfGuid,
       { ...updatedApplication },
+      existingApplication,
       updateEntities
     ));
 

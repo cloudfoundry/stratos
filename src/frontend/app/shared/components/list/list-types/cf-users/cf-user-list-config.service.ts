@@ -15,13 +15,12 @@ import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-sp
 export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   isLocal = true;
   viewType = ListViewTypes.TABLE_ONLY;
-  enableTextFilter = false;
   dataSource: CfUserDataSourceService;
-  pageSizeOptions = [9, 45, 90];
-
   columns: ITableColumn<APIResource<CfUser>>[];
-
-  getColumns = () => this.columns;
+  text = {
+    title: null,
+    noEntries: 'There are no users'
+  };
 
   constructor(private store: Store<AppState>, cfUserService: CfUserService) {
     super();
@@ -50,6 +49,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     this.dataSource = new CfUserDataSourceService(store, cfUserService, this);
   }
 
+  getColumns = () => this.columns;
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];

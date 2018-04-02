@@ -5,8 +5,9 @@ import { first, map } from 'rxjs/operators';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganisationService } from '../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -15,7 +16,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryEndpointService,
-    CloudFoundryOrganisationService
+    CloudFoundryOrganizationService
   ]
 })
 
@@ -32,7 +33,9 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
     },
     {
       link: 'users',
-      label: 'Users'
+      label: 'Users',
+      // Hide the users tab unless we are in development
+      hidden: environment.production
     }
   ];
 
@@ -42,7 +45,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
 
   public isFetching$: Observable<boolean>;
 
-  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganisationService) {
+  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService) {
     this.isFetching$ = cfOrgService.org$.pipe(
       map(org => org.entityRequestInfo.fetching)
     );
@@ -56,7 +59,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
           breadcrumbs: [
             {
               value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/summary`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
             }
           ]
         }

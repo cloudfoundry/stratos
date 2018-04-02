@@ -1,7 +1,7 @@
 import { TestBed, inject } from '@angular/core/testing';
 
 import { CfSpacesServiceInstancesListConfigService } from './cf-spaces-service-instances-list-config.service';
-import { getBaseTestModules, getCfSpaceServiceMock } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules, getCfSpaceServiceMock } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('CfSpacesServiceInstancesListConfigService', () => {
   beforeEach(() => {
@@ -10,7 +10,7 @@ describe('CfSpacesServiceInstancesListConfigService', () => {
         CfSpacesServiceInstancesListConfigService,
         getCfSpaceServiceMock
       ],
-      imports: [...getBaseTestModules]
+      imports: [...BaseTestModules]
     });
   });
 

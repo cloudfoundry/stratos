@@ -3,8 +3,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
 import {
   generateTestCfEndpointService,
-  getBaseTestModulesNoShared,
-  getMetadataCardComponents,
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
 import { AppChipsComponent } from '../../../../chips/chips.component';
@@ -16,8 +16,8 @@ describe('CfSecurityGroupsCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfSecurityGroupsCardComponent, getMetadataCardComponents, BooleanIndicatorComponent, AppChipsComponent],
-      imports: [...getBaseTestModulesNoShared],
+      declarations: [CfSecurityGroupsCardComponent, MetadataCardTestComponents, BooleanIndicatorComponent, AppChipsComponent],
+      imports: [...BaseTestModulesNoShared],
       providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointService()]
     })
       .compileComponents();

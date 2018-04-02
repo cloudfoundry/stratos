@@ -14,8 +14,9 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { Observable } from 'rxjs/Observable';
 import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
 import { map, first } from 'rxjs/operators';
-import { CloudFoundryOrganisationService } from '../../../../services/cloud-foundry-organisation.service';
+import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { environment } from '../../../../../../../environments/environment';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -24,7 +25,7 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundrySpaceService,
-    CloudFoundryOrganisationService
+    CloudFoundryOrganizationService
   ]
 })
 export class CloudFoundrySpaceBaseComponent implements OnInit {
@@ -49,6 +50,8 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     {
       link: 'users',
       label: 'Users',
+      // Hide the users tab unless we are in development
+      hidden: environment.production
     }
   ];
 
@@ -62,7 +65,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     public cfEndpointService: CloudFoundryEndpointService,
     private cfSpaceService: CloudFoundrySpaceService,
     private cfOrgSpaceService: CfOrgSpaceDataService,
-    private cfOrgService: CloudFoundryOrganisationService,
+    private cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>
   ) {
     this.isFetching$ = cfSpaceService.space$.pipe(
@@ -77,7 +80,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   private setUpBreadcrumbs(
     cfEndpointService: CloudFoundryEndpointService,
-    cfOrgService: CloudFoundryOrganisationService
+    cfOrgService: CloudFoundryOrganizationService
   ) {
     this.breadcrumbs$ = combineLatest(
       cfEndpointService.endpoint$,
@@ -88,11 +91,11 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
           breadcrumbs: [
             {
               value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/summary`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
             },
             {
               value: org.entity.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}/spaces`
             }
           ]
         }

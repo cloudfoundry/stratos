@@ -1,4 +1,4 @@
-import { ServiceCatalogueModule } from './features/service-catalogue/service-catalogue.module';
+import { ServiceCatalogModule } from './features/service-catalog/service-catalog.module';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -63,7 +63,7 @@ export class CustomRouterStateSerializer
     LoginModule,
     HomeModule,
     DashboardModule,
-    ServiceCatalogueModule,
+    ServiceCatalogModule,
     StoreRouterConnectingModule // Create action for router navigation
   ],
   providers: [

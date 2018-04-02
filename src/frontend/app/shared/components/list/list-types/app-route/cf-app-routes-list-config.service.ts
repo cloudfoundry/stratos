@@ -4,7 +4,7 @@ import { take, tap } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
-import { GetAppRoutes } from '../../../../../store/actions/application.actions';
+import { GetAppRoutes } from '../../../../../store/actions/application-service-routes.actions';
 import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -151,7 +151,8 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
 
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Routes'
+    title: 'Routes',
+    noEntries: 'There are no routes'
   };
   isLocal = true;
 
