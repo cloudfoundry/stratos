@@ -8,4 +8,8 @@
     <app-meta-card-key>Quota Definition Name</app-meta-card-key>
     <app-meta-card-value>{{ (cfSpaceService.quotaDefinition$ | async)?.entity.name }}</app-meta-card-value>
   </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>SSH Access</app-meta-card-key>
+    <app-meta-card-value>{{ (cfSpaceService.allowSsh$ | async) }}</app-meta-card-value>
+  </app-meta-card-item>
 </app-meta-card>

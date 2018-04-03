@@ -16,7 +16,7 @@
         <app-card-number-metric icon="person" label="Users" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
+        <app-card-number-metric icon="memory" units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
       </app-tile>
     </app-tile-group>
     <app-tile-group>
