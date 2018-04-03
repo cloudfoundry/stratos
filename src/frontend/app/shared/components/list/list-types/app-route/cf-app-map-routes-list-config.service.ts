@@ -121,7 +121,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
         createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
       ]),
       createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid),
-      true,
       this
     );
   }
