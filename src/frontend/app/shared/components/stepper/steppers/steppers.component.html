@@ -1,7 +1,7 @@
 <div class="steppers__wrapper">
-  <div class="steppers" *ngIf="this.steps && this.steps.length">
+  <div class="steppers" *ngIf="steps && steps.length">
     <div class="steppers__inner">
-      <div class="steppers__headers">
+      <div class="steppers__headers" *ngIf="steps.length > 1">
         <div *ngFor="let step of steps; let i = index" (click)="setActive(i)" [ngClass]="{'steppers__header--active': step.active || step.complete}" class="steppers__header">
           <div class="steppers__header-inner" *ngIf="steps.length !== 1">
             <mat-spinner *ngIf="(step.blocked$ | async)" diameter="20"></mat-spinner>
