@@ -1,9 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { first, map, take } from 'rxjs/operators';
+import { first, map, take, tap } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 import { Subscription } from 'rxjs/Rx';
 
@@ -15,8 +14,10 @@ import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/pag
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
 import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
+import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
+import { appStatsSchemaKey } from '../../../../store/helpers/entity-factory';
 import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
@@ -76,7 +77,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
-  application;
   applicationActions$: Observable<string[]>;
   addedGitHubTab = false;
   summaryDataChanging$: Observable<boolean>;
@@ -132,11 +132,23 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     ];
   }
 
+  private startStopApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
+    this.applicationService.application$.pipe(
+      first(),
+      tap(appData => {
+        this.confirmDialog.open(confirmConfig, () => {
+          this.applicationService.updateApplication({ state: requiredAppState }, [], appData.app.entity);
+          this.pollEntityService(updateKey, requiredAppState).delay(1).subscribe(() => { }, () => { }, onSuccess);
+        });
+      })
+    ).subscribe();
+  }
+
   stopApplication() {
-    this.confirmDialog.open(appStopConfirmation, () => {
-      const stoppedString = 'STOPPED';
-      this.applicationService.updateApplication({ state: stoppedString }, []);
-      this.pollEntityService('stopping', stoppedString).subscribe();
+    this.startStopApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
+      // On app reaching the 'STOPPED' state clear the app's stats pagination section
+      const { cfGuid, appGuid } = this.applicationService;
+      this.store.dispatch(new ResetPagination(appStatsSchemaKey, new GetAppStatsAction(appGuid, cfGuid).paginationKey));
     });
   }
 
@@ -149,23 +161,16 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   }
 
   startApplication() {
-    this.confirmDialog.open(appStartConfirmation, () => {
-      const startedString = 'STARTED';
-      this.applicationService.updateApplication({ state: startedString }, []);
-      this.pollEntityService('starting', startedString)
-        .delay(1)
-        .subscribe();
+    this.startStopApp(appStartConfirmation, 'starting', 'STARTED', () => {
+      // On app reaching the 'STARTED' state immediately go fetch the app stats instead of waiting for the normal poll to kick in
+      const { cfGuid, appGuid } = this.applicationService;
+      this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
     });
   }
 
   deleteApplication() {
     this.confirmDialog.open(appDeleteConfirmation, () => {
-      this.store.dispatch(
-        new DeleteApplication(
-          this.applicationService.appGuid,
-          this.applicationService.cfGuid
-        )
-      );
+      this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
     });
   }
 
@@ -182,10 +187,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       })
       .subscribe();
 
-    this.appSub$ = this.applicationService.app$.subscribe(app => {
+    this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
-        app.entityRequestInfo.deleting.deleted ||
-        app.entityRequestInfo.error
+        requestInfo.deleting.deleted ||
+        requestInfo.error
       ) {
         this.store.dispatch(new RouterNav({ path: ['applications'] }));
       }

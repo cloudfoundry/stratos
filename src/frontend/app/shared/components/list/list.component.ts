@@ -34,6 +34,7 @@ import {
   ListConfig,
   ListViewTypes,
 } from './list.component.types';
+import { combineAll } from 'rxjs/operator/combineAll';
 
 
 @Component({
@@ -71,6 +72,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterConfigs: IListMultiFilterConfig[];
+  multiFilterConfigsLoading$: Observable<boolean>;
 
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
@@ -206,12 +208,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       });
 
     this.multiFilterWidgetObservables = new Array<Subscription>();
+    const multiFiltersLoading = [];
     Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
       const sub = filterConfig.select.asObservable().do((filterItem: string) => {
         this.paginationController.multiFilter(filterConfig, filterItem);
       });
       this.multiFilterWidgetObservables.push(sub.subscribe());
+      multiFiltersLoading.push(filterConfig.loading$);
     });
+    this.multiFilterConfigsLoading$ = combineLatest(multiFiltersLoading).pipe(
+      map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
+    );
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;

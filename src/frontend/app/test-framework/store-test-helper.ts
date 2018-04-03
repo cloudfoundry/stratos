@@ -103,7 +103,6 @@ const testInitialStoreState: AppState = {
     featureFlag: {},
     securityGroup: {},
     buildpack: {},
-    service: {},
     application: {
       applicationWall: {
         pageCount: 1,
@@ -564,7 +563,9 @@ const testInitialStoreState: AppState = {
         }
       }
     },
-    serviceInstance: {}
+    serviceInstance: {},
+    serviceBinding: {},
+    service: {}
   },
   dashboard: {
     sidenavOpen: true,
@@ -21582,7 +21583,26 @@ const testInitialStoreState: AppState = {
   actionHistory: [],
   lists: {},
   routing: {
-    currentState: null
+    previousState: {
+      id: 4,
+      url: '/service-catalog',
+      urlAfterRedirects: '/service-catalog',
+      state: {
+        url: '/service-catalog',
+        params: {},
+        queryParams: {}
+      }
+    },
+    currentState: {
+      id: 5,
+      url: '/applications',
+      urlAfterRedirects: '/applications',
+      state: {
+        url: '/applications',
+        params: {},
+        queryParams: {}
+      }
+    }
   }
 };
 /* tslint:enable */

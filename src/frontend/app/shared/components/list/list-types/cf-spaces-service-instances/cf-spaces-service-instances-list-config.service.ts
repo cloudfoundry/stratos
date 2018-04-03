@@ -23,6 +23,10 @@ export class CfSpacesServiceInstancesListConfigService
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSpacesServiceInstancesDataSource;
   defaultView = 'table' as ListView;
+  text = {
+    title: null,
+    noEntries: 'There are no service instances'
+  };
 
   private serviceInstanceColumns: ITableColumn<APIResource<CfServiceInstance>>[] = [
     {

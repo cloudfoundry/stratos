@@ -14,6 +14,10 @@ import { CfSecurityGroupsDataSource } from './cf-security-groups-data-source';
 export class CfSecurityGroupsListConfigService extends BaseCfListConfig<APIResource> {
   dataSource: CfSecurityGroupsDataSource;
   cardComponent = CfSecurityGroupsCardComponent;
+  text = {
+    title: null,
+    noEntries: 'There are no security groups'
+  };
 
   constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();

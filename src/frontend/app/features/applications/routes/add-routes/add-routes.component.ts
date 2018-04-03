@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { pathGet } from '../../../../core/utils.service';
-import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application.actions';
+import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application-service-routes.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetSpace } from '../../../../store/actions/space.actions';

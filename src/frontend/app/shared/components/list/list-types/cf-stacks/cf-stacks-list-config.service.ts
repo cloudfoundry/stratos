@@ -13,6 +13,10 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 export class CfStacksListConfigService extends BaseCfListConfig<APIResource> {
   dataSource: CfStacksDataSource;
   cardComponent = CfStacksCardComponent;
+  text = {
+    title: null,
+    noEntries: 'There are no stacks'
+  };
 
   constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();

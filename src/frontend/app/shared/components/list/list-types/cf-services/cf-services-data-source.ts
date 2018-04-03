@@ -7,10 +7,11 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = 'cf-services';
+    const paginationKey = getPaginationKey('cf-services', 'all');
     const action = new GetAllServices(paginationKey);
     super({
       store,

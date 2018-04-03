@@ -64,7 +64,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
 
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
-    title: 'Environment Variables', filter: 'Search by name'
+    title: 'Environment Variables', filter: 'Search by name', noEntries: 'There are no variables'
   };
   enableTextFilter = true;
 

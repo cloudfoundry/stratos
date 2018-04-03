@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags.component';
-import { getBaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppChipsComponent } from '../../../../chips/chips.component';
 
 describe('TableCellServiceInstanceTagsComponent', () => {
@@ -11,7 +11,7 @@ describe('TableCellServiceInstanceTagsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [TableCellServiceInstanceTagsComponent, AppChipsComponent],
-      imports: [...getBaseTestModulesNoShared]
+      imports: [...BaseTestModulesNoShared]
 
     })
       .compileComponents();

@@ -7,12 +7,12 @@ import { SharedModule } from '../../../shared/shared.module';
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ServiceCataloguePageComponent } from './service-catalogue-page.component';
+import { ServiceCatalogPageComponent } from './service-catalog-page.component';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 
-describe('ServiceCataloguePageComponent', () => {
-  let component: ServiceCataloguePageComponent;
-  let fixture: ComponentFixture<ServiceCataloguePageComponent>;
+describe('ServiceCatalogPageComponent', () => {
+  let component: ServiceCatalogPageComponent;
+  let fixture: ComponentFixture<ServiceCatalogPageComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -24,13 +24,13 @@ describe('ServiceCataloguePageComponent', () => {
         BrowserAnimationsModule,
         createBasicStoreModule()
       ],
-      declarations: [ServiceCataloguePageComponent]
+      declarations: [ServiceCatalogPageComponent]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ServiceCataloguePageComponent);
+    fixture = TestBed.createComponent(ServiceCatalogPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

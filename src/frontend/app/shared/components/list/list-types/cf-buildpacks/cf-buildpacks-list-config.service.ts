@@ -15,6 +15,10 @@ export class CfBuildpacksListConfigService extends BaseCfListConfig<APIResource<
   cardComponent = CfBuildpackCardComponent;
   dataSource: CfBuildpacksDataSource;
   isLocal = false;
+  text = {
+    title: null,
+    noEntries: 'There are no buildpacks'
+  };
   constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfBuildpacksDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);

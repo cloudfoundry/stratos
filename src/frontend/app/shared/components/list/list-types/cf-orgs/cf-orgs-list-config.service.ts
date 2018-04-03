@@ -16,13 +16,17 @@ import { BaseCfListConfig } from '../base-cf/base-cf-list-config';
 export class CfOrgsListConfigService extends BaseCfListConfig<APIResource<IOrganization>> {
   dataSource: CfOrgsDataSourceService;
   cardComponent = CfOrgCardComponent;
-  getColumns = () => [];
+  text = {
+    title: null,
+    noEntries: 'There are no organizations'
+  };
 
   constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
     super();
     this.dataSource = new CfOrgsDataSourceService(this.store, activeRouteCfOrgSpace.cfGuid, this);
   }
 
+  getColumns = () => [];
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];

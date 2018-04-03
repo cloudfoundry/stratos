@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PageSubheaderComponent } from './page-subheader.component';
-import { getBaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('PageSubheaderComponent', () => {
   let component: PageSubheaderComponent;
@@ -11,7 +11,7 @@ describe('PageSubheaderComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [PageSubheaderComponent],
-        imports: [...getBaseTestModulesNoShared]
+        imports: [...BaseTestModulesNoShared]
       }).compileComponents();
     })
   );

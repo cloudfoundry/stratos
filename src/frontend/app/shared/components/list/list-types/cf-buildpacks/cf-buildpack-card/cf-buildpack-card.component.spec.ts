@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
-  getBaseTestModulesNoShared,
-  getMetadataCardComponents,
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CfBuildpackCardComponent } from './cf-buildpack-card.component';
 import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
@@ -13,8 +13,8 @@ describe('CfBuildpackCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CfBuildpackCardComponent, ...getMetadataCardComponents, BooleanIndicatorComponent],
-      imports: [...getBaseTestModulesNoShared]
+      declarations: [CfBuildpackCardComponent, ...MetadataCardTestComponents, BooleanIndicatorComponent],
+      imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();
   }));

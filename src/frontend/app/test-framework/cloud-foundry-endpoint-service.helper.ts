@@ -100,13 +100,13 @@ export function generateTestCfServiceProvider() {
   };
 }
 
-export const getBaseTestModulesNoShared = [
+export const BaseTestModulesNoShared = [
   RouterTestingModule,
   CoreModule,
   createBasicStoreModule(),
   NoopAnimationsModule
 ];
-export const getBaseTestModules = [...getBaseTestModulesNoShared, SharedModule];
+export const BaseTestModules = [...BaseTestModulesNoShared, SharedModule];
 
 export const getBaseProviders = [createBasicStoreModule()];
 
@@ -115,6 +115,6 @@ export const getCfSpaceServiceMock = {
   useClass: CloudFoundrySpaceServiceMock
 };
 
-export const getMetadataCardComponents = [MetaCardComponent, MetaCardItemComponent,
+export const MetadataCardTestComponents = [MetaCardComponent, MetaCardItemComponent,
   MetaCardKeyComponent, ApplicationStateIconPipe, ApplicationStateIconComponent,
   MetaCardTitleComponent, CardStatusComponent, MetaCardValueComponent];

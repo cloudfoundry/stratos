@@ -23,6 +23,11 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   dataSource: CfSpaceAppsDataSource;
   pageSizeOptions = [9, 45, 90];
   defaultView = 'table' as ListView;
+  text = {
+    title: null,
+    noEntries: 'There are no applications'
+  };
+
   getColumns = (): ITableColumn<APIResource<IApp>>[] => [
     {
       columnId: 'apps', headerCell: () => 'Applications',

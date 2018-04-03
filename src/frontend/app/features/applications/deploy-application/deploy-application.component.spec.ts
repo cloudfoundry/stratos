@@ -11,6 +11,8 @@ import { CreateApplicationModule } from '../create-application/create-applicatio
 import { DeployApplicationComponent } from './deploy-application.component';
 import { DeployApplicationStep2Component } from './deploy-application-step2/deploy-application-step2.component';
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
@@ -37,6 +39,8 @@ describe('DeployApplicationComponent', () => {
               initialState
             }
           ),
+          HttpClientModule,
+          HttpClientTestingModule,
         ]
     })
     .compileComponents();

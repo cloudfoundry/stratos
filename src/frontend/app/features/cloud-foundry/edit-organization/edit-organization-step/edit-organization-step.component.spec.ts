@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModules,
+  BaseTestModules,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { EditOrganizationStepComponent } from './edit-organization-step.component';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
@@ -14,7 +14,7 @@ describe('EditOrganizationStepComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [EditOrganizationStepComponent],
-      imports: [...getBaseTestModules],
+      imports: [...BaseTestModules],
       providers: [ActiveRouteCfOrgSpace, generateTestCfEndpointServiceProvider()]
     })
       .compileComponents();

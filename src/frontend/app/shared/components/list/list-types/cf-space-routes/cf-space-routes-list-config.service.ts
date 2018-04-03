@@ -114,6 +114,10 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
   // This would normally be fetched inline, however some of the route's children will be missing if the route was fetched by the org request
   // This can lead to a new request per row and can grind the console to a halt
   isLocal = false;
+  text = {
+    title: null,
+    noEntries: 'There are no routes'
+  };
 
   dispatchDeleteAction(route) {
     return this.store.dispatch(
