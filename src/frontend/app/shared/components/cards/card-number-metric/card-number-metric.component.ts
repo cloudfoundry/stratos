@@ -35,17 +35,18 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       this.formattedLimit = undefined;
     } else {
       this.formattedValue = this.formatForUnits(this.value);
+      if (!this.limit) {
+        return;
+      }
       let res;
-      if (this.limit) {
-        const limit = parseInt(this.limit, 10);
-        if (limit === -1) {
-          res = '∞';
-          this.usage = '';
-        } else {
-          const value = parseInt(this.value, 10);
-          res = this.formatForUnits(this.limit);
-          this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
-        }
+      const limit = parseInt(this.limit, 10);
+      if (limit === -1) {
+        res = '∞';
+        this.usage = '';
+      } else {
+        const value = parseInt(this.value, 10);
+        res = this.formatForUnits(this.limit);
+        this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
       }
       this.formattedLimit = res;
     }
@@ -56,9 +57,9 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       return v;
     }
     const n = parseInt(v, 10);
-    switch(this.units) {
+    switch (this.units) {
       default:
-      return this.utils.mbToHumanSize(n);
+        return this.utils.mbToHumanSize(n);
     }
   }
 

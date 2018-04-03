@@ -9,9 +9,7 @@
     &__limit {
       color: $subdued;
     }
-  }
-  
-  // .app-card-status {
+  } // .app-card-status {
   //   background-color: transparent;
   //   &--ok {
   //     background-color: map-get($status-colors, success);
@@ -28,5 +26,4 @@
   //   &--incomplete {
   //     background-color: map-get($status-colors, tentative);
   //   }
-  
 }

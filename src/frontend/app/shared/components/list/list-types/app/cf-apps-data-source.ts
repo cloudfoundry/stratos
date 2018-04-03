@@ -18,6 +18,19 @@ import { PaginationEntityState } from '../../../../../store/types/pagination.typ
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 
+const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+  // Filter by cf/org/space
+  const cfGuid = paginationState.clientPagination.filter.items['cf'];
+  const orgGuid = paginationState.clientPagination.filter.items['org'];
+  const spaceGuid = paginationState.clientPagination.filter.items['space'];
+  return entities.filter(e => {
+    const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+    const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+    const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+    return validCF && validOrg && validSpace;
+  });
+};
+
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
@@ -46,24 +59,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     }
 
     if (!transformEntities) {
-      transformEntities = [
-        {
-          type: 'filter',
-          field: 'entity.name'
-        },
-        (entities: APIResource[], paginationState: PaginationEntityState) => {
-          // Filter by cf/org/space
-          const cfGuid = paginationState.clientPagination.filter.items['cf'];
-          const orgGuid = paginationState.clientPagination.filter.items['org'];
-          const spaceGuid = paginationState.clientPagination.filter.items['space'];
-          return entities.filter(e => {
-            const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
-            const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
-            const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
-            return validCF && validOrg && validSpace;
-          });
-        }
-      ];
+      transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
     }
 
     super({

@@ -44,9 +44,7 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   apps$: Observable<APIResource<ISpace>[]>;
 
-
   ngOnInit() {
-
     this.apps$ = this.cfEndpointService.orgs$.pipe(
       map((orgs: APIResource<IOrganization>[]) => {
         return orgs.filter((org) => !this.activeRouteCfOrgSpace.orgGuid ||
@@ -65,11 +63,8 @@ export class CardCfRecentAppsComponent implements OnInit {
       first(),
       tap(apps => {
         apps.forEach(app => {
-          const appState = app.entity.state;
-          const appGuid = app.metadata.guid;
-          const cfGuid = this.activeRouteCfOrgSpace.cfGuid;
-          if (appState === 'STARTED') {
-            this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+          if (app.entity.state === 'STARTED') {
+            this.store.dispatch(new GetAppStatsAction(app.metadata.guid, this.activeRouteCfOrgSpace.cfGuid));
           }
         });
       })
