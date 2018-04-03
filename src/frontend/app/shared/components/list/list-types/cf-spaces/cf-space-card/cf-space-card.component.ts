@@ -17,18 +17,16 @@ import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
-import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { CardCell } from '../../../list.types';
 
 @Component({
   selector: 'app-cf-space-card',
   templateUrl: './cf-space-card.component.html',
   styleUrls: ['./cf-space-card.component.scss']
 })
-export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
-  implements OnInit, OnDestroy {
+export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implements OnInit, OnDestroy {
   cardMenu: MetaCardMenuItem[];
   spaceGuid: string;
   serviceInstancesCount: number;
@@ -46,14 +44,11 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   userRolesInOrg: string;
   currentUser$: Observable<EndpointUser>;
 
-  @Input('row') row: APIResource<ISpace>;
-
   constructor(
     private cfUserService: CfUserService,
     private cfEndpointService: CloudFoundryEndpointService,
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
-    private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfOrgService: CloudFoundryOrganizationService,
   ) {
     super();
@@ -152,7 +147,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   }
 
   delete = () => {
-    this.cfOrgSpaceDataService.deleteSpace(
+    this.cfOrgService.deleteSpace(
       this.spaceGuid,
       this.orgGuid,
       this.cfEndpointService.cfGuid

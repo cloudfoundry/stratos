@@ -11,14 +11,14 @@ import {
   ApplicationStateService,
   CardStatus,
 } from '../../../../application-state/application-state.service';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom, CardCell } from '../../../list.types';
 
 @Component({
   selector: 'app-card-app',
   templateUrl: './card-app.component.html',
   styleUrls: ['./card-app.component.scss']
 })
-export class CardAppComponent extends TableCellCustom<APIResource> implements OnInit {
+export class CardAppComponent extends CardCell<APIResource> implements OnInit {
 
   @Input('row') row;
   applicationState$: Observable<ApplicationStateData>;

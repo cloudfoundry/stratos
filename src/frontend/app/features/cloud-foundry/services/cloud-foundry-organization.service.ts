@@ -11,6 +11,7 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetOrganization } from '../../../store/actions/organization.actions';
+import { DeleteSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -72,6 +73,10 @@ export class CloudFoundryOrganizationService {
     );
 
     this.initialiseObservables();
+  }
+
+  public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
+    this.store.dispatch(new DeleteSpace(spaceGuid, orgGuid, endpointGuid));
   }
 
   private initialiseObservables() {

@@ -1,12 +1,12 @@
 import { RouterTestingModule } from '@angular/router/testing';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EndpointCardComponent } from './endpoint-card.component';
+import { CfEndpointCardComponent } from './endpoint-card.component';
 import { SharedModule } from '../../../../../shared.module';
 
 describe('EndpointCardComponent', () => {
-  let component: EndpointCardComponent;
-  let fixture: ComponentFixture<EndpointCardComponent>;
+  let component: CfEndpointCardComponent;
+  let fixture: ComponentFixture<CfEndpointCardComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -19,10 +19,15 @@ describe('EndpointCardComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EndpointCardComponent);
+    fixture = TestBed.createComponent(CfEndpointCardComponent);
     component = fixture.componentInstance;
     component.row = {
-      name: 'test'
+      name: 'test',
+      user: {
+        admin: false,
+        name: '',
+        guid: '',
+      }
     };
     fixture.detectChanges();
   });

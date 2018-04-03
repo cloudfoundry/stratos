@@ -7,7 +7,7 @@ import { getRoute, isTCPRoute } from '../../../../../../features/applications/ro
 import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { EntityInfo } from '../../../../../../store/types/api.types';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-route',

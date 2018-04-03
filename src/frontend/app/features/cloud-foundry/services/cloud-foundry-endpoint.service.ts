@@ -11,7 +11,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../store/actions/domains.actions';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { GetAllOrganizations } from '../../../store/actions/organization.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../../store/actions/organization.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -201,5 +201,9 @@ export class CloudFoundryEndpointService {
       },
       true
     ).entities$.subscribe();
+  }
+
+  deleteOrg(orgGuid: string, endpointGuid: string) {
+    this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
   }
 }

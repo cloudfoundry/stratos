@@ -48,6 +48,9 @@ export class StepComponent implements OnInit {
   @Input('disablePrevious')
   disablePrevious = false;
 
+  @Input('blocked$')
+  blocked$: Observable<boolean>;
+
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
 

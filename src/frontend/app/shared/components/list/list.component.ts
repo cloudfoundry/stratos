@@ -1,5 +1,4 @@
-import { ListView } from './../../../store/actions/list.actions';
-import { animateChild, query, stagger, transition, trigger, style, animate } from '@angular/animations';
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -16,12 +15,13 @@ import { MatPaginator, MatSelect, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map, tap, pairwise, distinctUntilChanged, filter, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
+import { ListView } from './../../../store/actions/list.actions';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
@@ -88,6 +88,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterConfigs: IListMultiFilterConfig[];
+  multiFilterConfigsLoading$: Observable<boolean>;
 
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
@@ -211,12 +212,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       });
 
     this.multiFilterWidgetObservables = new Array<Subscription>();
+    const multiFiltersLoading = [];
     Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
       const sub = filterConfig.select.asObservable().do((filterItem: string) => {
         this.paginationController.multiFilter(filterConfig, filterItem);
       });
       this.multiFilterWidgetObservables.push(sub.subscribe());
+      multiFiltersLoading.push(filterConfig.loading$);
     });
+    this.multiFilterConfigsLoading$ = combineLatest(multiFiltersLoading).pipe(
+      map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
+    );
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;

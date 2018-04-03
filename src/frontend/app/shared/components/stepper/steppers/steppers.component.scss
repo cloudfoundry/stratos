@@ -40,8 +40,10 @@
         content: none;
       }
     }
-    &--active .steppers__header-text {
-      font-weight: 600;
+    &--active {
+      .steppers__header-text {
+        font-weight: 600;
+      }
     }
     &-complete {
       font-size: 20px;
@@ -68,7 +70,7 @@
   &__contents {
     flex: 1;
     height: 100%;
-    margin: 30px 80px;
+    margin: 24px 48px;
   }
   &__wrapper {
     display: flex;
@@ -88,7 +90,7 @@
     display: flex;
     flex-direction: column;
     margin-top: 10px;
-    max-width: 60%;
+    max-width: 450px;
     mat-form-field {
       padding-top: 10px;
       width: 100%;
