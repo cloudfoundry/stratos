@@ -81,6 +81,9 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 
 @NgModule({
   imports: [
@@ -150,6 +153,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfSpaceDetailsComponent,
     BooleanIndicatorComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     ServiceIconComponent,
     EnvVarViewComponent
   ],
@@ -206,6 +212,9 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfSpaceDetailsComponent,
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     EnvVarViewComponent,
     ServiceIconComponent
   ],

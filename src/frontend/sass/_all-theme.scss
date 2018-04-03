@@ -16,6 +16,7 @@
 @import '../app/shared/components/no-content-message/no-content-message.component.theme';
 @import '../app/shared/components/boolean-indicator/boolean-indicator.component.theme';
 @import '../app/shared/components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component.theme';
+@import '../app/shared/components/cards/card-number-metric/card-number-metric.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -70,6 +71,7 @@ $side-nav-light-active: #484848;
   @include app-no-content-message-theme($theme, $app-theme);
   @include app-boolean-indicator-theme($theme);
   @include cf-security-group-theme($theme);
+  @include app-card-number-metric-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

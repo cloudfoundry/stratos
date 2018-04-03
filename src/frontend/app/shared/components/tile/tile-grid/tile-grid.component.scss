@@ -5,4 +5,14 @@ app-tile-grid {
   > app-tile-group {
     margin-bottom: 24px;
   }
+
+  &.app-tile-grid-fit {
+    width: 100%;
+    height: 100%;
+
+    > app-tile-group:last-child {
+      flex: 1 1;
+      margin-bottom: 0;
+    }
+  }
 }

@@ -1,0 +1,31 @@
+<div class="compact-app-card" *ngIf="row">
+    <app-application-state-icon [status]="appStatus$ | async "></app-application-state-icon>
+    <div class="compact-app-card__name">
+      <a [routerLink]="['/applications', activeRouteCfOrgSpace.cfGuid , row.metadata.guid]">{{ row.entity.name }}</a>
+    </div>
+    <div class="compact-app-card__updated">{{ row.metadata.updated_at | date:'medium' }}</div>
+</div>
+<!--
+<app-meta-card class="app-card" [routerLink]="['/applications', row.entity.cfGuid , row.metadata.guid]" [status$]="appStatus$">
+  <app-meta-card-title>{{ row.entity.name }}</app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>State</app-meta-card-key>
+    <app-meta-card-value>
+      <app-application-state [hideIcon]="true" [state]="applicationState$"></app-application-state>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Instances</app-meta-card-key>
+    <app-meta-card-value>
+      <app-running-instances [instances]="row.entity.instances" [cfGuid]="row.metadata.cfGuid" [appGuid]="row.metadata.guid">
+      </app-running-instances>
+    </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Created</app-meta-card-key>
+    <app-meta-card-value>
+      {{ row.metadata.created_at | date:'medium' }}
+    </app-meta-card-value>
+  </app-meta-card-item>
+</app-meta-card>
+-->  

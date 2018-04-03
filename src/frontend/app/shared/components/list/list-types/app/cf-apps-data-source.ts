@@ -1,20 +1,17 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  spaceSchemaKey,
-} from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
+import { applicationSchemaKey, entityFactory, spaceSchemaKey, routeSchemaKey, organizationSchemaKey
+ } from '../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
@@ -22,22 +19,29 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   constructor(
     store: Store<AppState>,
-    listConfig?: IListConfig<APIResource>
+    listConfig?: IListConfig<APIResource>,
+    transformEntities?: any[],
+    paginationKey =  CfAppsDataSource.paginationKey,
+    seedPaginationKey =  CfAppsDataSource.paginationKey,
   ) {
-    const { paginationKey } = CfAppsDataSource;
+    const syncNeeded = paginationKey !== seedPaginationKey;
     const action = new GetAllApplications(paginationKey, [
       createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
       createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
     ]);
 
-    super({
-      store,
-      action,
-      schema: entityFactory(applicationSchemaKey),
-      getRowUniqueId: getRowMetadata,
-      paginationKey,
-      isLocal: true,
-      transformEntities: [
+    if (syncNeeded) {
+      // We do this here to ensure we sync up with main endpoint table data.
+      store.dispatch(new CreatePagination(
+        action.entityKey,
+        paginationKey,
+        seedPaginationKey
+      ));
+    }
+
+    if (!transformEntities)  {
+      transformEntities = [
         {
           type: 'filter',
           field: 'entity.name'
@@ -54,10 +58,18 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
             return validCF && validOrg && validSpace;
           });
         }
-      ],
-      listConfig
+      ];
     }
-    );
 
+    super({
+      store,
+      action,
+      schema: entityFactory(applicationSchemaKey),
+      getRowUniqueId: getRowMetadata,
+      paginationKey,
+      isLocal: true,
+      transformEntities: transformEntities,
+      listConfig
+    });
   }
 }
