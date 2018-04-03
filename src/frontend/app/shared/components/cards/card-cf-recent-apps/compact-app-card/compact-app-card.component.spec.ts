@@ -32,7 +32,7 @@ describe('CompactAppCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CompactAppCardComponent);
     component = fixture.componentInstance;
-    component.row = {
+    component.app = {
       entity: {},
       metadata: {}
     };

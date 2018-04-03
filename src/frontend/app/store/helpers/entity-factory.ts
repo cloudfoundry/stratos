@@ -198,8 +198,6 @@ const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
 }, { idAttribute: getAPIResourceGuid });
 entityCache[organizationSchemaKey] = OrganizationSchema;
 
-const SpaceWithOnlyOrg = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-
 const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,

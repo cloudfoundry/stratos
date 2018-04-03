@@ -9,21 +9,5 @@
     &__limit {
       color: $subdued;
     }
-  } // .app-card-status {
-  //   background-color: transparent;
-  //   &--ok {
-  //     background-color: map-get($status-colors, success);
-  //   }
-  //   &--warning {
-  //     background-color: map-get($status-colors, warning);
-  //   }
-  //   &--error {
-  //     background-color: map-get($status-colors, danger);
-  //   }
-  //   &--tentative {
-  //     background-color: map-get($status-colors, tentative);
-  //   }
-  //   &--incomplete {
-  //     background-color: map-get($status-colors, tentative);
-  //   }
+  }
 }

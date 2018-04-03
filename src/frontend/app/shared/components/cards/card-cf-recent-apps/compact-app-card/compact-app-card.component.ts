@@ -15,7 +15,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input('row') row;
+  @Input('app') app;
 
   applicationState$: Observable<ApplicationStateData>;
 
@@ -27,12 +27,12 @@ export class CompactAppCardComponent implements OnInit {
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) { }
   ngOnInit() {
-    const initState = this.appStateService.get(this.row.entity, null);
+    const initState = this.appStateService.get(this.app.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.store,
       this.appStateService,
-      this.row.entity,
-      this.row.metadata.guid,
+      this.app.entity,
+      this.app.metadata.guid,
       this.activeRouteCfOrgSpace.cfGuid
     ).pipe(
       startWith(initState)
