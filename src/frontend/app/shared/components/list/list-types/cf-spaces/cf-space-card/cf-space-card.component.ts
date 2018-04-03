@@ -55,12 +55,10 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
     this.cardMenu = [
       {
-        icon: 'mode_edit',
         label: 'Edit',
         action: this.edit
       },
       {
-        icon: 'delete',
         label: 'Delete',
         action: this.delete
       }
