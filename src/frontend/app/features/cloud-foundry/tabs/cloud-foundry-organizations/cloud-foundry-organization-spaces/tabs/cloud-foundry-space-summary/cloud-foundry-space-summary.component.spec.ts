@@ -4,6 +4,8 @@ import { BaseTestModules } from '../../../../../../../test-framework/cloud-found
 import { CloudFoundrySpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-space.service.mock';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { CloudFoundrySpaceSummaryComponent } from './cloud-foundry-space-summary.component';
+import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
+import { ActiveRouteCfOrgSpace } from '../../../../../cf-page.types';
 
 describe('CloudFoundrySpaceSummaryComponent', () => {
   let component: CloudFoundrySpaceSummaryComponent;
@@ -14,6 +16,8 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
       declarations: [CloudFoundrySpaceSummaryComponent],
       imports: [...BaseTestModules],
       providers: [
+        ActiveRouteCfOrgSpace,
+        CloudFoundryEndpointService,
         { provide: CloudFoundrySpaceService, useClass: CloudFoundrySpaceServiceMock }
       ]
     })

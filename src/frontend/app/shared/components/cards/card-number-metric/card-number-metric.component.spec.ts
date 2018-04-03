@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CardNumberMetricComponent } from './card-number-metric.component';
+import { BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('CardNumberMetricComponent', () => {
   let component: CardNumberMetricComponent;
@@ -8,9 +9,10 @@ describe('CardNumberMetricComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CardNumberMetricComponent ]
+      declarations: [CardNumberMetricComponent],
+      imports: [...BaseTestModulesNoShared],
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
