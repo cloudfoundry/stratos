@@ -339,5 +339,5 @@ stratos-dev/console      2.0.0-bleeding-edge  A Helm chart for deploying Stratos
 To install Stratos.
 
 ```
-helm install stratos-dev/console --namespace=console --name my-console
+helm install stratos-dev/console --namespace=console --name my-console --version 2.0.0-bleeding-edge
 ```
