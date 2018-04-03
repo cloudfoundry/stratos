@@ -1,13 +1,18 @@
 import { compose } from '@ngrx/store';
-import { CreateNewApplicationState } from '../types/create-application.types';
+
 import { AppState } from '../app-state';
-import { DeployApplicationSource, SourceType, DeployApplicationState, ProjectExists } from '../types/deploy-application.types';
-import { selectNewAppCFDetails } from './create-application.selectors';
+import {
+  DeployApplicationSource,
+  DeployApplicationState,
+  ProjectExists,
+  SourceType,
+} from '../types/deploy-application.types';
+
 export const selectDeployAppState = (state: AppState) => state.deployApplication;
 
 export const getApplicationSource = (state: DeployApplicationState) => state.applicationSource;
-export const getSourceType = (state: DeployApplicationSource ) => state && state.type;
-export const getSourceSubType = (state: SourceType ) => state && state.subType;
+export const getSourceType = (state: DeployApplicationSource) => state && state.type;
+export const getSourceSubType = (state: SourceType) => state && state.subType;
 export const getApplicationProjectName = (state: DeployApplicationSource) => state && state.projectName;
 export const getProjectExists = (state: DeployApplicationState) => state && state.projectExists;
 export const getCommit = (state: DeployApplicationSource) => state && state.commit;

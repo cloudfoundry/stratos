@@ -1,17 +1,22 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
+import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
-import { applicationSchemaKey, entityFactory, spaceSchemaKey, routeSchemaKey, organizationSchemaKey
- } from '../../../../../store/helpers/entity-factory';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
-import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
@@ -21,8 +26,8 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     store: Store<AppState>,
     listConfig?: IListConfig<APIResource>,
     transformEntities?: any[],
-    paginationKey =  CfAppsDataSource.paginationKey,
-    seedPaginationKey =  CfAppsDataSource.paginationKey,
+    paginationKey = CfAppsDataSource.paginationKey,
+    seedPaginationKey = CfAppsDataSource.paginationKey,
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
     const action = new GetAllApplications(paginationKey, [
@@ -40,7 +45,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       ));
     }
 
-    if (!transformEntities)  {
+    if (!transformEntities) {
       transformEntities = [
         {
           type: 'filter',
