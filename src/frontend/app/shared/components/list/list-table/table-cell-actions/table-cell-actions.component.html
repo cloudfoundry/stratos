@@ -3,8 +3,8 @@
 </button>
 <mat-menu #menu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
   <ng-container *ngFor="let action of listConfig.getSingleActions()">
-    <button mat-menu-item *ngIf="action.visible(row)" (click)="execute(action, row)" [disabled]="!action.enabled(row)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
-      <mat-icon>{{action.icon}}</mat-icon>
+    <button class="table-cell-actions__button" mat-menu-item *ngIf="action.visible(row)" (click)="execute(action, row)" [disabled]="!action.enabled(row)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
+      <mat-icon *ngIf="!!action.icon">{{action.icon}}</mat-icon>
       <span>{{action.label}}</span>
     </button>
   </ng-container>

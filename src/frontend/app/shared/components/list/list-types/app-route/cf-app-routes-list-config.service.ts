@@ -82,7 +82,6 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
-    icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
     visible: (row: APIResource) => true,
@@ -91,7 +90,6 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
-    icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
     visible: (row: APIResource) => true,
@@ -102,22 +100,22 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     action: () => {
       this.appService.application$
         .pipe(
-          take(1),
-          tap(app => {
-            this.store.dispatch(
-              new RouterNav({
-                path: [
-                  'applications',
-                  this.appService.cfGuid,
-                  this.appService.appGuid,
-                  'add-route'
-                ],
-                query: {
-                  spaceGuid: app.app.entity.space_guid
-                }
-              })
-            );
-          })
+        take(1),
+        tap(app => {
+          this.store.dispatch(
+            new RouterNav({
+              path: [
+                'applications',
+                this.appService.cfGuid,
+                this.appService.appGuid,
+                'add-route'
+              ],
+              query: {
+                spaceGuid: app.app.entity.space_guid
+              }
+            })
+          );
+        })
         )
         .subscribe();
     },
@@ -208,20 +206,20 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-        take(1),
-        tap(domain => {
-          const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialogConfig(
-            'Delete Route',
-            `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
-            'Delete',
-            true
-          );
-          this.confirmDialog.open(confirmation, () => {
-            this.dispatchDeleteAction(item);
-            this.getDataSource().selectClear();
-          });
-        })
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialogConfig(
+          'Delete Route',
+          `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
+          'Delete',
+          true
+        );
+        this.confirmDialog.open(confirmation, () => {
+          this.dispatchDeleteAction(item);
+          this.getDataSource().selectClear();
+        });
+      })
       )
       .subscribe();
   }
@@ -230,20 +228,20 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-        take(1),
-        tap(domain => {
-          const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialogConfig(
-            'Unmap Route from Application',
-            `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-            'Unmap',
-            true
-          );
-          this.confirmDialog.open(confirmation, () => {
-            this.dispatchUnmapAction(item);
-            this.getDataSource().selectClear();
-          });
-        })
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialogConfig(
+          'Unmap Route from Application',
+          `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+          'Unmap',
+          true
+        );
+        this.confirmDialog.open(confirmation, () => {
+          this.dispatchUnmapAction(item);
+          this.getDataSource().selectClear();
+        });
+      })
       )
       .subscribe();
   }
