@@ -70,7 +70,6 @@ export class CfSpacesServiceInstancesListConfigService
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceInstance(item),
-    icon: 'delete',
     label: 'Delete',
     description: 'Delete Service Instance',
     visible: (row: APIResource) => true,
@@ -79,7 +78,6 @@ export class CfSpacesServiceInstancesListConfigService
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
-    icon: 'settings',
     label: 'Detach',
     description: 'Detach Service Instance',
     visible: (row: APIResource) => true,
