@@ -44,3 +44,9 @@ html {
 button.mat-simple-snackbar-action {
   margin-left: 0;
 }
+
+.router-component {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostBinding } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -49,6 +49,8 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
+  @HostBinding('class') class = 'router-component';
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,

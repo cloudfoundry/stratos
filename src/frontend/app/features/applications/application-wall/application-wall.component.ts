@@ -1,5 +1,5 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, HostBinding } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { distinctUntilChanged, tap, withLatestFrom, delay, debounceTime } from 'rxjs/operators';
@@ -39,6 +39,8 @@ import { APIResource } from '../../../store/types/api.types';
   }]
 })
 export class ApplicationWallComponent implements OnDestroy {
+
+  @HostBinding('class') class = 'router-component';
 
   private statsSub: Subscription;
 

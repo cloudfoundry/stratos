@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 
 import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
@@ -22,13 +22,6 @@ import { IServiceBinding } from '../../../../../../core/cf-api-svc.types';
     }
   ]
 })
-export class ServicesTabComponent implements OnInit {
-
-  serviceBindings$: Observable<APIResource<IServiceBinding>[]>;
-  constructor(private listConfig: ListConfig<APIResource>, private appService: ApplicationService) {
-    this.serviceBindings$ = this.appService.application$.pipe(map(app => app.app.entity.service_bindings));
-  }
-  ngOnInit() {
-  }
-
+export class ServicesTabComponent {
+  @HostBinding('class') class = 'router-component';
 }

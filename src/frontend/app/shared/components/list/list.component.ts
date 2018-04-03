@@ -14,7 +14,7 @@ import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/mate
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map, pairwise, tap } from 'rxjs/operators';
+import { map, pairwise, tap, startWith } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
@@ -119,8 +119,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     ).pipe(
       map(([isAdding, isSelecting]) => isAdding || isSelecting)
     );
-    this.hasRows$ = this.dataSource.pagination$.map(pag => pag.totalResults > 0);
-
     // Set up an observable containing the current view (card/table)
     this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
     const { view, } = getListStateObservables(this.store, this.listViewKey);
@@ -147,6 +145,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
+
+    this.hasRows$ = this.dataSource.page$.pipe(
+      map(pag => pag ? pag.length > 0 : false),
+      startWith(false)
+    );
 
     // Determine if we should hide the paginator
     this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 
 import {
   CfAppEventsConfigService,
@@ -16,5 +16,5 @@ import { ListConfig } from '../../../../../../shared/components/list/list.compon
 })
 
 export class EventsTabComponent {
-  constructor() { }
+  @HostBinding('class') class = 'router-component';
 }

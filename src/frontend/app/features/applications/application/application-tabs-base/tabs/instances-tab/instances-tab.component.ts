@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 
 import {
   CfAppInstancesConfigService,
@@ -17,4 +17,6 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
     ApplicationMonitorService
   ]
 })
-export class InstancesTabComponent { }
+export class InstancesTabComponent {
+  @HostBinding('class') class = 'router-component';
+}

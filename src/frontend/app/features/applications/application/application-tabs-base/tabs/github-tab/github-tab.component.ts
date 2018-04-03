@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -35,6 +35,9 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
   styleUrls: ['./github-tab.component.scss']
 })
 export class GithubTabComponent implements OnInit, OnDestroy {
+
+  @HostBinding('class') class = 'router-component';
+
   gitBranchEntityService: EntityService;
   gitCommitEntityService: EntityService;
   gitHubRepoEntityService: EntityService;

@@ -107,7 +107,6 @@
       </mat-card-content>
     </mat-card>
   </ng-template>
-
   <div [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)" class="list-component__no-entries">
     <ng-container *ngIf="(noRowsNotFiltering$ | async)">
       <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
