@@ -21,6 +21,7 @@ import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
+import { LocalListController } from './local-list-controller';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -129,7 +130,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
     this.page$ = this.isLocal ?
-      this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions)
+      new LocalListController(this.store, transformedEntities$, pagination$, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();

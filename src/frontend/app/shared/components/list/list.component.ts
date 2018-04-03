@@ -216,6 +216,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.multiFilterWidgetObservables.push(sub.subscribe());
       multiFiltersLoading.push(filterConfig.loading$);
     });
+
     this.multiFilterConfigsLoading$ = combineLatest(multiFiltersLoading).pipe(
       map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
     );
