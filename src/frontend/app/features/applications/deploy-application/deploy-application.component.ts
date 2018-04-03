@@ -33,7 +33,6 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute
   ) {
     this.isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'] === 'true';
-
   }
 
   onNext = () => {
