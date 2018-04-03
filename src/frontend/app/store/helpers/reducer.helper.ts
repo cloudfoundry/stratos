@@ -45,7 +45,7 @@ export function mergeEntity(baseEntity, newEntity) {
       // (for cases where we fetch missing inline data of an entity before the entity exists, for example fetch orgs and their spaces..
       // .. one org has over 50 spaces.. we fetch that list of spaces and apply it to a new org entity without metadata BEFORE we apply the
       // main org and mark it as fetched)
-      metadata: merge(baseEntity.metadata || {}, newEntity.metadata)
+      metadata: baseEntity.metadata ? merge(baseEntity.metadata, newEntity.metadata) : newEntity.metadata
     };
   } else {
     return merge(baseEntity, newEntity);
