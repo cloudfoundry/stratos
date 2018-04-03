@@ -3,6 +3,9 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
+  app-stateful-icon {
+    padding-left: 12px;
+  }
   &__content {
     display: flex;
     overflow-y: auto;

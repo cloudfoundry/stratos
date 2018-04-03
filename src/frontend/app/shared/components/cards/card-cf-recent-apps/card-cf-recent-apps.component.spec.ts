@@ -12,6 +12,7 @@ import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-pag
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 import { CfUserService } from '../../../data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { StatefulIconComponent } from '../../stateful-icon/stateful-icon.component';
 
 describe('CardCfRecentAppsComponent', () => {
   let component: CardCfRecentAppsComponent;
@@ -23,7 +24,8 @@ describe('CardCfRecentAppsComponent', () => {
         CardCfRecentAppsComponent,
         ApplicationStateIconComponent,
         CompactAppCardComponent,
-        ApplicationStateIconPipe
+        ApplicationStateIconPipe,
+        StatefulIconComponent
       ],
       imports: [...BaseTestModulesNoShared],
       providers: [
