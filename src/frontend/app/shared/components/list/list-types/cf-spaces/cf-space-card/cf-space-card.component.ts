@@ -17,7 +17,6 @@ import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
-import { CfOrgSpaceDataService } from '../../../../../data-services/cf-org-space-service.service';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
@@ -53,7 +52,6 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
     private cfEndpointService: CloudFoundryEndpointService,
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
-    private cfOrgSpaceDataService: CfOrgSpaceDataService,
     private cfOrgService: CloudFoundryOrganizationService,
   ) {
     super();
@@ -152,7 +150,7 @@ export class CfSpaceCardComponent extends TableCellCustom<APIResource<ISpace>>
   }
 
   delete = () => {
-    this.cfOrgSpaceDataService.deleteSpace(
+    this.cfOrgService.deleteSpace(
       this.spaceGuid,
       this.orgGuid,
       this.cfEndpointService.cfGuid
