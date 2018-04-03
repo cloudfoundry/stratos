@@ -16,7 +16,7 @@ console:
 # externalIP: 127.0.0.1
 images:
   console: stratos-console
-  proxy: stratos-proxy
+  proxy: stratos-jetstream
   postflight: stratos-postflight-job
   mariadb: stratos-mariadb
 
