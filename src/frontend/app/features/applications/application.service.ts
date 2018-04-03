@@ -259,7 +259,11 @@ export class ApplicationService {
       return !!updatingRoot.busy || !!updatingSection.busy;
     });
 
-    this.isFetchingEnvVars$ = this.appEnvVars.pagination$.map(ev => getCurrentPageRequestInfo(ev).busy).startWith(false).publishReplay(1).refCount();
+    this.isFetchingEnvVars$ = this.appEnvVars.pagination$
+      .map(ev => getCurrentPageRequestInfo(ev).busy)
+      .startWith(false)
+      .publishReplay(1)
+      .refCount();
 
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.map(
       ev => getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]
