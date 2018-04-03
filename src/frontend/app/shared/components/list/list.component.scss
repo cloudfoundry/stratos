@@ -1,4 +1,12 @@
 .list-component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  mat-progress-bar {
+    position: absolute;
+    top: -5px;
+  }
   *,
   .sort,
   .filter,
@@ -36,11 +44,6 @@
   $title-left-padding: 25px;
   $title-content-padding: 10px;
   &__header {
-    position: relative;
-    mat-progress-bar {
-      position: absolute;
-      top: -5px;
-    }
     mat-card {
       display: flex;
     }
@@ -94,6 +97,18 @@
     padding: 4px;
     mat-paginator-container {
       padding: 0;
+    }
+  }
+  &__no-entries {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  &__default-no-entries {
+    width: 100%;
+    mat-card-content {
+      padding-left: 10px;
     }
   }
 }

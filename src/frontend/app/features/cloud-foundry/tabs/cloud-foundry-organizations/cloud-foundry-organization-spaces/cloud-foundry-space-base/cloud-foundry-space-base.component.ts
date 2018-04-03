@@ -1,21 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../../../../../../shared/data-services/cf-org-space-service.service';
-import { CfUserService } from '../../../../../../shared/data-services/cf-user.service';
-import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
-import { AppState } from '../../../../../../store/app-state';
-import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { Observable } from 'rxjs/Observable';
-import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
-import { map, first } from 'rxjs/operators';
-import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { first, map } from 'rxjs/operators';
+
+import { environment } from '../../../../../../../environments/environment';
+import { IHeaderBreadcrumb } from '../../../../../../shared/components/page-header/page-header.types';
+import { RouterNav } from '../../../../../../store/actions/router.actions';
+import { AppState } from '../../../../../../store/app-state';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
+import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
+import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
+import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -49,6 +45,8 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     {
       link: 'users',
       label: 'Users',
+      // Hide the users tab unless we are in development
+      hidden: environment.production
     }
   ];
 
@@ -61,7 +59,6 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     private cfSpaceService: CloudFoundrySpaceService,
-    private cfOrgSpaceService: CfOrgSpaceDataService,
     private cfOrgService: CloudFoundryOrganizationService,
     private store: Store<AppState>
   ) {
@@ -88,11 +85,11 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
           breadcrumbs: [
             {
               value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/summary`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
             },
             {
               value: org.entity.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations/${org.entity.metadata.guid}/spaces`
             }
           ]
         }
@@ -105,7 +102,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   ngOnInit() { }
 
   deleteSpace = () => {
-    this.cfOrgSpaceService.deleteSpace(
+    this.cfOrgService.deleteSpace(
       this.cfSpaceService.spaceGuid,
       this.cfSpaceService.orgGuid,
       this.cfSpaceService.cfGuid

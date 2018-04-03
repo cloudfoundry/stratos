@@ -38,12 +38,12 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -63,6 +63,7 @@ import { NoContentMessageComponent } from './components/no-content-message/no-co
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
@@ -139,7 +140,6 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    EndpointCardComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -155,9 +155,9 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     AppChipsComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
-    ServiceIconComponent,
-    EnvVarViewComponent,
     CompactAppCardComponent,
+    ServiceIconComponent,
+    EnvVarViewComponent
   ],
   exports: [
     FormsModule,
@@ -214,9 +214,9 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     AppChipsComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
-    EnvVarViewComponent,
-    ServiceIconComponent,
     CompactAppCardComponent,
+    EnvVarViewComponent,
+    ServiceIconComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

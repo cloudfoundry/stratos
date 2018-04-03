@@ -9,9 +9,9 @@ import { APIResource } from '../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
 
 @Component({
-  selector: 'app-service-catalogue-page',
-  templateUrl: './service-catalogue-page.component.html',
-  styleUrls: ['./service-catalogue-page.component.scss'],
+  selector: 'app-service-catalog-page',
+  templateUrl: './service-catalog-page.component.html',
+  styleUrls: ['./service-catalog-page.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     {
@@ -20,7 +20,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers
     }
   ]
 })
-export class ServiceCataloguePageComponent implements OnInit {
+export class ServiceCatalogPageComponent implements OnInit {
 
   constructor(private listConfig: ListConfig<APIResource>) {
     const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();

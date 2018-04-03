@@ -23,13 +23,17 @@ import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 
+  isRedeploy: boolean;
   initCfOrgSpaceService: Subscription[] = [];
+  deployButtonText = 'Deploy';
 
   constructor(
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
-  ) { }
+  ) {
+    this.isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'] === 'true';
+  }
 
   onNext = () => {
     this.store.dispatch(new StoreCFSettings({
@@ -46,9 +50,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    const isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'];
-
-    if (isRedeploy) {
+    if (this.isRedeploy) {
+      this.deployButtonText = 'Redeploy';
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !!p),
         tap(p => {
@@ -75,6 +78,14 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       ).subscribe());
       // Delete any state in deployApplication
       this.store.dispatch(new DeleteDeployAppSection());
+    }
+  }
+
+  getTitle = () => {
+    if (this.isRedeploy) {
+      return 'Redeploy';
+    } else {
+      return 'Deploy';
     }
   }
 }

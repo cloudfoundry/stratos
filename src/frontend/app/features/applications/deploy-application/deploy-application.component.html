@@ -1,14 +1,14 @@
 <app-page-header>
-  Deploy
+  {{ getTitle() }}
 </app-page-header>
 <app-steppers cancel="/applications">
-  <app-step [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext">
-   <app-create-application-step1 #step1></app-create-application-step1>
+  <app-step [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext" [blocked$]="cfOrgSpaceService.isLoading$">
+    <app-create-application-step1 [isRedeploy]="isRedeploy" #step1></app-create-application-step1>
   </app-step>
-  <app-step [title]="'Source'" [valid]="step2.validate | async" [onNext]="step2.onNext" nextButtonText="Deploy">
-   <app-deploy-application-step2 #step2></app-deploy-application-step2>
+  <app-step [title]="'Source'" [valid]="step2.validate | async" [onNext]="step2.onNext" [nextButtonText]="deployButtonText">
+    <app-deploy-application-step2 [isRedeploy]="isRedeploy" #step2></app-deploy-application-step2>
   </app-step>
-  <app-step [title]="'Deploy'" [valid]="step3.validate | async" disablePrevious=true  cancelButtonText="Close" [onNext]="step3.onNext" finishButtonText="Go to App Summary">
-   <app-deploy-application-step3 #step3></app-deploy-application-step3>
+  <app-step [title]="'Deploy'" [valid]="step3.validate | async" disablePrevious=true cancelButtonText="Close" [onNext]="step3.onNext" finishButtonText="Go to App Summary">
+    <app-deploy-application-step3 #step3></app-deploy-application-step3>
   </app-step>
 </app-steppers>

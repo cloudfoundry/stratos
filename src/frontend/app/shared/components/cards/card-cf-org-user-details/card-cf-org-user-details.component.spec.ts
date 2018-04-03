@@ -6,8 +6,8 @@ import {
 } from '../../../../features/cloud-foundry/services/cloud-foundry-organization.service';
 import {
   generateTestCfEndpointServiceProvider,
-  getBaseTestModulesNoShared,
-  getMetadataCardComponents,
+  BaseTestModulesNoShared,
+  MetadataCardTestComponents,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CloudFoundryOrganizationServiceMock } from '../../../../test-framework/cloud-foundry-organization.service.mock';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -22,8 +22,8 @@ describe('CardCfOrgUserDetailsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [CardCfOrgUserDetailsComponent, ...getMetadataCardComponents],
-      imports: [...getBaseTestModulesNoShared],
+      declarations: [CardCfOrgUserDetailsComponent, ...MetadataCardTestComponents],
+      imports: [...BaseTestModulesNoShared],
       providers: [
         CfUserService,
         generateTestCfEndpointServiceProvider(),

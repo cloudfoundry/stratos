@@ -16,8 +16,12 @@ import { TableCellFeatureFlagStateComponent } from './table-cell-feature-flag-st
 export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResource<IFeatureFlag>> {
   dataSource: CfFeatureFlagsDataSource;
   defaultView = 'table' as ListView;
-  pageSizeOptions = [10, 25, 50];
+  pageSizeOptions = [25, 50, 100];
   viewType = ListViewTypes.TABLE_ONLY;
+  text = {
+    title: null,
+    noEntries: 'There are no feature flags'
+  };
 
   columns: Array<ITableColumn<APIResource<IFeatureFlag>>> = [
     {

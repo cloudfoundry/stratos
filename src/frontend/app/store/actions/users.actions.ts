@@ -21,6 +21,7 @@ export const REMOVE_PERMISSION_FAILED = '[Users]  Remove Permission failed';
 export class GetAllUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
+    public endpointGuid: string,
     public includeRelations: string[] = [
       createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
       createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),

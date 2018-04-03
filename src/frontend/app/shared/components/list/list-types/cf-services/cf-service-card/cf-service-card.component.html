@@ -2,10 +2,7 @@
   <app-meta-card-title>
     <div class="service-card__title">
       <div class="service-card__title__link">{{ getDisplayName() }}</div>
-      <div class="service-card__title__img">
-        <mat-icon *ngIf="!hasImage()">cloud_circle</mat-icon>
-        <img [src]="getImageUrl() | safeImg" *ngIf="hasImage()">
-      </div>
+      <app-service-icon [service]="row"></app-service-icon>
     </div>
   </app-meta-card-title>
   <app-meta-card-item style="long-text">

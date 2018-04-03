@@ -7,6 +7,7 @@ import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
+import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -32,7 +33,9 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
     },
     {
       link: 'users',
-      label: 'Users'
+      label: 'Users',
+      // Hide the users tab unless we are in development
+      hidden: environment.production
     }
   ];
 
@@ -56,7 +59,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
           breadcrumbs: [
             {
               value: endpoint.entity.name,
-              routerLink: `/cloud-foundry/${endpoint.entity.guid}/summary`
+              routerLink: `/cloud-foundry/${endpoint.entity.guid}/organizations`
             }
           ]
         }

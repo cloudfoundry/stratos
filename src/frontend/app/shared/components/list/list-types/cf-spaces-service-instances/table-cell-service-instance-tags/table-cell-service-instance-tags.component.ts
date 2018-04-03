@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfServiceInstance } from '../../../../../../store/types/service.types';
 import { AppChip } from '../../../../chips/chips.component';

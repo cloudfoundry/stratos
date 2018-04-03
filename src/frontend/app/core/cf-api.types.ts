@@ -1,5 +1,6 @@
 import { IRoute } from './cf-api.types';
 import { APIResource } from '../store/types/api.types';
+import { IServiceBinding } from './cf-api-svc.types';
 
 export interface IRoute {
   host: string;
@@ -105,7 +106,7 @@ export interface IApp {
   detected_start_command?: string;
   allow_ssh?: boolean;
   ports?: number[];
-  service_bindings?: APIResource[];
+  service_bindings?: APIResource<IServiceBinding>[];
   routes?: APIResource<IRoute>[];
   stack?: string | APIResource<IStack>;
   space?: string | APIResource<ISpace>;
@@ -206,10 +207,6 @@ export interface IFeatureFlag {
   enabled: boolean;
   url?: string;
   error_message?: string;
-}
-export interface IServiceInstance {
-  guid?: string;
-  cfGuid?: string;
 }
 export interface IStack {
   name: string;
