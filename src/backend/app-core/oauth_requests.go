@@ -10,6 +10,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+const OAUTH_RETRY_LIMIT = 3
+
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOauthFlowRequest")
 
@@ -20,17 +22,19 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 	}
 
 	got401 := false
-	expTime := time.Unix(tokenRec.TokenExpiry, 0)
+	retryLimit := OAUTH_RETRY_LIMIT
+
+	// Only need to get Client ID once
+	clientID, err := p.GetClientId(cnsi.CNSIType)
+	if err != nil {
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Endpoint type has not been registered",
+			"Endpoint type has not been registered %s: %s", cnsi.CNSIType, err)
+	}
 
 	for {
-		clientID, err := p.GetClientId(cnsi.CNSIType)
-		if err != nil {
-			return nil, interfaces.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Endpoint type has not been registered",
-				"Endpoint type has not been registered %s: %s", cnsi.CNSIType, err)
-		}
-
+		expTime := time.Unix(tokenRec.TokenExpiry, 0)
 		if got401 || expTime.Before(time.Now()) {
 			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
 			if err != nil {
@@ -60,6 +64,12 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 			return res, errors.New("Failed to authorize")
 		}
 		got401 = true
+		retryLimit--
+
+		// Give up if we've retried too many times
+		if retryLimit == 0 {
+			return res, nil
+		}
 	}
 }
 
@@ -106,5 +116,5 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 		return t, fmt.Errorf("Couldn't save new token: %v", err)
 	}
 
-	return t, nil
+	return tokenRecord, nil
 }
