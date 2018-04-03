@@ -103,7 +103,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionDeleteMulti: IMultiListAction<EndpointModel> = {
     action: (item) => {
-      return null;
+      return true;
     },
     icon: 'delete',
     label: 'Unregister',

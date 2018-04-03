@@ -1,4 +1,7 @@
 .list-component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   position: relative;
   mat-progress-bar {
     position: absolute;
@@ -91,9 +94,22 @@
     }
   }
   &__paginator {
+    height: 67px;
     padding: 4px;
     mat-paginator-container {
       padding: 0;
+    }
+  }
+  &__no-entries {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+  }
+  &__default-no-entries {
+    width: 100%;
+    mat-card-content {
+      padding-left: 10px;
     }
   }
 }
