@@ -45,7 +45,7 @@ import {
   animations: [
     trigger('list', [
       transition('* => in', [
-        style({ opacity: '0', transform: 'translateY(10px)' }),
+        style({ opacity: '0', transform: 'translateY(-10px)' }),
         animate('250ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
       ]),
       transition('* => left', [
