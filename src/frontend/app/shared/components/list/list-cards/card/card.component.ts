@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { TableCellCustom } from '../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../list.types';
 import {
   AppServiceBindingCardComponent,
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -19,21 +19,20 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { CardCell } from '../../../list.types';
 
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
   styleUrls: ['./app-service-binding-card.component.scss']
 })
-export class AppServiceBindingCardComponent extends TableCellCustom<APIResource<IServiceBinding>> implements OnInit {
+export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit {
 
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
   serviceInstance$: Observable<EntityInfo<APIResource<IServiceInstance>>>;
   tags$: Observable<AppChip<IServiceInstance>[]>;
-  @Input('row') row: APIResource<IServiceBinding>;
 
   constructor(
     private store: Store<AppState>,

@@ -1,15 +1,32 @@
 @import '../../../../../sass/mixins';
 .cards {
+  $space: 12px;
+  $space-row: 12px;
   app-card {
-    $space: 12px;
-    $space-row: 12px;
     margin-bottom: $space;
     width: 100%;
-    @include breakpoint(desktop) {
-      width: calc(25% - #{$space-row});
+  }
+  &__columns-2 {
+    app-card {
+      @include breakpoint(tablet) {
+        width: calc(50% - #{$space-row});
+      } //
+      // We should bring the below back in once we sort out the spacing.
+      // .. currently row is flex with space between
+      // .. this means on a row with 4 spaces and 2 cards the second card is spaced incorrectly
+      // .. need to remove this `space-between` and dynamically add padding to the last card as per v1
+      // @include breakpoint(desktop) {
+      //   width: calc(25% - #{$space-row});
+      // }
     }
-    @include breakpoint(tablet) {
-      width: calc(33% - #{$space-row});
+  }
+  &__columns-3 {
+    app-card {
+      @include breakpoint(tablet) {
+        width: calc(33% - #{$space-row});
+      } // @include breakpoint(desktop) {
+      //   width: calc(25% - #{$space-row});
+      // }
     }
     &:focus {
       outline: 0;

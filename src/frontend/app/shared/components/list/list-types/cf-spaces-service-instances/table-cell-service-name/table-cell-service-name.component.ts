@@ -1,7 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfServiceInstance, CfService } from '../../../../../../store/types/service.types';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
