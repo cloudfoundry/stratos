@@ -24,19 +24,14 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     // We will auto select endpoint/org/space that have been selected on the app wall.
     const appWallPaginationState = this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey));
     this.paginationStateSub = appWallPaginationState.filter(pag => !!pag).first().do(pag => {
-      let cf, org, space;
-      cf = pag.clientPagination.filter.items.cf;
-      if (!cf) {
-        return;
+      const { cf, org, space } = pag.clientPagination.filter.items;
+      if (cf) {
+        this.cfOrgSpaceService.cf.select.next(cf);
       }
-      this.cfOrgSpaceService.cf.select.next(cf);
-      org = pag.clientPagination.filter.items.org;
-      if (!org) {
-        return;
+      if (cf && org) {
+        this.cfOrgSpaceService.org.select.next(org);
       }
-      this.cfOrgSpaceService.org.select.next(org);
-      space = pag.clientPagination.filter.items.space;
-      if (space) {
+      if (cf && org && space) {
         this.cfOrgSpaceService.space.select.next(space);
       }
     }).subscribe();
