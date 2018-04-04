@@ -23,6 +23,10 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
       paginationKey,
       isLocal: true,
       transformEntities: [
+        {
+          type: 'filter',
+          field: 'entity.label'
+        },
         (entities: APIResource[], paginationState: PaginationEntityState) => {
           const cfGuid = paginationState.clientPagination.filter.items['cf'];
           return entities.filter(e => {
