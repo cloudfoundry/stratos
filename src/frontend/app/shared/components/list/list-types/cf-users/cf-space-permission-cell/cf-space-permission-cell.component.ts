@@ -1,23 +1,20 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
-import { getOrgRoles, getSpaceRoles, SpaceUserRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { getSpaceRoles, SpaceUserRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
+import { cfUserSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg, IUserPermissionInSpace } from '../../../../../../store/types/user.types';
+import { CfUser, IUserPermissionInSpace } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
-import { AppChip } from '../../../../chips/chips.component';
-import { cfUserSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
-import { TableCellCfUserPermissionComponent, ICellPermissionList } from '../cf-user-permission-cell/cf-user-permission-cell.component';
-
-interface ICellPermissionUpdates {
-  [key: string]: Observable<boolean>;
-}
+import {
+  ICellPermissionList,
+  TableCellCfUserPermissionComponent,
+} from '../cf-user-permission-cell/cf-user-permission-cell.component';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -36,10 +33,10 @@ export class CfSpacePermissionCellComponent extends TableCellCfUserPermissionCom
 
   protected setChipConfig(row: APIResource<CfUser>) {
     const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity);
-    const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList<SpaceUserRoles>>(
+    const userPermInfo = arrayHelper.flatten<ICellPermissionList<SpaceUserRoles>>(
       userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row))
     );
-    this.chipsConfig = this.getChipConfig<SpaceUserRoles>(userOrgPermInfo);
+    this.chipsConfig = this.getChipConfig<SpaceUserRoles>(userPermInfo);
   }
 
   private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>) {
