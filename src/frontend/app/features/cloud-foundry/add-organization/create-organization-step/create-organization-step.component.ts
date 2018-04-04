@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -32,6 +32,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   orgs$: Observable<APIResource<IOrganization>[]>;
   cfUrl: string;
   addOrg: FormGroup;
+  orgName: string;
 
   constructor(
     private store: Store<AppState>,
@@ -44,7 +45,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.addOrg = new FormGroup({
-      orgName: new FormControl('', [<any>Validators.required]),
+      orgName: new FormControl('', [<any>Validators.required, this.nameTakenValidator()]),
     });
     const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource>(
@@ -66,10 +67,17 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     this.orgSubscription = this.orgs$.subscribe();
   }
 
-  validate = () => {
+  nameTakenValidator = (): ValidatorFn => {
+    return (formField: AbstractControl): { [key: string]: any } => {
+      const nameValid = this.validate(formField.value);
+      return !nameValid ? { 'nameTaken': { value: formField.value } } : null;
+    };
+  }
+
+  validate = (value: string = null) => {
     const currValue = this.addOrg && this.addOrg.value['orgName'];
     if (this.allOrgs) {
-      return this.allOrgs.indexOf(currValue) === -1;
+      return this.allOrgs.indexOf(value ? value : this.orgName) === -1;
     }
     return true;
   }

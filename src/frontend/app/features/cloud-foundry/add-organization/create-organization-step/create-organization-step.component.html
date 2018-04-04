@@ -1,8 +1,11 @@
 <div class="add-org">
   <div>Specify the name of the new organization</div>
-  <form [formGroup]="addOrg" class="add-org__stepper-form">
+  <form [formGroup]="addOrg" class="stepper-form">
     <mat-form-field>
-      <input matInput formControlName="orgName" placeholder="Organization Name" required>
+      <input matInput formControlName="orgName" [(ngModel)]="orgName" placeholder="Organization Name" required>
+      <mat-error *ngIf="!validate()">
+        An organization with this name already exists. Please enter a different one.
+      </mat-error>
     </mat-form-field>
   </form>
 </div>
