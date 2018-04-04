@@ -19,6 +19,7 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAllOrganizationSpaces } from '../../../../../store/actions/organization.actions';
+import { sortByName } from '../../list.helper';
 
 export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
@@ -35,7 +36,7 @@ export class CfSpacesDataSourceService extends ListDataSource<APIResource> {
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,
-      transformEntities: [],
+      transformEntities: [sortByName(false)],
       listConfig
     });
   }
