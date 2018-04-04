@@ -70,6 +70,8 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
   options: RequestOptions;
   initialParams = {
     'results-per-page': 100,
+    'order-direction': 'asc',
+    'order-by': 'name'
   };
 }
 
