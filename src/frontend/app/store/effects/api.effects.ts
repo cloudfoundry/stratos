@@ -60,6 +60,7 @@ export class APIEffect {
       // Set initial params
       const initialParams = paginatedAction.initialParams;
       for (const key in initialParams) {
+        // TODO: RC Apply q as below (see app events)
         if (initialParams.hasOwnProperty(key)) {
           options.params.set(key, initialParams[key]);
         }
