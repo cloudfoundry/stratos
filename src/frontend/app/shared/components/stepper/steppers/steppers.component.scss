@@ -92,8 +92,11 @@
     margin-top: 10px;
     max-width: 450px;
     mat-form-field {
-      padding-top: 10px;
       width: 100%;
+    }
+    mat-form-field,
+    mat-slide-toggle {
+      padding-top: 10px;
     }
   }
 }
