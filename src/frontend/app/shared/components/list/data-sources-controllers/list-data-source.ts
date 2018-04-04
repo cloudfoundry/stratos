@@ -130,7 +130,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
     this.page$ = this.isLocal ?
-      new LocalListController(this.store, transformedEntities$, pagination$, dataFunctions).page$
+      new LocalListController(transformedEntities$, pagination$, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();

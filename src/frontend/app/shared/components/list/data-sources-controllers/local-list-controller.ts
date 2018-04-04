@@ -1,110 +1,115 @@
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, tap, withLatestFrom, delay } from 'rxjs/operators';
 
 import { getCurrentPageRequestInfo } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
-import { AppState } from './../../../../store/app-state';
+import { splitCurrentPage, getCurrentPageStartIndex } from './local-list-controller.helpers';
 
 export class LocalListController<T = any> {
-    public page$: Observable<T[]>;
-    constructor(private store: Store<AppState>, page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions) {
-        const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
-        const currentPageIndexObservable$ = this.buildCurrentPageIndexObservable(pagination$);
-        this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$);
-    }
+  public page$: Observable<T[]>;
+  constructor(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
+    console.log('constructor');
+    const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
+    const currentPageIndexObservable$ = this.buildCurrentPageNumberObservable(pagination$);
+    const currentPageSizeObservable$ = this.buildCurrentPageSizeObservable(pagination$);
+    this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$, currentPageSizeObservable$);
+  }
+  private pageSplitCache: (T | T[])[] = null;
+  private buildPagesObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
 
-    private buildPagesObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions) {
-        const cleanPagination$ = pagination$.pipe(
-            distinctUntilChanged((oldVal, newVal) => this.paginationHasChanged(oldVal, newVal))
-        );
-        const cleanPage$ = combineLatest(page$, pagination$).pipe(
-            distinctUntilChanged((oldPage, newPage) => {
-                console.log(oldPage[0].length === newPage[0].length)
-                return oldPage[0].length === newPage[0].length
-                    && (
-                        // Re-evaluate pages once we've finished fetching
-                        getCurrentPageRequestInfo(oldPage[1]).busy === getCurrentPageRequestInfo(newPage[1]).busy
-                        && !getCurrentPageRequestInfo(newPage[1]).busy
-                    );
-            }),
-            map(([page]) => page)
-        );
-        return combineLatest(
-            cleanPagination$,
-            cleanPage$,
-        ).pipe(
-            map(([paginationEntity, entities]) => {
-                if (entities && !entities.length) {
-                    return [];
-                }
+    const cleanPagination$ = pagination$.pipe(
+      distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
+    );
 
-                if (dataFunctions && dataFunctions.length) {
-                    entities = dataFunctions.reduce((value, fn) => {
-                        return fn(value, paginationEntity);
-                    }, entities);
-                }
+    const cleanPage$ = combineLatest(
+      page$.pipe(
+        distinctUntilChanged((oldPage, newPage) => oldPage.length === newPage.length)
+      ),
+      pagination$.pipe(
+        filter(pagination => {
+          return !getCurrentPageRequestInfo(pagination).busy;
+        }),
+        distinctUntilChanged((oldPag, newPag) => {
+          return getCurrentPageRequestInfo(oldPag).busy === getCurrentPageRequestInfo(newPag).busy;
+        })
+      )
+    ).pipe(
+      map(([page]) => page)
+    );
 
-                const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-                return pages;
-            }),
-            publishReplay(1),
-            refCount()
-        );
-    }
-
-    private buildCurrentPageIndexObservable(pagination$: Observable<PaginationEntityState>) {
-        return pagination$.pipe(
-            map(pagination => pagination.clientPagination.currentPage - 1),
-            distinctUntilChanged()
-        );
-    }
-
-    private buildCurrentPageObservable(pages$: Observable<T[][]>, currentPageIndex$: Observable<number>) {
-        return combineLatest(
-            pages$,
-            currentPageIndex$
-        ).pipe(
-            map(([pages, currentIndex]) => pages[currentIndex])
-        );
-    }
-
-    private splitClientPages(entites: T[], pageSize: number): T[][] {
-        console.log('splitting');
-        console.log(entites.length);
-        if (!entites || !entites.length) {
-            return [];
+    return combineLatest(
+      cleanPagination$,
+      cleanPage$
+    ).pipe(
+      map(([paginationEntity, entities]) => {
+        if (!entities || !entities.length) {
+          return [];
         }
-        if (entites.length <= pageSize) {
-            return [entites];
+        if (dataFunctions && dataFunctions.length) {
+          entities = dataFunctions.reduce((value, fn) => {
+            return fn(value, paginationEntity);
+          }, entities);
         }
-        const array = [...entites];
-        const pages = [];
+        this.pageSplitCache = null;
 
-        for (let i = 0; i < array.length; i += pageSize) {
-            pages.push(array.slice(i, i + pageSize));
-        }
-        return pages;
-    }
+        return entities;
+      })
+    );
+  }
 
-    private getPaginationCompareString(paginationEntity: PaginationEntityState) {
-        return `${Object.values(paginationEntity.clientPagination.filter.items).join('')}
-        :${paginationEntity.clientPagination.pageSize}
-        :${ paginationEntity.clientPagination.totalResults}
-        :${paginationEntity.params['order-direction-field']}
-        :${paginationEntity.params['order-direction']}
-        :${paginationEntity.clientPagination.filter.string}
-        :${Object.values(paginationEntity.clientPagination.filter.items)}`;
-        // Some outlier cases actually fetch independently from this list (looking at you app variables)
-    }
+  private buildCurrentPageNumberObservable(pagination$: Observable<PaginationEntityState>) {
+    return pagination$.pipe(
+      map(pagination => pagination.clientPagination.currentPage),
+      distinctUntilChanged((oldPage, newPage) => oldPage === newPage),
+      tap((page) => console.log(page))
+    );
+  }
 
-    private paginationHasChanged(oldPag: PaginationEntityState, newPag: PaginationEntityState) {
-        const oldPagCompareString = this.getPaginationCompareString(oldPag);
-        const newPagCompareString = this.getPaginationCompareString(newPag);
-        const hasChanged = oldPagCompareString !== newPagCompareString;
-        // console.log(oldPagCompareString, newPagCompareString);
-        // console.log(`Has changed: ${hasChanged}`);
-        return oldPagCompareString !== newPagCompareString;
-    }
+  private buildCurrentPageSizeObservable(pagination$: Observable<PaginationEntityState>) {
+    return pagination$.pipe(
+      map(pagination => pagination.clientPagination.pageSize),
+      distinctUntilChanged()
+    );
+  }
+
+  private buildCurrentPageObservable(
+    entities$: Observable<T[]>,
+    currentPageNumber$: Observable<number>,
+    currentPageSizeObservable$: Observable<number>
+  ) {
+    return combineLatest(
+      entities$,
+      currentPageNumber$
+    ).pipe(
+      withLatestFrom(currentPageSizeObservable$),
+      map(([[entities, currentPage], pageSize]) => {
+        const pages = this.pageSplitCache ? this.pageSplitCache : entities;
+        const data = splitCurrentPage(
+          pages,
+          pageSize,
+          currentPage
+        );
+        this.pageSplitCache = data.entities;
+        return data.entities[data.index] || [] as T[];
+      })
+    );
+  }
+
+  private getPaginationCompareString(paginationEntity: PaginationEntityState) {
+    return paginationEntity.clientPagination.pageSize
+      + paginationEntity.clientPagination.totalResults
+      + paginationEntity.params['order-direction-field']
+      + paginationEntity.params['order-direction']
+      + paginationEntity.clientPagination.filter.string
+      + Object.values(paginationEntity.clientPagination.filter.items)
+    // Some outlier cases actually fetch independently from this list (looking at you app variables)
+  }
+
+  private paginationHasChanged(oldPag: PaginationEntityState, newPag: PaginationEntityState) {
+    const oldPagCompareString = this.getPaginationCompareString(oldPag);
+    const newPagCompareString = this.getPaginationCompareString(newPag);
+    const hasChanged = oldPagCompareString !== newPagCompareString;
+    return oldPagCompareString !== newPagCompareString;
+  }
 }
