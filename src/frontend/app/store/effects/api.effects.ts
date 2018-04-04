@@ -78,9 +78,7 @@ export class APIEffect {
       }
       for (const key in paginationParams) {
         if (paginationParams.hasOwnProperty(key)) {
-          if (key === 'page' || !options.params.has(key)) { // Don't override params from actions except page.
-            options.params.set(key, paginationParams[key] as string);
-          }
+          options.params.set(key, paginationParams[key] as string);
         }
       }
       if (!options.params.has(resultPerPageParam)) {
