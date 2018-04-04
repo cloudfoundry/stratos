@@ -8,6 +8,9 @@ import { entityFactory, organizationSchemaKey } from '../../../../../store/helpe
 import { APIResource } from '../../../../../store/types/api.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { PaginationEntityState } from '../../../../../store/types/pagination.types';
+import { IOrganization } from '../../../../../core/cf-api.types';
+import { sortByName } from '../../list.helper';
 
 export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
 
@@ -20,7 +23,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,
-      transformEntities: [],
+      transformEntities: [sortByName(false)],
       listConfig
     });
   }
