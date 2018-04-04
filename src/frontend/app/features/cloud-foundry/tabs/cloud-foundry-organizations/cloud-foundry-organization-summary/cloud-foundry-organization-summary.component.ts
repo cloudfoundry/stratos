@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { goToAppWall } from '../../../cf.helpers';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../../store/app-state';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
@@ -9,5 +12,11 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
 
 })
 export class CloudFoundryOrganizationSummaryComponent {
-  constructor(private cfOrgService: CloudFoundryOrganizationService) { }
+  appLink: Function;
+
+  constructor(private store: Store<AppState>, private cfOrgService: CloudFoundryOrganizationService) {
+    this.appLink = () => {
+      goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
+    };
+  }
 }

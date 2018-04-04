@@ -7,13 +7,6 @@ import { CloudFoundrySpaceService } from '../../../../features/cloud-foundry/ser
   templateUrl: './card-cf-space-details.component.html',
   styleUrls: ['./card-cf-space-details.component.scss']
 })
-export class CardCfSpaceDetailsComponent implements OnInit {
-
-  constructor(private cfSpaceService: CloudFoundrySpaceService) {
-  }
-
-  ngOnInit() {
-  }
-
-
+export class CardCfSpaceDetailsComponent {
+  constructor(private cfSpaceService: CloudFoundrySpaceService) { }
 }

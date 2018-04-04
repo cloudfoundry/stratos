@@ -14,7 +14,7 @@ import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/mate
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map, pairwise, tap } from 'rxjs/operators';
+import { map, pairwise, tap, first } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
@@ -207,19 +207,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         return this.paginationController.filterByString(filterString);
       });
 
-    this.multiFilterWidgetObservables = new Array<Subscription>();
-    const multiFiltersLoading = [];
-    Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
-      const sub = filterConfig.select.asObservable().do((filterItem: string) => {
-        this.paginationController.multiFilter(filterConfig, filterItem);
-      });
-      this.multiFilterWidgetObservables.push(sub.subscribe());
-      multiFiltersLoading.push(filterConfig.loading$);
-    });
-    this.multiFilterConfigsLoading$ = combineLatest(multiFiltersLoading).pipe(
-      map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
-    );
-
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
@@ -233,6 +220,29 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.filterString = filter.string;
       this.multiFilters = filter.items;
     });
+
+    // Multi filters (e.g. cf/org/space)
+    // - Ensure the initial value is correct
+    // - Pass any multi filter changes made by the user to the pagination controller and thus the store
+    this.multiFilterWidgetObservables = new Array<Subscription>();
+    filterStoreToWidget.pipe(
+      first(),
+      tap(() => {
+        const multiFiltersLoading = [];
+        Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
+          filterConfig.select.next(this.multiFilters[filterConfig.key]);
+          const sub = filterConfig.select.asObservable().do((filterItem: string) => {
+            this.paginationController.multiFilter(filterConfig, filterItem);
+          });
+          this.multiFilterWidgetObservables.push(sub.subscribe());
+          multiFiltersLoading.push(filterConfig.loading$);
+        });
+        this.multiFilterConfigsLoading$ = combineLatest(multiFiltersLoading).pipe(
+          map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
+        );
+      })
+    ).subscribe();
+
 
     this.isFiltering$ = this.paginationController.filter$.pipe(
       map((filter: ListFilter) => {

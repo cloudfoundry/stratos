@@ -19,6 +19,7 @@ import {
   serviceInstancesSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
+  spaceQuotaSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
@@ -63,6 +64,7 @@ export class CloudFoundrySpaceService {
       new GetSpace(this.spaceGuid, this.cfGuid, [
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
         createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
         createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),

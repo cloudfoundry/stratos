@@ -1,5 +1,8 @@
 .number-metric-card {
   height: 100%;
+  &__anchor {
+    cursor: pointer;
+  }
   &__container {
     align-items: center;
     display: flex;

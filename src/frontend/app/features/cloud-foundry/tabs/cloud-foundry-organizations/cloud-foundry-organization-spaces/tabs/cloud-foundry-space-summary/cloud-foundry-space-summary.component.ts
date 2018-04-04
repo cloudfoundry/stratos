@@ -6,11 +6,7 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
   templateUrl: './cloud-foundry-space-summary.component.html',
   styleUrls: ['./cloud-foundry-space-summary.component.scss']
 })
-export class CloudFoundrySpaceSummaryComponent implements OnInit {
+export class CloudFoundrySpaceSummaryComponent {
 
   constructor(private cfSpaceService: CloudFoundrySpaceService) { }
-
-  ngOnInit() {
-  }
-
 }

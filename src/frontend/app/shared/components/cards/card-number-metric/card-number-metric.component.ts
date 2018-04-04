@@ -1,5 +1,8 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { UtilsService } from '../../../../core/utils.service';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppState } from '../../../../store/app-state';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-card-number-metric',
@@ -14,12 +17,13 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() units: string;
   @Input() value: string;
   @Input() showUsage = false;
+  @Input() link: string | Function;
 
   formattedValue: string;
   formattedLimit: string;
   usage: string;
 
-  constructor(private utils: UtilsService) { }
+  constructor(private utils: UtilsService, private store: Store<AppState>) { }
 
   ngOnInit() {
     this.format();
@@ -71,4 +75,11 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     }
   }
 
+  goToLink() {
+    if (typeof (this.link) === 'string') {
+      this.store.dispatch(new RouterNav({ path: [this.link] }));
+    } else {
+      this.link();
+    }
+  }
 }

@@ -1,8 +1,16 @@
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 
+import { SetClientFilter } from '../../store/actions/pagination.actions';
+import { RouterNav } from '../../store/actions/router.actions';
+import { AppState } from '../../store/app-state';
+import { applicationSchemaKey } from '../../store/helpers/entity-factory';
 import { APIResource } from '../../store/types/api.types';
 import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { selectPaginationState } from '../../store/selectors/pagination.selectors';
+import { takeWhile, takeUntil, filter, first, tap, skipUntil } from 'rxjs/operators';
+import { PaginationState, PaginationEntityState } from '../../store/types/pagination.types';
 
 export enum OrgUserRoles {
   MANAGER = 'managers',
@@ -146,3 +154,32 @@ export const getActiveRouteCfOrgSpaceProvider = {
     ActivatedRoute,
   ]
 };
+
+export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
+  const appWallPagKey = 'applicationWall';
+  store.dispatch(new SetClientFilter(
+    applicationSchemaKey,
+    appWallPagKey,
+    {
+      string: '',
+      items: {
+        cf: cfGuid,
+        org: orgGuid,
+        space: spaceGuid
+      }
+    }
+  ));
+  store.select(selectPaginationState(applicationSchemaKey, appWallPagKey)).pipe(
+    filter((state: PaginationEntityState) => {
+      if (state && state.clientPagination && state.clientPagination.filter && state.clientPagination.filter.items) {
+        const items = state.clientPagination.filter.items;
+        return items.cf === cfGuid && items.org === orgGuid && items.space === spaceGuid;
+      }
+      return false;
+    }),
+    first(),
+    tap(() => {
+      store.dispatch(new RouterNav({ path: ['applications'] }));
+    })
+  ).subscribe();
+}
