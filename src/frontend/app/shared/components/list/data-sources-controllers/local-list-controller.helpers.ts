@@ -14,7 +14,9 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
   }
   console.log('splitttting', currentPage);
   const pages = [...entities];
-
+  if (index + pageSize > pages.length) {
+    pageSize = pages.length - index;
+  }
   const page = pages.splice(index, pageSize) as T[];
   pages.splice(index, 0, page);
   return {
@@ -47,25 +49,4 @@ export function getCurrentPageStartIndex<T = any>(entities: (T | T[])[], pageSiz
     }
   }
   return data.index;
-  // const actualStartIndex = entities.reduce((data, ent, i) => {
-  //   // console.log(index, ent, i);
-  //   if (Array.isArray(ent)) {
-  //     ++data.index;
-  //     ++data.arrayCount;
-  //     return data;
-  //   }
-  //   console.log(data.arrayCount);
-  //   console.log('currentPage', (i - data.arrayCount) + 1);
-  //   console.log(currentPage);
-  //   console.log(((i - data.arrayCount) + 1) === currentPage);
-  //   if ((i + 1) % pageSize > 0 || ((i - data.arrayCount) + 1) <= currentPage) {
-  //     return data;
-  //   }
-  //   data.index += pageSize;
-  //   console.log('index', data.index);
-  //   return data;
-  // }, {
-  //     index: 0,
-  //     arrayCount: 0
-  //   });
 }

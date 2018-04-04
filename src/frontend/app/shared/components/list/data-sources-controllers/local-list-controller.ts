@@ -91,7 +91,7 @@ export class LocalListController<T = any> {
           currentPage
         );
         this.pageSplitCache = data.entities;
-        return data.entities[data.index] || [] as T[];
+        return (data.entities[data.index] || []) as T[];
       })
     );
   }
