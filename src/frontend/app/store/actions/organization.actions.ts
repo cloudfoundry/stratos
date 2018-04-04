@@ -66,6 +66,8 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
   flattenPagination = true;
   initialParams = {
     'results-per-page': 100,
+    'order-direction': 'asc',
+    'order-by': 'name'
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(organizationSchemaKey);
@@ -94,6 +96,8 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
   initialParams = {
     page: 1,
     'results-per-page': 100,
+    'order-direction': 'asc',
+    'order-by': 'name'
   };
   flattenPagination = true;
 }

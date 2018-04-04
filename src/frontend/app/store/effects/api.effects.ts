@@ -57,6 +57,13 @@ export class APIEffect {
     // Apply the params from the store
     if (paginatedAction.paginationKey) {
       options.params = new URLSearchParams();
+      // Set initial params
+      const initialParams = paginatedAction.initialParams;
+      for (const key in initialParams) {
+        if (initialParams.hasOwnProperty(key)) {
+          options.params.set(key, initialParams[key]);
+        }
+      }
       const paginationState = selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state);
       const paginationParams = this.getPaginationParams(paginationState);
       paginatedAction.pageNumber = paginationState ? paginationState.currentPage : 1;
