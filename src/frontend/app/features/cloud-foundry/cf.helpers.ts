@@ -11,6 +11,8 @@ import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 import { takeWhile, takeUntil, filter, first, tap, skipUntil } from 'rxjs/operators';
 import { PaginationState, PaginationEntityState } from '../../store/types/pagination.types';
+import { getPath } from '../../helper';
+import { pathGet } from '../../core/utils.service';
 
 export enum OrgUserRoles {
   MANAGER = 'managers',
@@ -157,9 +159,7 @@ export const getActiveRouteCfOrgSpaceProvider = {
 
 export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: string, spaceGuid?: string) {
   const appWallPagKey = 'applicationWall';
-  store.dispatch(new SetClientFilter(
-    applicationSchemaKey,
-    appWallPagKey,
+  store.dispatch(new SetClientFilter(applicationSchemaKey, appWallPagKey,
     {
       string: '',
       items: {
@@ -171,11 +171,8 @@ export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: st
   ));
   store.select(selectPaginationState(applicationSchemaKey, appWallPagKey)).pipe(
     filter((state: PaginationEntityState) => {
-      if (state && state.clientPagination && state.clientPagination.filter && state.clientPagination.filter.items) {
-        const items = state.clientPagination.filter.items;
-        return items.cf === cfGuid && items.org === orgGuid && items.space === spaceGuid;
-      }
-      return false;
+      const items = pathGet('clientPagination.filter.items', state);
+      return items ? items.cf === cfGuid && items.org === orgGuid && items.space === spaceGuid : false;
     }),
     first(),
     tap(() => {
