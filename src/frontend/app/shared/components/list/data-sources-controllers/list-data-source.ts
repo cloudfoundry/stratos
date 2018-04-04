@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { OperatorFunction } from 'rxjs/interfaces';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, shareReplay, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { CreatePagination, SetResultCount } from '../../../../store/actions/pagination.actions';

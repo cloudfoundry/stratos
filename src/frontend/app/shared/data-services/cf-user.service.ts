@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, shareReplay, first, publishReplay, refCount } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import {
