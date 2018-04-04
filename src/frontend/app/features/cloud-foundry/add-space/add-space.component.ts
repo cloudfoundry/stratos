@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { Component, HostBinding } from '@angular/core';
+
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 
 @Component({
@@ -11,9 +11,10 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ]
-
 })
-export class AddSpaceComponent implements OnInit {
+export class AddSpaceComponent {
+
+  @HostBinding('class') class = 'router-component';
 
   ogrSpacesUrl: string;
   constructor(
@@ -22,9 +23,6 @@ export class AddSpaceComponent implements OnInit {
     const cfId = activeRouteCfOrgSpace.cfGuid;
     const orgId = activeRouteCfOrgSpace.orgGuid;
     this.ogrSpacesUrl = `/cloud-foundry/${cfId}/organizations/${orgId}/spaces`;
-  }
-
-  ngOnInit() {
   }
 
 }

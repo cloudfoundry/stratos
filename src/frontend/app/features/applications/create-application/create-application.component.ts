@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
@@ -16,6 +16,8 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
   styleUrls: ['./create-application.component.scss'],
 })
 export class CreateApplicationComponent implements OnInit, OnDestroy {
+
+  @HostBinding('class') class = 'router-component';
 
   paginationStateSub: Subscription;
   constructor(private store: Store<AppState>, public cfOrgSpaceService: CfOrgSpaceDataService) { }

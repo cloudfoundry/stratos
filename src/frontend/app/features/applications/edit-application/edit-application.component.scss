@@ -3,17 +3,18 @@
   flex-direction: column;
   max-width: 480px;
   width: 100%;
-
   &__buttons {
     text-align: right;
   }
-
   &__toggler {
     margin: 12px 0;
   }
-
   &__error {
     font-weight: 600;
     padding: 8px;
   }
+}
+
+app-steppers {
+  flex: 1;
 }

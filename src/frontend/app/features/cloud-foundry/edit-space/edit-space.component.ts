@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
@@ -14,7 +14,9 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
     CloudFoundrySpaceService
   ]
 })
-export class EditSpaceComponent implements OnInit {
+export class EditSpaceComponent {
+
+  @HostBinding('class') class = 'router-component';
 
   spaceName: Observable<string>;
   spaceUrl: string;
@@ -28,9 +30,6 @@ export class EditSpaceComponent implements OnInit {
     this.spaceName = cfSpaceService.space$.pipe(
       map(s => s.entity.entity.name)
     );
-  }
-
-  ngOnInit() {
   }
 
 }
