@@ -22,7 +22,7 @@ import {
   PaginationObservables,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
+import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace, IUserPermissionInSpace } from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
 
@@ -51,18 +51,37 @@ export class CfUserService {
       shareReplay(1),
     )
 
-  getRolesFromUser(user: CfUser, type: 'organizations' | 'spaces' = 'organizations'): IUserPermissionInOrg[] {
-    const role = user[type] as APIResource<IOrganization | ISpace>[];
+  getOrgRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
+    const role = user['organizations'] as APIResource<IOrganization>[];
     return role.map(org => {
       const orgGuid = org.metadata.guid;
       return {
-        orgName: org.entity.name as string,
+        name: org.entity.name as string,
         orgGuid: org.metadata.guid,
         permissions: {
           orgManager: isOrgManager(user, orgGuid),
           billingManager: isOrgBillingManager(user, orgGuid),
           auditor: isOrgAuditor(user, orgGuid),
           user: isOrgUser(user, orgGuid)
+        }
+      };
+
+
+    });
+  }
+
+  getSpaceRolesFromUser(user: CfUser): IUserPermissionInSpace[] {
+    const role = user['spaces'] as APIResource<ISpace>[];
+    return role.map(space => {
+      const spaceGuid = space.metadata.guid;
+      return {
+        name: space.entity.name as string,
+        orgGuid: space.entity.organization_guid,
+        spaceGuid: spaceGuid,
+        permissions: {
+          manager: isSpaceManager(user, spaceGuid),
+          auditor: isSpaceAuditor(user, spaceGuid),
+          developer: isSpaceDeveloper(user, spaceGuid)
         }
       };
     });
