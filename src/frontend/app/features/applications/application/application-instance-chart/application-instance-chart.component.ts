@@ -19,7 +19,19 @@ export class ApplicationInstanceChartComponent implements OnInit {
   @Input('endpointGuid')
   private endpointGuid: string;
 
-  public instanceChartConfig = this.buildChartConfig();
+  @Input("yAxisLabel")
+  private yAxisLabel: string;
+
+  @Input("metricName")
+  private metricName: string;
+
+  @Input("seriesTranslation")
+  private seriesTranslation: string;
+
+  @Input("title")
+  private title: string;
+
+  public instanceChartConfig: MetricsLineChartConfig;
 
   public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
 
@@ -28,21 +40,32 @@ export class ApplicationInstanceChartComponent implements OnInit {
   private buildChartConfig() {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
-    lineChartConfig.yAxisLabel = 'CPU Usage (%)';
+    lineChartConfig.yAxisLabel = this.yAxisLabel;
     return lineChartConfig;
   }
 
   ngOnInit() {
+    this.instanceChartConfig = this.buildChartConfig();
     this.instanceMetricConfig = {
       getSeriesName: result => `Instance ${result.metric.instance_index}`,
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
+      mapSeriesItemValue: this.getmapSeriesItemValue(),
       metricsAction: new FetchApplicationMetricsAction(
         this.appGuid,
         this.endpointGuid,
-        'firehose_container_metric_cpu_percentage{}[1h]'
+        this.metricName,
       ),
     };
+  }
+
+  private getmapSeriesItemValue() {
+    switch(this.seriesTranslation) {
+      case 'mb':
+        return (bytes) => bytes / 1000000;
+      default:
+        return undefined;
+    }
   }
 
 }
