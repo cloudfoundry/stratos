@@ -1,5 +1,7 @@
 import { Store } from '@ngrx/store';
 
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 import { GetAllServices } from '../../../../../store/actions/service.actions';
 import { AppState } from '../../../../../store/app-state';
 import { entityFactory, serviceSchemaKey } from '../../../../../store/helpers/entity-factory';
@@ -7,7 +9,6 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { getPaginationKey } from '../../../../../store/actions/pagination.actions';
 
 export class CfServicesDataSource extends ListDataSource<APIResource> {
   constructor(store: Store<AppState>, endpointGuid: string, listConfig?: IListConfig<APIResource>) {
@@ -17,9 +18,7 @@ export class CfServicesDataSource extends ListDataSource<APIResource> {
       store,
       action,
       schema: entityFactory(serviceSchemaKey),
-      getRowUniqueId: (entity: APIResource) => {
-        return entity.metadata ? entity.metadata.guid : null;
-      },
+      getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
       transformEntities: [
