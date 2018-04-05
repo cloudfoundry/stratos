@@ -60,7 +60,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
     this.results$ = metricsMonitor.entity$.pipe(
       filter(metrics => !!metrics),
       map(metrics => {
-        const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig)
+        const metricsArray = this.mapMetricsToChartData(metrics, this.metricsConfig);
         if (this.metricsConfig.sort) {
           metricsArray.sort(this.metricsConfig.sort);
         }

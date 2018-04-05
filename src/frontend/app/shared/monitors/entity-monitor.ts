@@ -3,8 +3,13 @@ import { denormalize, schema } from 'normalizr';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { distinctUntilChanged, filter, map, publishReplay, refCount, startWith, withLatestFrom, tap, share } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
-
-import { getAPIRequestDataState, selectEntity, selectRequestInfo, getUpdateSectionById, getEntityUpdateSections } from '../../store/selectors/api.selectors';
+import {
+  getAPIRequestDataState,
+  selectEntity,
+  selectRequestInfo,
+  getUpdateSectionById,
+  getEntityUpdateSections
+} from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
 import { AppState } from './../../store/app-state';
 import {

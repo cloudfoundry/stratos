@@ -1,4 +1,8 @@
-import { endpointEntitiesSelector, endpointStatusSelector, endpointsEntityRequestDataSelector } from '../store/selectors/endpoint.selectors';
+import {
+  endpointEntitiesSelector,
+  endpointStatusSelector,
+  endpointsEntityRequestDataSelector
+} from '../store/selectors/endpoint.selectors';
 import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';

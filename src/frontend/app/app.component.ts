@@ -9,7 +9,7 @@ import { environment } from '../environments/environment';
 
 export class MetricsMetatdata {
   avaliable = false;
-};
+}
 
 @Component({
   selector: 'app-root',
@@ -22,7 +22,7 @@ export class AppComponent implements OnInit, AfterContentInit {
     private store: Store<AppState>,
     private router: Router,
     private loggedInService: LoggedInService
-  ) {
+) {
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();

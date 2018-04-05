@@ -20,7 +20,7 @@ export class ApplicationInstanceChartComponent implements OnInit {
 
   public instanceChartConfig = this.buildChartConfig();
 
-  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>
+  public instanceMetricConfig: MetricsConfig<IMetricMatrixResult<IMetricApplication>>;
 
   constructor() { }
 

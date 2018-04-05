@@ -437,10 +437,6 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 
 	res, err := h.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
-		defer res.Body.Close()
-		body, _ := ioutil.ReadAll(res.Body)
-		log.Info("Msg: %s", string(body))
-
 		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
 		return nil, interfaces.LogHTTPError(res, err)
 	}

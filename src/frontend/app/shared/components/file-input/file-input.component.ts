@@ -7,19 +7,19 @@ import { Component, OnInit, Output, EventEmitter, ViewChild, ElementRef, Input }
 })
 export class FileInputComponent implements OnInit {
 
+  @ViewChild('inputFile') nativeInputFile: ElementRef;
+
   @Input() accept: string;
   @Output() onFileSelect: EventEmitter<File[]> = new EventEmitter();
 
-  @ViewChild('inputFile') nativeInputFile: ElementRef;
+  private _files: File[];
+
+  get fileCount(): number { return this._files && this._files.length || 0; }
 
   constructor() { }
 
   ngOnInit() {
   }
-
-  private _files: File[];
-
-  get fileCount(): number { return this._files && this._files.length || 0; }
 
   onNativeInputFileSelect($event) {
     this._files = $event.srcElement.files;

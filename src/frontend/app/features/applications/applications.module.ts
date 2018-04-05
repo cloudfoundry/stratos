@@ -25,7 +25,9 @@ import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
 import { ApplicationInstanceChartComponent } from './application/application-instance-chart/application-instance-chart.component';
-import { ApplicationInstanceMemoryChartComponent } from './application/application-instance-memory-chart/application-instance-memory-chart.component';
+import {
+  ApplicationInstanceMemoryChartComponent
+} from './application/application-instance-memory-chart/application-instance-memory-chart.component';
 
 @NgModule({
   imports: [

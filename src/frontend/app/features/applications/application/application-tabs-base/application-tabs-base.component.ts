@@ -80,9 +80,9 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         this.tabLinks.push({
           link: 'metrics',
           label: 'Metrics'
-        })
+        });
       }
-    })
+    });
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
