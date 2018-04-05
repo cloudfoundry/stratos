@@ -33,6 +33,10 @@ export class MetricsService {
       entityFactory(endpointSchemaKey)
     );
 
+    this.setupObservables();
+  }
+
+  private setupObservables() {
     this.metricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
       map((endpoints: any) => {
         const result: MetricsEndpointProvider[] = [];
@@ -62,5 +66,4 @@ export class MetricsService {
       })
     );
   }
-
 }
