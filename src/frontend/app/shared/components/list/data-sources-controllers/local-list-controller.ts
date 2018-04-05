@@ -16,12 +16,17 @@ export class LocalListController<T = any> {
   }
   private pageSplitCache: (T | T[])[] = null;
   private buildPagesObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
-
     const cleanPagination$ = pagination$.pipe(
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
     );
 
-    const cleanPage$ = combineLatest(
+    const cleanPage$ = this.buildCleanPageObservable(page$, pagination$);
+
+    return this.buildFullCleanPageObservable(page$, pagination$, dataFunctions);
+  }
+
+  private buildCleanPageObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>) {
+    return combineLatest(
       page$.pipe(
         distinctUntilChanged((oldPage, newPage) => oldPage.length === newPage.length)
       ),
@@ -36,7 +41,9 @@ export class LocalListController<T = any> {
     ).pipe(
       map(([page]) => page)
     );
+  }
 
+  private buildFullCleanPageObservable(cleanPage$: Observable<T[]>, cleanPagination$: Observable<PaginationEntityState>, dataFunctions?) {
     return combineLatest(
       cleanPagination$,
       cleanPage$

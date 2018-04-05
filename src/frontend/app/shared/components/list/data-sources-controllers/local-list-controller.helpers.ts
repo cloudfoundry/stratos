@@ -6,7 +6,7 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
     };
   }
   const index = getCurrentPageStartIndex(entities, pageSize, currentPage);
-  if (Array.isArray(entities[index])) {
+  if (index === null || Array.isArray(entities[index])) {
     return {
       entities,
       index
@@ -26,24 +26,23 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
 
 export function getCurrentPageStartIndex<T = any>(entities: (T | T[])[], pageSize: number, requiredPage: number) {
   const data = {
-    index: 0,
+    index: null,
     currentPage: 0,
     splitPages: 0
   };
   for (let i = 0; i < entities.length; i++) {
     const ent = entities[i];
-    data.index = i;
     if (Array.isArray(ent)) {
       ++data.currentPage;
       ++data.splitPages;
     } else {
       const index = (i - data.splitPages) + (data.splitPages * pageSize);
-      const remainder = index % pageSize;
-      if (remainder === 0) {
+      if (index % pageSize === 0) {
         ++data.currentPage;
       }
     }
     if (data.currentPage === requiredPage) {
+      data.index = i;
       break;
     }
   }

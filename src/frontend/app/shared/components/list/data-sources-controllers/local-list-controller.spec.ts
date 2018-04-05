@@ -1,5 +1,4 @@
-import { LocalListController } from './local-list-controller';
-import { getCurrentPageStartIndex, splitClientPages } from './local-list-controller.helpers';
+import { getCurrentPageStartIndex, splitCurrentPage } from './local-list-controller.helpers';
 
 fdescribe('LocalListController', () => {
   const page = [
@@ -74,7 +73,7 @@ fdescribe('LocalListController', () => {
   });
 
   it('should get split pages', () => {
-    const data = splitClientPages([
+    const data = splitCurrentPage([
       [0,
         1,
         3],
@@ -88,7 +87,7 @@ fdescribe('LocalListController', () => {
         7,
         8]
     ], 3, 2);
-    expect(data).toEqual([
+    expect(data.entities).toEqual([
       [0,
         1,
         3],
@@ -102,5 +101,164 @@ fdescribe('LocalListController', () => {
         7,
         8]
     ]);
+    expect(data.index).toEqual(1);
+  });
+
+  it('should get split pages 1', () => {
+    const data = splitCurrentPage([
+      0,
+      1,
+      3,
+      2,
+      3,
+      3,
+      [4,
+        5,
+        5],
+      6,
+      7,
+      8
+    ], 3, 4);
+    expect(data.entities).toEqual([
+      0,
+      1,
+      3,
+      2,
+      3,
+      3,
+      [4,
+        5,
+        5],
+      [6,
+        7,
+        8]
+    ]);
+    expect(data.index).toEqual(7);
+  });
+
+  it('should get split pages 2', () => {
+    const data = splitCurrentPage([
+      0,
+      1,
+      3,
+      2,
+      3,
+      3,
+      4,
+      5,
+      5,
+      6,
+      7,
+      8
+    ], 5, 2);
+    expect(data.entities).toEqual([
+      0,
+      1,
+      3,
+      2,
+      3,
+      [3,
+        4,
+        5,
+        5,
+        6],
+      7,
+      8
+    ]);
+    expect(data.index).toEqual(5);
+  });
+
+  it('should get split pages 3', () => {
+    const data = splitCurrentPage([
+      0,
+      1,
+      3,
+      5,
+      6,
+      [2,
+        3,
+        3,
+        4,
+        5],
+      5,
+      6
+    ], 5, 3);
+    expect(data.entities).toEqual([
+      0,
+      1,
+      3,
+      5,
+      6,
+      [2,
+        3,
+        3,
+        4,
+        5],
+      [5,
+        6]
+    ]);
+    expect(data.index).toEqual(6);
+  });
+  it('should get split pages 4', () => {
+    const data = splitCurrentPage([
+      0,
+      1,
+      3,
+      5,
+      6,
+      2,
+      3,
+      3,
+      4,
+      5,
+      5,
+      6
+    ], 5, 3);
+    expect(data.entities).toEqual([
+      0,
+      1,
+      3,
+      5,
+      6,
+      2,
+      3,
+      3,
+      4,
+      5,
+      [5,
+        6]
+    ]);
+    expect(data.index).toEqual(10);
+  });
+  it('should get split pages 5', () => {
+    const data = splitCurrentPage([
+      0,
+      1,
+      3,
+      5,
+      6,
+      2,
+      3,
+      3,
+      4,
+      5,
+      5,
+      6
+    ], 5, 4);
+    expect(data.entities).toEqual([
+      0,
+      1,
+      3,
+      5,
+      6,
+      2,
+      3,
+      3,
+      4,
+      5,
+      5,
+      6
+    ]);
+    expect(data.index).toEqual(null);
   });
 });
