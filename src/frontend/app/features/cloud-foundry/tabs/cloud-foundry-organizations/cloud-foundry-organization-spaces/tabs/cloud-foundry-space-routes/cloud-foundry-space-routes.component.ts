@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+
+import {
+  CfSpaceRoutesListConfigService,
+} from '../../../../../../../shared/components/list/list-types/cf-space-routes/cf-space-routes-list-config.service';
 import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
-/* tslint:disable:max-line-length */
-import { CfSpaceRoutesListConfigService } from '../../../../../../../shared/components/list/list-types/cf-space-routes/cf-space-routes-list-config.service';
-/* tslint:enable:max-line-length */
 
 @Component({
   selector: 'app-cloud-foundry-space-routes',
@@ -15,11 +16,4 @@ import { CfSpaceRoutesListConfigService } from '../../../../../../../shared/comp
     }
   ]
 })
-export class CloudFoundrySpaceRoutesComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class CloudFoundrySpaceRoutesComponent { }

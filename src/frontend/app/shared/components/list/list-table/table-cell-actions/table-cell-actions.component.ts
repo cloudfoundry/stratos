@@ -7,7 +7,7 @@ import { map } from 'rxjs/operators';
 import { AppState } from '../../../../../store/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
-import { TableCellCustom } from '../table-cell/table-cell-custom';
+import { TableCellCustom } from '../../list.types';
 
 @Component({
   selector: 'app-table-cell-actions',

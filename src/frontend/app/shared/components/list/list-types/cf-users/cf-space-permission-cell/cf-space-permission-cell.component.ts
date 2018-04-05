@@ -7,12 +7,12 @@ import { arrayHelper } from '../../../../../../core/helper-classes/array.helper'
 import { getOrgRoles, IOrgUserRole } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
+import { cfUserSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { AppChip } from '../../../../chips/chips.component';
-import { cfUserSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 
 interface ICellPermissionList extends IOrgUserRole {
   busy: Observable<boolean>;

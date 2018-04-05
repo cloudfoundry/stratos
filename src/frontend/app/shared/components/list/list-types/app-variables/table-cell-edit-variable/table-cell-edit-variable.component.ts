@@ -1,8 +1,11 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
-import { ListAppEnvVar } from '../cf-app-variables-data-source';
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
+import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material';
+
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
+import { TableCellCustom } from '../../../list.types';
+import { ListAppEnvVar } from '../cf-app-variables-data-source';
+
 @Component({
   selector: 'app-table-cell-edit-variable',
   templateUrl: './table-cell-edit-variable.component.html',
@@ -14,8 +17,6 @@ export class TableCellEditVariableComponent extends TableCellCustom<ListAppEnvVa
     private dialog: MatDialog,
   ) {
     super();
-
-
   }
 
   showPopup = () => {

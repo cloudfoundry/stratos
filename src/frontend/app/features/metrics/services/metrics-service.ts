@@ -58,9 +58,6 @@ export class MetricsService {
     this.haveNoMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
       map((endpoints: any) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
-        console.log('HELLO');
-        console.log(metrics);
-        console.log(metrics.length === 0);
         return metrics.length === 0;
       })
     );

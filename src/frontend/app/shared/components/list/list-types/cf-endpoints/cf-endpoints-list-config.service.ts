@@ -10,7 +10,7 @@ import { IListConfig, ListViewTypes, defaultPaginationPageSizeOptionsTable } fro
 import { EndpointsListConfigService, endpointColumns } from '../endpoint/endpoints-list-config.service';
 import { CFEndpointsDataSource } from './cf-endpoints-data-source';
 import { TableCellEndpointStatusComponent } from '../endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { EndpointCardComponent } from '../../list-cards/custom-cards/endpoint-card/endpoint-card.component';
+import { CfEndpointCardComponent } from './cf-endpoint-card/endpoint-card.component';
 
 @Injectable()
 export class CFEndpointsListConfigService implements IListConfig<EndpointModel> {
@@ -18,7 +18,7 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
   isLocal = true;
   dataSource: CFEndpointsDataSource;
   viewType = ListViewTypes.CARD_ONLY;
-  cardComponent = EndpointCardComponent;
+  cardComponent = CfEndpointCardComponent;
   text = {
     title: '',
     filter: 'Filter Endpoints',

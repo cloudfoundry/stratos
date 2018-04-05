@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, shareReplay } from 'rxjs/operators';
+import { first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -11,7 +11,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { GetCFInfo } from '../../../store/actions/cloud-foundry.actions';
 import { FetchAllDomains } from '../../../store/actions/domains.actions';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { GetAllOrganizations } from '../../../store/actions/organization.actions';
+import { DeleteOrganization, GetAllOrganizations } from '../../../store/actions/organization.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -145,7 +145,7 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), shareReplay(1));
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
 
   }
 
@@ -201,5 +201,9 @@ export class CloudFoundryEndpointService {
       },
       true
     ).entities$.subscribe();
+  }
+
+  deleteOrg(orgGuid: string, endpointGuid: string) {
+    this.store.dispatch(new DeleteOrganization(orgGuid, endpointGuid));
   }
 }

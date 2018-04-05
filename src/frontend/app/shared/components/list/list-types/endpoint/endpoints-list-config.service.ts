@@ -94,7 +94,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
       });
     },
-    icon: 'delete',
     label: 'Unregister',
     description: 'Remove the endpoint',
     visible: row => true,
@@ -103,9 +102,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionDeleteMulti: IMultiListAction<EndpointModel> = {
     action: (item) => {
-      return null;
+      return true;
     },
-    icon: 'delete',
     label: 'Unregister',
     description: 'Remove the endpoint',
     visible: row => true,
@@ -120,7 +118,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
         this.store.dispatch(new GetSystemInfo());
       });
     },
-    icon: 'remove_from_queue',
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
     visible: row => row.connectionStatus === 'connected',
@@ -129,7 +126,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionConnect: IListAction<EndpointModel> = {
     action: (item) => {
-      console.log(item);
       const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
           name: item.name,

@@ -47,12 +47,13 @@ export class MapRoutesComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription = this.routesDataSource.isSelecting$
       .pipe(
-        filter(p => p),
         tap(p => {
           const selectedRow = Array.from(
             this.routesDataSource.selectedRows.values()
           );
-          this.selectedRoute$.next(selectedRow[0]);
+          if (selectedRow.length) {
+            this.selectedRoute$.next(selectedRow[0]);
+          }
         })
       )
       .subscribe();

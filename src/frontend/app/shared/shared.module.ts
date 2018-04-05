@@ -46,7 +46,6 @@ import { listCardComponents } from './components/list/list-cards/card.types';
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -144,7 +143,6 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfInfoComponent,
     CardCfUserInfoComponent,
     FileInputComponent,
-    EndpointCardComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,

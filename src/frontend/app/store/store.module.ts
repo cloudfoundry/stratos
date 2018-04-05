@@ -20,7 +20,6 @@ import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { AppReducersModule } from './reducers.module';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
-import { CaaspEffects } from './effects/caasp.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { RequestEffect } from './effects/request.effects';
 
@@ -46,7 +45,6 @@ import { RequestEffect } from './effects/request.effects';
       DeployAppEffects,
       GithubEffects,
       CloudFoundryEffects,
-      CaaspEffects,
       MetricsEffect,
       RequestEffect
     ])

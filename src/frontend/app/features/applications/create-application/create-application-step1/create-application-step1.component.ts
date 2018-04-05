@@ -4,7 +4,8 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, CfOrgSpaceSelectMode } from '../../../../shared/data-services/cf-org-space-service.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 
@@ -13,6 +14,15 @@ import { AppState } from '../../../../store/app-state';
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
   styleUrls: ['./create-application-step1.component.scss'],
+  providers: [
+    {
+      provide: CfOrgSpaceDataService,
+      useFactory: (store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
+        return new CfOrgSpaceDataService(store, paginationMonitorFactory, CfOrgSpaceSelectMode.ANY);
+      },
+      deps: [Store, PaginationMonitorFactory]
+    }
+  ],
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 

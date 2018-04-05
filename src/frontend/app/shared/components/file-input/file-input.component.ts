@@ -15,7 +15,6 @@ export class FileInputComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    console.log('file input');
   }
 
   private _files: File[];
@@ -23,14 +22,13 @@ export class FileInputComponent implements OnInit {
   get fileCount(): number { return this._files && this._files.length || 0; }
 
   onNativeInputFileSelect($event) {
-      this._files = $event.srcElement.files;
-      this.onFileSelect.emit(this._files);
-      console.log(this._files);
+    this._files = $event.srcElement.files;
+    this.onFileSelect.emit(this._files);
   }
 
   selectFile($event) {
-      this.nativeInputFile.nativeElement.click();
-      $event.preventDefault();
-      return false;
+    this.nativeInputFile.nativeElement.click();
+    $event.preventDefault();
+    return false;
   }
 }

@@ -1,21 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 
-import { CfAppRoutesDataSource } from '../../../shared/components/list/list-types/app-route/cf-app-routes-data-source';
 import {
   CfAppRoutesListConfigService,
 } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { FetchAllDomains } from '../../../store/actions/domains.actions';
 import { AppState } from '../../../store/app-state';
+import { domainSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
-import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { entityFactory } from '../../../store/helpers/entity-factory';
-import { domainSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-routes',

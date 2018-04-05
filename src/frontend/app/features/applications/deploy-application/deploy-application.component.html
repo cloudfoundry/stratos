@@ -2,7 +2,7 @@
   {{ getTitle() }}
 </app-page-header>
 <app-steppers cancel="/applications">
-  <app-step [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext">
+  <app-step [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext" [blocked$]="cfOrgSpaceService.isLoading$">
     <app-create-application-step1 [isRedeploy]="isRedeploy" #step1></app-create-application-step1>
   </app-step>
   <app-step [title]="'Source'" [valid]="step2.validate | async" [onNext]="step2.onNext" [nextButtonText]="deployButtonText">
