@@ -54,34 +54,21 @@ export class APIEffect {
 
     this.store.dispatch(new StartRequestAction(actionClone, requestType));
     this.store.dispatch(this.getActionFromString(apiAction.actions[0]));
+
     // Apply the params from the store
     if (paginatedAction.paginationKey) {
       options.params = new URLSearchParams();
+
       // Set initial params
-      const initialParams = paginatedAction.initialParams;
-      for (const key in initialParams) {
-        // TODO: RC Apply q as below (see app events)
-        if (initialParams.hasOwnProperty(key)) {
-          options.params.set(key, initialParams[key]);
-        }
+      if (paginatedAction.initialParams) {
+        this.setRequestParams(options.params, paginatedAction.initialParams);
       }
+
+      // Set params from store
       const paginationState = selectPaginationState(apiAction.entityKey, paginatedAction.paginationKey)(state);
       const paginationParams = this.getPaginationParams(paginationState);
       paginatedAction.pageNumber = paginationState ? paginationState.currentPage : 1;
-      if (paginationParams.hasOwnProperty('q')) {
-        // Convert q into a cf q string
-        paginationParams.qString = qParamsToString(paginationParams.q);
-        for (const q of paginationParams.qString) {
-          options.params.append('q', q);
-        }
-        delete paginationParams.qString;
-        delete paginationParams.q;
-      }
-      for (const key in paginationParams) {
-        if (paginationParams.hasOwnProperty(key)) {
-          options.params.set(key, paginationParams[key] as string);
-        }
-      }
+      this.setRequestParams(options.params, paginationParams);
       if (!options.params.has(resultPerPageParam)) {
         options.params.set(resultPerPageParam, resultPerPageParamDefault.toString());
       }
@@ -364,6 +351,24 @@ export class APIEffect {
       }
       if (relationInfo.relations.length) {
         options.params.set('include-relations', relationInfo.relations.join(','));
+      }
+    }
+  }
+
+  private setRequestParams(requestParams: URLSearchParams, params: { [key: string]: any }) {
+    if (params.hasOwnProperty('q')) {
+      // Convert q into a cf q string
+      params.qString = qParamsToString(params.q);
+      for (const q of params.qString) {
+        requestParams.append('q', q);
+      }
+      delete params.qString;
+      delete params.q;
+    }
+    // Assign other params
+    for (const key in params) {
+      if (params.hasOwnProperty(key)) {
+        requestParams.set(key, params[key] as string);
       }
     }
   }
