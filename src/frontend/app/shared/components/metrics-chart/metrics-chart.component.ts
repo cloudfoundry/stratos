@@ -1,10 +1,8 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { ChartComponent } from '@swimlane/ngx-charts';
-import { filter, map, tap, delay, startWith } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { ApplicationService } from '../../../features/applications/application.service';
 import { MetricsAction } from '../../../store/actions/metrics.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, metricSchemaKey } from '../../../store/helpers/entity-factory';
@@ -47,8 +45,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy {
   public results$;
   constructor(
     private store: Store<AppState>,
-    private entityMonitorFactory: EntityMonitorFactory,
-    private appService: ApplicationService
+    private entityMonitorFactory: EntityMonitorFactory
   ) { }
 
   ngOnInit() {
