@@ -5,15 +5,20 @@ import { CfUser, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.t
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
 
 export enum OrgUserRoles {
-  MANAGER = 'managers',
-  BILLING_MANAGERS = 'billing_managers',
-  AUDITOR = 'auditors',
-  USER = 'users'
+  MANAGER = 'manager',
+  BILLING_MANAGERS = 'billing_manager',
+  AUDITOR = 'auditor',
+  USER = 'user'
+}
+export enum SpaceUserRoles {
+  MANAGER = 'manager',
+  AUDITOR = 'auditor',
+  DEVELOPER = 'developer'
 }
 
-export interface IOrgUserRole {
+export interface IUserRole<T> {
   string: string;
-  key: OrgUserRoles;
+  key: T;
 }
 
 export function getOrgRolesString(userRolesInOrg: UserRoleInOrg): string {
@@ -50,7 +55,7 @@ export function getSpaceRolesString(userRolesInSpace: UserRoleInSpace): string {
   return roles ? roles : 'None';
 }
 
-export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IOrgUserRole[] {
+export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IUserRole<OrgUserRoles>[] {
   const roles = [];
   if (userRolesInOrg.orgManager) {
     roles.push({
@@ -74,6 +79,29 @@ export function getOrgRoles(userRolesInOrg: UserRoleInOrg): IOrgUserRole[] {
     roles.push({
       string: 'User',
       key: OrgUserRoles.USER
+    });
+  }
+  return roles;
+}
+
+export function getSpaceRoles(userRolesInSpace: UserRoleInSpace): IUserRole<SpaceUserRoles>[] {
+  const roles = [];
+  if (userRolesInSpace.manager) {
+    roles.push({
+      string: 'Manager',
+      key: SpaceUserRoles.MANAGER
+    });
+  }
+  if (userRolesInSpace.auditor) {
+    roles.push({
+      string: 'Auditor',
+      key: SpaceUserRoles.AUDITOR
+    });
+  }
+  if (userRolesInSpace.developer) {
+    roles.push({
+      string: 'Developer',
+      key: SpaceUserRoles.DEVELOPER
     });
   }
   return roles;

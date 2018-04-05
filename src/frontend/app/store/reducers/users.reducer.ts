@@ -4,14 +4,14 @@ import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { CfUser } from '../types/user.types';
 import { REMOVE_PERMISSION_SUCCESS, RemoveUserPermission } from '../actions/users.actions';
-import { OrgUserRoles } from '../../features/cloud-foundry/cf.helpers';
+import { OrgUserRoles, SpaceUserRoles } from '../../features/cloud-foundry/cf.helpers';
 import { APISuccessOrFailedAction } from '../types/request.types';
 
 export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: Action) {
   switch (action.type) {
     case REMOVE_PERMISSION_SUCCESS:
       const successAction = action as APISuccessOrFailedAction;
-      const removeUserPermissionAction = successAction.apiAction as RemoveUserPermission;
+      const removeUserPermissionAction = successAction.apiAction as RemoveUserPermission<OrgUserRoles>;
       const { orgGuid, permissionTypeKey, guid } = removeUserPermissionAction;
       return {
         ...state,
