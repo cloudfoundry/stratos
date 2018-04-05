@@ -24,6 +24,7 @@ import {
   spaceQuotaSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
+  githubCommitSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -87,6 +88,7 @@ export const defaultCfEntitiesState = {
   [appEventSchemaKey]: {},
   [endpointSchemaKey]: {},
   [githubBranchesSchemaKey]: {},
+  [githubCommitSchemaKey]: {},
   [cfUserSchemaKey]: {},
   [domainSchemaKey]: {},
   [appEnvVarsSchemaKey]: {},

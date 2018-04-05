@@ -9,16 +9,17 @@ import {
   CheckProjectExists,
   FETCH_BRANCHES_FOR_PROJECT,
   FETCH_COMMIT,
+  FETCH_COMMITS,
   FetchBranchesForProject,
   FetchCommit,
   ProjectDoesntExist,
   ProjectExists,
 } from '../../store/actions/deploy-applications.actions';
+import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { AppState } from './../app-state';
-import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 
 @Injectable()
 export class DeployAppEffects {
@@ -107,6 +108,42 @@ export class DeployAppEffects {
             metadata: {}
           };
           mappedData.result.push(commitId);
+          return [
+            new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
+          ];
+        })
+        .catch(err => [
+          new WrapperRequestActionFailed(err.message, apiAction, actionType)
+        ]);
+    });
+
+  @Effect()
+  fetchCommits$ = this.actions$
+    .ofType<FetchCommit>(FETCH_COMMITS)
+    .flatMap(action => {
+      const actionType = 'fetch';
+      const apiAction = {
+        entityKey: githubCommitSchemaKey,
+        type: action.type
+      };
+      this.store.dispatch(new StartRequestAction(apiAction, actionType));
+      // TODO: RC sort response
+      return this.http
+        .get(`https://api.github.com/repos/${action.projectName}/commits?sort=updated`)
+        .mergeMap(response => {
+          const commits: any[] = response.json();
+          const mappedData = {
+            entities: { [githubCommitSchemaKey]: {} },
+            result: []
+          } as NormalizedResponse;
+
+          const repoCommits = mappedData.entities[githubCommitSchemaKey] = {};
+          commits.forEach(commit => {
+            repoCommits[commit.sha] = {
+              entity: commit,
+              metadata: {}
+            };
+          });
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
           ];

@@ -8,9 +8,7 @@
         <mat-card-content>
           <div class="github-tab__deployment">
             <app-metadata-item label="Repository">
-              <a href="{{(gitHubRepo$ | async)?.html_url}}" target="_blank">
-                {{stratosProject.deploySource.project }}
-              </a>
+              <a href="{{(gitHubRepo$ | async)?.html_url}}" target="_blank">{{stratosProject.deploySource.project }}</a>
             </app-metadata-item>
             <app-metadata-item label="Branch">
               <a href="{{(gitHubRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}" target="_blank">
@@ -20,9 +18,7 @@
             <div class="github-tab__deployment__commit">
               <div>
                 <app-metadata-item label="Commit">
-                  <a href="{{(commit$ | async)?.html_url}}" target="_blank">
-                          {{ stratosProject.deploySource.commit}}
-                      </a>
+                  <a href="{{(commit$ | async)?.html_url}}" target="_blank">{{ stratosProject.deploySource.commit | limitTo: 8}}</a>
                 </app-metadata-item>
               </div>
               <div class="github-tab__deployment__commit-warning" *ngIf="!(isHead$ | async) && (initialised$ | async)">
@@ -42,8 +38,6 @@
         </mat-card-content>
       </mat-card>
     </app-tile>
-  </app-tile-group>
-  <app-tile-group>
     <app-tile>
       <mat-card>
         <mat-card-header>
@@ -94,4 +88,5 @@
       </mat-card>
     </app-tile>
   </app-tile-group>
+  <app-list></app-list>
 </app-tile-grid>

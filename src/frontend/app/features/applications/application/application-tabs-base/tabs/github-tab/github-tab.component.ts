@@ -8,9 +8,14 @@ import { Subscription } from 'rxjs/Subscription';
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import {
+  GithubCommitsListConfigService,
+} from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config.service';
+import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
+import {
   CheckProjectExists,
   FetchBranchesForProject,
   FetchCommit,
+  FetchCommits,
   SetAppSourceDetails,
   SetDeployBranch,
   StoreCFSettings,
@@ -23,6 +28,7 @@ import {
   githubBranchesSchemaKey,
   githubCommitSchemaKey,
   githubRepoSchemaKey,
+  spaceSchemaKey,
 } from '../../../../../../store/helpers/entity-factory';
 import { selectEntities } from '../../../../../../store/selectors/api.selectors';
 import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
@@ -32,7 +38,16 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
 @Component({
   selector: 'app-github-tab',
   templateUrl: './github-tab.component.html',
-  styleUrls: ['./github-tab.component.scss']
+  styleUrls: ['./github-tab.component.scss'],
+  providers: [
+    {
+      provide: ListConfig,
+      useFactory: (store: Store<AppState>) => {
+        return new GithubCommitsListConfigService(store, 'richard-cox/node-env');
+      },
+      deps: [Store]
+    }
+  ]
 })
 export class GithubTabComponent implements OnInit, OnDestroy {
 
@@ -68,6 +83,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
         const commitId = stProject.deploySource.commit.trim();
+
+        // this.store.dispatch(new FetchCommits(projectName));
 
         this.gitHubRepoEntityService = this.entityServiceFactory.create(
           githubRepoSchemaKey,
@@ -117,7 +134,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   deployApp(stratosProject: EnvVarStratosProject) {
     this.deployAppSubscription = Observable.combineLatest(
       this.applicationService.application$,
-      this.store.select(selectEntities('space')),
+      this.store.select(selectEntities(spaceSchemaKey)),
       this.gitBranchEntityService.entityObs$
     )
       .pipe(

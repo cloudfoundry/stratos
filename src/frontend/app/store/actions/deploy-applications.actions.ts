@@ -14,6 +14,7 @@ export const PROJECT_EXISTS = '[Deploy App] Project exists';
 export const FETCH_BRANCHES_FOR_PROJECT = '[Deploy App] Fetch branches';
 export const SAVE_APP_DETAILS = '[Deploy App] Save app details';
 export const FETCH_COMMIT = '[Deploy App] Fetch commit';
+export const FETCH_COMMITS = '[Deploy App] Fetch commits';
 export const SET_DEPLOY_CF_SETTINGS = '[Deploy App] Set CF Settings';
 export const DELETE_DEPLOY_APP_SECTION = '[Deploy App] Delete section';
 export const SET_BRANCH = '[Deploy App] Set branch';
@@ -80,6 +81,20 @@ export class FetchCommit implements IRequestAction {
   }
   type = FETCH_COMMIT;
   entityKey = githubCommitSchemaKey;
+}
+
+export class FetchCommits implements PaginatedAction {
+  constructor(public projectName: string) {
+    this.paginationKey = projectName;
+  }
+  actions = [
+    '[Deploy App] Fetch commits',
+    '[Deploy App] Fetch commits success',
+    '[Deploy App] Fetch commits failed',
+  ];
+  type = FETCH_COMMITS;
+  entityKey = githubCommitSchemaKey;
+  paginationKey: string;
 }
 
 export class StoreCFSettings implements Action {
