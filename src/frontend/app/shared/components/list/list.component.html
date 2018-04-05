@@ -9,7 +9,7 @@
         <!-- Multi filters, such as filter app wall by cf/org/space -->
         <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
           <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs" [floatLabel]="'never'">
-            <mat-select matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async).length" (change)="multiFilterConfig.select.next($event.value)">
+            <mat-select matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async) || !(multiFilterConfig.list$ | async).length" (change)="multiFilterConfig.select.next($event.value)">
               <mat-option>All</mat-option>
               <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
                 {{selectItem.label}}

@@ -9,7 +9,6 @@ import { splitCurrentPage, getCurrentPageStartIndex } from './local-list-control
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;
   constructor(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
-    console.log('constructor');
     const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
     const currentPageIndexObservable$ = this.buildCurrentPageNumberObservable(pagination$);
     const currentPageSizeObservable$ = this.buildCurrentPageSizeObservable(pagination$);
@@ -61,8 +60,7 @@ export class LocalListController<T = any> {
   private buildCurrentPageNumberObservable(pagination$: Observable<PaginationEntityState>) {
     return pagination$.pipe(
       map(pagination => pagination.clientPagination.currentPage),
-      distinctUntilChanged((oldPage, newPage) => oldPage === newPage),
-      tap((page) => console.log(page))
+      distinctUntilChanged((oldPage, newPage) => oldPage === newPage)
     );
   }
 
