@@ -18,6 +18,7 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { DotContentComponent } from './dot-content/dot-content.component';
 
 @NgModule({
   imports: [
@@ -34,7 +35,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     BytesToHumanSize,
     MegaBytesToHumanSize,
     SafeImgPipe,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    DotContentComponent
   ],
   providers: [
     AuthGuardService,
@@ -54,7 +56,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     BytesToHumanSize,
     MegaBytesToHumanSize,
     SafeImgPipe,
-    ClickStopPropagationDirective
+    ClickStopPropagationDirective,
+    DotContentComponent
   ],
   entryComponents: [
     LogOutDialogComponent

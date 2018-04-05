@@ -1,22 +1,8 @@
 @mixin steppers-theme($theme, $app-theme) {
-  $primary: map-get($theme, primary);
-  $accent: map-get($theme, accent);
   $background-colors: map-get($theme, background);
   $foreground-colors: map-get($theme, foreground);
   .steppers {
     background-color: mat-color($background-colors, background);
     color: map-get($foreground-colors, base);
-    &__header {
-      &-icon {
-        background-color: map-get($foreground-colors, slider-off-active);
-        color: mat-contrast($primary, 500);
-      }
-      &--active {
-        .steppers__header-icon {
-          background-color: mat-color($primary, 500);
-          color: mat-contrast($primary, 500);
-        }
-      }
-    }
   }
 }
