@@ -8,6 +8,7 @@ import { MDAppModule } from '../../../core/md.module';
 import { StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { ConsoleUaaWizardComponent } from './console-uaa-wizard.component';
+import { DotContentComponent } from '../../../core/dot-content/dot-content.component';
 
 describe('ConsoleUaaWizardComponent', () => {
   let component: ConsoleUaaWizardComponent;
@@ -15,7 +16,7 @@ describe('ConsoleUaaWizardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ConsoleUaaWizardComponent, StepComponent, SteppersComponent],
+      declarations: [ConsoleUaaWizardComponent, StepComponent, SteppersComponent, DotContentComponent],
       imports: [
         RouterTestingModule,
         FormsModule,
