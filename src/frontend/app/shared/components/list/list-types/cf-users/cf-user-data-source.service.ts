@@ -11,6 +11,8 @@ import { APIResource } from './../../../../../store/types/api.types';
 import { CfUser } from './../../../../../store/types/user.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { CfUserListConfigService } from './cf-user-list-config.service';
+import { PaginatedAction } from '../../../../../store/types/pagination.types';
+import { ListConfig } from '../../list.component.types';
 
 
 function setupStateManager(paginationMonitor: PaginationMonitor<APIResource<CfUser>>) {
@@ -31,9 +33,8 @@ function setupStateManager(paginationMonitor: PaginationMonitor<APIResource<CfUs
 }
 
 export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>> {
-  constructor(store: Store<AppState>, cfUserService: CfUserService, cfUserListConfigService: CfUserListConfigService) {
-    const { paginationKey } = cfUserService.allUsersAction;
-    const action = cfUserService.allUsersAction;
+  constructor(store: Store<AppState>, action: PaginatedAction, listConfigService: ListConfig<APIResource<CfUser>>) {
+    const { paginationKey } = action;
     const paginationMonitor = new PaginationMonitor<APIResource<CfUser>>(store, paginationKey, entityFactory(cfUserSchemaKey));
 
     const { sub, rowStateManager } = setupStateManager(paginationMonitor);
@@ -45,7 +46,7 @@ export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>>
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
-      listConfig: cfUserListConfigService,
+      listConfig: listConfigService,
       rowsState: rowStateManager.observable,
       destroy: () => sub.unsubscribe()
     });
