@@ -21,26 +21,17 @@ export class AuthGuardService implements CanActivate {
   ) { }
 
   canActivate(): Observable<boolean> {
+    const path = window.location.pathname;
     return this.store.select('auth')
       .map((state: AuthState) => {
-        if (!state.verifying && !state.sessionData) {
-          this.store.dispatch(new VerifySession());
-        }
-        return state;
-      })
-      .skipWhile((state: AuthState) => {
-        return !state.loggedIn && !state.error;
-      })
-      .map((state: AuthState) => {
-        if (state.sessionData.valid) {
-          return true;
-        } else {
-          state.sessionData.uaaError ?
-            this.store.dispatch(new RouterNav({ path: ['/uaa'] })) :
-            this.store.dispatch(new RouterNav({ path: ['/login'] }, window.location.pathname));
+        if (!state.sessionData || !state.sessionData.valid) {
+          this.store.dispatch(new RouterNav({
+            path: ['/login']
+          }, window.location.pathname));
           return false;
         }
-      });
+        return true;
+      }).first();
   }
 
 }

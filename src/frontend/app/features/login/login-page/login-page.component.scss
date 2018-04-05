@@ -33,7 +33,7 @@
     justify-content: center;
     padding-top: 24px;
   }
-  &__form {
+  &__body {
     padding: 24px;
   }
   &__submit {
@@ -44,14 +44,26 @@
     height: 20px;
     padding-top: 20px;
   }
-  &__loading-bar {
+  &__form-outer {
+    $cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+    $time: 250ms;
+    height: 180px;
+    opacity: 1;
+    transition: height $time $cubic 100ms, opacity $time * 2 $cubic $time + 50ms;
+  }
+  &__loading {
     display: none;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    &__logging-in {
-      display: inherit;
+  }
+  &__busy {
+    .login__form {
+      display: none;
+    }
+    .login__form-outer {
+      height: 0;
+      opacity: 0;
+    }
+    .login__loading {
+      display: block;
     }
   }
 }
