@@ -12,7 +12,6 @@ export function splitCurrentPage<T = any>(entities: (T | T[])[], pageSize: numbe
       index
     };
   }
-  console.log('splitttting', currentPage);
   const pages = [...entities];
   if (index + pageSize > pages.length) {
     pageSize = pages.length - index;
