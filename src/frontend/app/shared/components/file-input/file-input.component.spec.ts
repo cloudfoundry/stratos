@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { FileInputComponent } from './file-input.component';
+import { BaseTestModulesNoShared } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('FileInputComponent', () => {
   let component: FileInputComponent;
@@ -8,7 +9,8 @@ describe('FileInputComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FileInputComponent ]
+      declarations: [ FileInputComponent ],
+      imports: [...BaseTestModulesNoShared]
     })
     .compileComponents();
   }));
