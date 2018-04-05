@@ -4,6 +4,7 @@ import { MetricsConfig } from '../../../../shared/components/metrics-chart/metri
 import { FetchApplicationMetricsAction } from '../../../../store/actions/metrics.actions';
 import { IMetricMatrixResult } from '../../../../store/types/base-metric.types';
 import { MetricsChartHelpers } from '../../../../shared/components/metrics-chart/metrics.component.helpers';
+import { IMetricApplication } from '../../../../store/types/metric.types';
 
 @Component({
   selector: 'app-application-instance-memory-chart',
