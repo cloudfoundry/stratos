@@ -1,13 +1,15 @@
 #!/bin/bash
 set -e
 
-ORGNAME=cf-summit
+ORGNAME="CF Summit 2018"
 ORGNAME2="SUSE Hackweek"
-ORGNAME3="['hip','hip']"
-ORGNAME4="its_a_feature"
-ORGNAME5="greek_questionmark"
-ORGNAME6="K8"
+ORGNAME3="SUSE CAP"
+ORGNAME4="SUSE Dev"
+ORGNAME5="Cloud Foundry Incubators"
+ORGNAME6="Stratos Dev"
 SPACENAME=dev
+SPACENAME2=prod
+SPACENAME3=test
 
 ORGQUOTA_NAME=cf-summit-org-quota
 ORGQUOTA_TOTALMEMORY=100M
@@ -90,6 +92,8 @@ function createOrg {
 function createSpace {
   #cf create-space SPACE [-o ORG] [-q SPACE_QUOTA]
   cf create-space "$SPACENAME" -o "$ORGNAME" -q "$SPACEQUOTA_NAME"
+  cf create-space "$SPACENAME2" -o "$ORGNAME" -q "$SPACEQUOTA_NAME"
+  cf create-space "$SPACENAME3" -o "$ORGNAME" -q "$SPACEQUOTA_NAME"
 }
 
 function createServiceInstance {
@@ -150,6 +154,8 @@ function clean {
   echo Targeting $ORGNAME and deleting it\'s content
   cf target -o "$ORGNAME"
   cf delete-space "$SPACENAME" -f
+  cf delete-space "$SPACENAME2" -f
+  cf delete-space "$SPACENAME3" -f
   cf delete-space-quota "$SPACEQUOTA_NAME" -f
   
   echo Deleting Orgs
@@ -207,7 +213,7 @@ fi
 create
 
 echo This script has
-echo - Created an org \($ORGNAME\) and space \($SPACENAME\), both with custom quotas \($ORGQUOTA_NAME, $SPACEQUOTA_NAME\)
+echo - Created an orgs and spaces, both with custom quotas \($ORGQUOTA_NAME, $SPACEQUOTA_NAME\)
 echo - Created 2 service instances \($SERVICEINSTANCE_NAME, $SERVICEINSTANCE_NAME2\)
 echo - Created 3 apps \($APP_1_NAME, $APP_2_NAME, $APP_3_NAME\) and bound the service instances to them
 echo See top of file for variables
