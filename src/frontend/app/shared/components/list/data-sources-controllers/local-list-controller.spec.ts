@@ -1,6 +1,6 @@
 import { getCurrentPageStartIndex, splitCurrentPage } from './local-list-controller.helpers';
 
-fdescribe('LocalListController', () => {
+describe('LocalListController', () => {
   const page = [
     [1,
       2],
