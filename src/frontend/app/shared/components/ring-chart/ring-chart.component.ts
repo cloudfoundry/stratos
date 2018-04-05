@@ -9,16 +9,16 @@ import { ColorHelper } from '@swimlane/ngx-charts';
 })
 export class RingChartComponent implements OnInit {
 
-  @Input() data: any;
-  @Input() label = 'Total';
-  @Input() scheme = 'cool';
   domain: any[];
   colors: ColorHelper;
+
+  @Input() data: any;
+  @Input() label  = 'Total';
+  @Input() scheme: any = 'cool';
 
   @Input() valueFormatting: (value: number) => any = value => value;
   @Input() nameFormatting: (value: string) => any = label => label;
   @Input() percentageFormatting: (value: number) => any = percentage => percentage;
-
 
   constructor() { }
 

@@ -179,12 +179,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   deleteApplication() {
     this.confirmDialog.open(appDeleteConfirmation, () => {
-      this.store.dispatch(
-        new DeleteApplication(
-          this.applicationService.appGuid,
-          this.applicationService.cfGuid
-        )
-      );
+      this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
     });
   }
 
@@ -201,10 +196,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       })
       .subscribe();
 
-    this.appSub$ = this.applicationService.app$.subscribe(app => {
+    this.appSub$ = this.entityService.entityMonitor.entityRequest$.subscribe(requestInfo => {
       if (
-        app.entityRequestInfo.deleting.deleted ||
-        app.entityRequestInfo.error
+        requestInfo.deleting.deleted ||
+        requestInfo.error
       ) {
         this.store.dispatch(new RouterNav({ path: ['applications'] }));
       }

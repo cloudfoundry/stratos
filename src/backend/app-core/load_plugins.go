@@ -7,6 +7,7 @@ import (
 	"github.com/SUSE/stratos-ui/plugins/cfappssh"
 	"github.com/SUSE/stratos-ui/plugins/cloudfoundry"
 	"github.com/SUSE/stratos-ui/plugins/cloudfoundryhosting"
+	"github.com/SUSE/stratos-ui/plugins/metrics"
 	"github.com/SUSE/stratos-ui/plugins/userinfo"
 
 )
@@ -29,6 +30,9 @@ func (pp *portalProxy) loadPlugins() {
 	plugin, _ = cloudfoundryhosting.Init(pp)
 	pp.Plugins["cloudfoundryhosting"] = plugin
 	log.Info("Loaded plugin: cloudfoundryhosting")
+	plugin, _ = metrics.Init(pp)
+	pp.Plugins["metrics"] = plugin
+	log.Info("Loaded plugin: metrics")
 	plugin, _ = userinfo.Init(pp)
 	pp.Plugins["userinfo"] = plugin
 	log.Info("Loaded plugin: userinfo")

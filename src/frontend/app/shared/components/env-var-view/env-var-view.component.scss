@@ -2,10 +2,12 @@
   display: flex;
   flex-direction: column;
   &__content {
-    &__code-block-line {
-      pre {
-        white-space: pre-wrap;
-      }
+    &__value {
+      margin-top: 0;
+      white-space: pre-wrap;
+    }
+    &__key {
+      margin-bottom: 0;
     }
   }
   &__actions {

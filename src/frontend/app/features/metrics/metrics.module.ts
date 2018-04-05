@@ -10,7 +10,7 @@ import { SharedModule } from '../../shared/shared.module';
   imports: [
     CoreModule,
     CommonModule,
-    SharedModule,    
+    SharedModule,
     MetricsRoutingModule,
   ],
   declarations: [MetricsComponent],

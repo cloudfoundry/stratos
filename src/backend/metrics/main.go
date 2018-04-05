@@ -61,9 +61,6 @@ func (m *MetricsSpecification) GetMiddlewarePlugin() (interfaces.MiddlewarePlugi
 // Metrics endpoints - admin
 func (m *MetricsSpecification) AddAdminGroupRoutes(echoContext *echo.Group) {
 	echoContext.GET("/metrics/cf/:op", m.getCloudFoundryMetrics)
-
-	// TODOO: Kubernetes
-	//echoContext.GET("metrics/k8s", p.getKubernetesMetrics)
 }
 
 // Metrics API endpoints - non-admin

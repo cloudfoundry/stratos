@@ -10,6 +10,7 @@ import { SharedModule } from '../../../shared/shared.module';
 import { appReducers } from '../../../store/reducers.module';
 import { SideNavComponent } from '../side-nav/side-nav.component';
 import { DashboardBaseComponent } from './dashboard-base.component';
+import { MetricsService } from '../../metrics/services/metrics-service';
 
 describe('DashboardBaseComponent', () => {
   let component: DashboardBaseComponent;
@@ -29,7 +30,8 @@ describe('DashboardBaseComponent', () => {
         )
       ],
       providers: [
-        PageHeaderService
+        PageHeaderService,
+        MetricsService,
       ]
     })
       .compileComponents();
