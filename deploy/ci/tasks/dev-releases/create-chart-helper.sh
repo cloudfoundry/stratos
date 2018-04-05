@@ -23,7 +23,7 @@ setupAndPushChange() {
   git pull --rebase
   git stash pop
   echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-  git add dev/index.yaml
+  git add index.yaml
   git commit -m "Dev releases Helm repository updated for tag: ${TAG}"
   git config --global push.default simple
   git push origin HEAD:master

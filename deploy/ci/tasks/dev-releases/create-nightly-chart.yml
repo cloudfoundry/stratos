@@ -32,8 +32,7 @@ run:
       helm package console
       cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v2.0.0-${TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
-      mkdir -p ${STRATOS_MASTER}/dev
-      INDEX_FILE=${STRATOS_MASTER}/dev/index.yaml
+      INDEX_FILE=${STRATOS_MASTER}/index.yaml
       CHART_FILE=${ROOT_DIR}/helm-chart/console-helm-chart-v2.0.0-${TAG}.tgz
       if [ -f ${INDEX_FILE} ]; then
             NIGHTLY_EXISTS=$(cat  ${INDEX_FILE} | grep 2.0.0-${TAG})
@@ -53,6 +52,6 @@ run:
 
       # Update Helm Repository
       helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${TAG}/
-      cp index.yaml ${STRATOS_MASTER}/dev/
+      cp index.yaml ${STRATOS_MASTER}/
       cd ${STRATOS_MASTER}
       setupAndPushChange
