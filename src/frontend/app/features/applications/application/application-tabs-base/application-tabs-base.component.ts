@@ -130,8 +130,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         ]
       },
       {
-        key: 'space-summary',
-        breadcrumbs: [
+        key: 'space-summary', breadcrumbs: [
           {
             value: endpoint.name,
             routerLink: `${baseCFUrl}/organizations`
@@ -143,6 +142,23 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           {
             value: space.entity.name,
             routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/summary`
+          }
+        ]
+      },
+      {
+        key: 'space-services',
+        breadcrumbs: [
+          {
+            value: endpoint.name,
+            routerLink: `${baseCFUrl}/organizations`
+          },
+          {
+            value: org.entity.name,
+            routerLink: `${baseOrgUrl}/spaces`
+          },
+          {
+            value: space.entity.name,
+            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances`
           }
         ]
       },
@@ -164,7 +180,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         breadcrumbs: [
           {
             value: endpoint.name,
-            routerLink: `${baseCFUrl}/summary`
           }
         ]
       }

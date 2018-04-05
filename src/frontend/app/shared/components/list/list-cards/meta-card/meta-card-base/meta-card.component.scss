@@ -11,7 +11,11 @@
       position: absolute;
       right: 10px;
       top: 10px;
-    }
+    } // &__popup {
+    //   &__btn {
+    //     text-align: center;
+    //   }
+    // }
   }
   &-pointer {
     cursor: pointer;

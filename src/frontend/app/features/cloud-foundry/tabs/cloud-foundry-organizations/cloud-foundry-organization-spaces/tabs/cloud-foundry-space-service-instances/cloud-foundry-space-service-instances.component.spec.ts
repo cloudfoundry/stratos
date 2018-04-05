@@ -2,6 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloudFoundrySpaceServiceInstancesComponent } from './cloud-foundry-space-service-instances.component';
 import { BaseTestModules, getCfSpaceServiceMock } from '../../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { DatePipe } from '@angular/common';
 
 describe('CloudFoundrySpaceServiceInstancesComponent', () => {
   let component: CloudFoundrySpaceServiceInstancesComponent;
@@ -11,7 +12,7 @@ describe('CloudFoundrySpaceServiceInstancesComponent', () => {
     TestBed.configureTestingModule({
       declarations: [CloudFoundrySpaceServiceInstancesComponent],
       imports: [...BaseTestModules],
-      providers: [getCfSpaceServiceMock]
+      providers: [getCfSpaceServiceMock, DatePipe]
     })
       .compileComponents();
   }));

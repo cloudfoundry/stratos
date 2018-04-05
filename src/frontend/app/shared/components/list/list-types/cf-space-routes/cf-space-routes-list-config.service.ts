@@ -17,6 +17,7 @@ import { CfSpaceRoutesDataSource } from './cf-space-routes-data-source';
 import {
   TableCellRouteAppsAttachedComponent,
 } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
+import { DatePipe } from '@angular/common';
 
 @Injectable()
 export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {
@@ -73,7 +74,6 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
-    icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
     visible: (row: APIResource) => true,
@@ -82,7 +82,6 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
-    icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
     visible: (row: APIResource) => true,
@@ -95,18 +94,25 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
       headerCell: () => 'Route',
       cellComponent: TableCellRouteComponent,
       cellFlex: '4',
-      sort: {
-        type: 'sort',
-        orderKey: 'route',
-        field: 'entity.host'
-      }
     },
     {
       columnId: 'mappedapps',
       headerCell: () => 'Application Attached',
       cellComponent: TableCellRouteAppsAttachedComponent,
       cellFlex: '4',
-    }
+    },
+    {
+      columnId: 'creation', headerCell: () => 'Creation Date',
+      cellDefinition: {
+        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'creation',
+        field: 'metadata.created_at'
+      },
+      cellFlex: '2'
+    },
   ];
 
   pageSizeOptions = [5, 15, 30];
@@ -150,7 +156,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
   constructor(
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
-    private cfSpaceService: CloudFoundrySpaceService
+    private cfSpaceService: CloudFoundrySpaceService,
+    private datePipe: DatePipe
   ) {
     this.dataSource = new CfSpaceRoutesDataSource(
       this.store,
@@ -164,20 +171,20 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-        take(1),
-        tap(domain => {
-          const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialogConfig(
-            'Delete Route',
-            `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
-            'Delete',
-            true
-          );
-          this.confirmDialog.open(confirmation, () => {
-            this.dispatchDeleteAction(item);
-            this.getDataSource().selectClear();
-          });
-        })
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialogConfig(
+          'Delete Route',
+          `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
+          'Delete',
+          true
+        );
+        this.confirmDialog.open(confirmation, () => {
+          this.dispatchDeleteAction(item);
+          this.getDataSource().selectClear();
+        });
+      })
       )
       .subscribe();
   }
@@ -186,20 +193,20 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-        take(1),
-        tap(domain => {
-          const routeUrl = getRoute(item, false, false, domain);
-          const confirmation = new ConfirmationDialogConfig(
-            'Unmap Route from Application',
-            `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-            'Unmap',
-            true
-          );
-          this.confirmDialog.open(confirmation, () => {
-            this.dispatchUnmapAction(item);
-            this.getDataSource().selectClear();
-          });
-        })
+      take(1),
+      tap(domain => {
+        const routeUrl = getRoute(item, false, false, domain);
+        const confirmation = new ConfirmationDialogConfig(
+          'Unmap Route from Application',
+          `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+          'Unmap',
+          true
+        );
+        this.confirmDialog.open(confirmation, () => {
+          this.dispatchUnmapAction(item);
+          this.getDataSource().selectClear();
+        });
+      })
       )
       .subscribe();
   }

@@ -16,9 +16,9 @@ import {
 } from './table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import { DeleteServiceInstance, DeleteServiceBinding } from '../../../../../store/actions/service-instances.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
+import { DatePipe } from '@angular/common';
 @Injectable()
-export class CfSpacesServiceInstancesListConfigService
-  extends ListConfig<APIResource<CfServiceInstance>>
+export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIResource<CfServiceInstance>>
   implements IListConfig<APIResource<CfServiceInstance>>  {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSpacesServiceInstancesDataSource;
@@ -34,11 +34,6 @@ export class CfSpacesServiceInstancesListConfigService
       headerCell: () => 'Service Instances',
       cellDefinition: {
         getValue: (row) => `${row.entity.name}`
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'name',
-        field: 'entity.name'
       },
       cellFlex: '2'
     },
@@ -66,11 +61,22 @@ export class CfSpacesServiceInstancesListConfigService
       cellComponent: TableCellServiceInstanceAppsAttachedComponent,
       cellFlex: '3'
     },
+    {
+      columnId: 'creation', headerCell: () => 'Creation Date',
+      cellDefinition: {
+        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'creation',
+        field: 'metadata.created_at'
+      },
+      cellFlex: '2'
+    },
   ];
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceInstance(item),
-    icon: 'delete',
     label: 'Delete',
     description: 'Delete Service Instance',
     visible: (row: APIResource) => true,
@@ -79,14 +85,13 @@ export class CfSpacesServiceInstancesListConfigService
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
-    icon: 'settings',
     label: 'Detach',
     description: 'Detach Service Instance',
     visible: (row: APIResource) => true,
     enabled: (row: APIResource) => row.entity.service_bindings.length === 1
   };
 
-  constructor(private store: Store<AppState>, private cfSpaceService: CloudFoundrySpaceService) {
+  constructor(private store: Store<AppState>, private cfSpaceService: CloudFoundrySpaceService, private datePipe: DatePipe) {
     super();
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
   }

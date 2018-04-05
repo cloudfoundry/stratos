@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, first, publishReplay, refCount, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { filter, first, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
@@ -124,8 +124,8 @@ function getObservables<T = any>(
   let hasDispatchedOnce = false;
   let lastValidationFootprint: string;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).publishReplay(1).refCount();
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).publishReplay(1).refCount();
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -156,7 +156,7 @@ function getObservables<T = any>(
         filter(([ent, pagination]) => {
           return !!pagination && isPageReady(pagination);
         }),
-        shareReplay(1),
+        publishReplay(1), refCount(),
         tap(([ent, pagination]) => {
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {

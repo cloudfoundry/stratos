@@ -21,7 +21,6 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   enableTextFilter = false;
   tableFixedRowHeight?: boolean;
   dataSource: CfSpaceAppsDataSource;
-  pageSizeOptions = [9, 45, 90];
   defaultView = 'table' as ListView;
   text = {
     title: null,
