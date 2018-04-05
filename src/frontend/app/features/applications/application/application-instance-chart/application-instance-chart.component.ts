@@ -19,16 +19,16 @@ export class ApplicationInstanceChartComponent implements OnInit {
   @Input('endpointGuid')
   private endpointGuid: string;
 
-  @Input("yAxisLabel")
+  @Input('yAxisLabel')
   private yAxisLabel: string;
 
-  @Input("metricName")
+  @Input('metricName')
   private metricName: string;
 
-  @Input("seriesTranslation")
+  @Input('seriesTranslation')
   private seriesTranslation: string;
 
-  @Input("title")
+  @Input('title')
   private title: string;
 
   public instanceChartConfig: MetricsLineChartConfig;
@@ -60,7 +60,7 @@ export class ApplicationInstanceChartComponent implements OnInit {
   }
 
   private getmapSeriesItemValue() {
-    switch(this.seriesTranslation) {
+    switch (this.seriesTranslation) {
       case 'mb':
         return (bytes) => bytes / 1000000;
       default:
