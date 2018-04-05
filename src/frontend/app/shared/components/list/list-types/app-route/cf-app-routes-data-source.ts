@@ -21,7 +21,6 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
     appService: ApplicationService,
     action: PaginatedAction,
     paginationKey: string,
-    mapRoute = false,
     listConfig: IListConfig<APIResource>
   ) {
     super({
@@ -53,14 +52,6 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
 
     this.cfGuid = appService.cfGuid;
     this.appGuid = appService.appGuid;
-    if (mapRoute) {
-      this.selectedRowToggle = (row: APIResource) => {
-        this.selectedRows.clear();
-        this.selectedRows.set(this.getRowUniqueId(row), row);
-        this.isSelecting$.next(this.selectedRows.size > 0);
-      };
-      this.selectAllFilteredRows = () => { };
-    }
   }
 
 }

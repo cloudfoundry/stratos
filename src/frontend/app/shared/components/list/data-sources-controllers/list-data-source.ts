@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { OperatorFunction } from 'rxjs/interfaces';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, shareReplay, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { CreatePagination, SetResultCount } from '../../../../store/actions/pagination.actions';
@@ -130,7 +130,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
     this.page$ = this.isLocal ?
       this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions)
-      : transformedEntities$.pipe(shareReplay(1));
+      : transformedEntities$.pipe(publishReplay(1), refCount());
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
@@ -148,7 +148,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isLocal = config.isLocal || false;
     this.transformEntities = config.transformEntities;
     this.rowsState = config.rowsState ? config.rowsState.pipe(
-      shareReplay(1)
+      publishReplay(1), refCount()
     ) : Observable.of({}).first();
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
@@ -165,7 +165,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         ...(state[this.getRowUniqueId(row)] || {})
       })),
       distinctUntilChanged(),
-      shareReplay(1)
+      publishReplay(1), refCount()
     );
   }
 
@@ -191,14 +191,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isAdding$.next(false);
   }
 
-  selectedRowToggle(row: T) {
+  selectedRowToggle(row: T, multiMode: boolean = true) {
     const exists = this.selectedRows.has(this.getRowUniqueId(row));
     if (exists) {
       this.selectedRows.delete(this.getRowUniqueId(row));
+      this.selectAllChecked = false;
     } else {
+      if (!multiMode) {
+        this.selectedRows.clear();
+      }
       this.selectedRows.set(this.getRowUniqueId(row), row);
+      this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
     }
-    this.isSelecting$.next(this.selectedRows.size > 0);
+    this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
   }
 
   selectAllFilteredRows() {
@@ -283,9 +288,12 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         }
 
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-        // Note - ensure we don't also include the entities count pre/post reduce (fails for local pagination - specifically when a filter
-        // resets to include all entities)
-        if (paginationEntity.totalResults !== entities.length || paginationEntity.clientPagination.totalResults !== entities.length) {
+        const validPagesCountChange = this.transformEntity;
+        if (
+          validPagesCountChange &&
+          (paginationEntity.totalResults !== entities.length ||
+            paginationEntity.clientPagination.totalResults !== entities.length)
+        ) {
           this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
 

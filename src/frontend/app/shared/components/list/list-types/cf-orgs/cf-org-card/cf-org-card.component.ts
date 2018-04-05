@@ -47,12 +47,10 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
 
     this.cardMenu = [
       {
-        icon: 'mode_edit',
         label: 'Edit',
         action: this.edit
       },
       {
-        icon: 'delete',
         label: 'Delete',
         action: this.delete
       }
@@ -83,7 +81,7 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       tap(([role, apps]) => {
         this.setValues(role, apps);
       })
-    );
+      );
 
     this.subscriptions.push(fetchData$.subscribe());
     this.orgGuid = this.row.metadata.guid;
