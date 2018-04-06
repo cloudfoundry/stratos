@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
 import { ApplicationService } from '../application.service';
 import { EntityService } from '../../../core/entity-service';
 import { AppState } from '../../../store/app-state';
@@ -26,6 +26,8 @@ import { SetNewAppName, SetCFDetails } from '../../../store/actions/create-appli
   ]
 })
 export class EditApplicationComponent implements OnInit, OnDestroy {
+
+  @HostBinding('class') class = 'router-component';
 
   editAppForm: FormGroup;
 

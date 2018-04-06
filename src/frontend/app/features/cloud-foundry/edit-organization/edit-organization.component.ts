@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { Component, HostBinding } from '@angular/core';
+
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 @Component({
   selector: 'app-edit-organization',
@@ -9,7 +9,9 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
   styleUrls: ['./edit-organization.component.scss'],
   providers: [getActiveRouteCfOrgSpaceProvider]
 })
-export class EditOrganizationComponent implements OnInit {
+export class EditOrganizationComponent {
+
+  @HostBinding('class') class = 'router-component';
 
   orgUrl: string;
 
@@ -17,8 +19,4 @@ export class EditOrganizationComponent implements OnInit {
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
     this.orgUrl = `/cloud-foundry/${cfGuid}/organizations/${orgGuid}`;
   }
-
-  ngOnInit() {
-  }
-
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
@@ -9,6 +9,8 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
   styleUrls: ['./cloud-foundry-tabs-base.component.scss']
 })
 export class CloudFoundryTabsBaseComponent implements OnInit {
+  @HostBinding('class') class = 'router-component';
+
   tabLinks = [
     { link: 'summary', label: 'Summary' },
     { link: 'organizations', label: 'Organizations' },

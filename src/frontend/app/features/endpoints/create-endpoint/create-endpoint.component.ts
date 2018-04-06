@@ -1,15 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 
 @Component({
   selector: 'app-create-endpoint',
   templateUrl: './create-endpoint.component.html',
   styleUrls: ['./create-endpoint.component.scss']
 })
-export class CreateEndpointComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+export class CreateEndpointComponent {
+  @HostBinding('class') class = 'router-component';
 }

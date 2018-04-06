@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostBinding } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -23,6 +23,8 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
   providers: [CfOrgSpaceDataService]
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
+
+  @HostBinding('class') class = 'router-component';
 
   isRedeploy: boolean;
   initCfOrgSpaceService: Subscription[] = [];
