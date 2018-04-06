@@ -29,7 +29,7 @@ export class LogStreamTabComponent implements OnInit {
 
   public connectionStatus: Observable<number>;
   @ViewChild('searchFilter') searchFilter: NgModel;
-  @HostBinding('class') class = 'router-component';
+
 
   filter;
 

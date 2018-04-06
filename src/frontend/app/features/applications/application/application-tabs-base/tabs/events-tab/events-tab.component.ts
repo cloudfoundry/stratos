@@ -16,5 +16,5 @@ import { ListConfig } from '../../../../../../shared/components/list/list.compon
 })
 
 export class EventsTabComponent {
-  @HostBinding('class') class = 'router-component';
+
 }

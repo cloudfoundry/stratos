@@ -18,5 +18,5 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
   ]
 })
 export class InstancesTabComponent {
-  @HostBinding('class') class = 'router-component';
+
 }

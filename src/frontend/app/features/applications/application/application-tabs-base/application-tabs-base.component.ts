@@ -49,7 +49,7 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
-  @HostBinding('class') class = 'router-component';
+
 
   constructor(
     private route: ActivatedRoute,
