@@ -14,8 +14,6 @@ interface Tag {
 })
 export class CfServiceCardComponent extends CardCell<APIResource<IService>> implements OnInit {
 
-  static columns = 2;
-
   @Input('row') row: APIResource<IService>;
   extraInfo: IServiceExtra;
   tags: AppChip<Tag>[] = [];
