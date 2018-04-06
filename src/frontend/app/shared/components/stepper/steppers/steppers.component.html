@@ -5,10 +5,10 @@
         <div *ngFor="let step of steps; let i = index" (click)="setActive(i)" [ngClass]="{'steppers__header--active': step.active || step.complete}" class="steppers__header">
           <div class="steppers__header-inner" *ngIf="steps.length !== 1">
             <mat-spinner *ngIf="(step.blocked$ | async)" diameter="20"></mat-spinner>
-            <div *ngIf="!(step.blocked$ | async)" class="steppers__header-icon">
+            <app-dot-content *ngIf="!(step.blocked$ | async)" class="buildpack-card__title-dot" [disabled]="step.complete">
               <mat-icon class="steppers__header-complete" *ngIf="step.complete">{{ this.getIconLigature() }}</mat-icon>
               <div *ngIf="!step.complete">{{ i + 1 }}</div>
-            </div>
+            </app-dot-content>
             <span class="steppers__header-text">{{ step.title }}</span>
           </div>
         </div>
