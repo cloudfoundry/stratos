@@ -106,7 +106,7 @@ export class ListConfig<T> implements IListConfig<T> {
 }
 
 export interface IBaseListAction<T> {
-  icon: string;
+  icon?: string;
   label: string;
   description: string;
   visible: (row: T) => boolean;
