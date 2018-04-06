@@ -101,15 +101,6 @@ build_bk_build_base(){
     build_and_push_image stratos-bk-build-base Dockerfile.stratos-bk-build-base
 }
 
-build_portal_proxy_builder(){
-    if [ -z ${PUSH_IMAGES} ]; then
-        BUILDER_PUSH_FLAG="-n"
-    fi
-    pushd  ${DEPLOY_PATH}/
-    BK_BUILD_BASE=${REGISTRY}/${ORGANIZATION}/stratos-bk-build-base:${TAG}
-    BK_BUILD_BASE=${BK_BUILD_BASE} TAG=${TAG} DOCKER_REGISTRY=${REGISTRY} DOCKER_ORG=${ORGANIZATION} tools/build-push-proxy-builder-image.sh ${BUILDER_PUSH_FLAG}
-    popd
-}
 
 build_mariadb_base(){
     build_and_push_image stratos-db-base Dockerfile.stratos-mariadb-base
@@ -129,8 +120,6 @@ build_bk_base;
 build_nginx_base;
 # Used for stratos-jetstream-builder base
 build_bk_build_base;
-# Used for building the backend
-build_portal_proxy_builder;
 # Used for building the DB image
 build_mariadb_base;
 # Used for building the AIO image
