@@ -133,7 +133,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     const github = {
       project: appSource.projectName,
       branch: appSource.branch.name,
-      type: appSource.type.subType
+      type: appSource.type.subType,
+      commitHash: appSource.commit
     };
 
     const msg = {

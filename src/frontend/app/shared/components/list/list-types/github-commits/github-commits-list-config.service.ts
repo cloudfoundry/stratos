@@ -10,10 +10,11 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { spaceSchemaKey, githubBranchesSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { first, tap, combineLatest } from 'rxjs/operators';
-import { CheckProjectExists, SetAppSourceDetails, SetDeployBranch, FetchBranchesForProject } from '../../../../../store/actions/deploy-applications.actions';
+import { first, tap, combineLatest, withLatestFrom } from 'rxjs/operators';
+import { CheckProjectExists, SetAppSourceDetails, SetDeployBranch, FetchBranchesForProject, SetDeployCommit, StoreCFSettings } from '../../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
+import { selectEntities } from '../../../../../store/selectors/api.selectors';
 
 @Injectable()
 export class GithubCommitsListConfigService implements IListConfig<APIResource<GithubCommit>> {
@@ -79,7 +80,15 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
   ];
   private listActionRedeploy: IListAction<APIResource<GithubCommit>> = {
     action: (item) => {
-      // set Project data
+      // set CF data
+      this.store.dispatch(
+        new StoreCFSettings({
+          cloudFoundry: this.cfGuid,
+          org: this.orgGuid,
+          space: this.spaceGuid
+        })
+      );
+      // Set Project data
       this.store.dispatch(
         new CheckProjectExists(this.projectName)
       );
@@ -93,7 +102,8 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
       );
       // Set branch
       this.store.dispatch(new SetDeployBranch(this.branchName));
-      // TODO: RC set commit and load it in deploy stepper
+      // Set Commit
+      this.store.dispatch(new SetDeployCommit(item.entity.sha));
 
       this.store.dispatch(
         new RouterNav({
@@ -110,6 +120,9 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
 
   private projectName: string;
   private branchName: string;
+  private cfGuid: string;
+  private orgGuid: string;
+  private spaceGuid: string;
 
   constructor(
     private store: Store<AppState>,
@@ -117,28 +130,41 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory
   ) {
-    this.applicationService.applicationStratProject$.pipe(
-      first(),
-    ).subscribe(stratosProject => {
-      this.projectName = stratosProject.deploySource.project;
+    this.projectName = 'richard-cox/node-env';
+    this.branchName = 'master';
 
-      const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
-      const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
-        githubBranchesSchemaKey,
-        entityFactory(githubBranchesSchemaKey),
-        branchKey,
-        new FetchBranchesForProject(this.projectName),
-        false
-      );
-      gitBranchEntityService.entityObs$.pipe(
-        first(),
-      ).subscribe(branch => {
-        this.branchName = branch.entity.entity.name;
-        // TODO: RC This will not work. The creation of the datasource must occur synchronously in the ctor. These values need to be passed
-        // in... however this instance is created via a provider... which doesn't support async loading
-        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
-      });
+    this.applicationService.waitForAppEntity$.pipe(
+      combineLatest(this.applicationService.appSpace$),
+      first(),
+    ).subscribe(([app, space]) => {
+      this.cfGuid = app.entity.entity.cfGuid;
+      this.spaceGuid = app.entity.entity.space_guid;
+      this.orgGuid = space.entity.organization_guid;
     });
+
+    // TODO: RC This will not work. The creation of the datasource must occur synchronously in the ctor. These values need to be passed
+    // in... however this instance is created via a provider... which doesn't support async loading
+    // this.applicationService.applicationStratProject$.pipe(
+    //   first(),
+    // ).subscribe(stratosProject => {
+    //   this.projectName = stratosProject.deploySource.project;
+
+    //   const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
+    //   const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
+    //     githubBranchesSchemaKey,
+    //     entityFactory(githubBranchesSchemaKey),
+    //     branchKey,
+    //     new FetchBranchesForProject(this.projectName),
+    //     false
+    //   );
+    //   gitBranchEntityService.entityObs$.pipe(
+    //     first(),
+    //   ).subscribe(branch => {
+    //     this.branchName = branch.entity.entity.name;
+    //     this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
+    //   });
+    // });
+    this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
   }
 
   public getColumns = () => this.columns;

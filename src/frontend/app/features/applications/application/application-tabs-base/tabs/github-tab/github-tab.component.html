@@ -30,11 +30,6 @@
             </div>
             <app-metadata-item label="Deployed at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
           </div>
-          <div class="github-tab__deployment__deploy">
-            <div class="github-tab__deployment__deploy__button">
-              <button mat-button color="primary" (click)="deployApp(stratosProject)">Redeploy App</button>
-            </div>
-          </div>
         </mat-card-content>
       </mat-card>
     </app-tile>

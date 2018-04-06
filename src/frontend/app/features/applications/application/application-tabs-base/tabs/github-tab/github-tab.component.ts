@@ -87,7 +87,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
       take(1),
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
-        const commitId = stProject.deploySource.commit.trim();
+        const commitId = projectName + '-' + stProject.deploySource.commit.trim();
 
         this.gitHubRepoEntityService = this.entityServiceFactory.create(
           githubRepoSchemaKey,
@@ -134,48 +134,4 @@ export class GithubTabComponent implements OnInit, OnDestroy {
     );
   }
 
-  deployApp(stratosProject: EnvVarStratosProject) {
-    this.deployAppSubscription = Observable.combineLatest(
-      this.applicationService.application$,
-      this.store.select(selectEntities(spaceSchemaKey)),
-      this.gitBranchEntityService.entityObs$
-    )
-      .pipe(
-        take(1),
-        tap(([app, spaces, branch]) => {
-          // set CF data
-          const spaceGuid = app.app.entity.space_guid;
-          this.store.dispatch(
-            new StoreCFSettings({
-              cloudFoundry: app.app.entity.cfGuid,
-              org: spaces[spaceGuid].entity.organization_guid,
-              space: spaceGuid
-            })
-          );
-
-          // set Project data
-          this.store.dispatch(
-            new CheckProjectExists(stratosProject.deploySource.project)
-          );
-          // Set Source type
-          this.store.dispatch(
-            new SetAppSourceDetails({
-              name: 'Git',
-              id: 'git',
-              subType: 'github'
-            })
-          );
-          // Set branch
-          this.store.dispatch(new SetDeployBranch(branch.entity.entity.name));
-
-          this.store.dispatch(
-            new RouterNav({
-              path: ['/applications/deploy'],
-              query: { redeploy: true }
-            })
-          );
-        })
-      )
-      .subscribe();
-  }
 }
