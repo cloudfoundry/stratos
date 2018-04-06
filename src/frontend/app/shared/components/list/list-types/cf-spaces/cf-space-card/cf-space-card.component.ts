@@ -41,7 +41,7 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
   memoryTotal: number;
   orgApps$: Observable<APIResource<any>[]>;
   appCount: number;
-  userRolesInOrg: string;
+  userRolesInSpace: string;
   currentUser$: Observable<EndpointUser>;
 
   constructor(
@@ -69,20 +69,17 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.spaceGuid = this.row.metadata.guid;
 
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
-      switchMap(u => {
-        return this.cfUserService.getUserRoleInSpace(
-          u.guid,
-          this.spaceGuid,
-          this.cfEndpointService.cfGuid
-        );
-      }),
+      switchMap(u => this.cfUserService.getUserRoleInSpace(
+        u.guid,
+        this.spaceGuid,
+        this.cfEndpointService.cfGuid
+      )),
       map(u => getSpaceRolesString(u))
     );
 
-
     const fetchData$ = userRole$.pipe(
-      tap((role) => {
-        this.setValues(role);
+      tap((roles) => {
+        this.setValues(roles);
       })
     );
 
@@ -106,8 +103,8 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     this.serviceInstancesCount = this.row.entity.service_instances ? this.row.entity.service_instances.length : 0;
   }
 
-  setValues = (role: string) => {
-    this.userRolesInOrg = role;
+  setValues = (roles: string) => {
+    this.userRolesInSpace = roles;
     this.setCounts();
     this.memoryTotal = this.cfEndpointService.getMetricFromApps(this.row.entity.apps, 'memory');
     let quotaDefinition = this.row.entity.space_quota_definition;
