@@ -47,6 +47,10 @@ run:
                 sed -i 's/'"${INDEX_SHA256SUM}"'/'"${CURR_SHA256SUM}"'/g' ${INDEX_FILE}
               fi
               exit 0;
+            else
+              # Index file exists, but no 2.0.0-dev release has ever been published 
+              cp  ${INDEX_FILE} ${ROOT_DIR}/helm-chart/
+              MERGE_INDEX="--merge index.yaml"
             fi
       fi
 
