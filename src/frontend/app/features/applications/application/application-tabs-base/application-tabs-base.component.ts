@@ -87,7 +87,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
-  addedGitHubTab = false;
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;

@@ -688,6 +688,11 @@ const testInitialStoreState: AppState = {
             busy: false,
             error: false,
             message: ''
+          },
+          updating: {
+            busy: false,
+            error: false,
+            message: ''
           }
         },
         deleting: {

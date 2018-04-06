@@ -1,16 +1,25 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MetricsChartComponent } from './metrics-chart.component';
+import { MDAppModule } from '../../../core/md.module';
+import { CoreModule } from '../../../core/core.module';
+import { SharedModule } from '../../shared.module';
+import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 
-describe('MetricsChartComponent', () => {
+fdescribe('MetricsChartComponent', () => {
   let component: MetricsChartComponent;
   let fixture: ComponentFixture<MetricsChartComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ MetricsChartComponent ]
+      imports: [
+        MDAppModule,
+        CoreModule,
+        SharedModule,
+        createBasicStoreModule()
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

@@ -9,6 +9,9 @@ import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
 import {
+  ApplicationInstanceChartComponent,
+} from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
 import { ApplicationStateIconPipe } from './components/application-state/application-state-icon/application-state-icon.pipe';
@@ -158,7 +161,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     ServiceIconComponent,
     EnvVarViewComponent,
     RingChartComponent,
-    MetricsChartComponent
+    MetricsChartComponent,
+    ApplicationInstanceChartComponent
   ],
   exports: [
     FormsModule,
@@ -216,7 +220,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     AppChipsComponent,
     EnvVarViewComponent,
     ServiceIconComponent,
-    MetricsChartComponent
+    MetricsChartComponent,
+    ApplicationInstanceChartComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
