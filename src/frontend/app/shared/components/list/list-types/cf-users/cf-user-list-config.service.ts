@@ -28,6 +28,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       {
         columnId: 'username',
         headerCell: () => 'Username',
+        cellFlex: '1',
         cellDefinition: {
           getValue: row => row.entity.username || row.metadata.guid
         }
@@ -35,13 +36,13 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       {
         columnId: 'roles',
         headerCell: () => 'Organization Roles',
-        cellFlex: '2',
+        cellFlex: '3',
         cellComponent: TableCellCfUserPermissionComponent
       },
       {
         columnId: 'space-roles',
         headerCell: () => 'Space Roles',
-        cellFlex: '2',
+        cellFlex: '3',
         cellComponent: CfSpacePermissionCellComponent
       },
 

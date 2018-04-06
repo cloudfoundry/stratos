@@ -7,7 +7,7 @@
       <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>
-  <app-meta-card-item style="long-text">
+  <app-meta-card-item customStyle="long-text">
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
       {{ (service$ | async)?.entity.entity.description}}
@@ -31,7 +31,7 @@
       <a class="app-service-card__env-link" (click)="showEnvVars()">View</a>
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item style="column">
+  <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
       <app-chips [chips]="tags$ | async"></app-chips>

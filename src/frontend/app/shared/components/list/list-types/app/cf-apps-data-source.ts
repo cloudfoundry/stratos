@@ -1,15 +1,35 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
+import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
+import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
-import { applicationSchemaKey, entityFactory, spaceSchemaKey, routeSchemaKey } from '../../../../../store/helpers/entity-factory';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  organizationSchemaKey,
+  routeSchemaKey,
+  spaceSchemaKey,
+} from '../../../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
-import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
-import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+
+const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+  // Filter by cf/org/space
+  const cfGuid = paginationState.clientPagination.filter.items['cf'];
+  const orgGuid = paginationState.clientPagination.filter.items['org'];
+  const spaceGuid = paginationState.clientPagination.filter.items['space'];
+  return entities.filter(e => {
+    const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+    const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+    const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+    return validCF && validOrg && validSpace;
+  });
+};
 
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
@@ -17,13 +37,30 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   constructor(
     store: Store<AppState>,
-    listConfig?: IListConfig<APIResource>
+    listConfig?: IListConfig<APIResource>,
+    transformEntities?: any[],
+    paginationKey = CfAppsDataSource.paginationKey,
+    seedPaginationKey = CfAppsDataSource.paginationKey,
   ) {
-    const { paginationKey } = CfAppsDataSource;
+    const syncNeeded = paginationKey !== seedPaginationKey;
     const action = new GetAllApplications(paginationKey, [
       createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
       createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
     ]);
+
+    if (syncNeeded) {
+      // We do this here to ensure we sync up with main endpoint table data.
+      store.dispatch(new CreatePagination(
+        action.entityKey,
+        paginationKey,
+        seedPaginationKey
+      ));
+    }
+
+    if (!transformEntities) {
+      transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
+    }
 
     super({
       store,
@@ -32,27 +69,8 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
-      transformEntities: [
-        {
-          type: 'filter',
-          field: 'entity.name'
-        },
-        (entities: APIResource[], paginationState: PaginationEntityState) => {
-          // Filter by cf/org/space
-          const cfGuid = paginationState.clientPagination.filter.items['cf'];
-          const orgGuid = paginationState.clientPagination.filter.items['org'];
-          const spaceGuid = paginationState.clientPagination.filter.items['space'];
-          return entities.filter(e => {
-            const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
-            const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
-            const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
-            return validCF && validOrg && validSpace;
-          });
-        }
-      ],
+      transformEntities: transformEntities,
       listConfig
-    }
-    );
-
+    });
   }
 }

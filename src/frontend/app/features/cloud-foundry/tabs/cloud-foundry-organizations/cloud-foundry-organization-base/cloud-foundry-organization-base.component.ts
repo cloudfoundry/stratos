@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { first, map } from 'rxjs/operators';
 
+import { environment } from '../../../../../../environments/environment';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
-import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
-import { environment } from '../../../../../../environments/environment';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -49,6 +49,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
     this.isFetching$ = cfOrgService.org$.pipe(
       map(org => org.entityRequestInfo.fetching)
     );
+
     this.name$ = cfOrgService.org$.pipe(
       map(org => org.entity.entity.name),
       first()

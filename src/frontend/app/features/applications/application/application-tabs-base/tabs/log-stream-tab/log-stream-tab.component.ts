@@ -1,21 +1,15 @@
-import {
-  getEntityById,
-  selectEntity
-} from '../../../../../../store/selectors/api.selectors';
-import { State, Store } from '@ngrx/store';
-import { AppState } from '../../../../../../store/app-state';
-import { LogViewerComponent } from '../../../../../../shared/components/log-viewer/log-viewer.component';
-import { ApplicationService } from '../../../../application.service';
+import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
-import { Observable } from 'rxjs/Rx';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Store } from '@ngrx/store';
+import * as moment from 'moment';
 import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
-import { MatInput } from '@angular/material';
-import * as moment from 'moment';
+import { Observable } from 'rxjs/Rx';
+
 import { LoggerService } from '../../../../../../core/logger.service';
-import { applicationSchemaKey } from '../../../../../../store/helpers/entity-factory';
-import { AnsiColorizer} from '../../../../../../shared/components/log-viewer/ansi-colorizer';
+import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
+import { AppState } from '../../../../../../store/app-state';
+import { ApplicationService } from '../../../../application.service';
 
 export interface LogItem {
   message: string;
@@ -34,6 +28,8 @@ export class LogStreamTabComponent implements OnInit {
   public messages: Observable<string>;
 
   public connectionStatus: Observable<number>;
+  @ViewChild('searchFilter') searchFilter: NgModel;
+  @HostBinding('class') class = 'router-component';
 
   filter;
 
@@ -63,8 +59,8 @@ export class LogStreamTabComponent implements OnInit {
         );
         return [];
       })
-      .share()
-      .filter(data => !!data && data.length);
+        .share()
+        .filter(data => !!data && data.length);
 
       this.messages = messages;
       this.connectionStatus = connectionStatus;
