@@ -22,7 +22,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   @ViewChild('content') content: ElementRef;
 
   private logLinesCount = 0;
-  private maxLogLines = 1000;
   private countAttribute = 'batchLength';
 
   private highThroughputTimeMS = 300; // If the time interval between log emits is less then we're in high throughput mode
@@ -33,9 +32,10 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   private resizeSub: Subscription;
 
   private stopped$: BehaviorSubject<boolean>;
-  private isHighThroughput$: Observable<boolean>;
   private colorizer = new AnsiColors();
 
+  public maxLogLines = 1000;
+  public isHighThroughput$: Observable<boolean>;
   public isLocked$: Observable<boolean>;
   public message: string;
 
