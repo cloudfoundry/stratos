@@ -324,20 +324,22 @@ helm install -f docker-registry-secrets.yaml stratos/console
 ```
 
 ### Installing a Nightly Release
-Nightly releases are pushed to a `dev` helm repository. These are strictly for development purposes and should be considered unstable and may contain bugs.
+Nightly releases are pushed with a `dev` tag. These are strictly for development purposes and should be considered unstable and may contain bugs.
 
-To add the dev helm repository:
+To install the nightly release: 
+
+List all versions of the console, to determine the tag.
 ```
-helm repo add stratos-dev https://cloudfoundry-incubator.github.io/stratos/dev
-```
-Check the repository was successfully added by searching for the `console`
-```
-helm search console 
+helm search console -l
 NAME                      VERSION             DESCRIPTION                       
-stratos-dev/console      2.0.0-bleeding-edge  A Helm chart for deploying Stratos UI Console
-```
-To install Stratos.
+stratos/console      2.0.0-dev               A Helm chart for deploying Stratos UI Console
+stratos/console      1.0.0                   A Helm chart for deploying Stratos UI Console
+stratos/console      0.9.9                   A Helm chart for deploying Stratos UI Console
+stratos/console      0.9.8                   A Helm chart for deploying Stratos UI Console
 
 ```
-helm install stratos-dev/console --namespace=console --name my-console --version 2.0.0-bleeding-edge
+Install
+
+```
+helm install stratos-dev/console --namespace=console --name my-console --version 2.0.0-dev
 ```
