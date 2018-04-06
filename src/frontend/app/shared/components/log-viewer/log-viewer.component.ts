@@ -1,18 +1,6 @@
-import { throttle } from 'rxjs/operator/throttle';
-import { Element } from '@angular/compiler';
-import { ApplicationService } from '../../../features/applications/application.service';
-import { Observable, Subscription, BehaviorSubject } from 'rxjs/Rx';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  HostListener,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
-import { MatButton } from '@angular/material';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs/Rx';
+
 import { AnsiColors } from './ansi-colors';
 
 @Component({
@@ -33,31 +21,25 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @ViewChild('content') content: ElementRef;
 
-  currentLog = '';
+  private logLinesCount = 0;
+  private maxLogLines = 1000;
+  private countAttribute = 'batchLength';
 
-  logLinesCount = 0;
+  private highThroughputTimeMS = 300; // If the time interval between log emits is less then we're in high throughput mode
+  private highThroughputBufferIntervalMS = 100; // Buffer time for high through mode
 
-  maxLogLines = 1000;
+  private listeningSub: Subscription;
+  private statusSub: Subscription;
+  private resizeSub: Subscription;
 
-  highThroughputTimeMS = 300; // If the time interval between log emits is less then we're in high throughput mode
-  highThroughputBufferIntervalMS = 100; // Buffer time for high through mode
+  private stopped$: BehaviorSubject<boolean>;
+  private isHighThroughput$: Observable<boolean>;
+  private colorizer = new AnsiColors();
 
-  countAttribute = 'batchLength';
-  estimatedCount = 0;
+  public isLocked$: Observable<boolean>;
+  public message: string;
 
-  listeningSub: Subscription;
-  statusSub: Subscription;
-  resizeSub: Subscription;
-
-  stopped$: BehaviorSubject<boolean>;
-  isLocked$: Observable<boolean>;
-  isHighThroughput$: Observable<boolean>;
-
-  colorizer = new AnsiColors();
-
-  message: string;
-
-  ngOnInit() {
+  public ngOnInit() {
     const contentElement = this.content.nativeElement;
     const containerElement = this.container.nativeElement;
 
@@ -79,14 +61,14 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       .startWith(true);
 
     // When we resize the window, we need to re-enable auto-scroll - if the height changes
-    // we will determine that the user scrolled off the bottom, when in fact this si due to the resize event
+    // we will determine that the user scrolled off the bottom, when in fact this is due to the resize event
     this.resizeSub = Observable.fromEvent(window, 'resize')
-    .combineLatest(this.isLocked$)
-    .subscribe(([event, locked]) => {
-      if (locked) {
-        this.scrollToBottom();
-      }
-    });
+      .combineLatest(this.isLocked$)
+      .subscribe(([event, locked]) => {
+        if (locked) {
+          this.scrollToBottom();
+        }
+      });
 
     this.isHighThroughput$ = stoppableLogStream$
       .timeInterval()
@@ -145,7 +127,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
           case 0:
             this.message = 'Connecting....';
             break;
-            default:
+          default:
             this.message = undefined;
             break;
         }
@@ -153,27 +135,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     }
   }
 
-  scrollToBottom() {
-    const contentElement = this.content.nativeElement;
-    const containerElement = this.container.nativeElement;
-    containerElement.scrollTop = contentElement.clientHeight;
-  }
-
-  pause(pause) {
-    this.stopped$.next(pause);
-  }
-
-  binElement() {
-    const toRemove = this.content.nativeElement.firstChild;
-    if (!toRemove) {
-      return null;
-    }
-    const removedEle = this.content.nativeElement.removeChild(toRemove);
-    this.logLinesCount -= removedEle.getAttribute(this.countAttribute) || 1;
-    return removedEle;
-  }
-
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     if (this.listeningSub) {
       this.listeningSub.unsubscribe();
     }
@@ -184,4 +146,25 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       this.resizeSub.unsubscribe();
     }
   }
+
+  public scrollToBottom() {
+    const contentElement = this.content.nativeElement;
+    const containerElement = this.container.nativeElement;
+    containerElement.scrollTop = contentElement.clientHeight;
+  }
+
+  public pause(pause) {
+    this.stopped$.next(pause);
+  }
+
+  private binElement() {
+    const toRemove = this.content.nativeElement.firstChild;
+    if (!toRemove) {
+      return null;
+    }
+    const removedEle = this.content.nativeElement.removeChild(toRemove);
+    this.logLinesCount -= removedEle.getAttribute(this.countAttribute) || 1;
+    return removedEle;
+  }
+
 }
