@@ -3,7 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs/Rx';
 import { RouterState, Router, RouterStateSnapshot, ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter } from 'rxjs/operators';
+import { filter, first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-loading-page',
@@ -22,20 +22,25 @@ import { filter } from 'rxjs/operators';
 })
 export class LoadingPageComponent implements OnInit {
 
-  constructor(private router: ActivatedRoute) { }
+  constructor() { }
 
   @Input('isLoading')
-  isLoading: Observable<boolean>;
+  isLoading: Observable<boolean> = Observable
+    .of(false)
+    .pipe(
+      first()
+    );
 
   @Input('text')
   text = 'Retrieving your data';
 
   ngOnInit() {
-    this.isLoading
-      .pipe(
-        filter(loading => !loading)
-      )
-      .first();
+    if (this.isLoading) {
+      this.isLoading
+        .pipe(
+          filter(loading => !loading),
+          first()
+        );
+    }
   }
-
 }

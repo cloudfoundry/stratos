@@ -12,12 +12,11 @@ describe('ApplicationInstanceChartComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ApplicationInstanceChartComponent],
       imports: [
         createBasicStoreModule(),
+        RouterTestingModule,
         CoreModule,
         SharedModule,
-        RouterTestingModule,
       ]
     })
       .compileComponents();
