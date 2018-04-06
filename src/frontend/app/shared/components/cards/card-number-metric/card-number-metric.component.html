@@ -1,12 +1,23 @@
-<div class="number-metric-card">
-  <mat-card class="number-metric-card__container">
-    <mat-icon *ngIf="icon" class="number-metric-card__icon">{{ icon }}</mat-icon>
-    <div>
-      <div class="number-metric-card__value">{{ formattedValue }}
-        <span *ngIf="limit" class="number-metric-card__limit">/ {{ formattedLimit }}</span>
-        <div *ngIf="usage" class="number-metric-card__usage">{{ usage }} %</div>
+<ng-template #content>
+  <div class="number-metric-card">
+    <mat-card class="number-metric-card__container">
+      <mat-icon *ngIf="icon" class="number-metric-card__icon">{{ icon }}</mat-icon>
+      <div>
+        <div class="number-metric-card__value">{{ formattedValue }}
+          <span *ngIf="limit" class="number-metric-card__limit">/ {{ formattedLimit }}</span>
+          <div *ngIf="usage" class="number-metric-card__usage">{{ usage }} %</div>
+        </div>
+        <div class="number-metric-card__label">{{ label }}</div>
       </div>
-      <div class="number-metric-card__label">{{ label }}</div>
-    </div>
-  </mat-card>
-</div>
+    </mat-card>
+  </div>
+</ng-template>
+
+<ng-container *ngIf="link; else noLink">
+  <a (click)="goToLink()" class="number-metric-card__anchor">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </a>
+</ng-container>
+<ng-template #noLink>
+  <ng-container *ngTemplateOutlet="content"></ng-container>
+</ng-template>
