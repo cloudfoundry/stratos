@@ -20,13 +20,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
   selector: 'app-deploy-application',
   templateUrl: './deploy-application.component.html',
   styleUrls: ['./deploy-application.component.scss'],
-  providers: [{
-    provide: CfOrgSpaceDataService,
-    useFactory: (store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
-      return new CfOrgSpaceDataService(store, paginationMonitorFactory, CfOrgSpaceSelectMode.ANY);
-    },
-    deps: [Store, PaginationMonitorFactory]
-  }]
+  providers: [CfOrgSpaceDataService]
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 

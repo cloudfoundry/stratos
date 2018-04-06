@@ -14,13 +14,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
   selector: 'app-create-application',
   templateUrl: './create-application.component.html',
   styleUrls: ['./create-application.component.scss'],
-  providers: [{
-    provide: CfOrgSpaceDataService,
-    useFactory: (store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
-      return new CfOrgSpaceDataService(store, paginationMonitorFactory, CfOrgSpaceSelectMode.ANY);
-    },
-    deps: [Store, PaginationMonitorFactory]
-  }]
+  providers: [CfOrgSpaceDataService]
 })
 export class CreateApplicationComponent implements OnInit, OnDestroy {
 
