@@ -85,7 +85,7 @@ export class EntityService<T = any> {
           false
         ));
       })
-    );
+      );
 
     this.waitForEntity$ = this.entityObs$.pipe(
       filter((ent) => {
@@ -149,28 +149,28 @@ export class EntityService<T = any> {
   poll(interval = 10000, updateKey = this.refreshKey) {
     return Observable.interval(interval)
       .pipe(
-        tag('poll'),
-        withLatestFrom(
-          this.entityMonitor.entity$,
-          this.entityMonitor.entityRequest$
-        ),
-        map(([poll, resource, requestState]) => ({
-          resource,
-          updatingSection: composeFn(
-            getUpdateSectionById(updateKey),
-            getEntityUpdateSections,
-            () => requestState
-          )
-        })),
-        tap(({ resource, updatingSection }) => {
-          if (!updatingSection || !updatingSection.busy) {
-            this.actionDispatch(updateKey);
-          }
-        }),
-        filter(({ resource, updatingSection }) => {
-          return !!updatingSection;
-        }),
-        share(),
+      tag('poll'),
+      withLatestFrom(
+        this.entityMonitor.entity$,
+        this.entityMonitor.entityRequest$
+      ),
+      map(([poll, resource, requestState]) => ({
+        resource,
+        updatingSection: composeFn(
+          getUpdateSectionById(updateKey),
+          getEntityUpdateSections,
+          () => requestState
+        )
+      })),
+      tap(({ resource, updatingSection }) => {
+        if (!updatingSection || !updatingSection.busy) {
+          this.actionDispatch(updateKey);
+        }
+      }),
+      filter(({ resource, updatingSection }) => {
+        return !!updatingSection;
+      }),
+      share(),
     );
   }
 

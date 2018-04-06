@@ -3,7 +3,7 @@ import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';
-import { TableCellCustom, CardSize } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom, CardCell } from '../../../list.types';
 import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endpoint-helpers';
 
 @Component({
@@ -11,9 +11,10 @@ import { getFullEndpointApiUrl } from '../../../../../../features/endpoints/endp
   templateUrl: './endpoint-card.component.html',
   styleUrls: ['./endpoint-card.component.scss']
 })
-export class EndpointCardComponent extends TableCellCustom<EndpointModel> implements OnInit, OnChanges {
+export class CfEndpointCardComponent extends CardCell<EndpointModel> implements OnInit, OnChanges {
 
-  public size = CardSize.LARGE;
+  static columns = 2;
+
   private status$ = new ReplaySubject<CardStatus>();
 
   @Input('row')

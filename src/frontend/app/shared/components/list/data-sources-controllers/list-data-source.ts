@@ -191,14 +191,19 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isAdding$.next(false);
   }
 
-  selectedRowToggle(row: T) {
+  selectedRowToggle(row: T, multiMode: boolean = true) {
     const exists = this.selectedRows.has(this.getRowUniqueId(row));
     if (exists) {
       this.selectedRows.delete(this.getRowUniqueId(row));
+      this.selectAllChecked = false;
     } else {
+      if (!multiMode) {
+        this.selectedRows.clear();
+      }
       this.selectedRows.set(this.getRowUniqueId(row), row);
+      this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
     }
-    this.isSelecting$.next(this.selectedRows.size > 0);
+    this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
   }
 
   selectAllFilteredRows() {
@@ -283,9 +288,12 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         }
 
         const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-        // Note - ensure we don't also include the entities count pre/post reduce (fails for local pagination - specifically when a filter
-        // resets to include all entities)
-        if (paginationEntity.totalResults !== entities.length || paginationEntity.clientPagination.totalResults !== entities.length) {
+        const validPagesCountChange = this.transformEntity;
+        if (
+          validPagesCountChange &&
+          (paginationEntity.totalResults !== entities.length ||
+            paginationEntity.clientPagination.totalResults !== entities.length)
+        ) {
           this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
         }
 

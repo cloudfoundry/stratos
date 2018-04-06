@@ -1,4 +1,4 @@
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 import { Component, OnInit, Input } from '@angular/core';
 import { isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 

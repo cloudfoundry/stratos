@@ -101,7 +101,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   viewType = ListViewTypes.TABLE_ONLY;
   text = {
     title: null,
-    noEntries: 'There are no applications'
+    noEntries: 'There are no application instances'
   };
 
   private listActionTerminate: IListAction<any> = {

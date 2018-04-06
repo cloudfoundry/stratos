@@ -7,7 +7,7 @@ import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { CfServicePlan } from '../../../../../../store/types/service.types';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-service-plan',

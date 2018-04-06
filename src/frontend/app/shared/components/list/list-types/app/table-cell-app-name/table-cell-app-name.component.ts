@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 import { BREADCRUMB_URL_PARAM } from '../../../../page-header/page-header.types';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';

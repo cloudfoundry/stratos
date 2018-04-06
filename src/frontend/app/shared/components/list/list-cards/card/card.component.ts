@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { TableCellCustom } from '../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../list.types';
 import {
   AppServiceBindingCardComponent,
 } from '../../list-types/app-sevice-bindings/app-service-binding-card/app-service-binding-card.component';
@@ -25,11 +25,11 @@ import {
 import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-card/cf-service-card.component';
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
-import { EndpointCardComponent } from '../custom-cards/endpoint-card/endpoint-card.component';
+import { CfEndpointCardComponent } from '../../list-types/cf-endpoints/cf-endpoint-card/endpoint-card.component';
 
 export const listCards = [
   CardAppComponent,
-  EndpointCardComponent,
+  CfEndpointCardComponent,
   CfOrgCardComponent,
   CfSpaceCardComponent,
   CfBuildpackCardComponent,

@@ -16,4 +16,7 @@
   &-pointer {
     cursor: pointer;
   }
+  &:focus {
+    outline: 0;
+  }
 }

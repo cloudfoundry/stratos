@@ -42,11 +42,6 @@ export interface IListConfig<T> {
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   /**
-   * Local lists expect ALL entries to be fetched by the data sources action. This allows custom sorting and filtering. Non-local lists
-   * must sort and filter via their supporting api requests.
-   */
-  isLocal?: boolean;
-  /**
    * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
   pageSizeOptions?: Number[];
@@ -123,7 +118,12 @@ export interface IListAction<T> extends IBaseListAction<T> {
 }
 
 export interface IMultiListAction<T> extends IBaseListAction<T> {
-  action: (items: T[]) => void;
+  /**
+   * Return true if the selection should be cleared
+   *
+   * @memberof IMultiListAction
+   */
+  action: (items: T[]) => boolean;
 }
 
 export interface IGlobalListAction<T> extends IBaseListAction<T> {

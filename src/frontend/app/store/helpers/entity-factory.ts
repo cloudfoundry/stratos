@@ -98,25 +98,21 @@ entityCache[domainSchemaKey] = DomainSchema;
 const ServiceSchema = new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceSchemaKey] = ServiceSchema;
 
-const ApplicationWithoutRelationsSchema = new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
+
 const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
   entity: {
-    app: ApplicationWithoutRelationsSchema
+    app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })
   }
-}, {
-    idAttribute: getAPIResourceGuid
-  }
-);
+}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
 
 const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
   entity: {
     service: ServiceSchema
   }
-}, {
-    idAttribute: getAPIResourceGuid
-  }
-);
+}, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanSchemaKey] = ServicePlanSchema;
 
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
@@ -125,24 +121,31 @@ const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema]
   }
-}, {
-    idAttribute: getAPIResourceGuid,
-  }
-);
+}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceInstancesSchemaKey] = ServiceInstancesSchema;
 
 const BuildpackSchema = new EntitySchema(buildpackSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[buildpackSchemaKey] = BuildpackSchema;
 
-const RouteSchema = new EntitySchema(routeSchemaKey, {
+const coreRouteSchemaParams = {
   entity: {
-    apps: [ApplicationWithoutRelationsSchema],
     domain: DomainSchema
   }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
+};
+const RouteSchema = new EntitySchema(routeSchemaKey, {
+  entity: {
+    ...coreRouteSchemaParams,
+    apps: [new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })],
+  }
+}, { idAttribute: getAPIResourceGuid });
 entityCache[routeSchemaKey] = RouteSchema;
+const RouteNoAppsSchema = new EntitySchema(routeSchemaKey, {
+  entity: {
+    ...coreRouteSchemaParams,
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[routeSchemaKey] = RouteSchema;
+
 
 const QuotaDefinitionSchema = new EntitySchema(quotaDefinitionSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[quotaDefinitionSchemaKey] = QuotaDefinitionSchema;
@@ -152,30 +155,22 @@ const ApplicationWithoutSpaceEntitySchema = new EntitySchema(
   {
     entity: {
       stack: StackSchema,
-      routes: [RouteSchema],
+      routes: [RouteNoAppsSchema],
       service_bindings: [ServiceBindingsSchema]
     }
-  },
-  {
-    idAttribute: getAPIResourceGuid
-  },
+  }, { idAttribute: getAPIResourceGuid },
 );
-entityCache[applicationSchemaKey] = ApplicationWithoutSpaceEntitySchema;
-
-const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
 
 const coreSpaceSchemaParams = {
-  apps: [ApplicationWithoutSpaceEntitySchema],
   routes: [RouteSchema],
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
 };
-
 const SpaceSchema = new EntitySchema(spaceSchemaKey, {
   entity: {
-    ...coreSpaceSchemaParams
+    ...coreSpaceSchemaParams,
+    apps: [ApplicationWithoutSpaceEntitySchema],
   }
 }, {
     idAttribute: getAPIResourceGuid
@@ -185,32 +180,31 @@ entityCache[spaceSchemaKey] = SpaceSchema;
 const PrivateDomainsSchema = new EntitySchema(privateDomainsSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[privateDomainsSchemaKey] = PrivateDomainsSchema;
 
+const coreOrgSchemaParams = {
+  domains: [DomainSchema],
+  quota_definition: QuotaDefinitionSchema,
+  private_domains: [PrivateDomainsSchema]
+};
+const OrganizationsWithoutSpaces = new EntitySchema(organizationSchemaKey, {
+  entity: {
+    ...coreOrgSchemaParams,
+  }
+}, { idAttribute: getAPIResourceGuid });
 const OrganizationSchema = new EntitySchema(organizationSchemaKey, {
   entity: {
-    domains: [DomainSchema],
+    ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
-    quota_definition: QuotaDefinitionSchema,
-    private_domains: [PrivateDomainsSchema]
   }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
+}, { idAttribute: getAPIResourceGuid });
 entityCache[organizationSchemaKey] = OrganizationSchema;
 
 const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   entity: {
     ...coreSpaceSchemaParams,
     apps: [ApplicationWithoutSpaceEntitySchema],
-    routes: [RouteSchema],
-    organization: OrganizationSchema,
-    domains: [DomainSchema],
-    space_quota_definition: SpaceQuotaSchema,
-    service_instances: [ServiceInstancesSchema]
+    organization: OrganizationsWithoutSpaces,
   }
-}, {
-    idAttribute: getAPIResourceGuid
-  },
-  spaceWithOrgKey);
+}, { idAttribute: getAPIResourceGuid }, spaceWithOrgKey);
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
 
 const ApplicationEntitySchema = new EntitySchema(
@@ -218,15 +212,17 @@ const ApplicationEntitySchema = new EntitySchema(
   {
     entity: {
       stack: StackSchema,
-      space: SpaceWithOrgsEntitySchema,
-      routes: [RouteSchema],
+      space: new EntitySchema(spaceSchemaKey, {
+        entity: {
+          ...coreSpaceSchemaParams,
+          routes: [RouteNoAppsSchema],
+          organization: OrganizationsWithoutSpaces,
+        }
+      }, { idAttribute: getAPIResourceGuid }),
+      routes: [RouteNoAppsSchema],
       service_bindings: [ServiceBindingsSchema]
     }
-  },
-  {
-    idAttribute: getAPIResourceGuid
-  }
-);
+  }, { idAttribute: getAPIResourceGuid });
 entityCache[applicationSchemaKey] = ApplicationEntitySchema;
 
 const EndpointSchema = new EntitySchema(endpointSchemaKey, {}, { idAttribute: 'guid' });
@@ -236,9 +232,7 @@ const SecurityGroupSchema = new EntitySchema(securityGroupSchemaKey, {
   entity: {
     spaces: [SpaceSchema]
   }
-}, {
-    idAttribute: getAPIResourceGuid
-  });
+}, { idAttribute: getAPIResourceGuid });
 entityCache[securityGroupSchemaKey] = SecurityGroupSchema;
 
 const FeatureFlagSchema = new EntitySchema(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
@@ -250,12 +244,8 @@ const OrganizationAuditedSchema = new EntitySchema(
   organizationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_organizations');
 const OrganizationManagedSchema = new EntitySchema(
   organizationSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_organizations');
-const OrganizationBillingSchema = new EntitySchema(
-  organizationSchemaKey, {
-  }, {
-    idAttribute: getAPIResourceGuid
-  },
-  'billing_managed_organizations');
+const OrganizationBillingSchema = new EntitySchema(organizationSchemaKey, {},
+  { idAttribute: getAPIResourceGuid }, 'billing_managed_organizations');
 const SpaceUserSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'users_spaces');
 const SpaceManagedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'managed_spaces');
 const SpaceAuditedSchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid }, 'audited_spaces');

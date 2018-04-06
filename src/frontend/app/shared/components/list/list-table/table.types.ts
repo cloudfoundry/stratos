@@ -1,9 +1,9 @@
 import { DataFunction, DataFunctionDefinition } from '../data-sources-controllers/list-data-source';
+import { TableCellDefaultComponent } from './app-table-cell-default/app-table-cell-default.component';
 import { TableCellStatusDirective } from './table-cell-status.directive';
 import { listTableCells, TableCellComponent } from './table-cell/table-cell.component';
 import { TableRowComponent } from './table-row/table-row.component';
 import { TableComponent } from './table.component';
-import { TableCellDefaultComponent } from './app-table-cell-default/app-table-cell-default.component';
 
 export interface ICellDefinition<T> {
   // Dot separated path to get the value from the row

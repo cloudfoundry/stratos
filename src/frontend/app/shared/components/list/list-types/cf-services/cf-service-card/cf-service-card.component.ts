@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
+import { CardCell } from '../../../list.types';
 interface Tag {
   value: string;
   key: APIResource<IService>;
@@ -11,13 +12,15 @@ interface Tag {
   templateUrl: './cf-service-card.component.html',
   styleUrls: ['./cf-service-card.component.scss']
 })
-export class CfServiceCardComponent implements OnInit {
+export class CfServiceCardComponent extends CardCell<APIResource<IService>> implements OnInit {
+
+  static columns = 2;
 
   @Input('row') row: APIResource<IService>;
   extraInfo: IServiceExtra;
   tags: AppChip<Tag>[] = [];
   constructor() {
-
+    super();
   }
 
   ngOnInit() {
@@ -36,7 +39,6 @@ export class CfServiceCardComponent implements OnInit {
     }
     return this.row.entity.label;
   }
-
 
 
   hasDocumentationUrl() {

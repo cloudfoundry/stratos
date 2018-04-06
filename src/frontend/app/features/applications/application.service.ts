@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map, mergeMap, switchMap } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 
+import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
@@ -28,9 +29,9 @@ import {
   entityFactory,
   organizationSchemaKey,
   routeSchemaKey,
+  serviceBindingSchemaKey,
   spaceSchemaKey,
   stackSchemaKey,
-  serviceBindingSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import { ActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
@@ -49,8 +50,6 @@ import {
   EnvVarStratosProject,
 } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { getRoute, isTCPRoute } from './routes/routes.helper';
-import { IApp, IOrganization, ISpace } from '../../core/cf-api.types';
-import { IServiceBinding } from '../../core/cf-api-svc.types';
 
 export function createGetApplicationAction(guid: string, endpointGuid: string) {
   return new GetApplication(

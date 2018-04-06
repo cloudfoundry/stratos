@@ -5,10 +5,8 @@
   <mat-dialog-content class="env-var-view__content">
     <app-code-block>
       <ng-container>
-        <div class="env-var-view__content__code-block-line">
-          <pre>{{data.key}}=<span *ngIf="!isObject(data.value)">{{data.value}}</span></pre>
-          <pre *ngIf="isObject(data.value)">{{ data.value | json }}</pre>
-        </div>
+        <pre class="env-var-view__content__key">{{data.key}}=<span *ngIf="!isObject(data.value)">{{data.value}}</span></pre>
+        <pre class="env-var-view__content__value" *ngIf="isObject(data.value)">{{ data.value | json }}</pre>
       </ng-container>
     </app-code-block>
   </mat-dialog-content>
