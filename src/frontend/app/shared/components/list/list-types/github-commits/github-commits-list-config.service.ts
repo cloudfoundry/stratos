@@ -1,40 +1,50 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+
 import { AppState } from '../../../../../store/app-state';
-import { IListConfig, ListViewTypes, IListAction } from '../../list.component.types';
+import { APIResource } from '../../../../../store/types/api.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
-import { GithubCommitsDataSource } from './github-commits-data-source';
-import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { ITableColumn } from '../../list-table/table.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { GithubCommitsDataSource } from './github-commits-data-source';
+import { spaceSchemaKey, githubBranchesSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { first, tap, combineLatest } from 'rxjs/operators';
+import { CheckProjectExists, SetAppSourceDetails, SetDeployBranch, FetchBranchesForProject } from '../../../../../store/actions/deploy-applications.actions';
+import { RouterNav } from '../../../../../store/actions/router.actions';
+import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 
 @Injectable()
-export class GithubCommitsListConfigService implements IListConfig<GithubCommit> {
+export class GithubCommitsListConfigService implements IListConfig<APIResource<GithubCommit>> {
   dataSource: GithubCommitsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
-  columns: ITableColumn<GithubCommit>[] = [
+  private columns: ITableColumn<APIResource<GithubCommit>>[] = [
     {
       columnId: 'message',
       headerCell: () => 'Message',
       cellDefinition: {
-        valuePath: 'commit.message'
+        valuePath: 'entity.commit.message'
       },
       sort: {
         type: 'sort',
-        orderKey: 'sha',
-        field: 'commit.message'
+        orderKey: 'message',
+        field: 'entity.commit.message'
       },
-      cellFlex: '1'
+      cellFlex: '2'
     },
     {
-      columnId: 'SHA',
+      columnId: 'sha',
       headerCell: () => 'SHA',
       cellDefinition: {
-        valuePath: 'sha'
+        externalLink: true,
+        getLink: (commit) => commit.entity.html_url,
+        getValue: (commit) => commit.entity.sha.substring(0, 8)
       },
       sort: {
         type: 'sort',
         orderKey: 'sha',
-        field: 'sha'
+        field: 'entity.sha'
       },
       cellFlex: '1'
     },
@@ -42,52 +52,99 @@ export class GithubCommitsListConfigService implements IListConfig<GithubCommit>
       columnId: 'date',
       headerCell: () => 'Date',
       cellDefinition: {
-        valuePath: 'commit.author.date'
+        getValue: (commit) => this.datePipe.transform(commit.entity.commit.author.date, 'medium')
       },
       sort: {
         type: 'sort',
         orderKey: 'date',
-        field: 'commit.author.date'
+        field: 'entity.commit.author.date'
       },
-      cellFlex: '1'
+      cellFlex: '2'
     },
     {
       columnId: 'author',
       headerCell: () => 'Author',
       cellDefinition: {
-        getValue: (row) => `${row.commit.author.name} <${row.commit.author.email}>`
+        externalLink: true,
+        getLink: (commit) => commit.entity.author.html_url,
+        getValue: (commit) => commit.entity.commit.author.name
       },
       sort: {
         type: 'sort',
         orderKey: 'author',
-        field: 'commit.author.name'
+        field: 'entity.commit.author.name'
       },
-      cellFlex: '1'
+      cellFlex: '2'
     }
   ];
-  private listActionRedeploy: IListAction<EndpointModel> = {
+  private listActionRedeploy: IListAction<APIResource<GithubCommit>> = {
     action: (item) => {
-      console.log('REDEPLOY');
-      // this.store.dispatch(new DisconnectEndpoint(item.guid));
-      // this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-      //   this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
-      //   this.store.dispatch(new GetSystemInfo());
-      // });
+      // set Project data
+      this.store.dispatch(
+        new CheckProjectExists(this.projectName)
+      );
+      // Set Source type
+      this.store.dispatch(
+        new SetAppSourceDetails({
+          name: 'Git',
+          id: 'git',
+          subType: 'github'
+        })
+      );
+      // Set branch
+      this.store.dispatch(new SetDeployBranch(this.branchName));
+      // TODO: RC set commit and load it in deploy stepper
+
+      this.store.dispatch(
+        new RouterNav({
+          path: ['/applications/deploy'],
+          query: { redeploy: true }
+        })
+      );
     },
-    label: 'Redeploy',
+    label: 'Deploy',
     description: ``,
     visible: row => true,
     enabled: row => true,
   };
 
-  constructor(private store: Store<AppState>, private projectName: string) {
-    this.dataSource = new GithubCommitsDataSource(this.store, this, projectName);
+  private projectName: string;
+  private branchName: string;
+
+  constructor(
+    private store: Store<AppState>,
+    private datePipe: DatePipe,
+    private applicationService: ApplicationService,
+    private entityServiceFactory: EntityServiceFactory
+  ) {
+    this.applicationService.applicationStratProject$.pipe(
+      first(),
+    ).subscribe(stratosProject => {
+      this.projectName = stratosProject.deploySource.project;
+
+      const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
+      const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
+        githubBranchesSchemaKey,
+        entityFactory(githubBranchesSchemaKey),
+        branchKey,
+        new FetchBranchesForProject(this.projectName),
+        false
+      );
+      gitBranchEntityService.entityObs$.pipe(
+        first(),
+      ).subscribe(branch => {
+        this.branchName = branch.entity.entity.name;
+        // TODO: RC This will not work. The creation of the datasource must occur synchronously in the ctor. These values need to be passed
+        // in... however this instance is created via a provider... which doesn't support async loading
+        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
+      });
+    });
   }
 
   public getColumns = () => this.columns;
   public getGlobalActions = () => [];
   public getMultiActions = () => [];
-  public getSingleActions = () => [];
+  public getSingleActions = () => [this.listActionRedeploy];
   public getMultiFiltersConfigs = () => [];
   public getDataSource = () => this.dataSource;
 }

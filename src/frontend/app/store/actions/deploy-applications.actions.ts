@@ -88,7 +88,7 @@ export class FetchCommits implements PaginatedAction {
     this.paginationKey = projectName;
   }
   actions = [
-    '[Deploy App] Fetch commits',
+    '[Deploy App] Fetch commits start',
     '[Deploy App] Fetch commits success',
     '[Deploy App] Fetch commits failed',
   ];

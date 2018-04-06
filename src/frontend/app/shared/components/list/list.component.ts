@@ -124,6 +124,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     public config: ListConfig<T>
   ) { }
 
+
   ngOnInit() {
     this.globalActions = this.config.getGlobalActions();
     this.multiActions = this.config.getMultiActions();

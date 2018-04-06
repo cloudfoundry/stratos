@@ -1,4 +1,5 @@
-import { Component, OnInit, HostBinding } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -15,7 +16,6 @@ import {
   CheckProjectExists,
   FetchBranchesForProject,
   FetchCommit,
-  FetchCommits,
   SetAppSourceDetails,
   SetDeployBranch,
   StoreCFSettings,
@@ -42,10 +42,14 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
   providers: [
     {
       provide: ListConfig,
-      useFactory: (store: Store<AppState>) => {
-        return new GithubCommitsListConfigService(store, 'richard-cox/node-env');
+      useFactory: (
+        store: Store<AppState>,
+        datePipe: DatePipe,
+        applicationService: ApplicationService,
+        entityServiceFactory: EntityServiceFactory) => {
+        return new GithubCommitsListConfigService(store, datePipe, applicationService, entityServiceFactory);
       },
-      deps: [Store]
+      deps: [Store, DatePipe, ApplicationService, EntityServiceFactory]
     }
   ]
 })
@@ -78,13 +82,12 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
+    // const githubListConfig = this.listConfig as GithubCommitsListConfigService;
     this.stratosProject$ = this.applicationService.applicationStratProject$.pipe(
       take(1),
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
         const commitId = stProject.deploySource.commit.trim();
-
-        // this.store.dispatch(new FetchCommits(projectName));
 
         this.gitHubRepoEntityService = this.entityServiceFactory.create(
           githubRepoSchemaKey,

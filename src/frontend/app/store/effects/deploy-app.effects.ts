@@ -12,12 +12,14 @@ import {
   FETCH_COMMITS,
   FetchBranchesForProject,
   FetchCommit,
+  FetchCommits,
   ProjectDoesntExist,
   ProjectExists,
 } from '../../store/actions/deploy-applications.actions';
 import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 import { selectDeployAppState } from '../selectors/deploy-application.selector';
 import { NormalizedResponse } from '../types/api.types';
+import { GithubCommit } from '../types/github.types';
 import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { AppState } from './../app-state';
 
@@ -102,12 +104,7 @@ export class DeployAppEffects {
             entities: { [githubCommitSchemaKey]: {} },
             result: []
           } as NormalizedResponse;
-          const commitId = commit.sha;
-          mappedData.entities[githubCommitSchemaKey][commitId] = {
-            entity: commit,
-            metadata: {}
-          };
-          mappedData.result.push(commitId);
+          this.addCommit(mappedData, action.projectName, commit);
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
           ];
@@ -119,30 +116,26 @@ export class DeployAppEffects {
 
   @Effect()
   fetchCommits$ = this.actions$
-    .ofType<FetchCommit>(FETCH_COMMITS)
+    .ofType<FetchCommits>(FETCH_COMMITS)
     .flatMap(action => {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: githubCommitSchemaKey,
-        type: action.type
+        type: action.type,
+        paginationKey: action.paginationKey
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       // TODO: RC sort response
       return this.http
         .get(`https://api.github.com/repos/${action.projectName}/commits?sort=updated`)
         .mergeMap(response => {
-          const commits: any[] = response.json();
+          const commits: GithubCommit[] = response.json();
           const mappedData = {
             entities: { [githubCommitSchemaKey]: {} },
             result: []
           } as NormalizedResponse;
-
-          const repoCommits = mappedData.entities[githubCommitSchemaKey] = {};
           commits.forEach(commit => {
-            repoCommits[commit.sha] = {
-              entity: commit,
-              metadata: {}
-            };
+            this.addCommit(mappedData, action.projectName, commit);
           });
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
@@ -152,4 +145,13 @@ export class DeployAppEffects {
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
         ]);
     });
+
+  addCommit(mappedData: NormalizedResponse, projectName: string, commit: GithubCommit) {
+    const id = projectName + '-' + commit.sha;
+    mappedData.entities[githubCommitSchemaKey][id] = {
+      entity: commit,
+      metadata: {}
+    };
+    mappedData.result.push(id);
+  }
 }

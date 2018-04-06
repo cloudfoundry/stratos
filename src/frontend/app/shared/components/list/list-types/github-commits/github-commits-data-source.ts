@@ -10,13 +10,14 @@ import { ListDataSource } from '../../data-sources-controllers/list-data-source'
 import { IListConfig } from '../../list.component.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
+import { APIResource } from '../../../../../store/types/api.types';
 
-export class GithubCommitsDataSource extends ListDataSource<GithubCommit> {
+export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {
   store: Store<AppState>;
 
   constructor(
     store: Store<AppState>,
-    listConfig: IListConfig<GithubCommit>,
+    listConfig: IListConfig<APIResource<GithubCommit>>,
     projectName: string
   ) {
     const action = new FetchCommits(projectName);
@@ -25,15 +26,10 @@ export class GithubCommitsDataSource extends ListDataSource<GithubCommit> {
       store,
       action,
       schema: new EntitySchema(githubCommitSchemaKey),
-      getRowUniqueId: object => object.sha,
+      getRowUniqueId: object => object.entity.sha,
       paginationKey,
       isLocal: true,
-      transformEntities: [
-        {
-          type: 'filter',
-          field: 'name'
-        },
-      ],
+      transformEntities: [],
       listConfig
     });
   }
