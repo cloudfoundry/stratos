@@ -30,7 +30,7 @@ export interface VariableTabAllEnvVarType {
 })
 export class VariablesTabComponent implements OnInit {
 
-  @HostBinding('class') class = 'router-component';
+
 
   constructor(
     private store: Store<AppState>,

@@ -40,7 +40,7 @@ import { APIResource } from '../../../store/types/api.types';
 })
 export class ApplicationWallComponent implements OnDestroy {
 
-  @HostBinding('class') class = 'router-component';
+
 
   private statsSub: Subscription;
 

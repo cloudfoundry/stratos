@@ -36,7 +36,7 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
 })
 export class GithubTabComponent implements OnInit, OnDestroy {
 
-  @HostBinding('class') class = 'router-component';
+
 
   gitBranchEntityService: EntityService;
   gitCommitEntityService: EntityService;

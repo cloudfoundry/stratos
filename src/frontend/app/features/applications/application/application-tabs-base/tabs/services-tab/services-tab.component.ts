@@ -23,5 +23,5 @@ import { IServiceBinding } from '../../../../../../core/cf-api-svc.types';
   ]
 })
 export class ServicesTabComponent {
-  @HostBinding('class') class = 'router-component';
+
 }

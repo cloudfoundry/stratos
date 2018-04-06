@@ -19,7 +19,7 @@ import { ApplicationData, ApplicationService } from '../../../../application.ser
   ]
 })
 export class BuildTabComponent implements OnInit {
-  @HostBinding('class') class = 'router-component';
+
 
   constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
 

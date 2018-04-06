@@ -30,7 +30,7 @@ export class LogStreamTabComponent implements OnInit {
   public messages: Observable<string>;
 
   @ViewChild('searchFilter') searchFilter: NgModel;
-  @HostBinding('class') class = 'router-component';
+
 
   streamTitle$: Observable<string>;
 

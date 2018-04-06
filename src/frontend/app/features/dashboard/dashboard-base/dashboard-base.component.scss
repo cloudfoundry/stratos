@@ -8,8 +8,6 @@ $app-header-height: 56px;
     height: 100%;
   }
   &__content {
-    display: flex;
-    flex-direction: column;
     margin-top: $app-header-height;
     max-height: 100%;
     overflow: auto;

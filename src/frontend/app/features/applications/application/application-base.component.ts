@@ -66,5 +66,5 @@ function entityServiceFactory(
   ]
 })
 export class ApplicationBaseComponent {
-  @HostBinding('class') class = 'router-component';
+
 }
