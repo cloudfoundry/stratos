@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
-import { getOrgRoles, IOrgUserRole } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { getOrgRoles, OrgUserRoles, IUserRole, SpaceUserRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
@@ -13,11 +13,12 @@ import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
 import { IAppChip, AppChip } from '../../../../chips/chips.component';
 import { cfUserSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
+import { TableCellCustom } from '../../../list.types';
 
-interface ICellPermissionList extends IOrgUserRole {
+export interface ICellPermissionList<T> extends IUserRole<T> {
   busy: Observable<boolean>;
-  orgName: string;
-  orgId: string;
+  name: string;
+  id: string;
 }
 
 interface ICellPermissionUpdates {
@@ -30,38 +31,42 @@ interface ICellPermissionUpdates {
   styleUrls: ['./cf-user-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TableCellCfUserPermissionComponent {
+export class
+  TableCellCfUserPermissionComponent extends TableCellCustom<APIResource<CfUser>> {
   @Input('row')
   set row(row: APIResource<CfUser>) {
     this.setChipConfig(row);
     this.guid = row.metadata.guid;
   }
-  public chipsConfig: AppChip<ICellPermissionList>[];
+  public chipsConfig: AppChip<ICellPermissionList<OrgUserRoles | SpaceUserRoles>>[];
   private guid: string;
   constructor(
-    private store: Store<AppState>,
-    private cfUserService: CfUserService
-  ) { }
-
-  private setChipConfig(row: APIResource<CfUser>) {
-    const userRoles = this.cfUserService.getRolesFromUser(row.entity);
-    const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList>(
-      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
-    );
-    this.chipsConfig = this.getChipConfig(userOrgPermInfo);
+    public store: Store<AppState>,
+    public cfUserService: CfUserService
+  ) {
+    super();
   }
 
-  private getChipConfig(cellPermissionList: ICellPermissionList[]) {
+  protected setChipConfig(row: APIResource<CfUser>) {
+    const userRoles = this.cfUserService.getOrgRolesFromUser(row.entity);
+    const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList<OrgUserRoles>>(
+      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
+    );
+    this.chipsConfig = this.getChipConfig<OrgUserRoles>(userOrgPermInfo);
+  }
+
+  protected getChipConfig<T>(cellPermissionList: ICellPermissionList<T>[]) {
     return cellPermissionList.map(perm => {
-      const chipConfig = new AppChip<ICellPermissionList>();
+      const chipConfig = new AppChip<ICellPermissionList<T>>();
       chipConfig.key = perm;
-      chipConfig.value = `${perm.orgName}: ${perm.key}`;
+      chipConfig.value = `${perm.name}: ${perm.key}`;
       chipConfig.busy = perm.busy;
       chipConfig.clearAction = chip => {
         const permission = chip.key;
         this.removePermission(permission);
       };
-      chipConfig.hideClearButton = perm.key === 'users';
+      // Disable removal of role, since we can't add any
+      chipConfig.hideClearButton = true;
       return chipConfig;
     });
   }
@@ -75,7 +80,7 @@ export class TableCellCfUserPermissionComponent {
       );
       return {
         ...perm,
-        orgName: orgPerms.orgName,
+        name: orgPerms.name,
         orgId: orgPerms.orgGuid,
         busy: new EntityMonitor(
           this.store,
@@ -84,15 +89,15 @@ export class TableCellCfUserPermissionComponent {
           entityFactory(cfUserSchemaKey)
         ).getUpdatingSection(updatingKey).pipe(
           map(update => update.busy)
-        )
+          )
       };
     });
   }
 
-  public removePermission(cellPermission: ICellPermissionList) {
+  public removePermission<T>(cellPermission: ICellPermissionList<T>) {
     this.store.dispatch(new RemoveUserPermission(
       this.guid,
-      cellPermission.orgId,
+      cellPermission.id,
       cellPermission.key
     ));
   }

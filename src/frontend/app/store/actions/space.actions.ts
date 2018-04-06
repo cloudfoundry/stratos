@@ -70,6 +70,9 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
   options: RequestOptions;
   initialParams = {
     'results-per-page': 100,
+    'order-direction': 'asc',
+    'order-direction-field': 'name',
+    'order-by': 'name'
   };
 }
 
@@ -96,7 +99,7 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     'results-per-page': 100,
     page: 1,
     'order-direction': 'desc',
-    'order-direction-field': 'attachedApps',
+    'order-direction-field': 'creation',
   };
   parentGuid: string;
   entity = entityFactory(routeSchemaKey);
@@ -127,6 +130,8 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
   initialParams = {
     page: 1,
     'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'creation',
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);

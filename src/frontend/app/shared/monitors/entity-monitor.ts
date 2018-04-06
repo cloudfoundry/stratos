@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, shareReplay, startWith, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount, startWith, withLatestFrom } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
@@ -27,21 +27,25 @@ export class EntityMonitor<T = any> {
       map(request => request ? request : defaultRequestState),
       distinctUntilChanged(),
       startWith(defaultRequestState),
-      shareReplay(1),
+      publishReplay(1),
+      refCount(),
     );
     this.isDeletingEntity$ = this.entityRequest$.map(request => request.deleting.busy).pipe(
       distinctUntilChanged(),
-      shareReplay(1)
+      publishReplay(1),
+      refCount()
     );
     this.isFetchingEntity$ = this.entityRequest$.map(request => request.fetching).pipe(
       distinctUntilChanged(),
-      shareReplay(1)
+      publishReplay(1),
+      refCount()
     );
     this.updatingSection$ = this.entityRequest$.map(request => request.updating).pipe(
       distinctUntilChanged(),
-      shareReplay(1)
+      publishReplay(1),
+      refCount()
     );
-    this.apiRequestData$ = this.store.select(getAPIRequestDataState).shareReplay(1);
+    this.apiRequestData$ = this.store.select(getAPIRequestDataState).publishReplay(1).refCount();
     this.entity$ = this.getEntityObservable(
       schema,
       store.select(selectEntity<T>(entityKey, id)),
@@ -83,7 +87,8 @@ export class EntityMonitor<T = any> {
         map(updates => {
           return updates[updatingKey] || getDefaultActionState();
         }),
-        shareReplay(1)
+        publishReplay(1),
+        refCount()
       );
       this.updatingSectionObservableCache[updatingKey] = updateObs$;
       return updateObs$;
@@ -110,7 +115,7 @@ export class EntityMonitor<T = any> {
       ]) => {
         return entity ? denormalize(entity, schema, entities) : null;
       }),
-      shareReplay(1),
+      publishReplay(1), refCount(),
       startWith(null)
     );
   }
