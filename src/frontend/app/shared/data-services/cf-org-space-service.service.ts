@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@angular/core';
+import { Injectable, Optional, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
@@ -18,6 +18,7 @@ import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpo
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { APIResource } from '../../store/types/api.types';
+import { Subscription } from 'rxjs/Subscription';
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
@@ -37,7 +38,7 @@ export const enum CfOrgSpaceSelectMode {
 }
 
 @Injectable()
-export class CfOrgSpaceDataService {
+export class CfOrgSpaceDataService implements OnDestroy {
   private static CfOrgSpaceServicePaginationKey = 'endpointOrgSpaceService';
 
   public cf: CfOrgSpaceItem<EndpointModel>;
@@ -66,6 +67,7 @@ export class CfOrgSpaceDataService {
 
   private getEndpointsAndOrgs$: Observable<any>;
   private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
+  private subs: Subscription[] = [];
 
   constructor(
     private store: Store<AppState>,
@@ -82,10 +84,9 @@ export class CfOrgSpaceDataService {
     // Start watching the cf/org/space plus automatically setting values only when we actually have values to auto select
     this.org.list$.pipe(
       first(),
-      tap(() => {
-        this.setupAutoSelectors();
-      })
-    ).subscribe();
+    ).subscribe(null, null, () => {
+      this.setupAutoSelectors();
+    });
 
     this.isLoading$ = combineLatest(
       this.cf.loading$,
@@ -145,6 +146,7 @@ export class CfOrgSpaceDataService {
       select: new BehaviorSubject(undefined)
     };
   }
+
   private createSpace() {
     const spaceList$ = combineLatest(
       this.org.select.asObservable(),
@@ -185,16 +187,19 @@ export class CfOrgSpaceDataService {
     this.cf.list$.pipe(
       first(),
       tap(cfs => {
+        // if (this.cf.select.getValue()) {
+        //   return;
+        // }
+
         if (!!cfs.length &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && cfs.length === 1) ||
             (this.selectMode === CfOrgSpaceSelectMode.ANY))
         ) {
-          this.cf.select.next(cfs[0].guid);
+          this.selectSet(this.cf.select, cfs[0].guid);
         }
       })
     ).subscribe();
 
-    // Clear or automatically select org/space given cf
     const orgResetSub = this.cf.select.asObservable().pipe(
       startWith(undefined),
       distinctUntilChanged(),
@@ -205,35 +210,45 @@ export class CfOrgSpaceDataService {
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && orgs.length === 1) ||
             (this.selectMode === CfOrgSpaceSelectMode.ANY))
         ) {
-          this.org.select.next(orgs[0].guid);
+          this.selectSet(this.org.select, orgs[0].guid);
         } else {
-          this.org.select.next(undefined);
-          this.space.select.next(undefined);
+          this.selectSet(this.org.select, undefined);
+          this.selectSet(this.space.select, undefined);
         }
       }),
     ).subscribe();
-    this.cf.select.asObservable().finally(() => {
-      orgResetSub.unsubscribe();
-    });
+    this.subs.push(orgResetSub);
 
     // Clear or automatically select space given org
     const spaceResetSub = this.org.select.asObservable().pipe(
+      startWith(undefined),
       distinctUntilChanged(),
       withLatestFrom(this.space.list$),
       tap(([selectedOrg, spaces]) => {
         if (
           !!spaces.length &&
+          !this.space.select.getValue() &&
           ((this.selectMode === CfOrgSpaceSelectMode.FIRST_ONLY && spaces.length === 1) ||
             (this.selectMode === CfOrgSpaceSelectMode.ANY))
         ) {
-          this.space.select.next(spaces[0].guid);
+          this.selectSet(this.space.select, spaces[0].guid);
         } else {
-          this.space.select.next(undefined);
+          this.selectSet(this.space.select, undefined);
         }
       })
     ).subscribe();
-    this.org.select.asObservable().finally(() => {
-      spaceResetSub.unsubscribe();
+    this.subs.push(spaceResetSub);
+  }
+
+  private selectSet(select: BehaviorSubject<string>, newValue: string) {
+    if (select.getValue() !== newValue) {
+      select.next(newValue);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(sub => {
+      sub.unsubscribe();
     });
   }
 }
