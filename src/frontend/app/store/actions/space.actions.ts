@@ -15,6 +15,7 @@ import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { RouteEvents } from './route.actions';
+import { GetAllOrgUsers } from './organization.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -188,7 +189,7 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
   updatingKey = UpdateSpace.UpdateExistingSpace;
 }
 
-export class GetAllSpaceUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+export class GetAllSpaceUsers extends GetAllOrgUsers {
   constructor(
     public guid: string,
     public paginationKey: string,
@@ -203,17 +204,8 @@ export class GetAllSpaceUsers extends CFStartAction implements PaginatedAction, 
       createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
     ],
     public populateMissing = true) {
-    super();
-    this.options = new RequestOptions();
+    super(guid, paginationKey, endpointGuid, includeRelations, populateMissing);
     this.options.url = `spaces/${guid}/user_roles`;
-    this.options.method = 'get';
   }
   actions = getActions('Spaces', 'List all user roles');
-  entity = [entityFactory(cfUserSchemaKey)];
-  entityKey = cfUserSchemaKey;
-  options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-  };
 }
