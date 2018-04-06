@@ -1,5 +1,5 @@
 <div class="summary">
-  <app-tile-grid>
+  <app-tile-grid fit="true">
     <app-tile-group>
       <app-tile>
         <app-card-cf-info></app-card-cf-info>
@@ -7,10 +7,21 @@
     </app-tile-group>
     <app-tile-group>
       <app-tile>
-        <app-card-cf-usage></app-card-cf-usage>
+        <app-card-number-metric [link]="appLink" icon="apps" label="Applications" value="{{ (cfEndpointService.allApps$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
-      <app-tile *ngIf="(cfEndpointService.endpoint$ | async )?.entity.user">
-        <app-card-cf-user-info></app-card-cf-user-info>
+      <app-tile>
+        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" icon="domain" label="Orgs" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
+      </app-tile>
+      <app-tile>
+        <app-card-number-metric icon="memory" units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>
+      </app-tile>
+    </app-tile-group>
+    <app-tile-group>
+      <app-tile>
+        <app-card-cf-recent-apps></app-card-cf-recent-apps>
       </app-tile>
     </app-tile-group>
   </app-tile-grid>
