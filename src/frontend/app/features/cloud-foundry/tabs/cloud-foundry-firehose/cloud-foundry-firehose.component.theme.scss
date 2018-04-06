@@ -3,11 +3,14 @@
   $primary: map-get($theme, primary);
   $warn: map-get($theme, warn);
   $ansi-colors: map-get($app-theme, ansi-colors);
-
   .firehose-filter-panel {
-    background-color: map-get(map-get($ansi-colors, default-background), normal);
-    border-bottom: 1px solid map-get(map-get($ansi-colors, 'black'), intense);
-    color: map-get(map-get($ansi-colors, default-foreground), normal);
+    background-color: mat-color($primary);
+    border-bottom: mat-contrast($primary, 500);
+    color: mat-contrast($primary, 500);
+    &__link,
+    &__link:hover {
+      color: mat-contrast($primary, 500);
+    }
     &__filters {
       .mat-checkbox-frame {
         border-color: map-get(map-get($ansi-colors, default-foreground), normal);
