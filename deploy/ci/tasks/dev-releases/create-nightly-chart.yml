@@ -1,0 +1,61 @@
+---
+platform: linux
+inputs:
+- name: stratos
+- name: stratos-master
+outputs:
+- name: helm-chart
+image_resource:
+  type: docker-image
+  source:
+  # Generated using Dockerfile.stratos-helm
+   repository:  splatform/ci-stratos-helm
+   tag: "latest"
+
+run:
+  path: bash
+  args:
+    - -xc
+    - |
+
+      helm init || true
+      ROOT_DIR=$PWD
+      STRATOS=${ROOT_DIR}/stratos
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
+      STRATOS_MASTER=${ROOT_DIR}/stratos-master
+      cd ${STRATOS}/deploy/kubernetes/
+      TAG=$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)
+      # Patch Helm chart
+      patchHelmChart ${TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+
+      # Generate Helm package
+      helm package console
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v2.0.0-${TAG}.tgz
+      cd ${ROOT_DIR}/helm-chart/
+      INDEX_FILE=${STRATOS_MASTER}/index.yaml
+      CHART_FILE=${ROOT_DIR}/helm-chart/console-helm-chart-v2.0.0-${TAG}.tgz
+      if [ -f ${INDEX_FILE} ]; then
+            NIGHTLY_EXISTS=$(cat  ${INDEX_FILE} | grep 2.0.0-${TAG})
+            NIGHTLY_EXISTS=$(echo $?)
+            if [ $NIGHTLY_EXISTS -eq 0 ]; then
+              INDEX_SHA256SUM=$(sed -n 's/.*digest: \([a-zA-Z0-9]*\)/\1/p' ${INDEX_FILE})
+              CURR_SHA256SUM=$(sha256sum  ${CHART_FILE}| cut -d' ' -f1)
+              if [ "${INDEX_SHA256SUM}" = "${CURR_SHA256SUM}" ]; then
+                echo 'Checksum is equal, quitting'
+              else
+                echo 'Checksum not equal, patching index.yaml'
+                sed -i 's/'"${INDEX_SHA256SUM}"'/'"${CURR_SHA256SUM}"'/g' ${INDEX_FILE}
+              fi
+              exit 0;
+            else
+              # Index file exists, but no 2.0.0-dev release has ever been published 
+              cp  ${INDEX_FILE} ${ROOT_DIR}/helm-chart/
+              MERGE_INDEX="--merge index.yaml"
+            fi
+      fi
+
+      # Update Helm Repository
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${TAG}/
+      cp index.yaml ${STRATOS_MASTER}/
+      cd ${STRATOS_MASTER}
+      setupAndPushChange

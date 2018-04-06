@@ -24,7 +24,6 @@ import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
-import { CardCfSpaceUsageComponent } from './components/cards/card-cf-space-usage/card-cf-space-usage.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -81,6 +80,9 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 
 @NgModule({
   imports: [
@@ -146,10 +148,12 @@ import { ValuesPipe } from './pipes/values.pipe';
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
-    CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     BooleanIndicatorComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     ServiceIconComponent,
     EnvVarViewComponent
   ],
@@ -202,10 +206,12 @@ import { ValuesPipe } from './pipes/values.pipe';
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
-    CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     EnvVarViewComponent,
     ServiceIconComponent
   ],

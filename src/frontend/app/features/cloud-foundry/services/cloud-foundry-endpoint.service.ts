@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, shareReplay } from 'rxjs/operators';
+import { first, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IApp, ICfV2Info, IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityService } from '../../../core/entity-service';
@@ -23,6 +23,7 @@ import {
   quotaDefinitionSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
+  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -62,6 +63,8 @@ export class CloudFoundryEndpointService {
         createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with
+        // lots of spaces it saves n x routes requests
       ]);
   }
 
@@ -145,7 +148,7 @@ export class CloudFoundryEndpointService {
       map(p => p.entity.connectionStatus === 'connected')
     );
 
-    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), shareReplay(1));
+    this.currentUser$ = this.endpoint$.pipe(map(e => e.entity.user), first(), publishReplay(1), refCount());
 
   }
 

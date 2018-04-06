@@ -117,7 +117,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
         () => this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid))
       );
     },
-    icon: 'delete',
     label: 'Terminate',
     description: ``, // Description depends on console user permission
     visible: row => true,
@@ -132,7 +131,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       );
       this.router.navigate([sshRoute]);
     },
-    icon: 'computer',
     label: 'SSH',
     description: ``, // Description depends on console user permission
     visible: row => true,

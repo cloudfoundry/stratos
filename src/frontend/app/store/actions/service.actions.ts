@@ -28,9 +28,8 @@ export class GetAllServices extends CFStartAction implements PaginationAction, E
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'inline-relations-depth': 2,
     'order-direction': 'desc',
-    'order-direction-field': 'name',
+    'order-direction-field': 'label',
   };
 }
 export class GetService extends CFStartAction implements EntityInlineParentAction {
