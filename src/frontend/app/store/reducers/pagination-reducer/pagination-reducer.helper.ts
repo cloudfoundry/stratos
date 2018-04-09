@@ -175,7 +175,9 @@ function getObservables<T = any>(
     pagination$: pagination$.pipe(
       distinctUntilChanged()
     ),
-    entities$
+    entities$: entities$.pipe(
+      distinctUntilChanged()
+    )
   };
 }
 

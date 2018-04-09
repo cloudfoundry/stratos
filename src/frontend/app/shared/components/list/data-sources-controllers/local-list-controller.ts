@@ -63,7 +63,6 @@ export class LocalListController<T = any> {
           }, entities);
         }
         this.pageSplitCache = null;
-
         return entities;
       })
     );
