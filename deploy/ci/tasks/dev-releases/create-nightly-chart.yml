@@ -40,7 +40,7 @@ run:
             NIGHTLY_EXISTS=$(echo $?)
             if [ $NIGHTLY_EXISTS -eq 0 ]; then
               # Patch Digest
-              INDEX_SHA256SUM=$(sed -n 's/.*digest: \([a-zA-Z0-9]*\)/\1/p' ${INDEX_FILE})
+              INDEX_SHA256SUM=$(grep -B5 -A0 ${TAG} ${INDEX_FILE} | sed -n 's/digest: \([a-zA-Z0-9]*\)/\1/p')
               CURR_SHA256SUM=$(sha256sum  ${CHART_FILE}| cut -d' ' -f1)
               if [ "${INDEX_SHA256SUM}" = "${CURR_SHA256SUM}" ]; then
                 echo 'Checksum is equal, quitting'
@@ -63,11 +63,11 @@ run:
               # Index file exists, but no 2.0.0-dev release has ever been published 
               cp  ${INDEX_FILE} ${ROOT_DIR}/helm-chart/
               MERGE_INDEX="--merge index.yaml"
+              helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${TAG}/
+              cp index.yaml ${STRATOS_MASTER}/
             fi
       fi
 
       # Update Helm Repository
-      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${TAG}/
-      cp index.yaml ${STRATOS_MASTER}/
       cd ${STRATOS_MASTER}
       setupAndPushChange
