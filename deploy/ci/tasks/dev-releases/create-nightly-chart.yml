@@ -59,7 +59,7 @@ run:
               fi
 
               # Patch Created Date
-              CREATED_DATE=$((grep -B5 -A0 ${TAG} ${INDEX_FILE} | sed -n 's/created: \(.*\)/\1/p' | xargs)
+              CREATED_DATE=$(grep -B5 -A0 ${TAG} ${INDEX_FILE} | sed -n 's/created: \(.*\)/\1/p' | xargs)
               sed -i 's/'"${CREATED_DATE}"'/'"$(date +%Y-%m-%dT%H:%M:%S.%NZ)"'/g' ${INDEX_FILE}
             else
               # Index file exists, but no 2.0.0-dev release has ever been published 
