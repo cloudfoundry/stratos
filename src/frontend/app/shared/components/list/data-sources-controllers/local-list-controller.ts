@@ -5,6 +5,7 @@ import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, t
 import { getCurrentPageRequestInfo } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 import { splitCurrentPage, getCurrentPageStartIndex } from './local-list-controller.helpers';
+import { tag } from 'rxjs-spy/operators/tag';
 
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;
@@ -14,7 +15,9 @@ export class LocalListController<T = any> {
     const currentPageSizeObservable$ = this.buildCurrentPageSizeObservable(pagination$);
     this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$, currentPageSizeObservable$);
   }
+
   private pageSplitCache: (T | T[])[] = null;
+
   private buildPagesObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
     const cleanPagination$ = pagination$.pipe(
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
@@ -97,7 +100,10 @@ export class LocalListController<T = any> {
         );
         this.pageSplitCache = data.entities;
         return (data.entities[data.index] || []) as T[];
-      })
+      }),
+      publishReplay(1),
+      refCount(),
+      tag('local-list')
     );
   }
 
@@ -114,7 +120,6 @@ export class LocalListController<T = any> {
   private paginationHasChanged(oldPag: PaginationEntityState, newPag: PaginationEntityState) {
     const oldPagCompareString = this.getPaginationCompareString(oldPag);
     const newPagCompareString = this.getPaginationCompareString(newPag);
-    const hasChanged = oldPagCompareString !== newPagCompareString;
     return oldPagCompareString !== newPagCompareString;
   }
 }
