@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, first, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
+import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
@@ -172,8 +172,12 @@ function getObservables<T = any>(
     );
 
   return {
-    pagination$,
-    entities$
+    pagination$: pagination$.pipe(
+      distinctUntilChanged()
+    ),
+    entities$: entities$.pipe(
+      distinctUntilChanged()
+    )
   };
 }
 
