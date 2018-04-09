@@ -9,7 +9,7 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetSpace } from '../../../store/actions/space.actions';
+import { GetSpace, GetAllSpaceUsers } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -21,7 +21,7 @@ import {
   spaceWithOrgKey,
   spaceQuotaSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
@@ -43,6 +43,7 @@ export class CloudFoundrySpaceService {
   apps$: Observable<APIResource<IApp>[]>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   spaceEntityService: EntityService<APIResource<ISpace>>;
+  allSpaceUsersAction: GetAllSpaceUsers;
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -56,7 +57,11 @@ export class CloudFoundrySpaceService {
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-
+    this.allSpaceUsersAction = new GetAllSpaceUsers(
+      activeRouteCfOrgSpace.spaceGuid,
+      createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid),
+      activeRouteCfOrgSpace.cfGuid
+    );
     this.spaceEntityService = this.entityServiceFactory.create(
       spaceSchemaKey,
       entityFactory(spaceWithOrgKey),

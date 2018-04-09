@@ -10,7 +10,7 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetOrganization } from '../../../store/actions/organization.actions';
+import { GetOrganization, GetAllOrgUsers } from '../../../store/actions/organization.actions';
 import { DeleteSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
@@ -23,12 +23,16 @@ import {
   routeSchemaKey,
   serviceInstancesSchemaKey,
   spaceSchemaKey,
+  cfUserSchemaKey,
+  endpointSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { PaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { CfUser } from '../../../store/types/user.types';
 
 @Injectable()
 export class CloudFoundryOrganizationService {
@@ -45,6 +49,9 @@ export class CloudFoundryOrganizationService {
   apps$: Observable<APIResource<IApp>[]>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   orgEntityService: EntityService<APIResource<IOrganization>>;
+  allOrgUsers$: PaginationObservables<APIResource<CfUser>>;
+  allOrgUsersAction: GetAllOrgUsers;
+
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -56,6 +63,11 @@ export class CloudFoundryOrganizationService {
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.allOrgUsersAction = new GetAllOrgUsers(
+      activeRouteCfOrgSpace.orgGuid,
+      createEntityRelationPaginationKey(organizationSchemaKey, activeRouteCfOrgSpace.orgGuid),
+      activeRouteCfOrgSpace.cfGuid
+    );
     this.orgEntityService = this.entityServiceFactory.create(
       organizationSchemaKey,
       entityFactory(organizationSchemaKey),
@@ -65,6 +77,7 @@ export class CloudFoundryOrganizationService {
         createEntityRelationKey(organizationSchemaKey, domainSchemaKey),
         createEntityRelationKey(organizationSchemaKey, quotaDefinitionSchemaKey),
         createEntityRelationKey(organizationSchemaKey, privateDomainsSchemaKey),
+        createEntityRelationKey(organizationSchemaKey, cfUserSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
@@ -105,6 +118,7 @@ export class CloudFoundryOrganizationService {
   private initialiseAppObservables() {
     this.apps$ = this.spaces$.pipe(this.getFlattenedList('apps'));
     this.appInstances$ = this.apps$.pipe(
+      filter($apps => !!$apps),
       map(a => {
         return a ? a.map(app => app.entity.instances).reduce((x, sum) => x + sum, 0) : 0;
       })
