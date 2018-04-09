@@ -15,7 +15,7 @@ import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/mate
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, pairwise, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, pairwise, tap, startWith } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -46,15 +46,15 @@ import {
     trigger('list', [
       transition('* => in', [
         style({ opacity: '0', transform: 'translateY(-10px)' }),
-        animate('250ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
       ]),
       transition('* => left, * => repeatLeft', [
-        style({ opacity: '0', transform: 'translateX(-20%)' }),
-        animate('250ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+        style({ opacity: '0', transform: 'translateX(-30px)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ]),
       transition('* => right, * => repeatRight', [
-        style({ opacity: '0', transform: 'translateX(20%)' }),
-        animate('250ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+        style({ opacity: '0', transform: 'translateX(30px)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ])
     ])
   ]
@@ -302,6 +302,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         distinctUntilChanged((x, y) => x.pageIndex === y.pageIndex && x.busy === y.busy && x.viewType === y.viewType),
         pairwise(),
         map(([oldVal, newVal]) => {
+
           if (oldVal.viewType !== oldVal.viewType) {
             return 'none';
           }
@@ -310,12 +311,15 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
           } else if (oldVal.pageIndex < newVal.pageIndex) {
             return 'right';
           } else if (oldVal.busy && !newVal.busy) {
+            console.log(oldVal, newVal)
             return 'in';
           }
           return 'none';
         }),
+        startWith('none'),
         pairwise(),
         map(([oldVal, newVal]) => {
+          console.log(newVal)
           if (oldVal === newVal) {
             if (oldVal === 'left') {
               return 'repeatLeft';
