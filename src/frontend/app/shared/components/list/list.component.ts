@@ -48,11 +48,11 @@ import {
         style({ opacity: '0', transform: 'translateY(-10px)' }),
         animate('250ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
       ]),
-      transition('* => left', [
+      transition('* => left, * => repeatLeft', [
         style({ opacity: '0', transform: 'translateX(-20%)' }),
         animate('250ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ]),
-      transition('* => right', [
+      transition('* => right, * => repeatRight', [
         style({ opacity: '0', transform: 'translateX(20%)' }),
         animate('250ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ])
@@ -313,6 +313,18 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
             return 'in';
           }
           return 'none';
+        }),
+        pairwise(),
+        map(([oldVal, newVal]) => {
+          if (oldVal === newVal) {
+            if (oldVal === 'left') {
+              return 'repeatLeft';
+            }
+            if (oldVal === 'right') {
+              return 'repeatRight';
+            }
+          }
+          return newVal;
         })
       );
   }
