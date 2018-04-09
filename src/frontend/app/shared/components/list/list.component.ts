@@ -311,7 +311,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
           } else if (oldVal.pageIndex < newVal.pageIndex) {
             return 'right';
           } else if (oldVal.busy && !newVal.busy) {
-            console.log(oldVal, newVal)
             return 'in';
           }
           return 'none';
@@ -319,7 +318,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         startWith('none'),
         pairwise(),
         map(([oldVal, newVal]) => {
-          console.log(newVal)
           if (oldVal === newVal) {
             if (oldVal === 'left') {
               return 'repeatLeft';
