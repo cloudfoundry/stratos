@@ -1,20 +1,18 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AfterContentInit, Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { Router, ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd } from '@angular/router';
-
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
 
+import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { isFulfilled } from 'q';
-import { Subscription } from 'rxjs/Subscription';
-import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -24,6 +22,7 @@ import { environment } from '../../../../environments/environment';
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentInit {
 
+  private openCloseSub: Subscription;
   private closeSub: Subscription;
 
   private fullView: boolean;
@@ -81,18 +80,24 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
 
   ngOnInit() {
+    const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
-    this.routeChangeSubscription = this.router.events
-      .filter((event) => event instanceof NavigationEnd)
-      .subscribe((event) => {
-        this.fullView = this.isFullView(this.activatedRoute.snapshot);
-      });
+    this.routeChangeSubscription = this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      withLatestFrom(dashboardState$)
+    ).subscribe(([event, dashboard]) => {
+      this.fullView = this.isFullView(this.activatedRoute.snapshot);
+      if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
+        this.sidenav.close();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.routeChangeSubscription.unsubscribe();
     this.breakpointSub.unsubscribe();
     this.closeSub.unsubscribe();
+    this.openCloseSub.unsubscribe();
   }
 
   isFullView(route: ActivatedRouteSnapshot): boolean {
@@ -122,11 +127,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       this.store.dispatch(new CloseSideNav());
     });
 
-    this.store.select('dashboard')
+    const dashboardState$ = this.store.select('dashboard');
+    this.openCloseSub = dashboardState$
       .subscribe((dashboard: DashboardState) => {
         dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
         this.sidenav.mode = dashboard.sideNavMode;
       });
+
   }
 
   private enableMobileNav() {
