@@ -23,10 +23,9 @@ export class LocalListController<T = any> {
   private buildPagesObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
     const cleanPagination$ = pagination$.pipe(
       distinctUntilChanged((oldVal, newVal) => !this.paginationHasChanged(oldVal, newVal))
-      , tap(() => console.log('cleanPagination$'))
     );
 
-    const cleanPage$ = this.buildCleanPageObservable(page$, pagination$).do(() => console.log('cleanPage'));
+    const cleanPage$ = this.buildCleanPageObservable(page$, pagination$);
 
     return this.buildFullCleanPageObservable(page$, pagination$, dataFunctions);
   }
@@ -34,8 +33,7 @@ export class LocalListController<T = any> {
   private buildCleanPageObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>) {
     return combineLatest(
       page$.pipe(
-        distinctUntilChanged((oldPage, newPage) => oldPage.length === newPage.length)
-        , tap(() => console.log('page$'))
+        distinctUntilChanged((oldPage, newPage) => oldPage.length === newPage.length),
       ),
       pagination$.pipe(
         filter(pagination => {
@@ -43,11 +41,9 @@ export class LocalListController<T = any> {
         }),
         distinctUntilChanged((oldPag, newPag) => {
           return getCurrentPageRequestInfo(oldPag).busy === getCurrentPageRequestInfo(newPag).busy;
-        })
-        , tap(() => console.log('pagination$'))
+        }),
       )
     ).pipe(
-      tap(() => console.log('buildCleanPageObservable')),
       map(([page]) => page)
     );
   }
@@ -111,9 +107,9 @@ export class LocalListController<T = any> {
         }
         return (data.entities[data.index] || []) as T[];
       }),
-      // publishReplay(1),
-      // refCount(),
-      // tag('local-list')
+      publishReplay(1),
+      refCount(),
+      tag('local-list')
     );
   }
 
