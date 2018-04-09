@@ -84,7 +84,7 @@ export class AuthEffect {
         })
         .catch((err, caught) => {
           let setupMode = false;
-          let isUpgrading = false
+          let isUpgrading = false;
           if (err.status === 503) {
             setupMode = err.headers.has(SETUP_HEADER);
             isUpgrading = err.headers.has(UPGRADE_HEADER);
