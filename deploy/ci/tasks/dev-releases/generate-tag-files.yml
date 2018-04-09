@@ -1,0 +1,29 @@
+---
+platform: linux
+inputs:
+- name: stratos
+outputs:
+- name: image-tag
+image_resource:
+  type: docker-image
+  source:
+   repository:  splatform/ci-stratos-concourse
+   tag: "latest"
+
+run:
+  path: bash
+  args:
+    - -exc
+    - |
+      cd stratos
+      LATEST_ALPHA_TAG=$(git for-each-ref --sort=taggerdate --format '%(tag)' refs/tags | grep 'alpha' | tail -1)
+      ALPHA_RELEASE_NUMBER=$(echo $LATEST_ALPHA_TAG | grep -o '...$')
+      if [ -z "$ALPHA_RELEASE_NUMBER" ]; then
+        ALPHA_RELEASE_NUMBER='000'
+      fi
+      let ALPHA_RELEASE_NUMBER++
+      ALPHA_RELEASE_NUMBER=$(printf "%03d" $ALPHA_RELEASE_NUMBER)
+      FILENAME="2.0.0-${ALPHA_RELEASE_NUMBER}"
+      cd ../image-tag
+      echo "2.0.0-alpha-$ALPHA_RELEASE_NUMBER" > v2-alpha-tag
+      tar -cf v${FILENAME}.tar v2-alpha-tag

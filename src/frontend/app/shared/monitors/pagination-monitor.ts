@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, map, shareReplay, publishReplay, refCount } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';

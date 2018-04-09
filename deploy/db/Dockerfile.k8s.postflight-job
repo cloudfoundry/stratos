@@ -1,8 +1,0 @@
-FROM splatform/stratos-bk-base:opensuse
-
-RUN zypper -n in mariadb-client
-COPY outputs/portal-proxy /usr/local/bin/
-RUN chmod +x /usr/local/bin/portal-proxy
-COPY deploy/db/dbconf.yml db/dbconf.yml
-COPY deploy/db/scripts/run-postflight-job.k8s.sh /run-postflight-job.sh
-CMD ["/run-postflight-job.sh"]

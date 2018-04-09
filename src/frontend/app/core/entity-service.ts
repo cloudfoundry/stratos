@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs/observable/interval';
-import { filter, map, publishReplay, refCount, share, shareReplay, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, share, tap, withLatestFrom } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
