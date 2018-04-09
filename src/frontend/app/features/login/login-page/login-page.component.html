@@ -1,4 +1,4 @@
-<div class="login login__busy" [ngClass]="{'login__busy': busy$ | async }">
+<app-intro-screen class="login login__busy" [ngClass]="{'login__busy': busy$ | async }">
   <mat-card class="login__card">
     <app-stratos-title></app-stratos-title>
     <div class="login__body">
@@ -21,4 +21,4 @@
   <div class="login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
     {{ message }}
   </div>
-</div>
+</app-intro-screen>
