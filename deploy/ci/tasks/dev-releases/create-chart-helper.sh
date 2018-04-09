@@ -9,7 +9,7 @@ patchHelmChart () {
   sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' ${CHART_PATH}/values.yaml
   sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REG}"'/g' ${CHART_PATH}/values.yaml
 
-  sed -i -e 's/version: 0.1.0/version: '2.0.0-"${TAG}"'/g' ${CHART_PATH}/Chart.yaml  
+  sed -i -e 's/version: 0.1.0/version: '"${TAG}"'/g' ${CHART_PATH}/Chart.yaml  
 }
 
 setupAndPushChange() {
