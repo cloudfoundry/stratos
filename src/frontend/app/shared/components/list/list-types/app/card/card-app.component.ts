@@ -31,6 +31,7 @@ export class CardAppComponent extends CardCell<APIResource> implements OnInit {
   ) {
     super();
   }
+
   ngOnInit() {
     const initState = this.appStateService.get(this.row.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
@@ -47,4 +48,3 @@ export class CardAppComponent extends CardCell<APIResource> implements OnInit {
     );
   }
 }
-
