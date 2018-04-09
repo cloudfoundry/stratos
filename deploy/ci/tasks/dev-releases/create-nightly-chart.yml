@@ -57,8 +57,6 @@ run:
                 echo 'version not equal, patching index.yaml'
                 sed -i 's/'"${INDEX_VERSION}"'/'"${IMAGE_TAG}"'/g' ${INDEX_FILE}
               fi
-             
-              exit 0;
             else
               # Index file exists, but no 2.0.0-dev release has ever been published 
               cp  ${INDEX_FILE} ${ROOT_DIR}/helm-chart/
