@@ -60,37 +60,15 @@ resources:
     access_key_id: {{minio-access-key}}
     secret_access_key: {{minio-secret-access-key}}
     region_name: eu-central-1
+- name: nightly-gh-release
+  type: github-release
+  source:
+    owner: ((github-organization))
+    repository: ((github-repository))
+    access_token: ((github-access-token))
+    pre_release: true
+
 jobs:
-- name: fetch-commit-id
-  plan:
-  - get: stratos
-  - do:
-    - task: get-git-commit
-      timeout: 5m
-      file: stratos/deploy/ci/tasks/dev-releases/create-nightly-chart.yml
-    - put: jetstream-image
-      params:
-        dockerfile: stratos/deploy/Dockerfile.bk
-        build: stratos/
-        target_name:  prod-build
-        tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-    - put: postflight-image
-      params:
-        dockerfile: stratos/deploy/Dockerfile.bk
-        build: stratos/
-        target_name:  postflight-job
-        tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-    - put: mariadb-image
-      params:
-        dockerfile: stratos/deploy/db/Dockerfile.mariadb
-        build: stratos/deploy/db
-        tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
-    - put: ui-image
-      params:
-        dockerfile: stratos/deploy/Dockerfile.ui
-        build: stratos/
-        target_name: prod-build
-        tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
 - name: build-images
   plan:
   - get: stratos
@@ -147,23 +125,11 @@ jobs:
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
-       acl: public-read   
-- name: update-github
-  plan:
-  - get: stratos
-    passed: [create-chart]
-    trigger: true
-  - get: helm-chart-tarball
-    passed: [create-chart]
-  - do:
-    - task: build
-      privileged: true
-      timeout: 30m
-      file: stratos/deploy/ci/tasks/dev-releases/update-gh-nightly-release.yml
+       acl: public-read
+    - put: nightly-gh-release
       params:
-        GITHUB_TOKEN: ((github-access-token))
-        GITHUB_USER: ((github-organization))
-        GITHUB_REPO: ((github-repository))
-        GIT_USER: ((concourse-user))
-        GIT_EMAIL: ((concourse-email))
-        GIT_PRIVATE_KEY: ((github-private-key))
+        name: stratos/deploy/ci/tasks/dev-releases/nightly-release-name
+        tag: stratos/deploy/ci/tasks/dev-releases/nightly-tag
+        body: stratos/deploy/ci/tasks/dev-releases/nightly-release-description
+        globs:
+        - helm-chart-tarball/*.tgz
