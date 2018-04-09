@@ -1,14 +1,21 @@
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
+import { tag } from 'rxjs-spy/operators/tag';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { OperatorFunction } from 'rxjs/interfaces';
 import { Observable } from 'rxjs/Observable';
-import { distinctUntilChanged, filter, map, publishReplay, refCount } from 'rxjs/operators';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { CreatePagination, SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import {
+  getCurrentPageRequestInfo,
+  getPaginationObservables,
+} from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
@@ -122,8 +129,11 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const dataFunctions = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
+
+    // const setResultCount = entities => console.log('sadsad');
+    const setResultCount = entities => this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
     this.page$ = this.isLocal ?
-      new LocalListController(transformedEntities$, pagination$, dataFunctions).page$
+      new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
       : transformedEntities$.pipe(publishReplay(1), refCount());
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
@@ -242,6 +252,89 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       );
     }
   }
+
+  // getLocalPagesObservable(page$, pagination$: Observable<PaginationEntityState>, dataFunctions) {
+  //   return combineLatest(
+  //     pagination$,
+  //     page$
+  //   ).pipe(
+  //     tap(([paginationEntity]) => {
+  //       // If the list pagination is seeded, keep it synced with it's seed.
+  //       if (paginationEntity.seed && !this.seedSyncSub) {
+  //         this.seedSyncSub = this.store.select(selectPaginationState(this.entityKey, paginationEntity.seed))
+  //           .pipe(
+  //             pairwise(),
+  //             filter(([oldPag, newPag]) => {
+  //               return oldPag.ids !== newPag.ids ||
+  //                 oldPag.pageRequests !== newPag.pageRequests;
+  //             })
+  //           )
+  //           .map(pag => pag[1])
+  //           .subscribe(pag => {
+  //             this.store.dispatch(new CreatePagination(
+  //               this.entityKey,
+  //               this.paginationKey,
+  //               paginationEntity.seed
+  //             ));
+  //           });
+  //       }
+  //     }),
+  //     filter(([paginationEntity, entities]) => !getCurrentPageRequestInfo(paginationEntity).busy),
+  //     map(([paginationEntity, entities]) => {
+  //       if (entities && !entities.length) {
+  //         return [];
+  //       }
+
+  //       if (dataFunctions && dataFunctions.length) {
+  //         entities = dataFunctions.reduce((value, fn) => {
+  //           return fn(value, paginationEntity);
+  //         }, entities);
+  //       }
+
+  //       const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
+  //       const validPagesCountChange = this.transformEntity;
+  //       if (
+  //         validPagesCountChange &&
+  //         (paginationEntity.totalResults !== entities.length ||
+  //           paginationEntity.clientPagination.totalResults !== entities.length)
+  //       ) {
+  //         this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+  //       }
+
+  //       const pageIndex = paginationEntity.clientPagination.currentPage - 1;
+  //       return pages[pageIndex];
+  //     }),
+  //     publishReplay(1),
+  //     refCount(),
+  //     tag('local-list')
+  //   );
+  // }
+
+  // getPaginationCompareString(paginationEntity: PaginationEntityState) {
+  //   return Object.values(paginationEntity.clientPagination).join('.')
+  //     + paginationEntity.params['order-direction-field']
+  //     + paginationEntity.params['order-direction']
+  //     + paginationEntity.clientPagination.filter.string
+  //     + Object.values(paginationEntity.clientPagination.filter.items)
+  //     + getCurrentPageRequestInfo(paginationEntity).busy;
+  //   // Some outlier cases actually fetch independently from this list (looking at you app variables)
+  // }
+
+  // splitClientPages(entites: T[], pageSize: number): T[][] {
+  //   if (!entites || !entites.length) {
+  //     return [];
+  //   }
+  //   if (entites.length <= pageSize) {
+  //     return [entites];
+  //   }
+  //   const array = [...entites];
+  //   const pages = [];
+
+  //   for (let i = 0; i < array.length; i += pageSize) {
+  //     pages.push(array.slice(i, i + pageSize));
+  //   }
+  //   return pages;
+  // }
 
   connect(): Observable<T[]> {
     return this.page$

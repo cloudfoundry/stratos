@@ -6,14 +6,16 @@ import { getCurrentPageRequestInfo } from '../../../../store/reducers/pagination
 import { PaginationEntityState } from '../../../../store/types/pagination.types';
 import { splitCurrentPage, getCurrentPageStartIndex } from './local-list-controller.helpers';
 import { tag } from 'rxjs-spy/operators/tag';
+import { SetResultCount } from '../../../../store/actions/pagination.actions';
 
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;
-  constructor(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>, dataFunctions?) {
+  constructor(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>,
+    postSplit?: (entities: (T | T[])[]) => void, dataFunctions?) {
     const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
     const currentPageIndexObservable$ = this.buildCurrentPageNumberObservable(pagination$);
     const currentPageSizeObservable$ = this.buildCurrentPageSizeObservable(pagination$);
-    this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$, currentPageSizeObservable$);
+    this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$, currentPageSizeObservable$, postSplit);
   }
 
   private pageSplitCache: (T | T[])[] = null;
@@ -84,7 +86,8 @@ export class LocalListController<T = any> {
   private buildCurrentPageObservable(
     entities$: Observable<T[]>,
     currentPageNumber$: Observable<number>,
-    currentPageSizeObservable$: Observable<number>
+    currentPageSizeObservable$: Observable<number>,
+    postSplit?: (entities: (T | T[])[]) => void
   ) {
     return combineLatest(
       entities$,
@@ -99,11 +102,14 @@ export class LocalListController<T = any> {
           currentPage
         );
         this.pageSplitCache = data.entities;
+        if (postSplit) {
+          postSplit(entities);
+        }
         return (data.entities[data.index] || []) as T[];
       }),
-      publishReplay(1),
-      refCount(),
-      tag('local-list')
+      // publishReplay(1),
+      // refCount(),
+      // tag('local-list')
     );
   }
 
