@@ -1,10 +1,8 @@
 @import '../../../../sass/colors';
-
 $app-header-height: 56px;
-
 .dashboard {
-  height: 100vh;
   background-color: transparent;
+  height: 100vh;
   &__inner {
     display: flex;
     height: 100%;

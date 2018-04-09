@@ -95,7 +95,9 @@ entityCache[stackSchemaKey] = StackSchema;
 const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[domainSchemaKey] = DomainSchema;
 
-const ServiceSchema = new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const ServiceSchema = new EntitySchema(serviceSchemaKey, {
+  service_plans: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
+}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceSchemaKey] = ServiceSchema;
 
 const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });

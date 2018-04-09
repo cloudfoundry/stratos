@@ -1,0 +1,12 @@
+.mat-chip-list {
+  &__stacked {
+    .mat-chip-list-wrapper {
+      flex-direction: column;
+    }
+  }
+  &__rtl {
+    .mat-chip-list-wrapper {
+      flex-wrap: wrap-reverse;
+    }
+  }
+}

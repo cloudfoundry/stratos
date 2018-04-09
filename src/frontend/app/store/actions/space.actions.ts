@@ -7,12 +7,15 @@ import {
   routeSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
+  cfUserSchemaKey,
+  organizationSchemaKey,
 } from '../helpers/entity-factory';
-import { EntityInlineChildAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { RouteEvents } from './route.actions';
+import { GetAllOrgUsers } from './organization.actions';
 
 export const GET_SPACES = '[Space] Get all';
 export const GET_SPACES_SUCCESS = '[Space] Get all success';
@@ -70,6 +73,9 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
   options: RequestOptions;
   initialParams = {
     'results-per-page': 100,
+    'order-direction': 'asc',
+    'order-direction-field': 'name',
+    'order-by': 'name'
   };
 }
 
@@ -96,7 +102,7 @@ export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, En
     'results-per-page': 100,
     page: 1,
     'order-direction': 'desc',
-    'order-direction-field': 'attachedApps',
+    'order-direction-field': 'creation',
   };
   parentGuid: string;
   entity = entityFactory(routeSchemaKey);
@@ -127,6 +133,8 @@ export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction,
   initialParams = {
     page: 1,
     'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'creation',
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);
@@ -184,4 +192,25 @@ export class UpdateSpace extends CFStartAction implements ICFAction {
   entityKey = spaceSchemaKey;
   options: RequestOptions;
   updatingKey = UpdateSpace.UpdateExistingSpace;
+}
+
+export class GetAllSpaceUsers extends GetAllOrgUsers {
+  constructor(
+    public guid: string,
+    public paginationKey: string,
+    public endpointGuid: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(cfUserSchemaKey, organizationSchemaKey),
+      createEntityRelationKey(cfUserSchemaKey, 'audited_organizations'),
+      createEntityRelationKey(cfUserSchemaKey, 'managed_organizations'),
+      createEntityRelationKey(cfUserSchemaKey, 'billing_managed_organizations'),
+      createEntityRelationKey(cfUserSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
+      createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
+    ],
+    public populateMissing = true) {
+    super(guid, paginationKey, endpointGuid, includeRelations, populateMissing);
+    this.options.url = `spaces/${guid}/user_roles`;
+  }
+  actions = getActions('Spaces', 'List all user roles');
 }

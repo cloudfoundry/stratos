@@ -1,12 +1,11 @@
 import { RequestOptions } from '@angular/http';
 import { Action } from '@ngrx/store';
-import { Schema } from 'normalizr';
 
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
+import { EntitySchema } from '../helpers/entity-factory';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from './api.types';
 import { PaginatedAction } from './pagination.types';
-import { EntitySchema } from '../helpers/entity-factory';
 
 export interface SingleEntityAction {
   entityKey: string;

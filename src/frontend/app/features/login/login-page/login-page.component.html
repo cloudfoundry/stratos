@@ -1,20 +1,25 @@
-<div class="login">
+<div class="login login__busy" [ngClass]="{'login__busy': busy$ | async }">
   <mat-card class="login__card">
-    <mat-progress-bar class="login__loading-bar" [ngClass]="{'login__loading-bar__logging-in': loggingIn }" [color]="error ? 'warn' : 'primary'" [mode]="loggingIn ? 'query' : 'solid'">
-    </mat-progress-bar>
     <div class="login__title">
       <img class="login__logo" src="/assets/cff-logo_rgb.png" />
       <h1 class="mat-h1 login__header">Stratos</h1>
     </div>
-    <form class="login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
-      <mat-form-field>
-        <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
-      </mat-form-field>
-      <mat-form-field>
-        <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
-      </mat-form-field>
-      <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!loginForm.valid">Login</button>
-    </form>
+    <div class="login__body">
+      <div class="login__form-outer">
+        <form class="login__form" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
+          <mat-form-field>
+            <input matInput required [(ngModel)]="username" name="username" placeholder="Username">
+          </mat-form-field>
+          <mat-form-field>
+            <input matInput required type="password" [(ngModel)]="password" name="password" placeholder="Password">
+          </mat-form-field>
+          <button class="login__submit" color="primary" *ngIf="!loggedIn" type="submit" mat-button mat-raised-button [disabled]="!loginForm.valid">Login</button>
+        </form>
+      </div>
+      <div class="login__loading">
+        <mat-progress-bar mode="query"></mat-progress-bar>
+      </div>
+    </div>
   </mat-card>
   <div class="login-message" [ngClass]="{'login-message--show': !!message, 'login-message-error': this.error}">
     {{ message }}

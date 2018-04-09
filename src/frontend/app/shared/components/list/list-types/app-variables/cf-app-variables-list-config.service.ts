@@ -30,7 +30,6 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     action: (item: ListAppEnvVar) => {
       this.dispatchDeleteAction([item]);
     },
-    icon: 'delete',
     label: 'Delete',
     description: '',
     visible: (row: ListAppEnvVar) => true,
