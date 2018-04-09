@@ -24,20 +24,22 @@ run:
       source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
       STRATOS_MASTER=${ROOT_DIR}/stratos-master
       cd ${STRATOS}/deploy/kubernetes/
-      TAG=$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)
+      TAG=$(nightlyTag)
+      IMAGE_TAG=$(fetchImageTag)
       # Patch Helm chart
-      patchHelmChart ${TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+      patchHelmChart ${IMAGE_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
 
       # Generate Helm package
       helm package console
-      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v2.0.0-${TAG}.tgz
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-v${TAG}.tgz
       cd ${ROOT_DIR}/helm-chart/
       INDEX_FILE=${STRATOS_MASTER}/index.yaml
-      CHART_FILE=${ROOT_DIR}/helm-chart/console-helm-chart-v2.0.0-${TAG}.tgz
+      CHART_FILE=${ROOT_DIR}/helm-chart/console-helm-chart-v${TAG}.tgz
       if [ -f ${INDEX_FILE} ]; then
-            NIGHTLY_EXISTS=$(cat  ${INDEX_FILE} | grep 2.0.0-${TAG})
+            NIGHTLY_EXISTS=$(cat  ${INDEX_FILE} | grep ${TAG})
             NIGHTLY_EXISTS=$(echo $?)
             if [ $NIGHTLY_EXISTS -eq 0 ]; then
+              # Patch Digest
               INDEX_SHA256SUM=$(sed -n 's/.*digest: \([a-zA-Z0-9]*\)/\1/p' ${INDEX_FILE})
               CURR_SHA256SUM=$(sha256sum  ${CHART_FILE}| cut -d' ' -f1)
               if [ "${INDEX_SHA256SUM}" = "${CURR_SHA256SUM}" ]; then
@@ -46,6 +48,16 @@ run:
                 echo 'Checksum not equal, patching index.yaml'
                 sed -i 's/'"${INDEX_SHA256SUM}"'/'"${CURR_SHA256SUM}"'/g' ${INDEX_FILE}
               fi
+
+              # Patch Version
+              INDEX_VERSION=$(sed -n 's/version: \(2.0.0-dev.*\)/\1/p' ${INDEX_FILE})
+              if [ "${INDEX_VERSION}" = "${IMAGE_TAG}" ]; then
+                echo 'version is equal, quitting'
+              else
+                echo 'version not equal, patching index.yaml'
+                sed -i 's/'"${INDEX_VERSION}"'/'"${IMAGE_TAG}"'/g' ${INDEX_FILE}
+              fi
+             
               exit 0;
             else
               # Index file exists, but no 2.0.0-dev release has ever been published 

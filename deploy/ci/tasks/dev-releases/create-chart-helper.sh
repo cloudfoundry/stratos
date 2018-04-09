@@ -29,3 +29,11 @@ setupAndPushChange() {
   git push origin HEAD:master
 
 }
+
+fetchImageTag() {
+  echo "$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)-$(git rev-parse HEAD | head -c 8)"
+}
+
+nightlyTag() {
+  echo "$(cat ${STRATOS}/deploy/ci/tasks/dev-releases/nightly-tag)"
+}
