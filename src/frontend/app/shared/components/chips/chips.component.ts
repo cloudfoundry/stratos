@@ -34,6 +34,12 @@ export class AppChipsComponent {
   @Input('chips')
   public chips: AppChip[] = [];
 
+  @Input('stacked')
+  stacked = false;
+
+  @Input('orientation')
+  orientation: 'rtl' | 'ltr' = 'ltr';
+
   public toggleLimit() {
     if (this.limit === this.lowerLimit) {
       this.limit = this.chips.length;

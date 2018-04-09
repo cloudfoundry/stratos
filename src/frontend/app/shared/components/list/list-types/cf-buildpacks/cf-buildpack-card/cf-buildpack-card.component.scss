@@ -1,7 +1,12 @@
 .buildpack-card {
-  &__item {
-    &__icon {
-      margin-right: 6px;
+  &__title {
+    &-name {
+      align-items: baseline;
+      display: flex;
+      flex-direction: row;
+    }
+    &-dot {
+      padding-left: 6px;
     }
   }
 }

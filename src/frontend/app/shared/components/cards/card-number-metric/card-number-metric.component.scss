@@ -1,13 +1,16 @@
 .number-metric-card {
   height: 100%;
+  &__anchor {
+    cursor: pointer;
+  }
   &__container {
     align-items: center;
     display: flex;
     flex-direction: row;
+    padding: 12px 24px;
     > div {
       flex: 1;
     }
-    padding: 12px 24px;
   }
   &__icon {
     flex: 0 0 42px;

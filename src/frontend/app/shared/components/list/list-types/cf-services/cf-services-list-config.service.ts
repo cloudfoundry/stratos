@@ -15,6 +15,7 @@ import { createListFilterConfig } from '../../list.helper';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
 import { ITableColumn } from '../../list-table/table.types';
+import { EndpointModel } from '../../../../../store/types/endpoint.types';
 
 @Injectable()
 export class CfServicesListConfigService implements IListConfig<APIResource> {
@@ -67,7 +68,10 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       list$: this.store
         .select(endpointsRegisteredEntitiesSelector)
         .first()
-        .map(endpoints => Object.values(endpoints)),
+        .map(endpoints => {
+          return Object.values(endpoints)
+            .filter((endpoint: EndpointModel) => endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === 'cf');
+        }),
       loading$: Observable.of(false),
       select: new BehaviorSubject(undefined)
     };

@@ -1,28 +1,20 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { arrayHelper } from '../../../../../../core/helper-classes/array.helper';
-import { getOrgRoles, IOrgUserRole } from '../../../../../../features/cloud-foundry/cf.helpers';
+import { getSpaceRoles, SpaceUserRoles } from '../../../../../../features/cloud-foundry/cf.helpers';
 import { RemoveUserPermission } from '../../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { cfUserSchemaKey, entityFactory } from '../../../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg } from '../../../../../../store/types/user.types';
+import { CfUser, IUserPermissionInSpace } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { EntityMonitor } from '../../../../../monitors/entity-monitor';
-import { AppChip } from '../../../../chips/chips.component';
-
-interface ICellPermissionList extends IOrgUserRole {
-  busy: Observable<boolean>;
-  orgName: string;
-  orgId: string;
-}
-
-interface ICellPermissionUpdates {
-  [key: string]: Observable<boolean>;
-}
+import {
+  ICellPermissionList,
+  TableCellCfUserPermissionComponent,
+} from '../cf-user-permission-cell/cf-user-permission-cell.component';
 
 @Component({
   selector: 'app-cf-space-permission-cell',
@@ -30,53 +22,34 @@ interface ICellPermissionUpdates {
   styleUrls: ['./cf-space-permission-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CfSpacePermissionCellComponent {
-  @Input('row')
-  set row(row: APIResource<CfUser>) {
-    // this.setChipConfig(row);
-    // this.guid = row.metadata.guid;
-  }
-  public chipsConfig: AppChip<ICellPermissionList>[];
-  private guid: string;
+export class CfSpacePermissionCellComponent extends TableCellCfUserPermissionComponent {
+
   constructor(
-    private store: Store<AppState>,
-    private cfUserService: CfUserService
-  ) { }
+    public store: Store<AppState>,
+    public cfUserService: CfUserService
+  ) {
+    super(store, cfUserService);
+  }
 
-  private setChipConfig(row: APIResource<CfUser>) {
-    const userRoles = this.cfUserService.getRolesFromUser(row.entity, 'spaces');
-    const userOrgPermInfo = arrayHelper.flatten<ICellPermissionList>(
-      userRoles.map(orgPerms => this.getOrgPermissions(orgPerms, row))
+  protected setChipConfig(row: APIResource<CfUser>) {
+    const userRoles = this.cfUserService.getSpaceRolesFromUser(row.entity);
+    const userPermInfo = arrayHelper.flatten<ICellPermissionList<SpaceUserRoles>>(
+      userRoles.map(spacePerms => this.getSpacePermissions(spacePerms, row))
     );
-    this.chipsConfig = this.getChipConfig(userOrgPermInfo);
+    this.chipsConfig = this.getChipConfig<SpaceUserRoles>(userPermInfo);
   }
 
-  private getChipConfig(cellPermissionList: ICellPermissionList[]) {
-    return cellPermissionList.map(perm => {
-      const chipConfig = new AppChip<ICellPermissionList>();
-      chipConfig.key = perm;
-      chipConfig.value = `${perm.orgName}: ${perm.key}`;
-      chipConfig.busy = perm.busy;
-      chipConfig.clearAction = chip => {
-        const permission = chip.key;
-        this.removePermission(permission);
-      };
-      chipConfig.hideClearButton = perm.key === 'users';
-      return chipConfig;
-    });
-  }
-
-  private getOrgPermissions(orgPerms: IUserPermissionInOrg, row: APIResource<CfUser>) {
-    return getOrgRoles(orgPerms.permissions).map(perm => {
-      const updatingKey = RemoveUserPermission.generateUpdatingKey(
-        orgPerms.orgGuid,
+  private getSpacePermissions(spacePerms: IUserPermissionInSpace, row: APIResource<CfUser>) {
+    return getSpaceRoles(spacePerms.permissions).map(perm => {
+      const updatingKey = RemoveUserPermission.generateUpdatingKey<SpaceUserRoles>(
+        spacePerms.orgGuid,
         perm.key,
         row.metadata.guid
       );
       return {
         ...perm,
-        orgName: orgPerms.orgName,
-        orgId: orgPerms.orgGuid,
+        name: spacePerms.name,
+        spaceId: spacePerms.orgGuid,
         busy: new EntityMonitor(
           this.store,
           row.metadata.guid,
@@ -84,16 +57,9 @@ export class CfSpacePermissionCellComponent {
           entityFactory(cfUserSchemaKey)
         ).getUpdatingSection(updatingKey).pipe(
           map(update => update.busy)
-        )
+          )
       };
     });
   }
 
-  public removePermission(cellPermission: ICellPermissionList) {
-    this.store.dispatch(new RemoveUserPermission(
-      this.guid,
-      cellPermission.orgId,
-      cellPermission.key
-    ));
-  }
 }

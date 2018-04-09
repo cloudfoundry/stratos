@@ -1,5 +1,8 @@
 import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { UtilsService } from '../../../../core/utils.service';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppState } from '../../../../store/app-state';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-card-number-metric',
@@ -14,12 +17,13 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   @Input() units: string;
   @Input() value: string;
   @Input() showUsage = false;
+  @Input() link: string | Function;
 
   formattedValue: string;
   formattedLimit: string;
   usage: string;
 
-  constructor(private utils: UtilsService) { }
+  constructor(private utils: UtilsService, private store: Store<AppState>) { }
 
   ngOnInit() {
     this.format();
@@ -31,24 +35,33 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   format() {
     if (this.value === '') {
-      this.formattedValue = '-';
-      this.formattedLimit = undefined;
+      this.handleNoValue();
     } else {
-      this.formattedValue = this.formatForUnits(this.value);
-      let res;
-      if (this.limit) {
-        const limit = parseInt(this.limit, 10);
-        if (limit === -1) {
-          res = '∞';
-          this.usage = '';
-        } else {
-          const value = parseInt(this.value, 10);
-          res = this.formatForUnits(this.limit);
-          this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
-        }
-      }
-      this.formattedLimit = res;
+      this.handleValue();
     }
+  }
+
+  handleNoValue() {
+    this.formattedValue = '-';
+    this.formattedLimit = undefined;
+  }
+
+  handleValue() {
+    this.formattedValue = this.formatForUnits(this.value);
+    if (!this.limit) {
+      return;
+    }
+    let res;
+    const limit = parseInt(this.limit, 10);
+    if (limit === -1) {
+      res = '∞';
+      this.usage = '';
+    } else {
+      const value = parseInt(this.value, 10);
+      res = this.formatForUnits(this.limit);
+      this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
+    }
+    this.formattedLimit = res;
   }
 
   formatForUnits(v: string): string {
@@ -56,10 +69,17 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       return v;
     }
     const n = parseInt(v, 10);
-    switch(this.units) {
+    switch (this.units) {
       default:
-      return this.utils.mbToHumanSize(n);
+        return this.utils.mbToHumanSize(n);
     }
   }
 
+  goToLink() {
+    if (typeof (this.link) === 'string') {
+      this.store.dispatch(new RouterNav({ path: [this.link] }));
+    } else {
+      this.link();
+    }
+  }
 }

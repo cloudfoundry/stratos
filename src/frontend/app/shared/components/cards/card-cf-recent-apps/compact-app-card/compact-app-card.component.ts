@@ -1,11 +1,16 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, startWith, tap } from 'rxjs/operators';
-import { ApplicationStateData, CardStatus, ApplicationStateService } from '../../../application-state/application-state.service';
-import { AppState } from '../../../../../store/app-state';
+import { map, startWith } from 'rxjs/operators';
+
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
+import { AppState } from '../../../../../store/app-state';
+import {
+  ApplicationStateData,
+  ApplicationStateService,
+  CardStatus,
+} from '../../../application-state/application-state.service';
 import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 
 
@@ -16,7 +21,7 @@ import { BREADCRUMB_URL_PARAM } from '../../../page-header/page-header.types';
 })
 export class CompactAppCardComponent implements OnInit {
 
-  @Input('row') row;
+  @Input('app') app;
 
   applicationState$: Observable<ApplicationStateData>;
 
@@ -33,16 +38,16 @@ export class CompactAppCardComponent implements OnInit {
   ngOnInit() {
 
     this.bcType = this.setBreadcrumbType(this.activeRouteCfOrgSpace);
-    const initState = this.appStateService.get(this.row.entity, null);
+    const initState = this.appStateService.get(this.app.entity, null);
     this.applicationState$ = ApplicationService.getApplicationState(
       this.store,
       this.appStateService,
-      this.row.entity,
-      this.row.metadata.guid,
+      this.app.entity,
+      this.app.metadata.guid,
       this.activeRouteCfOrgSpace.cfGuid
     ).pipe(
       startWith(initState)
-      );
+    );
     this.appStatus$ = this.applicationState$.pipe(
       map(state => state.indicator)
     );

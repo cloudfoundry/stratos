@@ -5,7 +5,7 @@
       <app-service-icon [service]="row"></app-service-icon>
     </div>
   </app-meta-card-title>
-  <app-meta-card-item style="long-text">
+  <app-meta-card-item customStyle="long-text">
     <app-meta-card-key></app-meta-card-key>
     <app-meta-card-value>
       {{ row.entity.description}}
@@ -47,7 +47,7 @@
       {{ row.entity.service_plans.length }}
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item style="column">
+  <app-meta-card-item customStyle="column">
     <app-meta-card-key>Tags</app-meta-card-key>
     <app-meta-card-value>
       <app-chips [chips]="tags"></app-chips>

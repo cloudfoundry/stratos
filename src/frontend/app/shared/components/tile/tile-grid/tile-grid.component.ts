@@ -6,14 +6,7 @@ import { Component, OnInit, ViewEncapsulation, HostBinding, Input } from '@angul
   styleUrls: ['./tile-grid.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class TileGridComponent implements OnInit {
-
+export class TileGridComponent {
   @HostBinding('class.app-tile-grid-fit')
   @Input('fit') private fit = false;
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
 }

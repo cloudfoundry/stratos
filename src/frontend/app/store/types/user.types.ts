@@ -33,13 +33,23 @@ export interface UserRoleInOrg {
   user: boolean;
 }
 export interface IUserPermissionInOrg {
-  orgName: string;
+  name: string;
   orgGuid: string;
   permissions: {
     orgManager: boolean,
     billingManager: boolean,
     auditor: boolean,
     user: boolean
+  };
+}
+export interface IUserPermissionInSpace {
+  name: string;
+  orgGuid: string;
+  spaceGuid: string;
+  permissions: {
+    manager: boolean,
+    auditor: boolean,
+    developer: boolean
   };
 }
 
