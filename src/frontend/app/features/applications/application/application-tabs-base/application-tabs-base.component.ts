@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostBinding } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -49,6 +49,8 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
+
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -126,6 +128,23 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           {
             value: space.entity.name,
             routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/apps`
+          }
+        ]
+      },
+      {
+        key: 'space-services',
+        breadcrumbs: [
+          {
+            value: endpoint.name,
+            routerLink: `${baseCFUrl}/organizations`
+          },
+          {
+            value: org.entity.name,
+            routerLink: `${baseOrgUrl}/spaces`
+          },
+          {
+            value: space.entity.name,
+            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances`
           }
         ]
       }

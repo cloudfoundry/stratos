@@ -50,10 +50,7 @@ export class UtilsService {
 
   constructor() { }
 
-  precisionIfUseful(size: number, precision?: number) {
-    if (precision == null) {
-      precision = 1;
-    }
+  precisionIfUseful(size: number, precision: number = 1) {
     const floored = Math.floor(size);
     const fixed = Number(size.toFixed(precision));
     if (floored === fixed) {
@@ -62,7 +59,7 @@ export class UtilsService {
     return fixed;
   }
 
-  mbToHumanSize(mb: number) {
+  mbToHumanSize(mb: number): string {
     if (mb == null) {
       return '';
     }
@@ -76,7 +73,29 @@ export class UtilsService {
       return this.precisionIfUseful(mb / 1024) + ' GB';
     }
     return this.precisionIfUseful(mb) + ' MB';
+  }
 
+   bytesToHumanSize(value: string): string {
+    const bytes = parseInt(value, 10);
+    let retBytes = '';
+    if (!bytes && bytes !== 0) {
+      return '';
+    }
+    if (bytes === -1) {
+      retBytes = '∞';
+    }
+    if (bytes >= 1099511627776) {
+      retBytes = this.precisionIfUseful(bytes / 1099511627776) + ' TB';
+    } else if (bytes >= 1073741824) {
+      retBytes = this.precisionIfUseful(bytes / 1073741824) + ' GB';
+    } else if (bytes >= 1048576) {
+      retBytes = this.precisionIfUseful(bytes / 1048576) + ' MB';
+    } else if (bytes >= 1024) {
+      retBytes = this.precisionIfUseful(bytes / 1024) + ' kB';
+    } else if (bytes >= 0) {
+      retBytes = this.precisionIfUseful(bytes) + ' B';
+    }
+    return retBytes;
   }
 
   getDefaultPrecision(precision: number): number {

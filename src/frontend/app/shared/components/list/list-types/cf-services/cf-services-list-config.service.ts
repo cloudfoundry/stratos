@@ -14,23 +14,49 @@ import { IListConfig, IListMultiFilterConfig, ListViewTypes } from '../../list.c
 import { createListFilterConfig } from '../../list.helper';
 import { CfServiceCardComponent } from './cf-service-card/cf-service-card.component';
 import { CfServicesDataSource } from './cf-services-data-source';
+import { ITableColumn } from '../../list-table/table.types';
+import { EndpointModel } from '../../../../../store/types/endpoint.types';
 
 @Injectable()
 export class CfServicesListConfigService implements IListConfig<APIResource> {
   cf: CfOrgSpaceItem;
-  isLocal?: boolean;
+  isLocal: true;
   viewType = ListViewTypes.CARD_ONLY;
-  enableTextFilter = false;
-  tableFixedRowHeight?: boolean;
+  enableTextFilter = true;
   dataSource: CfServicesDataSource;
-  pageSizeOptions = [9, 45, 90];
   cardComponent = CfServiceCardComponent;
   defaultView = 'cards' as ListView;
   multiFilterConfigs: IListMultiFilterConfig[] = [];
   text = {
     title: null,
+    filter: 'Search by name',
     noEntries: 'There are no services'
   };
+  columns: ITableColumn<APIResource>[] = [{
+    columnId: 'label',
+    headerCell: () => 'Name',
+    sort: {
+      type: 'sort',
+      orderKey: 'label',
+      field: 'entity.label'
+    },
+  }, {
+    columnId: 'active',
+    headerCell: () => 'Active',
+    sort: {
+      type: 'sort',
+      orderKey: 'active',
+      field: 'entity.active'
+    },
+  }, {
+    columnId: 'bindable',
+    headerCell: () => 'Bindable',
+    sort: {
+      type: 'sort',
+      orderKey: 'bindable',
+      field: 'entity.bindable'
+    },
+  }];
 
   constructor(
     private store: Store<AppState>,
@@ -42,18 +68,19 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
       list$: this.store
         .select(endpointsRegisteredEntitiesSelector)
         .first()
-        .map(endpoints => Object.values(endpoints)),
+        .map(endpoints => {
+          return Object.values(endpoints)
+            .filter((endpoint: EndpointModel) => endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === 'cf');
+        }),
       loading$: Observable.of(false),
       select: new BehaviorSubject(undefined)
     };
-
     this.multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cf),
     ];
-
   }
 
-  getColumns = () => [];
+  getColumns = () => this.columns;
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];

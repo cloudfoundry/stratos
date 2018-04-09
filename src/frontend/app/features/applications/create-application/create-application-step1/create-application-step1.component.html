@@ -1,28 +1,32 @@
 <b>{{ stepperText }}</b>
-<form #cfForm="ngForm" class="stepper-form">
+<form #cfForm="ngForm" class="create-app-step-1 stepper-form">
   <mat-form-field>
-    <mat-select #cfSelect="ngModel" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required placeholder="Cloud Foundry" name="cf" [disabled]="isRedeploy">
+    <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy" placeholder="Cloud Foundry">
       <mat-option *ngFor="let cf of cfOrgSpaceService.cf.list$ | async" [value]="cf.guid">
         <span>{{ cf.name }}</span>
       </mat-option>
-      <!-- Copied from original version of these widgets.. doesn't seem to work -->
-      <app-stateful-icon *ngIf="(cfOrgSpaceService.cf.loading$ | async)" [state]="'busy'"></app-stateful-icon>
     </mat-select>
   </mat-form-field>
   <mat-form-field>
-    <mat-select #orgSelect="ngModel" [ngModel]="cfOrgSpaceService.org.select.getValue()" (change)="cfOrgSpaceService.org.select.next($event.value)" [disabled]="!cfOrgSpaceService.cf.select.getValue()  || isRedeploy" required placeholder="Organization" name="org">
+    <mat-select #orgSelect="ngModel" [disabled]="!cfOrgSpaceService.cf.select.getValue() || (cfOrgSpaceService.org.loading$ | async) || isRedeploy" [ngModel]="cfOrgSpaceService.org.select.getValue()" (change)="cfOrgSpaceService.org.select.next($event.value)"
+      required placeholder="Organization" name="org">
       <mat-option *ngFor="let org of cfOrgSpaceService.org.list$ | async" [value]="org.guid">
         <span>{{ org.name }}</span>
       </mat-option>
-      <!-- Copied from original version of these widgets.. doesn't seem to work -->
-      <app-stateful-icon *ngIf="(cfOrgSpaceService.org.loading$ | async)" [state]="'busy'"></app-stateful-icon>
     </mat-select>
+    <mat-error *ngIf="!(cfOrgSpaceService.space.list$ | async)?.length">
+      There are no organizations in this Cloud Foundry
+    </mat-error>
   </mat-form-field>
   <mat-form-field>
-    <mat-select #spaceSelect="ngModel" [ngModel]="cfOrgSpaceService.space.select.getValue()" (change)="cfOrgSpaceService.space.select.next($event.value)" [disabled]="!cfOrgSpaceService.org.select.getValue() || isRedeploy" required placeholder="Space" name="space">
+    <mat-select #spaceSelect="ngModel" [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy" [ngModel]="cfOrgSpaceService.space.select.getValue()" (change)="cfOrgSpaceService.space.select.next($event.value)"
+      required placeholder="Space" name="space">
       <mat-option *ngFor="let space of cfOrgSpaceService.space.list$ | async" [value]="space.guid">
         <span>{{ space.name }}</span>
       </mat-option>
     </mat-select>
+    <mat-error *ngIf="!(cfOrgSpaceService.space.list$ | async)?.length">
+      There are no spaces in this organization
+    </mat-error>
   </mat-form-field>
 </form>

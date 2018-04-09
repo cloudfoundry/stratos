@@ -6,13 +6,7 @@ import { AppVariablesDelete } from '../../../../../store/actions/app-variables.a
 import { AppState } from '../../../../../store/app-state';
 import { TableCellEditComponent } from '../../list-table/table-cell-edit/table-cell-edit.component';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  defaultPaginationPageSizeOptionsTable,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component.types';
+import { IListAction, IListConfig, IMultiListAction, ListViewTypes } from '../../list.component.types';
 import { CfAppVariablesDataSource, ListAppEnvVar } from './cf-app-variables-data-source';
 import { TableCellEditVariableComponent } from './table-cell-edit-variable/table-cell-edit-variable.component';
 
@@ -23,6 +17,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
   private multiListActionDelete: IMultiListAction<ListAppEnvVar> = {
     action: (items: ListAppEnvVar[]) => {
       this.dispatchDeleteAction(Array.from(this.envVarsDataSource.selectedRows.values()));
+      return true;
     },
     icon: 'delete',
     label: 'Delete',
@@ -35,7 +30,6 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     action: (item: ListAppEnvVar) => {
       this.dispatchDeleteAction([item]);
     },
-    icon: 'delete',
     label: 'Delete',
     description: '',
     visible: (row: ListAppEnvVar) => true,

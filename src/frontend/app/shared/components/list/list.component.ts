@@ -6,13 +6,15 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  ViewChild,
   TemplateRef,
+  ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, MatSelect, SortDirection } from '@angular/material';
+import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { map, pairwise, tap, first, startWith } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
@@ -22,19 +24,17 @@ import { IListDataSource } from './data-sources-controllers/list-data-source-typ
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
 import {
+  defaultPaginationPageSizeOptionsCards,
+  defaultPaginationPageSizeOptionsTable,
   IGlobalListAction,
   IListAction,
+  IListConfig,
   IListMultiFilterConfig,
   IMultiListAction,
   ListConfig,
-  IListConfig,
   ListViewTypes,
-  defaultPaginationPageSizeOptionsCards,
-  defaultPaginationPageSizeOptionsTable,
 } from './list.component.types';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map } from 'rxjs/operators';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { combineAll } from 'rxjs/operator/combineAll';
 
 
 @Component({
@@ -72,6 +72,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
   multiFilterConfigs: IListMultiFilterConfig[];
+  multiFilterConfigsLoading$: Observable<boolean>;
 
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
@@ -118,8 +119,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     ).pipe(
       map(([isAdding, isSelecting]) => isAdding || isSelecting)
     );
-    this.hasRows$ = this.dataSource.pagination$.map(pag => pag.totalResults > 0);
-
     // Set up an observable containing the current view (card/table)
     this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
     const { view, } = getListStateObservables(this.store, this.listViewKey);
@@ -147,6 +146,11 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
 
+    this.hasRows$ = this.dataSource.page$.pipe(
+      map(pag => pag ? pag.length > 0 : false),
+      startWith(false)
+    );
+
     // Determine if we should hide the paginator
     this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)
       .map(([hasRows, pagination]) => {
@@ -160,10 +164,15 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.paginator.pageSizeOptions = this.config.pageSizeOptions ||
       (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
 
+    let initialPageEvent: PageEvent;
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize
     this.paginationController.pagination$.first().subscribe(pagination => {
+      initialPageEvent = new PageEvent;
+      initialPageEvent.pageIndex = pagination.pageIndex - 1;
+      initialPageEvent.pageSize = pagination.pageSize;
       if (this.paginator.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
+        initialPageEvent.pageSize = this.paginator.pageSizeOptions[0];
         this.paginationController.pageSize(this.paginator.pageSizeOptions[0]);
       }
     });
@@ -174,15 +183,24 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.paginator.pageSize = pagination.pageSize;
     });
 
-    const paginationWidgetToStorePage = this.paginator.page
-      .map(page => page.pageIndex)
-      .do(pageIndex => this.paginationController.page(pageIndex));
-
-
-    const paginationWidgetToStorePageSize = this.paginator.page
-      .map(page => page.pageSize)
-      .distinctUntilChanged()
-      .do(pageSize => this.paginationController.pageSize(pageSize));
+    // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
+    // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
+    // event which handles either page or pageSize changes.
+    const paginationWidgetToStore = this.paginator.page.startWith(initialPageEvent).pipe(
+      pairwise(),
+      tap(([oldV, newV]) => {
+        const pageSizeChanged = oldV.pageSize !== newV.pageSize;
+        const pageChanged = oldV.pageIndex !== newV.pageIndex;
+        if (pageSizeChanged) {
+          this.paginationController.pageSize(newV.pageSize);
+          if (this.dataSource.isLocal) {
+            this.paginationController.page(0);
+          }
+        } else if (pageChanged) {
+          this.paginationController.page(newV.pageIndex);
+        }
+      })
+    );
 
     const filterWidgetToStore = this.filter.valueChanges
       .debounceTime(this.dataSource.isLocal ? 150 : 250)
@@ -191,14 +209,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       .do(filterString => {
         return this.paginationController.filterByString(filterString);
       });
-
-    this.multiFilterWidgetObservables = new Array<Subscription>();
-    Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
-      const sub = filterConfig.select.asObservable().do((filterItem: string) => {
-        this.paginationController.multiFilter(filterConfig, filterItem);
-      });
-      this.multiFilterWidgetObservables.push(sub.subscribe());
-    });
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
@@ -213,6 +223,29 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.filterString = filter.string;
       this.multiFilters = filter.items;
     });
+
+    // Multi filters (e.g. cf/org/space)
+    // - Ensure the initial value is correct
+    // - Pass any multi filter changes made by the user to the pagination controller and thus the store
+    this.multiFilterWidgetObservables = new Array<Subscription>();
+    filterStoreToWidget.pipe(
+      first(),
+      tap(() => {
+        const multiFiltersLoading = [];
+        Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
+          filterConfig.select.next(this.multiFilters[filterConfig.key]);
+          const sub = filterConfig.select.asObservable().do((filterItem: string) => {
+            this.paginationController.multiFilter(filterConfig, filterItem);
+          });
+          this.multiFilterWidgetObservables.push(sub.subscribe());
+          multiFiltersLoading.push(filterConfig.loading$);
+        });
+        this.multiFilterConfigsLoading$ = combineLatest(multiFiltersLoading).pipe(
+          map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
+        );
+      })
+    ).subscribe();
+
 
     this.isFiltering$ = this.paginationController.filter$.pipe(
       map((filter: ListFilter) => {
@@ -247,8 +280,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,
-      paginationWidgetToStorePage,
-      paginationWidgetToStorePageSize,
+      paginationWidgetToStore,
       filterStoreToWidget,
       filterWidgetToStore,
       sortStoreToWidget
@@ -291,8 +323,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   executeActionMultiple(listActionConfig: IMultiListAction<T>) {
-    listActionConfig.action(Array.from(this.dataSource.selectedRows.values()));
-    this.dataSource.selectClear();
+    if (listActionConfig.action(Array.from(this.dataSource.selectedRows.values()))) {
+      this.dataSource.selectClear();
+    }
   }
 
   executeActionGlobal(listActionConfig: IGlobalListAction<T>) {

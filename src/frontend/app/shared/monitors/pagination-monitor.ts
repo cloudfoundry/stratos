@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, map, shareReplay } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
@@ -99,7 +99,7 @@ export class PaginationMonitor<T = any> {
     entityKey: string,
     paginationKey: string
   ) {
-    return store.select(selectPaginationState(entityKey, paginationKey)).pipe(shareReplay(1));
+    return store.select(selectPaginationState(entityKey, paginationKey)).pipe(publishReplay(1), refCount());
   }
 
   private createPageObservable(
@@ -117,7 +117,8 @@ export class PaginationMonitor<T = any> {
         const page = pagination.ids[pagination.currentPage] || [];
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
       }),
-      shareReplay(1)
+      publishReplay(1),
+      refCount()
     );
   }
 
