@@ -88,6 +88,21 @@ export class LoginPageComponent implements OnInit, OnDestroy {
     this.loggedIn = auth.loggedIn;
     this.loggingIn = auth.loggingIn;
     this.verifying = auth.verifying;
+
+    // Upgrade in progress
+    if (auth.sessionData && auth.sessionData.upgradeInProgress) {
+      this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
+      this.store.dispatch(new RouterNav({ path: ['/upgrade'], extras: { skipLocationChange: true } }));
+      return false;
+    }
+
+    // Setup mode
+    if (auth.sessionData && auth.sessionData.uaaError) {
+      this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
+      this.store.dispatch(new RouterNav({ path: ['/uaa'] }));
+      return false;
+    }
+
     // auth.sessionData will be populated if user has been redirected here after attempting to access a protected page without
     // a valid session
     this.error = auth.error && (!auth.sessionData || !auth.sessionData.valid);

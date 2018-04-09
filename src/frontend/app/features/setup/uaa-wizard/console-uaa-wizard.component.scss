@@ -6,8 +6,16 @@
     display: flex;
     flex-direction: column;
   }
+  &__intro {
+    font-size: 18px;
+    font-weight: 600;
+    padding-top: 36px;
+  }
   form {
     min-width: 400px;
     width: 50%;
+  }
+  app-stratos-title {
+    text-align: center;
   }
 }
