@@ -40,7 +40,7 @@ run:
             NIGHTLY_EXISTS=$(echo $?)
             if [ $NIGHTLY_EXISTS -eq 0 ]; then
               # Patch Digest
-              INDEX_SHA256SUM=$(grep -B5 -A0 ${TAG} ${INDEX_FILE} | sed -n 's/digest: \([a-zA-Z0-9]*\)/\1/p')
+              INDEX_SHA256SUM=$(grep -B5 -A0 ${TAG} ${INDEX_FILE} | sed -n 's/digest: \([a-zA-Z0-9]*\)/\1/p' | xargs)
               CURR_SHA256SUM=$(sha256sum  ${CHART_FILE}| cut -d' ' -f1)
               if [ "${INDEX_SHA256SUM}" = "${CURR_SHA256SUM}" ]; then
                 echo 'Checksum is equal, quitting'
@@ -50,7 +50,7 @@ run:
               fi
 
               # Patch Version
-              INDEX_VERSION=$(sed -n 's/version: \(2.0.0-dev.*\)/\1/p' ${INDEX_FILE})
+              INDEX_VERSION=$(sed -n 's/version: \(2.0.0-dev.*\)/\1/p' ${INDEX_FILE} | xargs)
               if [ "${INDEX_VERSION}" = "${IMAGE_TAG}" ]; then
                 echo 'version is equal, quitting'
               else
