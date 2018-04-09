@@ -35,6 +35,11 @@ export class AuthGuardService implements CanActivate {
         if (state.sessionData.valid) {
           return true;
         } else {
+          // Upgrade in progress
+          if (state.sessionData.upgradeInProgress) {
+            this.store.dispatch(new RouterNav({ path: ['/upgrade'], extras: { skipLocationChange: true } }));
+            return false;
+          }
           state.sessionData.uaaError ?
             this.store.dispatch(new RouterNav({ path: ['/uaa'] })) :
             this.store.dispatch(new RouterNav({ path: ['/login'] }, window.location.pathname));
