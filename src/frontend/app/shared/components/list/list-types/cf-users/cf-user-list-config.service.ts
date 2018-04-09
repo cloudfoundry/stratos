@@ -47,7 +47,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       },
 
     ];
-    this.dataSource = new CfUserDataSourceService(store, cfUserService, this);
+    this.dataSource = new CfUserDataSourceService(store, cfUserService.allUsersAction, this);
   }
 
   getColumns = () => this.columns;
