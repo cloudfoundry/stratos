@@ -1,10 +1,10 @@
 #!/bin/bash
 
 patchHelmChart () {
-  TAG=$1
-  DOCKER_ORG=$2
-  DOCKER_REG=$3
-  CHART_PATH=$4
+  local TAG=$1
+  local DOCKER_ORG=$2
+  local DOCKER_REG=$3
+  local CHART_PATH=$4
   sed -i -e 's/consoleVersion: latest/consoleVersion: '"${TAG}"'/g' ${CHART_PATH}/values.yaml
   sed -i -e 's/organization: splatform/organization: '"${DOCKER_ORG}"'/g' ${CHART_PATH}/values.yaml
   sed -i -e 's/hostname: docker.io/hostname: '"${DOCKER_REG}"'/g' ${CHART_PATH}/values.yaml
