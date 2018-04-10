@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../../core/core.module';
 import { PageHeaderComponent } from './page-header.component';
+import { PageSubheaderComponent } from '../page-subheader/page-subheader.component';
 
 
 @NgModule({
@@ -9,10 +10,12 @@ import { PageHeaderComponent } from './page-header.component';
         CoreModule
     ],
     declarations: [
-        PageHeaderComponent
+        PageSubheaderComponent,
+        PageHeaderComponent,
     ],
     exports: [
-        PageHeaderComponent
+        PageSubheaderComponent,
+        PageHeaderComponent,
     ]
 })
 export class PageHeaderModule { }

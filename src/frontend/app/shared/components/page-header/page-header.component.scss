@@ -2,11 +2,7 @@
   $breadcrumb-opacity: .7;
   $breadcrumb-hover-opacity: 1;
   $breadcrumb-padding: 3px;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  transform: translate3d(0, 0, 0);
+  position: relative;
   &__nav-toggle-wrapper {
     margin-right: 20px;
   }
@@ -37,9 +33,33 @@
       opacity: $breadcrumb-hover-opacity;
     }
   }
+  &__outer {
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
 }
 
 .mat-toolbar-row,
 .mat-toolbar-single-row {
   height: 56px;
+}
+
+.subheader {
+  z-index: 2;
+}
+
+.header-event {
+  height: 25px;
+  margin-top: -25px;
+  transition: margin-top 250ms ease-in;
+  &--shown {
+    margin-top: 0;
+  }
+  &__outer {
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+  }
 }

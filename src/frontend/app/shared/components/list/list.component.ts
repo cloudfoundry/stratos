@@ -49,11 +49,11 @@ import {
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
       ]),
       transition('* => left, * => repeatLeft', [
-        style({ opacity: '0', transform: 'translateX(-20px)' }),
+        style({ opacity: '0', transform: 'translateX(-2%)' }),
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ]),
       transition('* => right, * => repeatRight', [
-        style({ opacity: '0', transform: 'translateX(20px)' }),
+        style({ opacity: '0', transform: 'translateX(2%)' }),
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ])
     ])

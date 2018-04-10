@@ -23,9 +23,12 @@ import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/ca
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
+import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
@@ -39,6 +42,7 @@ import { EditableDisplayValueComponent } from './components/editable-display-val
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FocusDirective } from './components/focus.directive';
+import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
   AppEventDetailDialogComponentComponent,
@@ -60,12 +64,12 @@ import { MetadataItemComponent } from './components/metadata-item/metadata-item.
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
-import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
+import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
@@ -80,11 +84,6 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
-import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
-import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
-import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
-import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 
 @NgModule({
   imports: [
@@ -122,7 +121,6 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
-    PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
@@ -186,7 +184,6 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     EndpointsMissingComponent,
     ApplicationStateComponent,
     SshViewerComponent,
-    PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
