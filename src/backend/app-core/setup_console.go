@@ -40,7 +40,7 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 	if err == nil {
 		forceSetupFlag, err := strconv.ParseBool(forceSetup)
 		if err == nil && forceSetupFlag {
-			return consoleConfig, errors.New("STRATOS_CF_LOCAL detected - forcing setup mode")
+			return errors.New("STRATOS_CF_LOCAL detected - forcing setup mode")
 		}
 	}
 
