@@ -135,7 +135,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
         disableClose: true
       });
     },
-    icon: 'add_to_queue',
     label: 'Connect',
     description: '',
     visible: row => row.connectionStatus === 'disconnected',

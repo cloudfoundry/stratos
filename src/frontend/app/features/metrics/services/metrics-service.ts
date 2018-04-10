@@ -23,6 +23,7 @@ export class MetricsService {
   endpointsMonitor: PaginationMonitor<EndpointModel>;
   waitForAppEntity$: Observable<EntityInfo<APIResource>>;
   haveNoMetricsEndpoints$: Observable<boolean>;
+  haveNoConnectedMetricsEndpoints$: Observable<boolean>;
 
   constructor(
     private store: Store<AppState>,
@@ -63,6 +64,14 @@ export class MetricsService {
       map((endpoints: any) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         return metrics.length === 0;
+      })
+    );
+
+    this.haveNoConnectedMetricsEndpoints$ =  this.endpointsMonitor.currentPage$.pipe(
+      map((endpoints: any) => {
+        const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
+        const connected = metrics.filter(e => !!e.user);
+        return connected.length === 0;
       })
     );
   }

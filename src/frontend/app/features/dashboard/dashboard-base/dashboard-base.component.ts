@@ -70,7 +70,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       matIcon: 'equalizer',
       link: '/metrics',
       endpointType: 'metrics',
-      hidden: this.metricsService.haveNoMetricsEndpoints$,
+      hidden: this.metricsService.haveNoConnectedMetricsEndpoints$,
     },
     {
       text: 'Endpoints',
