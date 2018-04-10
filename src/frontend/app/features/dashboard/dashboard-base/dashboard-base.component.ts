@@ -15,6 +15,7 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 import { isFulfilled } from 'q';
 import { Subscription } from 'rxjs/Subscription';
 import { environment } from '../../../../environments/environment';
+import { MetricsService } from '../../metrics/services/metrics-service';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -31,6 +32,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private breakpointObserver: BreakpointObserver,
     private router: Router,
     private activatedRoute: ActivatedRoute,
+    private metricsService: MetricsService,
   ) {
   }
 
@@ -62,6 +64,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       text: 'Cloud Foundry',
       matIcon: 'cloud',
       link: '/cloud-foundry'
+    },
+    {
+      text: 'Metrics',
+      matIcon: 'equalizer',
+      link: '/metrics',
+      endpointType: 'metrics',
+      hidden: this.metricsService.haveNoMetricsEndpoints$,
     },
     {
       text: 'Endpoints',

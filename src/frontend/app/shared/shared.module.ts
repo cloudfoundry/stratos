@@ -82,8 +82,11 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import { ServiceIconComponent } from './components/service-icon/service-icon.component';
+import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
-
+import { RingChartComponent } from './components/ring-chart/ring-chart.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 @NgModule({
   imports: [
     CommonModule,
@@ -93,7 +96,8 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule
+    CdkTableModule,
+    NgxChartsModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -155,7 +159,8 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
     ServiceIconComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    RingChartComponent,
   ],
   exports: [
     FormsModule,
@@ -207,6 +212,7 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
+    RingChartComponent,
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
     CardNumberMetricComponent,

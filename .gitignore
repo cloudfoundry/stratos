@@ -84,3 +84,8 @@ deploy/uaa/tmp/
 src/backend/app-core/plugins
 src/backend/app-core/debug
 .v8flags*
+
+src/backend/*/vendor/
+src/backend/app-core/load_plugins.go
+
+*.bak

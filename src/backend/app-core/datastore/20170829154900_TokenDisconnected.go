@@ -3,13 +3,12 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"os"
+
+	"bitbucket.org/liamstask/goose/lib/goose"
 )
 
 // Up is executed when this migration is applied
-func (s *StratosMigrations) Up_20170829154900(txn *sql.Tx) {
-	databaseProvider := os.Getenv("DATABASE_PROVIDER")
-	fmt.Printf("ENV is: %s", databaseProvider)
+func (s *StratosMigrations) Up_20170829154900(txn *sql.Tx, conf *goose.DBConf) {
 
 	alterTokens := "ALTER TABLE tokens ADD COLUMN disconnected boolean NOT NULL DEFAULT FALSE;"
 

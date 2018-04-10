@@ -61,6 +61,7 @@ import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-ta
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { AddSpaceComponent } from './add-space/add-space.component';
 import { EditSpaceStepComponent } from './edit-space/edit-space-step/edit-space-step.component';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { CreateSpaceStepComponent } from './add-space/create-space-step/create-space-step.component';
 import { CreateOrganizationStepComponent } from './add-organization/create-organization-step/create-organization-step.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
@@ -71,7 +72,7 @@ import { getActiveRouteCfOrgSpaceProvider } from './cf.helpers';
 import { CloudFoundryEndpointService } from './services/cloud-foundry-endpoint.service';
 
 @NgModule({
-  imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule],
+  imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule, NgxChartsModule],
   declarations: [
     CloudFoundryBaseComponent,
     CloudFoundryTabsBaseComponent,

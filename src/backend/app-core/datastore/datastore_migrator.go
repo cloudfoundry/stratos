@@ -72,8 +72,9 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) {
 	}
 
 	log.Println("========================")
-	log.Println("Stratos DB Migration")
+	log.Println("= Stratos DB Migration =")
 	log.Println("========================")
+	log.Printf("Database provider: %s", conf.Driver.Name)
 	log.Printf("Current %d", current)
 
 	stratosMigrations := findMigrartions()
@@ -99,11 +100,10 @@ func ApplyMigrations(conf *goose.DBConf, db *sql.DB) {
 
 			sMigrationMethods := &StratosMigrations{}
 			method := reflect.ValueOf(sMigrationMethods).MethodByName(element.Name)
-			in := make([]reflect.Value, 1)
+			in := make([]reflect.Value, 2)
 			in[0] = reflect.ValueOf(txn)
+			in[1] = reflect.ValueOf(conf)
 			method.Call(in)
-
-			log.Println("")
 
 			err = goose.FinalizeMigration(conf, txn, true, element.Version)
 			if err != nil {

@@ -404,7 +404,7 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 		badCNSIID := ""
 		badAuthToken := ""
 		badRefreshToken := ""
-		badUserInfo := userTokenInfo{
+		badUserInfo := interfaces.JWTUserTokenInfo{
 			UserGUID:    "",
 			TokenExpiry: 0,
 		}
@@ -416,7 +416,9 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
-		tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken, false)
+
+		tr := pp.InitEndpointTokenRecord(badUserInfo.TokenExpiry, badAuthToken, badRefreshToken, false)
+		err := pp.setCNSITokenRecord(badCNSIID, badUserInfo.UserGUID, tr)
 
 		log.Printf("tr is: %T %+v", tr, tr)
 		log.Printf("emptyTokenRecord is: %T %+v", emptyTokenRecord, emptyTokenRecord)

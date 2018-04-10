@@ -12,10 +12,10 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/end
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
+import { getFullEndpointApiUrl, getEndpointTypes } from '../../endpoint-helpers';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../endpoint-helpers';
 import { entityFactory } from '../../../../store/helpers/entity-factory';
 import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
 
@@ -34,9 +34,12 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   validate: Observable<boolean>;
 
   @ViewChild('form') form: NgForm;
+  @ViewChild('typeField') typeField: NgModel;
   @ViewChild('nameField') nameField: NgModel;
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
+
+  endpointTypes = getEndpointTypes();
 
   constructor(private store: Store<AppState>, public utilsService: UtilsService) {
 
@@ -59,6 +62,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
   onNext: StepOnNextFunction = () => {
     const action = new RegisterEndpoint(
+      this.typeField.value,
       this.nameField.value,
       this.urlField.value,
       !!this.skipSllField.value
