@@ -107,45 +107,48 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   ) {
     const baseCFUrl = `/cloud-foundry/${application.cfGuid}`;
     const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
+
+    const baseSpaceBreadcrumbs = [
+      { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
+      { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` }
+    ];
+
     return [
       {
-        breadcrumbs: [{
-          value: 'Applications',
-          routerLink: '/applications'
-        }]
+        breadcrumbs: [{ value: 'Applications', routerLink: '/applications' }]
       },
       {
         key: 'space',
         breadcrumbs: [
-          {
-            value: endpoint.name,
-            routerLink: `${baseCFUrl}/organizations`
-          },
-          {
-            value: org.entity.name,
-            routerLink: `${baseOrgUrl}/spaces`
-          },
-          {
-            value: space.entity.name,
-            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/apps`
-          }
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/apps` }
         ]
       },
       {
         key: 'space-services',
         breadcrumbs: [
-          {
-            value: endpoint.name,
-            routerLink: `${baseCFUrl}/organizations`
-          },
-          {
-            value: org.entity.name,
-            routerLink: `${baseOrgUrl}/spaces`
-          },
-          {
-            value: space.entity.name,
-            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances`
-          }
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances` }
+        ]
+      },
+      {
+        key: 'space-summary',
+        breadcrumbs: [
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/summary` }
+        ]
+      },
+      {
+        key: 'org',
+        breadcrumbs: [
+          { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
+          { value: org.entity.name, routerLink: `${baseOrgUrl}/summary` },
+        ]
+      },
+      {
+        key: 'cf',
+        breadcrumbs: [
+          { value: endpoint.name, routerLink: `${baseCFUrl}/summary` }
         ]
       }
     ];
