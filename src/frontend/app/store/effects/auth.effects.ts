@@ -34,6 +34,8 @@ import { MatDialog } from '@angular/material';
 import { SessionData } from '../types/auth.types';
 import { GetSystemInfo } from '../actions/system.actions';
 
+const SETUP_HEADER = 'stratos-setup-required';
+const UPGRADE_HEADER = 'retry-after';
 
 @Injectable()
 export class AuthEffect {
@@ -81,7 +83,14 @@ export class AuthEffect {
           return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
         })
         .catch((err, caught) => {
-          return action.login ? [new InvalidSession(err.status === 503)] : [new ResetAuth()];
+          let setupMode = false;
+          let isUpgrading = false;
+          if (err.status === 503) {
+            setupMode = err.headers.has(SETUP_HEADER);
+            isUpgrading = err.headers.has(UPGRADE_HEADER);
+          }
+
+          return action.login ? [new InvalidSession(setupMode, isUpgrading)] : [new ResetAuth()];
         });
     });
 

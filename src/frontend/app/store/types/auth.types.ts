@@ -25,5 +25,6 @@ export interface SessionData {
   };
   valid: boolean;
   uaaError?: boolean;
+  upgradeInProgress?: boolean;
   sessionExpiresOn: number;
 }

@@ -83,6 +83,8 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
+import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 
 @NgModule({
   imports: [
@@ -155,7 +157,9 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
     ServiceIconComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    StratosTitleComponent,
+    IntroScreenComponent
   ],
   exports: [
     FormsModule,
@@ -213,7 +217,9 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
     EnvVarViewComponent,
-    ServiceIconComponent
+    ServiceIconComponent,
+    StratosTitleComponent,
+    IntroScreenComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

@@ -9,6 +9,11 @@ import { StepComponent } from '../../../shared/components/stepper/step/step.comp
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { ConsoleUaaWizardComponent } from './console-uaa-wizard.component';
 import { DotContentComponent } from '../../../core/dot-content/dot-content.component';
+import { SharedModule } from '../../../shared/shared.module';
+import { CoreModule } from '../../../core/core.module';
+import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 
 describe('ConsoleUaaWizardComponent', () => {
   let component: ConsoleUaaWizardComponent;
@@ -16,14 +21,21 @@ describe('ConsoleUaaWizardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ConsoleUaaWizardComponent, StepComponent, SteppersComponent, DotContentComponent],
+      declarations: [
+        ConsoleUaaWizardComponent,
+        StepComponent,
+        SteppersComponent,
+        DotContentComponent,
+        PageHeaderComponent,
+        StratosTitleComponent,
+      ],
       imports: [
         RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
         MDAppModule,
         StoreModule.forRoot({}),
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
       ]
     })
       .compileComponents();
