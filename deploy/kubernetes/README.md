@@ -348,5 +348,5 @@ stratos/console      0.9.8                   A Helm chart for deploying Stratos 
 Install
 
 ```
-helm install stratos-dev/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
+helm install stratos/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
 ```
