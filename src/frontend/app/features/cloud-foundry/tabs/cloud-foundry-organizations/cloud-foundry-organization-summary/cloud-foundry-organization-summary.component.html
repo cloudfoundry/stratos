@@ -18,7 +18,7 @@
         <app-card-number-metric icon="content_copy" label="App Instances" value="{{ (cfOrgService.appInstances$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person" label="Users" value="-"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person" label="Users" value="{{(cfOrgService.allOrgUsers.entities$ | async)?.length}}"></app-card-number-metric>
       </app-tile>
     </app-tile-group>
 

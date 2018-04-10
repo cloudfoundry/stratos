@@ -20,12 +20,15 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
   spaceQuotaSchemaKey,
+  cfUserSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { CfUser } from '../../../store/types/user.types';
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -43,7 +46,10 @@ export class CloudFoundrySpaceService {
   apps$: Observable<APIResource<IApp>[]>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   spaceEntityService: EntityService<APIResource<ISpace>>;
+  allSpaceUsers: PaginationObservables<APIResource<CfUser>>;
   allSpaceUsersAction: GetAllSpaceUsers;
+  usersPaginationKey: string;
+
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -57,9 +63,10 @@ export class CloudFoundrySpaceService {
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
     this.allSpaceUsersAction = new GetAllSpaceUsers(
       activeRouteCfOrgSpace.spaceGuid,
-      createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid),
+      this.usersPaginationKey,
       activeRouteCfOrgSpace.cfGuid
     );
     this.spaceEntityService = this.entityServiceFactory.create(
@@ -122,6 +129,14 @@ export class CloudFoundrySpaceService {
         };
       }
     }));
+    this.allSpaceUsers = getPaginationObservables({
+      store: this.store,
+      action: this.allSpaceUsersAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.usersPaginationKey,
+        entityFactory(cfUserSchemaKey)
+      )
+    });
   }
 
   private initialiseAppObservables() {

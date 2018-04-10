@@ -23,7 +23,7 @@ describe('LogStreamTabComponent', () => {
   let component: LogStreamTabComponent;
   let fixture: ComponentFixture<LogStreamTabComponent>;
 
-  const appId = '1';
+  const appId = '';
   const cfId = '2';
 
   beforeEach(async(() => {
