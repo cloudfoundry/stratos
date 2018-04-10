@@ -39,6 +39,8 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
 
+  typeValue: any;
+
   endpointTypes = getEndpointTypes();
 
   constructor(private store: Store<AppState>, public utilsService: UtilsService) {
@@ -56,6 +58,12 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
           };
         })
       );
+
+    // Auto-select default endpoint type - typically this is Cloud Foundry
+    const defaultType = this.endpointTypes.filter((t) => t.isDefault);
+    if (defaultType && defaultType.length) {
+      this.typeValue = defaultType[0].value;
+    }
   }
 
   ngOnInit() { }

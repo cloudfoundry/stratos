@@ -7,7 +7,8 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
 const endpointTypes = [
   {
     value: 'cf',
-    label: 'Cloud Foundry'
+    label: 'Cloud Foundry',
+    isDefault: true
   },
   {
     value: 'metrics',
