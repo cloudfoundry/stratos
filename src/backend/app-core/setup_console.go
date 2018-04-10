@@ -36,6 +36,14 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 	}
 
 	consoleConfig := new(interfaces.ConsoleConfig)
+	forceSetup, err := config.GetValue("STRATOS_CF_LOCAL")
+	if err == nil {
+		forceSetupFlag, err := strconv.ParseBool(forceSetup)
+		if err == nil && forceSetupFlag {
+			return consoleConfig, errors.New("STRATOS_CF_LOCAL detected - forcing setup mode")
+		}
+	}
+
 	url, err := url.Parse(c.FormValue("uaa_endpoint"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid UAA Endpoint value")
