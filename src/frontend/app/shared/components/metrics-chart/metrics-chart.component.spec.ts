@@ -37,7 +37,7 @@ describe('MetricsChartComponent', () => {
         'test',
       ),
       getSeriesName: () => 'test'
-    }
+    };
     fixture.detectChanges();
   });
 
