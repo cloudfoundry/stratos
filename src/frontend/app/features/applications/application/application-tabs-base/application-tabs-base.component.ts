@@ -77,6 +77,17 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          stratProject.deploySource.type === 'github'
+        ) {
+          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+        }
+      });
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
       if (hasMetrics) {
         this.tabLinks.push({
