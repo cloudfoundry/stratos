@@ -41,5 +41,5 @@ export class CloudFoundrySpaceServiceMock {
       }
 
     });
-  allSpaceUsers = {}
+  allSpaceUsers = {};
 }
