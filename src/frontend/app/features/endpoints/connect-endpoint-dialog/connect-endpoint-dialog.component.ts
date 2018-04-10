@@ -83,20 +83,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.setupSubscriptions();
   }
 
-  onFileSelect(event) {
-    const file = event[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = reader.result;
-      this.bodyContent = text;
-      this.endpointForm.controls.authValues.patchValue({
-        config: file.name,
-      });
-    };
-
-    reader.readAsText(file);
-  }
-
   authChanged(e) {
     const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
     this.endpointForm.removeControl('authValues');
