@@ -116,7 +116,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     ]).pipe(
       debounceTime(250)
     ).subscribe(result => {
-      console.log(result.matches);
       if (result.matches) {
         this.enableMobileNav();
       } else {
