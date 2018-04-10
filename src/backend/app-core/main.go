@@ -442,7 +442,12 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	if !isUpgrade {
 		e.Use(sessionCleanupMiddleware)
 	}
-	e.Use(middleware.Logger())
+	customLoggerConfig := middleware.LoggerConfig{
+		Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
+			`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
+			`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
+	}
+	e.Use(middleware.LoggerWithConfig(customLoggerConfig))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.AllowedOrigins,
