@@ -4,6 +4,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map, mergeMap } from 'rxjs/operators';
 
+import { BrowserStandardEncoder } from '../../helper';
 import {
   CONNECT_ENDPOINTS,
   CONNECT_ENDPOINTS_FAILED,
@@ -36,7 +37,6 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { BrowserStandardEncoder } from "../../helper";
 
 @Injectable()
 export class EndpointsEffect {
