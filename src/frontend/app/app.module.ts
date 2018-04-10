@@ -13,7 +13,7 @@ import { HomeModule } from './features/home/home.module';
 import { LoginModule } from './features/login/login.module';
 import { NoEndpointsNonAdminComponent } from './features/no-endpoints-non-admin/no-endpoints-non-admin.component';
 import { ServiceCatalogModule } from './features/service-catalog/service-catalog.module';
-import { UAASetupModule } from './features/uaa-setup/uaa-setup.module';
+import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
@@ -59,7 +59,7 @@ export class CustomRouterStateSerializer
     SharedModule,
     RouteModule,
     ApplicationsModule,
-    UAASetupModule,
+    SetupModule,
     LoginModule,
     HomeModule,
     DashboardModule,

@@ -8,13 +8,15 @@ import { CoreModule } from './core/core.module';
 import { CreateApplicationComponent } from './features/applications/create-application/create-application.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 import { HomePageComponent } from './features/home/home/home-page.component';
-import { ConsoleUaaWizardComponent } from './features/uaa-setup/uaa-wizard/console-uaa-wizard.component';
+import { ConsoleUaaWizardComponent } from './features/setup/uaa-wizard/console-uaa-wizard.component';
 import { SharedModule } from './shared/shared.module';
 import { EndpointsService } from './core/endpoints.service';
+import { UpgradePageComponent } from './features/setup/upgrade-page/upgrade-page.component';
 
 const appRoutes: Routes = [
   { path: '', redirectTo: 'applications', pathMatch: 'full' },
   { path: 'uaa', component: ConsoleUaaWizardComponent },
+  { path: 'upgrade', component: UpgradePageComponent },
   { path: 'login', loadChildren: 'app/features/login/login.module#LoginModule' },
   {
     path: '',

@@ -1,22 +1,20 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { AfterContentInit, Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
-import { Router, ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd } from '@angular/router';
-
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { debounceTime } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
+import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
 
+import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
+import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
-import { ChangeSideNavMode, CloseSideNav } from './../../../store/actions/dashboard-actions';
+import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { isFulfilled } from 'q';
-import { Subscription } from 'rxjs/Subscription';
-import { environment } from '../../../../environments/environment';
-import { MetricsService } from '../../metrics/services/metrics-service';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -35,11 +33,19 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
   ) {
+    if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
+      this.enableMobileNav();
+    }
   }
+
+  private openCloseSub: Subscription;
+  private closeSub: Subscription;
 
   private fullView: boolean;
 
   private routeChangeSubscription: Subscription;
+
+  private breakpointSub: Subscription;
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
@@ -82,16 +88,24 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   sideNaveMode = 'side';
 
   ngOnInit() {
+    const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
-    this.routeChangeSubscription = this.router.events
-      .filter((event) => event instanceof NavigationEnd)
-      .subscribe((event) => {
-        this.fullView = this.isFullView(this.activatedRoute.snapshot);
-      });
+    this.routeChangeSubscription = this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      withLatestFrom(dashboardState$)
+    ).subscribe(([event, dashboard]) => {
+      this.fullView = this.isFullView(this.activatedRoute.snapshot);
+      if (dashboard.sideNavMode === 'over' && dashboard.sidenavOpen) {
+        this.sidenav.close();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.routeChangeSubscription.unsubscribe();
+    this.breakpointSub.unsubscribe();
+    this.closeSub.unsubscribe();
+    this.openCloseSub.unsubscribe();
   }
 
   isFullView(route: ActivatedRouteSnapshot): boolean {
@@ -105,26 +119,38 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.breakpointObserver.observe([
-      Breakpoints.Handset
+    this.breakpointSub = this.breakpointObserver.observe([
+      Breakpoints.HandsetPortrait
     ]).pipe(
       debounceTime(250)
     ).subscribe(result => {
       if (result.matches) {
-        this.store.dispatch(new ChangeSideNavMode('over'));
+        this.enableMobileNav();
       } else {
-        this.store.dispatch(new ChangeSideNavMode('side'));
+        this.disableMobileNav();
       }
     });
 
-    this.sidenav.onClose.subscribe(() => {
+    this.closeSub = this.sidenav.onClose.subscribe(() => {
       this.store.dispatch(new CloseSideNav());
     });
 
-    this.store.select('dashboard')
+    const dashboardState$ = this.store.select('dashboard');
+    this.openCloseSub = dashboardState$
       .subscribe((dashboard: DashboardState) => {
         dashboard.sidenavOpen ? this.sidenav.open() : this.sidenav.close();
         this.sidenav.mode = dashboard.sideNavMode;
       });
+
+  }
+
+  private enableMobileNav() {
+    this.store.dispatch(new CloseSideNav());
+    this.store.dispatch(new ChangeSideNavMode('over'));
+  }
+
+  private disableMobileNav() {
+    this.store.dispatch(new OpenSideNav());
+    this.store.dispatch(new ChangeSideNavMode('side'));
   }
 }

@@ -328,11 +328,18 @@ Nightly releases are pushed with a `dev` tag. These are strictly for development
 
 To install the nightly release: 
 
+Update your Helm repositories to ensure you have the latest nightly release information:
+
+```
+helm repo update
+```
+
 List all versions of the console, to determine the tag.
 ```
 helm search console -l
-NAME                      VERSION             DESCRIPTION                       
-stratos/console      2.0.0-dev               A Helm chart for deploying Stratos UI Console
+NAME                 CHART VERSION           DESCRIPTION                       
+stratos/console      2.0.0-dev-9a5611dc      A Helm chart for deploying Stratos UI Consoles
+stratos/console      1.0.2                   A Helm chart for deploying Stratos UI Console
 stratos/console      1.0.0                   A Helm chart for deploying Stratos UI Console
 stratos/console      0.9.9                   A Helm chart for deploying Stratos UI Console
 stratos/console      0.9.8                   A Helm chart for deploying Stratos UI Console
@@ -341,5 +348,5 @@ stratos/console      0.9.8                   A Helm chart for deploying Stratos 
 Install
 
 ```
-helm install stratos-dev/console --namespace=console --name my-console --version 2.0.0-dev
+helm install stratos/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
 ```

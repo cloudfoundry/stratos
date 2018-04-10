@@ -83,6 +83,7 @@ const testInitialStoreState: AppState = {
       },
       valid: true,
       uaaError: false,
+      upgradeInProgress: false,
       sessionExpiresOn: 1000,
     },
     verifying: false

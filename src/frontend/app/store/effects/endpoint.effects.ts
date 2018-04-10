@@ -4,6 +4,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map, mergeMap } from 'rxjs/operators';
 
+import { BrowserStandardEncoder } from '../../helper';
 import {
   CONNECT_ENDPOINTS,
   CONNECT_ENDPOINTS_FAILED,
@@ -95,7 +96,9 @@ export class EndpointsEffect {
           ...<any>action.authValues,
           'cnsi_guid': action.guid,
           'connect_type': action.authType,
-        }
+        },
+        // Fix for #angular/18261
+        encoder: new BrowserStandardEncoder()
       });
 
       return this.doEndpointAction(

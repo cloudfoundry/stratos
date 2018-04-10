@@ -23,10 +23,6 @@ export class AuthGuardService implements CanActivate {
   canActivate(): Observable<boolean> {
     return this.store.select('auth')
       .map((state: AuthState) => {
-        if (state.sessionData && state.sessionData.uaaError) {
-          this.store.dispatch(new RouterNav({ path: ['/uaa'] }));
-          return false;
-        }
         if (!state.sessionData || !state.sessionData.valid) {
           this.store.dispatch(new RouterNav({
             path: ['/login']

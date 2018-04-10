@@ -18,6 +18,8 @@ export class PageHeaderComponent {
 
   @Input('hideSideNavButton') hideSideNavButton = false;
 
+  @Input('hideMenu') hideMenu = false;
+
   @Input('breadcrumbs')
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
