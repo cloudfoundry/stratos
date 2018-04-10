@@ -7,7 +7,7 @@ import { ApiActionTypes } from './request.actions';
 import { PaginatedAction } from '../types/pagination.types';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../helpers/entity-factory';
 import { cfUserSchemaKey } from '../helpers/entity-factory';
-import { OrgUserRoles } from '../../features/cloud-foundry/cf.helpers';
+import { OrgUserRoles, SpaceUserRoles } from '../../features/cloud-foundry/cf.helpers';
 import { EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
 
 export const GET_ALL = '[Users] Get all';
@@ -47,14 +47,14 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction, Entit
   };
 }
 
-export class RemoveUserPermission extends CFStartAction implements IRequestAction {
+export class RemoveUserPermission<T> extends CFStartAction implements IRequestAction {
   constructor(
     public guid: string,
     public orgGuid: string,
-    public permissionTypeKey: OrgUserRoles
+    public permissionTypeKey: T
   ) {
     super();
-    this.updatingKey = RemoveUserPermission.generateUpdatingKey(orgGuid, permissionTypeKey, guid);
+    this.updatingKey = RemoveUserPermission.generateUpdatingKey<T>(orgGuid, permissionTypeKey, guid);
     this.options = new RequestOptions();
     this.options.url = `organizations/${this.updatingKey}`;
     this.options.method = 'delete';
@@ -65,7 +65,8 @@ export class RemoveUserPermission extends CFStartAction implements IRequestActio
   options: RequestOptions;
   updatingKey: string;
 
-  static generateUpdatingKey(orgGuid: string, permissionType: OrgUserRoles, userGuid: string) {
-    return `${orgGuid}/${permissionType}/${userGuid}`;
+  static generateUpdatingKey<T>(guid: string, permissionType: T, userGuid: string) {
+    return `${guid}/${permissionType}/${userGuid}`;
   }
+
 }

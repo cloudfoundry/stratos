@@ -5,6 +5,7 @@ import { EntityInfo } from '../../../../store/types/api.types';
 import { SharedModule } from '../../../shared.module';
 import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { CardsComponent } from './cards.component';
+import { CardCell } from '../list.types';
 
 describe('CardsComponent', () => {
   let component: CardsComponent<EntityInfo>;
@@ -23,6 +24,7 @@ describe('CardsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CardsComponent);
     component = fixture.componentInstance;
+    component.component = {} as CardCell<any>;
     component.dataSource = {} as IListDataSource<EntityInfo>;
     fixture.detectChanges();
   });

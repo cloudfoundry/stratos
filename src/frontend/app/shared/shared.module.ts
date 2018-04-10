@@ -24,7 +24,6 @@ import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
-import { CardCfSpaceUsageComponent } from './components/cards/card-cf-space-usage/card-cf-space-usage.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -38,12 +37,12 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -63,6 +62,7 @@ import { NoContentMessageComponent } from './components/no-content-message/no-co
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
@@ -80,8 +80,11 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 @NgModule({
@@ -140,7 +143,6 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    EndpointCardComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -150,10 +152,12 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
-    CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     BooleanIndicatorComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     ServiceIconComponent,
     EnvVarViewComponent,
     RingChartComponent,
@@ -207,11 +211,13 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
-    CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
     RingChartComponent,
     CardCfOrgUserDetailsComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     EnvVarViewComponent,
     ServiceIconComponent
   ],

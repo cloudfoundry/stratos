@@ -1,4 +1,5 @@
 // Page sub-header
+@import '../../../../sass/mixins';
 .page-subheader {
   display: flex;
   flex-direction: column;
@@ -9,9 +10,41 @@
   right: 0;
   top: 56px;
   &__tabs {
-    height: 48px;
+    height: 46px;
   }
   &__tab-hidden {
     display: none;
+  }
+}
+
+.tab-nav {
+  display: inline-block;
+  white-space: nowrap;
+  &__inner {
+    flex: 1;
+    @include breakpoint(laptop) {
+      overflow: hidden;
+    }
+  }
+  &__outer {
+    align-items: center;
+    display: flex;
+  }
+  &__scroll-button {
+    display: none;
+    flex: none;
+  }
+}
+
+.page-subheader__tabs-overflowing {
+  .tab-nav {
+    &__scroll-button {
+      display: inline-block;
+    } // We do this only when we're 'programmatically' sure we're overflowing
+    // to stop the ui from jumping while we programmatically
+    // apply margin-bottom
+    &__inner {
+      overflow: auto;
+    }
   }
 }

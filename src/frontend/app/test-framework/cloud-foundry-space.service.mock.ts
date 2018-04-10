@@ -1,9 +1,11 @@
 import { Observable } from 'rxjs/Observable';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ISpace } from '../core/cf-api.types';
+import { GetAllSpaceUsers } from '../store/actions/space.actions';
 
 export class CloudFoundrySpaceServiceMock {
 
+  allSpaceUsersAction = new GetAllSpaceUsers('guid', 'guid-key', 'guid');
   space$: Observable<any> = Observable.of(
     {
       entity: {
