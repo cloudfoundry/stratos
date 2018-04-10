@@ -4,11 +4,12 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
     return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
 }
 
+export const DEFAULT_ENDPOINT_TYPE = 'cf';
+
 const endpointTypes = [
   {
     value: 'cf',
     label: 'Cloud Foundry',
-    isDefault: true
   },
   {
     value: 'metrics',

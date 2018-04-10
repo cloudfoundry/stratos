@@ -12,7 +12,7 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/end
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
-import { getFullEndpointApiUrl, getEndpointTypes } from '../../endpoint-helpers';
+import { getFullEndpointApiUrl, getEndpointTypes, DEFAULT_ENDPOINT_TYPE } from '../../endpoint-helpers';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
@@ -60,7 +60,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       );
 
     // Auto-select default endpoint type - typically this is Cloud Foundry
-    const defaultType = this.endpointTypes.filter((t) => t.isDefault);
+    const defaultType = this.endpointTypes.filter((t) => t.value === DEFAULT_ENDPOINT_TYPE);
     if (defaultType && defaultType.length) {
       this.typeValue = defaultType[0].value;
     }
