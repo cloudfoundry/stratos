@@ -21604,6 +21604,9 @@ const testInitialStoreState: AppState = {
         queryParams: {}
       }
     }
+  },
+  internalEvents: {
+    types: {}
   }
 };
 /* tslint:enable */

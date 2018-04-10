@@ -1,3 +1,4 @@
+import { endpointSchemaKey } from './../../../store/helpers/entity-factory';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
@@ -15,6 +16,7 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 import { isFulfilled } from 'q';
 import { Subscription } from 'rxjs/Subscription';
 import { environment } from '../../../../environments/environment';
+import { SendEventAction } from '../../../store/actions/internal-events.actions';
 
 @Component({
   selector: 'app-dashboard-base',
