@@ -128,6 +128,14 @@ func (p *portalProxy) initialiseConsoleConfig(consoleRepo console_config.Reposit
 	log.Debug("initialiseConsoleConfig")
 
 	consoleConfig := new(interfaces.ConsoleConfig)
+	forceSetup, err := config.GetValue("STRATOS_CF_LOCAL")
+	if err == nil {
+		forceSetupFlag, err := strconv.ParseBool(forceSetup)
+		if err == nil && forceSetupFlag {
+			return consoleConfig, errors.New("STRATOS_CF_LOCAL detected - forcing setup mode")
+		}
+	}
+
 	uaaEndpoint, err := config.GetValue("UAA_ENDPOINT")
 	if err != nil {
 		return consoleConfig, errors.New("UAA_Endpoint not found")

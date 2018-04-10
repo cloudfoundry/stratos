@@ -1,0 +1,13 @@
+applications:
+- name: console
+  memory: 256M
+  disk_quota: 256M
+  host: console
+  timeout: 180
+  buildpacks:
+  - https://github.com/SUSE/stratos-buildpack
+  health-check-type: port
+  env:
+    STRATOS_CF_LOCAL: true
+
+
