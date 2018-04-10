@@ -4,6 +4,7 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { map, mergeMap } from 'rxjs/operators';
 
+import { BrowserStandardEncoder } from '../../helper';
 import {
   CONNECT_ENDPOINTS,
   CONNECT_ENDPOINTS_FAILED,
@@ -92,7 +93,9 @@ export class EndpointsEffect {
           'cnsi_guid': action.guid,
           'username': action.username,
           'password': action.password,
-        }
+        },
+        // Fix for #angular/18261
+        encoder: new BrowserStandardEncoder()
       });
 
       return this.doEndpointAction(
@@ -125,11 +128,11 @@ export class EndpointsEffect {
 
   @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
     .pipe(
-      map(action => {
-        if (action.endpointType === 'cloud-foundry') {
-          this.store.dispatch(new ClearPages('application', 'applicationWall'));
-        }
-      })
+    map(action => {
+      if (action.endpointType === 'cloud-foundry') {
+        this.store.dispatch(new ClearPages('application', 'applicationWall'));
+      }
+    })
     );
 
 
