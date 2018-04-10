@@ -56,10 +56,13 @@
         var fPath = path.join(folder, plugin);
         var stat = fs.lstatSync(fPath);
         if (stat.isDirectory()) {
+          var isMain = plugin === 'app-core';
+          var srcPath = isMain ? tempSrcPath : path.join(tempSrcPath, 'plugins', plugin);
           plugins.push({
             name: plugin, 
             path: fPath,
-            isMain: plugin === 'app-core'
+            isMain: isMain,
+            srcPath: srcPath
           });
         }
       });
@@ -95,7 +98,7 @@
     // see CF deployment script deploy/cloud-foundry/package.sh
     if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
-      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep;
+      tempSrcPath = path.join(tempPath, conf.goPath);
       return done();
     } else {
       mktemp.createDir('/tmp/stratos-ui-XXXX.build',
@@ -148,9 +151,11 @@
 
       var promises = [];
       _.each(plugins, function (plugin) {
+        if (!plugin.isMain) {
         var pluginSource = plugin.path;
         var pluginDest = path.join(pluginsFolder, plugin.name);
         promises.push(fsSymLinkQ(pluginSource, pluginDest));
+        }
       });
 
       Q.all(promises)

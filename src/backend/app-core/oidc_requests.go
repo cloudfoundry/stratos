@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,13 +11,13 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doOauthFlowRequest")
+func (p *portalProxy) doOidcFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
+	log.Debug("doOidcFlowRequest")
 
 	// get a cnsi token record and a cnsi record
 	tokenRec, cnsi, err := p.getCNSIRequestRecords(cnsiRequest)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
+		return nil, fmt.Errorf("Unable to retrieve Endpoint record: %v", err)
 	}
 
 	got401 := false
@@ -32,10 +33,10 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 		}
 
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.RefreshOidcToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
 			if err != nil {
 				log.Info(err)
-				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
+				return nil, fmt.Errorf("Couldn't refresh OIDC token for Endpoint with GUID %s", cnsiRequest.GUID)
 			}
 			tokenRec = refreshedTokenRec
 		}
@@ -63,23 +64,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 	}
 }
 
-func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
-	log.Debug("getCNSIRequestRecords")
-	// look up token
-	t, ok := p.GetCNSITokenRecord(r.GUID, r.UserGUID)
-	if !ok {
-		return t, c, fmt.Errorf("Could not find token for csni:user %s:%s", r.GUID, r.UserGUID)
-	}
-
-	c, err = p.GetCNSIRecord(r.GUID)
-	if err != nil {
-		return t, c, fmt.Errorf("Info could not be found for CNSI with GUID %s: %s", r.GUID, err)
-	}
-
-	return t, c, nil
-}
-
-func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
 	log.Debug("refreshToken")
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
@@ -88,19 +73,48 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
+	// Parse out token metadata is there is some, and override some of theser parameters
+
+	var scopes string
+
+	log.Info(userToken.Metadata)
+	if len(userToken.Metadata) > 0 {
+		metadata := &interfaces.OAuth2Metadata{}
+		if err := json.Unmarshal([]byte(userToken.Metadata), metadata); err == nil {
+			log.Info(metadata)
+			log.Info(metadata.ClientID)
+			log.Info(metadata.ClientSecret)
+
+			if len(metadata.ClientID) > 0 {
+				client = metadata.ClientID
+			}
+			if len(metadata.ClientSecret) > 0 {
+				clientSecret = metadata.ClientSecret
+			}
+			if len(metadata.IssuerURL) > 0 {
+				tokenEndpoint = metadata.IssuerURL
+				tokenEndpointWithPath = fmt.Sprintf("%s/token", tokenEndpoint)
+			}
+		}
+	}
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, scopes)
 	if err != nil {
 		return t, fmt.Errorf("Token refresh request failed: %v", err)
 	}
 
-	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
+	u, err := p.GetUserTokenInfo(uaaRes.IDToken)
 	if err != nil {
-		return t, fmt.Errorf("Could not get user token info from access token")
+		return t, fmt.Errorf("Could not get user token info from id token")
 	}
 
 	u.UserGUID = userGUID
 
 	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	tokenRecord.AuthType = interfaces.AuthTypeOIDC
+	// Copy across the metadata from the original token
+	tokenRecord.Metadata = userToken.Metadata
+	
 	err = p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)

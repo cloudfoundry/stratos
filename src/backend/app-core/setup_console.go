@@ -69,7 +69,7 @@ func (p *portalProxy) setupConsole(c echo.Context) error {
 			"Failed to authenticate with UAA due to %s", err)
 	}
 
-	userTokenInfo, err := getUserTokenInfo(uaaRes.AccessToken)
+	userTokenInfo, err := p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
 		return interfaces.NewHTTPShadowError(
 			http.StatusBadRequest,
