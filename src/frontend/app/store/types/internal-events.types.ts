@@ -8,10 +8,12 @@ export interface InternalEventState {
     eventCode: string | number;
 }
 
-export interface InternalEventsState {
-    types: {
-        [type: string]: {
-            [eventKey: string]: InternalEventState[]
-        }
+export interface InternalEventTypeState {
+    [type: string]: {
+        [eventKey: string]: InternalEventState[]
     };
+}
+
+export interface InternalEventsState {
+    types: InternalEventTypeState;
 }

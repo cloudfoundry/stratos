@@ -2,7 +2,7 @@ import { applicationSchemaKey, endpointSchemaKey } from './../helpers/entity-fac
 import { AppState } from '../app-state';
 import { Action } from '@ngrx/store';
 import { LoggerAction, LoggerDebugAction } from '../actions/log.actions';
-import { SEND_EVENT, InternalEventsState, GLOBAL_EVENT } from '../types/internal-events.types';
+import { SEND_EVENT, InternalEventsState, GLOBAL_EVENT, InternalEventTypeState } from '../types/internal-events.types';
 import { SendEventAction } from '../actions/internal-events.actions';
 
 const defaultState: InternalEventsState = {
@@ -18,19 +18,18 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
     const newState = {
       ...state
     };
+    const eventType = newState.types[action.eventType] || {};
     const type = {
-      ...(newState.types[action.eventType] || {})
+      [action.eventKey]: [
+        {
+          message,
+          eventCode,
+          timeStamp
+        },
+        ...(eventType[action.eventKey] || [])
+      ],
+      ...eventType
     };
-
-    if (!type[action.eventKey]) {
-      type[action.eventKey] = [];
-    }
-    type[action.eventKey].push({
-      message,
-      eventCode,
-      timeStamp
-    });
-
     newState.types = { ...newState.types, [action.eventType]: type };
     return newState;
   }
