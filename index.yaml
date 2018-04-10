@@ -87,6 +87,6 @@ entries:
     digest: 170aab2a5f743458a537be9a1cc71ce36608d72a6da0db0f26eb73632adccf88
     name: console
     urls:
-    - https://github.com/cloudfoundry-incubator/stratos/releases/download/2.0.0-dev-9a5611dc/console-helm-chart-v2.0.0-dev-9a5611dc.tgz
+    - https://github.com/cloudfoundry-incubator/stratos/releases/download/2.0.0-dev/console-helm-chart-v2.0.0-dev-9a5611dc.tgz
     version: 2.0.0-dev-9a5611dc
 generated: 2018-04-06T15:16:08.587024134Z
