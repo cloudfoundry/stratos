@@ -1,15 +1,23 @@
+import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel } from './../../store/types/endpoint.types';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
-    return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
+  return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
 
-const endpointTypes = [
+export interface EndpointTypeHelper {
+  value: string;
+  label: string;
+  urlValidation?: string;
+}
+
+const endpointTypes: EndpointTypeHelper[] = [
   {
     value: 'cf',
     label: 'Cloud Foundry',
+    urlValidation: urlValidationExpression
   },
   {
     value: 'metrics',

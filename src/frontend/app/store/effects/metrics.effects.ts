@@ -8,7 +8,7 @@ import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
 import { metricSchemaKey } from '../helpers/entity-factory';
 import { IMetricsResponse } from '../types/base-metric.types';
-import { IRequestAction, WrapperRequestActionSuccess } from './../types/request.types';
+import { IRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
 
 
 @Injectable()
@@ -17,12 +17,16 @@ export class MetricsEffect {
   constructor(
     private actions$: Actions,
     private store: Store<AppState>,
-    private httpClient: HttpClient
+    private httpClient: HttpClient,
   ) { }
 
   @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START)
     .mergeMap(action => {
       const fullUrl = this.buildFullUrl(action);
+      const apiAction = {
+        guid: action.guid,
+        entityKey: metricSchemaKey
+      } as IRequestAction;
       return this.httpClient.get<{ [cfguid: string]: IMetricsResponse }>(fullUrl, {
         headers: { 'x-cap-cnsi-list': action.cfGuid }
       }).pipe(
@@ -32,10 +36,6 @@ export class MetricsEffect {
           const metricObject = metric ? {
             [metricKey]: metric.data
           } : {};
-          const apiAction = {
-            guid: action.guid,
-            entityKey: metricSchemaKey
-          } as IRequestAction;
           return new WrapperRequestActionSuccess(
             {
               entities: {
@@ -46,7 +46,15 @@ export class MetricsEffect {
             apiAction
           );
         })
-      );
+      ).catch(errObservable => {
+        return [
+          new WrapperRequestActionFailed(
+            errObservable.message,
+            apiAction,
+            'fetch'
+          )
+        ];
+      });
     });
 
   private buildFullUrl(action: MetricsAction) {

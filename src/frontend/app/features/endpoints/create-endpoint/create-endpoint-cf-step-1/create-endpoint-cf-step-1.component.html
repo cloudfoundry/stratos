@@ -1,6 +1,6 @@
 <form #form="ngForm" class="stepper-form">
   <mat-form-field>
-    <mat-select placeholder="Endpoint Type" id="ep-type" name="ep-type" [(ngModel)]="typeValue" #typeField="ngModel" required>
+    <mat-select placeholder="Endpoint Type" id="ep-type" name="ep-type" [(ngModel)]="typeValue" (change)="setUrlValidation($event.value)" #typeField="ngModel" required>
       <mat-option *ngFor="let type of endpointTypes" [value]="type.value">
         {{ type.label }}
       </mat-option>
@@ -12,7 +12,7 @@
     <mat-error *ngIf="nameField.errors && nameField.errors.appUnique">Name is not unique</mat-error>
   </mat-form-field>
   <mat-form-field novalidate>
-    <input matInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Endpoint Address" [appUnique]="(existingEndpoints | async)?.urls">
+    <input matInput id="url" name="url" [(ngModel)]="urlValue" #urlField="ngModel" type="url" required placeholder="Endpoint Address" pattern="{{urlValidation}}" [appUnique]="(existingEndpoints | async)?.urls">
     <mat-error *ngIf="urlField.errors && urlField.errors.required">URL is required</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.pattern">Invalid API URL</mat-error>
     <mat-error *ngIf="urlField.errors && urlField.errors.appUnique">URL is not unique</mat-error>

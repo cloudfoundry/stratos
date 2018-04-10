@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
+import { Store } from '@ngrx/store';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { GetSystemInfo } from '../../../store/actions/system.actions';
+import { AppState } from '../../../store/app-state';
 
 
 @Component({
@@ -17,5 +20,7 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
   }]
 })
 export class EndpointsPageComponent {
-  constructor(public endpointsService: EndpointsService) { }
+  constructor(private store: Store<AppState>, public endpointsService: EndpointsService) {
+    this.store.dispatch(new GetSystemInfo());
+  }
 }

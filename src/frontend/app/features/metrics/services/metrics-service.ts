@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { EntityService } from '../../../core/entity-service';
 import { Observable } from 'rxjs/Observable';
-import { EntityInfo, APIResource } from '../../../store/types/api.types';
-import { switchMap, shareReplay, tap, filter, map } from 'rxjs/operators';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { map, publishReplay, refCount } from 'rxjs/operators';
+
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { AppState } from '../../../store/app-state';
+import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { EndpointModel } from '../../../store/types/endpoint.types';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
-import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;
@@ -57,22 +56,27 @@ export class MetricsService {
         });
         return result;
       }),
-      shareReplay(1)
+      publishReplay(1),
+      refCount(),
     );
 
     this.haveNoMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
       map((endpoints: any) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         return metrics.length === 0;
-      })
+      }),
+      publishReplay(1),
+      refCount(),
     );
 
-    this.haveNoConnectedMetricsEndpoints$ =  this.endpointsMonitor.currentPage$.pipe(
+    this.haveNoConnectedMetricsEndpoints$ = this.endpointsMonitor.currentPage$.pipe(
       map((endpoints: any) => {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         const connected = metrics.filter(e => !!e.user);
         return connected.length === 0;
-      })
+      }),
+      publishReplay(1),
+      refCount(),
     );
   }
 }

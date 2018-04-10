@@ -7,12 +7,10 @@ import { getNameForEndpointType } from '../../endpoints/endpoint-helpers';
   templateUrl: './metrics.component.html',
   styleUrls: ['./metrics.component.scss']
 })
-export class MetricsComponent implements OnInit {
+export class MetricsComponent {
 
   getNameForEndpointType = getNameForEndpointType;
 
   constructor(private metricsService: MetricsService) { }
-
-  ngOnInit() { }
 
 }

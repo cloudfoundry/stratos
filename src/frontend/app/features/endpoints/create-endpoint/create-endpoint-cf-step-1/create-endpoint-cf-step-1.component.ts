@@ -42,8 +42,9 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   typeValue: any;
 
   endpointTypes = getEndpointTypes();
+  urlValidation: string;
 
-  constructor(private store: Store<AppState>, public utilsService: UtilsService) {
+  constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
@@ -63,6 +64,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
     const defaultType = this.endpointTypes.filter((t) => t.value === DEFAULT_ENDPOINT_TYPE);
     if (defaultType && defaultType.length) {
       this.typeValue = defaultType[0].value;
+      this.setUrlValidation(this.typeValue);
     }
   }
 
@@ -108,5 +110,10 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       .map(() => {
         return this.form.valid;
       });
+  }
+
+  setUrlValidation(endpointValue: string) {
+    const endpoint = this.endpointTypes.find(e => e.value === endpointValue);
+    this.urlValidation = endpoint ? endpoint.urlValidation : '';
   }
 }
