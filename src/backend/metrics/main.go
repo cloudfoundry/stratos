@@ -154,27 +154,6 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool) 
 	// No info endpoint that we can fetch to check if the Endpoint is a metrics endpoint
 	// We'll discover that when we try and connect
 
-	// uri.Path = "v2/info"
-	// h := c.portalProxy.GetHttpClient(skipSSLValidation)
-
-	// res, err := h.Get(uri.String())
-	// if err != nil {
-	// 	return newCNSI, nil, err
-	// }
-
-	// if res.StatusCode != 200 {
-	// 	buf := &bytes.Buffer{}
-	// 	io.Copy(buf, res.Body)
-	// 	defer res.Body.Close()
-
-	// 	return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
-	// }
-
-	// dec := json.NewDecoder(res.Body)
-	// if err = dec.Decode(&v2InfoResponse); err != nil {
-	// 	return newCNSI, nil, err
-	// }
-
 	newCNSI.TokenEndpoint = apiEndpoint
 	newCNSI.AuthorizationEndpoint = apiEndpoint
 
