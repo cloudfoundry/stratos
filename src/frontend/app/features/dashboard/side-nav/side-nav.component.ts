@@ -9,21 +9,19 @@ export interface SideNavItem {
   text: string;
   matIcon: string;
   link: string;
-  endpointType?: string;
   hidden?: boolean | Observable<boolean>;
+  endpointType?: string;
 }
 
 @Component({
   selector: 'app-side-nav',
   templateUrl: './side-nav.component.html',
-  styleUrls: ['./side-nav.component.scss'],
+  styleUrls: ['./side-nav.component.scss']
 })
 
 export class SideNavComponent implements OnInit {
 
-  constructor(
-    private store: Store<AppState>,
-  ) { }
+  constructor(private store: Store<AppState>, ) { }
 
   @Input() tabs: SideNavItem[];
   // Button is not always visible on load, so manually push through an event
