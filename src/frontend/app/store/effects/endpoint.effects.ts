@@ -36,6 +36,7 @@ import {
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
+import { BrowserStandardEncoder } from "../../helper";
 
 @Injectable()
 export class EndpointsEffect {
@@ -92,7 +93,9 @@ export class EndpointsEffect {
           'cnsi_guid': action.guid,
           'username': action.username,
           'password': action.password,
-        }
+        },
+        // Fix for #angular/18261
+        encoder: new BrowserStandardEncoder()
       });
 
       return this.doEndpointAction(
@@ -125,11 +128,11 @@ export class EndpointsEffect {
 
   @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
     .pipe(
-      map(action => {
-        if (action.endpointType === 'cloud-foundry') {
-          this.store.dispatch(new ClearPages('application', 'applicationWall'));
-        }
-      })
+    map(action => {
+      if (action.endpointType === 'cloud-foundry') {
+        this.store.dispatch(new ClearPages('application', 'applicationWall'));
+      }
+    })
     );
 
 
