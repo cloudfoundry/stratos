@@ -1,3 +1,4 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -14,12 +15,13 @@ import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/mate
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { map, pairwise, tap, first, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { ListFilter, ListPagination, ListSort, ListView, SetListViewAction } from '../../../store/actions/list.actions';
+import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
 import { getListStateObservables } from '../../../store/reducers/list.reducer';
+import { ListView } from './../../../store/actions/list.actions';
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { IListPaginationController, ListPaginationController } from './data-sources-controllers/list-pagination-controller';
 import { ITableColumn } from './list-table/table.types';
@@ -34,15 +36,29 @@ import {
   ListConfig,
   ListViewTypes,
 } from './list.component.types';
-import { combineAll } from 'rxjs/operator/combineAll';
 
 
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
-  styleUrls: ['./list.component.scss']
+  styleUrls: ['./list.component.scss'],
+  animations: [
+    trigger('list', [
+      transition('* => in', [
+        style({ opacity: '0', transform: 'translateY(-10px)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
+      ]),
+      transition('* => left, * => repeatLeft', [
+        style({ opacity: '0', transform: 'translateX(-30px)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+      ]),
+      transition('* => right, * => repeatRight', [
+        style({ opacity: '0', transform: 'translateX(30px)' }),
+        animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
+      ])
+    ])
+  ]
 })
-
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
@@ -90,6 +106,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   listViewKey: string;
   // Observable which allows you to determine if the top control bar should be shown
   hasControls$: Observable<boolean>;
+
+  pageState$: Observable<string>;
 
 
   public safeAddForm() {
@@ -286,6 +304,44 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       sortStoreToWidget
     ).subscribe();
 
+    this.pageState$ = combineLatest(
+      this.paginationController.pagination$,
+      this.dataSource.isLoadingPage$,
+      this.view$
+    )
+      .pipe(
+        filter(([pagination, busy, viewType]) => viewType !== 'table'),
+        map(([pagination, busy, viewType]) => ({ pageIndex: pagination.pageIndex, busy, viewType })),
+        distinctUntilChanged((x, y) => x.pageIndex === y.pageIndex && x.busy === y.busy && x.viewType === y.viewType),
+        pairwise(),
+        map(([oldVal, newVal]) => {
+
+          if (oldVal.viewType !== oldVal.viewType) {
+            return 'none';
+          }
+          if (oldVal.pageIndex > newVal.pageIndex) {
+            return 'left';
+          } else if (oldVal.pageIndex < newVal.pageIndex) {
+            return 'right';
+          } else if (oldVal.busy && !newVal.busy) {
+            return 'in';
+          }
+          return 'none';
+        }),
+        startWith('none'),
+        pairwise(),
+        map(([oldVal, newVal]) => {
+          if (oldVal === newVal) {
+            if (oldVal === 'left') {
+              return 'repeatLeft';
+            }
+            if (oldVal === 'right') {
+              return 'repeatRight';
+            }
+          }
+          return newVal;
+        })
+      );
   }
 
   ngAfterViewInit() {
