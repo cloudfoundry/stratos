@@ -16,6 +16,7 @@ import { isFulfilled } from 'q';
 import { Subscription } from 'rxjs/Subscription';
 import { environment } from '../../../../environments/environment';
 import { MetricsService } from '../../metrics/services/metrics-service';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -48,7 +49,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       matIcon: 'assessment',
       link: '/dashboard',
       // Experimental - only show in development
-      hidden: environment.production,
+      hidden: Observable.of(environment.production),
     },
     {
       text: 'Applications',

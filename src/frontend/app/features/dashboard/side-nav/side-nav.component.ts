@@ -9,7 +9,7 @@ export interface SideNavItem {
   text: string;
   matIcon: string;
   link: string;
-  hidden?: boolean | Observable<boolean>;
+  hidden?: Observable<boolean>;
 }
 
 @Component({
