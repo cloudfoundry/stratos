@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
@@ -19,11 +19,9 @@ import { ApplicationData, ApplicationService } from '../../../../application.ser
   ]
 })
 export class BuildTabComponent implements OnInit {
-  constructor(
-    private route: ActivatedRoute,
-    private applicationService: ApplicationService,
-    private store: Store<AppState>
-  ) { }
+
+
+  constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
 
   cardTwoFetching$: Observable<boolean>;
 

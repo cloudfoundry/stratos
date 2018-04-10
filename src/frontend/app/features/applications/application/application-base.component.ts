@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -52,6 +52,7 @@ function entityServiceFactory(
   templateUrl: './application-base.component.html',
   styleUrls: ['./application-base.component.scss'],
   providers: [
+    ApplicationService,
     {
       provide: ApplicationService,
       useFactory: applicationServiceFactory,
@@ -65,4 +66,5 @@ function entityServiceFactory(
 
   ]
 })
-export class ApplicationBaseComponent { }
+export class ApplicationBaseComponent {
+}

@@ -7,6 +7,7 @@ import { SharedModule } from '../../../../shared.module';
 import { CdkTableModule } from '@angular/cdk/table';
 import { setTimeout } from 'timers';
 import { Component } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('TableRowComponent', () => {
 
@@ -43,7 +44,8 @@ describe('TableRowComponent', () => {
       declarations: [TableRowComponent, TestHostComponent],
       imports: [
         CoreModule,
-        CdkTableModule
+        CdkTableModule,
+        NoopAnimationsModule,
       ]
     })
       .compileComponents();

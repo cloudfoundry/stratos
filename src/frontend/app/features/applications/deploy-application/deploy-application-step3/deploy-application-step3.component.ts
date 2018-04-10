@@ -34,7 +34,7 @@ const APP_CHECK_INTERVAL = 3000;
 export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   connect$: Subscription;
-  streamTitle: string;
+  streamTitle = 'Preparing...';
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
@@ -71,6 +71,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         return Observable.of(p).combineLatest(orgSubscription, spaceSubscription);
       }),
       tap(p => {
+        this.connect$.unsubscribe();
         const host = window.location.host;
         const streamUrl = (
           `wss://${host}/pp/${this.proxyAPIVersion}/${p[0].cloudFoundryDetails.cloudFoundry}/` +
