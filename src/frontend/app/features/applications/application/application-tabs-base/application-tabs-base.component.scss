@@ -4,4 +4,9 @@
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  &__anchor {
+    &:hover {
+      color: inherit;
+    }
+  }
 }
