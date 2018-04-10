@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+
 	"github.com/SUSE/stratos-ui/config"
 	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 )
 
 type MetricsSpecification struct {
@@ -238,8 +239,6 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 		for guid, info := range endpointsMap {
 			// Depends on the type
 			if info.DopplerLoggingEndpoint == metricProviderInfo.URL {
-				log.Info("Found it")
-
 				relate := EndpointMetricsRelation{}
 				relate.endpoint = info
 				relate.metrics = &metricProviderInfo

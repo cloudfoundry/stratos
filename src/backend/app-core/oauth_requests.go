@@ -10,8 +10,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-const OAUTH_RETRY_LIMIT = 3
-
 func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOauthFlowRequest")
 
@@ -22,7 +20,6 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 	}
 
 	got401 := false
-	retryLimit := OAUTH_RETRY_LIMIT
 
 	// Only need to get Client ID once
 	clientID, err := p.GetClientId(cnsi.CNSIType)
@@ -64,12 +61,6 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, re
 			return res, errors.New("Failed to authorize")
 		}
 		got401 = true
-		retryLimit--
-
-		// Give up if we've retried too many times
-		if retryLimit == 0 {
-			return res, nil
-		}
 	}
 }
 

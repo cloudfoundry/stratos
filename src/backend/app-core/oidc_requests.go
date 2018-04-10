@@ -114,11 +114,11 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 	tokenRecord.AuthType = interfaces.AuthTypeOIDC
 	// Copy across the metadata from the original token
 	tokenRecord.Metadata = userToken.Metadata
-	
+
 	err = p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)
 	}
 
-	return t, nil
+	return tokenRecord, nil
 }
