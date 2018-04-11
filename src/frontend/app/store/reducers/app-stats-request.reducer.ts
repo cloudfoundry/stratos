@@ -12,25 +12,36 @@ export function appStatsReducer(state: IRequestEntityTypeState<RequestInfoState>
   }
 }
 
+function createAppStat(appStat) {
+  return {
+    ...appStat,
+    deleting: {
+      ...appStat.deleting,
+      deleted: true,
+    }
+  };
+}
+
 function markAppStatsAsDeleted(state: IRequestEntityTypeState<RequestInfoState>, action: UpdateExistingApplication) {
-  if (!action.newApplication || action.newApplication.state !== 'STOPPED' || !action.existingApplication) {
+  // Only interest if we have the old and new app and either the app has been stopped or now contains zero instances
+  if (!action.newApplication || !action.existingApplication) {
+    return state;
+  }
+  if (action.newApplication.state !== 'STOPPED' && action.newApplication.instances !== 0) {
     return state;
   }
   const newState = { ...state };
+  const baseState = newState[action.guid];
+  if (baseState) {
+    newState[action.guid] = createAppStat(baseState);
+  }
   const instances = action.existingApplication.instances || 0;
   for (let i = 0; i < instances; i++) {
     const appStat = newState[action.guid + '-' + i];
     if (!appStat) {
       continue;
     }
-    const newAppStat = {
-      ...appStat,
-      deleting: {
-        ...appStat.deleting,
-        deleted: true,
-      }
-    };
-    newState[action.guid + '-' + i] = newAppStat;
+    newState[action.guid + '-' + i] = createAppStat(appStat);
   }
   return newState;
 }

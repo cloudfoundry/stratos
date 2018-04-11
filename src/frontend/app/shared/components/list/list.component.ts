@@ -100,6 +100,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   hasRowsOrIsFiltering$: Observable<boolean>;
   isFiltering$: Observable<boolean>;
   noRowsNotFiltering$: Observable<boolean>;
+  showProgressBar$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -342,6 +343,18 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
           return newVal;
         })
       );
+
+    let blockProgressBar = false;
+    this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
+      startWith(false),
+      pairwise(),
+      map(([oldIsLoading, newIsLoading]) => {
+        if (oldIsLoading && !newIsLoading) {
+          blockProgressBar = true;
+        }
+        return newIsLoading && !blockProgressBar;
+      })
+    );
   }
 
   ngAfterViewInit() {

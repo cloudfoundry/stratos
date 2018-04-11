@@ -53,12 +53,14 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   private runningInstances$: Observable<number>;
 
   private isRunning = false;
+  private app: any;
 
   ngOnInit() {
     this.sub = this.applicationService.application$.subscribe(app => {
       if (app.app.entity) {
         this.currentCount = app.app.entity.instances;
         this.isRunning = app.app.entity.state === 'STARTED';
+        this.app = app.app.entity;
       }
     });
   }
@@ -92,7 +94,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   // Set instance count. Ask for confirmation if setting count to 0
   private setInstanceCount(value: number) {
-    const doUpdate = () => this.applicationService.updateApplication({ instances: value }, [AppMetadataTypes.STATS]);
+    const doUpdate = () => this.applicationService.updateApplication({ instances: value }, [AppMetadataTypes.STATS], this.app);
     if (value === 0) {
       this.confirmDialog.open(appInstanceScaleToZeroConfirmation, doUpdate);
     } else {
