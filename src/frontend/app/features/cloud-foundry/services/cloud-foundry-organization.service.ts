@@ -31,7 +31,7 @@ import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
-import { PaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { CfUser } from '../../../store/types/user.types';
 
 @Injectable()
@@ -49,8 +49,9 @@ export class CloudFoundryOrganizationService {
   apps$: Observable<APIResource<IApp>[]>;
   org$: Observable<EntityInfo<APIResource<IOrganization>>>;
   orgEntityService: EntityService<APIResource<IOrganization>>;
-  allOrgUsers$: PaginationObservables<APIResource<CfUser>>;
+  allOrgUsers: PaginationObservables<APIResource<CfUser>>;
   allOrgUsersAction: GetAllOrgUsers;
+  usersPaginationKey: string;
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -63,9 +64,10 @@ export class CloudFoundryOrganizationService {
   ) {
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
+    this.usersPaginationKey = createEntityRelationPaginationKey(organizationSchemaKey, activeRouteCfOrgSpace.orgGuid);
     this.allOrgUsersAction = new GetAllOrgUsers(
       activeRouteCfOrgSpace.orgGuid,
-      createEntityRelationPaginationKey(organizationSchemaKey, activeRouteCfOrgSpace.orgGuid),
+      this.usersPaginationKey,
       activeRouteCfOrgSpace.cfGuid
     );
     this.orgEntityService = this.entityServiceFactory.create(
@@ -131,6 +133,15 @@ export class CloudFoundryOrganizationService {
     this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
     this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
     this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
+
+    this.allOrgUsers = getPaginationObservables({
+      store: this.store,
+      action: this.allOrgUsersAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.usersPaginationKey,
+        entityFactory(cfUserSchemaKey)
+      )
+    });
   }
 
   private getFlattenedList(property: string): (source: Observable<APIResource<ISpace>[]>) => Observable<any> {

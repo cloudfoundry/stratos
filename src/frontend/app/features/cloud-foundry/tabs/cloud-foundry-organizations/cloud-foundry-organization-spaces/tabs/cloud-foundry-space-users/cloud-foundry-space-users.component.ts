@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
+import { Component } from '@angular/core';
+
 import {
-  CfSpaceUsersListConfigService
+  CfSpaceUsersListConfigService,
 } from '../../../../../../../shared/components/list/list-types/cf-space-users/cf-space-users-list-config.service';
+import { ListConfig } from '../../../../../../../shared/components/list/list.component.types';
 
 @Component({
   selector: 'app-cloud-foundry-space-users',
@@ -13,11 +14,4 @@ import {
     useClass: CfSpaceUsersListConfigService
   }]
 })
-export class CloudFoundrySpaceUsersComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class CloudFoundrySpaceUsersComponent { }
