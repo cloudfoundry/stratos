@@ -91,7 +91,6 @@ import { CardNumberMetricComponent } from './components/cards/card-number-metric
 import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
-import { TableCellEndpointNameComponent } from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 
 @NgModule({
@@ -171,7 +170,6 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
-    TableCellEndpointNameComponent
     IntroScreenComponent
   ],
   exports: [
