@@ -12,11 +12,15 @@ export function appStatsReducer(state: IRequestEntityTypeState<RequestInfoState>
   }
 }
 
-function createAppStat(appStat) {
-  return {
-    ...appStat,
+function deleteAppStat(newState, key) {
+  const state = newState[key];
+  if (!state) {
+    return;
+  }
+  newState[key] = {
+    ...state,
     deleting: {
-      ...appStat.deleting,
+      ...state.deleting,
       deleted: true,
     }
   };
@@ -31,17 +35,12 @@ function markAppStatsAsDeleted(state: IRequestEntityTypeState<RequestInfoState>,
     return state;
   }
   const newState = { ...state };
-  const baseState = newState[action.guid];
-  if (baseState) {
-    newState[action.guid] = createAppStat(baseState);
-  }
+  // Delete root stat
+  deleteAppStat(newState, action.guid);
+  // Delete each instance stat
   const instances = action.existingApplication.instances || 0;
   for (let i = 0; i < instances; i++) {
-    const appStat = newState[action.guid + '-' + i];
-    if (!appStat) {
-      continue;
-    }
-    newState[action.guid + '-' + i] = createAppStat(appStat);
+    deleteAppStat(newState, action.guid + '-' + i);
   }
   return newState;
 }
