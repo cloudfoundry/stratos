@@ -78,7 +78,7 @@ $side-nav-light-active: #484848;
   @include table-row-theme($theme, $app-theme);
   @include app-hyperlinks($theme, $app-theme);
   @include app-no-content-message-theme($theme, $app-theme);
-  @include app-boolean-indicator-theme($theme);
+  @include app-boolean-indicator-theme($theme, $app-theme);
   @include cf-security-group-theme($theme);
   @include loading-page-theme($theme, $app-theme);
   @include app-log-viewer-theme($theme, $app-theme);
