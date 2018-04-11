@@ -16,7 +16,7 @@ export class MetricsComponent {
 
   getNameForEndpointType = getNameForEndpointType;
 
-  metricsEndpoint$: Observable<MetricsEndpointProvider>;
+  public metricsEndpoint$: Observable<MetricsEndpointProvider>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
   constructor(private activatedRoute: ActivatedRoute, private metricsService: MetricsService) {
