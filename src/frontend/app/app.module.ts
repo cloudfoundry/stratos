@@ -17,6 +17,7 @@ import { SetupModule } from './features/setup/setup.module';
 import { LoggedInService } from './logged-in.service';
 import { SharedModule } from './shared/shared.module';
 import { AppStoreModule } from './store/store.module';
+import { AboutModule } from './features/about/about.module';
 
 // Create action for router navigation. See
 // - https://github.com/ngrx/platform/issues/68
@@ -64,7 +65,8 @@ export class CustomRouterStateSerializer
     HomeModule,
     DashboardModule,
     ServiceCatalogModule,
-    StoreRouterConnectingModule // Create action for router navigation
+    StoreRouterConnectingModule, // Create action for router navigation
+    AboutModule,
   ],
   providers: [
     LoggedInService,
