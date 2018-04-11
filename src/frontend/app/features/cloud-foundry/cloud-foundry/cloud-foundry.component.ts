@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map } from 'rxjs/operators';
+import { filter, first, map, distinctUntilChanged } from 'rxjs/operators';
 
 import {
   CFEndpointsListConfigService,
@@ -28,10 +28,10 @@ export class CloudFoundryComponent {
     private cfService: CloudFoundryService
   ) {
     this.connectedEndpoints$ = cfService.cFEndpoints$.pipe(
-      map(cfEndpoints => {
-        const connectedEndpoints = cfEndpoints.filter(
-          c => c.connectionStatus === 'connected'
-        );
+      map(endpoints => endpoints.filter(
+        c => c.connectionStatus === 'connected'
+      )),
+      map(connectedEndpoints => {
         const hasOne = connectedEndpoints.length === 1;
         if (hasOne) {
           this.store.dispatch(new RouterNav({
@@ -42,6 +42,5 @@ export class CloudFoundryComponent {
       }),
       first()
     );
-
   }
 }
