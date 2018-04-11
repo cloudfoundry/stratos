@@ -5,8 +5,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status.component';
 
 describe('TableCellEndpointStatusComponent', () => {
-  let component: TableCellEndpointStatusComponent<EndpointModel>;
-  let fixture: ComponentFixture<TableCellEndpointStatusComponent<EndpointModel>>;
+  let component: TableCellEndpointStatusComponent<{}>;
+  let fixture: ComponentFixture<TableCellEndpointStatusComponent<{}>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({

@@ -4,7 +4,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { MetricsComponent } from './metrics/metrics.component';
 
 const metrics: Routes = [{
-  path: '',
+  path: ':metricsId',
   component: MetricsComponent,
   pathMatch: 'full'
 }];

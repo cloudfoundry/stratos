@@ -25,6 +25,7 @@ import {
 } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -35,9 +36,7 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'name',
     headerCell: () => 'Name',
-    cellDefinition: {
-      valuePath: 'name'
-    },
+    cellComponent: TableCellEndpointNameComponent,
     sort: {
       type: 'sort',
       orderKey: 'name',
