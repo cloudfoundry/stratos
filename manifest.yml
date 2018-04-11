@@ -1,7 +1,7 @@
 applications:
   - name: console
     memory: 768M
-    disk_quota: 750m
+    disk_quota: 1024M
     host: console
     timeout: 180
     buildpack: https://github.com/cloudfoundry-incubator/stratos-buildpack#v2

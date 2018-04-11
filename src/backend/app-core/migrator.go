@@ -196,7 +196,12 @@ func parseCloudFoundryEnv() (string, error) {
 
 	var dbConfig datastore.DatabaseConfig
 
-	if datastore.ParseCFEnvs(&dbConfig) {
+	parsedDBConfig, err := datastore.ParseCFEnvs(&dbConfig)
+	if err != nil {
+		return "", errors.New("Could not parse Cloud Foundry Services environment")
+	}
+
+	if parsedDBConfig {
 		exportDatabaseConfig(dbConfig)
 
 		switch dbType := os.Getenv(DB_TYPE); dbType {
@@ -213,7 +218,7 @@ func parseCloudFoundryEnv() (string, error) {
 		return dbEnv, nil
 	}
 
-	return "", errors.New("Could not parse Cloud Foundry Services environment")
+	return "", nil
 }
 
 func exportDatabaseConfig(dbConfig datastore.DatabaseConfig) {
