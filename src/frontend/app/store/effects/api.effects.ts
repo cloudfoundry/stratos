@@ -25,6 +25,8 @@ import { APIResource, NormalizedResponse } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
 import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { listEntityRelations } from '../helpers/entity-relations';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { SendEventAction } from '../actions/internal-events.actions';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -111,6 +113,10 @@ export class APIEffect {
         )];
       }),
     ).catch(errObservable => {
+      if (errObservable.type === endpointSchemaKey) {
+        errObservable.forEach(err => this.store.dispatch(new SendEventAction(endpointSchemaKey, err.guid)))
+      }
+
       this.logger.warn(`API request process failed`, errObservable.error);
       return [
         new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
@@ -272,10 +278,10 @@ export class APIEffect {
     totalPages
   } {
     if (resData) {
-      const endpointsErrors = this.getErrors(resData);
-      if (endpointsErrors.length) {
+      const errors = this.getErrors(resData);
+      if (errors.length) {
         // We should consider not completely failing the whole if some endpoints return.
-        throw Observable.throw(`Error from endpoints: ${endpointsErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
+        throw Observable.throw({ type: endpointSchemaKey, errors });
       }
     }
     let entities;
