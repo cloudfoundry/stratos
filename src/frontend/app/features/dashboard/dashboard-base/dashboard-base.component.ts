@@ -73,12 +73,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/cloud-foundry'
     },
     {
-      text: 'Metrics',
-      matIcon: 'equalizer',
-      link: '/metrics',
-      hidden: this.metricsService.haveNoConnectedMetricsEndpoints$,
-    },
-    {
       text: 'Endpoints',
       matIcon: 'settings_ethernet',
       link: '/endpoints'

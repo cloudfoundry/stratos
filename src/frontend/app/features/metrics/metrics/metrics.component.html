@@ -1,8 +1,6 @@
-<app-page-header>
-  <h1>Metrics</h1>
-</app-page-header>
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">{{ (metricsEndpoint$ | async)?.provider.name }}</app-page-header>
 
-<mat-card *ngFor="let ep of (metricsService.metricsEndpoints$ | async)">
+<mat-card *ngIf="(metricsEndpoint$ | async) as ep">
   <mat-card-content>
     <div class="metrics-info">
       <mat-icon>equalizer</mat-icon>
