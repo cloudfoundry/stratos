@@ -15,10 +15,14 @@
     <ng-content></ng-content>
     <div class="page-header__filler"></div>
     <ng-content select=".page-header-right"></ng-content>
-    <button *ngIf="!hideMenu" mat-icon-button [matMenuTriggerFor]="menu">
-      <mat-icon>more_vert</mat-icon>
+    <button *ngIf="!hideMenu" mat-icon-button [matMenuTriggerFor]="menu" class="page-header__avatar-button">
+      <mat-icon class="page-header__avatar-icon">person</mat-icon>
     </button>
-    <mat-menu #menu="matMenu">
+    <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
+      <button mat-menu-item routerLink="/about">
+        <span>About</span>
+      </button>
+      <div class="page-header__menu-separator"></div>
       <button mat-menu-item (click)="logout()">
         <span>Logout</span>
       </button>
