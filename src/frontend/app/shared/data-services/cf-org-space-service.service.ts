@@ -114,6 +114,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       list$: this.store
         .select(endpointsRegisteredEntitiesSelector)
         .first()
+        .map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf'))
         .map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
         }),

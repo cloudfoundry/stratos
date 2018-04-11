@@ -103,7 +103,7 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 
 	// Need to get SSH Code
 	// Refresh token first - makes sure it will be valid when we make the request to get the code
-	refreshedTokenRec, err := p.RefreshToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userGUID, clientID, "", cnsiRecord.TokenEndpoint)
+	refreshedTokenRec, err := p.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userGUID, clientID, "", cnsiRecord.TokenEndpoint)
 	if err != nil {
 		return fmt.Errorf("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
 	}

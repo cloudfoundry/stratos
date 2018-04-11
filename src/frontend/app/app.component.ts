@@ -13,7 +13,6 @@ import { AppState } from './store/app-state';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-
 export class AppComponent implements OnInit, AfterContentInit {
   constructor(
     private store: Store<AppState>,

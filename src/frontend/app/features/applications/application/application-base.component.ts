@@ -62,9 +62,9 @@ function entityServiceFactory(
       provide: EntityService,
       useFactory: entityServiceFactory,
       deps: [EntityServiceFactory, ActivatedRoute]
-    }
+    },
+
   ]
 })
 export class ApplicationBaseComponent {
-
 }

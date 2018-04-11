@@ -83,4 +83,8 @@ deploy/glide-cache/
 deploy/uaa/tmp/
 src/backend/app-core/plugins
 src/backend/app-core/debug
+src/backend/*/vendor/
+src/backend/app-core/load_plugins.go
 .v8flags*
+
+*.bak

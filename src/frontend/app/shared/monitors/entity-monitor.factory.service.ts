@@ -17,7 +17,7 @@ export class EntityMonitorFactory {
     id: string,
     entityKey: string,
     schema: schema.Entity,
-  ) {
+  ): EntityMonitor<T> {
     const cacheKey = id + entityKey;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];

@@ -3,11 +3,13 @@ import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angu
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
+import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
@@ -21,6 +23,20 @@ import { SideNavItem } from './../side-nav/side-nav.component';
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentInit {
+
+  constructor(
+    public pageHeaderService: PageHeaderService,
+    private store: Store<AppState>,
+    private eventWatcherService: EventWatcherService,
+    private breakpointObserver: BreakpointObserver,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private metricsService: MetricsService,
+  ) {
+    if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
+      this.enableMobileNav();
+    }
+  }
 
   private openCloseSub: Subscription;
   private closeSub: Subscription;
@@ -39,7 +55,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       matIcon: 'assessment',
       link: '/dashboard',
       // Experimental - only show in development
-      hidden: environment.production,
+      hidden: Observable.of(environment.production),
     },
     {
       text: 'Applications',
@@ -57,6 +73,12 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/cloud-foundry'
     },
     {
+      text: 'Metrics',
+      matIcon: 'equalizer',
+      link: '/metrics',
+      hidden: this.metricsService.haveNoConnectedMetricsEndpoints$,
+    },
+    {
       text: 'Endpoints',
       matIcon: 'settings_ethernet',
       link: '/endpoints'
@@ -64,20 +86,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   ];
 
   sideNaveMode = 'side';
-  constructor(
-    public pageHeaderService: PageHeaderService,
-    private store: Store<AppState>,
-    private eventWatcherService: EventWatcherService,
-    private breakpointObserver: BreakpointObserver,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-  ) {
-    if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
-      this.enableMobileNav();
-    }
-  }
-
-
 
   ngOnInit() {
     const dashboardState$ = this.store.select('dashboard');

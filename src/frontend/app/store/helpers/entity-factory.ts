@@ -28,6 +28,7 @@ export const securityGroupSchemaKey = 'securityGroup';
 export const featureFlagSchemaKey = 'featureFlag';
 export const privateDomainsSchemaKey = 'private_domains';
 export const spaceQuotaSchemaKey = 'space_quota_definition';
+export const metricSchemaKey = 'metrics';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 
@@ -99,6 +100,9 @@ const ServiceSchema = new EntitySchema(serviceSchemaKey, {
   service_plans: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceSchemaKey] = ServiceSchema;
+
+const MetricSchema = new EntitySchema(metricSchemaKey);
+entityCache[metricSchemaKey] = MetricSchema;
 
 const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;

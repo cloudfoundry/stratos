@@ -1,10 +1,15 @@
-import { Store } from '@ngrx/store';
+import { Store, compose } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, startWith, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount, startWith, withLatestFrom, tap, share } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
-
-import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
+import {
+  getAPIRequestDataState,
+  selectEntity,
+  selectRequestInfo,
+  getUpdateSectionById,
+  getEntityUpdateSections
+} from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
 import { AppState } from './../../store/app-state';
 import {
@@ -14,6 +19,7 @@ import {
   RequestInfoState,
   UpdatingSection,
 } from './../../store/reducers/api-request-reducer/types';
+import { tag } from 'rxjs-spy/operators/tag';
 
 export class EntityMonitor<T = any> {
   constructor(
@@ -118,6 +124,34 @@ export class EntityMonitor<T = any> {
       publishReplay(1), refCount(),
       startWith(null)
     );
+  }
+
+  /**
+   * @param interval - The polling interval in ms.
+   * @param updateKey - The store updating key for the poll
+   */
+  poll(interval = 10000, action: Function, getActionState: (request: RequestInfoState) => ActionState) {
+    return Observable.interval(interval)
+      .pipe(
+        tag('poll'),
+        withLatestFrom(
+          this.entity$,
+          this.entityRequest$
+        ),
+        map(([poll, resource, requestState]) => ({
+          resource,
+          updatingSection: getActionState(requestState)
+        })),
+        tap(({ resource, updatingSection }) => {
+          if (!updatingSection || !updatingSection.busy) {
+            action();
+          }
+        }),
+        filter(({ resource, updatingSection }) => {
+          return !!updatingSection;
+        }),
+        share()
+      );
   }
 
 }

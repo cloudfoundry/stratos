@@ -4,9 +4,13 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
+import {
+  ApplicationInstanceChartComponent,
+} from '../features/applications/application/application-instance-chart/application-instance-chart.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -38,6 +42,7 @@ import { DisplayValueComponent } from './components/display-value/display-value.
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
@@ -57,10 +62,12 @@ import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
+import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
+import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
@@ -95,7 +102,8 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule
+    CdkTableModule,
+    NgxChartsModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -141,6 +149,7 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
+    FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -151,13 +160,15 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
     CardCfSpaceDetailsComponent,
-    BooleanIndicatorComponent,
     AppChipsComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
     ServiceIconComponent,
     EnvVarViewComponent,
+    RingChartComponent,
+    MetricsChartComponent,
+    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent
   ],
@@ -202,6 +213,7 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
+    FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -211,13 +223,15 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     CardCfSpaceDetailsComponent,
-    CardCfOrgUserDetailsComponent,
+    RingChartComponent,
     AppChipsComponent,
     CardNumberMetricComponent,
     CardCfRecentAppsComponent,
     CompactAppCardComponent,
     EnvVarViewComponent,
     ServiceIconComponent,
+    MetricsChartComponent,
+    ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent
   ],

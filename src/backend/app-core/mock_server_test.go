@@ -168,15 +168,15 @@ func expectCFAndCERows() sqlmock.Rows {
 }
 
 func expectTokenRow() sqlmock.Rows {
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false)
+	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+		AddRow(mockUAAToken, mockUAAToken, mockTokenExpiry, false, "OAuth2", "")
 }
 
 func expectEncryptedTokenRow(mockEncryptionKey []byte) sqlmock.Rows {
 
 	encryptedUaaToken, _ := crypto.EncryptToken(mockEncryptionKey, mockUAAToken)
-	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected"}).
-		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false)
+	return sqlmock.NewRows([]string{"auth_token", "refresh_token", "token_expiry", "disconnected", "auth_type", "meta_data"}).
+		AddRow(encryptedUaaToken, encryptedUaaToken, mockTokenExpiry, false, "OAuth2", "")
 }
 
 func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
@@ -262,9 +262,8 @@ const (
 	mockProxyVersion    = 20161117141922
 
 	stringCFType = "cf"
-	stringCEType = "hce"
 
-	selectAnyFromTokens = `SELECT .+ FROM tokens WHERE .+`
+	selectAnyFromTokens = `SELECT (.+) FROM tokens WHERE (.+)`
 	insertIntoTokens    = `INSERT INTO tokens`
 	updateTokens        = `UPDATE tokens`
 	selectAnyFromCNSIs  = `SELECT (.+) FROM cnsis WHERE (.+)`
