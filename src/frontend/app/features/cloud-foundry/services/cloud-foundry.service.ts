@@ -26,9 +26,7 @@ export class CloudFoundryService {
     );
 
     this.cFEndpoints$ = this.cfEndpointsMonitor.currentPage$.pipe(
-      map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf')),
-      publishReplay(1),
-      refCount()
+      map(endpoints => endpoints.filter(e => e.cnsi_type === 'cf'))
     );
   }
 }

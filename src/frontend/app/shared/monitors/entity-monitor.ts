@@ -33,23 +33,15 @@ export class EntityMonitor<T = any> {
       map(request => request ? request : defaultRequestState),
       distinctUntilChanged(),
       startWith(defaultRequestState),
-      publishReplay(1),
-      refCount(),
     );
     this.isDeletingEntity$ = this.entityRequest$.map(request => request.deleting.busy).pipe(
-      distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
+      distinctUntilChanged()
     );
     this.isFetchingEntity$ = this.entityRequest$.map(request => request.fetching).pipe(
-      distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
+      distinctUntilChanged()
     );
     this.updatingSection$ = this.entityRequest$.map(request => request.updating).pipe(
       distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
     );
     this.apiRequestData$ = this.store.select(getAPIRequestDataState).publishReplay(1).refCount();
     this.entity$ = this.getEntityObservable(
@@ -92,9 +84,7 @@ export class EntityMonitor<T = any> {
       const updateObs$ = this.updatingSection$.pipe(
         map(updates => {
           return updates[updatingKey] || getDefaultActionState();
-        }),
-        publishReplay(1),
-        refCount()
+        })
       );
       this.updatingSectionObservableCache[updatingKey] = updateObs$;
       return updateObs$;
@@ -121,7 +111,7 @@ export class EntityMonitor<T = any> {
       ]) => {
         return entity ? denormalize(entity, schema, entities) : null;
       }),
-      publishReplay(1), refCount(),
+      distinctUntilChanged(),
       startWith(null)
     );
   }
