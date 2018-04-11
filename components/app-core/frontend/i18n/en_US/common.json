@@ -31,7 +31,7 @@
   "navbar": {
     "title": "@:product.name",
     "logo": "home",
-    "copyright": "&copy; SUSE 2017"
+    "copyright": "&copy; 2017 [[@:company.name]]"
   },
   "menu": {
     "applications": "@:applications",
