@@ -11,7 +11,7 @@ COPY deploy/all-in-one/config.all-in-one.properties config.properties
 RUN npm install \
     && npm run build \
     && npm run build-backend \
-    && npm run build-cf
+    && npm run deploy-cf
 
 # Generate dev-certs
 RUN CERTS_PATH=/go/dev-certs ./generate_cert.sh \

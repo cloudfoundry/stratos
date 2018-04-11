@@ -97,7 +97,7 @@
 
   gulp.task('create-temp', function (done) {
     // If STRATOS_TEMP is set, then a staged build is being carried out
-    // see CF deployment script deploy/cloud-foundry/package.sh
+    // see CF deployment script deploy/cloud-foundry/build.sh
     if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
       tempSrcPath = path.join(tempPath, conf.goPath);
