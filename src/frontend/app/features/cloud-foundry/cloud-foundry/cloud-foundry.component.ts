@@ -9,7 +9,7 @@ import {
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
-import { CloudFoundryService } from '../services/cloud-foundry.service';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 @Component({
   selector: 'app-cloud-foundry',
@@ -27,10 +27,7 @@ export class CloudFoundryComponent {
     private store: Store<AppState>,
     private cfService: CloudFoundryService
   ) {
-    this.connectedEndpoints$ = cfService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.filter(
-        c => c.connectionStatus === 'connected'
-      )),
+    this.connectedEndpoints$ = cfService.connectedCFEndpoints$.pipe(
       map(connectedEndpoints => {
         const hasOne = connectedEndpoints.length === 1;
         if (hasOne) {

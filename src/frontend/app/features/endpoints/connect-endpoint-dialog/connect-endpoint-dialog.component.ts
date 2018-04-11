@@ -2,7 +2,7 @@ import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -54,6 +54,11 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   private hasAttemptedConnect: boolean;
   private authTypesForEndpoint = [];
 
+  // We need a delay to ensure the BE has finished registering the endpoint.
+  // If we don't do this and if we're quick enough, we can navigate to the application page
+  // and end up with an empty list where we should have results.
+  public connectDelay = 1000;
+
   constructor(
     public store: Store<AppState>,
     public fb: FormBuilder,
@@ -102,6 +107,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
     this.connectingSub = this.endpointConnected$
       .filter(connected => connected)
+      .delay(this.connectDelay)
       .subscribe(() => {
         this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
@@ -123,8 +129,19 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.getEntitySelector()
     )
       .map(request => !!(request && request.api_endpoint && request.user));
-
-    this.connecting$ = this.update$.map(update => update.busy);
+    const busy$ = this.update$.map(update => update.busy).startWith(false);
+    this.connecting$ = busy$.pipe(
+      pairwise(),
+      switchMap(([oldBusy, newBusy]) => {
+        if (oldBusy === true && newBusy === false) {
+          return busy$.pipe(
+            delay(this.connectDelay),
+            startWith(true)
+          );
+        }
+        return Observable.of(newBusy);
+      })
+    );
     this.connectingError$ = this.update$.pipe(
       filter(() => this.hasAttemptedConnect),
       map(update => update.error)
