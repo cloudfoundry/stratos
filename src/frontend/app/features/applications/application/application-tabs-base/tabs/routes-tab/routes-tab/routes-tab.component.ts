@@ -13,6 +13,7 @@ import { ApplicationService } from '../../../../../application.service';
 import { FetchAllDomains } from '../../../../../../../store/actions/domains.actions';
 import { getPaginationObservables } from '../../../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { entityFactory, domainSchemaKey } from '../../../../../../../store/helpers/entity-factory';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-routes-tab',
@@ -38,7 +39,7 @@ export class RoutesTabComponent implements OnInit {
   ngOnInit() {
     const { cfGuid } = this.appService;
     const action = new FetchAllDomains(cfGuid);
-    this.paginationSubscription = getPaginationObservables<APIResource>(
+    getPaginationObservables<APIResource>(
       {
         store: this.store,
         action,
@@ -48,8 +49,9 @@ export class RoutesTabComponent implements OnInit {
         )
       },
       true
-    ).entities$.subscribe();
-
+    ).entities$.pipe(
+      first()
+    ).subscribe();
   }
 
 }
