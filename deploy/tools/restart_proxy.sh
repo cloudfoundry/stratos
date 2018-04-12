@@ -23,19 +23,9 @@ docker-compose -f docker-compose.development.yml stop nginx
 docker-compose -f docker-compose.development.yml stop proxy
 docker-compose -f docker-compose.development.yml rm -f proxy
 
-./build_portal_proxy.sh
-ret=$?
-cd ../
-docker build . -f deploy/Dockerfile.bk.dev -t deploy_proxy
-cd ${DEPLOYDIR}
-ls
+docker-compose -f docker-compose.development.yml build proxy
 
-if [ ${ret} -eq 0 ]; then
-    # nginx also restarts the proxy
-    docker-compose -f docker-compose.development.yml up -d nginx
-else
-    echo -e "\033[0;31mOoops Build failed! Not restarting portal-proxy container until you fix the build!\033[0m"
-fi
+docker-compose -f docker-compose.development.yml up -d nginx
 
 popd
 

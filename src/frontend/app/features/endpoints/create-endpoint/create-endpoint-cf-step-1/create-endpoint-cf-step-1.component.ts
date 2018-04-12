@@ -12,10 +12,10 @@ import { GetAllEndpoints, RegisterEndpoint } from '../../../../store/actions/end
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { EndpointsEffect } from '../../../../store/effects/endpoint.effects';
+import { getFullEndpointApiUrl, getEndpointTypes, DEFAULT_ENDPOINT_TYPE } from '../../endpoint-helpers';
 import { getAPIRequestDataState, selectUpdateInfo } from '../../../../store/selectors/api.selectors';
 import { selectPaginationState } from '../../../../store/selectors/pagination.selectors';
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
-import { getFullEndpointApiUrl } from '../../endpoint-helpers';
 import { entityFactory } from '../../../../store/helpers/entity-factory';
 import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
 
@@ -34,11 +34,17 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   validate: Observable<boolean>;
 
   @ViewChild('form') form: NgForm;
+  @ViewChild('typeField') typeField: NgModel;
   @ViewChild('nameField') nameField: NgModel;
   @ViewChild('urlField') urlField: NgModel;
   @ViewChild('skipSllField') skipSllField: NgModel;
 
-  constructor(private store: Store<AppState>, public utilsService: UtilsService) {
+  typeValue: any;
+
+  endpointTypes = getEndpointTypes();
+  urlValidation: string;
+
+  constructor(private store: Store<AppState>, private utilsService: UtilsService) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
@@ -53,12 +59,20 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
           };
         })
       );
+
+    // Auto-select default endpoint type - typically this is Cloud Foundry
+    const defaultType = this.endpointTypes.filter((t) => t.value === DEFAULT_ENDPOINT_TYPE);
+    if (defaultType && defaultType.length) {
+      this.typeValue = defaultType[0].value;
+      this.setUrlValidation(this.typeValue);
+    }
   }
 
   ngOnInit() { }
 
   onNext: StepOnNextFunction = () => {
     const action = new RegisterEndpoint(
+      this.typeField.value,
       this.nameField.value,
       this.urlField.value,
       !!this.skipSllField.value
@@ -96,5 +110,10 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       .map(() => {
         return this.form.valid;
       });
+  }
+
+  setUrlValidation(endpointValue: string) {
+    const endpoint = this.endpointTypes.find(e => e.value === endpointValue);
+    this.urlValidation = endpoint ? endpoint.urlValidation : '';
   }
 }

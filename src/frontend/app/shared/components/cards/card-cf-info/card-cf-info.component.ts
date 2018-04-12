@@ -28,6 +28,10 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
   }
 
+  isAdmin(user) {
+    return user && user.admin ? 'Yes' : 'No';
+  }
+
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
   }

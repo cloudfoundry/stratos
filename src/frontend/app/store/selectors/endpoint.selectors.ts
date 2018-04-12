@@ -1,6 +1,6 @@
 import { register } from 'ts-node/dist';
 import { createSelector } from '@ngrx/store';
-import { AppState } from '../app-state';
+import { AppState, IRequestEntityTypeState } from '../app-state';
 import { EndpointModel, EndpointState, endpointStoreNames } from '../types/endpoint.types';
 import { selectEntities, selectRequestInfo, selectEntity } from './api.selectors';
 
@@ -13,7 +13,7 @@ export const endpointEntitiesSelector = selectEntities<EndpointModel>(endpointSt
 export const endpointsRegisteredEntitiesSelector = createSelector(
   endpointEntitiesSelector,
   endpoints => {
-    const registered = {};
+    const registered = {} as IRequestEntityTypeState<EndpointModel>;
     Object.values(endpoints).map(endpoint => {
       if (endpoint.registered) {
         registered[endpoint.guid] = endpoint;

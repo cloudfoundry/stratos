@@ -1,11 +1,11 @@
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { create } from 'rxjs-spy';
 
-import { AppState } from './store/app-state';
-import { LoggedInService } from './logged-in.service';
-import { create, PartialLogger } from 'rxjs-spy';
 import { environment } from '../environments/environment';
+import { LoggedInService } from './logged-in.service';
+import { AppState } from './store/app-state';
 
 
 @Component({
@@ -13,7 +13,6 @@ import { environment } from '../environments/environment';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-
 export class AppComponent implements OnInit, AfterContentInit {
   constructor(
     private store: Store<AppState>,

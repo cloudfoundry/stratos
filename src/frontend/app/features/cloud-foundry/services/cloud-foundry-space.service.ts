@@ -9,7 +9,7 @@ import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetSpace } from '../../../store/actions/space.actions';
+import { GetSpace, GetAllSpaceUsers } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -19,12 +19,29 @@ import {
   serviceInstancesSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
+  spaceQuotaSchemaKey,
+  cfUserSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getSpaceRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+import { PaginationObservables, getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { CfUser } from '../../../store/types/user.types';
+
+const noQuotaDefinition = {
+  entity: {
+    memory_limit: -1,
+    app_instance_limit: -1,
+    instance_memory_limit: -1,
+    name: 'None assigned',
+    organization_guid: this.orgGuid,
+    total_services: -1,
+    total_routes: -1
+  },
+  metadata: null
+};
 
 @Injectable()
 export class CloudFoundrySpaceService {
@@ -42,6 +59,10 @@ export class CloudFoundrySpaceService {
   apps$: Observable<APIResource<IApp>[]>;
   space$: Observable<EntityInfo<APIResource<ISpace>>>;
   spaceEntityService: EntityService<APIResource<ISpace>>;
+  allSpaceUsers: PaginationObservables<APIResource<CfUser>>;
+  allSpaceUsersAction: GetAllSpaceUsers;
+  usersPaginationKey: string;
+
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private store: Store<AppState>,
@@ -55,7 +76,12 @@ export class CloudFoundrySpaceService {
     this.spaceGuid = activeRouteCfOrgSpace.spaceGuid;
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-
+    this.usersPaginationKey = createEntityRelationPaginationKey(spaceSchemaKey, activeRouteCfOrgSpace.spaceGuid);
+    this.allSpaceUsersAction = new GetAllSpaceUsers(
+      activeRouteCfOrgSpace.spaceGuid,
+      this.usersPaginationKey,
+      activeRouteCfOrgSpace.cfGuid
+    );
     this.spaceEntityService = this.entityServiceFactory.create(
       spaceSchemaKey,
       entityFactory(spaceWithOrgKey),
@@ -63,6 +89,7 @@ export class CloudFoundrySpaceService {
       new GetSpace(this.spaceGuid, this.cfGuid, [
         createEntityRelationKey(spaceSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(spaceSchemaKey, spaceQuotaSchemaKey),
         createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
         createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
@@ -101,20 +128,17 @@ export class CloudFoundrySpaceService {
       if (q.entity.entity.space_quota_definition) {
         return q.entity.entity.space_quota_definition;
       } else {
-        return {
-          entity: {
-            memory_limit: -1,
-            app_instance_limit: -1,
-            instance_memory_limit: -1,
-            name: 'None assigned',
-            organization_guid: this.orgGuid,
-            total_services: -1,
-            total_routes: -1
-          },
-          metadata: null
-        };
+        return noQuotaDefinition;
       }
     }));
+    this.allSpaceUsers = getPaginationObservables({
+      store: this.store,
+      action: this.allSpaceUsersAction,
+      paginationMonitor: this.paginationMonitorFactory.create(
+        this.usersPaginationKey,
+        entityFactory(cfUserSchemaKey)
+      )
+    });
   }
 
   private initialiseAppObservables() {

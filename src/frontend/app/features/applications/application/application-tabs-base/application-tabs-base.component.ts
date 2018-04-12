@@ -1,9 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostBinding } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, take, tap } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
+import { first, map, tap, withLatestFrom } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -22,6 +21,7 @@ import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.s
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
+import { EndpointsService } from './../../../../core/endpoints.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -49,13 +49,16 @@ const appDeleteConfirmation = new ConfirmationDialogConfig(
   styleUrls: ['./application-tabs-base.component.scss']
 })
 export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
+
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private applicationService: ApplicationService,
     private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    private endpointsService: EndpointsService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -74,11 +77,29 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          stratProject.deploySource.type === 'github'
+        ) {
+          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+        }
+      });
+    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+      if (hasMetrics) {
+        this.tabLinks.push({
+          link: 'metrics',
+          label: 'Metrics'
+        });
+      }
+    });
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
-  addedGitHubTab = false;
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
@@ -105,28 +126,48 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   ) {
     const baseCFUrl = `/cloud-foundry/${application.cfGuid}`;
     const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
+
+    const baseSpaceBreadcrumbs = [
+      { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
+      { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` }
+    ];
+
     return [
       {
-        breadcrumbs: [{
-          value: 'Applications',
-          routerLink: '/applications'
-        }]
+        breadcrumbs: [{ value: 'Applications', routerLink: '/applications' }]
       },
       {
         key: 'space',
         breadcrumbs: [
-          {
-            value: endpoint.name,
-            routerLink: `${baseCFUrl}/organizations`
-          },
-          {
-            value: org.entity.name,
-            routerLink: `${baseOrgUrl}/spaces`
-          },
-          {
-            value: space.entity.name,
-            routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/apps`
-          }
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/apps` }
+        ]
+      },
+      {
+        key: 'space-services',
+        breadcrumbs: [
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/service-instances` }
+        ]
+      },
+      {
+        key: 'space-summary',
+        breadcrumbs: [
+          ...baseSpaceBreadcrumbs,
+          { value: space.entity.name, routerLink: `${baseOrgUrl}/spaces/${space.metadata.guid}/summary` }
+        ]
+      },
+      {
+        key: 'org',
+        breadcrumbs: [
+          { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
+          { value: org.entity.name, routerLink: `${baseOrgUrl}/summary` },
+        ]
+      },
+      {
+        key: 'cf',
+        breadcrumbs: [
+          { value: endpoint.name, routerLink: `${baseCFUrl}/summary` }
         ]
       }
     ];
@@ -217,18 +258,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
       return !!(isFetchingApp || isUpdating);
     });
-
-    this.applicationService.applicationStratProject$
-      .pipe(take(1))
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          stratProject.deploySource.type === 'github'
-        ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
-        }
-      });
   }
 
   ngOnDestroy() {

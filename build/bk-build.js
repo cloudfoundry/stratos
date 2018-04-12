@@ -38,19 +38,14 @@
 
     var promise = Q.resolve();
     _.each(enabledPlugins, function(pluginInfo) {
-      var fullPluginPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.name);
-      var glidePluginPath = path.join(fullPluginPath, 'glide.yaml');
+      var glidePluginPath = path.join(pluginInfo.srcPath, 'glide.yaml');
+
       if (fs.existsSync(glidePluginPath)) {
         promise = promise
           .then(function() {
-            return buildUtils.runGlideInstall(fullPluginPath);
+            return buildUtils.runGlideInstall(pluginInfo.srcPath);
           });
       }
-    });
-
-    // Run glide install for the main source code
-    promise = promise.then(function() {
-      return buildUtils.runGlideInstall(prepareBuild.getSourcePath());
     });
 
     promise.then(function () {
@@ -73,8 +68,8 @@
     var promise = Q.resolve();
     var promises = [];
     _.each(enabledPlugins, function(pluginInfo) {
-      var pluginVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.name, 'vendor');
-      var pluginCheckedInVendorPath = path.join(prepareBuild.getSourcePath(), 'plugins', pluginInfo.name, '__vendor');
+      var pluginVendorPath = path.join(pluginInfo.srcPath, 'vendor');
+      var pluginCheckedInVendorPath = path.join(pluginInfo.srcPath, '__vendor');
 
       // sequentially chain promise
       promise

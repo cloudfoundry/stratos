@@ -41,7 +41,9 @@ export class CFEndpointsDataSource extends ListDataSource<EndpointModel> {
       isLocal: true,
       transformEntities: [
         (entities: EndpointModel[]) => {
-          return entities.filter(endpoint => endpoint.cnsi_type === 'cf');
+          return entities.filter(endpoint => {
+            return endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === 'cf';
+          });
         },
         {
           type: 'filter',

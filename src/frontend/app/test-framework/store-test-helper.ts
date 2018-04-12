@@ -83,6 +83,7 @@ const testInitialStoreState: AppState = {
       },
       valid: true,
       uaaError: false,
+      upgradeInProgress: false,
       sessionExpiresOn: 1000,
     },
     verifying: false
@@ -685,6 +686,11 @@ const testInitialStoreState: AppState = {
         fetching: false,
         updating: {
           _root_: {
+            busy: false,
+            error: false,
+            message: ''
+          },
+          updating: {
             busy: false,
             error: false,
             message: ''
@@ -21575,9 +21581,11 @@ const testInitialStoreState: AppState = {
           admin: true
         },
         connectionStatus: 'connected',
-        registered: true
-      }
+        registered: true,
+        metricsAvailable: false
+      },
     },
+    metrics: {},
     system: {}
   },
   actionHistory: [],

@@ -8,4 +8,4 @@
 </app-page-header>
 
 <app-endpoints-missing [showToolbarHint]="true" [showSnackForNoneConnected]="true"></app-endpoints-missing>
-<app-list [hidden]="!(endpointsService.haveRegistered$ | async)"></app-list>
+<app-list *ngIf="(endpointsService.haveRegistered$ | async)"></app-list>

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -62,17 +62,9 @@ function entityServiceFactory(
       provide: EntityService,
       useFactory: entityServiceFactory,
       deps: [EntityServiceFactory, ActivatedRoute]
-    }
+    },
+
   ]
 })
-export class ApplicationBaseComponent implements OnInit, OnDestroy {
-
-  constructor(
-  ) { }
-
-  ngOnInit(): void {
-  }
-
-  ngOnDestroy(): void {
-  }
+export class ApplicationBaseComponent {
 }

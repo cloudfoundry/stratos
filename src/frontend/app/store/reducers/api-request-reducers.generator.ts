@@ -21,6 +21,7 @@ import {
   serviceSchemaKey,
   spaceQuotaSchemaKey,
   spaceSchemaKey,
+  metricSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -98,7 +99,8 @@ const entities = [
   serviceInstancesSchemaKey,
   featureFlagSchemaKey,
   privateDomainsSchemaKey,
-  spaceQuotaSchemaKey
+  spaceQuotaSchemaKey,
+  metricSchemaKey
 ];
 
 

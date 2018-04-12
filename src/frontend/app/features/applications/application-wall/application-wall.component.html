@@ -23,5 +23,5 @@
   text: ''
 }"></app-no-content-message>
 </ng-template>
-<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" [hidden]="!(endpointsService.haveRegistered$ | async) || !(endpointsService.haveConnected$ | async)">
+<app-list [noEntries]="noEntries" [noEntriesForCurrentFilter]="noEntriesForCurrentFilter" *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)">
 </app-list>

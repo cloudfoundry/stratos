@@ -1,0 +1,44 @@
+---
+platform: linux
+inputs:
+- name: stratos
+- name: image-tag
+- name: stratos-master
+outputs:
+- name: helm-chart
+image_resource:
+  type: docker-image
+  source:
+  # Generated using Dockerfile.stratos-helm
+   repository:  splatform/ci-stratos-helm
+   tag: "latest"
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      # Expect this command to fail since k8s isn't available but it will initialise helm locally
+      helm init || true
+      ROOT_DIR=$PWD
+      STRATOS=${ROOT_DIR}/stratos
+      source ${STRATOS}/deploy/ci/tasks/dev-releases/create-chart-helper.sh
+      STRATOS_MASTER=${ROOT_DIR}/stratos-master
+      GIT_TAG=$(cat image-tag/v2-alpha-tag)
+      cd ${STRATOS}/deploy/kubernetes/
+      patchHelmChart ${GIT_TAG} ${DOCKER_ORG} ${DOCKER_REGISTRY} ./console
+
+      # Generate Helm package
+      helm package console
+      cp console*.tgz ${ROOT_DIR}/helm-chart/console-helm-chart-${GIT_TAG}.tgz
+      cd ${ROOT_DIR}/helm-chart/
+      if [ -f ${STRATOS_MASTER}/index.yaml ]; then
+        cp ${STRATOS_MASTER}/index.yaml ${ROOT_DIR}/helm-chart/
+        MERGE_INDEX="--merge index.yaml"
+      fi
+
+      # Update Helm Repository
+      helm repo index ./ ${MERGE_INDEX} --url https://github.com/${GITHUB_ORG}/${GITHUB_REPO}/releases/download/${GIT_TAG}/
+      cp index.yaml ${STRATOS_MASTER}
+      cd ${STRATOS_MASTER}
+      setupAndPushChange

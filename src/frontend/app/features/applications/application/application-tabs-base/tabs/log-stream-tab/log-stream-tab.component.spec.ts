@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule, NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
@@ -23,7 +23,7 @@ describe('LogStreamTabComponent', () => {
   let component: LogStreamTabComponent;
   let fixture: ComponentFixture<LogStreamTabComponent>;
 
-  const appId = '1';
+  const appId = '';
   const cfId = '2';
 
   beforeEach(async(() => {
@@ -31,7 +31,7 @@ describe('LogStreamTabComponent', () => {
       imports: [
         StoreModule,
         CoreModule,
-        BrowserAnimationsModule,
+        NoopAnimationsModule,
         RouterTestingModule,
         MDAppModule,
         createBasicStoreModule()

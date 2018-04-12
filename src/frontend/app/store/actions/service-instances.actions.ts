@@ -44,7 +44,7 @@ export class GetServicesInstancesInSpace
     page: 1,
     'results-per-page': 100,
     'order-direction': 'desc',
-    'order-direction-field': 'name',
+    'order-direction-field': 'creation',
   };
   parentGuid: string;
   parentEntitySchema = entityFactory(spaceSchemaKey);

@@ -73,8 +73,9 @@ import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.compo
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-import { TableCellCustom } from './table-cell-custom';
 import { CfSpacePermissionCellComponent } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
+import { TableCellCustom } from '../../list.types';
+import { TableCellEndpointNameComponent } from '../../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -89,6 +90,7 @@ export const listTableCells = [
   TableCellActionsComponent,
   TableCellAppNameComponent,
   TableCellEndpointStatusComponent,
+  TableCellEndpointNameComponent,
   TableCellAppStatusComponent,
   TableCellUsageComponent,
   TableCellRouteComponent,

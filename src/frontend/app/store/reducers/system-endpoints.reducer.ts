@@ -52,14 +52,24 @@ function fetchingEndpointInfo(state) {
 function succeedEndpointInfo(state, action) {
   const newState = { ...state };
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
-  getAllEnpointIds(newState, payload.endpoints.cf).forEach(guid => {
-    const endpointInfo = payload.endpoints.cf[guid];
-    newState[guid] = {
-      ...newState[guid],
-      ...endpointInfo
-    };
+  Object.keys(payload.endpoints).forEach(type => {
+    getAllEnpointIds(newState[type], payload.endpoints[type]).forEach(guid => {
+      const endpointInfo = payload.endpoints[type][guid] as EndpointModel;
+      newState[guid] = {
+        ...newState[guid],
+        ...endpointInfo,
+        metricsAvailable: endpointHasMetrics(endpointInfo)
+      };
+    });
   });
   return newState;
+}
+
+function endpointHasMetrics(endpoint: EndpointModel) {
+  if (!endpoint || !endpoint.metadata) {
+    return false;
+  }
+  return !!endpoint.metadata.metrics;
 }
 
 function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
@@ -77,6 +87,6 @@ function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointM
   };
 }
 
-function getAllEnpointIds(endpoints, payloadEndpoints = {}) {
+function getAllEnpointIds(endpoints = {}, payloadEndpoints = {}) {
   return new Set(Object.keys(endpoints).concat(Object.keys(payloadEndpoints)));
 }

@@ -4,9 +4,13 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { VirtualScrollModule } from 'angular2-virtual-scroll';
 
 import { CoreModule } from '../core/core.module';
+import {
+  ApplicationInstanceChartComponent,
+} from '../features/applications/application/application-instance-chart/application-instance-chart.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -24,7 +28,6 @@ import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
-import { CardCfSpaceUsageComponent } from './components/cards/card-cf-space-usage/card-cf-space-usage.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
@@ -38,12 +41,13 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
   AppEventDetailDialogComponentComponent,
 } from './components/list/list-cards/custom-cards/card-app-event/app-event-detail-dialog-component/app-event-detail-dialog-component.component';
-import { EndpointCardComponent } from './components/list/list-cards/custom-cards/endpoint-card/endpoint-card.component';
 import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
 import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
@@ -58,11 +62,14 @@ import { ListConfig } from './components/list/list.component.types';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
+import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
 import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
+import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
+import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
@@ -80,8 +87,12 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { ServiceIconComponent } from './components/service-icon/service-icon.component';
-import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
+import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
+import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
+import { CloudFoundryService } from './data-services/cloud-foundry.service';
 
 @NgModule({
   imports: [
@@ -92,7 +103,8 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     SteppersModule,
     VirtualScrollModule,
     CfAuthModule,
-    CdkTableModule
+    CdkTableModule,
+    NgxChartsModule,
   ],
   declarations: [
     LoadingPageComponent,
@@ -138,7 +150,7 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
-    EndpointCardComponent,
+    FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -148,12 +160,18 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
     BooleanIndicatorComponent,
-    CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    BooleanIndicatorComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     ServiceIconComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    RingChartComponent,
+    MetricsChartComponent,
+    ApplicationInstanceChartComponent,
+    StratosTitleComponent,
+    IntroScreenComponent
   ],
   exports: [
     FormsModule,
@@ -196,6 +214,7 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     CardCfUsageComponent,
     CardCfInfoComponent,
     CardCfUserInfoComponent,
+    FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
@@ -204,12 +223,18 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     NestedTabsComponent,
     CardCfOrgUsageComponent,
     CardCfOrgUserDetailsComponent,
-    CardCfSpaceUsageComponent,
     CardCfSpaceDetailsComponent,
-    CardCfOrgUserDetailsComponent,
+    RingChartComponent,
     AppChipsComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CompactAppCardComponent,
     EnvVarViewComponent,
-    ServiceIconComponent
+    ServiceIconComponent,
+    MetricsChartComponent,
+    ApplicationInstanceChartComponent,
+    StratosTitleComponent,
+    IntroScreenComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -223,7 +248,8 @@ import { EnvVarViewComponent } from './components/env-var-view/env-var-view.comp
     CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,
-    PaginationMonitorFactory
+    PaginationMonitorFactory,
+    CloudFoundryService
   ]
 })
 export class SharedModule { }

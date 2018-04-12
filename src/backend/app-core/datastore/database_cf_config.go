@@ -27,9 +27,9 @@ type VCAPService struct {
 }
 
 // Discover cf db services via their 'uri' env var and apply settings to the DatabaseConfig objects
-func ParseCFEnvs(db *DatabaseConfig) bool {
+func ParseCFEnvs(db *DatabaseConfig) (bool, error) {
 	if config.IsSet(SERVICES_ENV) == false {
-		return false
+		return false, nil
 	}
 
 	// Extract struts from VCAP_SERVICES env
@@ -38,10 +38,14 @@ func ParseCFEnvs(db *DatabaseConfig) bool {
 	err := json.Unmarshal([]byte(vcapServicesStr), &vcapServices)
 	if err != nil {
 		log.Warnf("Unable to convert %s env var into JSON. Error: %s", SERVICES_ENV, err)
-		return false
+		return false, nil
 	}
 
-	return findDatabaseConfig(vcapServices, db)
+	if len(vcapServices) == 0 {
+		log.Info("No DB configurations defined, will use SQLite")
+		return false, nil
+	}
+	return findDatabaseConfig(vcapServices, db), nil
 }
 
 func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfig) bool {

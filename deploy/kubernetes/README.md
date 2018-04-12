@@ -22,6 +22,7 @@ The following guide details how to deploy Stratos in Kubernetes.
     + [Create a default Storage Class](#create-a-default-storage-class)
   * [Deploying Stratos with your own TLS certificates](#deploying-stratos-with-your-own-tls-certificates)
   * [Using with a Secure Image Repostiory](#using-with-a-secure-image-repository)
+  * [Installing Nightly Release](#installing-a-nightly-release)
 <!-- /TOC -->
 
 ## Requirements
@@ -320,4 +321,32 @@ kube:
 Deploy the chart with the provided parameters:
 ```
 helm install -f docker-registry-secrets.yaml stratos/console
+```
+
+### Installing a Nightly Release
+Nightly releases are pushed with a `dev` tag. These are strictly for development purposes and should be considered unstable and may contain bugs.
+
+To install the nightly release: 
+
+Update your Helm repositories to ensure you have the latest nightly release information:
+
+```
+helm repo update
+```
+
+List all versions of the console, to determine the tag.
+```
+helm search console -l
+NAME                 CHART VERSION           DESCRIPTION                       
+stratos/console      2.0.0-dev-9a5611dc      A Helm chart for deploying Stratos UI Consoles
+stratos/console      1.0.2                   A Helm chart for deploying Stratos UI Console
+stratos/console      1.0.0                   A Helm chart for deploying Stratos UI Console
+stratos/console      0.9.9                   A Helm chart for deploying Stratos UI Console
+stratos/console      0.9.8                   A Helm chart for deploying Stratos UI Console
+
+```
+Install
+
+```
+helm install stratos/console --namespace=console --name my-console --version 2.0.0-dev-9a5611dc
 ```
