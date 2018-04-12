@@ -48,7 +48,6 @@ SERVICEINSTANCE_SCF_2_PLAN=20mb
 SERVICEINSTANCE_SCF_2_NAME=cf-summit-mysql-dev-2
 SERVICEINSTANCE_SCF_2_PARAMS='{"name":"value4","name":"value4"}'
 
-
 function login {
   cf login -a https://api.local.pcfdev.io --skip-ssl-validation
 }
@@ -104,7 +103,7 @@ function createServiceInstance {
 }
 
 function createServiceInstances {
-  cf target -o "$ORGNAME" -s "$SPACENAME"
+  cf target -o "SUSE CAP" -s dev
   createServiceInstance "$SERVICEINSTANCE_NAME" "$SERVICEINSTANCE_TYPE" "$SERVICEINSTANCE_PLAN" "$SERVICEINSTANCE_PARAMS"
   createServiceInstance "$SERVICEINSTANCE_NAME2" "$SERVICEINSTANCE_TYPE2" "$SERVICEINSTANCE_PLAN2" "$SERVICEINSTANCE_PARAMS2"
 }
@@ -170,7 +169,7 @@ function createApps {
 
   # This app will use 3 application instances from teh quota
   cf scale go-env -i 3 -f
-  
+
   # Push the same app but call it TestApp
   #cf push TestApp -p . --no-start
 
@@ -180,10 +179,11 @@ function createApps {
 }
 
 function bindServiceInstancesToApp {
-  cf bind-service "$APP_1_NAME" "$SERVICEINSTANCE_NAME"
-  cf bind-service "$APP_2_NAME" "$SERVICEINSTANCE_NAME2"
-  cf bind-service "$APP_3_NAME" "$SERVICEINSTANCE_NAME"
-  cf bind-service "$APP_3_NAME" "$SERVICEINSTANCE_NAME2"
+  cf target -o "SUSE CAP" -s dev
+  cf bind-service "Scheduler" "$SERVICEINSTANCE_NAME"
+  cf bind-service "Notifier" "$SERVICEINSTANCE_NAME2"
+  cf bind-service "Notifier" "$SERVICEINSTANCE_NAME"
+  cf bind-service "StaticWebSite" "$SERVICEINSTANCE_NAME2"
 }
 
 function create {
@@ -191,11 +191,11 @@ function create {
   createOrg "$ORGNAME" "$ORGQUOTA_NAME"
   createSpace "$ORGNAME"
   createOrg "$ORGNAME2"
-  createSpace "$ORGNAME2" 
+  createSpace "$ORGNAME2"
   createOrg "$ORGNAME3"
-  createSpace "$ORGNAME3" 
+  createSpace "$ORGNAME3"
   createOrg "$ORGNAME4" "$ORGQUOTA_NAME"
-  createSpace "$ORGNAME4" 
+  createSpace "$ORGNAME4"
   createQuota "$SPACEQUOTA_NAME" "$SPACEQUOTA_TOTALMEMORY" "$SPACEQUOTA_APPINSTANCEMEMORY" "$SPACEQUOTA_ROUTES" "$SPACEQUOTA_SERVICEINSTANCES" "$SPACEQUOTA_APPINSTANCES" false
 
   # Assign space quotas only in the first org
@@ -217,10 +217,10 @@ function create {
 
 function showHelp {
 
-echo This script creates a set of orgs and spaces and populates a few applications.
-echo Options:
-echo   -c to clean the orgs, space and apps
-echo   -s to create services
+  echo This script creates a set of orgs and spaces and populates a few applications.
+  echo Options:
+  echo   -c to clean the orgs, space and apps
+  echo   -s to create services
 }
 
 function clean {
@@ -231,7 +231,7 @@ function clean {
   cf delete-space "$SPACENAME2" -f
   cf delete-space "$SPACENAME3" -f
   cf delete-space-quota "$SPACEQUOTA_NAME" -f
-  
+
   echo Deleting Orgs
   # Delete org will also delete spaces, apps, service instances, routes, private domains and space-scoped service brokers
   cf delete-org "$ORGNAME" -f
