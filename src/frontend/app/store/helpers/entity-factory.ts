@@ -53,13 +53,21 @@ export class EntitySchema extends schema.Entity {
    * @memberof EntitySchema
    */
   constructor(
-    entityKey: string,
-    definition?: Schema,
-    options?: schema.EntityOptions,
+    private entityKey: string,
+    private definition?: Schema,
+    private options?: schema.EntityOptions,
     public relationKey?: string,
   ) {
     super(entityKey, definition, options);
     this.schema = definition || {};
+  }
+  public withEmptyDefinition() {
+    return new EntitySchema(
+      this.entityKey,
+      {},
+      this.options,
+      this.relationKey
+    );
   }
 }
 
@@ -244,7 +252,7 @@ entityCache[securityGroupSchemaKey] = SecurityGroupSchema;
 const FeatureFlagSchema = new EntitySchema(featureFlagSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[featureFlagSchemaKey] = FeatureFlagSchema;
 
-const SpaceEmptySchema = new EntitySchema(spaceSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+const SpaceEmptySchema = SpaceSchema.withEmptyDefinition();
 const orgUserEntity = {
   entity: {
     spaces: [SpaceEmptySchema]
