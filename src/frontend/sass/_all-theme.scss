@@ -24,6 +24,7 @@
 @import '../app/shared/components/cards/card-number-metric/card-number-metric.component.theme';
 @import '../app/core/dot-content/dot-content.component.theme';
 @import '../app/shared/components/stratos-title/stratos-title.component.theme';
+@import '../app/shared/components/page-header/page-header.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -78,7 +79,7 @@ $side-nav-light-active: #484848;
   @include table-row-theme($theme, $app-theme);
   @include app-hyperlinks($theme, $app-theme);
   @include app-no-content-message-theme($theme, $app-theme);
-  @include app-boolean-indicator-theme($theme);
+  @include app-boolean-indicator-theme($theme, $app-theme);
   @include cf-security-group-theme($theme);
   @include loading-page-theme($theme, $app-theme);
   @include app-log-viewer-theme($theme, $app-theme);
@@ -87,6 +88,7 @@ $side-nav-light-active: #484848;
   @include app-card-number-metric-theme($theme, $app-theme);
   @include app-dot-content($theme, $app-theme);
   @include stratos-title-component-theme($theme, $app-theme);
+  @include app-page-header-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
