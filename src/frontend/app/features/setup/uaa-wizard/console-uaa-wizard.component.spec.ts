@@ -14,6 +14,7 @@ import { CoreModule } from '../../../core/core.module';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
+import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
 
 describe('ConsoleUaaWizardComponent', () => {
   let component: ConsoleUaaWizardComponent;
@@ -28,6 +29,7 @@ describe('ConsoleUaaWizardComponent', () => {
         DotContentComponent,
         PageHeaderComponent,
         StratosTitleComponent,
+        LoadingPageComponent,
       ],
       imports: [
         RouterTestingModule,
