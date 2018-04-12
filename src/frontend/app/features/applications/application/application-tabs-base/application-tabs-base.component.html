@@ -1,8 +1,8 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async">
   <div *ngIf="applicationService.application$ | async as application" class="app-page-header">
     <h1>{{ application?.app?.entity?.name }} </h1>
-    <div class="page-header-right">
-      <a mat-icon-button *ngIf="(applicationService.applicationUrl$ | async) != null && application?.app.entity.state === 'STARTED'" href="{{applicationService.applicationUrl$ | async}}" target="_blank" matTooltip="Visit">
+    <div>
+      <a class="app-page-header__anchor" mat-icon-button *ngIf="(applicationService.applicationUrl$ | async) != null && application?.app.entity.state === 'STARTED'" href="{{applicationService.applicationUrl$ | async}}" target="_blank" matTooltip="Visit">
         <mat-icon>launch</mat-icon>
       </a>
       <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit" matTooltip="Edit">
