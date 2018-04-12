@@ -344,13 +344,18 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
 
-	if datastore.ParseCFEnvs(&dc) == true {
+	parsedDBConfig, err := datastore.ParseCFEnvs(&dc)
+	if err != nil {
+		return dc, errors.New("Could not parse Cloud Foundry Services environment")
+	}
+
+	if parsedDBConfig {
 		log.Info("Using Cloud Foundry DB service")
 	} else if err := config.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
+	dc, err = datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
