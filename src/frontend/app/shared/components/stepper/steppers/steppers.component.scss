@@ -58,7 +58,6 @@
   }
   &__contents {
     display: flex;
-    flex: 1 1 0;
     height: 100%;
     margin: 24px 48px;
   }
@@ -68,6 +67,7 @@
   }
   &__navigation {
     display: flex;
+    flex: none;
     justify-content: space-between;
     margin-top: 50px;
   }
