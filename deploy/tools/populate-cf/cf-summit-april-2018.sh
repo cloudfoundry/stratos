@@ -2,13 +2,6 @@
 #set -e
 
 # This script will populate Cloud Foundry with a set of orgs, spaces and apps.
-#
-
-# Quick check that the cf cli is available
-if [ ! $? -eq 0 ]; then
-  echo "This script needs the cf cli to be installed"
-  exit -1
-fi
 
 ORGNAME="CF Summit 2018"
 ORGNAME2="SUSE Hackweek"
@@ -80,9 +73,13 @@ function createQuota {
   fi
 }
 
+# Create an org, optionally assign it the qiven quota
 function createOrg {
-  #cf create-org ORG
-  cf create-org "$1" -q "$2"
+  if [ -z "$2" ]; then
+    cf create-org "$1"
+  else
+    cf create-org "$1" -q "$2"
+  fi
 }
 
 function createSpace {
@@ -130,11 +127,11 @@ function createApps {
 
   # Create these first, so they are not the most recent apps
   cf target -o "SUSE CAP" -s prod
-  rm -rf cf-demo-app
-  git clone https://github.com/nwmac/cf-demo-app
-  pushd cf-demo-app
-  cf push SUSECON_Demo_App --random-route -p .
-  popd
+  # rm -rf cf-demo-app
+  # git clone https://github.com/nwmac/cf-demo-app
+  # pushd cf-demo-app
+  # cf push SUSECON_Demo_App --random-route -p .
+  # popd
 
   rm -rf cf-quick-app
   git clone https://github.com/nwmac/cf-quick-app.git
@@ -145,7 +142,17 @@ function createApps {
   cf push Notifier -p . -b binary_buildpack
   cf push StaticWebSite -p . -b binary_buildpack
   cf push APIServer -p . -b binary_buildpack
+
+  # Stop one of the apps
+  cf stop Scheduler
+
+  cf target -o "$ORGNAME" -s dev
+
+  # Create an app in the 'Staging Failed' state
+  git checkout staging-fails
+  cf push BillingServer -p .
   popd
+
 
   # Create a few others to show space quotas
   rm -rf empty-app
@@ -153,12 +160,11 @@ function createApps {
   pushd empty-app
   touch delete-me
   # Won't be running, so won't actually use any quota
-  createApp "Incomplete App" "5M" "5M" 1
+  createApp "IncompleteApp" "5M" "5M" 1
   popd
 
   rm -rf go-env
   git clone https://github.com/irfanhabib/go-env
-
   pushd go-env
   cf push -m 22M
 
@@ -166,7 +172,7 @@ function createApps {
   cf scale go-env -i 3 -f
   
   # Push the same app but call it TestApp
-  cf push TestApp -p . --no-start
+  #cf push TestApp -p . --no-start
 
   popd
 
@@ -184,9 +190,9 @@ function create {
   createQuota "$ORGQUOTA_NAME" "$ORGQUOTA_TOTALMEMORY" "$ORGQUOTA_APPINSTANCEMEMORY" "$ORGQUOTA_ROUTES" "$ORGQUOTA_SERVICEINSTANCES" "$ORGQUOTA_APPINSTANCES" true
   createOrg "$ORGNAME" "$ORGQUOTA_NAME"
   createSpace "$ORGNAME"
-  createOrg "$ORGNAME2" "$ORGQUOTA_NAME"
+  createOrg "$ORGNAME2"
   createSpace "$ORGNAME2" 
-  createOrg "$ORGNAME3" "$ORGQUOTA_NAME"
+  createOrg "$ORGNAME3"
   createSpace "$ORGNAME3" 
   createOrg "$ORGNAME4" "$ORGQUOTA_NAME"
   createSpace "$ORGNAME4" 
@@ -209,6 +215,14 @@ function create {
   fi
 }
 
+function showHelp {
+
+echo This script creates a set of orgs and spaces and populates a few applications.
+echo Options:
+echo   -c to clean the orgs, space and apps
+echo   -s to create services
+}
+
 function clean {
   echo "Cleaning...."
   echo Targeting $ORGNAME and deleting it\'s content
@@ -229,11 +243,28 @@ function clean {
   cf delete-quota "$ORGQUOTA_NAME" -f
 }
 
+echo "================================================="
+echo "Org, Space, Quota, Apps script                   "
+echo "================================================="
+echo ""
+
+# Quick check that the cf cli is available
+echo "Checking that the CF cli is available..."
+cf --version
+if [ ! $? -eq 0 ]; then
+  echo "This script needs the CF cli to be installed"
+  exit -1
+fi
+
 CLEAN=false
 CREATE_SERVICES=false
 CF=SCF
-while getopts ":cps" opt ; do
+while getopts ":cpsh" opt ; do
   case $opt in
+    h)
+      showHelp
+      exit 0
+    ;;
     c)
       CLEAN=true
     ;;
@@ -272,15 +303,18 @@ fi
 
 #login
 if [ "$CLEAN" = true ]; then
+  echo "==========================="
+  echo "Cleaning orgs and spaces..."
+  echo "==========================="
   clean
+  exit 0
 fi
+
+echo "================================================="
+echo "Creating orgs, spaces, quota and applications ..."
+echo "================================================="
+
 create
 
-echo This script has
-echo - Created an orgs and spaces, both with custom quotas \($ORGQUOTA_NAME, $SPACEQUOTA_NAME\)
-echo - Created 2 service instances \($SERVICEINSTANCE_NAME, $SERVICEINSTANCE_NAME2\)
-echo - Created 3 apps \($APP_1_NAME, $APP_2_NAME, $APP_3_NAME\) and bound the service instances to them
-echo See top of file for variables
-echo ---------------
-echo Add -c to do a real basic clean of any previous run
-echo Add -s to create services
+echo ""
+echo "All done"
