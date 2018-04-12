@@ -112,6 +112,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'instances', label: 'Instances' },
+    { link: 'routes', label: 'Routes' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },

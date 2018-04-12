@@ -18,6 +18,7 @@ import { GithubTabComponent } from './application/application-tabs-base/tabs/git
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
+import { RoutesTabComponent } from './application/application-tabs-base/tabs/routes-tab/routes-tab/routes-tab.component';
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { ApplicationsRoutingModule } from './applications.routing';
@@ -25,7 +26,6 @@ import { EditApplicationComponent } from './edit-application/edit-application.co
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
-import { RoutesComponent } from './routes/routes.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 
 @NgModule({
@@ -45,7 +45,6 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     ViewBuildpackComponent,
     ApplicationTabsBaseComponent,
     SshApplicationComponent,
-    RoutesComponent,
     EditApplicationComponent,
     InstancesTabComponent,
     AddRoutesComponent,
@@ -53,6 +52,7 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     MapRoutesComponent,
     AddRouteStepperComponent,
     MetricsTabComponent,
+    RoutesTabComponent,
   ],
   providers: [
     ApplicationService,
