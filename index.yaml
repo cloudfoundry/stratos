@@ -89,4 +89,14 @@ entries:
     urls:
     - https://github.com/suse/stratos-ui/releases/download/0.9.0/console-helm-chart-0.9.0.tgz
     version: 0.9.0
-generated: 2018-04-12T10:38:14.530773184Z
+  metrics:
+  - apiVersion: v1
+    created: 2018-04-12T11:14:42.658213114Z
+    description: Stratos Metrics component to fetch metrics data from S/CF. Uses Prometheus
+      and Firehose Exporter
+    digest: 9c6bac79b2f8a6c9b52a077eaf4343c61fed764913c8d2d40d7baddcf7e34866
+    name: metrics
+    urls:
+    - https://github.com/suse/stratos-metrics/releases/download/2.0.0-metrics-dev/console-metrics-helm-chart-v2.0.0-metrics-dev-b5272b2d.tgz
+    version: 2.0.0-metrics-dev-b5272b2d
+generated: 2018-04-12T11:14:42.650631144Z
