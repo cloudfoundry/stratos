@@ -1,4 +1,5 @@
 import { PaginationState } from '../../types/pagination.types';
+import { applicationSchemaKey, spaceSchemaKey, organizationSchemaKey, serviceSchemaKey } from '../../helpers/entity-factory';
 export function paginationClearType(state: PaginationState, entityKey, defaultPaginationEntityState) {
   if (state[entityKey]) {
     const clearState = { ...state };
@@ -15,8 +16,9 @@ export function paginationClearType(state: PaginationState, entityKey, defaultPa
 
 export function clearEndpointEntities(state: PaginationState, defaultPaginationEntityState) {
   let newState = {};
-  newState = paginationClearType(state, 'application', defaultPaginationEntityState);
-  newState = paginationClearType(newState, 'space', defaultPaginationEntityState);
-  newState = paginationClearType(newState, 'organization', defaultPaginationEntityState);
+  newState = paginationClearType(state, applicationSchemaKey, defaultPaginationEntityState);
+  newState = paginationClearType(newState, spaceSchemaKey, defaultPaginationEntityState);
+  newState = paginationClearType(newState, organizationSchemaKey, defaultPaginationEntityState);
+  newState = paginationClearType(newState, serviceSchemaKey, defaultPaginationEntityState);
   return newState;
 }

@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { map, mergeMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -25,12 +25,12 @@ import {
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
 } from '../actions/endpoint.actions';
-import { ClearPages, ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointStoreNames, EndpointType, StateUpdateAction } from '../types/endpoint.types';
+import { endpointStoreNames, EndpointType } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
@@ -130,16 +130,6 @@ export class EndpointsEffect {
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED]
       );
     });
-
-  @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
-    .pipe(
-      map(action => {
-        if (action.endpointType === 'cloud-foundry') {
-          this.store.dispatch(new ClearPages('application', 'applicationWall'));
-        }
-      })
-    );
-
 
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
