@@ -20,6 +20,8 @@ export class PageHeaderComponent {
 
   @Input('hideMenu') hideMenu = false;
 
+  @Input('showUnderFlow') showUnderFlow = false;
+
   @Input('breadcrumbs')
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);

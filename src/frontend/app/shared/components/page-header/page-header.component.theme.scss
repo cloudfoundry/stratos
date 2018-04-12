@@ -1,9 +1,13 @@
 @mixin app-page-header-theme($theme, $app-theme) {
+  $primary: map-get($theme, primary);
   $foreground: map-get($theme, foreground);
   $accent: map-get($theme, accent);
   .page-header {
     &__menu-separator {
       background-color: mat-color($foreground, divider);
+    }
+    &__underflow {
+      background-color: mat-color($primary);
     }
   } // Menu size changes - done in theme otherwise would need ViewEncapsulation.None
   .mat-menu-panel.page-header__menu {
