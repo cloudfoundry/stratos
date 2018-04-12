@@ -88,7 +88,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new UnregisterEndpoint(item.guid));
+      this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
       this.handleDeleteAction(item, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
       });
@@ -111,7 +111,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new DisconnectEndpoint(item.guid));
+      this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
       this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
         this.store.dispatch(new GetSystemInfo());

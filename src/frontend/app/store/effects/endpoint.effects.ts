@@ -107,7 +107,7 @@ export class EndpointsEffect {
         params,
         null,
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
-        action.type,
+        action.endpointType,
         action.body,
       );
     });
@@ -195,7 +195,7 @@ export class EndpointsEffect {
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
     actionStrings: [string, string] = [null, null],
-    endpointType: EndpointType = 'cloud-foundry',
+    endpointType: EndpointType = 'cf',
     body?: string,
   ) {
     const headers = new HttpHeaders();

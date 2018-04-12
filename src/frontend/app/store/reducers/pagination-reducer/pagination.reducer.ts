@@ -147,7 +147,7 @@ function paginate(action, state, updatePagination) {
   }
 
   if (isEndpointAction(action)) {
-    return clearEndpointEntities(state, getDefaultPaginationEntityState());
+    return clearEndpointEntities(state, action, getDefaultPaginationEntityState());
   }
 
   return enterPaginationReducer(state, action, updatePagination);
