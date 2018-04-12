@@ -7,5 +7,5 @@
   </div>
 </app-page-header>
 
-<app-endpoints-missing *ngIf="!(endpointsService.haveRegistered$ | async)" [showToolbarHint]="true" [showSnackForNoneConnected]="true"></app-endpoints-missing>
+<app-endpoints-missing [showToolbarHint]="true" [showSnackForNoneConnected]="true"></app-endpoints-missing>
 <app-list *ngIf="(endpointsService.haveRegistered$ | async)"></app-list>

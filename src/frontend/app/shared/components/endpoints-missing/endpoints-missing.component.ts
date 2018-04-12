@@ -21,8 +21,7 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
   @Input('showToolbarHint') showToolbarHint = false;
 
   snackBarText = {
-    message: `To access your cloud native workloads and other related third party services, connect with
-    your personal credentials to the corresponding registered services.`,
+    message: `There are no connected Cloud Foundry endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
   };
 
@@ -65,7 +64,7 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
           return this.noneRegisteredText;
         }
         if (!hasConnected) {
-          return this.noneConnectedText;
+          return this.showSnackForNoneConnected ? null : this.noneConnectedText;
         }
         return null;
       })
