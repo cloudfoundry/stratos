@@ -5,6 +5,7 @@ import {
   CfServicesListConfigService,
 } from '../../../shared/components/list/list-types/cf-services/cf-services-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { APIResource } from '../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
 
@@ -22,7 +23,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers
 })
 export class ServiceCatalogPageComponent implements OnInit {
 
-  constructor(private listConfig: ListConfig<APIResource>) {
+  constructor(private listConfig: ListConfig<APIResource>, public cloudFoundryService: CloudFoundryService) {
     const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
   }
   ngOnInit() {
