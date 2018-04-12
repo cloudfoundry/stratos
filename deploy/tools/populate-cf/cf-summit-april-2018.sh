@@ -1,12 +1,19 @@
 #!/bin/bash
-set -e
+#set -e
+
+# This script will populate Cloud Foundry with a set of orgs, spaces and apps.
+#
+
+# Quick check that the cf cli is available
+if [ ! $? -eq 0 ]; then
+  echo "This script needs the cf cli to be installed"
+  exit -1
+fi
 
 ORGNAME="CF Summit 2018"
 ORGNAME2="SUSE Hackweek"
 ORGNAME3="SUSE CAP"
-ORGNAME4="SUSE Dev"
-ORGNAME5="Cloud Foundry Incubators"
-ORGNAME6="Stratos Dev"
+ORGNAME4="SUSE Developers"
 SPACENAME=dev
 SPACENAME2=prod
 SPACENAME3=test
@@ -19,11 +26,14 @@ ORGQUOTA_SERVICEINSTANCES=50
 ORGQUOTA_APPINSTANCES=50
 
 SPACEQUOTA_NAME=cf-summit-space-quota
-SPACEQUOTA_TOTALMEMORY=50M
-SPACEQUOTA_APPINSTANCEMEMORY=20M
-SPACEQUOTA_ROUTES=10
+SPACEQUOTA_TOTALMEMORY=70M
+SPACEQUOTA_APPINSTANCEMEMORY=50M
+SPACEQUOTA_ROUTES=6
 SPACEQUOTA_SERVICEINSTANCES=5
-SPACEQUOTA_APPINSTANCES=10
+SPACEQUOTA_APPINSTANCES=5
+
+SERVICE_TYPE="persi-nfs"
+SERVICE_NAME="cf-summit-persi-nfs"
 
 SERVICEINSTANCE_PCF_1_TYPE=p-mysql
 SERVICEINSTANCE_PCF_1_PLAN=512mb
@@ -35,30 +45,16 @@ SERVICEINSTANCE_PCF_2_PLAN=standard
 SERVICEINSTANCE_PCF_2_NAME=cf-summit-p-rabbitmq
 SERVICEINSTANCE_PCF_2_PARAMS='{"name":"value2","name":"value2"}'
 
-SERVICEINSTANCE_SCF_1_TYPE=mysql-dev
+SERVICEINSTANCE_SCF_1_TYPE=$SERVICE_TYPE
 SERVICEINSTANCE_SCF_1_PLAN=10mb
 SERVICEINSTANCE_SCF_1_NAME=cf-summit-mysql-dev-1
 SERVICEINSTANCE_SCF_1_PARAMS='{"name":"value3","name":"value3"}'
 
-SERVICEINSTANCE_SCF_2_TYPE=mysql-dev
+SERVICEINSTANCE_SCF_2_TYPE=$SERVICE_TYPE
 SERVICEINSTANCE_SCF_2_PLAN=20mb
 SERVICEINSTANCE_SCF_2_NAME=cf-summit-mysql-dev-2
 SERVICEINSTANCE_SCF_2_PARAMS='{"name":"value4","name":"value4"}'
 
-APP_1_NAME=cf-summit-app-1
-APP_1_DISK=5M
-APP_1_MEMORY=5M
-APP_1_INSTANCES=1
-
-APP_2_NAME=cf-summit-app-2
-APP_2_DISK=5M
-APP_2_MEMORY=5M
-APP_2_INSTANCES=1
-
-APP_3_NAME=cf-summit-app-3
-APP_3_DISK=5M
-APP_3_MEMORY=5M
-APP_3_INSTANCES=2
 
 function login {
   cf login -a https://api.local.pcfdev.io --skip-ssl-validation
@@ -90,10 +86,18 @@ function createOrg {
 }
 
 function createSpace {
+  SPACE_QUOTA_ARGS=""
+  SPACE_ORG=$1
+  if [ "$2" = "true" ]; then
+    SPACE_QUOTA_ARGS=-q $SPACEQUOTA_NAME
+  fi
+
+  echo "Creating spaces in $SPACE_ORG : $SPACE_QUOTA_ARGS"
+
   #cf create-space SPACE [-o ORG] [-q SPACE_QUOTA]
-  cf create-space "$SPACENAME" -o "$ORGNAME" -q "$SPACEQUOTA_NAME"
-  cf create-space "$SPACENAME2" -o "$ORGNAME" -q "$SPACEQUOTA_NAME"
-  cf create-space "$SPACENAME3" -o "$ORGNAME" -q "$SPACEQUOTA_NAME"
+  cf create-space "$SPACENAME" -o "$SPACE_ORG" ${SPACE_QUOTA_ARGS}
+  cf create-space "$SPACENAME2" -o "$SPACE_ORG" ${SPACE_QUOTA_ARGS}
+  cf create-space "$SPACENAME3" -o "$SPACE_ORG" ${SPACE_QUOTA_ARGS}
 }
 
 function createServiceInstance {
@@ -113,18 +117,59 @@ function createApp {
   echo Disk Limit: "$2"
   echo Memory Limit: "$3"
   echo Number of instances: "$4"
-  
+
+  cf target -o "$ORGNAME" -s "$SPACENAME"
   cf push "$1" -k "$2" -m "$3" -i "$4" --no-manifest --no-start
 }
 
 function createApps {
   TEMP_PUSH_FOLDER=temp-push-folder
-  mkdir "$TEMP_PUSH_FOLDER" -p
-  pushd "$TEMP_PUSH_FOLDER"
+  rm -rf $TEMP_PUSH_FOLDER
+  mkdir $TEMP_PUSH_FOLDER -p
+  pushd $TEMP_PUSH_FOLDER
+
+  # Create these first, so they are not the most recent apps
+  cf target -o "SUSE CAP" -s prod
+  rm -rf cf-demo-app
+  git clone https://github.com/nwmac/cf-demo-app
+  pushd cf-demo-app
+  cf push SUSECON_Demo_App --random-route -p .
+  popd
+
+  rm -rf cf-quick-app
+  git clone https://github.com/nwmac/cf-quick-app.git
+  pushd cf-quick-app
+
+  cf target -o "SUSE CAP" -s dev
+  cf push Scheduler -p . -b binary_buildpack -i 4
+  cf push Notifier -p . -b binary_buildpack
+  cf push StaticWebSite -p . -b binary_buildpack
+  cf push APIServer -p . -b binary_buildpack
+  popd
+
+  # Create a few others to show space quotas
+  rm -rf empty-app
+  mkdir empty-app -p
+  pushd empty-app
   touch delete-me
-  createApp "$APP_1_NAME" "$APP_1_DISK" "$APP_1_MEMORY" "$APP_1_INSTANCES"
-  createApp "$APP_2_NAME" "$APP_2_DISK" "$APP_2_MEMORY" "$APP_2_INSTANCES"
-  createApp "$APP_3_NAME" "$APP_3_DISK" "$APP_3_MEMORY" "$APP_3_INSTANCES"
+  # Won't be running, so won't actually use any quota
+  createApp "Incomplete App" "5M" "5M" 1
+  popd
+
+  rm -rf go-env
+  git clone https://github.com/irfanhabib/go-env
+
+  pushd go-env
+  cf push -m 22M
+
+  # This app will use 3 application instances from teh quota
+  cf scale go-env -i 3 -f
+  
+  # Push the same app but call it TestApp
+  cf push TestApp -p . --no-start
+
+  popd
+
   popd
 }
 
@@ -138,19 +183,34 @@ function bindServiceInstancesToApp {
 function create {
   createQuota "$ORGQUOTA_NAME" "$ORGQUOTA_TOTALMEMORY" "$ORGQUOTA_APPINSTANCEMEMORY" "$ORGQUOTA_ROUTES" "$ORGQUOTA_SERVICEINSTANCES" "$ORGQUOTA_APPINSTANCES" true
   createOrg "$ORGNAME" "$ORGQUOTA_NAME"
+  createSpace "$ORGNAME"
   createOrg "$ORGNAME2" "$ORGQUOTA_NAME"
+  createSpace "$ORGNAME2" 
   createOrg "$ORGNAME3" "$ORGQUOTA_NAME"
+  createSpace "$ORGNAME3" 
   createOrg "$ORGNAME4" "$ORGQUOTA_NAME"
-  createOrg "$ORGNAME5" "$ORGQUOTA_NAME"
-  createOrg "$ORGNAME6" "$ORGQUOTA_NAME"
+  createSpace "$ORGNAME4" 
   createQuota "$SPACEQUOTA_NAME" "$SPACEQUOTA_TOTALMEMORY" "$SPACEQUOTA_APPINSTANCEMEMORY" "$SPACEQUOTA_ROUTES" "$SPACEQUOTA_SERVICEINSTANCES" "$SPACEQUOTA_APPINSTANCES" false
-  createSpace
-  createServiceInstances
+
+  # Assign space quotas only in the first org
+  cf target -o "$ORGNAME"
+  cf set-space-quota "$SPACENAME" "$SPACEQUOTA_NAME"
+  cf set-space-quota "$SPACENAME2" "$SPACEQUOTA_NAME"
+  cf set-space-quota "$SPACENAME3" "$SPACEQUOTA_NAME"
+
+  if [ "$CREATE_SERVICES" = true ]; then
+    createServiceInstances
+  fi
+
   createApps
-  bindServiceInstancesToApp
+
+  if [ "$CREATE_SERVICES" = true ]; then
+    bindServiceInstancesToApp
+  fi
 }
 
 function clean {
+  echo "Cleaning...."
   echo Targeting $ORGNAME and deleting it\'s content
   cf target -o "$ORGNAME"
   cf delete-space "$SPACENAME" -f
@@ -170,11 +230,15 @@ function clean {
 }
 
 CLEAN=false
+CREATE_SERVICES=false
 CF=SCF
-while getopts ":cp" opt ; do
+while getopts ":cps" opt ; do
   case $opt in
     c)
       CLEAN=true
+    ;;
+    s)
+      CREATE_SERVICES=true
     ;;
     p)
       CF=PCF
@@ -219,3 +283,4 @@ echo - Created 3 apps \($APP_1_NAME, $APP_2_NAME, $APP_3_NAME\) and bound the se
 echo See top of file for variables
 echo ---------------
 echo Add -c to do a real basic clean of any previous run
+echo Add -s to create services
