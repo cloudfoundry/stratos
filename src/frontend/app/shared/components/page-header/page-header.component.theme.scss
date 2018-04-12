@@ -1,16 +1,11 @@
 @mixin app-page-header-theme($theme, $app-theme) {
-  $primary: map-get($theme, primary);
   $foreground: map-get($theme, foreground);
+  $accent: map-get($theme, accent);
   .page-header {
-    &__avatar-button {
-      background-color: mat-color($primary, 600);
-    }
     &__menu-separator {
       background-color: mat-color($foreground, divider);
     }
-  }
-
-  // Menu size changes - done in theme otherwise would need ViewEncapsulation.None
+  } // Menu size changes - done in theme otherwise would need ViewEncapsulation.None
   .mat-menu-panel.page-header__menu {
     max-width: 400px;
     min-width: 200px;
