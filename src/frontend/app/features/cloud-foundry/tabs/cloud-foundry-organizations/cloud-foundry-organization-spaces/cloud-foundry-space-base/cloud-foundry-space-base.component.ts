@@ -56,6 +56,9 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   public isFetching$: Observable<boolean>;
 
+  // Used to hide tab that is not yet implemented when in production
+  public isDevEnvironment = !environment.production;
+
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,
     private cfSpaceService: CloudFoundrySpaceService,
