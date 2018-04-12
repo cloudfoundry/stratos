@@ -8,7 +8,7 @@ spec:
   ports:
 {{- if and (not .Values.useLb) (or (not .Values.kube.external_ip) (and .Values.kube.external_ip .Values.kube.external_console_http_port)) }}
   - name: http
-    {{- if and .Values.kube.external_ip .Values.kube.external_console_http_port }}
+    {{- if and (or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips) .Values.kube.external_console_http_port }}
     port: {{ .Values.kube.external_console_http_port }}
     {{- else }}
     port: 80
@@ -17,7 +17,7 @@ spec:
     targetPort: 80
 {{- end }}
   - name: https
-{{- if and .Values.kube.external_ip .Values.kube.external_console_https_port }}
+{{- if and (or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips) .Values.kube.external_console_https_port }}
     port: {{ .Values.kube.external_console_https_port }}
 {{- else }}
     port: {{ .Values.console.port }}
@@ -32,14 +32,8 @@ spec:
 {{- else }}
   type: NodePort
 {{- end }}
-{{- if .Values.kube.external_ip }}
-  externalIPs:
-  -  {{ .Values.kube.external_ip }}
-{{- else }}
-  {{- if .Values.console.externalIP }}
-  externalIPs:
-  -  {{ .Values.console.externalIP }}
-  {{- end }}
+{{- if or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips  }}
+  externalIPs: {{ template "service.externalIPs" . }}
 {{- end }}
 ---
 apiVersion: v1

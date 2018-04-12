@@ -18,11 +18,13 @@
 @import '../app/shared/components/no-content-message/no-content-message.component.theme';
 @import '../app/shared/components/boolean-indicator/boolean-indicator.component.theme';
 @import '../app/shared/components/list/list-types/cf-security-groups/cf-security-groups-card/cf-security-groups-card.component.theme';
+@import '../app/shared/components/loading-page/loading-page.component.theme';
 @import '../app/shared/components/log-viewer/log-viewer.component.theme';
 @import '../app/shared/components/chips/chips.component.theme';
 @import '../app/shared/components/cards/card-number-metric/card-number-metric.component.theme';
 @import '../app/core/dot-content/dot-content.component.theme';
 @import '../app/shared/components/stratos-title/stratos-title.component.theme';
+@import '../app/shared/components/page-header/page-header.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -77,14 +79,16 @@ $side-nav-light-active: #484848;
   @include table-row-theme($theme, $app-theme);
   @include app-hyperlinks($theme, $app-theme);
   @include app-no-content-message-theme($theme, $app-theme);
-  @include app-boolean-indicator-theme($theme);
+  @include app-boolean-indicator-theme($theme, $app-theme);
   @include cf-security-group-theme($theme);
+  @include loading-page-theme($theme, $app-theme);
   @include app-log-viewer-theme($theme, $app-theme);
   @include app-deploy-app-theme($theme, $app-theme);
   @include app-cloud-foundry-firehose-theme($theme, $app-theme);
   @include app-card-number-metric-theme($theme, $app-theme);
   @include app-dot-content($theme, $app-theme);
   @include stratos-title-component-theme($theme, $app-theme);
+  @include app-page-header-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

@@ -7,7 +7,7 @@
     <button mat-icon-button name="delete" *ngIf="(cfEndpointService.connected$ | async)" (click)="deleteSpace()">
         <mat-icon>delete</mat-icon>
       </button>
-    <button mat-icon-button name="user-management" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/manage-users">
+    <button mat-icon-button name="user-management" *ngIf="isDevEnvironment && (cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/manage-users">
         <mat-icon>people</mat-icon>
       </button>
   </div>

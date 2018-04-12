@@ -56,22 +56,27 @@
         var fPath = path.join(folder, plugin);
         var stat = fs.lstatSync(fPath);
         if (stat.isDirectory()) {
+          var isMain = plugin === 'app-core';
+          var srcPath = isMain ? tempSrcPath : path.join(tempSrcPath, 'plugins', plugin);
           plugins.push({
-            name: plugin, 
+            name: plugin,
             path: fPath,
-            isMain: plugin === 'app-core'
+            isMain: isMain,
+            srcPath: srcPath
           });
         }
       });
     }
-  }  
+  }
 
   module.exports.getPlugins = getPlugins;
 
   gulp.task('clean-backend', function (done) {
     // Local dev build - only remove plugins and main binary
     if (module.exports.localDevSetup) {
-      var files = glob.sync('+(portal-proxy|*.so|plugins.json)', { cwd: conf.outputPath});
+      var files = glob.sync('+(portal-proxy|*.so|plugins.json)', {
+        cwd: conf.outputPath
+      });
       _.each(files, function (file) {
         /* eslint-disable no-sync */
         fs.removeSync(path.join(conf.outputPath, file));
@@ -92,10 +97,10 @@
 
   gulp.task('create-temp', function (done) {
     // If STRATOS_TEMP is set, then a staged build is being carried out
-    // see CF deployment script deploy/cloud-foundry/package.sh
+    // see CF deployment script deploy/cloud-foundry/build.sh
     if (process.env.STRATOS_TEMP) {
       tempPath = process.env.STRATOS_TEMP;
-      tempSrcPath = tempPath + path.sep + conf.goPath + path.sep;
+      tempSrcPath = path.join(tempPath, conf.goPath);
       return done();
     } else {
       mktemp.createDir('/tmp/stratos-ui-XXXX.build',
@@ -148,9 +153,11 @@
 
       var promises = [];
       _.each(plugins, function (plugin) {
-        var pluginSource = plugin.path;
-        var pluginDest = path.join(pluginsFolder, plugin.name);
-        promises.push(fsSymLinkQ(pluginSource, pluginDest));
+        if (!plugin.isMain) {
+          var pluginSource = plugin.path;
+          var pluginDest = path.join(pluginsFolder, plugin.name);
+          promises.push(fsSymLinkQ(pluginSource, pluginDest));
+        }
       });
 
       Q.all(promises)

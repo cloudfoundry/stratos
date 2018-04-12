@@ -28,10 +28,16 @@ export interface EndpointModel {
   name: string;
   skip_ssl_validation?: boolean;
   token_endpoint?: string;
-  // This is generated client side when we login
-  registered?: boolean;
   user?: EndpointUser;
+  metadata?: {
+    metrics: string
+  };
+  // These are generated client side when we login
+  registered?: boolean;
   connectionStatus?: endpointConnectionStatus;
+  metricsAvailable: boolean;
+  //
+
 }
 
 // Metadata for the user connected to an endpoint
@@ -48,7 +54,7 @@ export interface EndpointState {
 }
 
 // If we support more endpoint types in future, this type should be extended
-export type EndpointType = 'cloud-foundry';
+export type EndpointType = string;
 
 export interface StateUpdateAction {
   type: string;

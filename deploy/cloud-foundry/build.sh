@@ -28,12 +28,12 @@ npm install
 # Fetch Glide dependencies
 npm run cf-get-backend-deps
 
-npm run build
+npm run build-cf
 
 # Build backend components
 npm run cf-build-backend
 
-npm run build-cf
+npm run deploy-cf
 
 chmod +x portal-proxy
 

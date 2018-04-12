@@ -65,6 +65,11 @@ func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 	log.SetOutput(os.Stdout)
+
+	log.Info("========================================")
+	log.Info("=== Stratos Jetstream Backend Server ===")
+	log.Info("========================================")
+	log.Info("")
 	log.Info("Initialization started.")
 
 	// Register time.Time in gob
@@ -339,13 +344,18 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
 
-	if datastore.ParseCFEnvs(&dc) == true {
+	parsedDBConfig, err := datastore.ParseCFEnvs(&dc)
+	if err != nil {
+		return dc, errors.New("Could not parse Cloud Foundry Services environment")
+	}
+
+	if parsedDBConfig {
 		log.Info("Using Cloud Foundry DB service")
 	} else if err := config.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
+	dc, err = datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
@@ -573,9 +583,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// Connect to CF cluster
 	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
 
-	// Verify credentials for CF cluster
-	sessionGroup.POST("/auth/login/cnsi/verify", p.verifyLoginToCNSI)
-
 	// Disconnect CF cluster
 	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
@@ -598,7 +605,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		routePlugin.AddSessionGroupRoutes(sessionGroup)
 	}
 
-	// This is used for passthru of CF/HCE requests
+	// This is used for passthru of requests
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
 

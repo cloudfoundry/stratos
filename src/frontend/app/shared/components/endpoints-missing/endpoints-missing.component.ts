@@ -5,6 +5,8 @@ import { Store } from '@ngrx/store';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { UserService } from '../../../core/user.service';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import { map, tap, delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-endpoints-missing',
@@ -13,69 +15,63 @@ import { EndpointsService } from '../../../core/endpoints.service';
 })
 export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestroy {
 
+  noContent$: Observable<{ firstLine: string; secondLine: { text: string; }; }>;
   @Input('showSnackForNoneConnected') showSnackForNoneConnected = false;
 
   @Input('showToolbarHint') showToolbarHint = false;
 
-  firstLine;
-  secondLine;
-  toolbarLink;
-  hide = true;
-
   snackBarText = {
-    message: `To access your cloud native workloads and other related third party services, connect with
-    your personal credentials to the corresponding registered services.`,
+    message: `There are no connected Cloud Foundry endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
   };
 
   noneRegisteredText = {
-    firstLineText: 'There are no registered endpoints',
+    firstLine: 'There are no registered Cloud Foundry endpoints',
     toolbarLink: {
       text: 'Register an endpoint'
     },
-    secondLineText: {
+    secondLine: {
       text: 'Use the Endpoints view to register'
     },
   };
 
   noneConnectedText = {
-    firstLineText: 'There are no connected endpoints',
-    secondLineText: {
+    firstLine: 'There are no connected Cloud Foundry endpoints',
+    secondLine: {
       text: 'Use the Endpoints view to connect'
     },
   };
 
-  subscription: Subscription;
-
   private _snackBar: MatSnackBarRef<SimpleSnackBar>;
 
-  constructor(private userService: UserService, private snackBar: MatSnackBar, public endpointService: EndpointsService) { }
+  constructor(private userService: UserService, private snackBar: MatSnackBar, public cloudFoundryService: CloudFoundryService) { }
 
   ngOnInit() {
 
   }
 
   ngAfterViewInit() {
-    this.subscription = Observable.combineLatest(
-      this.endpointService.haveRegistered$,
-      this.endpointService.haveConnected$
-    ).subscribe(([haveRegistered, haveConnected]) => {
-      const showNoneRegistered = !haveRegistered;
-      const showNoneConnected = !this.showSnackForNoneConnected && haveRegistered && !haveConnected;
-
-      setTimeout(() => {
-        this.firstLine = showNoneConnected ? this.noneConnectedText.firstLineText : this.noneRegisteredText.firstLineText;
-        this.secondLine = showNoneConnected ? this.noneConnectedText.secondLineText :
-          this.showToolbarHint ? {} : this.noneRegisteredText.secondLineText;
-        this.toolbarLink = showNoneConnected ? {} : this.showToolbarHint ? this.noneRegisteredText.toolbarLink : {};
-        this.hide = !showNoneRegistered && !showNoneConnected;
-        this.showSnackBar(this.showSnackForNoneConnected && haveRegistered && !haveConnected);
-      });
-    });
+    this.noContent$ = Observable.combineLatest(
+      this.cloudFoundryService.hasRegisteredCFEndpoints$,
+      this.cloudFoundryService.hasConnectedCFEndpoints$
+    ).pipe(
+      delay(1),
+      tap(([hasRegistered, hasConnected]) => {
+        this.showSnackBar(this.showSnackForNoneConnected && hasRegistered && !hasConnected);
+      }),
+      map(([hasRegistered, hasConnected]) => {
+        if (!hasRegistered) {
+          return this.noneRegisteredText;
+        }
+        if (!hasConnected) {
+          return this.showSnackForNoneConnected ? null : this.noneConnectedText;
+        }
+        return null;
+      })
+    ).startWith(null);
   }
 
   ngOnDestroy() {
-    this.subscription.unsubscribe();
     this.showSnackBar(false);
   }
 

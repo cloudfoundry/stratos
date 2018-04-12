@@ -1,16 +1,22 @@
 .loading-page {
-  position: absolute;
-  top: 0;
+  align-items: center;
   bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: center;
-  align-items: center;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
   &__indicator {
     flex: none;
     &-bar {
       margin-top: 15px;
+    }
+    &-alert {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
     }
   }
 }

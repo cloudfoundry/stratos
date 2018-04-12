@@ -4,7 +4,7 @@
     <button mat-icon-button name="add-org" *ngIf="(this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
       <mat-icon>add_box</mat-icon>
     </button>
-    <button mat-icon-button name="user-management" *ngIf="(this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/manage-users">
+    <button mat-icon-button name="user-management" *ngIf="isDevEnvironment && (this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/manage-users">
       <mat-icon>people</mat-icon>
     </button>
   </div>

@@ -27,7 +27,8 @@ describe('EndpointCardComponent', () => {
         admin: false,
         name: '',
         guid: '',
-      }
+      },
+      metricsAvailable: false
     };
     fixture.detectChanges();
   });

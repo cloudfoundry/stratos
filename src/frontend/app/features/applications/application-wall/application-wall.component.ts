@@ -20,6 +20,8 @@ import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 import { APIResource } from '../../../store/types/api.types';
+import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 @Component({
   selector: 'app-application-wall',
@@ -45,13 +47,11 @@ import { APIResource } from '../../../store/types/api.types';
 })
 export class ApplicationWallComponent implements OnDestroy {
 
-
-
   private statsSub: Subscription;
   private initCfOrgSpaceService: Subscription;
 
   constructor(
-    public endpointsService: EndpointsService,
+    public cloudFoundryService: CloudFoundryService,
     private store: Store<AppState>,
     private appListConfig: ListConfig<APIResource>,
     private cfOrgSpaceService: CfOrgSpaceDataService

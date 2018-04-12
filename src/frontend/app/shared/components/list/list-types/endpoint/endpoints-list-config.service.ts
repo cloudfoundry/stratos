@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl, getNameForEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
@@ -25,19 +25,18 @@ import {
 } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
-  return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
+  return getNameForEndpointType(endpoint.cnsi_type);
 }
 
 export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'name',
     headerCell: () => 'Name',
-    cellDefinition: {
-      valuePath: 'name'
-    },
+    cellComponent: TableCellEndpointNameComponent,
     sort: {
       type: 'sort',
       orderKey: 'name',
@@ -129,7 +128,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
           name: item.name,
-          guid: item.guid
+          guid: item.guid,
+          type: item.cnsi_type,
         },
         disableClose: true
       });

@@ -1,11 +1,15 @@
 .buildpack-card {
   &__title {
+    display: flex;
+    flex-direction: row;
     &-name {
       align-items: baseline;
       display: flex;
+      flex: 1;
       flex-direction: row;
     }
     &-dot {
+      flex: 0 0 auto;
       padding-left: 6px;
     }
   }
