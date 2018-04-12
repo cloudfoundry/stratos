@@ -127,7 +127,8 @@ export class EndpointsEffect {
         '/pp/v1/auth/logout/cnsi',
         params,
         null,
-        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED]
+        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
@@ -146,7 +147,8 @@ export class EndpointsEffect {
         '/pp/v1/unregister',
         params,
         'delete',
-        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED]
+        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
@@ -167,7 +169,8 @@ export class EndpointsEffect {
         '/pp/v1/register/' + action.endpointType,
         params,
         'create',
-        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED]
+        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
