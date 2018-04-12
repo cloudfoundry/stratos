@@ -15,7 +15,7 @@ import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/mate
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap, withLatestFrom } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -166,7 +166,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
 
     this.hasRows$ = this.dataSource.page$.pipe(
-      map(pag => pag ? pag.length > 0 : false),
+      map(pag => !!(pag && pag.length)),
       startWith(false)
     );
 
@@ -344,16 +344,21 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         })
       );
 
-    let blockProgressBar = false;
-    this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
-      startWith(false),
+    const canShowLoading$ = this.dataSource.pagination$.pipe(
+      map(pag => pag.currentPage),
+      distinctUntilChanged(),
       pairwise(),
-      map(([oldIsLoading, newIsLoading]) => {
-        if (oldIsLoading && !newIsLoading) {
-          blockProgressBar = true;
-        }
-        return newIsLoading && !blockProgressBar;
-      })
+      map(([oldPage, newPage]) => oldPage !== newPage),
+      startWith(true),
+    );
+
+    this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
+      startWith(true),
+      withLatestFrom(canShowLoading$),
+      map(([loading, canShowLoading]) => {
+        return canShowLoading && loading;
+      }),
+      distinctUntilChanged()
     );
   }
 
