@@ -6,7 +6,7 @@
 
 **Improvements:**
 
-- Added support for SUSE Cloud Foundry 1.1 confirmation values to the Helm chart [\#1950](https://github.com/cloudfoundry-incubator/stratos/pull/1950)
+- Added support for SUSE Cloud Foundry 1.1 configuration values to the Helm chart [\#1950](https://github.com/cloudfoundry-incubator/stratos/pull/1950)
 
 **Fixes:**
 
