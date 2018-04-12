@@ -8,7 +8,7 @@
           Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
         </p>
         <p>Before accessing Stratos for the first time some configuration information is required.</p>
-        
+
         <p>Press <b>NEXT</b> to get started.</p>
       </div>
     </app-step>
@@ -16,17 +16,16 @@
       <div class="uaa-wizard__form">
         <p>Please enter the following information to allow Stratos to authenticate with your UAA:</p>
         <form class="uaa-wizard__form" [formGroup]="uaaForm" class="stepper-form">
-          UAA Endpoint
           <mat-form-field>
-            <input matInput formControlName="apiUrl" placeholder="API Url">
+            <input matInput formControlName="apiUrl" placeholder="UAA Endpoint Url">
           </mat-form-field>
-          Console credentials for UAA
           <mat-form-field>
             <input matInput formControlName="clientId" placeholder="Client ID">
           </mat-form-field>
           <mat-form-field>
             <input matInput formControlName="clientSecret" placeholder="Client Secret">
           </mat-form-field>
+          Enter the username and password of an admin user (this is used to retrieve scope metadata)
           <mat-form-field>
             <input matInput formControlName="adminUsername" placeholder="Admin Username">
           </mat-form-field>
@@ -37,16 +36,20 @@
       </div>
     </app-step>
     <app-step title="Stratos Admin Scope" [onNext]="uaaScopeNext">
-      <div class="uaa-wizard__form">
-        <p>Please select the UAA scope to use to identify Stratos Administrator users:</p>
-        <form class="stepper-form">
-          <mat-select selected="uaaScopes[0]" [(ngModel)]="selectedScope" name="UAAScope">
-            <mat-option *ngFor="let scope of uaaScopes" [value]="scope">
-              {{ scope }}
-            </mat-option>
-          </mat-select>
-        </form>
-      </div>
+      <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration" text="Please wait - this will take a few moments">
+        <div class="uaa-wizard__form">
+          <p>Please select the UAA scope to use to identify Stratos Administrator users:</p>
+          <form class="stepper-form">
+            <mat-form-field>
+              <mat-select selected="uaaScopes[0]" [(ngModel)]="selectedScope" name="UAAScope">
+                <mat-option *ngFor="let scope of uaaScopes" [value]="scope">
+                  {{ scope }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </form>
+        </div>
+      </app-loading-page>
     </app-step>
   </app-steppers>
 </div>

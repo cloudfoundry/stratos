@@ -135,7 +135,8 @@ export class PaginationMonitor<T = any> {
       map(pagination => {
         const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
         return currentPageRequest.busy;
-      })
+      }),
+      distinctUntilChanged()
     );
   }
   // ### Initialization methods end.

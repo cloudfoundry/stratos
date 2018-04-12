@@ -1,7 +1,6 @@
 .list-component {
   display: flex;
   flex-direction: column;
-  height: 100%;
   position: relative;
   mat-progress-bar {
     position: absolute;
@@ -30,14 +29,6 @@
       border-top-right-radius: 0;
     }
   }
-  &__blocker {
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    z-index: 999;
-  }
   &__body-inner {
     position: relative;
   }
@@ -65,6 +56,10 @@
           display: flex;
         }
       }
+    }
+    &__right {
+      flex: 1;
+      justify-content: flex-end;
     }
     &__left {
       flex: 1;

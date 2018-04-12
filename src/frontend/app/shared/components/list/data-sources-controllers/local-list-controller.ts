@@ -54,6 +54,7 @@ export class LocalListController<T = any> {
       cleanPage$
     ).pipe(
       map(([paginationEntity, entities]) => {
+        this.pageSplitCache = null;
         if (!entities || !entities.length) {
           return [];
         }
@@ -62,7 +63,6 @@ export class LocalListController<T = any> {
             return fn(value, paginationEntity);
           }, entities);
         }
-        this.pageSplitCache = null;
         return entities;
       })
     );

@@ -21,7 +21,7 @@ import { ICFAction, IRequestAction, RequestEntityLocation, APISuccessOrFailedAct
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
-import { APIResource, NormalizedResponse } from './../types/api.types';
+import { APIResource, NormalizedResponse, instanceOfAPIResource } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
 import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { listEntityRelations } from '../helpers/entity-relations';
@@ -138,11 +138,15 @@ export class APIEffect {
 
     // Inject `cfGuid` in nested entities
     Object.keys(result.entity).forEach(resourceKey => {
-      const nestedResourceEntity = result.entity[resourceKey];
-      if (nestedResourceEntity &&
-        nestedResourceEntity.hasOwnProperty('entity') &&
-        nestedResourceEntity.hasOwnProperty('metadata')) {
-        resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid, nestedResourceEntity.metadata.guid);
+      const nestedResource = result.entity[resourceKey];
+      if (instanceOfAPIResource(nestedResource)) {
+        resource.entity[resourceKey] = this.completeResourceEntity(nestedResource, cfGuid, nestedResource.metadata.guid);
+      } else if (Array.isArray(nestedResource)) {
+        resource.entity[resourceKey] = nestedResource.map(nested => {
+          return nested && typeof nested === 'object'
+            ? this.completeResourceEntity(nested, cfGuid, nested.metadata ? nested.metadata.guid : guid + '-' + resourceKey)
+            : nested;
+        });
       }
     });
 

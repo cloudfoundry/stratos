@@ -1,10 +1,15 @@
 .uaa-wizard {
+  display: flex;
   height: 100%;
   margin: 0 100px;
   padding-top: 56px;
   &__form {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    > p {
+      margin: 0 0 12px;
+    }
   }
   &__intro {
     font-size: 18px;
@@ -13,8 +18,30 @@
   }
   form {
     min-width: 400px;
-    width: 50%;
+    width: 100%;
   }
+  app-steppers {
+    display: flex;
+    flex: 1;
+    margin: 24px 0;
+    > .steppers__wrapper {
+      flex: 1;
+    }
+    .stepper-form {
+      margin-top: 0;
+      max-width: none;
+    }
+    .mat-form-field {
+      max-width: 450px;
+    }
+    .steppers__contents {
+      margin: 0 48px;
+      overflow-y: auto;
+    }
+    .steppers__navigation {
+      margin-top: 36px;
+    }
+ }
   app-stratos-title {
     text-align: center;
   }

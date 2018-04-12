@@ -1,9 +1,9 @@
-import { AfterContentInit, Component, OnInit } from '@angular/core';
+import { AfterContentInit, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { any } from 'codelyzer/util/function';
-import { Observable } from 'rxjs/Rx';
+import { Observable, BehaviorSubject } from 'rxjs/Rx';
 
 import { environment } from '../../../../environments/environment';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
@@ -16,7 +16,8 @@ import { UAASetupState } from '../../../store/types/uaa-setup.types';
 @Component({
   selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
-  styleUrls: ['./console-uaa-wizard.component.scss']
+  styleUrls: ['./console-uaa-wizard.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
 
@@ -26,6 +27,7 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
   validateUAAForm: Observable<boolean>;
   uaaScopes = [];
   selectedScope = '';
+  applyingSetup$ = new BehaviorSubject<boolean>(false);
 
   uaaFormNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetupUAA({
@@ -52,12 +54,13 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
 
   uaaScopeNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
+    this.applyingSetup$.next(true);
     return this.store.select(s => [s.uaaSetup, s.auth])
       .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         return !(uaa.settingUp || auth.verifying);
       })
-      .delay(1000)
-      .take(5)
+      .delay(3000)
+      .take(10)
       .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
@@ -67,7 +70,12 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       })
       .map((state: [UAASetupState, AuthState]) => {
         if (!state[0].error) {
-          this.router.navigateByUrl('');
+          // Do a hard reload of the app
+          const loc = window.location;
+          const reload = loc.protocol + '//' + loc.host;
+          window.location.assign(reload);
+        } else {
+          this.applyingSetup$.next(false);
         }
         return {
           success: !state[0].error,

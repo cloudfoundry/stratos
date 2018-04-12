@@ -34,6 +34,9 @@ export class LoadingPageComponent implements OnInit {
   @Input('text')
   text = 'Retrieving your data';
 
+  @Input('alert')
+  alert = '';
+
   ngOnInit() {
     if (this.isLoading) {
       this.isLoading

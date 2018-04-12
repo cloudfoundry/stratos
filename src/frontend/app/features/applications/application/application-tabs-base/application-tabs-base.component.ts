@@ -11,7 +11,7 @@ import { ConfirmationDialogConfig } from '../../../../shared/components/confirma
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
+import { GetAppStatsAction, GetAppSummaryAction, AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -178,7 +178,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       first(),
       tap(appData => {
         this.confirmDialog.open(confirmConfig, () => {
-          this.applicationService.updateApplication({ state: requiredAppState }, [], appData.app.entity);
+          this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity);
           this.pollEntityService(updateKey, requiredAppState).delay(1).subscribe(() => { }, () => { }, onSuccess);
         });
       })

@@ -6,7 +6,7 @@ import { CoreModule } from '../core/core.module';
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { CloudFoundryEndpointService } from '../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../features/cloud-foundry/services/cloud-foundry-space.service';
-import { CloudFoundryService } from '../features/cloud-foundry/services/cloud-foundry.service';
+import { CloudFoundryService } from '../shared/data-services/cloud-foundry.service';
 import {
   ApplicationStateIconComponent,
 } from '../shared/components/application-state/application-state-icon/application-state-icon.component';

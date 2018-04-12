@@ -92,6 +92,7 @@ import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-app
 import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
+import { CloudFoundryService } from './data-services/cloud-foundry.service';
 
 @NgModule({
   imports: [
@@ -247,7 +248,8 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
     CfUserService,
     ConfirmationDialogService,
     EntityMonitorFactory,
-    PaginationMonitorFactory
+    PaginationMonitorFactory,
+    CloudFoundryService
   ]
 })
 export class SharedModule { }
