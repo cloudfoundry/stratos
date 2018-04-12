@@ -45,6 +45,9 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
 
   public isFetching$: Observable<boolean>;
 
+  // Used to hide tab that is not yet implemented when in production
+  public isDevEnvironment = !environment.production;
+
   constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService) {
     this.isFetching$ = cfOrgService.org$.pipe(
       map(org => org.entityRequestInfo.fetching)
