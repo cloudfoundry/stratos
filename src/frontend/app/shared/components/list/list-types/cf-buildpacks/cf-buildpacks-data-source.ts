@@ -20,8 +20,8 @@ export class CfBuildpacksDataSource extends ListDataSource<APIResource> {
       schema: entityFactory(buildpackSchemaKey),
       getRowUniqueId: getRowMetadata,
       paginationKey,
-      isLocal: false,
-      transformEntities: [],
+      isLocal: true,
+      transformEntities: [{ type: 'filter', field: 'entity.name' }],
       listConfig
     });
   }
