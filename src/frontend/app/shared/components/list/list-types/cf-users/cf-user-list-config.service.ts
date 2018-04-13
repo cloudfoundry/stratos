@@ -16,7 +16,33 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   isLocal = true;
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfUserDataSourceService;
-  columns: ITableColumn<APIResource<CfUser>>[];
+  columns: ITableColumn<APIResource<CfUser>>[] = [
+    {
+      columnId: 'username',
+      headerCell: () => 'Username',
+      cellFlex: '1',
+      cellDefinition: {
+        getValue: row => row.entity.username || row.metadata.guid
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'username',
+        field: 'entity.username'
+      }
+    },
+    {
+      columnId: 'roles',
+      headerCell: () => 'Organization Roles',
+      cellFlex: '3',
+      cellComponent: TableCellCfUserPermissionComponent
+    },
+    {
+      columnId: 'space-roles',
+      headerCell: () => 'Space Roles',
+      cellFlex: '3',
+      cellComponent: CfSpacePermissionCellComponent
+    }
+  ];
   enableTextFilter = true;
   text = {
     title: null,
@@ -26,34 +52,6 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
 
   constructor(private store: Store<AppState>, cfUserService: CfUserService) {
     super();
-    this.columns = [
-      {
-        columnId: 'username',
-        headerCell: () => 'Username',
-        cellFlex: '1',
-        cellDefinition: {
-          getValue: row => row.entity.username || row.metadata.guid
-        },
-        sort: {
-          type: 'sort',
-          orderKey: 'username',
-          field: 'entity.username'
-        }
-      },
-      {
-        columnId: 'roles',
-        headerCell: () => 'Organization Roles',
-        cellFlex: '3',
-        cellComponent: TableCellCfUserPermissionComponent
-      },
-      {
-        columnId: 'space-roles',
-        headerCell: () => 'Space Roles',
-        cellFlex: '3',
-        cellComponent: CfSpacePermissionCellComponent
-      },
-
-    ];
     this.dataSource = new CfUserDataSourceService(store, cfUserService.allUsersAction, this);
   }
 
