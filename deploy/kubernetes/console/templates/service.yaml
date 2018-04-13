@@ -33,7 +33,7 @@ spec:
   type: NodePort
 {{- end }}
 {{- if or .Values.kube.external_ip .Values.console.externalIP .Values.kube.external_ips  }}
-  externalIPs: {{ template "service.externalIPs" . }}
+  externalIPs: "{{ template "service.externalIPs" . }}"
 {{- end }}
 ---
 apiVersion: v1
