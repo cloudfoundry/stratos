@@ -3,6 +3,8 @@ import { UtilsService } from '../../../../core/utils.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CardStatus } from '../../application-state/application-state.service';
 
 @Component({
   selector: 'app-card-number-metric',
@@ -22,6 +24,8 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   formattedValue: string;
   formattedLimit: string;
   usage: string;
+
+  status$ = new BehaviorSubject<CardStatus>(CardStatus.NONE);
 
   constructor(private utils: UtilsService, private store: Store<AppState>) { }
 
@@ -56,10 +60,17 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     if (limit === -1) {
       res = '∞';
       this.usage = '';
+      this.status$.next(CardStatus.NONE);
     } else {
       const value = parseInt(this.value, 10);
       res = this.formatForUnits(this.limit);
       this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
+      const usage = value / limit;
+      if (usage > 0.9) {
+        this.status$.next(CardStatus.ERROR);
+      } else if (usage > 0.8) {
+        this.status$.next(CardStatus.WARNING);
+      }
     }
     this.formattedLimit = res;
   }
