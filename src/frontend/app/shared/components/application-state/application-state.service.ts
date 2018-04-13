@@ -10,6 +10,7 @@ export interface ApplicationStateData {
 }
 
 export enum CardStatus {
+  NONE = 'none',
   OK = 'ok',
   WARNING = 'warning',
   TENTATIVE = 'tentative',

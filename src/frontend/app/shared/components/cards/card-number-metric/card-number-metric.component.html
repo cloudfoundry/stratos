@@ -1,9 +1,11 @@
 <ng-template #content>
   <div class="number-metric-card">
     <mat-card class="number-metric-card__container">
+      <app-card-status [status$]="status$"></app-card-status>
       <mat-icon *ngIf="icon" class="number-metric-card__icon">{{ icon }}</mat-icon>
       <div>
-        <div class="number-metric-card__value">{{ formattedValue }}
+        <div class="number-metric-card__value" *ngIf="(status$ | async) as status">
+          <span [ngClass]="{'text-danger': status === 'error', 'text-warning': status === 'warning'}">{{ formattedValue }}</span>
           <span *ngIf="limit" class="number-metric-card__limit">/ {{ formattedLimit }}</span>
           <div *ngIf="usage" class="number-metric-card__usage">{{ usage }} %</div>
         </div>
