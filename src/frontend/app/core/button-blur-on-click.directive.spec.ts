@@ -1,8 +1,48 @@
+import { Component, DebugElement, ElementRef, Renderer } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 
-describe('ButtonBlurOnClickDirective', () => {
-  it('should create an instance', () => {
-    const directive = new ButtonBlurOnClickDirective();
-    expect(directive).toBeTruthy();
+
+@Component({
+  template: `<button mat-icon-button></button>`
+})
+class TestButtonComponent {
+}
+
+class MockElementRef { }
+class MockRenderer { }
+
+fdescribe('ButtonBlurOnClickDirective', () => {
+
+  let component: TestButtonComponent;
+  let fixture: ComponentFixture<TestButtonComponent>;
+  let inputEl: DebugElement;
+  let buttonBlurDirective: ButtonBlurOnClickDirective;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ElementRef, useClass: MockElementRef },
+        { provide: Renderer, useClass: MockRenderer }
+      ],
+      declarations: [
+        TestButtonComponent,
+        ButtonBlurOnClickDirective
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(TestButtonComponent);
+    component = fixture.componentInstance;
+
+    inputEl = fixture.debugElement.query(By.css('button'));
+
+    buttonBlurDirective = inputEl.injector.get<ButtonBlurOnClickDirective>(ButtonBlurOnClickDirective);
+
+    fixture.detectChanges();
   });
+
+  it('should create an instance', () => {
+    expect(buttonBlurDirective).toBeTruthy();
+  });
+
 });
