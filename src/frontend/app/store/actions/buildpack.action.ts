@@ -17,4 +17,8 @@ export class FetchAllBuildpacks extends CFStartAction implements PaginatedAction
   entity = [entityFactory(buildpackSchemaKey)];
   entityKey = buildpackSchemaKey;
   options: RequestOptions;
+  flattenPagination = true;
+  initialParams = {
+    'results-per-page': 50,
+  };
 }

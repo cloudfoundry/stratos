@@ -38,4 +38,8 @@ export class GetAllStacks extends CFStartAction implements PaginatedAction {
   entity = [entityFactory(stackSchemaKey)];
   entityKey = stackSchemaKey;
   options: RequestOptions;
+  flattenPagination = true;
+  initialParams = {
+    'results-per-page': 50,
+  };
 }
