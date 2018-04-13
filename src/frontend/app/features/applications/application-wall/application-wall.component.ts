@@ -84,14 +84,15 @@ export class ApplicationWallComponent implements OnDestroy {
       filter((pag) => !!pag),
       first(),
       tap(pag => {
-        if (pag.clientPagination.filter.items.cf) {
-          this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+        const { cf, org, space } = pag.clientPagination.filter.items;
+        if (cf) {
+          this.cfOrgSpaceService.cf.select.next(cf);
         }
-        if (pag.clientPagination.filter.items.org) {
-          this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+        if (org) {
+          this.cfOrgSpaceService.org.select.next(org);
         }
-        if (pag.clientPagination.filter.items.space) {
-          this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+        if (space) {
+          this.cfOrgSpaceService.space.select.next(space);
         }
       })
     ).subscribe();

@@ -1,4 +1,5 @@
 import { PaginationState } from '../../types/pagination.types';
+import { spreadClientPagination } from './pagination-reducer.helper';
 export function paginationClearOfEntity(state: PaginationState, action) {
   // Remove entities from a pagination list. Used for quickly showing the result of a delete
   if (state[action.entityKey]) {
@@ -22,9 +23,7 @@ export function paginationClearOfEntity(state: PaginationState, action) {
           const newEntityPaginationState = {
             ...entityPaginationState,
             ids: { ...entityPaginationState.ids },
-            clientPagination: {
-              ...entityPaginationState.clientPagination
-            }
+            clientPagination: spreadClientPagination(entityPaginationState.clientPagination)
           };
           newEntityPaginationState.ids[pageKey] = [...newEntityPaginationState.ids[pageKey]];
           newEntityPaginationState.ids[pageKey].splice(index, 1);

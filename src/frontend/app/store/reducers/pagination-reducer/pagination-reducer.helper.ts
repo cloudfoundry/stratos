@@ -10,7 +10,7 @@ import { AppState } from '../../app-state';
 import { populatePaginationFromParent } from '../../helpers/entity-relations';
 import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
-import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
+import { PaginatedAction, PaginationEntityState, PaginationParam, QParam, PaginationClientPagination } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
 
 export interface PaginationObservables<T> {
@@ -225,5 +225,17 @@ export function getCurrentPageRequestInfo(pagination: PaginationEntityState): Ac
     busy: false,
     error: false,
     message: ''
+  };
+}
+
+export function spreadClientPagination(pag: PaginationClientPagination): PaginationClientPagination {
+  return {
+    ...pag,
+    filter: {
+      ...pag.filter,
+      items: {
+        ...pag.filter.items
+      }
+    }
   };
 }
