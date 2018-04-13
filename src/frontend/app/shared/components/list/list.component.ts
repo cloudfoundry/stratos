@@ -15,7 +15,7 @@ import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/mate
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap, withLatestFrom, takeUntil, takeWhile } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -408,6 +408,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   public refresh() {
     this.dataSource.refresh();
+    this.dataSource.isLoadingPage$.pipe(
+      tap(isLoading => {
+        if (!isLoading) {
+          this.paginator.firstPage();
+        }
+      }),
+      takeWhile(isLoading => isLoading)
+    ).subscribe();
   }
-
 }
