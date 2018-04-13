@@ -10,6 +10,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
 import { Actions, Effect } from '@ngrx/effects';
 import { Injectable } from '@angular/core';
+import { GetAllEndpoints } from '../actions/endpoint.actions';
 
 @Injectable()
 export class SystemEffects {
@@ -29,11 +30,18 @@ export class SystemEffects {
         type: action.type,
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
+      const endpointsActions = new GetAllEndpoints(action.login);
+      const actionType = 'fetch';
+      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
       return this.httpClient.get('/pp/v1/info')
         .mergeMap((info: SystemInfo) => {
           return [new GetSystemSuccess(info, action.login), new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)];
         }).catch((e) => {
-          return [new GetSystemFailed(), new WrapperRequestActionFailed('Could not fetch system info', apiAction)];
+          return [
+            new GetSystemFailed(),
+            new WrapperRequestActionFailed('Could not get system endpoints', endpointsActions),
+            new WrapperRequestActionFailed('Could not fetch system info', apiAction)
+          ];
         });
     });
 }

@@ -55,10 +55,7 @@ export class EndpointsEffect {
     .pipe(mergeMap(action => {
       const endpointsActions = new GetAllEndpoints(action.login);
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
-
       const endpoints = action.payload.endpoints;
-
       // Data is an array of endpoints
       const mappedData = {
         entities: {

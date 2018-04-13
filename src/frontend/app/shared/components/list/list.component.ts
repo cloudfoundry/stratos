@@ -406,4 +406,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     listActionConfig.action();
   }
 
+  public refresh() {
+    this.dataSource.refresh();
+  }
+
 }

@@ -9,6 +9,7 @@ import { PaginationMonitorFactory } from '../../../../monitors/pagination-monito
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from './endpoint-data-source.helpers';
+import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -32,7 +33,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       action,
       listConfig,
       rowStateManager.observable,
-      () => sub.unsubscribe()
+      () => sub.unsubscribe(),
+      () => this.store.dispatch(new GetSystemInfo())
     );
     super(config);
   }
@@ -41,7 +43,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     action,
     listConfig,
     rowsState,
-    destroy
+    destroy,
+    refresh
   ) {
     return {
       store,
@@ -62,7 +65,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       ] as DataFunctionDefinition[],
       listConfig,
       rowsState,
-      destroy
+      destroy,
+      refresh
     };
   }
 }

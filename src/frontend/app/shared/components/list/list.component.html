@@ -1,3 +1,4 @@
+<button *ngIf="refresh" (click)="refresh()">Refresh</button>
 <div class="list-component" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
   <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async)" [hidden]="!(showProgressBar$ | async)" [mode]="'query'"></mat-progress-bar>
   <div class="list-component__header" [hidden]="!(hasControls$ | async)">
