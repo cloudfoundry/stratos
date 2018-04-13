@@ -7,11 +7,7 @@
           <span *ngIf="limit" class="number-metric-card__limit">/ {{ formattedLimit }}</span>
           <div *ngIf="usage" class="number-metric-card__usage">{{ usage }} %</div>
         </div>
-        <div class="number-metric-card__label">
-          <!-- Hide if we _might_ show plural but don't yet know (stops blip from `users` to `user` -->
-          <span *ngIf="!(labelSingular && !value); else empty">{{ labelSingular && value === '1' ? labelSingular : label }}</span>
-          <ng-template #empty>&nbsp;</ng-template>
-        </div>
+        <div class="number-metric-card__label">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
       </div>
     </mat-card>
   </div>
