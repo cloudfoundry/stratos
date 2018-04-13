@@ -81,13 +81,20 @@
           <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('cards');" *ngIf="(view$ | async)==='table'">
             <mat-icon>grid_on</mat-icon>
           </button>
-          <ng-container *ngTemplateOutlet="refreshButton"></ng-container>
+          <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(view$ | async)==='cards'">
+          <mat-icon>list</mat-icon>
+          </button>
         </div>
         <button mat-icon-button *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
-          <mat-icon aria-label="Refresh list data">refresh</mat-icon>
+          <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
         </button>
       </div>
     </mat-card>
+  </div>
+  <div class="refresh-button__no-header" *ngIf="!(hasControls$ | async)">
+    <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+        <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
+      </button>
   </div>
   <div class="list-component__body">
     <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
@@ -118,8 +125,9 @@
     </ng-container>
   </div>
 </div>
+
 <ng-template #refreshButton>
-  <button mat-icon-button [disabled]="(dataSource.isLoadingPage$ | async)" (click)="updateListView('table');" *ngIf="(view$ | async)==='cards'">
-    <mat-icon>list</mat-icon>
+  <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+    <mat-icon aria-label="Refresh list data">refresh</mat-icon>
   </button>
 </ng-template>

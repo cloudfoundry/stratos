@@ -108,3 +108,28 @@
     }
   }
 }
+
+.refresh-button {
+  &__no-header {
+    display: flex;
+    flex-direction: row-reverse;
+    margin-bottom: 10px;
+  }
+}
+
+.refresh-icon {
+  transition: transform 1s linear;
+}
+
+.refreshing {
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
