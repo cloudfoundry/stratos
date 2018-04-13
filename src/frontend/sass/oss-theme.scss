@@ -2,13 +2,11 @@
 @import './mat-themes';
 @import './all-theme';
 @import './mat-colors';
-
 // Themes palettes and colors
 $oss-theme-primary: mat-palette($mat-blue);
 $oss-theme-accent: mat-palette($mat-blue);
 $oss-theme-warn: mat-palette($mat-red);
 $oss-theme: mat-light-theme($oss-theme-primary, $oss-theme-accent, $oss-theme-warn);
-
 // Create the theme
 @include mat-core();
 @include angular-material-theme($oss-theme);

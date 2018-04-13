@@ -68,7 +68,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   ) {
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
-    this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/summary`;
+    this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
   }
 
   appService = this.applicationService;
@@ -91,25 +91,25 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
     const space$ = this.appService.waitForAppEntity$
       .pipe(
-        switchMap(app => {
-          const space = app.entity.entity.space as APIResource<ISpace>;
-          this.spaceGuid = space.metadata.guid;
-          const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
-            entityFactory(spaceSchemaKey),
-            this.spaceGuid,
-            new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
-            true
-          );
-          return spaceService.waitForEntity$;
-        }),
-        filter(({ entity, entityRequestInfo }) => !!entity.entity.domains),
-        tap(({ entity, entityRequestInfo }) => {
-          const domains = entity.entity.domains;
-          domains.forEach(domain => {
-            this.domains[domain.metadata.guid] = domain;
-          });
-          this.selectedDomain = Object.values(this.domains)[0];
-        })
+      switchMap(app => {
+        const space = app.entity.entity.space as APIResource<ISpace>;
+        this.spaceGuid = space.metadata.guid;
+        const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
+          entityFactory(spaceSchemaKey),
+          this.spaceGuid,
+          new GetSpace(this.spaceGuid, this.cfGuid, [createEntityRelationKey(spaceSchemaKey, domainSchemaKey)]),
+          true
+        );
+        return spaceService.waitForEntity$;
+      }),
+      filter(({ entity, entityRequestInfo }) => !!entity.entity.domains),
+      tap(({ entity, entityRequestInfo }) => {
+        const domains = entity.entity.domains;
+        domains.forEach(domain => {
+          this.domains[domain.metadata.guid] = domain;
+        });
+        this.selectedDomain = Object.values(this.domains)[0];
+      })
       );
     this.subscriptions.push(space$.subscribe());
 
@@ -181,30 +181,30 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     );
     const associateRoute$ = this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
-        filter(route => !route.creating && !route.fetching),
-        mergeMap(route => {
-          if (route.error) {
-            this.submitted = false;
-            this.displaySnackBar();
-            return Observable.of(null);
-          } else {
-            this.store.dispatch(new AssociateRouteWithAppApplication(
-              this.appGuid,
-              route.response.result[0],
-              this.cfGuid
-            ));
-            return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
-              pairwise(),
-              filter(([oldApp, newApp]) => {
-                return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);
-              }),
-              tap(appState => {
-                this.submitted = false;
-                this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid] }));
-              })
-            );
-          }
-        })
+      filter(route => !route.creating && !route.fetching),
+      mergeMap(route => {
+        if (route.error) {
+          this.submitted = false;
+          this.displaySnackBar();
+          return Observable.of(null);
+        } else {
+          this.store.dispatch(new AssociateRouteWithAppApplication(
+            this.appGuid,
+            route.response.result[0],
+            this.cfGuid
+          ));
+          return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
+            pairwise(),
+            filter(([oldApp, newApp]) => {
+              return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);
+            }),
+            tap(appState => {
+              this.submitted = false;
+              this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
+            })
+          );
+        }
+      })
       );
 
     this.subscriptions.push(associateRoute$.subscribe());
@@ -234,7 +234,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
               createEntityRelationKey(applicationSchemaKey, domainSchemaKey)
             ));
             this.store.dispatch(new RouterNav({
-              path: ['applications', this.cfGuid, this.appGuid]
+              path: ['applications', this.cfGuid, this.appGuid, 'routes']
             }));
           }
         })

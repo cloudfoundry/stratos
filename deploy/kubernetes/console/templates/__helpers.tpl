@@ -24,3 +24,14 @@ This will do the following:
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Get SCf UAA Endpoint
+*/}}
+{{- define "scfUaaEndpoint" -}}
+{{- if and .Values.env.DOMAIN (not .Values.env.UAA_HOST) -}}
+{{- printf "https://scf.uaa.%s:%v" .Values.env.DOMAIN .Values.env.UAA_PORT -}}
+{{- else if .Values.env.UAA_HOST -}}
+{{- printf "https://scf.%s:%v" .Values.env.UAA_HOST .Values.env.UAA_PORT -}}
+{{- end -}}
+{{- end -}}

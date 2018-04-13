@@ -242,7 +242,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
       this.filterString = filter.string;
-      this.multiFilters = filter.items;
+      this.multiFilters = { ...filter.items };
     });
 
     // Multi filters (e.g. cf/org/space)

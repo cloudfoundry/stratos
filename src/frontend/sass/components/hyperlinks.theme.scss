@@ -1,13 +1,10 @@
 // Hyperlinks
 @mixin app-hyperlinks($theme, $app-theme) {
-
-  $accent: map-get($theme, accent);
-
+  $primary: map-get($theme, primary);
   a {
-    color: mat-color($accent);
-
+    color: mat-color($primary);
     &:hover {
-      color: mat-color($accent, 700);
+      color: mat-color($primary, 700);
     }
   }
 }
