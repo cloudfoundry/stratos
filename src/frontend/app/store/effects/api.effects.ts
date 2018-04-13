@@ -111,7 +111,7 @@ export class APIEffect {
         )];
       }),
     ).catch(errObservable => {
-      this.logger.warn(`API request process failed`, errObservable.error);
+      this.logger.warn(`API request process failed`, errObservable.error || errObservable);
       return [
         new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
         new WrapperRequestActionFailed(
@@ -140,9 +140,9 @@ export class APIEffect {
     Object.keys(result.entity).forEach(resourceKey => {
       const nestedResource = result.entity[resourceKey];
       if (instanceOfAPIResource(nestedResource)) {
-        resource.entity[resourceKey] = this.completeResourceEntity(nestedResource, cfGuid, nestedResource.metadata.guid);
+        result.entity[resourceKey] = this.completeResourceEntity(nestedResource, cfGuid, nestedResource.metadata.guid);
       } else if (Array.isArray(nestedResource)) {
-        resource.entity[resourceKey] = nestedResource.map(nested => {
+        result.entity[resourceKey] = nestedResource.map(nested => {
           return nested && typeof nested === 'object'
             ? this.completeResourceEntity(nested, cfGuid, nested.metadata ? nested.metadata.guid : guid + '-' + resourceKey)
             : nested;
