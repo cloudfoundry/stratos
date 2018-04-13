@@ -16,7 +16,7 @@
     <div class="page-header__filler"></div>
     <ng-content select=".page-header-right"></ng-content>
     <button *ngIf="!hideMenu" mat-icon-button [matMenuTriggerFor]="menu" class="page-header__avatar-button">
-      <mat-icon class="page-header__avatar-icon">person</mat-icon>
+      <mat-icon class="page-header__avatar-icon">more_vert</mat-icon>
     </button>
     <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
       <button mat-menu-item routerLink="/about">
@@ -28,4 +28,6 @@
       </button>
     </mat-menu>
   </mat-toolbar>
+  <div *ngIf="showUnderFlow" class="page-header__underflow">
+  </div>
 </div>
