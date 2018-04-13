@@ -1,4 +1,3 @@
-
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
@@ -10,6 +9,8 @@ import { EventsTabComponent } from './application/application-tabs-base/tabs/eve
 import { GithubTabComponent } from './application/application-tabs-base/tabs/github-tab/github-tab.component';
 import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
+import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
+import { RoutesTabComponent } from './application/application-tabs-base/tabs/routes-tab/routes-tab/routes-tab.component';
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
 import { CreateApplicationComponent } from './create-application/create-application.component';
@@ -19,8 +20,7 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
-import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
-import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
+
 
 const appplicationsRoutes: Routes = [
   {
@@ -61,6 +61,7 @@ const appplicationsRoutes: Routes = [
               { path: '', redirectTo: 'summary', pathMatch: 'full' },
               { path: 'summary', component: BuildTabComponent },
               { path: 'instances', component: InstancesTabComponent },
+              { path: 'routes', component: RoutesTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
               { path: 'variables', component: VariablesTabComponent },
