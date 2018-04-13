@@ -3,7 +3,7 @@ import { UtilsService } from '../../../../core/utils.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CardStatus } from '../../application-state/application-state.service';
 
 @Component({
