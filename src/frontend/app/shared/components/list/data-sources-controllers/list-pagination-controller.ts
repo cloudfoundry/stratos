@@ -29,7 +29,9 @@ export interface IListPaginationController<T> {
   dataSource: IListDataSource<T>;
 }
 
-function onPaginationEntityState(paginationEntityState$: Observable<PaginationEntityState>, func: (paginationEntityState: PaginationEntityState) => void) {
+function onPaginationEntityState(
+  paginationEntityState$: Observable<PaginationEntityState>,
+  func: (paginationEntityState: PaginationEntityState) => void) {
   paginationEntityState$.pipe(
     first()
   ).subscribe(func);
