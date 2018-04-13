@@ -8,6 +8,7 @@ import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 
 function syncPaginationSection(
   store: Store<AppState>,
@@ -50,7 +51,8 @@ export class CFEndpointsDataSource extends ListDataSource<EndpointModel> {
           field: 'name'
         },
       ],
-      listConfig
+      listConfig,
+      refresh: () => this.store.dispatch(new GetSystemInfo(false, action))
     });
   }
 }

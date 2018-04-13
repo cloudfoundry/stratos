@@ -30,16 +30,19 @@ export class SystemEffects {
         type: action.type,
       } as IRequestAction;
       this.store.dispatch(new StartRequestAction(apiAction));
-      const endpointsActions = new GetAllEndpoints(action.login);
+      const { associatedAction } = action;
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
+      this.store.dispatch(new StartRequestAction(associatedAction, actionType));
       return this.httpClient.get('/pp/v1/info')
         .mergeMap((info: SystemInfo) => {
-          return [new GetSystemSuccess(info, action.login), new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)];
+          return [
+            new GetSystemSuccess(info, action.login, associatedAction),
+            new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)
+          ];
         }).catch((e) => {
           return [
             new GetSystemFailed(),
-            new WrapperRequestActionFailed('Could not get system endpoints', endpointsActions),
+            new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
             new WrapperRequestActionFailed('Could not fetch system info', apiAction)
           ];
         });

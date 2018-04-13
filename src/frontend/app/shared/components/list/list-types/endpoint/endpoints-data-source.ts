@@ -22,8 +22,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     entityMonitorFactory: EntityMonitorFactory
   ) {
     const action = new GetAllEndpoints();
-    const rowStatehelper = new ListRowSateHelper();
-    const { rowStateManager, sub } = rowStatehelper.getRowStateManager(
+    const rowStateHelper = new ListRowSateHelper();
+    const { rowStateManager, sub } = rowStateHelper.getRowStateManager(
       paginationMonitorFactory,
       entityMonitorFactory,
       GetAllEndpoints.storeKey

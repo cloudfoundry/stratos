@@ -53,7 +53,7 @@ export class EndpointsEffect {
 
   @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
     .pipe(mergeMap(action => {
-      const endpointsActions = new GetAllEndpoints(action.login);
+      const { associatedAction } = action;
       const actionType = 'fetch';
       const endpoints = action.payload.endpoints;
       // Data is an array of endpoints
@@ -79,8 +79,8 @@ export class EndpointsEffect {
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
       return [
-        new WrapperRequestActionSuccess(mappedData, endpointsActions, actionType),
-        new GetAllEndpointsSuccess(mappedData, endpointsActions.login),
+        new WrapperRequestActionSuccess(mappedData, associatedAction, actionType),
+        new GetAllEndpointsSuccess(mappedData, associatedAction.login),
       ];
     }));
 
