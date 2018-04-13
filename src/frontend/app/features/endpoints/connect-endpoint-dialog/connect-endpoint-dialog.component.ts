@@ -14,7 +14,7 @@ import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
 import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { EndpointModel, endpointStoreNames } from '../../../store/types/endpoint.types';
+import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -47,7 +47,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         username: ['', Validators.required],
         password: ['', Validators.required],
       },
-      types: ['cf', 'metrics']
+      types: new Array<EndpointType>('cf', 'metrics')
     },
   ];
 
@@ -67,7 +67,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     @Inject(MAT_DIALOG_DATA) public data: {
       name: string,
       guid: string,
-      type: string,
+      type: EndpointType,
     }
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
@@ -194,6 +194,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     const { guid, authType, authValues } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
+      this.data.type,
       authType,
       authValues,
       this.bodyContent,

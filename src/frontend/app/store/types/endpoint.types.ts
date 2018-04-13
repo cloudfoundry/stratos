@@ -22,7 +22,7 @@ export interface EndpointModel {
     User: object
   };
   authorization_endpoint?: string;
-  cnsi_type?: string;
+  cnsi_type?: EndpointType;
   doppler_logging_endpoint?: string;
   guid?: string;
   name: string;
@@ -54,7 +54,7 @@ export interface EndpointState {
 }
 
 // If we support more endpoint types in future, this type should be extended
-export type EndpointType = string;
+export type EndpointType = 'cf' | 'metrics';
 
 export interface StateUpdateAction {
   type: string;
