@@ -99,8 +99,10 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     }
   ];
   viewType = ListViewTypes.TABLE_ONLY;
+  enableTextFilter = true;
   text = {
     title: null,
+    filter: 'Search by state',
     noEntries: 'There are no application instances'
   };
 

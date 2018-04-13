@@ -17,8 +17,10 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfUserDataSourceService;
   columns: ITableColumn<APIResource<CfUser>>[];
+  enableTextFilter = true;
   text = {
     title: null,
+    filter: 'Search by username',
     noEntries: 'There are no users'
   };
 
@@ -31,6 +33,11 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
         cellFlex: '1',
         cellDefinition: {
           getValue: row => row.entity.username || row.metadata.guid
+        },
+        sort: {
+          type: 'sort',
+          orderKey: 'username',
+          field: 'entity.username'
         }
       },
       {
