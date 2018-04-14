@@ -15,6 +15,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
 
   @Input() icon: string;
   @Input() label: string;
+  @Input() labelSingular: string;
   @Input() limit: string;
   @Input() units: string;
   @Input() value: string;

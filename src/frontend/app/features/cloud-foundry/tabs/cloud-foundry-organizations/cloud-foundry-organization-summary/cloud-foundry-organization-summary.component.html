@@ -9,16 +9,16 @@
 
     <app-tile-group>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces" icon="apps" label="Spaces" value="{{ (cfOrgService.spaces$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces" icon="apps" label="Spaces" labelSingular="Space" value="{{ (cfOrgService.spaces$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric [link]="appLink" icon="apps" label="Applications" value="{{ (cfOrgService.apps$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application" value="{{ (cfOrgService.apps$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
         <app-card-number-metric icon="content_copy" label="App Instances" value="{{ (cfOrgService.appInstances$ | async) }}" limit="{{ (cfOrgService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person" label="Users" value="{{(cfOrgService.allOrgUsers.entities$ | async)?.length}}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{(cfOrgService.allOrgUsers.entities$ | async)?.length}}"></app-card-number-metric>
       </app-tile>
     </app-tile-group>
 

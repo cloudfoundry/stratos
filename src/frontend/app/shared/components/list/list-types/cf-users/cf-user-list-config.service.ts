@@ -21,6 +21,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       columnId: 'username',
       headerCell: () => 'Username',
       cellFlex: '1',
+      cellAlignSelf: 'baseline',
       cellDefinition: {
         getValue: row => row.entity.username || row.metadata.guid
       },
@@ -34,14 +35,16 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       columnId: 'roles',
       headerCell: () => 'Organization Roles',
       cellFlex: '3',
+      cellAlignSelf: 'baseline',
       cellComponent: TableCellCfUserPermissionComponent
     },
     {
       columnId: 'space-roles',
       headerCell: () => 'Space Roles',
       cellFlex: '3',
+      cellAlignSelf: 'baseline',
       cellComponent: CfSpacePermissionCellComponent
-    }
+    },
   ];
   enableTextFilter = true;
   text = {
