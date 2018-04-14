@@ -7,13 +7,13 @@
     </app-tile-group>
     <app-tile-group>
       <app-tile>
-        <app-card-number-metric [link]="appLink" icon="apps" label="Applications" value="{{ (cfEndpointService.allApps$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric [link]="appLink" icon="apps" label="Applications" labelSingular="Application" value="{{ (cfEndpointService.allApps$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" icon="domain" label="Orgs" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" icon="domain" label="Orgs" labelSingular="Org" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{ (cfEndpointService.users$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
         <app-card-number-metric icon="memory" units="mb" label="Memory Usage" value="{{ (cfEndpointService.totalMem$ | async) }}"></app-card-number-metric>

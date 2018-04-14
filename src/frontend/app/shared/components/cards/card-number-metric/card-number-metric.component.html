@@ -9,7 +9,7 @@
           <span *ngIf="limit" class="number-metric-card__limit">/ {{ formattedLimit }}</span>
           <div *ngIf="usage" class="number-metric-card__usage">{{ usage }} %</div>
         </div>
-        <div class="number-metric-card__label">{{ label }}</div>
+        <div class="number-metric-card__label">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
       </div>
     </mat-card>
   </div>
