@@ -25,6 +25,11 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       cellDefinition: {
         getValue: row => row.entity.username || row.metadata.guid
       },
+      sort: {
+        type: 'sort',
+        orderKey: 'username',
+        field: 'entity.username'
+      }
     },
     {
       columnId: 'roles',
@@ -40,10 +45,11 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
       cellAlignSelf: 'baseline',
       cellComponent: CfSpacePermissionCellComponent
     },
-
   ];
+  enableTextFilter = true;
   text = {
     title: null,
+    filter: 'Search by username',
     noEntries: 'There are no users'
   };
 

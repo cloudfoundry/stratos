@@ -20,7 +20,7 @@ export class CfOrgsDataSourceService extends ListDataSource<APIResource> {
       getRowUniqueId: getRowMetadata,
       paginationKey: action.paginationKey,
       isLocal: true,
-      transformEntities: [],
+      transformEntities: [{ type: 'filter', field: 'entity.name' }],
       listConfig
     });
   }
