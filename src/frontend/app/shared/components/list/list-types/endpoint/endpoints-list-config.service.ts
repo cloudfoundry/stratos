@@ -85,7 +85,6 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
 
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
-
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
       this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
@@ -207,5 +206,4 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   public getColumns = () => this.columns;
   public getDataSource = () => this.dataSource;
   public getMultiFiltersConfigs = () => [];
-
 }

@@ -88,6 +88,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
 
+  public refresh: () => void;
+
   constructor(
     private config: IListDataSourceConfig<A, T>
   ) {
@@ -151,6 +153,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   init(config: IListDataSourceConfig<A, T>) {
     this.store = config.store;
     this.action = config.action;
+    this.refresh = this.getRefreshFunction(config);
     this.sourceScheme = config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
@@ -164,6 +167,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+  }
+
+  private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
+    if (config.hideRefresh) {
+      return null;
+    }
+    return config.refresh ? config.refresh : () => {
+      this.store.dispatch(this.action);
+    };
   }
   /**
    * Will return the row state with default values filled in.
