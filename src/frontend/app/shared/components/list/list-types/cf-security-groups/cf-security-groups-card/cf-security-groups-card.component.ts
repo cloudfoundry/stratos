@@ -30,9 +30,9 @@ export class CfSecurityGroupsCardComponent extends CardCell<APIResource> impleme
   ngOnInit() {
     this.row.entity.rules.forEach(t => {
       this.tags.push({
-        value: `${t.protocol} ${this.getRuleString(t)}`,
+        value: `${t.entity.protocol} ${this.getRuleString(t.entity)}`,
         key: t,
-        color: this.typeColors[t.protocol]
+        color: this.typeColors[t.entity.protocol]
       });
     });
 
