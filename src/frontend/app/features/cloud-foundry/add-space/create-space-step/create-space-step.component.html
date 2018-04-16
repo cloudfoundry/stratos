@@ -3,7 +3,7 @@
   <form [formGroup]="createSpaceForm" class="stepper-form">
     <mat-form-field>
       <input matInput formControlName="spaceName" placeholder="Space Name" required>
-      <mat-error *ngIf="!validate()">
+      <mat-error *ngIf="spaceName.hasError('spaceNameTaken')">
         A space with this name already exists. Please enter a different one.
       </mat-error>
     </mat-form-field>

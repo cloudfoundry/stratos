@@ -67,7 +67,7 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
   flattenPagination = true;
   initialParams = {
     'results-per-page': 100,
-    'order-direction': 'asc',
+    'order-direction': 'desc',
     'order-direction-field': 'name'
   };
   parentGuid: string;
@@ -118,6 +118,7 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
   entity = [entityFactory(organizationSchemaKey)];
   entityKey = organizationSchemaKey;
   options: RequestOptions;
+  removeEntityOnDelete = true;
 }
 
 export class CreateOrganization extends CFStartAction implements ICFAction {

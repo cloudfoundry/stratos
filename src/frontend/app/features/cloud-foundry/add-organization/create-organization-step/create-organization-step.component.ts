@@ -32,7 +32,8 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   orgs$: Observable<APIResource<IOrganization>[]>;
   cfUrl: string;
   addOrg: FormGroup;
-  orgName: string;
+
+  get orgName(): any { return this.addOrg ? this.addOrg.get('orgName') : { value: '' }; }
 
   constructor(
     private store: Store<AppState>,
@@ -68,19 +69,11 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
-      const nameValid = this.validate(formField.value);
-      return !nameValid ? { 'nameTaken': { value: formField.value } } : null;
-    };
+    return (formField: AbstractControl): { [key: string]: any } =>
+      !this.validate(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
   }
 
-  validate = (value: string = null) => {
-    const currValue = this.addOrg && this.addOrg.value['orgName'];
-    if (this.allOrgs) {
-      return this.allOrgs.indexOf(value ? value : this.orgName) === -1;
-    }
-    return true;
-  }
+  validate = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
 
   submit = () => {
     const orgName = this.addOrg.value['orgName'];
@@ -107,7 +100,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     'Failed to create organization! Please select a different name and try again!',
     'Dismiss'
   )
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.orgSubscription.unsubscribe();
     if (this.submitSubscription) {
       this.submitSubscription.unsubscribe();
