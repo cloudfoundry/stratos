@@ -27,9 +27,16 @@ import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers
 import { listEntityRelations } from '../helpers/entity-relations';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { SendEventAction } from '../actions/internal-events.actions';
+import { InternalEventServerity, APIEventState } from '../types/internal-events.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
+interface APIErrorCheck {
+  error: boolean;
+  errorCode: string;
+  guid: string;
+  url: string;
+}
 @Injectable()
 export class APIEffect {
 
@@ -113,9 +120,9 @@ export class APIEffect {
         )];
       }),
     ).catch(errObservable => {
-      if (errObservable.type && errObservable.type === endpointSchemaKey) {
-        errObservable.forEach(err => this.store.dispatch(new SendEventAction(endpointSchemaKey, err.guid)));
-      }
+      // if (errObservable.type && errObservable.type === endpointSchemaKey) {
+      //   errObservable.forEach(err => this.store.dispatch(new SendEventAction(endpointSchemaKey, err.guid)));
+      // }
       return [
         new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
         new WrapperRequestActionFailed(
@@ -157,18 +164,60 @@ export class APIEffect {
     return result;
   }
 
-  getErrors(resData) {
+  // getErrors(resData): APIErrorCheck[] {
+  //   return Object.keys(resData)
+  //     .filter(guid => resData[guid] !== null)
+  //     .map(cfGuid => {
+  //       // Return list of guid+error objects for those endpoints with errors
+  //       const endpoints = resData[cfGuid];
+  //       // return endpoints.error ? {
+  //       //   error: endpoints.error,
+  //       //   errorCode: 500,
+  //       //   guid: cfGuid
+  //       // } : null;
+  //       return {
+  //         error: !!,
+  //         errorCode: '500',
+  //         guid: cfGuid
+  //       };
+  //     })
+  //     .filter(endpointErrors => !!endpointErrors);
+  // }
+
+  checkForErrors(resData, action: ICFAction): APIErrorCheck[] {
     return Object.keys(resData)
       .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
         const endpoints = resData[cfGuid];
-        return endpoints.error ? {
-          error: endpoints.error,
-          guid: cfGuid
-        } : null;
-      })
-      .filter(endpointErrors => !!endpointErrors);
+        return {
+          error: !!endpoints.error,
+          errorCode: endpoints.error ? '500' : '200',
+          guid: cfGuid,
+          url: action.options.url
+        };
+      });
+  }
+
+  handleApiEvents(erroChecks: APIErrorCheck[]) {
+    erroChecks.forEach(check => {
+      const event = {
+        eventCode: check.errorCode,
+        serverity: check.error ?
+          InternalEventServerity.ERROR :
+          InternalEventServerity.SYSTEM,
+        message: check.error ? 'API request error' : 'API request success',
+        metadata: {
+          url: check.url
+        }
+      } as APIEventState;
+      this.store.dispatch(
+        new SendEventAction(
+          endpointSchemaKey,
+          check.guid,
+          event
+        ));
+    });
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -273,18 +322,15 @@ export class APIEffect {
     });
   }
 
-  private handleMultiEndpoints(resData, apiAction): {
+  private handleMultiEndpoints(resData, apiAction: ICFAction): {
     resData,
     entities,
     totalResults,
     totalPages
   } {
     if (resData) {
-      const errors = this.getErrors(resData);
-      // if (errors.length) {
-      // We should consider not completely failing the whole if some endpoints return.
-      throw Observable.throw({ type: endpointSchemaKey, errors });
-      // }
+      const endpointChecks = this.checkForErrors(resData, apiAction);
+      this.handleApiEvents(endpointChecks);
     }
     let entities;
     let totalResults = 0;

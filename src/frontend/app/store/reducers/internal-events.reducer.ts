@@ -25,14 +25,9 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
   switch (action.type) {
     case SEND_EVENT: {
       const sendAction = action as SendEventAction;
-      const { message, eventCode, timestamp, serverity, eventSubjectId, eventType } = sendAction;
+      const { eventSubjectId, eventType, eventState } = sendAction;
       return setSubjectEvents(state, eventSubjectId, eventType, [
-        {
-          message,
-          eventCode,
-          timestamp,
-          serverity
-        },
+        eventState,
         ...getEvents(state, eventSubjectId, eventType)
       ]);
     }

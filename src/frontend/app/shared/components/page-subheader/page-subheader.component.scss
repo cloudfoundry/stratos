@@ -6,6 +6,7 @@
   height: 56px;
   overflow: hidden;
   &__tabs {
+    position: relative;
     height: 46px;
   }
   &__tab-hidden {

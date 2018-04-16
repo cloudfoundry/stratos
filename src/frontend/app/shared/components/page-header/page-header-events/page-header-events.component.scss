@@ -1,0 +1,13 @@
+.header-event {
+  align-items: center;
+  display: flex;
+  padding: 10px;
+  &__message-wrapper {
+    margin-left: 5px;
+  }
+  &__outer {
+    display: flex;
+    justify-content: center;
+    z-index: 1;
+  }
+}

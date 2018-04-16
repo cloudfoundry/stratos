@@ -30,11 +30,8 @@
   </div>
   <app-page-subheader class="subheader" *ngIf="tabs" [tabs]="tabs">
   </app-page-subheader>
-  <div class="header-event__outer" [@enterAnimation] *ngIf="notice$ | async as notice">
-    <span class="header-event" [ngClass]="{'header-event--shown': (notice && notice.message)}">
-      {{ notice.message }}
-    </span>
-  </div>
   <div *ngIf="showUnderFlow" class="page-header__underflow">
   </div>
+  <app-page-header-events *ngIf="endpointIds$" class="header-events" [endpointIds]="endpointIds$ | async"></app-page-header-events>
+  <app-page-header-events *ngIf="!endpointIds$" class="header-events"></app-page-header-events>
 </div>

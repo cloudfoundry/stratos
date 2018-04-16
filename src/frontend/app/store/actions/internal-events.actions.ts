@@ -1,7 +1,7 @@
 import { Action } from '@ngrx/store';
 import * as moment from 'moment';
 
-import { SEND_EVENT, InternalEventServerity, CLEAR_EVENTS } from '../types/internal-events.types';
+import { SEND_EVENT, InternalEventServerity, CLEAR_EVENTS, InternalEventState } from '../types/internal-events.types';
 
 export class SendEventAction implements Action {
     public type = SEND_EVENT;
@@ -9,11 +9,12 @@ export class SendEventAction implements Action {
     constructor(
         public eventType: string,
         public eventSubjectId: string,
-        public eventCode: string = eventSubjectId,
-        public serverity: InternalEventServerity = InternalEventServerity.INFO,
-        public message?: string
+        public eventState: InternalEventState
     ) {
-        this.timestamp = moment.now();
+        eventState.timestamp = moment.now();
+        if (!eventState.serverity) {
+            eventState.serverity = InternalEventServerity.SYSTEM;
+        }
     }
 }
 

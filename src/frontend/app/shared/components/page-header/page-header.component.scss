@@ -1,8 +1,11 @@
+$top-index: 2;
+$bottom-index: $top-index - 1;
 .page-header {
   $breadcrumb-opacity: .7;
   $breadcrumb-hover-opacity: 1;
   $breadcrumb-padding: 3px;
   position: relative;
+  z-index: $top-index;
   &__nav-toggle-wrapper {
     margin-right: 20px;
   }
@@ -38,6 +41,7 @@
     position: absolute;
     right: 0;
     top: 0;
+    z-index: 1;
   }
   &__menu-separator {
     height: 1px;
@@ -54,19 +58,11 @@
 }
 
 .subheader {
-  z-index: 2;
+  display: block;
+  position: relative;
+  z-index: $top-index;
 }
 
-.header-event {
-  height: 25px;
-  margin-top: -25px;
-  transition: margin-top 250ms ease-in;
-  &--shown {
-    margin-top: 0;
-  }
-  &__outer {
-    display: flex;
-    justify-content: center;
-    z-index: 1;
-  }
+.header-events {
+  z-index: $bottom-index;
 }

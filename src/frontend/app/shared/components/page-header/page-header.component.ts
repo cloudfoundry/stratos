@@ -12,39 +12,26 @@ import { IHeaderBreadcrumb, IHeaderBreadcrumbLink, BREADCRUMB_URL_PARAM, PageHea
 import { ActivatedRoute } from '@angular/router';
 import { internalEventTimeStampSelector } from '../../../store/selectors/internal-events.selectors';
 import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
-import { InternalEventSubjectState } from '../../../store/types/internal-events.types';
+import { InternalEventSubjectState, InternalEventServerity } from '../../../store/types/internal-events.types';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-page-header',
   templateUrl: './page-header.component.html',
-  styleUrls: ['./page-header.component.scss'],
-  animations: [
-    trigger(
-      'enterAnimation', [
-        transition(':enter', [
-          style({ transform: 'translateY(-40px)' }),
-          animate('250ms ease-in', style({ transform: 'translateY(0)' }))
-        ]),
-        transition(':leave', [
-          style({ transform: 'translateY(0)' }),
-          animate('250ms ease-out', style({ transform: 'translateY(-40px)' }))
-        ])
-      ]
-    )
-  ]
+  styleUrls: ['./page-header.component.scss']
 })
 export class PageHeaderComponent {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
+  public eventServerity = InternalEventServerity;
 
   @Input('hideSideNavButton') hideSideNavButton = false;
 
   @Input('hideMenu') hideMenu = false;
 
-  @Input('notice$')
-  notice$: Observable<PageHeaderNotice>;
+  @Input('endpointIds$')
+  endpointIds$: Observable<string[]>;
 
   @Input('tabs')
   tabs: ISubHeaderTabs[];

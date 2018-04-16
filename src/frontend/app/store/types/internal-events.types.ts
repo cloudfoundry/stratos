@@ -5,11 +5,22 @@ export const SEND_EVENT = '[Internal Event] Send';
 export const CLEAR_EVENTS = '[Internal Event] Clear';
 
 export interface InternalEventState {
-    message: string;
-    timestamp: number;
+    message?: string;
+    timestamp?: number;
     eventCode: string | number;
     serverity: InternalEventServerity;
+    metadata: {
+        [key: string]: any;
+    };
 }
+
+export interface APIEventState extends InternalEventState {
+    metadata: {
+        url: string;
+    };
+}
+
+
 
 export interface InternalEventSubjectState {
     [eventSubjectId: string]: InternalEventState[];
@@ -26,7 +37,9 @@ export interface InternalEventsState {
 export enum InternalEventServerity {
     ERROR = 'INTERNAL_EVENT_ERROR',
     WARNING = 'INTERNAL_EVENT_WARNING',
-    INFO = 'INTERNAL_EVENT_INFO'
+    INFO = 'INTERNAL_EVENT_INFO',
+    // Shouldn't be shown in the UI.
+    SYSTEM = 'INTERNAL_EVENT_SYSTEM'
 }
 
 export enum InternalEventSubjectStatus {
