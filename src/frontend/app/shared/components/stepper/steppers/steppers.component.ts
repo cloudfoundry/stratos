@@ -110,6 +110,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
         _step.active = i === index ? true : false;
       });
       this.currentIndex = index;
+      this.steps[this.currentIndex].onEnter();
     }
   }
 
