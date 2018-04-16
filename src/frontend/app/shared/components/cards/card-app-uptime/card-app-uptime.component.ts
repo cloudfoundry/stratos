@@ -20,6 +20,7 @@ export class CardAppUptimeComponent implements OnInit {
     averageUptime: number,
     runningCount: number
   }>;
+  isRunning$: Observable<boolean>;
 
   ngOnInit() {
     this.appData$ = this.appMonitor.appMonitor$.pipe(
@@ -35,6 +36,9 @@ export class CardAppUptimeComponent implements OnInit {
         averageUptime: 0,
         runningCount: 0
       })
+    );
+    this.isRunning$ = this.appService.application$.pipe(
+      map(app => app ? app.app.entity.state === 'STARTED' : false)
     );
   }
 }
