@@ -18,6 +18,10 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @Input('logStream') logStream: Observable<any>;
 
+  @Input('isHighthroughput') isHighthroughput = false;
+
+  @Input('highThroughputBufferIntervalMS') highThroughputBufferIntervalMS = 100;
+
   @ViewChild('container') container: ElementRef;
 
   @ViewChild('content') content: ElementRef;
@@ -26,7 +30,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   private countAttribute = 'batchLength';
 
   private highThroughputTimeMS = 300; // If the time interval between log emits is less then we're in high throughput mode
-  private highThroughputBufferIntervalMS = 100; // Buffer time for high through mode
 
   private listeningSub: Subscription;
   private statusSub: Subscription;
@@ -71,22 +74,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         }
       });
 
-    this.isHighThroughput$ = stoppableLogStream$
-      .timeInterval()
-      .sampleTime(500)
-      .map(x => {
-        const high = x.interval < this.highThroughputTimeMS;
-        return high;
-      })
-      .distinctUntilChanged()
-      .startWith(false);
-
     const buffer$ = Observable.interval()
-      .combineLatest(this.isHighThroughput$)
-      .throttle(([t, high]) => {
-        return Observable.interval(
-          high ? this.highThroughputBufferIntervalMS : 0
-        );
+      .throttle(t => {
+        return Observable.interval(this.isHighthroughput ? this.highThroughputBufferIntervalMS : 0);
       });
 
     const addedLogs$ = stoppableLogStream$
