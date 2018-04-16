@@ -2,8 +2,9 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { map, mergeMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
+import { BrowserStandardEncoder } from '../../helper';
 import {
   CONNECT_ENDPOINTS,
   CONNECT_ENDPOINTS_FAILED,
@@ -24,12 +25,12 @@ import {
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
 } from '../actions/endpoint.actions';
-import { ClearPages, ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointStoreNames, EndpointType, StateUpdateAction } from '../types/endpoint.types';
+import { endpointStoreNames, EndpointType } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
@@ -52,12 +53,9 @@ export class EndpointsEffect {
 
   @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
     .pipe(mergeMap(action => {
-      const endpointsActions = new GetAllEndpoints(action.login);
+      const { associatedAction } = action;
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
-
-      const endpoints = action.payload.endpoints.cf; // We're only storing cf's??
-
+      const endpoints = action.payload.endpoints;
       // Data is an array of endpoints
       const mappedData = {
         entities: {
@@ -66,20 +64,23 @@ export class EndpointsEffect {
         result: []
       } as NormalizedResponse;
 
-      const data = Object.values(endpoints).forEach(endpointInfo => {
-        mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
-          ...endpointInfo,
-          connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
-          registered: !!endpointInfo.user,
-        };
-        mappedData.result.push(endpointInfo.guid);
+      Object.keys(endpoints).forEach((type: string) => {
+        const endpointsForType = endpoints[type];
+        Object.values(endpointsForType).forEach(endpointInfo => {
+          mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
+            ...endpointInfo,
+            connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
+            registered: !!endpointInfo.user,
+          };
+          mappedData.result.push(endpointInfo.guid);
+        });
       });
 
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
       return [
-        new WrapperRequestActionSuccess(mappedData, endpointsActions, actionType),
-        new GetAllEndpointsSuccess(mappedData, endpointsActions.login),
+        new WrapperRequestActionSuccess(mappedData, associatedAction, actionType),
+        new GetAllEndpointsSuccess(mappedData, associatedAction.login),
       ];
     }));
 
@@ -89,10 +90,12 @@ export class EndpointsEffect {
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
+          ...<any>action.authValues,
           'cnsi_guid': action.guid,
-          'username': action.username,
-          'password': action.password,
-        }
+          'connect_type': action.authType,
+        },
+        // Fix for #angular/18261
+        encoder: new BrowserStandardEncoder()
       });
 
       return this.doEndpointAction(
@@ -100,7 +103,9 @@ export class EndpointsEffect {
         '/pp/v1/auth/login/cnsi',
         params,
         null,
-        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED]
+        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
+        action.endpointType,
+        action.body,
       );
     });
 
@@ -119,19 +124,10 @@ export class EndpointsEffect {
         '/pp/v1/auth/logout/cnsi',
         params,
         null,
-        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED]
+        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
-
-  @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
-    .pipe(
-      map(action => {
-        if (action.endpointType === 'cloud-foundry') {
-          this.store.dispatch(new ClearPages('application', 'applicationWall'));
-        }
-      })
-    );
-
 
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
@@ -148,7 +144,8 @@ export class EndpointsEffect {
         '/pp/v1/unregister',
         params,
         'delete',
-        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED]
+        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
@@ -166,10 +163,11 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         apiAction,
-        '/pp/v1/register/cf',
+        '/pp/v1/register/' + action.endpointType,
         params,
         'create',
-        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED]
+        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
@@ -197,12 +195,13 @@ export class EndpointsEffect {
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
     actionStrings: [string, string] = [null, null],
-    endpointType: EndpointType = 'cloud-foundry'
+    endpointType: EndpointType = 'cf',
+    body?: string,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
-    return this.http.post(url, {}, {
+    return this.http.post(url, body || {}, {
       headers,
       params
     }).map(endpoint => {

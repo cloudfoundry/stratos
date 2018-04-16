@@ -274,31 +274,36 @@ export class ApplicationService {
 
     this.applicationUrl$ = this.app$.pipe(
       map(({ entity }) => entity),
-      filter((app) => !!app && !!app.entity.routes),
       map(app => {
-        const nonTCPRoutes = app.entity.routes.filter(p => !isTCPRoute(p));
+        const routes = app && app.entity.routes ? app.entity.routes : [];
+        const nonTCPRoutes = routes.filter(p => p && !isTCPRoute(p));
         if (nonTCPRoutes.length > 0) {
           return nonTCPRoutes[0];
         }
         return null;
       }),
-      filter(route => !!route),
       switchMap(route => {
-        // The route can async update itself to contain the required domain... so we need to watch it for it's normalized content
-        return this.entityServiceFactory.create<APIResource>(
-          routeSchemaKey,
-          entityFactory(routeSchemaKey),
-          route.metadata.guid,
-          {
-            type: '',
-            entityKey: routeSchemaKey,
-            entity: entityFactory(routeSchemaKey)
-          },
-          false).entityObs$;
-      }),
-      map(route => route.entity),
-      filter(route => route.entity.domain),
-      map(route => getRoute(route, true, false, route.entity.domain))
+        if (!route) {
+          return Observable.of(null);
+        } else {
+          // The route can async update itself to contain the required domain... so we need to watch it for it's normalized content
+          return this.entityServiceFactory.create<APIResource>(
+            routeSchemaKey,
+            entityFactory(routeSchemaKey),
+            route.metadata.guid,
+            {
+              type: '',
+              entityKey: routeSchemaKey,
+              entity: entityFactory(routeSchemaKey)
+            },
+            false)
+            .entityObs$.pipe(
+              map(entRoute => entRoute.entity),
+              filter(entRoute => entRoute.entity.domain),
+              map(entRoute => getRoute(entRoute, true, false, entRoute.entity.domain))
+            );
+        }
+      })
     ).publishReplay(1).refCount();
   }
 

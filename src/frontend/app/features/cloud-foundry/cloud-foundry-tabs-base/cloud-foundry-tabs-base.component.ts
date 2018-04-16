@@ -1,16 +1,17 @@
-import { SendClearEventAction } from './../../../store/actions/internal-events.actions';
-import { map, tap } from 'rxjs/operators';
-import { internalEventSubjectSelector, internalEventCodeSelector } from './../../../store/selectors/internal-events.selectors';
-import { PageHeaderNotice } from './../../../shared/components/page-header/page-header.types';
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
-import { AppState } from './../../../store/app-state';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
+
+import { environment } from '../../../../environments/environment';
 import { SendEventAction } from '../../../store/actions/internal-events.actions';
 import { endpointSchemaKey } from '../../../store/helpers/entity-factory';
 import { InternalEventServerity } from '../../../store/types/internal-events.types';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
+import { PageHeaderNotice } from './../../../shared/components/page-header/page-header.types';
+import { SendClearEventAction } from './../../../store/actions/internal-events.actions';
+import { AppState } from './../../../store/app-state';
+import { internalEventCodeSelector } from './../../../store/selectors/internal-events.selectors';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
@@ -28,6 +29,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     { link: 'stacks', label: 'Stacks' },
     { link: 'security-groups', label: 'Security Groups' }
   ];
+
+  // Used to hide tab that is not yet implemented when in production
+  isDevEnvironment = !environment.production;
 
   isFetching$: Observable<boolean>;
   public notice$: Observable<PageHeaderNotice>;

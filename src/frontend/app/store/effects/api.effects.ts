@@ -21,7 +21,7 @@ import { ICFAction, IRequestAction, RequestEntityLocation, APISuccessOrFailedAct
 import { environment } from './../../../environments/environment';
 import { ApiActionTypes, ValidateEntitiesStart } from './../actions/request.actions';
 import { AppState, IRequestEntityTypeState } from './../app-state';
-import { APIResource, NormalizedResponse } from './../types/api.types';
+import { APIResource, NormalizedResponse, instanceOfAPIResource } from './../types/api.types';
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
 import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { listEntityRelations } from '../helpers/entity-relations';
@@ -113,11 +113,9 @@ export class APIEffect {
         )];
       }),
     ).catch(errObservable => {
-      if (errObservable.type === endpointSchemaKey) {
-        errObservable.forEach(err => this.store.dispatch(new SendEventAction(endpointSchemaKey, err.guid)))
+      if (errObservable.type && errObservable.type === endpointSchemaKey) {
+        errObservable.forEach(err => this.store.dispatch(new SendEventAction(endpointSchemaKey, err.guid)));
       }
-
-      this.logger.warn(`API request process failed`, errObservable.error);
       return [
         new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
         new WrapperRequestActionFailed(
@@ -144,11 +142,15 @@ export class APIEffect {
 
     // Inject `cfGuid` in nested entities
     Object.keys(result.entity).forEach(resourceKey => {
-      const nestedResourceEntity = result.entity[resourceKey];
-      if (nestedResourceEntity &&
-        nestedResourceEntity.hasOwnProperty('entity') &&
-        nestedResourceEntity.hasOwnProperty('metadata')) {
-        resource.entity[resourceKey] = this.completeResourceEntity(nestedResourceEntity, cfGuid, nestedResourceEntity.metadata.guid);
+      const nestedResource = result.entity[resourceKey];
+      if (instanceOfAPIResource(nestedResource)) {
+        result.entity[resourceKey] = this.completeResourceEntity(nestedResource, cfGuid, nestedResource.metadata.guid);
+      } else if (Array.isArray(nestedResource)) {
+        result.entity[resourceKey] = nestedResource.map(nested => {
+          return nested && typeof nested === 'object'
+            ? this.completeResourceEntity(nested, cfGuid, nested.metadata ? nested.metadata.guid : guid + '-' + resourceKey)
+            : nested;
+        });
       }
     });
 
@@ -239,7 +241,7 @@ export class APIEffect {
       const registeredEndpointGuids = [];
       Object.keys(endpoints).forEach(endpointGuid => {
         const endpoint = endpoints[endpointGuid];
-        if (endpoint.registered) {
+        if (endpoint.registered && endpoint.cnsi_type === 'cf') {
           registeredEndpointGuids.push(endpoint.guid);
         }
       });
@@ -279,10 +281,10 @@ export class APIEffect {
   } {
     if (resData) {
       const errors = this.getErrors(resData);
-      if (errors.length) {
-        // We should consider not completely failing the whole if some endpoints return.
-        throw Observable.throw({ type: endpointSchemaKey, errors });
-      }
+      // if (errors.length) {
+      // We should consider not completely failing the whole if some endpoints return.
+      throw Observable.throw({ type: endpointSchemaKey, errors });
+      // }
     }
     let entities;
     let totalResults = 0;

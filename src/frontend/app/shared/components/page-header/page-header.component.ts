@@ -48,6 +48,7 @@ export class PageHeaderComponent {
 
   @Input('tabs')
   tabs: ISubHeaderTabs[];
+  @Input('showUnderFlow') showUnderFlow = false;
 
   @Input('breadcrumbs')
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {

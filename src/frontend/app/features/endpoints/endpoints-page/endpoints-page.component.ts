@@ -6,13 +6,9 @@ import {
   EndpointsListConfigService,
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { GetSystemInfo } from '../../../store/actions/system.actions';
 import { AppState } from '../../../store/app-state';
-import { EndpointModel } from '../../../store/types/endpoint.types';
-import { GetSystemInfo } from './../../../store/actions/system.actions';
 
-function getEndpointTypeString(endpoint: EndpointModel): string {
-  return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
-}
 
 @Component({
   selector: 'app-endpoints-page',

@@ -12,6 +12,7 @@ import {
   endpointSchemaKey,
   featureFlagSchemaKey,
   githubBranchesSchemaKey,
+  metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
   routeSchemaKey,
@@ -26,6 +27,7 @@ import {
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
+import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
 import { GitBranch, GithubCommit } from './github.types';
 import { CfService, CfServiceBinding, CfServiceInstance, CfServicePlan } from './service.types';
@@ -51,6 +53,7 @@ export interface IRequestDataState extends IRequestTypeState {
   service: IRequestEntityTypeState<APIResource<CfService>>;
   serviceBinding: IRequestEntityTypeState<APIResource<CfServiceBinding>>;
   securityGroup: IRequestEntityTypeState<APIResource<ISecurityGroup>>;
+  metrics: IRequestEntityTypeState<IMetrics>;
 }
 
 export interface IRequestState extends IRequestTypeState {
@@ -97,5 +100,6 @@ export const defaultCfEntitiesState = {
   [securityGroupSchemaKey]: {},
   [featureFlagSchemaKey]: {},
   [privateDomainsSchemaKey]: {},
-  [spaceQuotaSchemaKey]: {}
+  [spaceQuotaSchemaKey]: {},
+  [metricSchemaKey]: {}
 };

@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
-import { PaginationEntityState } from '../../../../store/types/pagination.types';
+import { PaginationEntityState, PaginatedAction } from '../../../../store/types/pagination.types';
 
 export interface AppEvent {
   actee_name: string;
@@ -73,6 +73,8 @@ export interface IListDataSource<T> {
   connect(): Observable<T[]>;
   destroy();
   getRowState(row: T);
+
+  refresh();
 }
 
 export type getRowUniqueId<T> = (T) => string;

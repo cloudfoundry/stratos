@@ -2,8 +2,7 @@ import { Component, OnDestroy, OnInit, HostBinding } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, take, tap } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
+import { first, map, tap, withLatestFrom } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -12,7 +11,7 @@ import { ConfirmationDialogConfig } from '../../../../shared/components/confirma
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
-import { GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
+import { GetAppStatsAction, GetAppSummaryAction, AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
 import { DeleteApplication } from '../../../../store/actions/application.actions';
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -22,6 +21,7 @@ import { endpointEntitiesSelector } from '../../../../store/selectors/endpoint.s
 import { APIResource } from '../../../../store/types/api.types';
 import { EndpointModel } from '../../../../store/types/endpoint.types';
 import { ApplicationService } from '../../application.service';
+import { EndpointsService } from './../../../../core/endpoints.service';
 
 // Confirmation dialogs
 const appStopConfirmation = new ConfirmationDialogConfig(
@@ -57,7 +57,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     private applicationService: ApplicationService,
     private entityService: EntityService<APIResource>,
     private store: Store<AppState>,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    private endpointsService: EndpointsService
   ) {
     const endpoints$ = store.select(endpointEntitiesSelector);
     this.breadcrumbs$ = applicationService.waitForAppEntity$.pipe(
@@ -76,11 +77,29 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }),
       first()
     );
+    this.applicationService.applicationStratProject$
+      .pipe(first())
+      .subscribe(stratProject => {
+        if (
+          stratProject &&
+          stratProject.deploySource &&
+          stratProject.deploySource.type === 'github'
+        ) {
+          this.tabLinks.push({ link: 'github', label: 'GitHub' });
+        }
+      });
+    this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe(hasMetrics => {
+      if (hasMetrics) {
+        this.tabLinks.push({
+          link: 'metrics',
+          label: 'Metrics'
+        });
+      }
+    });
   }
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
   isFetching$: Observable<boolean>;
   applicationActions$: Observable<string[]>;
-  addedGitHubTab = false;
   summaryDataChanging$: Observable<boolean>;
   appSub$: Subscription;
   entityServiceAppRefresh$: Subscription;
@@ -93,6 +112,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'instances', label: 'Instances' },
+    { link: 'routes', label: 'Routes' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
@@ -159,7 +179,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       first(),
       tap(appData => {
         this.confirmDialog.open(confirmConfig, () => {
-          this.applicationService.updateApplication({ state: requiredAppState }, [], appData.app.entity);
+          this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity);
           this.pollEntityService(updateKey, requiredAppState).delay(1).subscribe(() => { }, () => { }, onSuccess);
         });
       })
@@ -239,18 +259,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       }
       return !!(isFetchingApp || isUpdating);
     });
-
-    this.applicationService.applicationStratProject$
-      .pipe(take(1))
-      .subscribe(stratProject => {
-        if (
-          stratProject &&
-          stratProject.deploySource &&
-          stratProject.deploySource.type === 'github'
-        ) {
-          this.tabLinks.push({ link: 'github', label: 'GitHub' });
-        }
-      });
   }
 
   ngOnDestroy() {

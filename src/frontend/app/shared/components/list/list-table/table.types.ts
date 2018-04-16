@@ -25,6 +25,7 @@ export interface ITableColumn<T> {
   class?: string;
   sort?: boolean | DataFunctionDefinition | DataFunction<T>;
   cellFlex?: string;
+  cellAlignSelf?: string;
 }
 
 export interface ITableText {

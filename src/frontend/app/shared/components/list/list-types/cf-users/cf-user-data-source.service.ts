@@ -46,6 +46,7 @@ export class CfUserDataSourceService extends ListDataSource<APIResource<CfUser>>
       getRowUniqueId: getRowMetadata,
       paginationKey,
       isLocal: true,
+      transformEntities: [{ type: 'filter', field: 'entity.username' }],
       listConfig: listConfigService,
       rowsState: rowStateManager.observable,
       destroy: () => sub.unsubscribe()

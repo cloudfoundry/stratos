@@ -689,6 +689,11 @@ const testInitialStoreState: AppState = {
             busy: false,
             error: false,
             message: ''
+          },
+          updating: {
+            busy: false,
+            error: false,
+            message: ''
           }
         },
         deleting: {
@@ -21576,9 +21581,11 @@ const testInitialStoreState: AppState = {
           admin: true
         },
         connectionStatus: 'connected',
-        registered: true
-      }
+        registered: true,
+        metricsAvailable: false
+      },
     },
+    metrics: {},
     system: {}
   },
   actionHistory: [],

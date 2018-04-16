@@ -1,7 +1,2 @@
-<app-no-content-message
-    [icon]="'settings_ethernet'"
-    [hidden]="hide"
-    [firstLine]="firstLine"
-    [secondLine]="secondLine"
-    [toolbarLink]="toolbarLink">
+<app-no-content-message *ngIf="noContent$ | async as message" [icon]="'settings_ethernet'" [hidden]="!message" [firstLine]="message.firstLine" [secondLine]="message.secondLine" [toolbarLink]="showToolbarHint ? message.toolbarLink: null">
 </app-no-content-message>

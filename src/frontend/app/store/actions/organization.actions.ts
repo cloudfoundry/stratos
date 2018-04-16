@@ -97,7 +97,7 @@ export class GetAllOrganizations extends CFStartAction implements PaginatedActio
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'order-direction': 'asc',
+    'order-direction': 'desc',
     'order-direction-field': 'name',
     'order-by': 'name'
   };
@@ -182,5 +182,8 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
   initialParams = {
     page: 1,
     'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'username',
   };
+  flattenPagination = true;
 }

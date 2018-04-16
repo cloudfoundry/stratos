@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
-import { getFullEndpointApiUrl } from '../../../../../features/endpoints/endpoint-helpers';
+import { getFullEndpointApiUrl, getNameForEndpointType } from '../../../../../features/endpoints/endpoint-helpers';
 import { DisconnectEndpoint, UnregisterEndpoint } from '../../../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../../../store/actions/snackBar.actions';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
@@ -25,19 +25,18 @@ import {
 } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
-  return endpoint.cnsi_type === 'cf' ? 'Cloud Foundry' : endpoint.cnsi_type;
+  return getNameForEndpointType(endpoint.cnsi_type);
 }
 
 export const endpointColumns: ITableColumn<EndpointModel>[] = [
   {
     columnId: 'name',
     headerCell: () => 'Name',
-    cellDefinition: {
-      valuePath: 'name'
-    },
+    cellComponent: TableCellEndpointNameComponent,
     sort: {
       type: 'sort',
       orderKey: 'name',
@@ -86,10 +85,9 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
 
 @Injectable()
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
-
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new UnregisterEndpoint(item.guid));
+      this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
       this.handleDeleteAction(item, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
       });
@@ -112,7 +110,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new DisconnectEndpoint(item.guid));
+      this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
       this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
         this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
         this.store.dispatch(new GetSystemInfo());
@@ -129,12 +127,12 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       const dialogRef = this.dialog.open(ConnectEndpointDialogComponent, {
         data: {
           name: item.name,
-          guid: item.guid
+          guid: item.guid,
+          type: item.cnsi_type,
         },
         disableClose: true
       });
     },
-    icon: 'add_to_queue',
     label: 'Connect',
     description: '',
     visible: row => row.connectionStatus === 'disconnected',
@@ -208,5 +206,4 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   public getColumns = () => this.columns;
   public getDataSource = () => this.dataSource;
   public getMultiFiltersConfigs = () => [];
-
 }

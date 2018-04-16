@@ -2,13 +2,13 @@
   <h1>Application SSH ({{ (applicationService.app$ | async)?.entity?.entity.name }} #{{ instanceId }})</h1>
   <div class="page-header-right">
     <span>
-      <button mat-icon-button name="stop" *ngIf="sshViewer.isConnected" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
+      <button mat-icon-button matTooltip="Disconnect" name="stop" *ngIf="sshViewer.isConnected" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection">
         <mat-icon>stop</mat-icon>
       </button>
-      <button mat-icon-button name="start" *ngIf="!sshViewer.isConnected" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
+      <button mat-icon-button matTooltip="Connect" name="start" *ngIf="!sshViewer.isConnected" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection">
         <mat-icon>play_arrow</mat-icon>
       </button>
-      <button mat-icon-button [routerLink]="appInstanceLink">
+      <button mat-icon-button matTooltip="Back to App" [routerLink]="appInstanceLink">
         <mat-icon>close</mat-icon>
       </button>
     </span>

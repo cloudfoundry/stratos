@@ -44,7 +44,10 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction, Entit
   initialParams = {
     page: 1,
     'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'username',
   };
+  flattenPagination = true;
 }
 
 export class RemoveUserPermission<T> extends CFStartAction implements IRequestAction {

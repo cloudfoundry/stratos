@@ -124,8 +124,11 @@ function getObservables<T = any>(
   let hasDispatchedOnce = false;
   let lastValidationFootprint: string;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).publishReplay(1).refCount();
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).publishReplay(1).refCount();
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+    publishReplay(1),
+    refCount()
+  );
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -142,9 +145,7 @@ function getObservables<T = any>(
           })
         ).subscribe();
       }
-    }),
-    publishReplay(1),
-    refCount(),
+    })
   );
 
   const entities$: Observable<T[]> =

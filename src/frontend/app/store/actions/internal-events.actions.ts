@@ -9,9 +9,9 @@ export class SendEventAction implements Action {
     constructor(
         public eventType: string,
         public eventSubjectId: string,
-        public message: string,
         public eventCode: string = eventSubjectId,
-        public serverity: InternalEventServerity = InternalEventServerity.INFO
+        public serverity: InternalEventServerity = InternalEventServerity.INFO,
+        public message?: string
     ) {
         this.timestamp = moment.now();
     }

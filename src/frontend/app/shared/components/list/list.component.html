@@ -1,7 +1,7 @@
 <div class="list-component" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
-  <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async)" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
-  <div class="list-component__header" [hidden]="!(hasControls$ | async)">
-    <mat-progress-bar color="primary" [hidden]="!(dataSource.isLoadingPage$ | async)" [mode]="'query'"></mat-progress-bar>
+  <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async) && (showProgressBar$ | async)" [mode]="'query'"></mat-progress-bar>
+  <div class="list-component__header" [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
+    <mat-progress-bar color="primary" *ngIf="showProgressBar$ | async" [mode]="'query'"></mat-progress-bar>
     <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
       <div class="list-component__header__left">
         <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>
@@ -85,14 +85,21 @@
           <mat-icon>list</mat-icon>
           </button>
         </div>
+        <button mat-icon-button *ngIf="dataSource.refresh && !(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+          <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
+        </button>
       </div>
     </mat-card>
   </div>
+  <div class="refresh-button__no-header" *ngIf="dataSource.refresh && !(hasControls$ | async) && (!(hasRowsOrIsFiltering$ | async) && noEntries)">
+    <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+        <mat-icon class="refresh-icon" [ngClass]="{refreshing: (isRefreshing$ | async)}" aria-label="Refresh list data">refresh</mat-icon>
+      </button>
+  </div>
   <div class="list-component__body">
     <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
-      <div *ngIf="dataSource.isLoadingPage$ | async" class="list-component__blocker"></div>
-      <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)"></app-cards>
-      <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(dataSource.isLoadingPage$ | async) && !(hasRows$ | async)">
+      <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
+      <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
       </app-table>
     </div>
     <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
@@ -107,7 +114,7 @@
       </mat-card-content>
     </mat-card>
   </ng-template>
-  <div [hidden]="(dataSource.isLoadingPage$ | async) || (hasRows$ | async)" class="list-component__no-entries">
+  <div [hidden]="(showProgressBar$ | async) || (hasRows$ | async)" class="list-component__no-entries">
     <ng-container *ngIf="(noRowsNotFiltering$ | async)">
       <ng-container *ngTemplateOutlet="noEntries ? noEntries : defaultNoEntries">
       </ng-container>
@@ -118,3 +125,9 @@
     </ng-container>
   </div>
 </div>
+
+<ng-template #refreshButton>
+  <button mat-mini-fab *ngIf="!(isAddingOrSelecting$ | async)" [disabled]="dataSource.isLoadingPage$ | async" (click)="refresh()">
+    <mat-icon aria-label="Refresh list data">refresh</mat-icon>
+  </button>
+</ng-template>
