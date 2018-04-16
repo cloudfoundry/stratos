@@ -15,19 +15,6 @@ export const internalEventSubjectSelector = (type: string, subjectId: string) =>
     internalEventTypeSelector(type)
 );
 
-export const internalEventSubjectsSelector = (type: string, subjectIds: string[]) => compose(
-    state => {
-        const events = {} as InternalEventSubjectState;
-        subjectIds.forEach(id => {
-            if (state[id]) {
-                events[id] = state[id];
-            }
-        });
-        return events;
-    },
-    internalEventTypeSelector(type)
-);
-
 export const internalEventServeritySelector = (type: string, subjectId: string, serverity: InternalEventServerity) => createSelector(
     internalEventSubjectSelector(type, subjectId),
     state => state.filter(event => event.serverity === serverity),

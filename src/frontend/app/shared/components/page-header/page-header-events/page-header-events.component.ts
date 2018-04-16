@@ -1,13 +1,18 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { internalEventSubjectsSelector } from '../../../../store/selectors/internal-events.selectors';
-import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
-import { filter, map, tap } from 'rxjs/operators';
-import { InternalEventServerity } from '../../../../store/types/internal-events.types';
+import { animate, style, transition, trigger } from '@angular/animations';
+import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { trigger, transition, style, animate } from '@angular/animations';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
+import { filter, map, distinctUntilChanged, debounceTime } from 'rxjs/operators';
+
+import { AppState } from '../../../../store/app-state';
+import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
+import { internalEventTypeSelector } from '../../../../store/selectors/internal-events.selectors';
+import { InternalEventServerity, InternalEventSubjectState } from '../../../../store/types/internal-events.types';
+
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-page-header-events',
@@ -38,13 +43,29 @@ export class PageHeaderEventsComponent implements OnInit {
     if (!this.endpointIds.length && activatedRoute.snapshot.params.cfId) {
       this.endpointIds.push(activatedRoute.snapshot.params.cfId);
     }
-    this.endpointErrors$ = this.store.select(internalEventSubjectsSelector(endpointSchemaKey, this.endpointIds)).pipe(
-      filter(state => !!Object.keys(state).length),
-      map(state => {
+    const endpointEvents$ = this.store.select(internalEventTypeSelector(endpointSchemaKey)).pipe(
+      debounceTime(250),
+      distinctUntilChanged(),
+      map(allEvents => {
+        console.log('event.timestamp');
+        const events = {} as InternalEventSubjectState;
+        this.endpointIds.forEach(id => {
+          if (allEvents[id]) {
+            events[id] = allEvents[id];
+          }
+        });
+        return events;
+      })
+    );
+    const interval$ = new IntervalObservable(30000).startWith(-1);
+    this.endpointErrors$ = combineLatest(endpointEvents$, interval$).pipe(
+      filter(([state]) => !!Object.keys(state).length),
+      map(([state]) => {
+        const time = moment().subtract(5, 'hours').unix() * 1000;
         return Object.keys(state).reduce<string[]>((array, key) => {
           const events = state[key];
           const hasErrorEvent = !!events.find(event => {
-            return event.serverity === InternalEventServerity.ERROR;
+            return event.serverity === InternalEventServerity.ERROR && event.timestamp > time;
           });
           if (hasErrorEvent) {
             array.push(key);
@@ -56,7 +77,12 @@ export class PageHeaderEventsComponent implements OnInit {
     );
   }
 
+  private searchEventsForErrors(events) {
+    const index = Math.round(events.length / 2);
+  }
+  private checkIndex(events, index) {
+    const event = events[index];
+  }
   ngOnInit() {
   }
-
 }
