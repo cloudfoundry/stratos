@@ -110,7 +110,7 @@ export interface IBaseListAction<T> {
   label: string;
   description: string;
   visible: (row: T) => boolean;
-  enabled: (row: T) => boolean;
+  enabled: (row: T) => boolean | Observable<T>;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {
