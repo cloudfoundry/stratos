@@ -1,5 +1,5 @@
 <div class="app-code-block" [ngClass]="{'app-code-block___success': _copySuccessWait}">
-  <div #preBlock>
+  <div #preBlock [ngClass]="{'app-code-block__pre': codeBlockStyle === 'pre'}">
     <ng-content></ng-content>
   </div>
   <div class="app-code-block___copied-div">

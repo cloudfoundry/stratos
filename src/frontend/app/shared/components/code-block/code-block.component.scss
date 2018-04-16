@@ -1,7 +1,10 @@
 .app-code-block {
   position: relative;
-  min-height: 20px;
-  padding: 20px;
+  min-height: 44px;
+  padding: 10px 20px;
+  &__pre {
+    white-space: pre-line;
+  }
   pre {
     margin: 0;
     white-space: pre-line;
@@ -10,8 +13,8 @@
   &___copied-div,
   &___copy-icon {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 10px;
+    right: 10px;
     transition: opacity 250ms linear;
   }
   &___copied-div {

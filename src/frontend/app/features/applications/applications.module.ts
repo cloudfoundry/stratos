@@ -27,6 +27,7 @@ import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-s
 import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
+import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
 
 @NgModule({
   imports: [
@@ -51,6 +52,7 @@ import { SshApplicationComponent } from './ssh-application/ssh-application.compo
     GithubTabComponent,
     MapRoutesComponent,
     AddRouteStepperComponent,
+    CliInfoApplicationComponent,
     MetricsTabComponent,
     RoutesTabComponent,
   ],
