@@ -126,20 +126,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
 
-    const setResultCount = entities => {
-      this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
-      pagination$.pipe(
-        first()
-      ).subscribe((paginationEntity) => {
-        const validPagesCountChange = this.transformEntity;
-        if (
-          validPagesCountChange &&
-          (paginationEntity.totalResults !== entities.length ||
-            paginationEntity.clientPagination.totalResults !== entities.length)
-        ) {
-          this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
-        }
-      });
+    const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
+      const validPagesCountChange = this.transformEntity;
+      if (
+        paginationEntity.totalResults !== entities.length ||
+        paginationEntity.clientPagination.totalResults !== entities.length
+      ) {
+        this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+      }
     };
     this.page$ = this.isLocal ?
       new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
