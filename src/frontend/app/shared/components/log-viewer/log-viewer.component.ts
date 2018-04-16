@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnIni
 import { BehaviorSubject, Observable, Subscription } from 'rxjs/Rx';
 
 import { AnsiColors } from './ansi-colors';
+import { tap, filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-log-viewer',
@@ -90,13 +91,16 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     const addedLogs$ = stoppableLogStream$
       .buffer(buffer$)
-      .filter(log => !!log.length)
-      .do(logs => {
+      .pipe(
+      filter(log => !!log.length),
+      // Apply filter to messages if applicable
+      map(logs => logs.map(log => this.filter ? this.filter(log) : log).filter(log => !!log)),
+      filter(log => !!log.length),
+      tap(logs => {
         this.logLinesCount += logs.length;
         const elementString = logs
           .map(log => {
-            let formatted = this.filter ? this.filter(log) : log;
-            formatted = this.colorizer.ansiColorsToHtml(formatted);
+            const formatted = this.colorizer.ansiColorsToHtml(log);
             return `<div>${formatted}</div>`;
           })
           .join('');
@@ -111,7 +115,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         }
         ele.innerHTML = elementString;
         contentElement.append(ele);
-      });
+      })
+      );
 
     this.listeningSub = Observable.combineLatest(this.isLocked$, addedLogs$)
       .do(([isLocked, logs]) => {
