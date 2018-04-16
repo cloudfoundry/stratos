@@ -17,10 +17,16 @@ function deleteOrgSpaces(state: APIResource, orgGuid: string) {
   if (!orgGuid) {
     return state;
   }
-  const oldEntities = Object.values(state);
+
+  const orgGuids = Object.keys(state);
+  if (orgGuids.indexOf(orgGuid) === -1) {
+    return state;
+  }
+
   const entities = {};
-  oldEntities.forEach(org => {
-    if (org.metadata.guid === orgGuid) {
+  orgGuids.forEach(currentGuid => {
+    const org = state[currentGuid];
+    if (currentGuid === orgGuid) {
       const newOrg = {
         ...org,
         entity: {
@@ -28,9 +34,9 @@ function deleteOrgSpaces(state: APIResource, orgGuid: string) {
           spaces: null
         }
       };
-      entities[org.metadata.guid] = newOrg;
+      entities[currentGuid] = newOrg;
     } else {
-      entities[org.metadata.guid] = org;
+      entities[currentGuid] = org;
     }
   });
   return entities;

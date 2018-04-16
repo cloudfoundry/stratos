@@ -162,6 +162,7 @@ export class DeleteSpace extends BaseSpaceAction {
     this.options.params.append('async', 'false');
   }
   actions = [DELETE_SPACE, DELETE_SPACE_SUCCESS, DELETE_SPACE_FAILED];
+  removeEntityOnDelete = true;
 }
 
 export class CreateSpace extends BaseSpaceAction {
