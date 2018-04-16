@@ -98,7 +98,7 @@
             "state-app-label": "Etat de l'Application",
             "state-package-label": "état du paquet",
             "instances-label": "instances",
-            "created-label": "crée",
+            "created-label": "créé",
             "modified-label": "modifié",
             "deployed-label": "console déployée",
             "deployed-source-label": "la console déploie la source",
@@ -124,7 +124,7 @@
               "memory-error-required": "La mémoire est requise",
               "memory-error-min": "La mémoire doit être supérieure à 0",
               "instances-label": "Instances",
-              "instances-error-required": "Les Instances sont requise",
+              "instances-error-required": "Les Instances sont requises",
               "instances-error-min": "Les instances doivent être 0 ou plus",
               "instances-error-whole": "Le nombre d'instances doit être un nombre entier"
             }
@@ -276,7 +276,7 @@
               "auto-scaler": "Vous pouvez lier la mise à l'échelle automatique à cette application ici. Notez que vous devrez utiliser l'interface de ligne de commande pour configurer la stratégie de mise à l'échelle automatique de cette application afin qu'elle soit activée."
             },
             "no-instances": {
-              "title": "Il n'y a pas de service d'instances pas déjà lié à cette application",
+              "title": "Il n'y a pas de service d'instances déjà lié à cette application",
               "prompt": "Créer une nouvelle instance de service pour continuer"
             },
             "create": "Créer une nouvelle instance de service"
@@ -341,8 +341,8 @@
               "yes": "Detach",
               "no": "@:buttons.cancel"
             },
-            "error": "Some applications failed to detach from the service instance",
-            "success": "Service instance successfully detached"
+            "error": "Certaines applications n'ont pas pu se détacher de l'instance de service",
+            "success": "L'instance service est détaché avec succès"
           },
           "delete": {
             "title": "Supprimer le service",
@@ -361,7 +361,7 @@
             "title": "Lier le Service \"{{ svcName }}\" à l'Application \"{{ appName }}\""
           },
           "add": {
-            "title": "Ajouter le  Service '{{ svcName }}' à Application '{{ appName }}'",
+            "title": "Ajouter le Service '{{ svcName }}' à l'Application '{{ appName }}'",
             "back-to-services": "Retour aux Services",
             "add": "Ajouter une instance Service",
             "create": {
