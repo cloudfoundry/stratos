@@ -56,6 +56,10 @@ export class CliInfoApplicationComponent implements OnInit {
       this.previousQueryParams = route && route.state.queryParams ? route.state.queryParams : {};
     });
 
+    this.setupObservables(cfGuid);
+  }
+
+  private setupObservables(cfGuid: string) {
     this.cfEndpointEntityService = this.entityServiceFactory.create(
       endpointSchemaKey,
       entityFactory(endpointSchemaKey),
