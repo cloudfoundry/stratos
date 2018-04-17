@@ -37,4 +37,13 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   execute(listActionConfig: IListAction<T>, row: T) {
     listActionConfig.action(row);
   }
+
+  isEnabled(action: IListAction<T>, row: T) {
+    const enabled = action.enabled(row);
+    if (enabled instanceof Observable ) {
+      return enabled;
+    } else {
+      return Observable.of(enabled);
+    }
+  }
 }
