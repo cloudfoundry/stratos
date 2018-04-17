@@ -20,7 +20,7 @@ import { DeployApplicationModule } from './deploy-application/deploy-application
 import { EditApplicationComponent } from './edit-application/edit-application.component';
 import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-stepper.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
-
+import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
 
 const appplicationsRoutes: Routes = [
   {
@@ -50,6 +50,10 @@ const appplicationsRoutes: Routes = [
           {
             path: 'ssh/:index',
             component: SshApplicationComponent,
+          },
+          {
+            path: 'cli',
+            component: CliInfoApplicationComponent,
           },
           {
             path: '',
