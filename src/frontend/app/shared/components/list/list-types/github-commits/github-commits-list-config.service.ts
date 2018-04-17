@@ -24,6 +24,11 @@ import { GithubCommitsDataSource } from './github-commits-data-source';
 export class GithubCommitsListConfigService implements IListConfig<APIResource<GithubCommit>> {
   dataSource: GithubCommitsDataSource;
   viewType = ListViewTypes.TABLE_ONLY;
+  text = {
+    title: 'Commits',
+    noEntries: 'There are no commits'
+  };
+
   private columns: ITableColumn<APIResource<GithubCommit>>[] = [
     {
       columnId: 'message',
