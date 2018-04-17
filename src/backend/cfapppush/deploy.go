@@ -402,8 +402,7 @@ func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 	info.Url = fmt.Sprintf("https://github.com/%s", info.Project)
 	log.Infof("GitHub Source: %s, branch %s, url: %s", info.Project, info.Branch, info.Url)
-
-	info.CommitHash, err = cloneRepository(info.Url, info.Branch, clientWebSocket, tempDir)
+	info.CommitHash, err = cloneRepository(info.Url, info.Branch, info.CommitHash, clientWebSocket, tempDir)
 	if err != nil {
 		return "", tempDir, err
 	}
@@ -435,7 +434,7 @@ func getGitUrlSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 	log.Infof("Git Url Source: %s, branch %s", info.Url, info.Branch)
 
-	info.CommitHash, err = cloneRepository(info.Url, info.Branch, clientWebSocket, tempDir)
+	info.CommitHash, err = cloneRepository(info.Url, info.Branch, info.CommitHash, clientWebSocket, tempDir)
 	if err != nil {
 		return "", tempDir, err
 	}
@@ -593,7 +592,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	return repo, nil
 }
 
-func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
+func cloneRepository(repoUrl string, branch string, commit string, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
 
 	if len(branch) == 0 {
 		err := errors.New("No branch supplied")
@@ -611,12 +610,22 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 		return "", err
 	}
 
+	if commit != "" {
+		log.Infof("Checking out commit %s", commit)
+		err = vcsGit.ResetBranchToCommit(tempDir, commit)
+		if err != nil {
+			log.Infof("Failed to checkout commit %s", commit)
+			sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
+			return "", err
+		}
+		return commit, nil
+	}
+
 	head, err := vcsGit.Head(tempDir)
 	if err != nil {
 		log.Infof("Unable to fetch HEAD in branch due to %s", err)
 		return "", err
 	}
-
 	return strings.TrimSpace(head), nil
 
 }
