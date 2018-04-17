@@ -32,7 +32,6 @@ const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEn
   const orgGuid = paginationState.clientPagination.filter.items['org'];
   const spaceGuid = paginationState.clientPagination.filter.items['space'];
   return entities.filter(e => {
-    console.log(e);
     const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
     const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
     const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
