@@ -132,6 +132,18 @@ export class ApplicationStateService {
         indicator: CardStatus.ERROR,
         actions: 'stop,restart,cli'
       },
+      'STAGED(0,N,N,N)': {
+        label: 'Deployed',
+        subLabel: 'Crashing',
+        indicator: CardStatus.ERROR,
+        actions: 'stop,restart,cli'
+      },
+      'CRASHING': {
+        label: 'Deployed',
+        subLabel: 'Crashing',
+        indicator: CardStatus.ERROR,
+        actions: 'stop,restart,cli'
+      },
       'STAGED(N,N,0)': {
         label: 'Deployed',
         subLabel: 'Partially Online',
@@ -144,6 +156,14 @@ export class ApplicationStateService {
         indicator: CardStatus.WARNING,
         actions: 'stop,restart,launch,cli'
       }
+    },
+    COMPLEX: {
+      SCALING: {
+        label: 'Deployed',
+        subLabel: 'Scaling',
+        indicator: CardStatus.OK,
+        actions: 'stop,restart,launch,cli'
+    }
     }
   };
 
@@ -209,12 +229,9 @@ export class ApplicationStateService {
           // Do the best we can if we do not have app instance metadata
           if (appInstances) {
             const counts = this.getCounts(summary, appInstances);
-
-            // Special case: App instances only in running and starting state
-            if (counts.starting > 0 && counts.running > 0 && counts.okay === counts.expected) {
-              extState = pkgState + '(N,0,0,N)';
-            } else if (counts.starting > 0 && counts.okay === counts.expected) {
-              extState = pkgState + '(0,0,0,N)';
+            let scExtState = this.checkSpecialCases(pkgState, counts);
+            if (scExtState) {
+              extState = scExtState;
             } else {
               extState = pkgState + '(' +
                 this.formatCount(counts.running) + ',' +
@@ -239,6 +256,30 @@ export class ApplicationStateService {
     };
   }
 
+  private checkSpecialCases(pkgState: string, counts) {
+    // Special case: App instances only in running and starting state
+    if (counts.starting > 0 && counts.running > 0 && counts.okay === counts.expected) {
+      return pkgState + '(N,0,0,N)';
+    } else if (counts.starting > 0 && counts.okay === counts.expected) {
+      return '(0,0,0,N)';
+    } else if (counts.starting > 0 && counts.running > 0 && counts.crashed > 0) {
+      return 'CRASHING';
+    }
+    return undefined;
+  }
+
+  /**
+   * Special case a few complex use cases that don't fid the state machine
+   */
+  checkComplexCase(appState, pkgState, counts): ApplicationStateData {
+    if (pkgState === 'STAGED' && appState === 'STARTED') {
+      // Check for scaling use case - all instances are either Starting or Running
+      if (counts.starting > 0 && counts.running > 0 && counts.expected === (counts.running + counts.starting)) {
+        return this.stateMetadata.COMPLEX.SCALING;
+      }
+    }
+    return undefined
+  }
 
   /**
  * @description Gets the package state based on the application summary metadata
@@ -280,7 +321,7 @@ export class ApplicationStateService {
     } else {
       counts.crashed = this.getCount(undefined, appInstances, 'CRASHED');
       if (counts.crashed >= 0) {
-        counts.flapping = summary.instances - counts.crashed - counts.running;
+        counts.flapping = counts.expected - counts.crashed - counts.running;
       } else {
         // If we couldn't determine #crashed, then we can't calculate #flapping
         counts.flapping = -1;
