@@ -13,6 +13,9 @@ import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
 import { Observable } from 'rxjs/Observable';
+import { IApp } from '../../../core/cf-api.types';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 // Context used in the CLI Info template
 interface CFAppCLIInfoContext {
@@ -37,12 +40,16 @@ export class CliInfoApplicationComponent implements OnInit {
   };
 
   public context$: Observable<CFAppCLIInfoContext>;
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public route$: Observable<{ url: string, queryParams: any}>;
 
   constructor(
     private store: Store<AppState>,
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory
-  ) { }
+  ) {
+    this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
+  }
 
   ngOnInit() {
     const { cfGuid, appGuid } = this.applicationService;
@@ -50,13 +57,26 @@ export class CliInfoApplicationComponent implements OnInit {
       `/applications/${cfGuid}/${appGuid}`
     );
 
+    this.setupRouteObservable(defaultBackLink);
     // Will auto unsubscribe as we are using 'first'
-    this.store.select(getPreviousRoutingState).pipe(first()).subscribe(route => {
-      this.previousUrl = route && route.state ? route.state.url : defaultBackLink;
-      this.previousQueryParams = route && route.state.queryParams ? route.state.queryParams : {};
+    this.route$.pipe(first()).subscribe(route => {
+      this.previousUrl = route.url;
+      this.previousQueryParams = route.queryParams;
     });
 
     this.setupObservables(cfGuid);
+    this.setupBreadcrumbs(cfGuid, appGuid);
+  }
+
+  private setupRouteObservable(defaultBackLink: string) {
+    this.route$ = this.store.select(getPreviousRoutingState).pipe(
+      map(route => {
+        return {
+          url: route && route.state ? route.state.url : defaultBackLink,
+          queryParams: route && route.state.queryParams ? route.state.queryParams : {}
+        };
+      })
+    );
   }
 
   private setupObservables(cfGuid: string) {
@@ -86,10 +106,28 @@ export class CliInfoApplicationComponent implements OnInit {
     );
   }
 
+  setupBreadcrumbs(cfGuid: string, appGuid: string) {
+    this.breadcrumbs$ = combineLatest(
+      this.route$,
+      this.context$
+    ).pipe(
+      map(([route, context]) => {
+        return [
+          {
+            breadcrumbs: [
+              { value: 'Applications', routerLink: '/applications' },
+              { value: context.appName, routerLink: route.url }
+            ]
+          }
+        ];
+      }));
+  }
+
   back() {
     this.store.dispatch(new RouterNav({
       path: this.previousUrl,
-      query: this.previousQueryParams }
+      query: this.previousQueryParams
+    }
     ));
   }
 
