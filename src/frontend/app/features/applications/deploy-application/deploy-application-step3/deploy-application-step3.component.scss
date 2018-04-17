@@ -5,6 +5,7 @@
 
 .deploy-app {
   display: flex;
+  height: 43px;
   padding: 12px;
   width: 100%;
   &__title {
@@ -14,4 +15,9 @@
   &__spinner {
     flex: 0;
   }
+  &__log {
+    display: flex;
+    height: calc(100% - 43px);
+  }
 }
+
