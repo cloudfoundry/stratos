@@ -19,7 +19,7 @@ import { GetAllApplications } from '../../../../store/actions/application.action
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { CfAppsDataSource, createGetAllAppAction } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { interval } from 'rxjs/observable/interval';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -259,7 +259,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
                 if (apps.total_results === 1) {
                   this.appGuid = apps.resources[0].metadata.guid;
                   // New app - so refresh the application wall data
-                  this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
+                  this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
                   return Observable.of(true);
                 }
               }
