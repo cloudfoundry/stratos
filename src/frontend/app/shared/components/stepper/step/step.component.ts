@@ -48,6 +48,9 @@ export class StepComponent implements OnInit {
   @Input('disablePrevious')
   disablePrevious = false;
 
+  @Input('cancelRequiresValid')
+  cancelRequiresValid = false;
+
   @Input('blocked$')
   blocked$: Observable<boolean>;
 
