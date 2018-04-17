@@ -1,7 +1,7 @@
 <b>Create a route</b>
 <form novalidate #form="ngForm" class="stepper-form">
   <mat-form-field>
-    <mat-select placeholder="Domain" ngModel name="domain" [(ngModel)]="selectedDomainGuid">
+    <mat-select placeholder="Domain" name="domain" [(ngModel)]="selectedDomainGuid">
       <mat-option *ngFor="let domain of (domains$ | async)" [value]="domain.entity.guid">
         <span>{{ domain.entity.name }}</span>
       </mat-option>
