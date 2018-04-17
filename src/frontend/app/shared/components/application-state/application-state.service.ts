@@ -6,7 +6,7 @@ export interface ApplicationStateData {
   indicator: CardStatus;
   actions: {
     [key: string]: boolean
-  };
+  } | string;
 }
 
 export enum CardStatus {
@@ -97,6 +97,12 @@ export class ApplicationStateService {
         actions: 'stop,restart,cli'
       },
       'STAGED(N,0,0,N)': {
+        label: 'Deployed',
+        subLabel: 'Scaling App',
+        indicator: CardStatus.OK,
+        actions: 'stop,restart,launch,cli'
+      },
+      'STAGED(0,0,0,N)': {
         label: 'Deployed',
         subLabel: 'Starting App',
         indicator: CardStatus.BUSY,
@@ -194,7 +200,7 @@ export class ApplicationStateService {
           return appStateMatch['?'];
         } else {
 
-          // Special case for when the desired app instance counf is 0
+          // Special case for when the desired app instance count is 0
           if (summary && summary.instances === 0) {
             return appStateMatch.NO_INSTANCES;
           }
@@ -205,8 +211,10 @@ export class ApplicationStateService {
             const counts = this.getCounts(summary, appInstances);
 
             // Special case: App instances only in running and starting state
-            if (counts.starting > 0 && counts.okay === summary.instances) {
+            if (counts.starting > 0 && counts.running > 0 && counts.okay === counts.expected) {
               extState = pkgState + '(N,0,0,N)';
+            } else if (counts.starting > 0 && counts.okay === counts.expected) {
+              extState = pkgState + '(0,0,0,N)';
             } else {
               extState = pkgState + '(' +
                 this.formatCount(counts.running) + ',' +
@@ -260,10 +268,13 @@ export class ApplicationStateService {
     counts.running = this.getCount(undefined, appInstances, 'RUNNING');
     counts.starting = this.getCount(undefined, appInstances, 'STARTING');
     counts.okay = counts.running + counts.starting;
+    // Note: We may have less app instance metadata than indicated by the app's desired instance count
+    // So base decisions on the app instance metadata and ignore the app's count
+    counts.expected = appInstances.length;
 
     // If we know how many aer running and this is the same as the total # instances then
     // this implies that #crashed and #flapping are 0, so we can skip needing to use app instance metadata
-    if (counts.running === summary.instances) {
+    if (counts.running === counts.expected) {
       counts.crashed = 0;
       counts.flapping = 0;
     } else {

@@ -122,10 +122,10 @@ describe('ApplicationStateService', () => {
       const testData = makeTestData('STARTED', 'STAGED', ['STARTING', 'RUNNING']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
 
-      expect(res.indicator).toBe('busy');
+      expect(res.indicator).toBe('ok');
       expect($translate.instant(res.label)).toBe('Deployed');
-      expect($translate.instant(res.subLabel)).toBe('Starting App');
-      expect(Object.keys(res.actions).length).toBe(3);
+      expect($translate.instant(res.subLabel)).toBe('Scaling App');
+      expect(Object.keys(res.actions).length).toBe(4);
       expect(res.actions.stop).toBe(true);
       expect(res.actions.restart).toBe(true);
     });
