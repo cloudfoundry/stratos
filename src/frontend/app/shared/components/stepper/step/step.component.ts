@@ -36,6 +36,9 @@ export class StepComponent implements OnInit {
   @Input('valid')
   valid = true;
 
+  @Input('canClose')
+  canClose = true;
+
   @Input('nextButtonText')
   nextButtonText = 'Next';
 
@@ -47,9 +50,6 @@ export class StepComponent implements OnInit {
 
   @Input('disablePrevious')
   disablePrevious = false;
-
-  @Input('cancelRequiresValid')
-  cancelRequiresValid = false;
 
   @Input('blocked$')
   blocked$: Observable<boolean>;
