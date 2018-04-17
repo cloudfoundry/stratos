@@ -4,7 +4,7 @@
     "unregister": {
       "unregister": "Annuler la souscription",
       "title": "Annuler la souscription à l'Endpoint",
-      "confirm": "Etes vous sûr de vouloir nnuler la souscription à l'Endpoint '{{name}}'?",
+      "confirm": "Etes vous sûr de vouloir Annuler la souscription à l'Endpoint '{{name}}'?",
       "error": "Opération Echouée: Annuler la souscription à l'Endpoint",
       "success": "Opération Réussie: Annuler la souscription à l'Endpoint '{{name}}'"
     },
@@ -20,7 +20,7 @@
       "success-notification": "Opération Réussie: souscription à '{{name}}'",
       "error-no-connect": "Le serveur d'authentification n'a pas pu répondre. Veuillez réessayer. Si cette erreur persiste, veuillez contacter l'administrateur.",
       "error-server-failure": "Une erreur de serveur s'est produite lors de la tentative d'enregistrement de votre service. Veuillez réessayer. Si cette erreur persiste, veuillez contacter l'administrateur.",
-      "error-user-input": "Le nom d'utilisateur ou le mot de passe que vous avez utilisé est incorrecte. Veuillez réessayer."
+      "error-user-input": "Nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer."
     },
     "disconnect": {
       "disconnect": "Déconnecter",
