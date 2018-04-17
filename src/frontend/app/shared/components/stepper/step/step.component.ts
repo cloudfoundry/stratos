@@ -7,6 +7,7 @@ import { Observable } from 'rxjs/Observable';
 export interface IStepperStep {
   validate: Observable<boolean>;
   onNext: StepOnNextFunction;
+  onEnter?: () => void;
 }
 
 export type StepOnNextFunction = () => Observable<{
@@ -59,6 +60,9 @@ export class StepComponent implements OnInit {
 
   @Input()
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
+
+  @Input()
+  onEnter: () => void = () => { }
 
   constructor() {
   }
