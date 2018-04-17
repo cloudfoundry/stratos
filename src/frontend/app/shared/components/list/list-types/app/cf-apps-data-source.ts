@@ -18,12 +18,21 @@ import { PaginationEntityState } from '../../../../../store/types/pagination.typ
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
 
+export function createGetAllAppAction(paginationKey): GetAllApplications {
+  return new GetAllApplications(paginationKey, [
+    createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
+    createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+    createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
+  ]);
+}
+
 const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
   // Filter by cf/org/space
   const cfGuid = paginationState.clientPagination.filter.items['cf'];
   const orgGuid = paginationState.clientPagination.filter.items['org'];
   const spaceGuid = paginationState.clientPagination.filter.items['space'];
   return entities.filter(e => {
+    console.log(e);
     const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
     const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
     const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
@@ -43,11 +52,7 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
     seedPaginationKey = CfAppsDataSource.paginationKey,
   ) {
     const syncNeeded = paginationKey !== seedPaginationKey;
-    const action = new GetAllApplications(paginationKey, [
-      createEntityRelationKey(applicationSchemaKey, spaceSchemaKey),
-      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-      createEntityRelationKey(applicationSchemaKey, routeSchemaKey),
-    ]);
+    const action = createGetAllAppAction(paginationKey);
 
     if (syncNeeded) {
       // We do this here to ensure we sync up with main endpoint table data.
