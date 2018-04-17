@@ -96,6 +96,10 @@ export class FetchCommits implements PaginatedAction {
   type = FETCH_COMMITS;
   entityKey = githubCommitSchemaKey;
   paginationKey: string;
+  initialParams = {
+    'order-direction': 'asc',
+    'order-direction-field': 'date',
+  };
 }
 
 export class StoreCFSettings implements Action {
