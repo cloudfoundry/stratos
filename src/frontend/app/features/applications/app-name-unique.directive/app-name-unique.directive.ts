@@ -1,15 +1,12 @@
 import { Directive, forwardRef, Input, OnInit } from '@angular/core';
-import { AbstractControl, NG_ASYNC_VALIDATORS, Validator, AsyncValidatorFn, AsyncValidator } from '@angular/forms';
+import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { IsNewAppNameFree } from '../../../store/actions/create-applications-page.actions';
+import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
-import { Headers, Http, Request, RequestOptions, QueryEncoder, URLSearchParams } from '@angular/http';
-import { ApplicationService } from '../application.service';
-import { selectEntity } from '../../../store/selectors/api.selectors';
-import { environment } from '../../../../environments/environment';
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -65,21 +62,21 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     }
     this.appApplicationNameUnique.set(true);
     return Observable.timer(500).take(1)
-    .combineLatest(this.store.select(selectNewAppState).take(1))
-    .switchMap((v) => {
-      const cfGuid = v[1].cloudFoundryDetails.cloudFoundry;
-      const spaceGuid = v[1].cloudFoundryDetails.space;
-      const currentName = v[1].name;
-      return this.checkAppName(cfGuid, spaceGuid, currentName, control.value);
-    })
-    .map(v => {
-      this.appApplicationNameUnique.set(false, !v);
-      return v ? null : {appNameTaken: true};
-    })
-    .catch(err => {
-      this.appApplicationNameUnique.set(false, false);
-      return Observable.throw(err);
-    });
+      .combineLatest(this.store.select(selectNewAppState).take(1))
+      .switchMap((v) => {
+        const cfGuid = v[1].cloudFoundryDetails.cloudFoundry;
+        const spaceGuid = v[1].cloudFoundryDetails.space;
+        const currentName = v[1].name;
+        return this.checkAppName(cfGuid, spaceGuid, currentName, control.value);
+      })
+      .map(v => {
+        this.appApplicationNameUnique.set(false, !v);
+        return v ? null : { appNameTaken: true };
+      })
+      .catch(err => {
+        this.appApplicationNameUnique.set(false, false);
+        return Observable.throw(err);
+      });
   }
 
   private checkAppName(cfGuid, spaceGuid, currentName, name): Observable<any> {
@@ -96,14 +93,14 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     options.headers.set('x-cap-cnsi-list', cfGuid);
     options.headers.set('x-cap-passthrough', 'true');
     return this.http.request(new Request(options))
-    .map(response => {
-      let resData;
-      try {
-        resData = response.json();
-      } catch (e) {
-        resData = {};
-      }
-      return resData.total_results === 0;
-    });
+      .map(response => {
+        let resData;
+        try {
+          resData = response.json();
+        } catch (e) {
+          resData = {};
+        }
+        return resData.total_results === 0;
+      });
   }
 }
