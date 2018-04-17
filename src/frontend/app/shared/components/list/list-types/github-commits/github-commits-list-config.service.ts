@@ -1,20 +1,24 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { combineLatest, first } from 'rxjs/operators';
 
+import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import {
+  CheckProjectExists,
+  SetAppSourceDetails,
+  SetDeployBranch,
+  SetDeployCommit,
+  StoreCFSettings,
+} from '../../../../../store/actions/deploy-applications.actions';
+import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
-import { spaceSchemaKey, githubBranchesSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
-import { ApplicationService } from '../../../../../features/applications/application.service';
-import { first, tap, combineLatest, withLatestFrom } from 'rxjs/operators';
-import { CheckProjectExists, SetAppSourceDetails, SetDeployBranch, FetchBranchesForProject, SetDeployCommit, StoreCFSettings } from '../../../../../store/actions/deploy-applications.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
-import { selectEntities } from '../../../../../store/selectors/api.selectors';
 
 @Injectable()
 export class GithubCommitsListConfigService implements IListConfig<APIResource<GithubCommit>> {
@@ -108,11 +112,11 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
       this.store.dispatch(
         new RouterNav({
           path: ['/applications/deploy'],
-          query: { redeploy: true }
+          query: { redeploy: this.appGuid }
         })
       );
     },
-    label: 'Deploy',
+    label: 'Redeploy',
     description: ``,
     visible: row => true,
     enabled: row => true,
@@ -123,6 +127,7 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
   private cfGuid: string;
   private orgGuid: string;
   private spaceGuid: string;
+  private appGuid: string;
 
   constructor(
     private store: Store<AppState>,
@@ -140,6 +145,7 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
       this.cfGuid = app.entity.entity.cfGuid;
       this.spaceGuid = app.entity.entity.space_guid;
       this.orgGuid = space.entity.organization_guid;
+      this.appGuid = app.entity.metadata.guid;
     });
 
     // TODO: RC This will not work. The creation of the datasource must occur synchronously in the ctor. These values need to be passed

@@ -25,7 +25,7 @@
                 <div>
                   <mat-icon color="warn">warning</mat-icon>
                 </div>
-                <div class="github-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}} branch has been updated since this app was pushed. Redeploy to update</div>
+                <div class="github-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}} branch has been updated since this app was deployed. Redeploy to update</div>
               </div>
             </div>
             <app-metadata-item label="Deployed at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>

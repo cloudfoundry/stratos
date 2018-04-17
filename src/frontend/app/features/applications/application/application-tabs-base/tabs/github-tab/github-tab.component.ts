@@ -87,7 +87,8 @@ export class GithubTabComponent implements OnInit, OnDestroy {
       take(1),
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
-        const commitId = projectName + '-' + stProject.deploySource.commit.trim();
+        const commitId = stProject.deploySource.commit.trim();
+        const commitEntityKey = projectName + '-' + commitId;
 
         this.gitHubRepoEntityService = this.entityServiceFactory.create(
           githubRepoSchemaKey,
@@ -100,7 +101,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
         this.gitCommitEntityService = this.entityServiceFactory.create(
           githubCommitSchemaKey,
           entityFactory(githubCommitSchemaKey),
-          commitId,
+          commitEntityKey,
           new FetchCommit(commitId, projectName),
           false
         );
