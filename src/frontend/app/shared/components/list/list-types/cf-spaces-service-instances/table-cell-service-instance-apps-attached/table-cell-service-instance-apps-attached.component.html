@@ -1,5 +1,5 @@
 <div class="bound-apps" *ngFor="let app of boundApps">
-  <a [routerLink]="[app.url]">{{app.appName}}</a>
+  <a [routerLink]="[app.url]" [queryParams]="app.params">{{app.appName}}</a>
 </div>
 <div *ngIf="boundApps && boundApps.length===0">
   None
