@@ -49,7 +49,7 @@ export class SshApplicationComponent implements OnInit {
       {
         breadcrumbs: [
           { value: 'Applications', routerLink: '/applications' },
-          { value: application.name, routerLink: `/applications/${application.cfGuid}/${application.cfGuid}/instances` }
+          { value: application.name, routerLink: `/applications/${application.cfGuid}/${application.guid}/instances` }
         ]
       },
     ];

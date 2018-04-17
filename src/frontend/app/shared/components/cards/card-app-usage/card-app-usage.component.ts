@@ -22,7 +22,7 @@ export class CardAppUsageComponent implements OnInit {
   ngOnInit() {
     this.appData$ = Observable.combineLatest(
       this.appMonitor.appMonitor$.startWith(null),
-      this.appService.application$.map(data => data.app.entity.state === 'STARTED'),
+      this.appService.applicationRunning$,
     ).pipe(
       map(([monitor, isRunning]) => ({
         monitor: monitor,

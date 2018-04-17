@@ -12,7 +12,7 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 })
 export class CardAppUptimeComponent implements OnInit {
 
-  constructor(private appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
+  constructor(public appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
 
   appData$: Observable<{
     maxUptime: number,
@@ -20,7 +20,6 @@ export class CardAppUptimeComponent implements OnInit {
     averageUptime: number,
     runningCount: number
   }>;
-  isRunning$: Observable<boolean>;
 
   ngOnInit() {
     this.appData$ = this.appMonitor.appMonitor$.pipe(
@@ -36,9 +35,6 @@ export class CardAppUptimeComponent implements OnInit {
         averageUptime: 0,
         runningCount: 0
       })
-    );
-    this.isRunning$ = this.appService.application$.pipe(
-      map(app => app ? app.app.entity.state === 'STARTED' : false)
     );
   }
 }
