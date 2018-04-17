@@ -12,11 +12,12 @@ import (
 )
 
 var vcsGit = &vcsCmd{
-	name:        "Git",
-	cmd:         "git",
-	createCmd:   []string{"clone -b {branch} {repo} {dir}"},
-	checkoutCmd: []string{"checkout refs/remotes/origin/{branch}"},
-	headCmd:     []string{"rev-parse HEAD"},
+	name:             "Git",
+	cmd:              "git",
+	createCmd:        []string{"clone -b {branch} {repo} {dir}"},
+	resetToCommitCmd: []string{"reset --hard {commit}"},
+	checkoutCmd:      []string{"checkout refs/remotes/origin/{branch}"},
+	headCmd:          []string{"rev-parse HEAD"},
 }
 
 // Currently only git is supported
@@ -28,14 +29,24 @@ type vcsCmd struct {
 	name string
 	cmd  string // name of binary to invoke command
 
-	createCmd   []string // commands to download a fresh copy of a repository
-	checkoutCmd []string // commands to checkout a branch
-	headCmd     []string // get current head commit
+	createCmd        []string // commands to download a fresh copy of a repository
+	checkoutCmd      []string // commands to checkout a branch
+	headCmd          []string // get current head commit
+	resetToCommitCmd []string // reset branch to commit
 }
 
 func (vcs *vcsCmd) Create(dir string, repo string, branch string) error {
 	for _, cmd := range vcs.createCmd {
 		if err := vcs.run(".", cmd, "dir", dir, "repo", repo, "branch", branch); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (vcs *vcsCmd) ResetBranchToCommit(dir string, commit string) error {
+	for _, cmd := range vcs.resetToCommitCmd {
+		if err := vcs.run(dir, cmd, "commit", commit); err != nil {
 			return err
 		}
 	}
