@@ -32,10 +32,10 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store<AppState>,
-    public applicationService: ApplicationService,
+    public appService: ApplicationService,
     private renderer: Renderer,
     private confirmDialog: ConfirmationDialogService) {
-    this.status$ = this.applicationService.applicationState$.pipe(
+    this.status$ = this.appService.applicationState$.pipe(
       map(state => state.indicator)
     );
   }
@@ -52,14 +52,12 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   // Observable on the running instances count for the application
   private runningInstances$: Observable<number>;
 
-  private isRunning = false;
   private app: any;
 
   ngOnInit() {
-    this.sub = this.applicationService.application$.subscribe(app => {
+    this.sub = this.appService.application$.subscribe(app => {
       if (app.app.entity) {
         this.currentCount = app.app.entity.instances;
-        this.isRunning = app.app.entity.state === 'STARTED';
         this.app = app.app.entity;
       }
     });
@@ -94,7 +92,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   // Set instance count. Ask for confirmation if setting count to 0
   private setInstanceCount(value: number) {
-    const doUpdate = () => this.applicationService.updateApplication({ instances: value }, [AppMetadataTypes.STATS], this.app);
+    const doUpdate = () => this.appService.updateApplication({ instances: value }, [AppMetadataTypes.STATS], this.app);
     if (value === 0) {
       this.confirmDialog.open(appInstanceScaleToZeroConfirmation, doUpdate);
     } else {
