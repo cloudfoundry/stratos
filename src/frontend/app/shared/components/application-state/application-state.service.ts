@@ -156,14 +156,6 @@ export class ApplicationStateService {
         indicator: CardStatus.WARNING,
         actions: 'stop,restart,launch,cli'
       }
-    },
-    COMPLEX: {
-      SCALING: {
-        label: 'Deployed',
-        subLabel: 'Scaling',
-        indicator: CardStatus.OK,
-        actions: 'stop,restart,launch,cli'
-    }
     }
   };
 
@@ -261,22 +253,9 @@ export class ApplicationStateService {
     if (counts.starting > 0 && counts.running > 0 && counts.okay === counts.expected) {
       return pkgState + '(N,0,0,N)';
     } else if (counts.starting > 0 && counts.okay === counts.expected) {
-      return '(0,0,0,N)';
+      return pkgState + '(0,0,0,N)';
     } else if (counts.starting > 0 && counts.running > 0 && counts.crashed > 0) {
       return 'CRASHING';
-    }
-    return undefined;
-  }
-
-  /**
-   * Special case a few complex use cases that don't fid the state machine
-   */
-  checkComplexCase(appState, pkgState, counts): ApplicationStateData {
-    if (pkgState === 'STAGED' && appState === 'STARTED') {
-      // Check for scaling use case - all instances are either Starting or Running
-      if (counts.starting > 0 && counts.running > 0 && counts.expected === (counts.running + counts.starting)) {
-        return this.stateMetadata.COMPLEX.SCALING;
-      }
     }
     return undefined;
   }
