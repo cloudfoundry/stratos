@@ -70,6 +70,7 @@ import {
 import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-foundry-stacks.component';
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
+import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 
 @NgModule({
   imports: [CoreModule, SharedModule, CloudFoundryRoutingModule, RouterModule, NgxChartsModule],
@@ -103,7 +104,8 @@ import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-fou
     CreateSpaceStepComponent,
     CreateOrganizationStepComponent,
     EditOrganizationComponent,
-    EditOrganizationStepComponent
+    EditOrganizationStepComponent,
+    CliInfoCloudFoundryComponent
   ],
   providers: [
     CFEndpointsListConfigService,

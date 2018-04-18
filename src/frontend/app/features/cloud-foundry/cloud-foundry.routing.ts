@@ -53,6 +53,7 @@ import { CloudFoundryStacksComponent } from './tabs/cloud-foundry-stacks/cloud-f
 import { CloudFoundrySummaryTabComponent } from './tabs/cloud-foundry-summary-tab/cloud-foundry-summary-tab.component';
 import { CloudFoundryUsersComponent } from './tabs/cloud-foundry-users/cloud-foundry-users.component';
 import { EditOrganizationComponent } from './edit-organization/edit-organization.component';
+import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-cloud-foundry.component';
 
 const cloudFoundry: Routes = [{
   path: '',
@@ -84,6 +85,20 @@ const cloudFoundry: Routes = [{
       {
         path: 'organizations/:orgId/spaces/:spaceId/edit-space',
         component: EditSpaceComponent
+      },
+      {
+        path: 'cli',
+        component: CliInfoCloudFoundryComponent,
+      },
+      {
+        path: 'organizations/:orgId/cli',
+        component: CliInfoCloudFoundryComponent,
+        pathMatch: 'full'
+      },
+      {
+        path: 'organizations/:orgId/spaces/:spaceId/cli',
+        component: CliInfoCloudFoundryComponent,
+        pathMatch: 'full'
       },
       {
         path: '',

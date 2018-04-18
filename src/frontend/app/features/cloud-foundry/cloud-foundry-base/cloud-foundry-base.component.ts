@@ -17,7 +17,7 @@ function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CfUserService,
-    CloudFoundryEndpointService
+    CloudFoundryEndpointService,
   ]
 })
 export class CloudFoundryBaseComponent implements OnInit {
