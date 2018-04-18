@@ -1,17 +1,17 @@
-<div *ngIf="endpointErrors$ | async as cfIds" class="header-event--error">
+<div *ngIf="errorMessage$ | async as message" class="header-event--error">
   <div [@eventEnter] class="header-event__outer">
     <span class="header-event">
       <mat-icon>error</mat-icon>
       <!-- <ng-container [ngTemplateOutlet]="eventIcon" [ngTemplateOutletContext]="{eventServerity: eventServerity}"></ng-container> -->
-      <div class="header-event__message-wrapper">We've been encountering errors for this Cloud Foundry</div>
+      <div class="header-event__message-wrapper">{{ message }}</div>
     </span>
   </div>
 </div>
 
-<ng-template #eventIcon let-serverity="serverity" let-serverities="eventServerity">
+<!-- <ng-template #eventIcon let-serverity="serverity" let-serverities="eventServerity">
   <ng-container [ngSwitch]="serverity">
     <mat-icon *ngSwitchCase="serverities.ERROR">error</mat-icon>
     <mat-icon *ngSwitchCase="serverities.WARNING">warning</mat-icon>
     <mat-icon *ngSwitchDefault>info</mat-icon>
   </ng-container>
-</ng-template>
+</ng-template> -->

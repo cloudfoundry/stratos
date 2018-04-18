@@ -8,7 +8,7 @@ import {
   GLOBAL_EVENT,
   InternalEventTypeState,
   InternalEventSubjectStatus,
-  InternalEventServerity,
+  InternalEventSeverity,
   CLEAR_EVENTS,
   InternalEventState
 } from '../types/internal-events.types';

@@ -1,18 +1,12 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
-import { filter, map, distinctUntilChanged, debounceTime } from 'rxjs/operators';
+import { withLatestFrom, map, filter } from 'rxjs/operators';
 
-import { AppState } from '../../../../store/app-state';
 import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
-import { internalEventTypeSelector } from '../../../../store/selectors/internal-events.selectors';
-import { InternalEventServerity, InternalEventSubjectState } from '../../../../store/types/internal-events.types';
-
-import * as moment from 'moment';
+import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
+import { InternalEventMonitorFactory } from '../../../monitors/internal-event-monitor.factory';
 
 @Component({
   selector: 'app-page-header-events',
@@ -34,48 +28,16 @@ import * as moment from 'moment';
   ]
 })
 export class PageHeaderEventsComponent implements OnInit {
-  @Input('endpointIds')
-  public endpointIds: string[] = [];
+  @Input('endpointIds$')
+  public endpointIds$: Observable<string[]>;
 
-  public endpointErrors$: Observable<string[]>;
+  public errorMessage$: Observable<string>;
 
-  constructor(private store: Store<AppState>, private activatedRoute: ActivatedRoute) {
-    if (!this.endpointIds.length && activatedRoute.snapshot.params.cfId) {
-      this.endpointIds.push(activatedRoute.snapshot.params.cfId);
-    }
-    const endpointEvents$ = this.store.select(internalEventTypeSelector(endpointSchemaKey)).pipe(
-      debounceTime(250),
-      distinctUntilChanged(),
-      map(allEvents => {
-        console.log('event.timestamp');
-        const events = {} as InternalEventSubjectState;
-        this.endpointIds.forEach(id => {
-          if (allEvents[id]) {
-            events[id] = allEvents[id];
-          }
-        });
-        return events;
-      })
-    );
-    const interval$ = new IntervalObservable(30000).startWith(-1);
-    this.endpointErrors$ = combineLatest(endpointEvents$, interval$).pipe(
-      filter(([state]) => !!Object.keys(state).length),
-      map(([state]) => {
-        const time = moment().subtract(5, 'hours').unix() * 1000;
-        return Object.keys(state).reduce<string[]>((array, key) => {
-          const events = state[key];
-          const hasErrorEvent = !!events.find(event => {
-            return event.serverity === InternalEventServerity.ERROR && event.timestamp > time;
-          });
-          if (hasErrorEvent) {
-            array.push(key);
-          }
-          return array;
-        }, []);
-      }),
-      filter(events => !!events.length)
-    );
-  }
+  constructor(
+    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    public cloudFoundryService: CloudFoundryService,
+    private activatedRoute: ActivatedRoute
+  ) { }
 
   private searchEventsForErrors(events) {
     const index = Math.round(events.length / 2);
@@ -84,5 +46,23 @@ export class PageHeaderEventsComponent implements OnInit {
     const event = events[index];
   }
   ngOnInit() {
+    if (!this.endpointIds$ && this.activatedRoute.snapshot.params.cfId) {
+      this.endpointIds$ = Observable.of([this.activatedRoute.snapshot.params.cfId])
+    }
+    if (this.endpointIds$) {
+      const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
+      this.errorMessage$ = cfEndpointEventMonitor.hasErroredOverTime().pipe(
+        filter(errors => errors && !!Object.keys(errors)),
+        withLatestFrom(this.cloudFoundryService.cFEndpoints$),
+        map(([errors, endpoints]) => {
+          const endpointString = errors.map(
+            id => endpoints.find(endpoint => endpoint.guid === id)
+          )
+            .map(endpoint => endpoint.name)
+            .join(' & ');
+          return `We've encountered errors with ${endpointString}`;
+        })
+      );
+    }
   }
 }

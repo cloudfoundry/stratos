@@ -12,7 +12,7 @@ import { IHeaderBreadcrumb, IHeaderBreadcrumbLink, BREADCRUMB_URL_PARAM, PageHea
 import { ActivatedRoute } from '@angular/router';
 import { internalEventTimeStampSelector } from '../../../store/selectors/internal-events.selectors';
 import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
-import { InternalEventSubjectState, InternalEventServerity } from '../../../store/types/internal-events.types';
+import { InternalEventSubjectState, InternalEventSeverity } from '../../../store/types/internal-events.types';
 import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
 import { trigger, transition, style, animate } from '@angular/animations';
 
@@ -24,7 +24,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 export class PageHeaderComponent {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
-  public eventServerity = InternalEventServerity;
+  public eventSeverity = InternalEventSeverity;
 
   @Input('hideSideNavButton') hideSideNavButton = false;
 

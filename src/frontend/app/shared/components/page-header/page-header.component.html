@@ -32,6 +32,5 @@
   </app-page-subheader>
   <div *ngIf="showUnderFlow" class="page-header__underflow">
   </div>
-  <app-page-header-events *ngIf="endpointIds$" class="header-events" [endpointIds]="endpointIds$ | async"></app-page-header-events>
-  <app-page-header-events *ngIf="!endpointIds$" class="header-events"></app-page-header-events>
+  <app-page-header-events class="header-events" [endpointIds$]="endpointIds$"></app-page-header-events>
 </div>

@@ -27,7 +27,7 @@ import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers
 import { listEntityRelations } from '../helpers/entity-relations';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { SendEventAction } from '../actions/internal-events.actions';
-import { InternalEventServerity, APIEventState } from '../types/internal-events.types';
+import { InternalEventSeverity, APIEventState } from '../types/internal-events.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
 
@@ -203,9 +203,10 @@ export class APIEffect {
     erroChecks.forEach(check => {
       const event = {
         eventCode: check.errorCode,
-        serverity: check.error ?
-          InternalEventServerity.ERROR :
-          InternalEventServerity.SYSTEM,
+        severity: InternalEventSeverity.ERROR,
+        // severity: check.error ?
+        //   InternalEventSeverity.ERROR :
+        //   InternalEventSeverity.SYSTEM,
         message: check.error ? 'API request error' : 'API request success',
         metadata: {
           url: check.url

@@ -1,24 +1,27 @@
-import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
-import { debounceTime, distinctUntilChanged, filter, map, catchError } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
 
-import { AppState } from '../../store/app-state';
-import { internalEventTypeSelector } from '../../store/selectors/internal-events.selectors';
-import { InternalEventServerity, InternalEventSubjectState } from '../../store/types/internal-events.types';
+import { InternalEventSeverity, InternalEventSubjectState } from '../../store/types/internal-events.types';
 
 export class InternalEventMonitor {
 
   public events$: Observable<InternalEventSubjectState>;
 
-  constructor(store: Store<AppState>, eventType: string, subjectIds: string[] | Observable<string[]> = Observable.of(null)) {
+  constructor(
+    events$: Observable<InternalEventSubjectState>,
+    eventType: string,
+    subjectIds: string[] | Observable<string[]> = Observable.of(null)
+  ) {
     if (Array.isArray(subjectIds)) {
       subjectIds = Observable.of(subjectIds);
     }
     this.events$ = combineLatest(
-      store.select(internalEventTypeSelector(eventType)).pipe(distinctUntilChanged(), debounceTime(250)).startWith({}),
+      events$.pipe(
+        map(events => events.types[eventType] || {})
+      ),
       subjectIds
     ).pipe(
       map(([allEvents, ids]) => {
@@ -32,9 +35,7 @@ export class InternalEventMonitor {
           }
         });
         return events;
-      }),
-      sharedReplay(1),
-      refCount()
+      })
     );
   }
 
@@ -47,7 +48,7 @@ export class InternalEventMonitor {
         return Object.keys(state).reduce<string[]>((array, key) => {
           const events = state[key];
           const hasErrorEvent = !!events.find(event => {
-            return event.serverity === InternalEventServerity.ERROR && event.timestamp > time;
+            return event.severity === InternalEventSeverity.ERROR && event.timestamp > time;
           });
           if (hasErrorEvent) {
             array.push(key);
@@ -55,7 +56,8 @@ export class InternalEventMonitor {
           return array;
         }, []);
       }),
-      filter(events => !!events.length);
+      filter(events => !!events.length)
+    );
   }
 
 }

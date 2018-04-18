@@ -92,6 +92,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 
 @NgModule({
   imports: [
@@ -246,7 +247,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     ConfirmationDialogService,
     EntityMonitorFactory,
     PaginationMonitorFactory,
-    CloudFoundryService
+    CloudFoundryService,
+    InternalEventMonitorFactory
   ]
 })
 export class SharedModule { }
