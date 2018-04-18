@@ -2,7 +2,7 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
-import { filter, map } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, tap, startWith } from 'rxjs/operators';
 
 import { InternalEventSeverity, InternalEventSubjectState } from '../../store/types/internal-events.types';
 
@@ -15,12 +15,14 @@ export class InternalEventMonitor {
     eventType: string,
     subjectIds: string[] | Observable<string[]> = Observable.of(null)
   ) {
+    const empty = {};
     if (Array.isArray(subjectIds)) {
       subjectIds = Observable.of(subjectIds);
     }
     this.events$ = combineLatest(
       events$.pipe(
-        map(events => events.types[eventType] || {})
+        map(events => events.types[eventType] || {}),
+        distinctUntilChanged()
       ),
       subjectIds
     ).pipe(
@@ -40,9 +42,10 @@ export class InternalEventMonitor {
   }
 
   public hasErroredOverTime(minutes = 5) {
-    const interval$ = new IntervalObservable(30000).startWith(-1);
+    const interval$ = new IntervalObservable(30000).pipe(
+      startWith(-1)
+    );
     return combineLatest(this.events$, interval$).pipe(
-      filter(([state]) => !!Object.keys(state).length),
       map(([state]) => {
         const time = moment().subtract(minutes, 'minutes').unix() * 1000;
         return Object.keys(state).reduce<string[]>((array, key) => {
@@ -55,8 +58,7 @@ export class InternalEventMonitor {
           }
           return array;
         }, []);
-      }),
-      filter(events => !!events.length)
+      })
     );
   }
 

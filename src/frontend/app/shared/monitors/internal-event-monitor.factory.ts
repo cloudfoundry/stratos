@@ -16,14 +16,12 @@ export class InternalEventMonitorFactory {
 
     this.events$ = store.select(internalEventStateSelector).pipe(
       distinctUntilChanged(),
-      debounceTime(250),
       publishReplay(1),
       refCount(),
-      tap(console.log)
     );
   }
 
-  getMonitor(eventType: string, subjectIds: string[] | Observable<string[]>) {
+  getMonitor(eventType: string, subjectIds?: string[] | Observable<string[]>) {
     return new InternalEventMonitor(this.events$, eventType, subjectIds);
   }
 

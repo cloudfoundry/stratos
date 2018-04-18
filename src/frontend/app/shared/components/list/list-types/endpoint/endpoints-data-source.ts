@@ -10,6 +10,8 @@ import { DataFunctionDefinition, ListDataSource } from '../../data-sources-contr
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from './endpoint-data-source.helpers';
 import { GetSystemInfo } from '../../../../../store/actions/system.actions';
+import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
+import { tap, pairwise } from 'rxjs/operators';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {
@@ -19,7 +21,8 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
     store: Store<AppState>,
     listConfig: IListConfig<EndpointModel>,
     paginationMonitorFactory: PaginationMonitorFactory,
-    entityMonitorFactory: EntityMonitorFactory
+    entityMonitorFactory: EntityMonitorFactory,
+    internalEventMonitorFactory: InternalEventMonitorFactory
   ) {
     const action = new GetAllEndpoints();
     const rowStateHelper = new ListRowSateHelper();
@@ -28,12 +31,31 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       entityMonitorFactory,
       GetAllEndpoints.storeKey
     );
+    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
+    const eventSub = eventMonitor.hasErroredOverTime().pipe(
+      tap(errored => errored.forEach(id => rowStateManager.updateRowState(id, {
+        error: true,
+        message: `We've been having trouble communicating with this endpoint`
+      }))),
+      pairwise(),
+      tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
+        if (!newErrored.find(newId => newId === oldId)) {
+          rowStateManager.updateRowState(oldId, {
+            error: false,
+            message: ''
+          });
+        }
+      })),
+    ).subscribe();
     const config = EndpointsDataSource.getEndpointConfig(
       store,
       action,
       listConfig,
       rowStateManager.observable,
-      () => sub.unsubscribe(),
+      () => {
+        eventSub.unsubscribe();
+        sub.unsubscribe();
+      },
       () => this.store.dispatch(new GetSystemInfo())
     );
     super(config);

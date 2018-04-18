@@ -199,24 +199,22 @@ export class APIEffect {
       });
   }
 
-  handleApiEvents(erroChecks: APIErrorCheck[]) {
-    erroChecks.forEach(check => {
-      const event = {
-        eventCode: check.errorCode,
-        severity: InternalEventSeverity.ERROR,
-        // severity: check.error ?
-        //   InternalEventSeverity.ERROR :
-        //   InternalEventSeverity.SYSTEM,
-        message: check.error ? 'API request error' : 'API request success',
-        metadata: {
-          url: check.url
-        }
-      } as APIEventState;
+  handleApiEvents(errorChecks: APIErrorCheck[]) {
+    errorChecks.forEach(check => {
       this.store.dispatch(
         new SendEventAction(
           endpointSchemaKey,
           check.guid,
-          event
+          {
+            eventCode: check.errorCode,
+            severity: check.error ?
+              InternalEventSeverity.ERROR :
+              InternalEventSeverity.SYSTEM,
+            message: check.error ? 'API request error' : 'API request success',
+            metadata: {
+              url: check.url
+            }
+          }
         ));
     });
   }

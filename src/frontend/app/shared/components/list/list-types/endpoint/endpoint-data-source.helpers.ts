@@ -3,11 +3,12 @@ import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factor
 import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { PaginationMonitor } from '../../../../monitors/pagination-monitor';
-import { map, tap, mergeMap } from 'rxjs/operators';
+import { map, tap, mergeMap, switchMap } from 'rxjs/operators';
 import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { entityFactory } from '../../../../../store/helpers/entity-factory';
 import { endpointSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 export class ListRowSateHelper {
   public getRowStateManager(
@@ -38,21 +39,27 @@ export class ListRowSateHelper {
     rowStateManager: TableRowStateManager
   ) {
     return paginationMonitor.currentPage$.pipe(
-      map(endpoints => endpoints
+      distinctUntilChanged(),
+      switchMap(endpoints => endpoints
         .map(endpoint => {
           const entityMonitor = entityMonitorFactory
             .create(endpoint.guid, endpointSchemaKey, entityFactory(endpointSchemaKey));
           const request$ = entityMonitor.entityRequest$.pipe(
-            tap(request => {
+            map(request => {
               const disconnect = request.updating[EndpointsEffect.disconnectingKey] || { busy: false };
               const unregister = request.deleting || { busy: false };
               const busy = disconnect.busy || unregister.busy;
               const blocked = unregister.busy;
-              rowStateManager.setRowState(endpoint.guid, {
+              return {
                 blocked,
                 busy
-              });
-            })
+              };
+            }),
+            distinctUntilChanged((oldRowState, newRowState) => {
+              return oldRowState.blocked === newRowState.blocked &&
+                oldRowState.busy === newRowState.busy;
+            }),
+            tap(rowState => rowStateManager.updateRowState(endpoint.guid, rowState))
           );
           return request$;
         })
