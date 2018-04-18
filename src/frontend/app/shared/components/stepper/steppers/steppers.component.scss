@@ -11,6 +11,7 @@
   }
   &__headers {
     display: flex;
+    flex: 0 0 72px;
     height: 72px;
   }
   &__header {
@@ -58,18 +59,21 @@
   }
   &__contents {
     display: flex;
-    height: 100%;
-    margin: 24px 48px;
+    flex: 1;
+    height: 0;
+    margin: 12px 36px;
+    min-height: 160px;
+    overflow-y: auto;
   }
   &__wrapper {
     display: flex;
     min-height: 100%;
   }
   &__navigation {
+    align-items: flex-end;
     display: flex;
-    flex: none;
+    flex: 0 0 60px;
     justify-content: space-between;
-    margin-top: 50px;
   }
   &__navigation-right {
     flex: 1;
