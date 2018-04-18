@@ -50,8 +50,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   // Validation poller
   validSub: Subscription;
-  // Use a bool instead of obs. To create the obs we isRedeploy, which is  not available until too late
-  valid = false;
+  valid$ = new BehaviorSubject<boolean>(false);
 
   error$ = new BehaviorSubject<boolean>(false);
   // Observable for when the deploy modal can be closed
@@ -67,10 +66,9 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     private http: HttpClient,
   ) {
     this.closeable$ = Observable.combineLatest(
-      // this.validate,
+      this.valid$,
       this.error$).pipe(
-        map(([errored]) => {
-          const validated = this.valid;
+        map(([validated, errored]) => {
           return validated || errored;
         })
       );
@@ -189,8 +187,12 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
         this.deploying = true;
-        // Set this up here to avoid any fun with redeploy case
-        this.validSub = this.createValidationPoller().subscribe(valid => this.valid = valid);
+        // Set this up here to avoid any fun with redeploy case and the deploying flag
+        this.validSub = this.createValidationPoller().pipe(
+          takeWhile(valid => !valid)
+        ).subscribe(null, null, () => {
+          this.valid$.next(true);
+        });
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
@@ -266,7 +268,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   private handleRedeployValidation(): Observable<boolean> {
-    return interval(1).pipe(
+    return interval(500).pipe(
       map(() => {
         if (this.deploying) {
           return false;
@@ -277,7 +279,6 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
           return true;
         }
       }),
-      takeWhile(() => !this.valid),
     );
   }
 
@@ -300,11 +301,9 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
                   this.appGuid = apps.resources[0].metadata.guid;
                   // New app - so refresh the application wall data
                   this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-                  console.log('handleDeployValidation valid:', true);
                   return true;
                 }
               }
-              console.log('handleDeployValidation valid:', false);
               return false;
             }),
             catchError(err => [
