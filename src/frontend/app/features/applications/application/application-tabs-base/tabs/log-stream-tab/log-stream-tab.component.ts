@@ -10,6 +10,7 @@ import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
+import { catchError, share, filter, take, tap } from 'rxjs/operators';
 
 export interface LogItem {
   message: string;
@@ -53,14 +54,16 @@ export class LogStreamTabComponent implements OnInit {
         }/apps/${this.applicationService.appGuid}/stream`;
 
       const { messages, connectionStatus } = websocketConnect(streamUrl, new QueueingSubject<string>());
-      messages.catch(e => {
-        this.logService.error(
-          'Error while connecting to socket: ' + JSON.stringify(e)
-        );
-        return [];
-      })
-        .share()
-        .filter(data => !!data && data.length);
+      messages.pipe(
+        catchError(e => {
+          this.logService.error(
+            'Error while connecting to socket: ' + JSON.stringify(e)
+          );
+          return [];
+        }),
+        share(),
+        filter(data => !!data && data.length)
+      );
 
       this.messages = messages;
       this.connectionStatus = connectionStatus;
