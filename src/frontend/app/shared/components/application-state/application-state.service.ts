@@ -229,7 +229,7 @@ export class ApplicationStateService {
           // Do the best we can if we do not have app instance metadata
           if (appInstances) {
             const counts = this.getCounts(summary, appInstances);
-            let scExtState = this.checkSpecialCases(pkgState, counts);
+            const scExtState = this.checkSpecialCases(pkgState, counts);
             if (scExtState) {
               extState = scExtState;
             } else {
@@ -278,7 +278,7 @@ export class ApplicationStateService {
         return this.stateMetadata.COMPLEX.SCALING;
       }
     }
-    return undefined
+    return undefined;
   }
 
   /**

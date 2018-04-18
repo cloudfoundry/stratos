@@ -236,12 +236,12 @@ describe('ApplicationStateService', () => {
     });
 
     it('Borked, one crashed, one running, one stating', function () {
-      let testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'CRASHED', 'STARTING']);
-      let res = cfAppStateService.get(testData.summary, testData.instances);
+      const testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'CRASHED', 'STARTING']);
+      const res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('error');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Crashing');
-    });    
+    });
 
     it('Started, but no stats available', function () {
       const testData = makeTestData('STARTED', 'STAGED');
