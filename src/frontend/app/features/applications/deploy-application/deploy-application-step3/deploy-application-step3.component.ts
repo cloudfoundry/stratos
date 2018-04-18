@@ -273,7 +273,6 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         if (this.deploying) {
           return false;
         } else {
-          // this.store.dispatch(createGetApplicationAction(this.appGuid, this.cfGuid));
           this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
           this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.cfGuid));
           return true;

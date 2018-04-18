@@ -19,6 +19,7 @@ import { GithubCommit } from '../../../../../store/types/github.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
+import { TableCellCommitParentsComponent } from './table-cell-commit-parents/table-cell-commit-parents.component';
 
 @Injectable()
 export class GithubCommitsListConfigService implements IListConfig<APIResource<GithubCommit>> {
@@ -41,7 +42,8 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
         orderKey: 'message',
         field: 'entity.commit.message'
       },
-      cellFlex: '2'
+      cellFlex: '2',
+      class: 'app-table__cell--table-column-clip'
     },
     {
       columnId: 'sha',
@@ -59,17 +61,10 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
       cellFlex: '1'
     },
     {
-      columnId: 'date',
-      headerCell: () => 'Date',
-      cellDefinition: {
-        getValue: (commit) => this.datePipe.transform(commit.entity.commit.author.date, 'medium')
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'date',
-        field: 'entity.commit.author.date'
-      },
-      cellFlex: '2'
+      columnId: 'parentShas',
+      headerCell: () => 'Parent Commits',
+      cellComponent: TableCellCommitParentsComponent,
+      cellFlex: '1',
     },
     {
       columnId: 'author',
@@ -85,7 +80,20 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
         field: 'entity.commit.author.name'
       },
       cellFlex: '2'
-    }
+    },
+    {
+      columnId: 'date',
+      headerCell: () => 'Date',
+      cellDefinition: {
+        getValue: (commit) => this.datePipe.transform(commit.entity.commit.author.date, 'medium')
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'date',
+        field: 'entity.commit.author.date'
+      },
+      cellFlex: '2'
+    },
   ];
   private listActionRedeploy: IListAction<APIResource<GithubCommit>> = {
     action: (item) => {
