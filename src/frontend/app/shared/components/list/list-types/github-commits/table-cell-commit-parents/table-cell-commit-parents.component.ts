@@ -8,8 +8,4 @@ import { TableCellCustom } from '../../../list.types';
   styleUrls: ['./table-cell-commit-parents.component.scss']
 })
 export class TableCellCommitParentsComponent<T> extends TableCellCustom<T> {
-  @Input('row') row;
-  constructor() {
-    super();
-  }
 }

@@ -77,6 +77,7 @@ import { CfSpacePermissionCellComponent } from '../../list-types/cf-users/cf-spa
 import { TableCellCustom } from '../../list.types';
 import { TableCellEndpointNameComponent } from '../../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellCommitParentsComponent } from '../../list-types/github-commits/table-cell-commit-parents/table-cell-commit-parents.component';
+import { TableCellCommitAuthorComponent } from '../../list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
 
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -107,7 +108,8 @@ export const listTableCells = [
   TableCellCfUserPermissionComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
-  TableCellCommitParentsComponent
+  TableCellCommitParentsComponent,
+  TableCellCommitAuthorComponent
 ];
 
 @Component({

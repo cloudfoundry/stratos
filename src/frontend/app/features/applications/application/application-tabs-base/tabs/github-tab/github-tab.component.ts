@@ -35,6 +35,8 @@ import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.t
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 
+
+
 @Component({
   selector: 'app-github-tab',
   templateUrl: './github-tab.component.html',
@@ -54,8 +56,6 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
   ]
 })
 export class GithubTabComponent implements OnInit, OnDestroy {
-
-
 
   gitBranchEntityService: EntityService;
   gitCommitEntityService: EntityService;
@@ -82,7 +82,6 @@ export class GithubTabComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    // const githubListConfig = this.listConfig as GithubCommitsListConfigService;
     this.stratosProject$ = this.applicationService.applicationStratProject$.pipe(
       take(1),
       tap((stProject: EnvVarStratosProject) => {
