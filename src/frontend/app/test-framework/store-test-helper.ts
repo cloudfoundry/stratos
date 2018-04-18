@@ -570,7 +570,8 @@ const testInitialStoreState: AppState = {
   },
   dashboard: {
     sidenavOpen: true,
-    sideNavMode: 'side'
+    sideNavMode: 'side',
+    headerEventMinimized: false
   },
   createApplication: {
     cloudFoundryDetails: null,

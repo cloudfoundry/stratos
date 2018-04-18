@@ -8,6 +8,8 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { APIResource } from '../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
+import { map } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-service-catalog-page',
@@ -21,11 +23,14 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers
     }
   ]
 })
-export class ServiceCatalogPageComponent implements OnInit {
+export class ServiceCatalogPageComponent {
+
+  public cfIds$: Observable<string[]>;
 
   constructor(private listConfig: ListConfig<APIResource>, public cloudFoundryService: CloudFoundryService) {
     const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
-  }
-  ngOnInit() {
+    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
+      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+    );
   }
 }
