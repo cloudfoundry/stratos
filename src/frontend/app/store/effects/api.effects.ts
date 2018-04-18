@@ -201,21 +201,21 @@ export class APIEffect {
 
   handleApiEvents(errorChecks: APIErrorCheck[]) {
     errorChecks.forEach(check => {
-      this.store.dispatch(
-        new SendEventAction(
-          endpointSchemaKey,
-          check.guid,
-          {
-            eventCode: check.errorCode,
-            severity: check.error ?
-              InternalEventSeverity.ERROR :
-              InternalEventSeverity.SYSTEM,
-            message: check.error ? 'API request error' : 'API request success',
-            metadata: {
-              url: check.url
+      if (check.error) {
+        this.store.dispatch(
+          new SendEventAction(
+            endpointSchemaKey,
+            check.guid,
+            {
+              eventCode: check.errorCode,
+              severity: InternalEventSeverity.ERROR,
+              message: 'API request error',
+              metadata: {
+                url: check.url
+              }
             }
-          }
-        ));
+          ));
+      }
     });
   }
 
