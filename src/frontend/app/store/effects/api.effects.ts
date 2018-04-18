@@ -164,26 +164,6 @@ export class APIEffect {
     return result;
   }
 
-  // getErrors(resData): APIErrorCheck[] {
-  //   return Object.keys(resData)
-  //     .filter(guid => resData[guid] !== null)
-  //     .map(cfGuid => {
-  //       // Return list of guid+error objects for those endpoints with errors
-  //       const endpoints = resData[cfGuid];
-  //       // return endpoints.error ? {
-  //       //   error: endpoints.error,
-  //       //   errorCode: 500,
-  //       //   guid: cfGuid
-  //       // } : null;
-  //       return {
-  //         error: !!,
-  //         errorCode: '500',
-  //         guid: cfGuid
-  //       };
-  //     })
-  //     .filter(endpointErrors => !!endpointErrors);
-  // }
-
   checkForErrors(resData, action: ICFAction): APIErrorCheck[] {
     return Object.keys(resData)
       .filter(guid => resData[guid] !== null)
