@@ -35,8 +35,6 @@ import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.t
 import { ApplicationService } from '../../../../application.service';
 import { EnvVarStratosProject } from '../build-tab/application-env-vars.service';
 
-
-
 @Component({
   selector: 'app-github-tab',
   templateUrl: './github-tab.component.html',

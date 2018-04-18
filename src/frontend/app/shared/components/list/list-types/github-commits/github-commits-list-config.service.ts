@@ -11,6 +11,7 @@ import {
   SetDeployBranch,
   SetDeployCommit,
   StoreCFSettings,
+  FetchBranchesForProject,
 } from '../../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -20,6 +21,9 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { TableCellCommitParentsComponent } from './table-cell-commit-parents/table-cell-commit-parents.component';
+import { githubBranchesSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
 
 @Injectable()
 export class GithubCommitsListConfigService implements IListConfig<APIResource<GithubCommit>> {
@@ -69,11 +73,7 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
     {
       columnId: 'author',
       headerCell: () => 'Author',
-      cellDefinition: {
-        externalLink: true,
-        getLink: (commit) => commit.entity.author.html_url,
-        getValue: (commit) => commit.entity.commit.author.name
-      },
+      cellComponent: TableCellCommitAuthorComponent,
       sort: {
         type: 'sort',
         orderKey: 'author',
@@ -142,15 +142,14 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
   private spaceGuid: string;
   private appGuid: string;
 
+  private initialised = new BehaviorSubject<boolean>(false);
+
   constructor(
     private store: Store<AppState>,
     private datePipe: DatePipe,
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory
   ) {
-    this.projectName = 'richard-cox/node-env';
-    this.branchName = 'master';
-
     this.applicationService.waitForAppEntity$.pipe(
       combineLatest(this.applicationService.appSpace$),
       first(),
@@ -161,29 +160,27 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
       this.appGuid = app.entity.metadata.guid;
     });
 
-    // TODO: RC This will not work. The creation of the datasource must occur synchronously in the ctor. These values need to be passed
-    // in... however this instance is created via a provider... which doesn't support async loading
-    // this.applicationService.applicationStratProject$.pipe(
-    //   first(),
-    // ).subscribe(stratosProject => {
-    //   this.projectName = stratosProject.deploySource.project;
+    this.applicationService.applicationStratProject$.pipe(
+      first(),
+    ).subscribe(stratosProject => {
+      this.projectName = stratosProject.deploySource.project;
 
-    //   const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
-    //   const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
-    //     githubBranchesSchemaKey,
-    //     entityFactory(githubBranchesSchemaKey),
-    //     branchKey,
-    //     new FetchBranchesForProject(this.projectName),
-    //     false
-    //   );
-    //   gitBranchEntityService.entityObs$.pipe(
-    //     first(),
-    //   ).subscribe(branch => {
-    //     this.branchName = branch.entity.entity.name;
-    //     this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
-    //   });
-    // });
-    this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
+      const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
+      const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
+        githubBranchesSchemaKey,
+        entityFactory(githubBranchesSchemaKey),
+        branchKey,
+        new FetchBranchesForProject(this.projectName),
+        false
+      );
+      gitBranchEntityService.entityObs$.pipe(
+        first(),
+      ).subscribe(branch => {
+        this.branchName = branch.entity.entity.name;
+        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
+        this.initialised.next(true);
+      });
+    });
   }
 
   public getColumns = () => this.columns;
@@ -192,4 +189,5 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
   public getSingleActions = () => [this.listActionRedeploy];
   public getMultiFiltersConfigs = () => [];
   public getDataSource = () => this.dataSource;
+  public getInitialised = () => this.initialised;
 }

@@ -19,6 +19,7 @@ describe('TableCellCommitParentsComponent', () => {
     fixture = TestBed.createComponent(TableCellCommitParentsComponent);
     component = fixture.componentInstance;
     component.row = {
+      entity: {}
     };
     fixture.detectChanges();
   });
