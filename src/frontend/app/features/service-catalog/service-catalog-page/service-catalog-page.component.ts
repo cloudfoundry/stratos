@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
 
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
@@ -8,8 +10,6 @@ import { ListConfig } from '../../../shared/components/list/list.component.types
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { APIResource } from '../../../store/types/api.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-service-catalog-page',
