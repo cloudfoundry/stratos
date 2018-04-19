@@ -498,7 +498,15 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 	return deps
 
 }
-func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (coreconfig.Repository, error) {
+func (cfAppPush *CFAppPush) getConfigData(
+	echoContext echo.Context,
+	cnsiGuid string,
+	orgGuid string,
+	spaceGuid string,
+	spaceName string,
+	orgName string,
+	clientWebSocket *websocket.Conn,
+) (coreconfig.Repository, error) {
 
 	var configRepo coreconfig.Repository
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGuid)
