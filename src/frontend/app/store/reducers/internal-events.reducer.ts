@@ -1,18 +1,14 @@
-import { applicationSchemaKey, endpointSchemaKey } from './../helpers/entity-factory';
-import { AppState } from '../app-state';
 import { Action } from '@ngrx/store';
-import { LoggerAction, LoggerDebugAction } from '../actions/log.actions';
+
+import { SendClearEventAction, SendEventAction } from '../actions/internal-events.actions';
 import {
-  SEND_EVENT,
-  InternalEventsState,
-  GLOBAL_EVENT,
-  InternalEventTypeState,
-  InternalEventSubjectStatus,
-  InternalEventSeverity,
   CLEAR_EVENTS,
-  InternalEventState
+  GLOBAL_EVENT,
+  InternalEventsState,
+  InternalEventState,
+  SEND_EVENT,
 } from '../types/internal-events.types';
-import { SendEventAction, SendClearEventAction } from '../actions/internal-events.actions';
+import { endpointSchemaKey } from './../helpers/entity-factory';
 
 const defaultState: InternalEventsState = {
   types: {
@@ -32,24 +28,7 @@ export function internalEventReducer(state: InternalEventsState = defaultState, 
       ]);
     }
     case CLEAR_EVENTS: {
-      const clearAction = action as SendClearEventAction;
-      const { eventSubjectId, eventType, params } = clearAction;
-      const events = getEvents(state, eventSubjectId, eventType);
-      const filteredEvents = events.filter((event: InternalEventState) => {
-        if (params.timestamp) {
-          return params.timestamp < event.timestamp;
-        }
-        if (params.eventCode) {
-          return params.eventCode !== event.eventCode;
-        }
-        return true;
-      });
-      return setSubjectEvents(
-        state,
-        eventSubjectId,
-        eventType,
-        filteredEvents
-      );
+      return this.clearEvents(state, action);
     }
   }
   return state;
@@ -70,4 +49,24 @@ function setSubjectEvents(state: InternalEventsState, eventSubjectId: string, ev
   };
   newState.types = { ...newState.types, [eventType]: type };
   return newState;
+}
+
+function clearEvents(state: InternalEventsState, clearAction: SendClearEventAction) {
+  const { eventSubjectId, eventType, params } = clearAction;
+  const events = getEvents(state, eventSubjectId, eventType);
+  const filteredEvents = events.filter((event: InternalEventState) => {
+    if (params.timestamp) {
+      return params.timestamp < event.timestamp;
+    }
+    if (params.eventCode) {
+      return params.eventCode !== event.eventCode;
+    }
+    return true;
+  });
+  return setSubjectEvents(
+    state,
+    eventSubjectId,
+    eventType,
+    filteredEvents
+  );
 }

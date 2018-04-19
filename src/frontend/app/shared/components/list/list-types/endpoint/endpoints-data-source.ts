@@ -31,22 +31,7 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       entityMonitorFactory,
       GetAllEndpoints.storeKey
     );
-    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
-    const eventSub = eventMonitor.hasErroredOverTime().pipe(
-      tap(errored => errored.forEach(id => rowStateManager.updateRowState(id, {
-        error: true,
-        message: `We've been having trouble communicating with this endpoint`
-      }))),
-      pairwise(),
-      tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
-        if (!newErrored.find(newId => newId === oldId)) {
-          rowStateManager.updateRowState(oldId, {
-            error: false,
-            message: ''
-          });
-        }
-      })),
-    ).subscribe();
+    const eventSub = EndpointsDataSource.monitorEvents(internalEventMonitorFactory, rowStateManager);
     const config = EndpointsDataSource.getEndpointConfig(
       store,
       action,
@@ -90,5 +75,23 @@ export class EndpointsDataSource extends ListDataSource<EndpointModel> {
       destroy,
       refresh
     };
+  }
+  static monitorEvents(internalEventMonitorFactory: InternalEventMonitorFactory, rowStateManager: TableRowStateManager) {
+    const eventMonitor = internalEventMonitorFactory.getMonitor(endpointSchemaKey);
+    return eventMonitor.hasErroredOverTime().pipe(
+      tap(errored => errored.forEach(id => rowStateManager.updateRowState(id, {
+        error: true,
+        message: `We've been having trouble communicating with this endpoint`
+      }))),
+      pairwise(),
+      tap(([oldErrored, newErrored]) => oldErrored.forEach(oldId => {
+        if (!newErrored.find(newId => newId === oldId)) {
+          rowStateManager.updateRowState(oldId, {
+            error: false,
+            message: ''
+          });
+        }
+      })),
+    ).subscribe();
   }
 }
