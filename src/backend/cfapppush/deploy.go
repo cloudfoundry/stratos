@@ -146,6 +146,11 @@ type GitUrlSourceInfo struct {
 	CommitHash string `json:"commit"`
 }
 
+type CloneDetails struct {
+	Url    string
+	Branch string
+	Commit string
+}
 type FolderSourceInfo struct {
 	DeploySource
 	Files   int      `json:"files"`
@@ -402,8 +407,12 @@ func getGitHubSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 	info.Url = fmt.Sprintf("https://github.com/%s", info.Project)
 	log.Infof("GitHub Source: %s, branch %s, url: %s", info.Project, info.Branch, info.Url)
-
-	info.CommitHash, err = cloneRepository(info.Url, info.Branch, clientWebSocket, tempDir)
+	cloneDetails := CloneDetails{
+		Url:    info.Url,
+		Branch: info.Branch,
+		Commit: info.CommitHash,
+	}
+	info.CommitHash, err = cloneRepository(cloneDetails, clientWebSocket, tempDir)
 	if err != nil {
 		return "", tempDir, err
 	}
@@ -434,8 +443,12 @@ func getGitUrlSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	}
 
 	log.Infof("Git Url Source: %s, branch %s", info.Url, info.Branch)
-
-	info.CommitHash, err = cloneRepository(info.Url, info.Branch, clientWebSocket, tempDir)
+	cloneDetails := CloneDetails{
+		Url:    info.Url,
+		Branch: info.Branch,
+		Commit: info.CommitHash,
+	}
+	info.CommitHash, err = cloneRepository(cloneDetails, clientWebSocket, tempDir)
 	if err != nil {
 		return "", tempDir, err
 	}
@@ -593,22 +606,39 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid str
 	return repo, nil
 }
 
-func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
+func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempDir string) (string, error) {
 
-	if len(branch) == 0 {
+	if len(cloneDetails.Branch) == 0 {
 		err := errors.New("No branch supplied")
-		log.Infof("Failed to checkout repo %s due to %+v", branch, repoUrl, err)
+		log.Infof("Failed to checkout repo %s due to %+v", cloneDetails.Branch, cloneDetails.Url, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
 		return "", err
 	}
 
 	vcsGit := GetVCS()
 
-	err := vcsGit.Create(tempDir, repoUrl, branch)
+	err := vcsGit.Create(tempDir, cloneDetails.Url, cloneDetails.Branch)
 	if err != nil {
-		log.Infof("Failed to clone repo %s due to %+v", repoUrl, err)
+		log.Infof("Failed to clone repo %s due to %+v", cloneDetails.Url, err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 		return "", err
+	}
+
+	return getCommit(cloneDetails, clientWebSocket, tempDir, vcsGit)
+
+}
+
+func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempDir string, vcsGit *vcsCmd) (string, error) {
+
+	if cloneDetails.Commit != "" {
+		log.Infof("Checking out commit %s", cloneDetails.Commit)
+		err := vcsGit.ResetBranchToCommit(tempDir, cloneDetails.Commit)
+		if err != nil {
+			log.Infof("Failed to checkout commit %s", cloneDetails.Commit)
+			sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
+			return "", err
+		}
+		return cloneDetails.Commit, nil
 	}
 
 	head, err := vcsGit.Head(tempDir)
@@ -616,7 +646,6 @@ func cloneRepository(repoUrl string, branch string, clientWebSocket *websocket.C
 		log.Infof("Unable to fetch HEAD in branch due to %s", err)
 		return "", err
 	}
-
 	return strings.TrimSpace(head), nil
 
 }

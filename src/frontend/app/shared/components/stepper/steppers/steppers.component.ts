@@ -110,6 +110,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
         _step.active = i === index ? true : false;
       });
       this.currentIndex = index;
+      this.steps[this.currentIndex].onEnter();
     }
   }
 
@@ -141,6 +142,16 @@ export class SteppersComponent implements OnInit, AfterContentInit {
       !this.steps[index] ||
       !this.steps[index].valid ||
       this.steps[index].busy
+    ) {
+      return false;
+    }
+    return true;
+  }
+
+  canCancel(index) {
+    if (
+      !this.steps[index] ||
+      !this.steps[index].canClose
     ) {
       return false;
     }

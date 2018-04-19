@@ -149,6 +149,7 @@ export abstract class BaseSpaceAction extends CFStartAction implements ICFAction
   entity = [entityFactory(spaceSchemaKey)];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
+  removeEntityOnDelete?: boolean;
 }
 
 export class DeleteSpace extends BaseSpaceAction {
@@ -162,6 +163,7 @@ export class DeleteSpace extends BaseSpaceAction {
     this.options.params.append('async', 'false');
   }
   actions = [DELETE_SPACE, DELETE_SPACE_SUCCESS, DELETE_SPACE_FAILED];
+  removeEntityOnDelete = true;
 }
 
 export class CreateSpace extends BaseSpaceAction {

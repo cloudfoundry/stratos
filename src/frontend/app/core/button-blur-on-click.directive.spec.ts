@@ -13,7 +13,7 @@ class TestButtonComponent {
 class MockElementRef { }
 class MockRenderer { }
 
-fdescribe('ButtonBlurOnClickDirective', () => {
+describe('ButtonBlurOnClickDirective', () => {
 
   let component: TestButtonComponent;
   let fixture: ComponentFixture<TestButtonComponent>;
