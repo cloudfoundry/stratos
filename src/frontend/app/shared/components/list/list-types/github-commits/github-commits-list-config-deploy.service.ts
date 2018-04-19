@@ -9,7 +9,7 @@ import { GithubCommitsListConfigServiceBase } from './github-commits-list-config
 import { selectPEProjectName, selectApplicationSource } from '../../../../../store/selectors/deploy-application.selector';
 import { first, filter, map } from 'rxjs/operators';
 import { GithubCommitsDataSource } from './github-commits-data-source';
-import { TableCellRadioComponent } from '../app-route/table-cell-radio/table-cell-radio.component';
+import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { DeployApplicationSource } from '../../../../../store/types/deploy-application.types';
 
 @Injectable()

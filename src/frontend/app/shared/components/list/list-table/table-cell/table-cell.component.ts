@@ -27,7 +27,7 @@ import {
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import { TableCellAppRouteComponent } from '../../list-types/app-route/table-cell-app-route/table-cell-app-route.component';
-import { TableCellRadioComponent } from '../../list-types/app-route/table-cell-radio/table-cell-radio.component';
+import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from '../../list-types/app-route/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from '../../list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
 import {

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 
-import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { TableCellCustom } from '../../../list.types';
+import { ApplicationService } from '../../../../../features/applications/application.service';
+import { TableCellCustom } from '../../list.types';
 
 @Component({
   selector: 'app-table-cell-radio',
