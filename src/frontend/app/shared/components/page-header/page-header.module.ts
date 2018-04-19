@@ -7,17 +7,17 @@ import { PageHeaderEventsComponent } from './page-header-events/page-header-even
 
 
 @NgModule({
-    imports: [
-        CoreModule
-    ],
-    declarations: [
-        PageSubheaderComponent,
-        PageHeaderComponent,
-        PageHeaderEventsComponent,
-    ],
-    exports: [
-        PageSubheaderComponent,
-        PageHeaderComponent,
-    ]
+  imports: [
+    CoreModule
+  ],
+  declarations: [
+    PageSubheaderComponent,
+    PageHeaderComponent,
+    PageHeaderEventsComponent,
+  ],
+  exports: [
+    PageSubheaderComponent,
+    PageHeaderComponent,
+  ]
 })
 export class PageHeaderModule { }

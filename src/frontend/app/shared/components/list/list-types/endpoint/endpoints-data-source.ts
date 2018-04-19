@@ -1,17 +1,18 @@
 import { Store } from '@ngrx/store';
+import { pairwise, tap } from 'rxjs/operators';
 
 import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
+import { GetSystemInfo } from '../../../../../store/actions/system.actions';
 import { AppState } from '../../../../../store/app-state';
 import { endpointSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { EndpointModel } from '../../../../../store/types/endpoint.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { DataFunctionDefinition, ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { TableRowStateManager } from '../../list-table/table-row/table-row-state-manager';
 import { IListConfig } from '../../list.component.types';
 import { ListRowSateHelper } from './endpoint-data-source.helpers';
-import { GetSystemInfo } from '../../../../../store/actions/system.actions';
-import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
-import { tap, pairwise } from 'rxjs/operators';
 
 
 export class EndpointsDataSource extends ListDataSource<EndpointModel> {

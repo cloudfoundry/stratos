@@ -61,7 +61,7 @@ export class PageHeaderEventsComponent implements OnInit {
     const event = events[index];
   }
   ngOnInit() {
-    if (!this.endpointIds$ && this.activatedRoute.snapshot.params.cfId) {
+    if (!this.endpointIds$ && this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.cfId) {
       this.endpointIds$ = Observable.of([this.activatedRoute.snapshot.params.cfId]);
     }
     if (this.endpointIds$) {
