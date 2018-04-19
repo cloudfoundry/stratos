@@ -62,7 +62,7 @@ export class PageHeaderEventsComponent implements OnInit {
   }
   ngOnInit() {
     if (!this.endpointIds$ && this.activatedRoute.snapshot.params.cfId) {
-      this.endpointIds$ = Observable.of([this.activatedRoute.snapshot.params.cfId])
+      this.endpointIds$ = Observable.of([this.activatedRoute.snapshot.params.cfId]);
     }
     if (this.endpointIds$) {
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);
