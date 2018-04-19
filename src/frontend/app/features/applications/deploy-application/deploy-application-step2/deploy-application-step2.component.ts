@@ -23,11 +23,11 @@ import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '.
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
+  selectNewProjectCommit,
   selectPEProjectName,
   selectProjectExists,
   selectSourceSubType,
   selectSourceType,
-  selectNewProjectCommit,
 } from '../../../../store/selectors/deploy-application.selector';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { SourceType } from '../../../../store/types/deploy-application.types';

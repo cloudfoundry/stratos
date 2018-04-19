@@ -7,7 +7,7 @@ import websocketConnect from 'rxjs-websockets';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { interval } from 'rxjs/observable/interval';
-import { catchError, filter, map, mergeMap, share, switchMap, takeWhile, tap } from 'rxjs/operators';
+import { catchError, filter, map, mergeMap, share, switchMap, takeWhile, tap, first } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../../environments/environment';
@@ -35,7 +35,7 @@ const APP_CHECK_INTERVAL = 3000;
   templateUrl: './deploy-application-step3.component.html',
   styleUrls: ['./deploy-application-step3.component.scss']
 })
-export class DeployApplicationStep3Component implements OnInit, OnDestroy {
+export class DeployApplicationStep3Component implements OnDestroy {
 
   @Input('isRedeploy') isRedeploy: string;
   connectSub: Subscription;
@@ -84,11 +84,11 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     }
   }
 
-  ngOnInit() {
+  onEnter = () => {
     if (this.isRedeploy) {
       this.appGuid = this.isRedeploy;
     }
-    this.connectSub = this.store.select(selectDeployAppState).pipe(
+    this.store.select(selectDeployAppState).pipe(
       filter(appDetail => !!appDetail.cloudFoundryDetails
         && !!appDetail.applicationSource
         && !!appDetail.applicationSource.projectName),
@@ -97,11 +97,11 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, appDetails.cloudFoundryDetails.space));
         return Observable.of(appDetails).combineLatest(orgSubscription, spaceSubscription);
       }),
+      first(),
       tap(([appDetail, org, space]) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;
         this.spaceGuid = appDetail.cloudFoundryDetails.space;
-        this.connectSub.unsubscribe();
         const host = window.location.host;
         const streamUrl = (
           `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +

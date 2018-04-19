@@ -76,8 +76,3 @@ export interface AppData {
   org: string;
   space: string;
 }
-
-
-export const GITHUB_COMMIT_ENTITY_KEY = 'githubCommits';
-
-

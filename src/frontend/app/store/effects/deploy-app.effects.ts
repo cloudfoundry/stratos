@@ -126,7 +126,7 @@ export class DeployAppEffects {
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return this.http
-        .get(`https://api.github.com/repos/${action.projectName}/commits?sort=updated`)
+        .get(`https://api.github.com/repos/${action.projectName}/commits?sha=${action.sha}`)
         .mergeMap(response => {
           const commits: GithubCommit[] = response.json();
           const mappedData = {

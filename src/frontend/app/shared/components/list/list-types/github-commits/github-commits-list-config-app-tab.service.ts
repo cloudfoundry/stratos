@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest, first } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -17,84 +16,15 @@ import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
-import { ITableColumn } from '../../list-table/table.types';
-import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
-import { GithubCommitsDataSource } from './github-commits-data-source';
-import { TableCellCommitParentsComponent } from './table-cell-commit-parents/table-cell-commit-parents.component';
+import { IListAction } from '../../list.component.types';
+import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
+import { combineLatest } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { githubBranchesSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { TableCellCommitAuthorComponent } from './table-cell-commit-author/table-cell-commit-author.component';
+import { GithubCommitsDataSource } from './github-commits-data-source';
 
 @Injectable()
-export class GithubCommitsListConfigService implements IListConfig<APIResource<GithubCommit>> {
-  dataSource: GithubCommitsDataSource;
-  viewType = ListViewTypes.TABLE_ONLY;
-  text = {
-    title: 'Commits',
-    noEntries: 'There are no commits'
-  };
-
-  private columns: ITableColumn<APIResource<GithubCommit>>[] = [
-    {
-      columnId: 'message',
-      headerCell: () => 'Message',
-      cellDefinition: {
-        valuePath: 'entity.commit.message'
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'message',
-        field: 'entity.commit.message'
-      },
-      cellFlex: '2',
-      class: 'app-table__cell--table-column-clip'
-    },
-    {
-      columnId: 'sha',
-      headerCell: () => 'SHA',
-      cellDefinition: {
-        externalLink: true,
-        getLink: (commit) => commit.entity.html_url,
-        getValue: (commit) => commit.entity.sha.substring(0, 8)
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'sha',
-        field: 'entity.sha'
-      },
-      cellFlex: '1'
-    },
-    {
-      columnId: 'parentShas',
-      headerCell: () => 'Parent Commits',
-      cellComponent: TableCellCommitParentsComponent,
-      cellFlex: '1',
-    },
-    {
-      columnId: 'author',
-      headerCell: () => 'Author',
-      cellComponent: TableCellCommitAuthorComponent,
-      sort: {
-        type: 'sort',
-        orderKey: 'author',
-        field: 'entity.commit.author.name'
-      },
-      cellFlex: '2'
-    },
-    {
-      columnId: 'date',
-      headerCell: () => 'Date',
-      cellDefinition: {
-        getValue: (commit) => this.datePipe.transform(commit.entity.commit.author.date, 'medium')
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'date',
-        field: 'entity.commit.author.date'
-      },
-      cellFlex: '2'
-    },
-  ];
+export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
 
   private listActionRedeploy: IListAction<APIResource<GithubCommit>> = {
     action: (item) => {
@@ -136,23 +66,22 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
     enabled: row => true,
   };
 
-  private projectName: string;
-  private branchName: string;
   private cfGuid: string;
   private orgGuid: string;
   private spaceGuid: string;
   private appGuid: string;
 
-  private initialised = new BehaviorSubject<boolean>(false);
-
   constructor(
-    private store: Store<AppState>,
-    private datePipe: DatePipe,
+    store: Store<AppState>,
+    datePipe: DatePipe,
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory
   ) {
+    super(store, datePipe);
+
     this.setGuids();
     this.setGithubDetails();
+
   }
 
   private setGuids() {
@@ -185,17 +114,11 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
         first(),
       ).subscribe(branch => {
         this.branchName = branch.entity.entity.name;
-        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName);
+        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName, this.branchName);
         this.initialised.next(true);
       });
     });
   }
 
-  public getColumns = () => this.columns;
-  public getGlobalActions = () => [];
-  public getMultiActions = () => [];
   public getSingleActions = () => [this.listActionRedeploy];
-  public getMultiFiltersConfigs = () => [];
-  public getDataSource = () => this.dataSource;
-  public getInitialised = () => this.initialised;
 }

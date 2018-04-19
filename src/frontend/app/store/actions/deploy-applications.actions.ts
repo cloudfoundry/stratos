@@ -85,8 +85,15 @@ export class FetchCommit implements IRequestAction {
 }
 
 export class FetchCommits implements PaginatedAction {
-  constructor(public projectName: string) {
-    this.paginationKey = projectName;
+
+  /**
+   * Creates an instance of FetchCommits.
+   * @param {string} projectName For example `cloudfoundry-incubator/stratos`
+   * @param {string} sha Branch name, tag, etc
+   * @memberof FetchCommits
+   */
+  constructor(public projectName: string, public sha: string) {
+    this.paginationKey = projectName + sha;
   }
   actions = [
     '[Deploy App] Fetch commits start',

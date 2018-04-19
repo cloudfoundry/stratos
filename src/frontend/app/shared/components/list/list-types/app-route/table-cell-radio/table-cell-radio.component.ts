@@ -8,21 +8,10 @@ import { TableCellCustom } from '../../../list.types';
   templateUrl: './table-cell-radio.component.html',
   styleUrls: ['./table-cell-radio.component.scss']
 })
-export class TableCellRadioComponent<T> extends TableCellCustom<T>
-  implements OnInit {
-  @Input('row') row;
+export class TableCellRadioComponent<T> extends TableCellCustom<T> implements OnInit {
   disable: boolean;
-  constructor(private appService: ApplicationService) {
-    super();
-  }
 
   ngOnInit() {
-    const foundApp =
-      this.row.entity &&
-      this.row.entity.apps &&
-      this.row.entity.apps.find(
-        a => a.metadata.guid === this.appService.appGuid
-      );
-    this.disable = foundApp && foundApp.length !== 0;
+    this.disable = this.config ? this.config.isDisabled() : false;
   }
 }

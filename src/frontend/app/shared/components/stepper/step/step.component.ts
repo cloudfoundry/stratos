@@ -64,6 +64,9 @@ export class StepComponent implements OnInit {
   @Input()
   onEnter: () => void = () => { }
 
+  @Input()
+  onLeave: () => void = () => { }
+
   constructor() {
   }
 

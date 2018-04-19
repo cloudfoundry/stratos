@@ -106,7 +106,7 @@ export class ListConfig<T> implements IListConfig<T> {
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = () => null;
+  getDataSource = (): any => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
   getInitialised = () => Observable.of(true);
 }

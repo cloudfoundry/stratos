@@ -9,8 +9,8 @@ import { Subscription } from 'rxjs/Subscription';
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import {
-  GithubCommitsListConfigService,
-} from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config.service';
+  GithubCommitsListConfigServiceAppTab,
+} from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import {
   CheckProjectExists,
@@ -47,7 +47,7 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
         datePipe: DatePipe,
         applicationService: ApplicationService,
         entityServiceFactory: EntityServiceFactory) => {
-        return new GithubCommitsListConfigService(store, datePipe, applicationService, entityServiceFactory);
+        return new GithubCommitsListConfigServiceAppTab(store, datePipe, applicationService, entityServiceFactory);
       },
       deps: [Store, DatePipe, ApplicationService, EntityServiceFactory]
     }
