@@ -33,7 +33,7 @@ import (
 	"code.cloudfoundry.org/cli/cf/terminal"
 	"code.cloudfoundry.org/cli/cf/trace"
 	"code.cloudfoundry.org/cli/util"
-	"code.cloudfoundry.org/cli/util/words/generator"
+	"code.cloudfoundry.org/cli/util/randomword"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
@@ -532,7 +532,7 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 		deps.ServiceBuilder,
 	)
 
-	deps.WordGenerator = generator.NewWordGenerator()
+	deps.WordGenerator = new(randomword.Generator)
 
 	deps.AppZipper = appfiles.ApplicationZipper{}
 	deps.AppFiles = appfiles.ApplicationFiles{}
