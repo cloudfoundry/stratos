@@ -125,7 +125,6 @@ export class DeployAppEffects {
         paginationKey: action.paginationKey
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
-      // TODO: RC sort response
       return this.http
         .get(`https://api.github.com/repos/${action.projectName}/commits?sort=updated`)
         .mergeMap(response => {

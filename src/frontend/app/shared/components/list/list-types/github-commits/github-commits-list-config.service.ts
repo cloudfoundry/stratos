@@ -95,6 +95,7 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
       cellFlex: '2'
     },
   ];
+
   private listActionRedeploy: IListAction<APIResource<GithubCommit>> = {
     action: (item) => {
       // set CF data
@@ -150,6 +151,11 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
     private applicationService: ApplicationService,
     private entityServiceFactory: EntityServiceFactory
   ) {
+    this.setGuids();
+    this.setGithubDetails();
+  }
+
+  private setGuids() {
     this.applicationService.waitForAppEntity$.pipe(
       combineLatest(this.applicationService.appSpace$),
       first(),
@@ -159,7 +165,9 @@ export class GithubCommitsListConfigService implements IListConfig<APIResource<G
       this.orgGuid = space.entity.organization_guid;
       this.appGuid = app.entity.metadata.guid;
     });
+  }
 
+  private setGithubDetails() {
     this.applicationService.applicationStratProject$.pipe(
       first(),
     ).subscribe(stratosProject => {
