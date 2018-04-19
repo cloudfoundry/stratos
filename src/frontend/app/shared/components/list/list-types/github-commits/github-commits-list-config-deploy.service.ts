@@ -31,7 +31,7 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
 
 
     this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
-      map((appSource: DeployApplicationSource) => appSource.type.id === 'github' ? {
+      map((appSource: DeployApplicationSource) => appSource.type.id === 'git' && appSource.type.subType === 'github' ? {
         projectName: appSource.projectName,
         sha: appSource.branch.name
       } : null),

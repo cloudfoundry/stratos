@@ -38,7 +38,7 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
       cellComponent: TableCellRadioComponent,
       cellConfig: {
         isDisabled: (row): boolean => {
-          return row.entity && row.entity.apps && row.entity.apps.find(
+          return row && row.entity && row.entity.apps && row.entity.apps.find(
             a => a.metadata.guid === this.appService.appGuid
           );
         }
