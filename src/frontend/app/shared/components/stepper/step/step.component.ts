@@ -59,6 +59,9 @@ export class StepComponent implements OnInit {
   content: TemplateRef<any>;
 
   @Input()
+  skip$: Observable<boolean> = Observable.of(false);
+
+  @Input()
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
 
   @Input()

@@ -75,6 +75,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   ngOnDestroy() {
+    this.store.dispatch(new DeleteDeployAppSection());
     // Unsubscribe from the websocket stream
     if (this.connectSub) {
       this.connectSub.unsubscribe();
@@ -200,23 +201,23 @@ export class DeployApplicationStep3Component implements OnDestroy {
         this.deploying = false;
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
-        this.close(log, null, null, true);
+        this.close(log, null, null);
         break;
       case SocketEventTypes.CLOSE_INVALID_MANIFEST:
         this.close(log, 'Deploy Failed - Invalid manifest!',
-          'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!', true);
+          'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!');
         break;
       case SocketEventTypes.CLOSE_NO_MANIFEST:
         this.close(log, 'Deploy Failed - No manifest present!',
-          'Failed to deploy app! Please make sure that a valid manifest.yaml is present!', true);
+          'Failed to deploy app! Please make sure that a valid manifest.yaml is present!');
         break;
       case SocketEventTypes.CLOSE_FAILED_CLONE:
         this.close(log, 'Deploy Failed - Failed to clone repository!',
-          'Failed to deploy app! Please make sure the repository is public!', true);
+          'Failed to deploy app! Please make sure the repository is public!');
         break;
       case SocketEventTypes.CLOSE_FAILED_NO_BRANCH:
         this.close(log, 'Deploy Failed - Failed to located branch!',
-          'Failed to deploy app! Please make sure that branch exists!', true);
+          'Failed to deploy app! Please make sure that branch exists!');
         break;
       case SocketEventTypes.CLOSE_FAILURE:
       case SocketEventTypes.CLOSE_PUSH_ERROR:
@@ -224,7 +225,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       case SocketEventTypes.CLOSE_NO_CNSI:
       case SocketEventTypes.CLOSE_NO_CNSI_USERTOKEN:
         this.close(log, 'Deploy Failed!',
-          'Failed to deploy app!', true);
+          'Failed to deploy app!');
         break;
       case SocketEventTypes.SOURCE_REQUIRED:
       case SocketEventTypes.EVENT_CLONED:
@@ -236,11 +237,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
     }
   }
 
-  close(log, title, error, deleteAppSection) {
+  close(log, title, error) {
     this.error$.next(true);
-    if (deleteAppSection) {
-      this.store.dispatch(new DeleteDeployAppSection());
-    }
 
     if (title) {
       this.streamTitle = title;
