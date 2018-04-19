@@ -36,7 +36,7 @@ export const appReducers = {
   deployApplication: deployAppReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
-  routing: routingReducer
+  routing: routingReducer,
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];

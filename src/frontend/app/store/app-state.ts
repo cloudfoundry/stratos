@@ -11,6 +11,7 @@ import { PaginationState } from './types/pagination.types';
 import { UAASetupState } from './types/uaa-setup.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { RoutingHistory } from './types/routing.type';
+import { UserProfileInfo } from './types/user-profile.types';
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
 }
