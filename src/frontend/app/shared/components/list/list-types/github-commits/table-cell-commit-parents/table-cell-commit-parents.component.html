@@ -1,0 +1,6 @@
+<div *ngFor="let parent of row.entity.parents">
+  <a href="{{parent.html_url}}" target="_blank">{{parent.sha | limitTo:8}}</a>
+</div>
+<div *ngIf="!row.entity.parents || row.entity.parents.length===0">
+  None
+</div>

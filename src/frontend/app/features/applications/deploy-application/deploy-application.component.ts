@@ -24,7 +24,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 
-  isRedeploy: boolean;
+  isRedeploy: string;
   initCfOrgSpaceService: Subscription[] = [];
   deployButtonText = 'Deploy';
 
@@ -33,7 +33,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
   ) {
-    this.isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'] === 'true';
+    this.isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'];
   }
 
   onNext = () => {

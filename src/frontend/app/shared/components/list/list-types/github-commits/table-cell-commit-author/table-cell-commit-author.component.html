@@ -1,0 +1,4 @@
+<div *ngIf="row.entity.commit.author.name">
+  <a *ngIf="row.entity.author && row.entity.author.html_url; else noLink" href="{{row.entity.author.html_url}}" target="_blank">{{row.entity.commit.author.name}}</a>
+  <ng-template #noLink>{{row.entity.commit.author.name}}</ng-template>
+</div>
