@@ -212,7 +212,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
 
   deleteApplication() {
     this.confirmDialog.open(appDeleteConfirmation, () => {
-      this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
+      this.router.navigate(['./delete'], { relativeTo: this.route });
     });
   }
 
