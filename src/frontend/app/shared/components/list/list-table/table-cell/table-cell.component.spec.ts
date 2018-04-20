@@ -17,6 +17,7 @@ import { RunningInstancesComponent } from '../../../running-instances/running-in
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppChipsComponent } from '../../../chips/chips.component';
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
+import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -36,7 +37,8 @@ describe('TableCellComponent', () => {
         PercentagePipe,
         RunningInstancesComponent,
         AppChipsComponent,
-        BooleanIndicatorComponent
+        BooleanIndicatorComponent,
+        GithubCommitAuthorComponent
       ],
       imports: [
         CoreModule

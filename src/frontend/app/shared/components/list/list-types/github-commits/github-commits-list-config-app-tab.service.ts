@@ -22,12 +22,15 @@ import { combineLatest } from 'rxjs/operators';
 import { first } from 'rxjs/operators';
 import { githubBranchesSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { GithubCommitsDataSource } from './github-commits-data-source';
+import { Observable } from 'rxjs/Observable';
+import { RowState } from '../../data-sources-controllers/list-data-source-types';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
 
   private listActionRedeploy: IListAction<APIResource<GithubCommit>> = {
-    action: (item) => {
+    action: (commitEntity) => {
       // set CF data
       this.store.dispatch(
         new StoreCFSettings({
@@ -51,7 +54,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       // Set branch
       this.store.dispatch(new SetDeployBranch(this.branchName));
       // Set Commit
-      this.store.dispatch(new SetDeployCommit(item.entity.sha));
+      this.store.dispatch(new SetDeployCommit(commitEntity.entity.sha));
 
       this.store.dispatch(
         new RouterNav({
@@ -60,16 +63,30 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         })
       );
     },
-    label: 'Redeploy',
+    label: 'Deploy',
     description: ``,
-    visible: row => true,
-    enabled: row => true,
+    visible: commitEntity => true,
+    enabled: commitEntity => true,
+  };
+
+  private listActionCompare: IListAction<APIResource<GithubCommit>> = {
+    action: (commitEntity) => {
+      window.open(`https://github.com/${this.projectName}/compare/${this.commit}...${commitEntity.entity.sha}`, '_blank');
+    },
+    label: 'Compare',
+    description: '',
+    visible: commitEntity => {
+      // This should be the same for all rows, unlike the enabled state which will change depending on commit
+      return commitEntity.entity.url.startsWith('https://api.github.com');
+    },
+    enabled: commitEntity => commitEntity.entity.sha !== this.commit,
   };
 
   private cfGuid: string;
   private orgGuid: string;
   private spaceGuid: string;
   private appGuid: string;
+  private commit: string;
 
   constructor(
     store: Store<AppState>,
@@ -81,7 +98,6 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
 
     this.setGuids();
     this.setGithubDetails();
-
   }
 
   private setGuids() {
@@ -101,6 +117,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       first(),
     ).subscribe(stratosProject => {
       this.projectName = stratosProject.deploySource.project;
+      this.commit = stratosProject.deploySource.commit;
 
       const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
       const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
@@ -114,11 +131,11 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         first(),
       ).subscribe(branch => {
         this.branchName = branch.entity.entity.name;
-        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName, this.branchName);
+        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName, this.branchName, this.commit);
         this.initialised.next(true);
       });
     });
   }
 
-  public getSingleActions = () => [this.listActionRedeploy];
+  public getSingleActions = () => [this.listActionRedeploy, this.listActionCompare];
 }

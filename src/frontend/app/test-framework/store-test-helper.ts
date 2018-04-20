@@ -586,6 +586,7 @@ const testInitialStoreState: AppState = {
     cloudFoundryDetails: null,
     applicationSource: {
       type: {
+        id: '',
         name: ''
       }
     },

@@ -33,12 +33,13 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
     this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => appSource.type.id === 'git' && appSource.type.subType === 'github' ? {
         projectName: appSource.projectName,
-        sha: appSource.branch.name
+        sha: appSource.branch.name,
+        commitSha: appSource.commit ? appSource.commit.sha : null
       } : null),
       filter(fetchDetails => !!fetchDetails && !!fetchDetails.projectName && !!fetchDetails.sha),
       first()
     ).subscribe(fetchDetails => {
-      this.dataSource = new GithubCommitsDataSource(this.store, this, fetchDetails.projectName, fetchDetails.sha);
+      this.dataSource = new GithubCommitsDataSource(this.store, this, fetchDetails.projectName, fetchDetails.sha, fetchDetails.commitSha);
       this.initialised.next(true);
     });
   }

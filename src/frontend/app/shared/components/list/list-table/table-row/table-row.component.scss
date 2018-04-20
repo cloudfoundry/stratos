@@ -17,6 +17,13 @@
       display: flex;
     }
   }
+  &__highlighted {
+    border-left-style: solid;
+    border-left-width: 4px;
+    .table-row__inner {
+      padding-left: 20px; // Cancel out highlighted padding (border left in theme)
+    }
+  }
 }
 
 .table-row {

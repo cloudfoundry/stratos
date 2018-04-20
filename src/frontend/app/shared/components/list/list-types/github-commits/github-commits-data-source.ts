@@ -11,6 +11,7 @@ import { IListConfig } from '../../list.component.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
 import { APIResource } from '../../../../../store/types/api.types';
+import { Observable } from 'rxjs/Observable';
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {
   store: Store<AppState>;
@@ -26,10 +27,16 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCo
     store: Store<AppState>,
     listConfig: IListConfig<APIResource<GithubCommit>>,
     projectName: string,
-    sha: string
+    sha: string,
+    commitSha?: string,
   ) {
     const action = new FetchCommits(projectName, sha);
     const paginationKey = action.paginationKey;
+    const rowsState = Observable.of(commitSha ? {
+      [commitSha]: {
+        highlighted: true
+      }
+    } : {});
     super({
       store,
       action,
@@ -38,7 +45,8 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCo
       paginationKey,
       isLocal: true,
       transformEntities: [],
-      listConfig
+      listConfig,
+      rowsState
     });
   }
 }

@@ -177,10 +177,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
    */
   getRowState(row: T) {
     return this.rowsState.pipe(
-      map(state => ({
-        ...getDefaultRowState(),
-        ...(state[this.getRowUniqueId(row)] || {})
-      })),
+      map(state => ({ ...getDefaultRowState(), ...(state[this.getRowUniqueId(row)] || {}) })),
       distinctUntilChanged(),
       publishReplay(1), refCount()
     );

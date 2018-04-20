@@ -95,6 +95,7 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
 import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
+import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 
 @NgModule({
   imports: [
@@ -175,7 +176,8 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     StratosTitleComponent,
     IntroScreenComponent,
     CliInfoComponent,
-    CliCommandComponent
+    CliCommandComponent,
+    GithubCommitAuthorComponent
   ],
   exports: [
     FormsModule,
@@ -240,7 +242,8 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     StratosTitleComponent,
     IntroScreenComponent,
     CliInfoComponent,
-    CliCommandComponent
+    CliCommandComponent,
+    GithubCommitAuthorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
