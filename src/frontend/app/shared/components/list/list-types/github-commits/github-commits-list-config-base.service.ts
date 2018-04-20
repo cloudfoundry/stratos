@@ -51,12 +51,12 @@ export abstract class GithubCommitsListConfigServiceBase implements IListConfig<
       },
       cellFlex: '2'
     },
-    {
-      columnId: 'parentShas',
-      headerCell: () => 'Parent Commits',
-      cellComponent: TableCellCommitParentsComponent,
-      cellFlex: '2',
-    },
+    // {
+    //   columnId: 'parentShas',
+    //   headerCell: () => 'Parent Commits',
+    //   cellComponent: TableCellCommitParentsComponent,
+    //   cellFlex: '2',
+    // },
     {
       columnId: 'author',
       headerCell: () => 'Author',
