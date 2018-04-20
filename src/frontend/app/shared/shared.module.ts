@@ -93,6 +93,8 @@ import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/
 import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
+import { CliInfoComponent } from './components/cli-info/cli-info.component';
+import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
 
 @NgModule({
   imports: [
@@ -171,7 +173,9 @@ import { CloudFoundryService } from './data-services/cloud-foundry.service';
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
-    IntroScreenComponent
+    IntroScreenComponent,
+    CliInfoComponent,
+    CliCommandComponent
   ],
   exports: [
     FormsModule,
@@ -234,7 +238,9 @@ import { CloudFoundryService } from './data-services/cloud-foundry.service';
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
-    IntroScreenComponent
+    IntroScreenComponent,
+    CliInfoComponent,
+    CliCommandComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

@@ -5,8 +5,10 @@ import { Store } from '@ngrx/store';
 import { filter, map, mergeMap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
+import { IDomain } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { AssociateRouteWithAppApplication } from '../../../../store/actions/application-service-routes.actions';
 import { CreateNewApplication } from '../../../../store/actions/application.actions';
 import { GetOrganization } from '../../../../store/actions/organization.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
@@ -20,13 +22,12 @@ import {
   organizationSchemaKey,
   routeSchemaKey,
 } from '../../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
-import { AssociateRouteWithAppApplication } from '../../../../store/actions/application-service-routes.actions';
 
 @Component({
   selector: 'app-create-application-step3',
@@ -42,7 +43,8 @@ export class CreateApplicationStep3Component implements OnInit {
 
   hostName: string;
 
-  domains: Observable<any>;
+  domains$: Observable<IDomain[]>;
+  selectedDomainGuid: string;
 
   message = null;
 
@@ -78,6 +80,10 @@ export class CreateApplicationStep3Component implements OnInit {
       });
   }
 
+  validate(): boolean {
+    return !!this.selectedDomainGuid && !!this.hostName;
+  }
+
   createApp(): Observable<RequestInfoState> {
     const { cloudFoundryDetails, name } = this.newAppData;
 
@@ -98,11 +104,9 @@ export class CreateApplicationStep3Component implements OnInit {
     const { cloudFoundryDetails, name } = this.newAppData;
 
     const { cloudFoundry, org, space } = cloudFoundryDetails;
-    const routeDomainMetaData = this.form.controls.domain.value.metadata || null;
     const hostName = this.hostName;
-    const shouldCreate = routeDomainMetaData && hostName && this.form.valid;
-    const domainGuid = routeDomainMetaData ? routeDomainMetaData.guid : '';
-    const newRouteGuid = hostName + domainGuid;
+    const shouldCreate = this.selectedDomainGuid && hostName && this.form.valid;
+    const newRouteGuid = hostName + this.selectedDomainGuid;
 
     if (shouldCreate) {
       this.store.dispatch(new CreateRoute(
@@ -110,7 +114,7 @@ export class CreateApplicationStep3Component implements OnInit {
         cloudFoundry,
         {
           space_guid: space,
-          domain_guid: domainGuid,
+          domain_guid: this.selectedDomainGuid,
           host: hostName
         }
       ));
@@ -119,7 +123,7 @@ export class CreateApplicationStep3Component implements OnInit {
   }
 
   ngOnInit() {
-    this.domains = this.store.select(selectNewAppState).pipe(
+    this.domains$ = this.store.select(selectNewAppState).pipe(
       filter(state => state.cloudFoundryDetails && state.cloudFoundryDetails.cloudFoundry && state.cloudFoundryDetails.org),
       mergeMap(state => {
         this.hostName = state.name.split(' ').join('-').toLowerCase();
@@ -135,6 +139,9 @@ export class CreateApplicationStep3Component implements OnInit {
         );
         return orgEntService.waitForEntity$.pipe(
           map(({ entity, entityRequestInfo }) => {
+            if (!this.selectedDomainGuid && entity.entity.domains && entity.entity.domains.length) {
+              this.selectedDomainGuid = entity.entity.domains[0].entity.guid;
+            }
             return entity.entity.domains;
           })
         );
