@@ -9,75 +9,30 @@
   </div>
 </app-page-header>
 
-<div class="cli-info" *ngIf="context$ | async as context">
-  <div class="cli-info__content">
-      <div>
-        <p>Use the Cloud Foundry CLI to execute commands directly against a Cloud Foundry instance.</p>
-        <h4>Getting Started</h4>
-        <p>Before starting follow these steps:</p>
+<app-cli-info *ngIf="context$ | async as context" [context]="context">
 
-        <span>1. Download and install the CLI - </span>
-        <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">see here</a>
+  <br>
+  <h4>Application Management Commands</h4>
 
-        <p>2. Set the api endpoint</p>
-        <app-code-block>cf api {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</app-code-block>
+  <app-cli-command name="Summary" msg="To get the application summary:" syntax="cf app {{context.appName || '[app name]'}}">
+  </app-cli-command>
 
-        <p>3. Login</p>
-        <app-code-block codeBlockStyle="pre" hide-copy="true">$ cf login
-          API endpoint: {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}
+  <app-cli-command name="Start" msg="To start the application:" syntax="cf start {{context.appName || '[app name]'}}">
+  </app-cli-command>
 
-          Email> {{context.username || '[username]'}}
+  <app-cli-command name="Stop" msg="To stop the application:" syntax="cf stop {{context.appName || '[app name]'}}">
+  </app-cli-command>
 
-          Password> [password]
-          Authenticating...
-          OK
-        </app-code-block>
+  <app-cli-command name="Restart" msg="To restart the application:" syntax="f restart {{context.appName || '[app name]'}}">
+  </app-cli-command>
 
-        <p>4. Target an org and space</p>
-        <app-code-block>cf target -o {{context.orgName || '[organization name]'}} -s {{context.spaceName || '[space name]'}}
-        </app-code-block>
-      </div>
-      <div>
+  <br>
+  <h4>Scaling the Application</h4>
 
-        <br><h4>Application Management Commands</h4>
+  <app-cli-command name="Instances" msg="To change the number of application instances:" syntax="cf scale {{context.appName || '[app name]'}} -i [N]">
+  </app-cli-command>
 
-        <div class="cli-info__command">
-            <div class="cli-info__cmdname">Summary</div>
-            <div class="cli-info__cmdmsg">To get the application summary:</div>
-          <app-code-block>cf app {{context.appName || '[app name]'}}</app-code-block>
-        </div>
+  <app-cli-command name="Memory" msg="To change the memory allocated to application instances:" syntax="cf scale {{context.appName || '[app name]'}} -i -m [N]">
+  </app-cli-command>
 
-        <div class="cli-info__command">
-          <div class="cli-info__cmdname">Start</div>
-          <div class="cli-info__cmdmsg">To start the application:</div>
-          <app-code-block>cf start {{context.appName || '[app name]'}}</app-code-block>          
-        </div>
-        
-        <div class="cli-info__command">
-          <div class="cli-info__cmdname">Stop</div>
-          <div class="cli-info__cmdmsg">To stop the application:</div>
-          <app-code-block>cf stop {{context.appName || '[app name]'}}</app-code-block>
-        </div>
-
-        <div class="cli-info__command">
-          <div class="cli-info__cmdname">Restart</div>
-          <div class="cli-info__cmdmsg">To restart the application:</div>
-          <app-code-block>cf restart {{context.appName || '[app name]'}}</app-code-block>
-        </div>
-              
-        <br><h4>Scaling the Application</h4>
-
-        <div class="cli-info__command">
-          <div class="cli-info__cmdname">Instances</div>
-          <div class="cli-info__cmdmsg">To change the number of application instances:</div>
-          <app-code-block>cf scale {{context.appName || '[app name]'}} -i [N]</app-code-block>
-        </div>
-
-        <div class="cli-info__command">
-          <div class="cli-info__cmdname">Memory</div>
-          <div class="cli-info__cmdmsg">To change the memory allocated to application instances:</div>
-          <app-code-block>cf restart {{context.appName || '[app name]'}} -i -m [N]</app-code-block>
-        </div>
-      </div>
-    </div>
-</div>
+</app-cli-info>
