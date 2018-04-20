@@ -585,7 +585,9 @@ const testInitialStoreState: AppState = {
   deployApplication: {
     cloudFoundryDetails: null,
     applicationSource: {
-      type: { }
+      type: {
+        name: ''
+      }
     },
     projectExists: {
       checking: false,
