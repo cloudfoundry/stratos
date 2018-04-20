@@ -1,4 +1,5 @@
-import { Component, OnInit, HostBinding } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -7,6 +8,10 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { EntityService } from '../../../../../../core/entity-service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
+import {
+  GithubCommitsListConfigServiceAppTab,
+} from '../../../../../../shared/components/list/list-types/github-commits/github-commits-list-config-app-tab.service';
+import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import {
   CheckProjectExists,
   FetchBranchesForProject,
@@ -23,6 +28,7 @@ import {
   githubBranchesSchemaKey,
   githubCommitSchemaKey,
   githubRepoSchemaKey,
+  spaceSchemaKey,
 } from '../../../../../../store/helpers/entity-factory';
 import { selectEntities } from '../../../../../../store/selectors/api.selectors';
 import { GithubCommit, GithubRepo } from '../../../../../../store/types/github.types';
@@ -32,11 +38,22 @@ import { EnvVarStratosProject } from '../build-tab/application-env-vars.service'
 @Component({
   selector: 'app-github-tab',
   templateUrl: './github-tab.component.html',
-  styleUrls: ['./github-tab.component.scss']
+  styleUrls: ['./github-tab.component.scss'],
+  providers: [
+    {
+      provide: ListConfig,
+      useFactory: (
+        store: Store<AppState>,
+        datePipe: DatePipe,
+        applicationService: ApplicationService,
+        entityServiceFactory: EntityServiceFactory) => {
+        return new GithubCommitsListConfigServiceAppTab(store, datePipe, applicationService, entityServiceFactory);
+      },
+      deps: [Store, DatePipe, ApplicationService, EntityServiceFactory]
+    }
+  ]
 })
 export class GithubTabComponent implements OnInit, OnDestroy {
-
-
 
   gitBranchEntityService: EntityService;
   gitCommitEntityService: EntityService;
@@ -68,6 +85,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
       tap((stProject: EnvVarStratosProject) => {
         const projectName = stProject.deploySource.project;
         const commitId = stProject.deploySource.commit.trim();
+        const commitEntityKey = projectName + '-' + commitId;
 
         this.gitHubRepoEntityService = this.entityServiceFactory.create(
           githubRepoSchemaKey,
@@ -80,7 +98,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
         this.gitCommitEntityService = this.entityServiceFactory.create(
           githubCommitSchemaKey,
           entityFactory(githubCommitSchemaKey),
-          commitId,
+          commitEntityKey,
           new FetchCommit(commitId, projectName),
           false
         );
@@ -114,48 +132,4 @@ export class GithubTabComponent implements OnInit, OnDestroy {
     );
   }
 
-  deployApp(stratosProject: EnvVarStratosProject) {
-    this.deployAppSubscription = Observable.combineLatest(
-      this.applicationService.application$,
-      this.store.select(selectEntities('space')),
-      this.gitBranchEntityService.entityObs$
-    )
-      .pipe(
-        take(1),
-        tap(([app, spaces, branch]) => {
-          // set CF data
-          const spaceGuid = app.app.entity.space_guid;
-          this.store.dispatch(
-            new StoreCFSettings({
-              cloudFoundry: app.app.entity.cfGuid,
-              org: spaces[spaceGuid].entity.organization_guid,
-              space: spaceGuid
-            })
-          );
-
-          // set Project data
-          this.store.dispatch(
-            new CheckProjectExists(stratosProject.deploySource.project)
-          );
-          // Set Source type
-          this.store.dispatch(
-            new SetAppSourceDetails({
-              name: 'Git',
-              id: 'git',
-              subType: 'github'
-            })
-          );
-          // Set branch
-          this.store.dispatch(new SetDeployBranch(branch.entity.entity.name));
-
-          this.store.dispatch(
-            new RouterNav({
-              path: ['/applications/deploy'],
-              query: { redeploy: true }
-            })
-          );
-        })
-      )
-      .subscribe();
-  }
 }

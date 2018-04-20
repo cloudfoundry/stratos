@@ -1,0 +1,7 @@
+<div *ngIf="row.entity.commit.author.name">
+  <div *ngIf="row.entity.author; else noCoreAuthor" class="commit-author__core-author">
+    <a href="{{row.entity.author.html_url}}" target="_blank">{{row.entity.commit.author.name}}</a>
+    <img src="{{row.entity.author.avatar_url}}">
+  </div>
+  <ng-template #noCoreAuthor>{{row.entity.commit.author.name}}</ng-template>
+</div>

@@ -42,6 +42,11 @@ export interface IListConfig<T> {
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   /**
+   * Fetch an observable that will emit once the underlying config components have been created. For instance if the data source requires
+   * something from the store which requires an async call
+   */
+  getInitialised?: () => Observable<boolean>;
+  /**
    * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
   pageSizeOptions?: number[];
@@ -101,8 +106,9 @@ export class ListConfig<T> implements IListConfig<T> {
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = () => null;
+  getDataSource = (): any => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getInitialised = () => Observable.of(true);
 }
 
 export interface IBaseListAction<T> {

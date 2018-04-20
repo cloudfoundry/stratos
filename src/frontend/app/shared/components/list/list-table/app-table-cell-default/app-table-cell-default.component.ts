@@ -33,7 +33,10 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
     this.setValueGenerator();
     this.setValue(this.row);
     this.isLink = !!this.cellDefinition.getLink;
-    this.isExternalLink = this.isLink && this.cellDefinition.externalLink;
+    if (this.isLink) {
+      this.isExternalLink = this.cellDefinition.externalLink;
+      this.linkValue = this.cellDefinition.getLink(this.row);
+    }
   }
 
   private setValue(row: T) {

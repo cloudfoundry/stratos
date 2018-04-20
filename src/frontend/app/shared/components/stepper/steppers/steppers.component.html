@@ -4,11 +4,22 @@
       <div class="steppers__headers" *ngIf="steps.length > 1">
         <div *ngFor="let step of steps; let i = index" (click)="setActive(i)" [ngClass]="{'steppers__header--active': step.active || step.complete}" class="steppers__header">
           <div class="steppers__header-inner" *ngIf="steps.length !== 1">
-            <mat-spinner *ngIf="(step.blocked$ | async)" diameter="20"></mat-spinner>
-            <app-dot-content *ngIf="!(step.blocked$ | async)" class="buildpack-card__title-dot" [disabled]="step.complete">
-              <mat-icon class="steppers__header-complete" *ngIf="step.complete">{{ this.getIconLigature() }}</mat-icon>
-              <div *ngIf="!step.complete">{{ i + 1 }}</div>
-            </app-dot-content>
+            <!-- Blocked -->
+            <mat-spinner *ngIf="step.blocked; else notBlocked" diameter="20"></mat-spinner>
+            <!-- Not Blocked -->
+            <ng-template #notBlocked>
+              <!-- Skipped -->
+              <span *ngIf="step.skip; else notSkipped">
+                <app-dot-content class="buildpack-card__title-dot" [disabled]="true"><div>{{ i + 1 }}</div></app-dot-content>
+              </span>
+              <!-- Not Skipped -->
+              <ng-template #notSkipped>
+                <app-dot-content class="buildpack-card__title-dot">
+                  <mat-icon class="steppers__header-complete" *ngIf="step.complete">{{ this.getIconLigature() }}</mat-icon>
+                  <div *ngIf="!step.complete ">{{ i + 1 }}</div>
+                </app-dot-content>
+              </ng-template>
+            </ng-template>
             <span class="steppers__header-text">{{ step.title }}</span>
           </div>
         </div>
@@ -22,7 +33,7 @@
         </div>
         <div class="steppers__navigation-right">
           <button color="primary" mat-button [routerLink]="cancel$ | async" [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)" *ngIf="cancel">{{ this.getCancelButtonText(currentIndex) }}</button>
-          <button color="primary" type="submit" mat-button mat-raised-button (click)="goNext(currentIndex)" [disabled]="(steps[currentIndex].blocked$ | async) || !canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex) }}</button>
+          <button color="primary" type="submit" mat-button mat-raised-button (click)="goNext(currentIndex)" [disabled]="steps[currentIndex].blocked || !canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex) }}</button>
         </div>
       </div>
     </div>

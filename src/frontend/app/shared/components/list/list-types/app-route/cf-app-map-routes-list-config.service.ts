@@ -23,7 +23,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellAppRouteComponent } from './table-cell-app-route/table-cell-app-route.component';
-import { TableCellRadioComponent } from './table-cell-radio/table-cell-radio.component';
+import { TableCellRadioComponent } from '../../list-table/table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 
@@ -36,6 +36,13 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
       columnId: 'radio',
       headerCell: () => '',
       cellComponent: TableCellRadioComponent,
+      cellConfig: {
+        isDisabled: (row): boolean => {
+          return row && row.entity && row.entity.apps && row.entity.apps.find(
+            a => a.metadata.guid === this.appService.appGuid
+          );
+        }
+      },
       class: 'table-column-select',
       cellFlex: '1'
     },

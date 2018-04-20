@@ -11,11 +11,23 @@ import {
   ViewChild,
 } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
-import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/material';
+import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap, withLatestFrom, takeUntil, takeWhile } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  pairwise,
+  publishReplay,
+  refCount,
+  startWith,
+  takeWhile,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -62,25 +74,73 @@ import {
 export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private uberSub: Subscription;
 
-  view$: Observable<ListView>;
-
   @Input('addForm') addForm: NgForm;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild('filter') filter: NgModel;
-  filterString = '';
-  multiFilters = {};
+  @Input() noEntries: TemplateRef<any>;
 
-  @Input()
-  noEntries: TemplateRef<any>;
+  @Input() noEntriesForCurrentFilter: TemplateRef<any>;
 
-  @Input()
-  noEntriesForCurrentFilter: TemplateRef<any>;
+  @ViewChild(MatPaginator) set setPaginator(paginator: MatPaginator) {
+    if (!paginator) {
+      return;
+    }
+    // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
+    // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
+    // event which handles either page or pageSize changes.
+    this.paginationWidgetToStore = paginator.page.startWith(this.initialPageEvent).pipe(
+      pairwise(),
+    ).subscribe(([oldV, newV]) => {
+      const pageSizeChanged = oldV.pageSize !== newV.pageSize;
+      const pageChanged = oldV.pageIndex !== newV.pageIndex;
+      if (pageSizeChanged) {
+        this.paginationController.pageSize(newV.pageSize);
+        if (this.dataSource.isLocal) {
+          this.paginationController.page(0);
+        }
+      } else if (pageChanged) {
+        this.paginationController.page(newV.pageIndex);
+      }
+    });
+  }
 
-  sortColumns: ITableColumn<T>[];
-  @ViewChild('headerSortField') headerSortField: MatSelect;
-  headerSortDirection: SortDirection = 'asc';
-  headerSortDirectionChanged = new EventEmitter<SortDirection>();
+  @ViewChild('filter') set setFilter(filter: NgModel) {
+    if (!filter) {
+      return;
+    }
+    this.filterWidgetToStore = filter.valueChanges
+      .debounceTime(this.dataSource.isLocal ? 150 : 250)
+      .distinctUntilChanged()
+      .map(value => value as string)
+      .do(filterString => {
+        return this.paginationController.filterByString(filterString);
+      }).subscribe();
+  }
+
+  private initialPageEvent: PageEvent;
+  private paginatorSettings: {
+    pageSizeOptions: number[],
+    pageSize: Number,
+    pageIndex: Number,
+    length: Number
+  } = {
+      pageSizeOptions: null,
+      pageSize: null,
+      pageIndex: null,
+      length: null
+    };
+  private headerSort: {
+    direction: SortDirection,
+    value: string;
+  } = {
+      direction: null,
+      value: null
+    };
+  private filterString = '';
+  private multiFilters = {};
+  private sortColumns: ITableColumn<T>[];
+
+  private paginationWidgetToStore: Subscription;
+  private filterWidgetToStore: Subscription;
 
   globalActions: IListAction<T>[];
   multiActions: IMultiListAction<T>[];
@@ -92,6 +152,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   paginationController: IListPaginationController<T>;
   multiFilterWidgetObservables = new Array<Subscription>();
+
+  view$: Observable<ListView>;
 
   isAddingOrSelecting$: Observable<boolean>;
   hasRows$: Observable<boolean>;
@@ -111,6 +173,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   pageState$: Observable<string>;
 
+  initialised$: Observable<boolean>;
 
   public safeAddForm() {
     // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
@@ -124,7 +187,23 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     public config: ListConfig<T>
   ) { }
 
+
   ngOnInit() {
+    if (this.config.getInitialised) {
+      this.initialised$ = this.config.getInitialised().pipe(
+        filter(initialised => initialised),
+        first(),
+        tap(() => this.initialise()),
+        publishReplay(1), refCount()
+      );
+    } else {
+      this.initialise();
+      this.initialised$ = Observable.of(true);
+    }
+
+  }
+
+  private initialise() {
     this.globalActions = this.config.getGlobalActions();
     this.multiActions = this.config.getMultiActions();
     this.singleActions = this.config.getSingleActions();
@@ -176,68 +255,43 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)
       .map(([hasRows, pagination]) => {
         const minPageSize = (
-          this.paginator.pageSizeOptions && this.paginator.pageSizeOptions.length ? this.paginator.pageSizeOptions[0] : -1
+          this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?
+            this.paginatorSettings.pageSizeOptions[0] : -1
         );
         return !hasRows ||
           pagination && (pagination.totalResults <= minPageSize);
       });
 
-    this.paginator.pageSizeOptions = this.config.pageSizeOptions ||
+
+    this.paginatorSettings.pageSizeOptions = this.config.pageSizeOptions ||
       (this.config.viewType === ListViewTypes.TABLE_ONLY ? defaultPaginationPageSizeOptionsTable : defaultPaginationPageSizeOptionsCards);
 
-    let initialPageEvent: PageEvent;
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize
     this.paginationController.pagination$.first().subscribe(pagination => {
-      initialPageEvent = new PageEvent;
-      initialPageEvent.pageIndex = pagination.pageIndex - 1;
-      initialPageEvent.pageSize = pagination.pageSize;
-      if (this.paginator.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
-        initialPageEvent.pageSize = this.paginator.pageSizeOptions[0];
-        this.paginationController.pageSize(this.paginator.pageSizeOptions[0]);
+      this.initialPageEvent = new PageEvent;
+      this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
+      this.initialPageEvent.pageSize = pagination.pageSize;
+      if (this.paginatorSettings.pageSizeOptions.findIndex(pageSize => pageSize === pagination.pageSize) < 0) {
+        this.initialPageEvent.pageSize = this.paginatorSettings.pageSizeOptions[0];
+        this.paginationController.pageSize(this.paginatorSettings.pageSizeOptions[0]);
       }
     });
 
     const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
-      this.paginator.length = pagination.totalResults;
-      this.paginator.pageIndex = pagination.pageIndex - 1;
-      this.paginator.pageSize = pagination.pageSize;
+      this.paginatorSettings.length = pagination.totalResults;
+      this.paginatorSettings.pageIndex = pagination.pageIndex - 1;
+      this.paginatorSettings.pageSize = pagination.pageSize;
     });
 
-    // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
-    // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
-    // event which handles either page or pageSize changes.
-    const paginationWidgetToStore = this.paginator.page.startWith(initialPageEvent).pipe(
-      pairwise(),
-      tap(([oldV, newV]) => {
-        const pageSizeChanged = oldV.pageSize !== newV.pageSize;
-        const pageChanged = oldV.pageIndex !== newV.pageIndex;
-        if (pageSizeChanged) {
-          this.paginationController.pageSize(newV.pageSize);
-          if (this.dataSource.isLocal) {
-            this.paginationController.page(0);
-          }
-        } else if (pageChanged) {
-          this.paginationController.page(newV.pageIndex);
-        }
-      })
-    );
-
-    const filterWidgetToStore = this.filter.valueChanges
-      .debounceTime(this.dataSource.isLocal ? 150 : 250)
-      .distinctUntilChanged()
-      .map(value => value as string)
-      .do(filterString => {
-        return this.paginationController.filterByString(filterString);
-      });
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
 
     const sortStoreToWidget = this.paginationController.sort$.do((sort: ListSort) => {
-      this.headerSortField.value = sort.field;
-      this.headerSortDirection = sort.direction;
+      this.headerSort.value = sort.field;
+      this.headerSort.direction = sort.direction;
     });
 
     const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
@@ -301,9 +355,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,
-      paginationWidgetToStore,
       filterStoreToWidget,
-      filterWidgetToStore,
       sortStoreToWidget
     ).subscribe();
 
@@ -377,6 +429,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy() {
     this.multiFilterWidgetObservables.forEach(sub => sub.unsubscribe());
+    if (this.paginationWidgetToStore) {
+      this.paginationWidgetToStore.unsubscribe();
+    }
+    if (this.filterWidgetToStore) {
+      this.filterWidgetToStore.unsubscribe();
+    }
     this.uberSub.unsubscribe();
     this.dataSource.destroy();
   }
@@ -397,8 +455,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateListSort(field: string, direction: SortDirection) {
-    this.headerSortField.value = field;
-    this.headerSortDirection = direction;
+    this.headerSort.value = field;
+    this.headerSort.direction = direction;
     this.paginationController.sort({
       direction,
       field
@@ -421,7 +479,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.dataSource.isLoadingPage$.pipe(
         tap(isLoading => {
           if (!isLoading) {
-            this.paginator.firstPage();
+            this.paginationController.page(0);
           }
         }),
         takeWhile(isLoading => isLoading)

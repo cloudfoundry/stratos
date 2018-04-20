@@ -89,7 +89,7 @@ entityCache[githubBranchesSchemaKey] = GithubBranchSchema;
 const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
 entityCache[githubRepoSchemaKey] = GithubRepoSchema;
 
-const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey);
+const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey, {}, { idAttribute: commit => commit.sha });
 entityCache[githubCommitSchemaKey] = GithubCommitSchema;
 
 const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);

@@ -1,4 +1,4 @@
-<div class="list-component" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
+<div class="list-component" *ngIf="initialised$ | async" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
   <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async) && (showProgressBar$ | async)" [mode]="'query'"></mat-progress-bar>
   <div class="list-component__header" [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
     <mat-progress-bar color="primary" *ngIf="showProgressBar$ | async" [mode]="'query'"></mat-progress-bar>
@@ -30,16 +30,16 @@
         <!-- Sort Button & Drop down -->
         <div class="sort" [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
           <mat-form-field>
-            <mat-select matInput #headerSortField shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (change)="updateListSort($event.value, headerSortDirection)">
+            <mat-select matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (change)="updateListSort($event.value, headerSort.direction)">
               <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
                 {{column.headerCell()}}
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <button mat-icon-button (click)="updateListSort(headerSortField.value, 'desc')" [disabled]="(disableActions$ | async)" *ngIf="headerSortDirection==='asc'">
+          <button mat-icon-button (click)="updateListSort(headerSort.value, 'desc')" [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='asc'">
             <mat-icon>sort</mat-icon>
           </button>
-          <button mat-icon-button (click)="updateListSort(headerSortField.value, 'asc')" [disabled]="(disableActions$ | async)" *ngIf="headerSortDirection==='desc'">
+          <button mat-icon-button (click)="updateListSort(headerSort.value, 'asc')" [disabled]="(disableActions$ | async)" *ngIf="headerSort.direction==='desc'">
             <mat-icon style="transform: rotate(180deg);">sort</mat-icon>
           </button>
         </div>
@@ -103,7 +103,7 @@
       </app-table>
     </div>
     <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">
-      <mat-paginator #paginator [pageSizeOptions]="paginator.pageSizeOptions" [pageSize]="paginator.pageSize" [pageIndex]="paginator.pageIndex" showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)">
+      <mat-paginator [pageSizeOptions]="paginatorSettings.pageSizeOptions" [pageSize]="paginatorSettings.pageSize" [pageIndex]="paginatorSettings.pageIndex" showFirstLastButtons="true" [hidden]="(dataSource.isSelecting$ | async)" [length]="paginatorSettings.length">
       </mat-paginator>
     </mat-card>
   </div>
