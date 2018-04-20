@@ -8,7 +8,7 @@
   <app-step title="Name" [valid]="step2.validate | async" [onNext]="step2.onNext" [onEnter]="step2.onEnter">
     <app-create-application-step2 #step2></app-create-application-step2>
   </app-step>
-  <app-step [title]="'Create Route'" [onNext]="step3.onNext">
+  <app-step [title]="'Create Route'" [valid]="step3.validate()" [onNext]="step3.onNext">
     <app-create-application-step3 #step3></app-create-application-step3>
   </app-step>
 </app-steppers>

@@ -72,6 +72,7 @@ export class ApplicationServiceMock {
     actions: {}
   });
   appSpace$: Observable<APIResource<ISpace>> = Observable.of(createEntity<ISpace>({} as ISpace));
+  applicationRunning$: Observable<boolean> = Observable.of(false);
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {
