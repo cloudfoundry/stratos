@@ -21,9 +21,6 @@
         background-color: transparentize($error-color, .9);
       }
     }
-    &__errored {
-      background-color: transparentize($error-color, .9);
-    }
     &__highlighted {
       background-color: transparentize($primary-color, .95);
       border-left-color: $primary-color;
