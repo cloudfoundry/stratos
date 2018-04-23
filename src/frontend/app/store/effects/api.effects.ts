@@ -30,6 +30,7 @@ import { SendEventAction } from '../actions/internal-events.actions';
 import { InternalEventSeverity, APIEventState } from '../types/internal-events.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
+const endpointHeader = 'x-cap-cnsi-list';
 
 interface APIErrorCheck {
   error: boolean;
@@ -119,14 +120,20 @@ export class APIEffect {
           }
         )];
       }),
-    ).catch(errObservable => {
-      // if (errObservable.type && errObservable.type === endpointSchemaKey) {
-      //   errObservable.forEach(err => this.store.dispatch(new SendEventAction(endpointSchemaKey, err.guid)));
-      // }
+    ).catch(error => {
+      const endpoints: string[] = options.headers.get(endpointHeader).split((','));
+      endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
+        eventCode: error.status || 500,
+        severity: InternalEventSeverity.ERROR,
+        message: 'Jetstream API request error',
+        metadata: {
+          url: error.url || apiAction.options.url
+        }
+      })));
       return [
         new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
         new WrapperRequestActionFailed(
-          errObservable.message,
+          error.message,
           actionClone,
           requestType
         )
@@ -261,7 +268,6 @@ export class APIEffect {
   }
 
   addBaseHeaders(endpoints: IRequestEntityTypeState<EndpointModel> | string, header: Headers): Headers {
-    const endpointHeader = 'x-cap-cnsi-list';
     const headers = header || new Headers();
     if (typeof endpoints === 'string') {
       headers.set(endpointHeader, endpoints);

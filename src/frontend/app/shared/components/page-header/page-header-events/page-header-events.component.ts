@@ -54,12 +54,6 @@ export class PageHeaderEventsComponent implements OnInit {
     this.store.dispatch(new ToggleHeaderEvent());
   }
 
-  private searchEventsForErrors(events) {
-    const index = Math.round(events.length / 2);
-  }
-  private checkIndex(events, index) {
-    const event = events[index];
-  }
   ngOnInit() {
     if (!this.endpointIds$ && this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.cfId) {
       this.endpointIds$ = Observable.of([this.activatedRoute.snapshot.params.cfId]);
