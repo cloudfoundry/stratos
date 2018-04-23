@@ -15,7 +15,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/engine/standard"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -29,9 +28,6 @@ const (
 
 	// Send ping messages to peer with this period (must be less than pongWait)
 	pingPeriod = (pongWait * 9) / 10
-
-	// Time allowed to write a ping message
-	pingWriteTimeout = 10 * time.Second
 
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
@@ -134,7 +130,7 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 	defer connection.Close()
 
 	// Upgrade the web socket
-	ws, pingTicker, err := upgradeToWebSocket(c)
+	ws, pingTicker, err := interfaces.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}
@@ -323,37 +319,4 @@ func getSSHCode(authorizeEndpoint, clientID, token string, skipSSLValidation boo
 	}
 
 	return codes[0], nil
-}
-
-// Upgrade the HTTP connection to a WebSocket with a Ping ticker
-func upgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker, error) {
-
-	// Adapt echo.Context to Gorilla handler
-	responseWriter := echoContext.Response().(*standard.Response).ResponseWriter
-	request := echoContext.Request().(*standard.Request).Request
-
-	// We're now ok talking to CF, time to upgrade the request to a WebSocket connection
-	log.Debugf("Upgrading request to the WebSocket protocol...")
-	clientWebSocket, err := upgrader.Upgrade(responseWriter, request, nil)
-	if err != nil {
-		return nil, nil, fmt.Errorf("Upgrading connection to a WebSocket failed: [%v]", err)
-	}
-	log.Debugf("Successfully upgraded to a WebSocket connection")
-
-	// HSC-1276 - handle pong messages and reset the read deadline
-	clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
-	clientWebSocket.SetPongHandler(func(string) error {
-		clientWebSocket.SetReadDeadline(time.Now().Add(pongWait))
-		return nil
-	})
-
-	// HSC-1276 - send regular Pings to prevent the WebSocket being closed on us
-	ticker := time.NewTicker(pingPeriod)
-	go func() {
-		for range ticker.C {
-			clientWebSocket.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(pingWriteTimeout))
-		}
-	}()
-
-	return clientWebSocket, ticker, nil
 }

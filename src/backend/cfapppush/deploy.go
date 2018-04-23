@@ -33,7 +33,7 @@ import (
 	"code.cloudfoundry.org/cli/cf/trace"
 	"code.cloudfoundry.org/cli/util"
 	"code.cloudfoundry.org/cli/util/randomword"
-
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
@@ -108,7 +108,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
-	clientWebSocket, pingTicker, err := upgradeToWebSocket(echoContext)
+	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
 		return err
@@ -498,15 +498,7 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 	return deps
 
 }
-func (cfAppPush *CFAppPush) getConfigData(
-	echoContext echo.Context,
-	cnsiGuid string,
-	orgGuid string,
-	spaceGuid string,
-	spaceName string,
-	orgName string,
-	clientWebSocket *websocket.Conn,
-) (coreconfig.Repository, error) {
+func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGuid string, orgGuid string, spaceGuid string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (coreconfig.Repository, error) {
 
 	var configRepo coreconfig.Repository
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGuid)

@@ -1,7 +1,8 @@
-package cfapppush
+package interfaces
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -10,8 +11,24 @@ import (
 	"github.com/labstack/echo/engine/standard"
 )
 
+const (
+	// Time allowed to read the next pong message from the peer
+	pongWait = 30 * time.Second
+
+	// Send ping messages to peer with this period (must be less than pongWait)
+	pingPeriod = (pongWait * 9) / 10
+
+	// Time allowed to write a ping message
+	pingWriteTimeout = 10 * time.Second
+)
+
+// Allow connections from any Origin
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
 // Upgrade the HTTP connection to a WebSocket with a Ping ticker
-func upgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker, error) {
+func UpgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, *time.Ticker, error) {
 
 	// Adapt echo.Context to Gorilla handler
 	responseWriter := echoContext.Response().(*standard.Response).ResponseWriter
