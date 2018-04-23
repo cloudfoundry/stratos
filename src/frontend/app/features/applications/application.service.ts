@@ -134,6 +134,7 @@ export class ApplicationService {
   applicationStratProject$: Observable<EnvVarStratosProject>;
   applicationState$: Observable<ApplicationStateData>;
   applicationUrl$: Observable<string>;
+  applicationRunning$: Observable<boolean>;
 
   /**
    * Fetch the current state of the app (given it's instances) as an object ready
@@ -246,6 +247,10 @@ export class ApplicationService {
     this.applicationStratProject$ = this.appEnvVars.entities$.map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
     }).publishReplay(1).refCount();
+
+    this.applicationRunning$ = this.application$.pipe(
+      map(app => app ? app.app.entity.state === 'STARTED' : false)
+    );
 
   }
 

@@ -12,7 +12,7 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 })
 export class CardAppUptimeComponent implements OnInit {
 
-  constructor(private appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
+  constructor(public appService: ApplicationService, private appMonitor: ApplicationMonitorService) { }
 
   appData$: Observable<{
     maxUptime: number,

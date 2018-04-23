@@ -36,6 +36,8 @@ import { CardNumberMetricComponent } from './components/cards/card-number-metric
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
+import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
+import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
@@ -86,13 +88,13 @@ import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.serv
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 
 @NgModule({
   imports: [
@@ -170,7 +172,9 @@ import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.f
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
-    IntroScreenComponent
+    IntroScreenComponent,
+    CliInfoComponent,
+    CliCommandComponent
   ],
   exports: [
     FormsModule,
@@ -232,7 +236,9 @@ import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.f
     MetricsChartComponent,
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
-    IntroScreenComponent
+    IntroScreenComponent,
+    CliInfoComponent,
+    CliCommandComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
