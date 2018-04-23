@@ -141,17 +141,21 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         this.initialised.next(true);
       });
 
-      this.store.select(
-        selectEntity<APIResource<GithubCommit>>(githubCommitSchemaKey, this.projectName + '-' + this.deployedCommitSha))
-        .pipe(
-          filter(deployedCommit => !!deployedCommit),
-          first(),
-          map(deployedCommit => deployedCommit.entity)
-        ).subscribe(deployedCommit => {
-          this.deployedCommit = deployedCommit;
-          this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();
-        });
+      this.setDeployedCommitDetails();
     });
+  }
+
+  private setDeployedCommitDetails() {
+    this.store.select(
+      selectEntity<APIResource<GithubCommit>>(githubCommitSchemaKey, this.projectName + '-' + this.deployedCommitSha))
+      .pipe(
+        filter(deployedCommit => !!deployedCommit),
+        first(),
+        map(deployedCommit => deployedCommit.entity)
+      ).subscribe(deployedCommit => {
+        this.deployedCommit = deployedCommit;
+        this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();
+      });
   }
 
   public getSingleActions = () => [this.listActionRedeploy, this.listActionCompare];
