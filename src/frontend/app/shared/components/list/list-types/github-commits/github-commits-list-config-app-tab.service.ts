@@ -1,30 +1,28 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import * as moment from 'moment';
+import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import {
   CheckProjectExists,
+  FetchBranchesForProject,
   SetAppSourceDetails,
   SetDeployBranch,
   SetDeployCommit,
   StoreCFSettings,
-  FetchBranchesForProject,
 } from '../../../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../store/app-state';
+import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../../store/helpers/entity-factory';
+import { selectEntity } from '../../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../../store/types/api.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 import { IListAction } from '../../list.component.types';
-import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
-import { combineLatest } from 'rxjs/operators';
-import { first } from 'rxjs/operators';
-import { githubBranchesSchemaKey, entityFactory } from '../../../../../store/helpers/entity-factory';
 import { GithubCommitsDataSource } from './github-commits-data-source';
-import { Observable } from 'rxjs/Observable';
-import { RowState } from '../../data-sources-controllers/list-data-source-types';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
@@ -70,23 +68,31 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
   };
 
   private listActionCompare: IListAction<APIResource<GithubCommit>> = {
-    action: (commitEntity) => {
-      window.open(`https://github.com/${this.projectName}/compare/${this.commit}...${commitEntity.entity.sha}`, '_blank');
+    action: (compareToCommit) => {
+      window.open(`https://github.com/${this.projectName}/compare/${this.deployedCommitSha}...${compareToCommit.entity.sha}`, '_blank');
     },
     label: 'Compare',
     description: '',
-    visible: commitEntity => {
-      // This should be the same for all rows, unlike the enabled state which will change depending on commit
-      return commitEntity.entity.url.startsWith('https://api.github.com');
+    visible: commitEntity => true,
+    enabled: commitEntity => {
+      const isDeployedCommit = commitEntity.entity.sha === this.deployedCommitSha;
+      if (!isDeployedCommit) {
+        // The github url will show 'no change' if the compare to commit is earlier in the tree than the deployed commit. We could swap
+        // these around for those cases... however the diff +/- is then incorrect. So until we have a better way of doing this disable
+        // the button instead
+        return this.deployedTime < moment(commitEntity.entity.commit.author.date).unix();
+      }
+      return false;
     },
-    enabled: commitEntity => commitEntity.entity.sha !== this.commit,
   };
 
   private cfGuid: string;
   private orgGuid: string;
   private spaceGuid: string;
   private appGuid: string;
-  private commit: string;
+  private deployedCommitSha: string;
+  private deployedCommit: GithubCommit;
+  private deployedTime: number;
 
   constructor(
     store: Store<AppState>,
@@ -117,7 +123,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       first(),
     ).subscribe(stratosProject => {
       this.projectName = stratosProject.deploySource.project;
-      this.commit = stratosProject.deploySource.commit;
+      this.deployedCommitSha = stratosProject.deploySource.commit;
 
       const branchKey = `${this.projectName}-${stratosProject.deploySource.branch}`;
       const gitBranchEntityService = this.entityServiceFactory.create<APIResource>(
@@ -131,9 +137,20 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
         first(),
       ).subscribe(branch => {
         this.branchName = branch.entity.entity.name;
-        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName, this.branchName, this.commit);
+        this.dataSource = new GithubCommitsDataSource(this.store, this, this.projectName, this.branchName, this.deployedCommitSha);
         this.initialised.next(true);
       });
+
+      this.store.select(
+        selectEntity<APIResource<GithubCommit>>(githubCommitSchemaKey, this.projectName + '-' + this.deployedCommitSha))
+        .pipe(
+          filter(deployedCommit => !!deployedCommit),
+          first(),
+          map(deployedCommit => deployedCommit.entity)
+        ).subscribe(deployedCommit => {
+          this.deployedCommit = deployedCommit;
+          this.deployedTime = moment(this.deployedCommit.commit.author.date).unix();
+        });
     });
   }
 
