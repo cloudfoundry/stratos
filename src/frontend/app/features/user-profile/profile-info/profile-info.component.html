@@ -1,4 +1,11 @@
-<app-page-header>User Profile</app-page-header>
+<app-page-header>
+  <h1>User Profile</h1>
+  <div class="page-header-right">
+    <button mat-icon-button name="edit" routerLink="/userProfile/edit" matTooltip="Edit">
+      <mat-icon>edit</mat-icon>
+    </button>
+  </div>
+</app-page-header>
 <div class="user-profile">
   <app-user-profile-banner *ngIf="userProfile$ | async as profile" name="{{ profile.name.givenName }} {{ profile.name.familyName }}" email="{{ primaryEmailAddress$ | async }}">
   </app-user-profile-banner>

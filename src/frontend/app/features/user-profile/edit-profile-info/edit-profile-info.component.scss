@@ -1,0 +1,9 @@
+.edit-profile {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+  max-width: 100%;
+  mat-form-field {
+    max-width: 450px;
+  }
+}

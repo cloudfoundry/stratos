@@ -1,0 +1,37 @@
+<app-page-header>
+  <h1>Edit User Profile</h1>
+  <div class="page-header-right">
+    <button mat-icon-button mat-button routerLink="/userProfile">
+        <mat-icon>clear</mat-icon>
+      </button>
+  </div>
+</app-page-header>
+<app-steppers cancel="/userProfile">
+  <app-step [title]="'Edit User Profile'" [valid]="editProfileForm.valid && editProfileForm.dirty" [onNext]="updateProfile">
+    <div>
+      <form [formGroup]="editProfileForm" validate class="edit-profile">
+        <mat-form-field>
+          <input matInput placeholder="Given Name" formControlName="givenName">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Family Name" formControlName="familyName">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Primary Email Address" formControlName="emailAddress">
+        </mat-form-field>
+        <p>Current password is required when changing email address or password</p>
+        <mat-form-field>
+          <input matInput placeholder="Current Password" type="password" formControlName="currentPassword">
+        </mat-form-field>
+        <p>Change Password (Leave blank to keep current password)</p>
+        <mat-form-field>
+          <input matInput placeholder="New Password" type="password" formControlName="newPassword">
+        </mat-form-field>
+        <mat-form-field>
+          <input matInput placeholder="Confirm New Password" type="password" formControlName="confirmPassword">
+        </mat-form-field>
+        <p *ngIf="error" class="edit-app__error">There was an error updating the profile.</p>
+      </form>
+    </div>
+  </app-step>
+</app-steppers>
