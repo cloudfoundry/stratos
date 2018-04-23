@@ -149,11 +149,13 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   }
 
   canCancel(index) {
-    // If step has 'cancelRequiresValid' set then use the same gate as the next button
-    if (!this.steps[index]) {
+    if (
+      !this.steps[index] ||
+      !this.steps[index].canClose
+    ) {
       return false;
     }
-    return this.steps[index].cancelRequiresValid ? this.canGoNext(index) : true;
+    return true;
   }
 
   getIconLigature(step: StepComponent, index: number): 'done' {

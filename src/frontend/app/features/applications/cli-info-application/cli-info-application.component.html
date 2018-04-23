@@ -1,0 +1,38 @@
+<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+  <h1>CLI Info</h1>
+  <div class="page-header-right">
+    <span>
+      <button mat-icon-button (click)="back()">
+        <mat-icon matTooltip="Back to App">close</mat-icon>
+      </button>
+    </span>
+  </div>
+</app-page-header>
+
+<app-cli-info *ngIf="context$ | async as context" [context]="context">
+
+  <br>
+  <h4>Application Management Commands</h4>
+
+  <app-cli-command name="Summary" msg="To get the application summary:" syntax="cf app {{context.appName || '[app name]'}}">
+  </app-cli-command>
+
+  <app-cli-command name="Start" msg="To start the application:" syntax="cf start {{context.appName || '[app name]'}}">
+  </app-cli-command>
+
+  <app-cli-command name="Stop" msg="To stop the application:" syntax="cf stop {{context.appName || '[app name]'}}">
+  </app-cli-command>
+
+  <app-cli-command name="Restart" msg="To restart the application:" syntax="f restart {{context.appName || '[app name]'}}">
+  </app-cli-command>
+
+  <br>
+  <h4>Scaling the Application</h4>
+
+  <app-cli-command name="Instances" msg="To change the number of application instances:" syntax="cf scale {{context.appName || '[app name]'}} -i [N]">
+  </app-cli-command>
+
+  <app-cli-command name="Memory" msg="To change the memory allocated to application instances:" syntax="cf scale {{context.appName || '[app name]'}} -i -m [N]">
+  </app-cli-command>
+
+</app-cli-info>

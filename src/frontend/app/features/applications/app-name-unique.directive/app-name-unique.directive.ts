@@ -32,6 +32,8 @@ export class AppNameUniqueChecking {
 
     if (this.busy) {
       this.status = 'busy';
+    } else if (this.taken === undefined) {
+      this.status = '';
     } else {
       this.status = this.taken ? 'error' : 'done';
     }
@@ -56,7 +58,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   }
 
   ngOnInit(): void {
-    this.appApplicationNameUnique.set(false, false);
+    this.appApplicationNameUnique.set(false);
   }
 
   public validate(control: AbstractControl): Observable<{ appNameTaken: boolean } | null> {
@@ -65,26 +67,26 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     }
     this.appApplicationNameUnique.set(true);
     return Observable.timer(500).take(1)
-    .combineLatest(this.store.select(selectNewAppState).take(1))
-    .switchMap((v) => {
-      const cfGuid = v[1].cloudFoundryDetails.cloudFoundry;
-      const spaceGuid = v[1].cloudFoundryDetails.space;
-      const currentName = v[1].name;
-      return this.checkAppName(cfGuid, spaceGuid, currentName, control.value);
-    })
-    .map(v => {
-      this.appApplicationNameUnique.set(false, !v);
-      return v ? null : {appNameTaken: true};
-    })
-    .catch(err => {
-      this.appApplicationNameUnique.set(false, false);
-      return Observable.throw(err);
-    });
+      .combineLatest(this.store.select(selectNewAppState).take(1))
+      .switchMap(newAppState => {
+        const cfGuid = newAppState[1].cloudFoundryDetails.cloudFoundry;
+        const spaceGuid = newAppState[1].cloudFoundryDetails.space;
+        const currentName = newAppState[1].name;
+        return this.appNameTaken(cfGuid, spaceGuid, currentName, control.value);
+      })
+      .map(appNameTaken => {
+        this.appApplicationNameUnique.set(false, appNameTaken);
+        return appNameTaken ? { appNameTaken } : null;
+      })
+      .catch(err => {
+        this.appApplicationNameUnique.set(false);
+        return Observable.throw(err);
+      });
   }
 
-  private checkAppName(cfGuid, spaceGuid, currentName, name): Observable<any> {
-    if (name === currentName || name.length === 0) {
-      return Observable.of(true);
+  private appNameTaken(cfGuid, spaceGuid, currentName, name): Observable<any> {
+    if (name.length === 0) {
+      return Observable.of(undefined);
     }
     const options = new RequestOptions();
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/apps`;
@@ -96,14 +98,14 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     options.headers.set('x-cap-cnsi-list', cfGuid);
     options.headers.set('x-cap-passthrough', 'true');
     return this.http.request(new Request(options))
-    .map(response => {
-      let resData;
-      try {
-        resData = response.json();
-      } catch (e) {
-        resData = {};
-      }
-      return resData.total_results === 0;
-    });
+      .map(response => {
+        let resData;
+        try {
+          resData = response.json();
+        } catch (e) {
+          resData = {};
+        }
+        return resData.total_results > 0;
+      });
   }
 }

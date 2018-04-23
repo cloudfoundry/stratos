@@ -19,9 +19,10 @@ import { GetAllApplications } from '../../../../store/actions/application.action
 import { environment } from '../../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { CfAppsDataSource, createGetAllAppAction } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { interval } from 'rxjs/observable/interval';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 // Interval to check for new application
 const APP_CHECK_INTERVAL = 3000;
@@ -42,6 +43,9 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   // Validation poller
   validate = this.createValidationPoller();
+  error$ = new BehaviorSubject<boolean>(false);
+  // Observable for when the deploy modal can be closed
+  closeable$: Observable<boolean>;
 
   // Are we deploying?
   deploying = false;
@@ -51,7 +55,15 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     private snackBar: MatSnackBar,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     private http: HttpClient,
-  ) { }
+  ) {
+    this.closeable$ = Observable.combineLatest(
+      this.validate,
+      this.error$).pipe(
+        map(([validated, errored]) => {
+          return validated || errored;
+        })
+      );
+  }
 
   ngOnDestroy() {
     // Unsubscribe from the websocket stream
@@ -204,6 +216,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   close(log, title, error, deleteAppSection) {
+    this.error$.next(true);
     if (deleteAppSection) {
       this.store.dispatch(new DeleteDeployAppSection());
     }
@@ -221,7 +234,6 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
 
   onNext: StepOnNextFunction = () => {
     this.deploying = false;
-    this.store.dispatch(new GetAllApplications(CfAppsDataSource.paginationKey));
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
     // Take user to applications
@@ -246,6 +258,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
                 const apps = info[this.appData.cloudFoundry];
                 if (apps.total_results === 1) {
                   this.appGuid = apps.resources[0].metadata.guid;
+                  // New app - so refresh the application wall data
+                  this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
                   return Observable.of(true);
                 }
               }

@@ -1,33 +1,39 @@
 .app-code-block {
+  min-height: 44px;
+  padding: 10px 20px;
   position: relative;
-  min-height: 20px;
-  padding: 20px;
+  &__pre {
+    white-space: pre-line;
+  }
   pre {
     margin: 0;
     white-space: pre-line;
     word-wrap: break-word;
   }
-  &___copied-div,
-  &___copy-icon {
+  &__copied-div,
+  &__copy-icon {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    right: 10px;
+    top: 10px;
     transition: opacity 250ms linear;
   }
-  &___copied-div {
-    opacity: 0;
-    display: flex;
+  &__copied-div {
     align-items: center;
+    display: flex;
+    opacity: 0;
     span {
       margin-right: 5px;
     }
   }
-  &___success {
+  &__copy-icon {
+    cursor: pointer;
+  }
+  &__success {
     .app-code-block {
-      &___copied-div {
+      &__copied-div {
         opacity: 1;
       }
-      &___copy-icon {
+      &__copy-icon {
         opacity: 0;
       }
     }
