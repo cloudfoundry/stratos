@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
-import { ServicesService } from '../services.service';
-import { tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { Observable } from 'rxjs/Observable';
+
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { selectEntity } from '../../../store/selectors/api.selectors';
+import { AppState } from '../../../store/app-state';
+import { ServicesService } from '../services.service';
+import { map, tap, first } from 'rxjs/operators';
 
 
 function servicesServiceFactory(
@@ -40,6 +40,13 @@ export class ServiceBaseComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  getServiceLabel = (): Observable<string> => {
+    return Observable.combineLatest(this.servicesService.service$, this.servicesService.serviceExtraInfo$).pipe(
+      first(),
+      map(([a, b]) => !!b ? b.displayName : a.entity.label)
+    );
   }
 
 }

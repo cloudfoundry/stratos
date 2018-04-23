@@ -1,2 +1,2 @@
-<app-page-header>{{ (servicesService.serviceExtraInfo$ | async)?.displayName }}</app-page-header>
+<app-page-header>{{ getServiceLabel() | async }}</app-page-header>
 <router-outlet></router-outlet>
