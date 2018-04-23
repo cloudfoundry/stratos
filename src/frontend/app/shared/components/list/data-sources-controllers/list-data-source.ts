@@ -164,7 +164,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
-    if (config.hideRefresh) {
+    if (config.listConfig.hideRefresh) {
       return null;
     }
     return config.refresh ? config.refresh : () => {

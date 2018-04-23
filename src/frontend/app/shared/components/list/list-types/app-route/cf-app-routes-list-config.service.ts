@@ -30,7 +30,7 @@ import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   routesDataSource: CfAppRoutesDataSource;
 
-  private multiListActionDelete: IMultiListAction<APIResource> = {
+  public multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
       if (items.length === 1) {
         this.deleteSingleRoute(items[0]);

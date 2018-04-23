@@ -1,6 +1,7 @@
-<app-loading-page [isLoading]="deleting$" [text]="'Deleting application'">
+<app-loading-page [isLoading]="deleting$" [text]="'Gathering application information'">
   <app-page-header>
     <h1>Delete routes</h1>
   </app-page-header>
+  {{ routes | json }} {{ instances | json }}
   <app-delete-app-routes [routes]="routes"></app-delete-app-routes>
 </app-loading-page>

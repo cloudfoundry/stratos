@@ -69,6 +69,7 @@ export interface IListConfig<T> {
    * The card component used in card view
    */
   cardComponent?: any;
+  hideRefresh?: boolean;
 }
 
 export interface IListMultiFilterConfig {
