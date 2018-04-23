@@ -94,6 +94,8 @@ import { StratosTitleComponent } from './components/stratos-title/stratos-title.
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
+import { CliInfoComponent } from './components/cli-info/cli-info.component';
+import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
 
 @NgModule({
   imports: [
@@ -174,6 +176,8 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
     StratosTitleComponent,
     IntroScreenComponent,
     UserProfileBannerComponent
+    CliInfoComponent,
+    CliCommandComponent
   ],
   exports: [
     FormsModule,
@@ -238,6 +242,8 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
     StratosTitleComponent,
     IntroScreenComponent,
     UserProfileBannerComponent,
+    CliInfoComponent,
+    CliCommandComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

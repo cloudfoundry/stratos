@@ -61,6 +61,7 @@ export class ApplicationServiceMock {
     indicator: null,
     actions: {}
   });
+  applicationRunning$: Observable<boolean> = Observable.of(false);
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {

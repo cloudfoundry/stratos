@@ -5,6 +5,7 @@ import { map, share } from 'rxjs/operators';
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { CardStatus } from '../../application-state/application-state.service';
+import { pathGet } from '../../../../core/utils.service';
 
 @Component({
   selector: 'app-card-app-usage',
@@ -20,13 +21,13 @@ export class CardAppUsageComponent implements OnInit {
 
   ngOnInit() {
     this.appData$ = Observable.combineLatest(
-      this.appMonitor.appMonitor$,
-      this.appService.application$.map(data => data.app.entity.state === 'STARTED'),
+      this.appMonitor.appMonitor$.startWith(null),
+      this.appService.applicationRunning$,
     ).pipe(
       map(([monitor, isRunning]) => ({
         monitor: monitor,
         isRunning: isRunning,
-        status: !isRunning ? 'tentative' : monitor.status.usage
+        status: !isRunning ? 'tentative' : pathGet('status.usage', monitor)
       })),
       share()
     );

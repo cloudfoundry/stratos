@@ -6,7 +6,7 @@
       <mat-error *ngIf="form.controls.appName?.hasError('appNameTaken')">
         This name has been taken, please try another.
       </mat-error>
-      <div class="inline-icon inline-icon__form">
+      <div *ngIf="!form.controls.appName?.hasError('required')" class="inline-icon inline-icon__form">
         <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
       </div>
     </mat-form-field>
