@@ -108,3 +108,9 @@ type rawDockerInfo struct {
 type Applications struct {
 	Applications []RawManifestApplication `yaml:"applications"`
 }
+
+type CloneDetails struct {
+	Url    string
+	Branch string
+	Commit string
+}
