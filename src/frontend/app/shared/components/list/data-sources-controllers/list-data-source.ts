@@ -241,6 +241,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   selectClear() {
     this.selectedRows.clear();
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(false);
   }
 

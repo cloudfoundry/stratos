@@ -28,7 +28,7 @@ export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIRes
     noEntries: 'There are no service instances'
   };
 
-  private serviceInstanceColumns: ITableColumn<APIResource<CfServiceInstance>>[] = [
+  public serviceInstanceColumns: ITableColumn<APIResource<CfServiceInstance>>[] = [
     {
       columnId: 'name',
       headerCell: () => 'Service Instances',

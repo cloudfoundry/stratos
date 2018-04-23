@@ -16,18 +16,27 @@ import { DeleteApplication, GetAllApplications } from '../../../store/actions/ap
 import { getPaginationKey } from '../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
-import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
+import {
+  applicationSchemaKey, appStatsSchemaKey, entityFactory, serviceInstancesSchemaKey, spaceSchemaKey, serviceBindingSchemaKey
+} from '../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { ApplicationService } from '../application.service';
 import { AppInstanceStats } from '../../../store/types/app-metadata.types';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
+import { CloudFoundrySpaceService } from '../../cloud-foundry/services/cloud-foundry-space.service';
+import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
+import { GetServicesInstancesInSpace } from '../../../store/actions/service-instances.actions';
 
 @Component({
   selector: 'app-application-delete',
   templateUrl: './application-delete.component.html',
-  styleUrls: ['./application-delete.component.scss']
+  styleUrls: ['./application-delete.component.scss'],
+  providers: [
+    CloudFoundrySpaceService
+  ]
 })
 export class ApplicationDeleteComponent implements OnDestroy {
 
@@ -93,8 +102,11 @@ export class ApplicationDeleteComponent implements OnDestroy {
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = new GetAppServiceBindings(
       appGuid,
-      cfGuid
-    );
+      cfGuid,
+      createEntityRelationPaginationKey(serviceBindingSchemaKey, appGuid), [
+        createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+      ]);
     const routesAction = new GetAppRoutes(
       appGuid,
       cfGuid,
@@ -136,12 +148,11 @@ export class ApplicationDeleteComponent implements OnDestroy {
     this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
   }
 
-  private setSelectedServiceInstances($event: APIResource<IServiceBinding>[]) {
-    this.selectedServiceInstances = $event;
+  private setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
+    this.selectedServiceInstances = selected;
   }
 
-  private setSelectedRoutes($event: APIResource<IRoute>[]) {
-    console.log($event);
-    this.selectedRoutes = $event;
+  private setSelectedRoutes(selected: APIResource<IRoute>[]) {
+    this.selectedRoutes = selected;
   }
 }

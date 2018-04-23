@@ -4,10 +4,10 @@
   </app-page-header>
   <app-steppers *ngIf="!(fetchingRelated$ | async)" cancel="/applications">
     <app-step *ngIf="routes && routes.length" title="Routes">
-      <app-delete-app-routes (selectedRoutes)="setSelectedRoutes($event)"></app-delete-app-routes>
+      <app-delete-app-routes (selected)="setSelectedRoutes($event)"></app-delete-app-routes>
     </app-step>
     <app-step title="Service Instances" *ngIf="instances && instances.length">
-      {{ instances | json }}
+      <app-delete-app-instances (selected)="setSelectedRoutes($event)"></app-delete-app-instances>
     </app-step>
     <app-step title="Confirm">
       Confirm

@@ -20,6 +20,7 @@ import {
   IListConfig,
   IMultiListAction,
   ListViewTypes,
+  ListConfig,
 } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
@@ -27,9 +28,8 @@ import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcp
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 
 @Injectable()
-export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
+export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
   routesDataSource: CfAppRoutesDataSource;
-
   public multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
       if (items.length === 1) {
@@ -175,7 +175,7 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   }
 
   getGlobalActions = () => [this.listActionAdd];
-  getMultiActions() {
+  getMultiActions = () => {
     return [this.multiListActionUnmap, this.multiListActionDelete];
   }
 
@@ -189,6 +189,7 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     private appService: ApplicationService,
     private confirmDialog: ConfirmationDialogService
   ) {
+    super();
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,

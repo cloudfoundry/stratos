@@ -67,7 +67,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   ngOnInit() {
     this.dataSource = this.listConfig.getDataSource();
 
-    const addSelect = (this.listConfig.getMultiActions() || []).length > 0;
+    const addSelect = this.listConfig.allowSelection || (this.listConfig.getMultiActions() || []).length > 0;
     const addActions = (this.listConfig.getSingleActions() || []).length > 0;
     if (addSelect || addActions) {
       const newColumns = [...this.columns];

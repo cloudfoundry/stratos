@@ -71,6 +71,7 @@ export interface IListConfig<T> {
    */
   cardComponent?: any;
   hideRefresh?: boolean;
+  allowSelection?: boolean;
 }
 
 export interface IListMultiFilterConfig {
@@ -99,6 +100,7 @@ export class ListConfig<T> implements IListConfig<T> {
   tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
+  allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
