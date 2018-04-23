@@ -77,6 +77,7 @@ export interface IService {
   plan_updateable: number;
   service_plans_url: string;
   service_plans: APIResource<IServicePlan>[];
+  cfGuid?: string;
 }
 
 export interface IServiceExtra {
