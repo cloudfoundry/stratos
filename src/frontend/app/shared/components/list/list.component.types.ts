@@ -6,6 +6,7 @@ import { ITableColumn, ITableText } from './list-table/table.types';
 import { Type } from '@angular/core';
 import { ListView } from '../../../store/actions/list.actions';
 import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
+import { ListDataSource } from './data-sources-controllers/list-data-source';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -102,7 +103,7 @@ export class ListConfig<T> implements IListConfig<T> {
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = () => null;
+  getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }
 

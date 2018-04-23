@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginationEntityState, PaginatedAction } from '../../../../store/types/pagination.types';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 export interface AppEvent {
   actee_name: string;
@@ -58,6 +59,7 @@ export interface IListDataSource<T> {
 
   selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
+  selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
   trackBy(index: number, item: T);
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table

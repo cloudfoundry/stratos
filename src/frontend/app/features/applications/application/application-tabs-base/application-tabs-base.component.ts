@@ -210,10 +210,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteApplication() {
-    this.confirmDialog.open(appDeleteConfirmation, () => {
-      this.router.navigate(['./delete'], { relativeTo: this.route });
-    });
+  redirectToDeletePage() {
+    this.router.navigate(['./delete'], { relativeTo: this.route });
   }
 
   ngOnInit() {

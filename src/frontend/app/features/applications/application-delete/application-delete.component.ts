@@ -22,6 +22,7 @@ import { APIResource } from '../../../store/types/api.types';
 import { PaginatedAction } from '../../../store/types/pagination.types';
 import { ApplicationService } from '../application.service';
 import { AppInstanceStats } from '../../../store/types/app-metadata.types';
+import { IServiceBinding } from '../../../core/cf-api-svc.types';
 
 @Component({
   selector: 'app-application-delete',
@@ -30,7 +31,9 @@ import { AppInstanceStats } from '../../../store/types/app-metadata.types';
 })
 export class ApplicationDeleteComponent implements OnDestroy {
 
-
+  fetchingRelated$: Observable<boolean>;
+  selectedRoutes: APIResource<IRoute>[];
+  selectedServiceInstances: APIResource<IServiceBinding>[];
   private redirectAfterDeleteSub: Subscription;
   private appWallFetchAction: GetAllApplications;
   public routes: APIResource<IRoute>[];
@@ -49,14 +52,14 @@ export class ApplicationDeleteComponent implements OnDestroy {
 
     const [instanceMonitor, routeMonitor] = this.fetchRelatedEntities();
 
-    const fetchingRelated$ = combineLatest(instanceMonitor.fetchingCurrentPage$, routeMonitor.fetchingCurrentPage$).pipe(
+    this.fetchingRelated$ = combineLatest(instanceMonitor.fetchingCurrentPage$, routeMonitor.fetchingCurrentPage$).pipe(
       map(([fetchingInstances, fetchingRoutes]) => fetchingInstances || fetchingRoutes),
       startWith(true)
     );
 
-    this.deleting$ = this.isDeleting(fetchingRelated$);
+    this.deleting$ = this.isDeleting(this.fetchingRelated$);
 
-    fetchingRelated$.pipe(
+    this.fetchingRelated$.pipe(
       filter(fetching => !fetching),
       first(),
       switchMap(() => combineLatest(
@@ -92,16 +95,19 @@ export class ApplicationDeleteComponent implements OnDestroy {
       appGuid,
       cfGuid
     );
-    const routesAction = this.makeActionLocal(new GetAppRoutes(
+    const routesAction = new GetAppRoutes(
       appGuid,
       cfGuid,
       createEntityRelationPaginationKey(applicationSchemaKey, appGuid)
-    ));
+    );
     const instancePaginationKey = instanceAction.paginationKey;
     const routesPaginationKey = routesAction.paginationKey;
     this.store.dispatch(instanceAction);
     this.store.dispatch(routesAction);
-    const instanceMonitor = this.paginationMonitorFactory.create<AppInstanceStats>(instancePaginationKey, instanceAction.entity[0]);
+    const instanceMonitor = this.paginationMonitorFactory.create<APIResource<IServiceBinding>>(
+      instancePaginationKey,
+      instanceAction.entity[0]
+    );
     const routesMonitor = this.paginationMonitorFactory.create<APIResource<IRoute>>(routesPaginationKey, routesAction.entity[0]);
     return [
       instanceMonitor,
@@ -127,11 +133,15 @@ export class ApplicationDeleteComponent implements OnDestroy {
     ).subscribe();
   }
   private dispatchAppWallFetch() {
-    this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey))
+    this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
   }
-  private makeActionLocal(action: PaginatedAction) {
-    action.flattenPagination = true;
-    action.initialParams['results-per-page'] = 100;
-    return action;
+
+  private setSelectedServiceInstances($event: APIResource<IServiceBinding>[]) {
+    this.selectedServiceInstances = $event;
+  }
+
+  private setSelectedRoutes($event: APIResource<IRoute>[]) {
+    console.log($event);
+    this.selectedRoutes = $event;
   }
 }
