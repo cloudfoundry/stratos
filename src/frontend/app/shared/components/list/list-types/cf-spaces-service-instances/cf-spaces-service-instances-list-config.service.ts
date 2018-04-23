@@ -1,22 +1,27 @@
+import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
-import { ListViewTypes, IListAction, ListConfig, IListConfig } from '../../list.component.types';
-import { ListView } from '../../../../../store/actions/list.actions';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../../store/app-state';
+
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
+import { ListView } from '../../../../../store/actions/list.actions';
+import { RouterNav } from '../../../../../store/actions/router.actions';
+import { DeleteServiceBinding, DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
+import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { ITableColumn } from '../../list-table/table.types';
 import { CfServiceInstance } from '../../../../../store/types/service.types';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { ServiceInstancesListConfigService } from '../service-instances/service-instances-list-config.service';
+import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
+import {
+  TableCellServiceInstanceAppsAttachedComponent,
+} from './table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
+import {
+  TableCellServiceInstanceTagsComponent,
+} from './table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import { TableCellServiceNameComponent } from './table-cell-service-name/table-cell-service-name.component';
 import { TableCellServicePlanComponent } from './table-cell-service-plan/table-cell-service-plan.component';
-import { TableCellServiceInstanceTagsComponent } from './table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import {
-  TableCellServiceInstanceAppsAttachedComponent
-} from './table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
-import { DeleteServiceInstance, DeleteServiceBinding } from '../../../../../store/actions/service-instances.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { DatePipe } from '@angular/common';
+
 @Injectable()
 export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIResource<CfServiceInstance>>
   implements IListConfig<APIResource<CfServiceInstance>>  {
@@ -28,52 +33,6 @@ export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIRes
     noEntries: 'There are no service instances'
   };
 
-  private serviceInstanceColumns: ITableColumn<APIResource<CfServiceInstance>>[] = [
-    {
-      columnId: 'name',
-      headerCell: () => 'Service Instances',
-      cellDefinition: {
-        getValue: (row) => `${row.entity.name}`
-      },
-      cellFlex: '2'
-    },
-    {
-      columnId: 'service',
-      headerCell: () => 'Service',
-      cellComponent: TableCellServiceNameComponent,
-      cellFlex: '1'
-    },
-    {
-      columnId: 'servicePlan',
-      headerCell: () => 'Plan',
-      cellComponent: TableCellServicePlanComponent,
-      cellFlex: '1'
-    },
-    {
-      columnId: 'tags',
-      headerCell: () => 'Tags',
-      cellComponent: TableCellServiceInstanceTagsComponent,
-      cellFlex: '2'
-    },
-    {
-      columnId: 'attachedApps',
-      headerCell: () => 'Application Attached',
-      cellComponent: TableCellServiceInstanceAppsAttachedComponent,
-      cellFlex: '3'
-    },
-    {
-      columnId: 'creation', headerCell: () => 'Creation Date',
-      cellDefinition: {
-        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
-      },
-      sort: {
-        type: 'sort',
-        orderKey: 'creation',
-        field: 'metadata.created_at'
-      },
-      cellFlex: '2'
-    },
-  ];
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceInstance(item),
@@ -118,7 +77,7 @@ export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIRes
   getMultiActions = () => [];
   getSingleActions = () => [this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
-  getColumns = () => this.serviceInstanceColumns;
+  getColumns = () => ServiceInstancesListConfigService.getColumns(this.datePipe);
   getDataSource = () => this.dataSource;
 
 }
