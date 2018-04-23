@@ -2,29 +2,20 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
+import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { DeleteServiceBinding, DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { CfServiceInstance } from '../../../../../store/types/service.types';
-import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import { ServiceInstancesListConfigService } from '../service-instances/service-instances-list-config.service';
 import { CfSpacesServiceInstancesDataSource } from './cf-spaces-service-instances-data-source';
-import {
-  TableCellServiceInstanceAppsAttachedComponent,
-} from './table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
-import {
-  TableCellServiceInstanceTagsComponent,
-} from './table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import { TableCellServiceNameComponent } from './table-cell-service-name/table-cell-service-name.component';
-import { TableCellServicePlanComponent } from './table-cell-service-plan/table-cell-service-plan.component';
 
 @Injectable()
-export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIResource<CfServiceInstance>>
-  implements IListConfig<APIResource<CfServiceInstance>>  {
+export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIResource<IServiceInstance>>
+  implements IListConfig<APIResource<IServiceInstance>>  {
   viewType = ListViewTypes.TABLE_ONLY;
   dataSource: CfSpacesServiceInstancesDataSource;
   defaultView = 'table' as ListView;
@@ -55,11 +46,11 @@ export class CfSpacesServiceInstancesListConfigService extends ListConfig<APIRes
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
   }
 
-  deleteServiceInstance = (serviceInstance: APIResource<CfServiceInstance>) =>
+  deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
     this.store.dispatch(new DeleteServiceInstance(this.cfSpaceService.cfGuid, serviceInstance.metadata.guid))
 
 
-  deleteServiceBinding = (serviceInstance: APIResource<CfServiceInstance>) => {
+  deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
     /**
      * If only one binding exists, carry out the action otherwise
      * take user to a form to select which app binding they want to remove

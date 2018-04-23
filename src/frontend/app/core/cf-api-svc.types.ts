@@ -43,7 +43,7 @@ export interface IServiceInstance {
   service_plan_url: string;
   service_plan?: APIResource<IServicePlan>;
   service_bindings_url: string;
-  service_binding?: APIResource<IServiceBinding>[];
+  service_bindings?: APIResource<IServiceBinding>[];
   service_keys_url: string;
   routes_url: string;
   service_url: string;
@@ -78,6 +78,8 @@ export interface IService {
   service_plans_url: string;
   service_plans: APIResource<IServicePlan>[];
   cfGuid?: string;
+  guid?: string;
+
 }
 
 export interface IServiceExtra {
