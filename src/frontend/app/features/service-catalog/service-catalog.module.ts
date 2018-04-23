@@ -7,7 +7,7 @@ import { ServiceBaseComponent } from './service-base/service-base.component';
 import { ServiceCatalogPageComponent } from './service-catalog-page/service-catalog-page.component';
 import { ServiceCatalogRoutingModule } from './service-catalog.routing';
 import { ServiceInstancesComponent } from './service-instances/service-instances.component';
-import { CoreModule } from "../../core/core.module";
+import { CoreModule } from '../../core/core.module';
 
 @NgModule({
   imports: [

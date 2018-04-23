@@ -1,0 +1,10 @@
+<div class="add-space-stepper">
+  <app-page-header>
+    Create Space
+  </app-page-header>
+  <app-steppers [cancel]="serviceInstancesUrl">
+    <app-step title="Create Service Instance" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Create">
+      <app-select-plan-step #step1></app-select-plan-step>
+    </app-step>
+  </app-steppers>
+</div>
