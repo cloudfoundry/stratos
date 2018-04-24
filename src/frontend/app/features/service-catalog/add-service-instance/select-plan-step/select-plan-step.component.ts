@@ -27,9 +27,8 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy {
   subscription: Subscription;
   stepperForm: FormGroup;
   servicePlans$: Observable<ServicePlan[]>;
-  // selectedPlan: ServicePlan;
 
-  constructor(public store: Store<AppState>, public servicesService: ServicesService) {
+  constructor(private store: Store<AppState>, private servicesService: ServicesService) {
     this.servicePlans$ = servicesService.servicePlans$.pipe(
       map(o => o.filter(s => s.entity.bindable)),
       map(o => o.map(p => ({
