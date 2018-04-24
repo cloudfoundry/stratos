@@ -99,6 +99,7 @@ export class APIEffect {
       }),
       mergeMap(response => {
         const { entities, totalResults, totalPages } = response;
+        console.log('api effect fetch');
         return [new ValidateEntitiesStart(
           actionClone,
           entities.result,

@@ -17,7 +17,7 @@ import { getPaginationKey } from '../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import {
-  applicationSchemaKey, appStatsSchemaKey, entityFactory, serviceInstancesSchemaKey, spaceSchemaKey, serviceBindingSchemaKey
+  applicationSchemaKey, appStatsSchemaKey, entityFactory, serviceInstancesSchemaKey, spaceSchemaKey, serviceBindingSchemaKey, serviceSchemaKey
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
@@ -99,14 +99,19 @@ export class ApplicationDeleteComponent implements OnDestroy {
     );
   }
   public fetchRelatedEntities() {
+    const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = new GetAppServiceBindings(
       appGuid,
       cfGuid,
-      createEntityRelationPaginationKey(serviceBindingSchemaKey, appGuid), [
+      createEntityRelationPaginationKey(serviceBindingSchemaKey, appGuid),
+      [
         createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
+        createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
+        createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
         createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      ]);
+      ]
+    );
     const routesAction = new GetAppRoutes(
       appGuid,
       cfGuid,

@@ -434,6 +434,7 @@ export function validateEntityRelations(config: ValidateEntityRelationsConfig): 
 
 export function listEntityRelations(action: EntityInlineParentAction) {
   const tree = fetchEntityTree(action);
+  console.log(tree);
   return {
     maxDepth: tree.maxDepth,
     relations: tree.requiredParamNames

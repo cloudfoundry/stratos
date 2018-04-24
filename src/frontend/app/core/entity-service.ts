@@ -79,6 +79,7 @@ export class EntityService<T = any> {
           return;
         }
         validated = true;
+        console.log('entity service fetch');
         store.dispatch(new ValidateEntitiesStart(
           action as ICFAction,
           [entityInfo.entity.metadata.guid],
