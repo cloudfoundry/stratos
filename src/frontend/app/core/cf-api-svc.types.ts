@@ -55,7 +55,7 @@ export interface IServicePlan {
   free: boolean;
   description: string;
   service_guid: string;
-  extra: string;
+  extra: string; // stringified IServiceExtra
   unique_id: string;
   public: boolean;
   bindable: number;
@@ -63,6 +63,11 @@ export interface IServicePlan {
   service_url: string;
   service_instances_url: string;
   service?: APIResource<IService>;
+}
+
+export interface IServicePlanExtra {
+  displayName: string;
+  bullets: string[];
 }
 export interface IService {
   label: string;

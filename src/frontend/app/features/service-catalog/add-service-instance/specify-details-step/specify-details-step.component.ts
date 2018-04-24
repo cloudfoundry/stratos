@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+
+import { ServicesService } from '../../services.service';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -7,9 +11,18 @@ import { Component, OnInit } from '@angular/core';
 })
 export class SpecifyDetailsStepComponent implements OnInit {
 
-  constructor() { }
+  servicePlanGuids$: Observable<string[]>;
+
+  constructor(private servicesService: ServicesService) {
+
+
+  }
 
   ngOnInit() {
   }
 
+
+  validate = () => true;
+
+  onNext = () => Observable.of({ success: true });
 }

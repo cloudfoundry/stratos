@@ -40,7 +40,7 @@ export class ServicesService {
       entityFactory(serviceSchemaKey),
       this.serviceGuid,
       new GetService(this.serviceGuid, this.cfGuid),
-      false
+      true
     );
     this.service$ = this.serviceEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),

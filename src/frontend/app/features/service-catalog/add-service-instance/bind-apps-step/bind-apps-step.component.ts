@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -11,5 +12,9 @@ export class BindAppsStepComponent implements OnInit {
 
   ngOnInit() {
   }
+
+  validate = () => true;
+
+  submit = () => Observable.of(true);
 
 }
