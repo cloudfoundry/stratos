@@ -570,7 +570,8 @@ const testInitialStoreState: AppState = {
   },
   dashboard: {
     sidenavOpen: true,
-    sideNavMode: 'side'
+    sideNavMode: 'side',
+    headerEventMinimized: false
   },
   createApplication: {
     cloudFoundryDetails: null,
@@ -21611,6 +21612,9 @@ const testInitialStoreState: AppState = {
         queryParams: {}
       }
     }
+  },
+  internalEvents: {
+    types: {}
   }
 };
 /* tslint:enable */
