@@ -42,4 +42,12 @@ export class ServiceBaseComponent implements OnInit {
   ngOnInit() {
   }
 
+  addServiceInstanceLink = () => [
+    '/service-catalog',
+    this.servicesService.cfGuid,
+    this.servicesService.serviceGuid,
+    'create'
+
+  ]
+
 }

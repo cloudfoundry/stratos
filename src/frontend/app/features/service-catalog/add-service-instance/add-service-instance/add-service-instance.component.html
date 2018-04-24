@@ -3,8 +3,15 @@
     Create Space
   </app-page-header>
   <app-steppers [cancel]="serviceInstancesUrl">
-    <app-step title="Create Service Instance" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel" finishButtonText="Create">
+    <app-step title="Select Service Plan" [onNext]="step1.submit" [valid]="step1.validate()" cancelButtonText="Cancel">
       <app-select-plan-step #step1></app-select-plan-step>
+      <app-specify-details-step #step2></app-specify-details-step>
+    </app-step>
+    <app-step title="Specify Service Instance Details" [onNext]="step2.submit" [valid]="step2.validate()" cancelButtonText="Cancel">
+      <app-specify-details-step #step2></app-specify-details-step>
+    </app-step>
+    <app-step title="Bind Apps" [onNext]="step3.submit" [valid]="step3.validate()" cancelButtonText="Cancel" finishButtonText="Create">
+      <app-bind-apps-step #step2></app-bind-apps-step>
     </app-step>
   </app-steppers>
 </div>
