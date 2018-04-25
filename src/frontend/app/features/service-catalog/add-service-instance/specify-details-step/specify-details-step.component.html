@@ -1,16 +1,16 @@
 <div class="specify-details">
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
-      <input matInput class="form-control" formControlName="name" placeholder="Name">
+      <input matInput class="form-control" formControlName="name" placeholder="Name" required>
     </mat-form-field>
     <mat-form-field>
-      <mat-select class="form-control" formControlName="org" [(ngModel)]="selectedOrgId" (change)="setOrg($event.value)">
+      <mat-select class="form-control" placeholder="Organization" required formControlName="org" [(ngModel)]="selectedOrgId" (change)="setOrg($event.value)">
         <mat-option *ngFor="let organization of orgs$ | async" [value]="organization.metadata.guid">{{ organization.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
     <mat-form-field>
-      <mat-select class="form-control" formControlName="space" [(ngModel)]="selectedSpaceId">
-        <mat-option [disabled]="selectedOrgId" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
+      <mat-select class="form-control" placeholder="Space" required formControlName="space" [(ngModel)]="selectedSpaceId">
+        <mat-option [disabled]="!selectedOrgId" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
     <mat-form-field>
@@ -18,6 +18,11 @@
     </mat-form-field>
     <mat-form-field>
       <textarea matInput placeholder="JSON parameters" matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="params"></textarea>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-select class="form-control" placeholder="Bind App" formControlName="apps" [(ngModel)]="selectAppGuid" (change)="setApp($event.value)">
+        <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
+      </mat-select>
     </mat-form-field>
   </form>
 </div>

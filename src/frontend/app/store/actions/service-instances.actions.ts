@@ -119,6 +119,33 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
 }
+export class CreateServiceInstance extends CFStartAction implements ICFAction {
+  constructor(
+    public endpointGuid: string,
+    public guid: string,
+    public name: string,
+    public servicePlanGuid: string,
+    public spaceGuid: string,
+    public params: string,
+    public tags: string[],
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_instances`;
+    this.options.method = 'post';
+    this.options.body = {
+      name: name,
+      space_guid: spaceGuid,
+      service_plan_guid: servicePlanGuid,
+      parameters: params,
+      tags: tags
+    };
+  }
+  actions = getActions('Service Instances', 'Create Service Instance');
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
+  options: RequestOptions;
+}
 
 
 export class DeleteServiceBinding extends CFStartAction implements ICFAction {

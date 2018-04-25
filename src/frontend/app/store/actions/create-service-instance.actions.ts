@@ -10,6 +10,7 @@ export const SET_SERVICE_PLAN = '[Create SI] Set Plan';
 export const SET_ORG = '[Create SI] Set Org';
 export const SET_SPACE = '[Create SI] Set Space';
 export const SET_CREATE_SERVICE_INSTANCE = '[Create SI] Set All';
+export const SET_APP = '[Create SI] Set App';
 
 export class SetServicePlan implements Action {
   constructor(public servicePlanGuid: string) { }
@@ -22,6 +23,10 @@ export class SetOrg implements Action {
 export class SetSpace implements Action {
   constructor(public spaceGuid: string) { }
   type = SET_SPACE;
+}
+export class SetApp implements Action {
+  constructor(public appGuid: string) { }
+  type = SET_APP;
 }
 
 export class SetCreateServiceInstance implements Action {

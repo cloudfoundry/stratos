@@ -6,11 +6,8 @@
     <app-step title="Select Service Plan" [onNext]="step1.onNext" [valid]="step1.validate()" cancelButtonText="Cancel">
       <app-select-plan-step #step1></app-select-plan-step>
     </app-step>
-    <app-step title="Specify Service Instance Details" [onNext]="step2.onNext" [valid]="step2.validate()" cancelButtonText="Cancel">
+    <app-step title="Specify Details" [onNext]="step2.onNext" [valid]="step2.validate()" cancelButtonText="Cancel" finishButtonText="Create" s>
       <app-specify-details-step #step2></app-specify-details-step>
-    </app-step>
-    <app-step title="Bind Apps" [onNext]="step3.submit" [valid]="step3.validate()" cancelButtonText="Cancel" finishButtonText="Create">
-      <app-bind-apps-step #step3></app-bind-apps-step>
     </app-step>
   </app-steppers>
 </div>
