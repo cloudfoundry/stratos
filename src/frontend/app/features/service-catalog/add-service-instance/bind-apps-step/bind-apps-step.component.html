@@ -1,3 +1,12 @@
-<p>
-  bind-apps-step works!
-</p>
+<div class="bind-apps">
+  <form class="stepper-form" [formGroup]="stepperForm">
+    <mat-form-field>
+      <mat-select class="form-control" placeholder="App" formControlName="apps">
+        <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <textarea matInput placeholder="JSON parameters" matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="params"></textarea>
+    </mat-form-field>
+  </form>
+</div>

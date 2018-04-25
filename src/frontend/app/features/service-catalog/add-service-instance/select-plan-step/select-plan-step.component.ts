@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterContentInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -22,7 +22,8 @@ interface ServicePlan {
   templateUrl: './select-plan-step.component.html',
   styleUrls: ['./select-plan-step.component.scss']
 })
-export class SelectPlanStepComponent implements OnInit, OnDestroy {
+export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentInit {
+  validate: Observable<boolean>;
   selectedPlan: string;
   subscription: Subscription;
   stepperForm: FormGroup;
@@ -67,8 +68,14 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy {
     return selectedPlan.extra && selectedPlan.extra.bullets;
   }
 
-  validate = () => true;
-
+  ngAfterContentInit() {
+    console.log(this.stepperForm.valid);
+    this.validate = this.stepperForm.statusChanges
+      .map(() => {
+        console.log(this.stepperForm.valid);
+        return this.stepperForm.valid;
+      });
+  }
   onNext = () => {
     this.store.dispatch(new SetServicePlan(this.selectedPlan));
     return Observable.of({ success: true });

@@ -7,4 +7,5 @@ export interface CreateServiceInstanceState {
   parameters?: string;
   tags?: string[];
   bindAppGuid?: string;
+  serviceInstanceGuid?: string;
 }

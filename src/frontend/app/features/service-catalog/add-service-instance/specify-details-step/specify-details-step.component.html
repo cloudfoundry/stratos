@@ -17,12 +17,7 @@
       <textarea matInput placeholder="Tags" matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="tags"></textarea>
     </mat-form-field>
     <mat-form-field>
-      <textarea matInput placeholder="JSON parameters" matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="params"></textarea>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-select class="form-control" placeholder="Bind App" formControlName="apps" [(ngModel)]="selectAppGuid" (change)="setApp($event.value)">
-        <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
-      </mat-select>
+      <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
     </mat-form-field>
   </form>
 </div>
