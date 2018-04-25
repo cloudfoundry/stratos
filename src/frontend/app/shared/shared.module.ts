@@ -174,9 +174,9 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
-    UserProfileBannerComponent
     CliInfoComponent,
-    CliCommandComponent
+    CliCommandComponent,
+    UserProfileBannerComponent
   ],
   exports: [
     FormsModule,
