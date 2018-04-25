@@ -102,13 +102,13 @@ type LoginRes struct {
 type LoginHookFunc func(c echo.Context) error
 
 type ProxyRequestInfo struct {
-	EndpointGUID    string
-	URI *url.URL
-	UserGUID string
-	ResultGUID string
-	Headers http.Header
-	Body []byte
-	Method string
+	EndpointGUID string
+	URI          *url.URL
+	UserGUID     string
+	ResultGUID   string
+	Headers      http.Header
+	Body         []byte
+	Method       string
 }
 
 type SessionStorer interface {
@@ -142,9 +142,9 @@ type Info struct {
 // Extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
-	User     *ConnectedUser    `json:"user"`
-	Metadata map[string]string `json:"metadata,omitempty"`
-	TokenMetadata string			 `json:"-"`
+	User          *ConnectedUser    `json:"user"`
+	Metadata      map[string]string `json:"metadata,omitempty"`
+	TokenMetadata string            `json:"-"`
 }
 
 // Versions - response returned to caller from a getVersions action
@@ -164,19 +164,20 @@ type ConsoleConfig struct {
 
 // CNSIRequest
 type CNSIRequest struct {
-	GUID     string
-	UserGUID string
+	GUID     string `json:"-"`
+	UserGUID string `json:"-"`
 
-	Method      string
-	Body        []byte
-	Header      http.Header
-	URL         *url.URL
-	StatusCode  int
-	PassThrough bool
+	Method      string      `json:"-"`
+	Body        []byte      `json:"-"`
+	Header      http.Header `json:"-"`
+	URL         *url.URL    `json:"-"`
+	StatusCode  int         `json:"statusCode"`
+	Status      string      `json:"status"`
+	PassThrough bool        `json:"-"`
 
-	Response []byte
-	Error    error
-	ResponseGUID	string
+	Response     []byte `json:"-"`
+	Error        error  `json:"-"`
+	ResponseGUID string `json:"-"`
 }
 
 type PortalConfig struct {
