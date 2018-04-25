@@ -87,8 +87,6 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 		case !ok:
 			response = []byte(`{"error": "Request timed out"}`)
 		case cnsiResponse.Error != nil:
-			log.Error("error")
-			log.Errorf("%v+", cnsiResponse.Error)
 			response = []byte(fmt.Sprintf(`{"error": {"statusCode": 500, "status": "%q"}}`, cnsiResponse.Error.Error()))
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
