@@ -15,6 +15,11 @@ import { IntroScreenComponent } from '../../../shared/components/intro-screen/in
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
+import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
+import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { SetupModule } from '../setup.module';
 
 describe('ConsoleUaaWizardComponent', () => {
   let component: ConsoleUaaWizardComponent;
@@ -22,18 +27,13 @@ describe('ConsoleUaaWizardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        ConsoleUaaWizardComponent,
-        StepComponent,
-        SteppersComponent,
-        DotContentComponent,
-        PageHeaderComponent,
-        StratosTitleComponent,
-        LoadingPageComponent,
-      ],
       imports: [
+        CoreModule,
+        SharedModule,
+        SetupModule,
         RouterTestingModule,
         FormsModule,
+        PageHeaderModule,
         ReactiveFormsModule,
         MDAppModule,
         StoreModule.forRoot({}),

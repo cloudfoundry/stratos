@@ -1,38 +1,32 @@
-import {
-  GET_ENDPOINTS_FAILED,
-  GET_ENDPOINTS_SUCCESS,
-  GetAllEndpoints,
-  GetAllEndpointsFailed,
-  GetAllEndpointsSuccess,
-} from '../actions/endpoint.actions';
-import { AppState } from './../app-state';
+import { Injectable } from '@angular/core';
+import { Headers, Http, RequestOptionsArgs, URLSearchParams } from '@angular/http';
+import { MatDialog } from '@angular/material';
+import { Router } from '@angular/router';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+
+import { BrowserStandardEncoder } from '../../helper';
+import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
+import { GetSystemInfo } from '../actions/system.actions';
+import { SessionData } from '../types/auth.types';
 import {
   InvalidSession,
-  Login,
   LOGIN,
+  Login,
   LoginFailed,
   LoginSuccess,
+  LOGOUT,
+  Logout,
+  LogoutFailed,
+  LogoutSuccess,
+  RESET_AUTH,
+  ResetAuth,
   SESSION_INVALID,
   VerifiedSession,
   VERIFY_SESSION,
   VerifySession,
-  SESSION_VERIFIED,
-  LogoutFailed,
-  Logout,
-  LOGOUT,
-  LogoutSuccess,
-  LOGOUT_SUCCESS,
-  ResetAuth,
-  RESET_AUTH,
 } from './../actions/auth.actions';
-import { Injectable } from '@angular/core';
-import { Headers, Http, URLSearchParams, RequestOptionsArgs } from '@angular/http';
-import { Action, Store } from '@ngrx/store';
-import { Actions, Effect } from '@ngrx/effects';
-import { Router } from '@angular/router';
-import { MatDialog } from '@angular/material';
-import { SessionData } from '../types/auth.types';
-import { GetSystemInfo } from '../actions/system.actions';
+import { AppState } from './../app-state';
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -57,7 +51,7 @@ export class AuthEffect {
         }
       };
       const headers = new Headers();
-      const params = new URLSearchParams();
+      const params = new URLSearchParams('', new BrowserStandardEncoder());
 
       params.set('username', username);
       params.set('password', password);

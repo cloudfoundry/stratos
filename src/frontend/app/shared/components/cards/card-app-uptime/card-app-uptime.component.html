@@ -1,5 +1,5 @@
 <mat-card *ngIf="appData$ | async as appData" class="card-app-uptime">
-  <div class="card-app-uptime__contents">
+  <div class="card-app-uptime__contents" *ngIf="appService.applicationRunning$ | async; else notRunning">
     <div class="card-app-uptime__main">
       <mat-card-header>
         <mat-card-title>Uptime</mat-card-title>
@@ -14,3 +14,10 @@
     </div>
   </div>
 </mat-card>
+<ng-template #notRunning>
+  <mat-card-content>
+    <mat-card-header>
+      <mat-card-title>Application is not running</mat-card-title>
+    </mat-card-header>
+  </mat-card-content>
+</ng-template>
