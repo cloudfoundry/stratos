@@ -95,6 +95,8 @@ import { IntroScreenComponent } from './components/intro-screen/intro-screen.com
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
 import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
+import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
+import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 
 @NgModule({
   imports: [
@@ -175,7 +177,9 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     StratosTitleComponent,
     IntroScreenComponent,
     CliInfoComponent,
-    CliCommandComponent
+    CliCommandComponent,
+    AppActionMonitorComponent,
+    AppActionMonitorIconComponent
   ],
   exports: [
     FormsModule,
@@ -240,7 +244,9 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     StratosTitleComponent,
     IntroScreenComponent,
     CliInfoComponent,
-    CliCommandComponent
+    AppActionMonitorComponent,
+    CliCommandComponent,
+    AppActionMonitorIconComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

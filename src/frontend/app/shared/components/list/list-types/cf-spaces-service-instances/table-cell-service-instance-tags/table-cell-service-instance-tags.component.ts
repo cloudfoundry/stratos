@@ -22,7 +22,7 @@ export class TableCellServiceInstanceTagsComponent<T> extends TableCellCustom<T>
   }
 
   ngOnInit() {
-    this.row.entity.tags.forEach(t => {
+    this.row.entity.service_instance.entity.tags.forEach(t => {
       this.tags.push({
         value: t,
         key: this.row,

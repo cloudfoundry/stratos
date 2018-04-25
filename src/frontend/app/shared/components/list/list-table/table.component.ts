@@ -19,7 +19,8 @@ const tableColumnSelect = {
   columnId: 'select',
   headerCellComponent: TableHeaderSelectComponent,
   cellComponent: TableCellSelectComponent,
-  class: 'table-column-select', cellFlex: '1'
+  class: 'table-column-select',
+  cellFlex: '1'
 };
 
 const tableColumnAction = {
@@ -41,23 +42,16 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
 
   @ViewChild(MatSort) sort: MatSort;
 
-
   // See https://github.com/angular/angular-cli/issues/2034 for weird definition
-  @Input('listConfig') listConfig = null as IListConfig<T>;
-  dataSource = null as IListDataSource<T>;
+  @Input('hideTable') hideTable = false;
+  @Input('addSelect') addSelect = false;
+  @Input('addActions') addActions = false;
+  @Input('dataSource') dataSource: IListDataSource<T>;
   @Input('paginationController') paginationController = null as IListPaginationController<T>;
   @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
 
-  @Input('text') text: ITableText;
-  @Input('enableFilter') enableFilter = false;
   @Input('fixedRowHeight') fixedRowHeight = false;
-  @Input('addForm') addForm: NgForm;
-  public safeAddForm() {
-    // Something strange is afoot. When using addform in [disabled] it thinks this is null, even when initialised
-    // When applying the question mark (addForm?) it's value is ignored by [disabled]
-    return this.addForm || {};
-  }
 
   constructor(
     private _store: Store<AppState>,
@@ -65,24 +59,21 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.dataSource = this.listConfig.getDataSource();
-
-    const addSelect = this.listConfig.allowSelection || (this.listConfig.getMultiActions() || []).length > 0;
-    const addActions = (this.listConfig.getSingleActions() || []).length > 0;
-    if (addSelect || addActions) {
+    if (this.addSelect || this.addActions) {
       const newColumns = [...this.columns];
-      if (addSelect) {
+      if (this.addSelect) {
         newColumns.splice(0, 0, tableColumnSelect);
       }
-      if (addActions) {
+      if (this.addActions) {
         newColumns.push(tableColumnAction);
       }
       this.columns = newColumns;
     }
 
     this.columnNames = this.columns.map(x => x.columnId);
-
-    this.initWidgetStore();
+    if (this.paginationController) {
+      this.initWidgetStore();
+    }
   }
 
   initWidgetStore() {
@@ -110,6 +101,8 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.uberSub.unsubscribe();
+    if (this.uberSub) {
+      this.uberSub.unsubscribe();
+    }
   }
 }

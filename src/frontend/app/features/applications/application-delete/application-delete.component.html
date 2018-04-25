@@ -7,10 +7,18 @@
       <app-delete-app-routes class="app-delete__step-table" (selected)="setSelectedRoutes($event)"></app-delete-app-routes>
     </app-step>
     <app-step title="Service Instances" *ngIf="instances && instances.length">
-      <app-delete-app-instances class="app-delete__step-table" (selected)="setSelectedRoutes($event)"></app-delete-app-instances>
+      <app-delete-app-instances class="app-delete__step-table" (selected)="setSelectedServiceInstances($event)"></app-delete-app-instances>
     </app-step>
     <app-step title="Confirm">
-      Confirm
+      <!-- <app-action-monitor *ngIf="routes && routes.length" [data]="routes" [entityKey]="routeSchemaKey" [monitorState]="deletingState"></app-action-monitor> -->
+      <app-action-monitor [data$]="selectedRoutes$" [entityKey]="routeSchemaKey" [monitorState]="deletingState" [getId]="getId" [columns]="['name']">
+        <ng-container matColumnDef="name">
+          <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
+          <mat-cell *matCellDef="let element"> name </mat-cell>
+        </ng-container>
+      </app-action-monitor>
+      <app-action-monitor [data$]="selectedServiceInstances$" [entityKey]="serviceInstancesSchemaKey" [monitorState]="deletingState" [getId]="getId"></app-action-monitor>
+      <button (click)="startDelete()">delete</button>
     </app-step>
   </app-steppers>
 </app-loading-page>

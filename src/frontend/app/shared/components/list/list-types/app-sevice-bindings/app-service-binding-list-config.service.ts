@@ -13,13 +13,83 @@ import { IServiceBinding } from '../../../../../core/cf-api-svc.types';
 import { AppServiceBindingDataSource } from './app-service-binding-data-source';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppServiceBindingCardComponent } from './app-service-binding-card/app-service-binding-card.component';
+import { TableCellServicePlanComponent } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+import {
+  TableCellServiceInstanceTagsComponent
+} from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
+import { DatePipe } from '@angular/common';
+import { DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
 @Injectable()
 export class AppServiceBindingListConfigService extends BaseCfListConfig<APIResource> {
   dataSource: AppServiceBindingDataSource;
   cardComponent = AppServiceBindingCardComponent;
-  getColumns = () => [];
+  viewType = ListViewTypes.BOTH;
+  defaultView = 'table' as ListView;
+  getColumns = () => {
+    return [
+      {
+        columnId: 'name',
+        headerCell: () => 'Service Instances',
+        cellDefinition: {
+          getValue: (row) => {
+            return `${row.entity.service_instance.entity.name}`;
+          }
+        },
+        cellFlex: '2'
+      },
+      {
+        columnId: 'service',
+        headerCell: () => 'Service',
+        cellDefinition: {
+          getValue: (row) => `${row.entity.service_instance.entity.service.entity.label}`
+        },
+        cellFlex: '1'
+      },
+      {
+        columnId: 'servicePlan',
+        headerCell: () => 'Plan',
+        cellComponent: TableCellServicePlanComponent,
+        cellFlex: '1'
+      },
+      {
+        columnId: 'tags',
+        headerCell: () => 'Tags',
+        cellComponent: TableCellServiceInstanceTagsComponent,
+        cellFlex: '2'
+      },
+      // {
+      //   columnId: 'attachedApps',
+      //   headerCell: () => 'Application Attached',
+      //   cellDefinition: {
+      //     getValue: (row) => {
+      //       console.log(row);
+      //       return `${row.entity.service_instance.entity.service_bindings.map(binding => binding.app.entity.name).join(', ')}`
+      //     }
+      //   },
+      //   cellFlex: '1'
+      // },
+      // {
+      //   columnId: 'attachedApps',
+      //   headerCell: () => 'Application Attached',
+      //   cellComponent: TableCellServiceInstanceAppsAttachedComponent,
+      //   cellFlex: '3'
+      // },
+      {
+        columnId: 'creation', headerCell: () => 'Creation Date',
+        cellDefinition: {
+          getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+        },
+        sort: {
+          type: 'sort',
+          orderKey: 'creation',
+          field: 'metadata.created_at'
+        } as DataFunctionDefinition,
+        cellFlex: '2'
+      }
+    ];
+  }
 
-  constructor(private store: Store<AppState>, private appService: ApplicationService) {
+  constructor(private store: Store<AppState>, private appService: ApplicationService, private datePipe: DatePipe) {
     super();
     this.dataSource = new AppServiceBindingDataSource(this.store, appService, this);
   }

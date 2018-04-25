@@ -131,7 +131,8 @@ const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
           app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
         }, { idAttribute: getAPIResourceGuid })],
         service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid })
-      }
+      },
+      service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
     }, { idAttribute: getAPIResourceGuid }),
   }
 }, { idAttribute: getAPIResourceGuid });

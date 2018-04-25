@@ -162,7 +162,6 @@ function getObservables<T = any>(
           const newValidationFootprint = getPaginationCompareString(pagination);
           if (lastValidationFootprint !== newValidationFootprint) {
             lastValidationFootprint = newValidationFootprint;
-            console.log('pag fetch');
             store.dispatch(new ValidateEntitiesStart(
               action,
               pagination.ids[pagination.currentPage],

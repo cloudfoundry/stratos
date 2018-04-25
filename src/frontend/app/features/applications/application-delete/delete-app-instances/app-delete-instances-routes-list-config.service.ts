@@ -38,76 +38,14 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
   hideRefresh: boolean;
   allowSelection: boolean;
   constructor(store: Store<AppState>, appService: ApplicationService, private _datePipe: DatePipe) {
-    super(store, appService);
+    super(store, appService, _datePipe);
 
     this.getGlobalActions = () => null;
     this.getMultiActions = () => null;
 
     this.getSingleActions = () => null;
     this.getSingleActions = () => null;
-    this.viewType = ListViewTypes.TABLE_ONLY;
     this.defaultView = 'table';
     this.allowSelection = true;
-    this.getColumns = () => {
-      return [
-        {
-          columnId: 'name',
-          headerCell: () => 'Service Instances',
-          cellDefinition: {
-            getValue: (row) => `${row.entity.service_instance.entity.name}`
-          },
-          cellFlex: '2'
-        },
-        {
-          columnId: 'service',
-          headerCell: () => 'Service',
-          cellDefinition: {
-            getValue: (row) => `${row.entity.service_instance.entity.service.entity.label}`
-          },
-          cellFlex: '1'
-        },
-        {
-          columnId: 'servicePlan',
-          headerCell: () => 'Plan',
-          cellComponent: TableCellServicePlanComponent,
-          cellFlex: '1'
-        },
-        {
-          columnId: 'tags',
-          headerCell: () => 'Tags',
-          cellComponent: TableCellServiceInstanceTagsComponent,
-          cellFlex: '2'
-        },
-        {
-          columnId: 'attachedApps',
-          headerCell: () => 'Application Attached',
-          cellDefinition: {
-            getValue: (row) => {
-              console.log(row);
-              return `${row.entity.service_instance.entity.service_bindings.map(binding => binding.app.entity.name).join(', ')}`
-            }
-          },
-          cellFlex: '1'
-        },
-        // {
-        //   columnId: 'attachedApps',
-        //   headerCell: () => 'Application Attached',
-        //   cellComponent: TableCellServiceInstanceAppsAttachedComponent,
-        //   cellFlex: '3'
-        // },
-        {
-          columnId: 'creation', headerCell: () => 'Creation Date',
-          cellDefinition: {
-            getValue: (row: APIResource) => `${this._datePipe.transform(row.metadata.created_at, 'medium')}`
-          },
-          sort: {
-            type: 'sort',
-            orderKey: 'creation',
-            field: 'metadata.created_at'
-          },
-          cellFlex: '2'
-        },
-      ];
-    }
   }
 }

@@ -5,30 +5,34 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { filter, first, map, startWith, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
+import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
+import {
+  AppServiceBindingDataSource,
+} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import { CfAppsDataSource, createGetAllAppAction } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
-import { GetAppRoutes, GetAppServiceBindings } from '../../../store/actions/application-service-routes.actions';
-import { DeleteApplication, GetAllApplications } from '../../../store/actions/application.actions';
-import { getPaginationKey } from '../../../store/actions/pagination.actions';
+import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
+import { GetAllApplications } from '../../../store/actions/application.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import {
-  applicationSchemaKey, appStatsSchemaKey, entityFactory, serviceInstancesSchemaKey, spaceSchemaKey, serviceBindingSchemaKey, serviceSchemaKey
+  applicationSchemaKey,
+  entityFactory,
+  serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
-import { PaginatedAction } from '../../../store/types/pagination.types';
-import { ApplicationService } from '../application.service';
 import { AppInstanceStats } from '../../../store/types/app-metadata.types';
-import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { CloudFoundrySpaceService } from '../../cloud-foundry/services/cloud-foundry-space.service';
-import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/cf-page.types';
-import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
-import { GetServicesInstancesInSpace } from '../../../store/actions/service-instances.actions';
+import { ApplicationService } from '../application.service';
+import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { Subject } from 'rxjs/Subject';
+import { DeleteRoute } from '../../../store/actions/route.actions';
 
 @Component({
   selector: 'app-application-delete',
@@ -40,14 +44,20 @@ import { GetServicesInstancesInSpace } from '../../../store/actions/service-inst
 })
 export class ApplicationDeleteComponent implements OnDestroy {
 
-  fetchingRelated$: Observable<boolean>;
   selectedRoutes: APIResource<IRoute>[];
   selectedServiceInstances: APIResource<IServiceBinding>[];
+  fetchingRelated$: Observable<boolean>;
+  public selectedRoutes$ = new Subject();
+  public selectedServiceInstances$ = new Subject();
   private redirectAfterDeleteSub: Subscription;
   private appWallFetchAction: GetAllApplications;
   public routes: APIResource<IRoute>[];
   public instances: AppInstanceStats[];
   public deleting$: Observable<boolean>;
+
+  public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
+  public routeSchemaKey = routeSchemaKey;
+  public deletingState = AppMonitorComponentTypes.DELETE;
 
   constructor(
     private store: Store<AppState>,
@@ -63,14 +73,14 @@ export class ApplicationDeleteComponent implements OnDestroy {
 
     this.fetchingRelated$ = combineLatest(instanceMonitor.fetchingCurrentPage$, routeMonitor.fetchingCurrentPage$).pipe(
       map(([fetchingInstances, fetchingRoutes]) => fetchingInstances || fetchingRoutes),
+      filter(fetching => !fetching),
+      first(),
       startWith(true)
     );
 
     this.deleting$ = this.isDeleting(this.fetchingRelated$);
 
     this.fetchingRelated$.pipe(
-      filter(fetching => !fetching),
-      first(),
       switchMap(() => combineLatest(
         instanceMonitor.currentPage$,
         routeMonitor.currentPage$
@@ -101,17 +111,7 @@ export class ApplicationDeleteComponent implements OnDestroy {
   public fetchRelatedEntities() {
     const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
-    const instanceAction = new GetAppServiceBindings(
-      appGuid,
-      cfGuid,
-      createEntityRelationPaginationKey(serviceBindingSchemaKey, appGuid),
-      [
-        createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
-        createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
-        createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
-      ]
-    );
+    const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
     const routesAction = new GetAppRoutes(
       appGuid,
       cfGuid,
@@ -154,10 +154,26 @@ export class ApplicationDeleteComponent implements OnDestroy {
   }
 
   private setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
+    console.log('service', selected);
     this.selectedServiceInstances = selected;
+    this.selectedServiceInstances$.next(selected);
   }
 
   private setSelectedRoutes(selected: APIResource<IRoute>[]) {
+    console.log('routes', selected);
     this.selectedRoutes = selected;
+    this.selectedRoutes$.next(selected);
+  }
+
+  public getId(element: APIResource) {
+    return element.metadata.guid;
+  }
+
+  public startDelete() {
+    if (this.selectedRoutes && this.selectedRoutes.length) {
+      this.selectedRoutes.forEach(route => {
+        this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
+      });
+    }
   }
 }
