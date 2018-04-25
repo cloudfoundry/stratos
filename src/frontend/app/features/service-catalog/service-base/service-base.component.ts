@@ -7,7 +7,7 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../store/app-state';
 import { ServicesService } from '../services.service';
-import { map, tap, first } from 'rxjs/operators';
+import { map, tap, first, publishReplay, refCount } from 'rxjs/operators';
 
 
 function servicesServiceFactory(
@@ -51,10 +51,16 @@ export class ServiceBaseComponent implements OnInit {
   ]
 
   getServiceLabel = (): Observable<string> => {
-    return Observable.combineLatest(this.servicesService.service$, this.servicesService.serviceExtraInfo$).pipe(
+    return this.servicesService.service$.pipe(
       first(),
-      map(([a, b]) => !!b ? b.displayName : a.entity.label)
+      map((s) => !!s.entity.extra ? JSON.parse(s.entity.extra).displayName : s.entity.label),
+      publishReplay(1),
+      refCount()
     );
   }
+
+  // getServiceLabel = (): Observable<string> => {
+  //   return Observable.of('test');
+  // }
 
 }

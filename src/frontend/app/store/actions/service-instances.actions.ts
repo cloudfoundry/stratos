@@ -7,6 +7,7 @@ import {
   servicePlanSchemaKey,
   spaceSchemaKey,
   serviceSchemaKey,
+  applicationSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -59,7 +60,8 @@ export class GetServiceInstances
     public includeRelations: string[] = [
       createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey)
+      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
+      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
     ],
     public populateMissing = true
   ) {

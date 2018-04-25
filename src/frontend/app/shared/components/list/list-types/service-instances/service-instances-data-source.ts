@@ -12,8 +12,8 @@ import { IListConfig } from '../../list.component.types';
 
 export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, serviceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, serviceInstancesSchemaKey);
-    const action =    new GetServiceInstances(cfGuid, paginationKey);
+    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, serviceGuid);
+    const action = new GetServiceInstances(cfGuid, paginationKey);
 
     super({
       store,

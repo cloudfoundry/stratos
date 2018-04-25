@@ -109,6 +109,8 @@ const ServiceSchema = new EntitySchema(serviceSchemaKey, {
     service_plans: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
   }
 }, { idAttribute: getAPIResourceGuid });
+const ServiceNoPlansSchema = new EntitySchema(serviceSchemaKey, {
+}, { idAttribute: getAPIResourceGuid });
 entityCache[serviceSchemaKey] = ServiceSchema;
 
 const MetricSchema = new EntitySchema(metricSchemaKey);
@@ -126,14 +128,13 @@ entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
 
 const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
   entity: {
-    service: ServiceSchema
+    service: ServiceNoPlansSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanSchemaKey] = ServicePlanSchema;
 
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
-    service: ServiceSchema,
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema]
   }

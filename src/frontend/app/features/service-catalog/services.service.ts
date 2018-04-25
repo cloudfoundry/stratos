@@ -13,7 +13,7 @@ import { IService, IServiceExtra, IServicePlan } from '../../core/cf-api-svc.typ
 import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute } from '@angular/router';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { filter, map, tap } from 'rxjs/operators';
+import { filter, map, tap, publish, refCount, publishReplay } from 'rxjs/operators';
 
 @Injectable()
 export class ServicesService {
@@ -44,7 +44,9 @@ export class ServicesService {
     );
     this.service$ = this.serviceEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),
-      map(o => o.entity)
+      map(o => o.entity),
+      publishReplay(1),
+      refCount()
     );
 
     this.serviceExtraInfo$ = this.service$.pipe(
