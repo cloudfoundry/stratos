@@ -21611,6 +21611,12 @@ const testInitialStoreState: AppState = {
         queryParams: {}
       }
     }
+  },
+  createServiceInstance: {
+    name: '',
+  servicePlanGuid: '',
+  spaceGuid: '',
+  orgGuid: ''
   }
 };
 /* tslint:enable */

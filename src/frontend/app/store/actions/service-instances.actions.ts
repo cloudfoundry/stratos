@@ -151,10 +151,10 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
 
 
 export class DeleteServiceBinding extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public serviceBindingGuid: string) {
+  constructor(public endpointGuid: string, public guid: string) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `service_bindings/${serviceBindingGuid}`;
+    this.options.url = `service_bindings/${guid}`;
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
     this.options.params.set('async', 'false');

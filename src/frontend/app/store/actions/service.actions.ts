@@ -34,7 +34,7 @@ export class GetAllServices extends CFStartAction implements PaginationAction, E
 }
 export class GetService extends CFStartAction implements EntityInlineParentAction {
   constructor(
-    public serviceGuid: string,
+    public guid: string,
     public endpointGuid: string,
     public includeRelations: string[] = [
       createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
@@ -43,7 +43,7 @@ export class GetService extends CFStartAction implements EntityInlineParentActio
   ) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `services/${serviceGuid}`;
+    this.options.url = `services/${guid}`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }
