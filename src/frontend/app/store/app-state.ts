@@ -9,6 +9,7 @@ import { IRequestDataState, IRequestState } from './types/entity.types';
 import { PaginationState } from './types/pagination.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
+import { UserProfileInfo } from './types/user-profile.types';
 import { InternalEventsState } from './types/internal-events.types';
 
 export interface IRequestTypeState {

@@ -95,6 +95,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 
 @NgModule({
   imports: [
@@ -174,7 +175,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     StratosTitleComponent,
     IntroScreenComponent,
     CliInfoComponent,
-    CliCommandComponent
+    CliCommandComponent,
+    UserProfileBannerComponent
   ],
   exports: [
     FormsModule,
@@ -237,6 +239,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
+    UserProfileBannerComponent,
     CliInfoComponent,
     CliCommandComponent
   ],
