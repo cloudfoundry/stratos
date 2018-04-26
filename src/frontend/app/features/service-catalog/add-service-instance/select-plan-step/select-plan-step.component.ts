@@ -23,7 +23,7 @@ interface ServicePlan {
   styleUrls: ['./select-plan-step.component.scss']
 })
 export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentInit {
-  validate: Observable<boolean>;
+  // validate: () => boolean;
   subscription: Subscription;
   stepperForm: FormGroup;
   servicePlans$: Observable<ServicePlan[]>;
@@ -43,13 +43,21 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required)
     });
+
+  }
+
+  validate = () => {
+    if (this.stepperForm) {
+      return this.stepperForm.valid;
+    }
+    return false;
   }
 
   ngOnInit() {
     this.subscription = this.servicePlans$.pipe(
       tap(o => {
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
-        this.stepperForm.updateValueAndValidity();
+        // this.stepperForm.updateValueAndValidity();
       }),
       first()
     ).subscribe();
@@ -66,11 +74,12 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
     return selectedPlan.extra && selectedPlan.extra.bullets;
   }
 
+  onEnter = () => {
+    this.stepperForm.controls.servicePlans.updateValueAndValidity();
+  }
+
   ngAfterContentInit() {
-    this.validate = this.stepperForm.statusChanges
-      .map(() => {
-        return this.stepperForm.valid;
-      });
+
   }
   onNext = () => {
     this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));

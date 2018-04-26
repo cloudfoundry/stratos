@@ -92,7 +92,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
       map(([path, params]) => {
         this.store.dispatch(new RouterNav({ path: path, query: params }));
       })
-    );
+      );
   }
 
   setActive(index: number) {

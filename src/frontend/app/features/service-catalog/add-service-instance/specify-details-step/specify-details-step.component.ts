@@ -32,7 +32,7 @@ import { ServicesService } from '../../services.service';
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
 })
-export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterContentChecked {
+export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterContentInit {
   validate: Observable<boolean>;
   orgSubscription: Subscription;
   spaceSubscription: Subscription;
@@ -82,6 +82,15 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     this.orgSubscription.unsubscribe();
   }
   ngOnInit() {
+
+
+  }
+
+  ngAfterContentInit() {
+    this.validate = this.stepperForm.statusChanges
+      .map(() => {
+        return this.stepperForm.valid;
+      });
     this.spaceSubscription = this.spaces$.pipe(
       tap(o => {
         const selectedSpaceId = o[0].metadata.guid;
@@ -94,18 +103,10 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     this.orgSubscription = this.orgs$.pipe(
       tap(o => {
         const selectedOrgId = o[0].metadata.guid;
-        this.stepperForm.controls.space.setValue(selectedOrgId);
+        this.stepperForm.controls.org.setValue(selectedOrgId);
         this.store.dispatch(new SetOrg(selectedOrgId));
       })
     ).subscribe();
-
-  }
-
-  ngAfterContentChecked() {
-    this.validate = this.stepperForm.statusChanges
-      .map(() => {
-        return this.stepperForm.valid;
-      });
   }
 
   onNext = () => {
