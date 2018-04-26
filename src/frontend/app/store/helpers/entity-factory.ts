@@ -29,6 +29,7 @@ export const featureFlagSchemaKey = 'featureFlag';
 export const privateDomainsSchemaKey = 'private_domains';
 export const spaceQuotaSchemaKey = 'space_quota_definition';
 export const metricSchemaKey = 'metrics';
+export const userProfileSchemaKey = 'userProfile';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 
@@ -290,3 +291,7 @@ export function entityFactory(key: string): EntitySchema {
   }
   return entity;
 }
+
+const UserProfileInfoSchema = new EntitySchema(userProfileSchemaKey, {}, { idAttribute: 'id' });
+entityCache[userProfileSchemaKey] = UserProfileInfoSchema;
+

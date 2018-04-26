@@ -21599,7 +21599,28 @@ const testInitialStoreState: AppState = {
       },
     },
     metrics: {},
-    system: {}
+    system: {},
+    userProfile: {
+      id: 'test-user',
+      name: {
+        familyName: 'User',
+        givenName: 'Test',
+      },
+      userName: 'tesy-user-name',
+      meta: {
+        created: '',
+        lastModified: '',
+      },
+      verified: true,
+      active: true,
+      emails: [
+        {
+          primary: true,
+          value: 'test@test.com',
+        }
+      ],
+      passwordLastModified: ''
+    }
   },
   actionHistory: [],
   lists: {},

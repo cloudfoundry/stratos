@@ -95,6 +95,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { UploadProgressIndicatorComponent } from './components/upload-progress-indicator/upload-progress-indicator.component';
 
 @NgModule({
@@ -176,6 +177,7 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     IntroScreenComponent,
     CliInfoComponent,
     CliCommandComponent,
+    UserProfileBannerComponent,
     UploadProgressIndicatorComponent
   ],
   exports: [
@@ -239,6 +241,7 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
+    UserProfileBannerComponent,
     CliInfoComponent,
     CliCommandComponent,
     UploadProgressIndicatorComponent,
