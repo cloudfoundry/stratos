@@ -37,7 +37,23 @@ interface APIErrorCheck {
   errorCode: string;
   guid: string;
   url: string;
+  errorResponse: JetStreamCFErrorResponse;
 }
+
+interface JetStreamError {
+  error: {
+    status: string;
+    statusCode: number;
+  };
+  errorResponse: JetStreamCFErrorResponse;
+}
+
+interface JetStreamCFErrorResponse {
+  code: number;
+  description: string;
+  error_code: string;
+}
+
 @Injectable()
 export class APIEffect {
 
@@ -176,12 +192,14 @@ export class APIEffect {
       .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
-        const endpoints = resData[cfGuid];
+        const endpoints = resData[cfGuid] as JetStreamError;
+        const hasError = !!endpoints.error;
         return {
-          error: !!endpoints.error,
-          errorCode: endpoints.error ? '500' : '200',
+          error: hasError,
+          errorCode: hasError ? endpoints.error.statusCode.toString() : '200',
           guid: cfGuid,
-          url: action.options.url
+          url: action.options.url,
+          errorResponse: hasError ? endpoints.errorResponse : null,
         };
       });
   }
@@ -198,7 +216,8 @@ export class APIEffect {
               severity: InternalEventSeverity.ERROR,
               message: 'API request error',
               metadata: {
-                url: check.url
+                url: check.url,
+                errorResponse: check.errorResponse,
               }
             }
           ));
