@@ -1,6 +1,6 @@
 import 'rxjs/add/observable/of';
 
-import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -14,7 +14,8 @@ export type StepOnNextFunction = () => Observable<{
   success: boolean,
   message?: string,
   // Should we redirect to the store previous state?
-  redirect?: boolean
+  redirect?: boolean,
+  data?: any,
 }>;
 
 @Component({
@@ -31,8 +32,22 @@ export class StepComponent implements OnInit {
   error = false;
   busy = false;
 
+  _hidden = false;
+
   @Input()
   title: string;
+
+  @Output() onHidden= new EventEmitter<boolean>();
+
+  @Input('hidden')
+  set hidden(hidden: boolean) {
+    this._hidden = hidden;
+    this.onHidden.emit(this._hidden);
+  }
+
+  get hidden() {
+    return this._hidden;
+  }
 
   @Input('valid')
   valid = true;
@@ -65,15 +80,13 @@ export class StepComponent implements OnInit {
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
 
   @Input()
-  onEnter: () => void = () => { }
+  onEnter: (data: any) => void = () => { }
 
   @Input()
-  onLeave: () => void = () => { }
+  onLeave: (isNext?: boolean) => void = () => { }
 
-  constructor() {
-  }
+  constructor() { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
 }

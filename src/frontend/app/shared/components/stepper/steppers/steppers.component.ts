@@ -14,6 +14,7 @@ import { RoutesRecognized } from '@angular/router';
 import { EmptyObservable } from 'rxjs/observable/EmptyObservable';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { empty } from 'rxjs/observable/empty';
+import { NoSubstitutionTemplateLiteral } from 'typescript';
 
 @Component({
   selector: 'app-steppers',
@@ -22,7 +23,7 @@ import { empty } from 'rxjs/observable/empty';
   providers: [SteppersService],
   encapsulation: ViewEncapsulation.None
 })
-export class SteppersComponent implements OnInit, AfterContentInit {
+export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   cancel$: Observable<string>;
 
@@ -32,8 +33,13 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   cancel = null;
 
   steps: StepComponent[] = [];
+  allSteps: StepComponent[] = [];
+
+  hiddenSubs: Subscription[] = [];
 
   stepValidateSub: Subscription = null;
+
+  private enterData;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{
@@ -57,9 +63,24 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   ngOnInit() {
   }
 
+  ngOnDestroy() {
+    this.hiddenSubs.forEach(sub => sub.unsubscribe());
+  }
+
   ngAfterContentInit() {
-    this.steps = this._steps.toArray();
+    this.allSteps = this._steps.toArray();
     this.setActive(0);
+
+    this.allSteps.forEach((step => {
+      this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
+        this.filterSteps();
+      }));
+    }));
+    this.filterSteps();
+  }
+
+  private filterSteps() {
+    this.steps = this.allSteps.filter((step => !step.hidden));
   }
 
   goNext() {
@@ -68,10 +89,11 @@ export class SteppersComponent implements OnInit, AfterContentInit {
       step.busy = true;
       step.onNext()
         .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false }))
-        .switchMap(({ success, message, redirect }) => {
+        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {} }))
+        .switchMap(({ success, data, message, redirect }) => {
           step.error = !success;
           step.busy = false;
+          this.enterData = data;
           if (success) {
             if (redirect) {
               return this.redirect();
@@ -111,10 +133,12 @@ export class SteppersComponent implements OnInit, AfterContentInit {
       }
       _step.active = i === index ? true : false;
     });
-    this.steps[this.currentIndex].onLeave();
+    // Tell onLeave if this is a Next or Previous transition
+    this.steps[this.currentIndex].onLeave(index > this.currentIndex);
     index = this.steps[index].skip ? ++index : index;
     this.currentIndex = index;
-    this.steps[this.currentIndex].onEnter();
+    this.steps[this.currentIndex].onEnter(this.enterData);
+    this.enterData = undefined;
   }
 
   canGoto(index: number): boolean {

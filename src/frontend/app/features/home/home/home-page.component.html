@@ -1,3 +1,10 @@
 <app-page-header>
   <h1>Dashboard</h1>
 </app-page-header>
+
+
+<app-upload-progress-indicator value="{{ value || 40 }}"></app-upload-progress-indicator>
+
+<br>
+<button (click)="value = 50">50%</button>
+<button (click)="value = 100">100%</button>

@@ -1,6 +1,7 @@
 <app-page-header>
   {{ getTitle() }}
 </app-page-header>
+
 <app-steppers cancel="/applications">
   <app-step *ngIf="!isRedeploy" [title]="'Cloud Foundry'" [valid]="step1.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
     <app-create-application-step1 [isRedeploy]="!!isRedeploy" #step1></app-create-application-step1>
@@ -8,8 +9,11 @@
   <app-step [title]="'Source'" [valid]="step2.validate | async" [onNext]="step2.onNext" [nextButtonText]="!isRedeploy ? 'Next' : deployButtonText">
     <app-deploy-application-step2 [isRedeploy]="!!isRedeploy" #step2></app-deploy-application-step2>
   </app-step>
-  <app-step *ngIf="!isRedeploy" [title]="'Source Config'" [valid]="step2_1.validate | async" [skip]="step2_1.skip$ | async" [onLeave]="step2_1.onLeave" [onEnter]="step2_1.onEnter" [onNext]="step2_1.onNext" [nextButtonText]="deployButtonText">
+  <app-step [hidden]="isRedeploy || (step2.sourceType$ | async)?.id  !== 'git'" [title]="'Source Config'" [valid]="step2_1.validate | async" [skip]="step2_1.skip$ | async" [onLeave]="step2_1.onLeave" [onEnter]="step2_1.onEnter" [onNext]="step2_1.onNext" [nextButtonText]="deployButtonText">
     <app-deploy-application-step2-1 #step2_1></app-deploy-application-step2-1>
+  </app-step>
+  <app-step [hidden]="isRedeploy || (step2.sourceType$ | async)?.id  !== 'fs'"  title="Source Upload" [valid]="step2_2.valid$ | async" [skip]="step2_2.skip$ | async" [onLeave]="step2_2.onLeave" [onEnter]="step2_2.onEnter" [onNext]="step2_2.onNext" [nextButtonText]="deployButtonText">
+    <app-deploy-application-step-source-upload #step2_2></app-deploy-application-step-source-upload>
   </app-step>
   <app-step [title]="'Deploy'" [valid]="step3.valid$ | async" [canClose]="step3.closeable$ | async" disablePrevious=true cancelButtonText="Close" [onEnter]="step3.onEnter" [onNext]="step3.onNext" finishButtonText="Go to App Summary">
     <app-deploy-application-step3 [isRedeploy]="isRedeploy" #step3></app-deploy-application-step3>
