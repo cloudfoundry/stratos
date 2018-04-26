@@ -45,6 +45,8 @@ export class AppActionMonitorComponent<T> implements OnInit {
 
   private dataSource: DataSource<T>;
 
+  public allColumns: ITableColumn<T>[] = [];
+
   constructor() { }
 
   ngOnInit() {
@@ -55,11 +57,12 @@ export class AppActionMonitorComponent<T> implements OnInit {
       updateKey: this.updateKey,
       getId: this.getId
     };
-    this.columns.push({
+    const monitorColumn = {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
       cellConfig
-    });
+    };
+    this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {
       connect: () => this.data$,
       disconnect: () => { },

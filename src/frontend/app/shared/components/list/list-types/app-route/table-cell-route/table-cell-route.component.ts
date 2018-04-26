@@ -15,7 +15,7 @@ import { TableCellCustom } from '../../../list.types';
   styleUrls: ['./table-cell-route.component.scss']
 })
 export class TableCellRouteComponent<T> extends TableCellCustom<T>
-  implements OnInit, OnDestroy {
+  implements OnInit {
   domainSubscription: Subscription;
   @Input('row') row;
   routeUrl: string;
@@ -25,19 +25,12 @@ export class TableCellRouteComponent<T> extends TableCellCustom<T>
   }
 
   ngOnInit() {
-    this.domainSubscription = this.store
-      .select(selectEntity<EntityInfo>('domain', this.row.entity.domain_guid))
-      .pipe(
-        filter(p => !!p),
-        tap(domain => {
-          this.routeUrl = getRoute(this.row, false, false, domain);
-          this.isRouteTCP = isTCPRoute(this.row);
-        })
-      )
-      .subscribe();
+    const domain = this.row.entity.domain;
+    this.routeUrl = getRoute(this.row, false, false, domain);
+    this.isRouteTCP = isTCPRoute(this.row);
   }
 
-  ngOnDestroy(): void {
-    this.domainSubscription.unsubscribe();
-  }
+  // ngOnDestroy(): void {
+  //   this.domainSubscription.unsubscribe();
+  // }
 }

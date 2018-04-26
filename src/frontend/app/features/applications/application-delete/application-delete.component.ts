@@ -3,10 +3,15 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { filter, first, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
+import {
+  AppMonitorComponentTypes,
+} from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import {
   AppServiceBindingDataSource,
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
@@ -16,30 +21,33 @@ import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.fa
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
 import { GetAllApplications } from '../../../store/actions/application.actions';
+import { DeleteRoute } from '../../../store/actions/route.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
   entityFactory,
+  routeSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
-  routeSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { AppInstanceStats } from '../../../store/types/app-metadata.types';
 import { CloudFoundrySpaceService } from '../../cloud-foundry/services/cloud-foundry-space.service';
 import { ApplicationService } from '../application.service';
-import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { Subject } from 'rxjs/Subject';
-import { DeleteRoute } from '../../../store/actions/route.actions';
-import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
+import { CfAppRoutesListConfigService } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+import {
+  AppServiceBindingListConfigService
+} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 
 @Component({
   selector: 'app-application-delete',
   templateUrl: './application-delete.component.html',
   styleUrls: ['./application-delete.component.scss'],
   providers: [
+    CfAppRoutesListConfigService,
+    AppServiceBindingListConfigService,
     CloudFoundrySpaceService
   ]
 })
@@ -77,8 +85,8 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
   public selectedServiceInstances: APIResource<IServiceBinding>[];
   public fetchingRelated$: Observable<boolean>;
   public selectedApplication$: Observable<APIResource<IApp>[]>;
-  public selectedRoutes$ = new Subject<APIResource<IRoute>[]>();
-  public selectedServiceInstances$ = new Subject<APIResource<IServiceBinding>[]>();
+  public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
+  public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   private redirectAfterDeleteSub: Subscription;
   private appWallFetchAction: GetAllApplications;
   public routes: APIResource<IRoute>[];
@@ -187,13 +195,11 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
   }
 
   private setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
-    console.log('service', selected);
     this.selectedServiceInstances = selected;
     this.selectedServiceInstances$.next(selected);
   }
 
   private setSelectedRoutes(selected: APIResource<IRoute>[]) {
-    console.log('routes', selected);
     this.selectedRoutes = selected;
     this.selectedRoutes$.next(selected);
   }

@@ -46,6 +46,7 @@ export class AppDeleteServiceInstancesListConfigService extends AppServiceBindin
     this.getSingleActions = () => null;
     this.getSingleActions = () => null;
     this.defaultView = 'table';
+    this.viewType = ListViewTypes.TABLE_ONLY;
     this.allowSelection = true;
   }
 }

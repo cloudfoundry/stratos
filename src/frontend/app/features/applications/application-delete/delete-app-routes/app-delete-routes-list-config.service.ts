@@ -22,6 +22,7 @@ export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigServi
     super(store, appService, confirmDialog);
     this.getGlobalActions = () => null;
     this.getMultiActions = () => null;
+    this.getSingleActions = () => null;
     this.allowSelection = true;
   }
 }

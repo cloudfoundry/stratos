@@ -24,16 +24,14 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
   dataSource: AppServiceBindingDataSource;
   cardComponent = AppServiceBindingCardComponent;
   viewType = ListViewTypes.BOTH;
-  defaultView = 'table' as ListView;
+  defaultView = 'cards' as ListView;
   getColumns = () => {
     return [
       {
         columnId: 'name',
         headerCell: () => 'Service Instances',
         cellDefinition: {
-          getValue: (row) => {
-            return `${row.entity.service_instance.entity.name}`;
-          }
+          getValue: (row) => row.entity.service_instance.entity.name
         },
         cellFlex: '2'
       },
@@ -41,14 +39,16 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         columnId: 'service',
         headerCell: () => 'Service',
         cellDefinition: {
-          getValue: (row) => `${row.entity.service_instance.entity.service.entity.label}`
+          getValue: (row) => row.entity.service_instance.entity.service.entity.label
         },
         cellFlex: '1'
       },
       {
         columnId: 'servicePlan',
         headerCell: () => 'Plan',
-        cellComponent: TableCellServicePlanComponent,
+        cellDefinition: {
+          getValue: (row) => row.entity.service_instance.entity.service_plan.entity.name
+        },
         cellFlex: '1'
       },
       {
@@ -57,23 +57,6 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         cellComponent: TableCellServiceInstanceTagsComponent,
         cellFlex: '2'
       },
-      // {
-      //   columnId: 'attachedApps',
-      //   headerCell: () => 'Application Attached',
-      //   cellDefinition: {
-      //     getValue: (row) => {
-      //       console.log(row);
-      //       return `${row.entity.service_instance.entity.service_bindings.map(binding => binding.app.entity.name).join(', ')}`
-      //     }
-      //   },
-      //   cellFlex: '1'
-      // },
-      // {
-      //   columnId: 'attachedApps',
-      //   headerCell: () => 'Application Attached',
-      //   cellComponent: TableCellServiceInstanceAppsAttachedComponent,
-      //   cellFlex: '3'
-      // },
       {
         columnId: 'creation', headerCell: () => 'Creation Date',
         cellDefinition: {
