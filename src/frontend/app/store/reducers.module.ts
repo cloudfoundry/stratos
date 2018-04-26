@@ -14,6 +14,7 @@ import { createServiceInstanceReducer } from './reducers/create-service-instance
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { endpointsReducer } from './reducers/endpoints.reducer';
+import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
@@ -38,7 +39,8 @@ export const appReducers = {
   createServiceInstance: createServiceInstanceReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
-  routing: routingReducer
+  routing: routingReducer,
+  internalEvents: internalEventReducer
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];

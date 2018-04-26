@@ -1,11 +1,20 @@
+import { Observable } from 'rxjs/Observable';
+import { endpointSchemaKey } from './../../../store/helpers/entity-factory';
 import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
+
+import * as moment from 'moment';
 
 import { ToggleSideNav } from './../../../store/actions/dashboard-actions';
 import { AppState } from './../../../store/app-state';
 import { Logout } from '../../../store/actions/auth.actions';
-import { IHeaderBreadcrumb, IHeaderBreadcrumbLink, BREADCRUMB_URL_PARAM } from './page-header.types';
+import { IHeaderBreadcrumb, IHeaderBreadcrumbLink, BREADCRUMB_URL_PARAM, PageHeaderNotice } from './page-header.types';
 import { ActivatedRoute } from '@angular/router';
+import { internalEventTimeStampSelector } from '../../../store/selectors/internal-events.selectors';
+import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.selectors';
+import { InternalEventSubjectState, InternalEventSeverity } from '../../../store/types/internal-events.types';
+import { ISubHeaderTabs } from '../page-subheader/page-subheader.types';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-page-header',
@@ -15,11 +24,17 @@ import { ActivatedRoute } from '@angular/router';
 export class PageHeaderComponent {
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
   private breadcrumbKey: string;
+  public eventSeverity = InternalEventSeverity;
 
   @Input('hideSideNavButton') hideSideNavButton = false;
 
   @Input('hideMenu') hideMenu = false;
 
+  @Input('endpointIds$')
+  endpointIds$: Observable<string[]>;
+
+  @Input('tabs')
+  tabs: ISubHeaderTabs[];
   @Input('showUnderFlow') showUnderFlow = false;
 
   @Input('breadcrumbs')

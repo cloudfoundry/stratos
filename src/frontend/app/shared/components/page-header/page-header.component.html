@@ -1,33 +1,44 @@
-<div class="page-header">
-  <mat-toolbar color="primary">
-    <div class="page-header__nav-toggle-wrapper">
-      <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
+<div class="page-header__outer">
+  <div class="page-header">
+    <div>
+      <mat-toolbar color="primary">
+        <div class="page-header__nav-toggle-wrapper">
+          <button mat-icon-button *ngIf="!hideSideNavButton" (click)="toggleSidenav()">
         <mat-icon class="page-header__nav-toggle">menu</mat-icon>
       </button>
+        </div>
+        <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
+          <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
+            <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink" [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+            <span class="page-header__breadcrumb" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
+            <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
+          </ng-container>
+        </div>
+        <ng-content></ng-content>
+        <div class="page-header__filler"></div>
+        <ng-content select=".page-header-right"></ng-content>
+        <button *ngIf="!hideMenu" mat-icon-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
+          <button mat-menu-item routerLink="/about">
+          <span>About</span>
+        </button>
+        <div class="page-header__menu-separator"></div>
+        <button mat-menu-item routerLink="/userProfile">
+          <span>Profile</span>
+        </button>
+        <div class="page-header__menu-separator"></div>
+        <button mat-menu-item (click)="logout()">
+          <span>Logout</span>
+        </button>
+        </mat-menu>
+      </mat-toolbar>
     </div>
-    <div class="page-header__breadcrumbs" *ngIf="breadcrumbDefinitions">
-      <ng-container *ngFor="let breadcrumbDef of breadcrumbDefinitions">
-        <span class="page-header__breadcrumb page-header__breadcrumb-link" *ngIf="breadcrumbDef.routerLink" [routerLink]="breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-        <span class="page-header__breadcrumb" *ngIf="!breadcrumbDef.routerLink">{{ breadcrumbDef.value }}</span>
-        <mat-icon class="page-header__breadcrumb-separator">chevron_right</mat-icon>
-      </ng-container>
-    </div>
-    <ng-content></ng-content>
-    <div class="page-header__filler"></div>
-    <ng-content select=".page-header-right"></ng-content>
-    <button *ngIf="!hideMenu" mat-icon-button [matMenuTriggerFor]="menu" class="page-header__avatar-button">
-      <mat-icon class="page-header__avatar-icon">more_vert</mat-icon>
-    </button>
-    <mat-menu #menu="matMenu" [overlapTrigger]="false" class="page-header__menu">
-      <button mat-menu-item routerLink="/about">
-        <span>About</span>
-      </button>
-      <div class="page-header__menu-separator"></div>
-      <button mat-menu-item (click)="logout()">
-        <span>Logout</span>
-      </button>
-    </mat-menu>
-  </mat-toolbar>
+  </div>
+  <app-page-subheader class="subheader" *ngIf="tabs" [tabs]="tabs">
+  </app-page-subheader>
   <div *ngIf="showUnderFlow" class="page-header__underflow">
   </div>
+  <app-page-header-events class="header-events" [endpointIds$]="endpointIds$"></app-page-header-events>
 </div>

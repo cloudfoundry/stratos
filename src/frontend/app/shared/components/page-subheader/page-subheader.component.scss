@@ -4,12 +4,9 @@
   display: flex;
   flex-direction: column;
   height: 56px;
-  left: 0;
   overflow: hidden;
-  position: absolute;
-  right: 0;
-  top: 56px;
   &__tabs {
+    position: relative;
     height: 46px;
   }
   &__tab-hidden {
