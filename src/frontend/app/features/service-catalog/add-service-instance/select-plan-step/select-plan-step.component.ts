@@ -1,15 +1,16 @@
-import { Component, OnDestroy, OnInit, AfterContentInit, ChangeDetectionStrategy, AfterContentChecked } from '@angular/core';
+import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { filter, first, map, share, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
+import { SetServicePlan } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesService } from '../../services.service';
-import { SetServicePlan } from '../../../../store/actions/create-service-instance.actions';
 
 interface ServicePlan {
   id: string;
@@ -20,10 +21,12 @@ interface ServicePlan {
 @Component({
   selector: 'app-select-plan-step',
   templateUrl: './select-plan-step.component.html',
-  styleUrls: ['./select-plan-step.component.scss']
+  styleUrls: ['./select-plan-step.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentInit {
-  // validate: () => boolean;
+  changeSubscription: Subscription;
+  validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
   stepperForm: FormGroup;
   servicePlans$: Observable<ServicePlan[]>;
@@ -43,24 +46,20 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required)
     });
-
-  }
-
-  validate = () => {
-    if (this.stepperForm) {
-      return this.stepperForm.valid;
-    }
-    return false;
-  }
-
-  ngOnInit() {
     this.subscription = this.servicePlans$.pipe(
       tap(o => {
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
-        // this.stepperForm.updateValueAndValidity();
+        this.validate.next(this.stepperForm.valid);
+
       }),
       first()
     ).subscribe();
+
+
+  }
+
+  ngOnInit() {
+
   }
 
   getDisplayName(selectedPlan: ServicePlan) {
@@ -75,12 +74,16 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
   }
 
   onEnter = () => {
-    this.stepperForm.controls.servicePlans.updateValueAndValidity();
+    this.changeSubscription = this.stepperForm.statusChanges
+      .map(() => {
+        this.validate.next(this.stepperForm.valid);
+      }).subscribe();
   }
 
   ngAfterContentInit() {
 
   }
+
   onNext = () => {
     this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
     return Observable.of({ success: true });
