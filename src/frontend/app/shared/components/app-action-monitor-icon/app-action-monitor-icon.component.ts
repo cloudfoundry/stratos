@@ -4,7 +4,7 @@ import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/typ
 import { schema } from 'normalizr';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { Observable } from 'rxjs/Observable';
-import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom } from 'rxjs/operators';
+import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom, tap } from 'rxjs/operators';
 
 export enum AppMonitorComponentTypes {
   UPDATE = 'MONITOR_UPDATE',
@@ -52,6 +52,7 @@ export class AppActionMonitorIconComponent implements OnInit {
   }
 
   private getStateObservable(entityMonitor: EntityMonitor, monitorState: AppMonitorComponentTypes) {
+    console.log(this.entityKey, monitorState);
     switch (monitorState) {
       case AppMonitorComponentTypes.DELETE:
         return this.getDeletingState(entityMonitor);
@@ -66,6 +67,7 @@ export class AppActionMonitorIconComponent implements OnInit {
 
   private getDeletingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
     return entityMonitor.entityRequest$.pipe(
+      tap(r => console.log(this.entityKey, r)),
       map(requestState => ({
         busy: requestState.deleting.busy,
         error: requestState.deleting.error,

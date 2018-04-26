@@ -20,7 +20,7 @@ import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
-import { GetAllApplications } from '../../../store/actions/application.actions';
+import { GetAllApplications, DeleteApplication } from '../../../store/actions/application.actions';
 import { DeleteRoute } from '../../../store/actions/route.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
@@ -40,6 +40,7 @@ import { CfAppRoutesListConfigService } from '../../../shared/components/list/li
 import {
   AppServiceBindingListConfigService
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
+import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
 
 @Component({
   selector: 'app-application-delete',
@@ -91,11 +92,11 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
   private appWallFetchAction: GetAllApplications;
   public routes: APIResource<IRoute>[];
   public instances: AppInstanceStats[];
-  public deleting$: Observable<boolean>;
+  public fetchingApplication$: Observable<boolean>;
 
   public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
   public routeSchemaKey = routeSchemaKey;
-  public appSchemaKey = applicationSchemaKey;
+  public applicationSchemaKey = applicationSchemaKey;
   public deletingState = AppMonitorComponentTypes.DELETE;
 
   constructor(
@@ -119,13 +120,14 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
       startWith(true)
     );
 
-    this.deleting$ = this.isDeleting(this.fetchingRelated$);
+    this.fetchingApplication$ = this.isFetchingApplication(this.fetchingRelated$);
 
     this.fetchingRelated$.pipe(
       switchMap(() => combineLatest(
         instanceMonitor.currentPage$,
         routeMonitor.currentPage$
-      ))
+      )),
+      first()
     )
       .subscribe(([instances, routes]) => {
         this.routes = routes;
@@ -173,9 +175,9 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
     ];
   }
 
-  private isDeleting(fetchingRelated$: Observable<boolean>) {
-    return combineLatest(fetchingRelated$, this.applicationService.isDeletingApp$).pipe(
-      map(([fetchingRelated, deletingApp]) => fetchingRelated || deletingApp)
+  private isFetchingApplication(fetchingRelated$: Observable<boolean>) {
+    return combineLatest(fetchingRelated$, this.applicationService.isFetchingApp$).pipe(
+      map(([fetchingRelated, fetching]) => fetchingRelated || fetching)
     );
   }
   private getRedirectSub(appMonitor: EntityMonitor<APIResource<IApp>>) {
@@ -209,9 +211,15 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
   }
 
   public startDelete() {
+    this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
     if (this.selectedRoutes && this.selectedRoutes.length) {
       this.selectedRoutes.forEach(route => {
         this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
+      });
+    }
+    if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
+      this.selectedServiceInstances.forEach(instance => {
+        this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.metadata.guid));
       });
     }
   }

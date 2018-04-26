@@ -1,4 +1,4 @@
-<app-loading-page [isLoading]="deleting$" [text]="'Gathering application information'">
+<app-loading-page [isLoading]="fetchingApplication$" [text]="'Gathering application information'">
   <app-page-header>
     <h1>Delete application</h1>
   </app-page-header>
@@ -29,8 +29,8 @@
         <ng-container *ngIf="selectedServiceInstances && selectedServiceInstances.length">
           <h3>Instances</h3>
           <app-action-monitor class="app-delete__monitor" [columns]="instanceDeleteColumns" [data$]="selectedServiceInstances$" [entityKey]="serviceInstancesSchemaKey" [monitorState]="deletingState" [getId]="getId"></app-action-monitor>
-          <button (click)="startDelete()">delete</button>
         </ng-container>
+        <button (click)="startDelete()">delete</button>
       </div>
     </app-step>
   </app-steppers>
