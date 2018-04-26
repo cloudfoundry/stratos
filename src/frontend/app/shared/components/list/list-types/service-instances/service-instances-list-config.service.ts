@@ -42,9 +42,6 @@ export class ServiceInstancesListConfigService
         cellDefinition: { getValue: (row) => `${row.entity.name}` }, cellFlex: '2'
       },
       {
-        columnId: 'service', headerCell: () => 'Service', cellComponent: TableCellServiceNameComponent, cellFlex: '1'
-      },
-      {
         columnId: 'servicePlan', headerCell: () => 'Plan', cellComponent: TableCellServicePlanComponent, cellFlex: '1'
       },
       {

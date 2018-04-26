@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -8,6 +8,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { AppState } from '../../../store/app-state';
 import { ServicesService } from '../services.service';
 import { map, tap, first, publishReplay, refCount } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
 
 
 function servicesServiceFactory(
@@ -33,10 +34,11 @@ function servicesServiceFactory(
     }
   ]
 })
-export class ServiceBaseComponent implements OnInit {
+export class ServiceBaseComponent implements OnInit, OnDestroy {
+  servicesSubscription: Subscription;
 
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
-
+    this.servicesSubscription = this.servicesService.service$.subscribe();
   }
 
   ngOnInit() {
@@ -52,15 +54,13 @@ export class ServiceBaseComponent implements OnInit {
 
   getServiceLabel = (): Observable<string> => {
     return this.servicesService.service$.pipe(
-      first(),
       map((s) => !!s.entity.extra ? JSON.parse(s.entity.extra).displayName : s.entity.label),
       publishReplay(1),
       refCount()
     );
   }
-
-  // getServiceLabel = (): Observable<string> => {
-  //   return Observable.of('test');
-  // }
+  ngOnDestroy(): void {
+    this.servicesSubscription.unsubscribe();
+  }
 
 }

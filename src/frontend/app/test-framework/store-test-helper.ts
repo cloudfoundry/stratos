@@ -581,6 +581,12 @@ const testInitialStoreState: AppState = {
       name: ''
     }
   },
+  createServiceInstance: {
+    name: '',
+    servicePlanGuid: '',
+    spaceGuid: '',
+    orgGuid: ''
+  },
   deployApplication: {
     cloudFoundryDetails: null,
   },

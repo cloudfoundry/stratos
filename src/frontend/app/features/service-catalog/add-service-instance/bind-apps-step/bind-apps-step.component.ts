@@ -45,6 +45,7 @@ export class BindAppsStepComponent implements OnInit, OnDestroy, AfterContentIni
     });
 
     this.allAppsSubscription = this.store.select(selectCreateServiceInstance).pipe(
+      filter(selectCreateServiceInstance => !!selectCreateServiceInstance.spaceGuid),
       tap(createServiceInstanceState => {
         const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstanceState.spaceGuid);
         this.apps$ = getPaginationObservables<APIResource<IApp>>({
@@ -67,13 +68,10 @@ export class BindAppsStepComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   ngAfterContentInit() {
-    console.log(this.validate);
     this.validate = this.stepperForm.statusChanges
       .map(() => {
         return this.stepperForm.valid;
       });
-
-
   }
 
   submit = () => {

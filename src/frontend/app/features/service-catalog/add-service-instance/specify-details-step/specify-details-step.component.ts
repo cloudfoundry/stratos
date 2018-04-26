@@ -1,9 +1,9 @@
-import { Component, OnDestroy, OnInit, AfterContentInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterContentInit, AfterContentChecked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, map, share, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, filter, map, share, switchMap, tap, first } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -32,15 +32,13 @@ import { ServicesService } from '../../services.service';
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
 })
-export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterContentInit {
+export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterContentChecked {
   validate: Observable<boolean>;
   orgSubscription: Subscription;
   spaceSubscription: Subscription;
 
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
-  selectedOrgId: string;
-  selectedSpaceId: string;
 
   stepperForm = new FormGroup({
     name: new FormControl('', Validators.required),
@@ -64,14 +62,10 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
         getAllOrgsAction.paginationKey,
         entityFactory(organizationSchemaKey)
       )
-    }, true).entities$;
-
-    this.orgSubscription = this.orgs$.pipe(
-      tap(o => {
-        this.selectedOrgId = o[0].metadata.guid;
-        this.store.dispatch(new SetOrg(this.selectedOrgId));
-      })
-    ).subscribe();
+    }, true).entities$.pipe(
+      share(),
+      first()
+      );
 
     this.spaces$ = this.store.select(selectOrgGuid).pipe(
       filter(p => !!p),
@@ -80,14 +74,6 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       map(org => org.entity.spaces),
       share()
     );
-
-    this.spaceSubscription = this.spaces$.pipe(
-      tap(o => {
-        this.selectedSpaceId = o[0].metadata.guid;
-        this.store.dispatch(new SetSpace(this.selectedSpaceId));
-      })
-    ).subscribe();
-
   }
 
   setOrg = (guid) => this.store.dispatch(new SetOrg(guid));
@@ -96,12 +82,28 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     this.orgSubscription.unsubscribe();
   }
   ngOnInit() {
+    this.spaceSubscription = this.spaces$.pipe(
+      tap(o => {
+        const selectedSpaceId = o[0].metadata.guid;
+        this.stepperForm.controls.space.setValue(selectedSpaceId);
+        this.store.dispatch(new SetSpace(selectedSpaceId));
+
+      })
+    ).subscribe();
+
+    this.orgSubscription = this.orgs$.pipe(
+      tap(o => {
+        const selectedOrgId = o[0].metadata.guid;
+        this.stepperForm.controls.space.setValue(selectedOrgId);
+        this.store.dispatch(new SetOrg(selectedOrgId));
+      })
+    ).subscribe();
+
   }
 
-  ngAfterContentInit() {
+  ngAfterContentChecked() {
     this.validate = this.stepperForm.statusChanges
       .map(() => {
-        console.log(this.stepperForm.valid);
         return this.stepperForm.valid;
       });
   }

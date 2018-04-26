@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, AfterContentInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, AfterContentInit, ChangeDetectionStrategy, AfterContentChecked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -24,7 +24,6 @@ interface ServicePlan {
 })
 export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentInit {
   validate: Observable<boolean>;
-  selectedPlan: string;
   subscription: Subscription;
   stepperForm: FormGroup;
   servicePlans$: Observable<ServicePlan[]>;
@@ -41,20 +40,19 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
       share(),
       first()
     );
-
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required)
     });
-
-    this.subscription = this.servicePlans$.pipe(
-      tap(o => {
-        this.selectedPlan = o[0].id;
-      }),
-      first()
-    ).subscribe();
   }
 
   ngOnInit() {
+    this.subscription = this.servicePlans$.pipe(
+      tap(o => {
+        this.stepperForm.controls.servicePlans.setValue(o[0].id);
+        this.stepperForm.updateValueAndValidity();
+      }),
+      first()
+    ).subscribe();
   }
 
   getDisplayName(selectedPlan: ServicePlan) {
@@ -69,15 +67,13 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
   }
 
   ngAfterContentInit() {
-    console.log(this.stepperForm.valid);
     this.validate = this.stepperForm.statusChanges
       .map(() => {
-        console.log(this.stepperForm.valid);
         return this.stepperForm.valid;
       });
   }
   onNext = () => {
-    this.store.dispatch(new SetServicePlan(this.selectedPlan));
+    this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
     return Observable.of({ success: true });
   }
 
@@ -89,7 +85,7 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
   }
 
   getSelectedPlan = (): Observable<ServicePlan> => this.servicePlans$.pipe(
-    map(o => o.filter(p => p.id === this.selectedPlan)[0]),
+    map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
     filter(p => !!p)
   )
 
