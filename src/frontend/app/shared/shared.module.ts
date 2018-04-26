@@ -66,7 +66,6 @@ import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
-import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
@@ -81,6 +80,7 @@ import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.compon
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
@@ -97,6 +97,7 @@ import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 
 @NgModule({
   imports: [
@@ -135,7 +136,6 @@ import { AppActionMonitorIconComponent } from './components/app-action-monitor-i
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
-    PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
@@ -179,7 +179,8 @@ import { AppActionMonitorIconComponent } from './components/app-action-monitor-i
     CliInfoComponent,
     CliCommandComponent,
     AppActionMonitorComponent,
-    AppActionMonitorIconComponent
+    AppActionMonitorIconComponent,
+    UserProfileBannerComponent
   ],
   exports: [
     FormsModule,
@@ -206,7 +207,6 @@ import { AppActionMonitorIconComponent } from './components/app-action-monitor-i
     EndpointsMissingComponent,
     ApplicationStateComponent,
     SshViewerComponent,
-    PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
@@ -243,6 +243,7 @@ import { AppActionMonitorIconComponent } from './components/app-action-monitor-i
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
+    UserProfileBannerComponent,
     CliInfoComponent,
     AppActionMonitorComponent,
     CliCommandComponent,
@@ -261,7 +262,8 @@ import { AppActionMonitorIconComponent } from './components/app-action-monitor-i
     ConfirmationDialogService,
     EntityMonitorFactory,
     PaginationMonitorFactory,
-    CloudFoundryService
+    CloudFoundryService,
+    InternalEventMonitorFactory
   ]
 })
 export class SharedModule { }

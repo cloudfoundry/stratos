@@ -1,4 +1,4 @@
-<app-page-header>
+<app-page-header [tabs]="tabLinks">
   <h1>{{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
     <button mat-icon-button name="add-org" *ngIf="(this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
@@ -12,8 +12,6 @@
     </button>
   </div>
 </app-page-header>
-<app-page-subheader [tabs]="tabLinks">
-</app-page-subheader>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Cloud Foundry details'">
   <router-outlet></router-outlet>
 </app-loading-page>

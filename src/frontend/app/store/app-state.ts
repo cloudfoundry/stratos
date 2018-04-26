@@ -1,16 +1,17 @@
-import { RouterReducerState } from '@ngrx/router-store';
-
 import { ActionHistoryState } from './reducers/action-history-reducer';
 import { AuthState } from './reducers/auth.reducer';
 import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
-import { EndpointState } from './types/endpoint.types';
 import { CreateNewApplicationState } from './types/create-application.types';
+import { DeployApplicationState } from './types/deploy-application.types';
+import { EndpointState } from './types/endpoint.types';
 import { IRequestDataState, IRequestState } from './types/entity.types';
 import { PaginationState } from './types/pagination.types';
-import { UAASetupState } from './types/uaa-setup.types';
-import { DeployApplicationState } from './types/deploy-application.types';
 import { RoutingHistory } from './types/routing.type';
+import { UAASetupState } from './types/uaa-setup.types';
+import { UserProfileInfo } from './types/user-profile.types';
+import { InternalEventsState } from './types/internal-events.types';
+
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
 }
@@ -30,4 +31,5 @@ export interface AppState {
   deployApplication: DeployApplicationState;
   lists: ListsState;
   routing: RoutingHistory;
+  internalEvents: InternalEventsState;
 }

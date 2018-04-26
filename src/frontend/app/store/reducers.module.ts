@@ -17,6 +17,7 @@ import { requestPaginationReducer } from './reducers/pagination-reducer.generato
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { ActionReducerMap } from '@ngrx/store/src/models';
 import { routingReducer } from './reducers/routing.reducer';
+import { internalEventReducer } from './reducers/internal-events.reducer';
 
 
 export function logger(reducer) {
@@ -36,7 +37,8 @@ export const appReducers = {
   deployApplication: deployAppReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
-  routing: routingReducer
+  routing: routingReducer,
+  internalEvents: internalEventReducer
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];

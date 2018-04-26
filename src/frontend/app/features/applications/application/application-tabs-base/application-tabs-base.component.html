@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
   <div *ngIf="applicationService.application$ | async as application" class="app-page-header">
     <h1>{{ application?.app?.entity?.name }} </h1>
     <div>
@@ -25,8 +25,6 @@
     </div>
   </div>
 </app-page-header>
-<app-page-subheader [tabs]="tabLinks">
-</app-page-subheader>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving application'" class="router-component">
   <router-outlet></router-outlet>
 </app-loading-page>
