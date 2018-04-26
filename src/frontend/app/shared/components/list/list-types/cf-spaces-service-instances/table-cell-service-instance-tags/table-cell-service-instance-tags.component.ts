@@ -1,12 +1,13 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { TableCellCustom } from '../../../list.types';
+import { Component, Input, OnInit } from '@angular/core';
+
+import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../../../store/types/api.types';
-import { CfServiceInstance } from '../../../../../../store/types/service.types';
 import { AppChip } from '../../../../chips/chips.component';
+import { TableCellCustom } from '../../../list.types';
 
 interface Tag {
   value: string;
-  key: APIResource<CfServiceInstance>;
+  key: APIResource<IServiceInstance>;
 }
 @Component({
   selector: 'app-table-cell-service-instance-tags',

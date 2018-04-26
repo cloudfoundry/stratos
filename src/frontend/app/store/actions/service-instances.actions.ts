@@ -50,6 +50,37 @@ export class GetServicesInstancesInSpace
   parentEntitySchema = entityFactory(spaceSchemaKey);
   flattenPagination = true;
 }
+
+export class GetServiceInstances
+  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  constructor(
+    public endpointGuid: string,
+    public paginationKey: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_instances`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Service Instances', 'Get all');
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'creation',
+  };
+  flattenPagination = true;
+}
 export class GetServiceInstance
   extends CFStartAction implements EntityInlineParentAction {
   constructor(
