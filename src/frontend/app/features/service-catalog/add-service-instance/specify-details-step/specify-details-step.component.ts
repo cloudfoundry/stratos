@@ -110,10 +110,12 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
 
     this.orgSubscription = this.orgs$.pipe(
       tap(o => {
-        // TODO select first org that has spaces
-        const selectedOrgId = o[0].metadata.guid;
-        this.stepperForm.controls.org.setValue(selectedOrgId);
-        this.store.dispatch(new SetOrg(selectedOrgId));
+        const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
+        if (orgWithSpaces.length > 0) {
+          const selectedOrgId = orgWithSpaces[0].metadata.guid;
+          this.stepperForm.controls.org.setValue(selectedOrgId);
+          this.store.dispatch(new SetOrg(selectedOrgId));
+        }
       })
     ).subscribe();
   }

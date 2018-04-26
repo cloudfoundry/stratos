@@ -93,8 +93,9 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-
-    this.changeSubscription.unsubscribe();
+    if (this.changeSubscription) {
+      this.changeSubscription.unsubscribe();
+    }
 
   }
 
