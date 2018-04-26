@@ -137,7 +137,7 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     let params = this.stepperForm.controls.params.value;
     params = params === '' ? null : params;
     let tagsStr = null;
-    tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label).join(',') : null;
+    tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 
     const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
 
