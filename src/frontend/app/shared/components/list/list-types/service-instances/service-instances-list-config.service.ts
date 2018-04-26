@@ -8,7 +8,7 @@ import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import { IListConfig, ListConfig, ListViewTypes, IListAction } from '../../list.component.types';
 import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
@@ -22,6 +22,8 @@ import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import { ServiceInstancesDataSource } from './service-instances-data-source';
+import { DeleteServiceInstance, DeleteServiceBinding } from '../../../../../store/actions/service-instances.actions';
+import { RouterNav } from '../../../../../store/actions/router.actions';
 
 @Injectable()
 export class ServiceInstancesListConfigService
@@ -34,6 +36,22 @@ export class ServiceInstancesListConfigService
     title: null,
     noEntries: 'There are no service instances'
   };
+  private listActionDelete: IListAction<APIResource> = {
+    action: (item: APIResource) => this.deleteServiceInstance(item),
+    label: 'Delete',
+    description: 'Delete Service Instance',
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
+  };
+
+  private listActionDetach: IListAction<APIResource> = {
+    action: (item: APIResource) => this.deleteServiceBinding(item),
+    label: 'Detach',
+    description: 'Detach Service Instance',
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => row.entity.service_bindings.length === 1
+  };
+
 
   static getColumns = (datePipe: DatePipe): ITableColumn<APIResource<IServiceInstance>>[] =>
     [
@@ -61,15 +79,32 @@ export class ServiceInstancesListConfigService
     ]
 
 
-
-  constructor(private store: Store<AppState>, servicesService: ServicesService, private datePipe: DatePipe) {
+  constructor(private store: Store<AppState>, private servicesService: ServicesService, private datePipe: DatePipe) {
     super();
     this.dataSource = new ServiceInstancesDataSource(servicesService.cfGuid, servicesService.serviceGuid, store, this);
   }
 
+
+  deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
+    this.store.dispatch(new DeleteServiceInstance(this.servicesService.cfGuid, serviceInstance.metadata.guid))
+
+
+  deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
+    /**
+     * If only one binding exists, carry out the action otherwise
+     * take user to a form to select which app binding they want to remove
+    **/
+    if (serviceInstance.entity.service_bindings.length === 1) {
+      this.store.dispatch(new DeleteServiceBinding(
+        this.servicesService.cfGuid,
+        serviceInstance.entity.service_bindings[0].metadata.guid));
+    } else {
+      this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));
+    }
+  }
   getGlobalActions = () => [];
   getMultiActions = () => [];
-  getSingleActions = () => [];
+  getSingleActions = () => [this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
   getColumns = () => ServiceInstancesListConfigService.getColumns(this.datePipe);
   getDataSource = () => this.dataSource;
