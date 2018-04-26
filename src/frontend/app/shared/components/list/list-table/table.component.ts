@@ -102,7 +102,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
     if (this.dataSource.getRowState) {
       return this.dataSource.getRowState(row);
     }
-    return {};
+    return null;
   }
 
   ngOnDestroy() {

@@ -99,6 +99,7 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
 import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
+import { TableCellRequestMonitorIconComponent } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 
 @NgModule({
   imports: [
@@ -181,7 +182,8 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
     CliCommandComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
-    UserProfileBannerComponent
+    UserProfileBannerComponent,
+    TableCellRequestMonitorIconComponent
   ],
   exports: [
     FormsModule,

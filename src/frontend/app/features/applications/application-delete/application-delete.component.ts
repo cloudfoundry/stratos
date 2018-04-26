@@ -33,6 +33,7 @@ import { ApplicationService } from '../application.service';
 import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { Subject } from 'rxjs/Subject';
 import { DeleteRoute } from '../../../store/actions/route.actions';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 
 @Component({
   selector: 'app-application-delete',
@@ -42,13 +43,42 @@ import { DeleteRoute } from '../../../store/actions/route.actions';
     CloudFoundrySpaceService
   ]
 })
-export class ApplicationDeleteComponent implements OnDestroy {
+export class ApplicationDeleteComponent<T> implements OnDestroy {
 
-  selectedRoutes: APIResource<IRoute>[];
-  selectedServiceInstances: APIResource<IServiceBinding>[];
-  fetchingRelated$: Observable<boolean>;
-  public selectedRoutes$ = new Subject();
-  public selectedServiceInstances$ = new Subject();
+  public instanceDeleteColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
+    {
+      headerCell: () => 'Name',
+      columnId: 'name',
+      cellDefinition: {
+        getValue: row => row.entity.service_instance.entity.name
+      }
+    }
+  ];
+  public routeDeleteColumns: ITableColumn<APIResource<IRoute>>[] = [
+    {
+      headerCell: () => 'Host',
+      columnId: 'host',
+      cellDefinition: {
+        getValue: row => row.entity.host
+      }
+    }
+  ];
+  public appDeleteColumns: ITableColumn<APIResource<IApp>>[] = [
+    {
+      headerCell: () => 'Name',
+      columnId: 'name',
+      cellDefinition: {
+        getValue: row => row.entity.name
+      }
+    }
+  ];
+
+  public selectedRoutes: APIResource<IRoute>[];
+  public selectedServiceInstances: APIResource<IServiceBinding>[];
+  public fetchingRelated$: Observable<boolean>;
+  public selectedApplication$: Observable<APIResource<IApp>[]>;
+  public selectedRoutes$ = new Subject<APIResource<IRoute>[]>();
+  public selectedServiceInstances$ = new Subject<APIResource<IServiceBinding>[]>();
   private redirectAfterDeleteSub: Subscription;
   private appWallFetchAction: GetAllApplications;
   public routes: APIResource<IRoute>[];
@@ -57,6 +87,7 @@ export class ApplicationDeleteComponent implements OnDestroy {
 
   public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
   public routeSchemaKey = routeSchemaKey;
+  public appSchemaKey = applicationSchemaKey;
   public deletingState = AppMonitorComponentTypes.DELETE;
 
   constructor(
@@ -65,8 +96,10 @@ export class ApplicationDeleteComponent implements OnDestroy {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory
   ) {
-
     const appMonitor = this.getApplicationMonitor();
+    this.selectedApplication$ = applicationService.app$.pipe(
+      map(entityInfo => [entityInfo.entity])
+    );
     this.redirectAfterDeleteSub = this.getRedirectSub(appMonitor);
 
     const [instanceMonitor, routeMonitor] = this.fetchRelatedEntities();

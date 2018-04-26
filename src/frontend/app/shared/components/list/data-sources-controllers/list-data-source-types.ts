@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { IRequestEntityTypeState } from '../../../../store/app-state';
 import { PaginationEntityState, PaginatedAction } from '../../../../store/types/pagination.types';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { DataSource } from '@angular/cdk/table';
 
 export interface AppEvent {
   actee_name: string;
@@ -37,9 +38,9 @@ export class ListActions<T> {
   singleActions = new Array<ListActionConfig<T>>();
 }
 
-export interface ITableListDataSource<T> {
+export interface ITableListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
-  getRowState(row: T): RowsState;
+  getRowState?(row: T): Observable<RowsState>;
   trackBy(index: number, item: T);
 }
 export interface IListDataSource<T> extends ITableListDataSource<T> {
@@ -75,9 +76,6 @@ export interface IListDataSource<T> extends ITableListDataSource<T> {
 
   getFilterFromParams(pag: PaginationEntityState): string;
   setFilterParam(filter: string, pag: PaginationEntityState);
-  connect(): Observable<T[]>;
-  destroy();
-
   refresh();
 }
 

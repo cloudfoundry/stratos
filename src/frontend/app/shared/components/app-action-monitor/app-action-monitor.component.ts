@@ -5,16 +5,19 @@ import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/typ
 import { Observable } from 'rxjs/Observable';
 import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/table';
+import { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
+import { ITableColumn } from '../list/list-table/table.types';
+import { TableCellRequestMonitorIconComponent, ITableCellRequestMonitorIconConfig } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 
 @Component({
   selector: 'app-action-monitor',
   templateUrl: './app-action-monitor.component.html',
   styleUrls: ['./app-action-monitor.component.scss']
 })
-export class AppActionMonitorComponent implements OnInit {
+export class AppActionMonitorComponent<T> implements OnInit {
 
   @Input('data$')
-  private data$: Observable<Array<any>>;
+  private data$: Observable<Array<T>>;
 
   @Input('entityKey')
   public entityKey: string;
@@ -31,24 +34,37 @@ export class AppActionMonitorComponent implements OnInit {
   @Input('getId')
   public getId: (element) => string;
 
+  @Input('trackBy')
+  public trackBy = ((index: number, item: T) => index.toString());
+
   @Input('columns')
-  public columns: string[];
+  public columns: ITableColumn<T>[] = [];
 
   @Output('currentState')
   public currentState: EventEmitter<IApplicationMonitorComponentState>;
 
-  private dataSource: DataSource<any>;
-
-  public displayedColumns = ['id', 'state'];
+  private dataSource: DataSource<T>;
 
   constructor() { }
 
   ngOnInit() {
-    this.columns.push('state');
+    const cellConfig: ITableCellRequestMonitorIconConfig<T> = {
+      entityKey: this.entityKey,
+      schema: this.schema,
+      monitorState: this.monitorState,
+      updateKey: this.updateKey,
+      getId: this.getId
+    };
+    this.columns.push({
+      columnId: 'monitorState',
+      cellComponent: TableCellRequestMonitorIconComponent,
+      cellConfig
+    });
     this.dataSource = {
       connect: () => this.data$,
-      disconnect: () => { }
-    } as DataSource<any>;
+      disconnect: () => { },
+      trackBy: this.getId ? (index, item) => this.getId(item) : this.trackBy
+    } as ITableListDataSource<T>;
   }
 
 }
