@@ -13,8 +13,17 @@
         <mat-option [disabled]="!selectedOrgId" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-form-field>
-      <textarea matInput placeholder="Tags" matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="tags"></textarea>
+    <!-- <mat-form-field>
+      <textarea matInput placeholder="Tags" matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="5" ></textarea>
+    </mat-form-field> -->
+    <mat-form-field class="tags-chip-list">
+      <mat-chip-list #chipList formControlName="tags">
+        <mat-chip *ngFor="let tag of tags" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">
+          {{tag.label}}
+          <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
+        </mat-chip>
+        <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
+      </mat-chip-list>
     </mat-form-field>
     <mat-form-field>
       <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>

@@ -1,10 +1,11 @@
 import { Component, OnDestroy, OnInit, AfterContentInit, AfterContentChecked } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatChipInputEvent } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, map, share, switchMap, tap, first, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
+import { ENTER, COMMA } from '@angular/cdk/keycodes';
 
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -36,6 +37,12 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
   validate: Observable<boolean>;
   orgSubscription: Subscription;
   spaceSubscription: Subscription;
+  tagsVisible = true;
+  tagsSelectable = true;
+  tagsRemovable = true;
+  tagsAddOnBlur = true;
+  separatorKeysCodes = [ENTER, COMMA];
+  tags = [];
 
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
@@ -123,17 +130,14 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     );
   }
 
-
-
   createServiceInstance(servicePlanGuid: string): Observable<RequestInfoState> {
 
     const name = this.stepperForm.controls.name.value;
     const spaceGuid = this.stepperForm.controls.space.value;
     let params = this.stepperForm.controls.params.value;
     params = params === '' ? null : params;
-    let allTags = this.stepperForm.controls.tags.value;
-    allTags = allTags === '' ? null : allTags.split(',');
-    const tags = allTags;
+    let tagsStr = null;
+    tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label).join(',') : null;
 
     const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
 
@@ -144,9 +148,9 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       servicePlanGuid,
       spaceGuid,
       params,
-      tags
+      tagsStr
     ));
-    this.store.dispatch(new SetCreateServiceInstance(name, spaceGuid, tags, params));
+    this.store.dispatch(new SetCreateServiceInstance(name, spaceGuid, tagsStr, params));
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
 
@@ -154,4 +158,26 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
   private displaySnackBar() {
     this.snackBar.open('Failed to create service instance! Please re-check the details.', 'Dismiss');
   }
+
+  addTag(event: MatChipInputEvent): void {
+    const input = event.input;
+    const value = event.value;
+    if ((value || '').trim()) {
+      this.tags.push({ label: value.trim() });
+    }
+
+    if (input) {
+      input.value = '';
+    }
+  }
+
+  removeTag(tag: any): void {
+    const index = this.tags.indexOf(tag);
+
+    if (index >= 0) {
+      this.tags.splice(index, 1);
+    }
+  }
+
+
 }
