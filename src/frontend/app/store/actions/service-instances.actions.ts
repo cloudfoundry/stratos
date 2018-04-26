@@ -164,4 +164,6 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
   entity = [entityFactory(serviceInstancesSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
+  removeEntityOnDelete = true;
+
 }

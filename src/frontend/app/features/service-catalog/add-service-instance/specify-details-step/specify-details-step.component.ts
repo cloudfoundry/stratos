@@ -17,7 +17,7 @@ import {
   SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { CreateServiceInstance } from '../../../../store/actions/service-instances.actions';
+import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, organizationSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
@@ -27,6 +27,8 @@ import { selectOrgGuid, selectServicePlan } from '../../../../store/selectors/cr
 import { APIResource } from '../../../../store/types/api.types';
 import { CloudFoundryEndpointService } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ServicesService } from '../../services.service';
+import { IServiceInstance } from '../../../../core/cf-api-svc.types';
+import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -34,9 +36,13 @@ import { ServicesService } from '../../services.service';
   styleUrls: ['./specify-details-step.component.scss'],
 })
 export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterContentInit {
+  stepperForm: FormGroup;
+  serviceInstanceNameSub: Subscription;
+  allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: Observable<boolean>;
   orgSubscription: Subscription;
   spaceSubscription: Subscription;
+  allServiceInstanceNames: string[];
   tagsVisible = true;
   tagsSelectable = true;
   tagsRemovable = true;
@@ -47,13 +53,11 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
 
-  stepperForm = new FormGroup({
-    name: new FormControl('', Validators.required),
-    org: new FormControl('', Validators.required),
-    space: new FormControl('', Validators.required),
-    params: new FormControl(''),
-    tags: new FormControl(''),
-  });
+  nameTakenValidator = (): ValidatorFn => {
+    return (formField: AbstractControl): { [key: string]: any } =>
+      !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
+  }
+
   constructor(
     private store: Store<AppState>,
     private servicesService: ServicesService,
@@ -61,6 +65,13 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     private snackBar: MatSnackBar,
   ) {
 
+    this.stepperForm = new FormGroup({
+      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
+      org: new FormControl('', Validators.required),
+      space: new FormControl('', Validators.required),
+      params: new FormControl(''),
+      tags: new FormControl(''),
+    });
     const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(servicesService.cfGuid);
     this.orgs$ = getPaginationObservables<APIResource<IOrganization>>({
       store: this.store,
@@ -68,6 +79,20 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       paginationMonitor: this.paginationMonitorFactory.create(
         getAllOrgsAction.paginationKey,
         entityFactory(organizationSchemaKey)
+      )
+    }, true).entities$.pipe(
+      share(),
+      first()
+      );
+
+    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.servicesService.serviceGuid);
+
+    this.allServiceInstances$ = getPaginationObservables<APIResource<IServiceInstance>>({
+      store: this.store,
+      action: new GetServiceInstances(this.servicesService.cfGuid, paginationKey),
+      paginationMonitor: this.paginationMonitorFactory.create(
+        paginationKey,
+        entityFactory(serviceInstancesSchemaKey)
       )
     }, true).entities$.pipe(
       share(),
@@ -97,6 +122,7 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
 
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
+    this.serviceInstanceNameSub.unsubscribe();
   }
 
   ngOnInit() {
@@ -116,6 +142,21 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
           this.stepperForm.controls.org.setValue(selectedOrgId);
           this.store.dispatch(new SetOrg(selectedOrgId));
         }
+      })
+    ).subscribe();
+
+    this.updateServiceInstanceNames();
+  }
+
+  updateServiceInstanceNames = () => {
+    this.serviceInstanceNameSub = this.stepperForm.controls.space.statusChanges.pipe(
+      combineLatest(this.allServiceInstances$),
+      map(([c, services]) => {
+        return services.filter(s => s.entity.space_guid === this.stepperForm.controls.space.value);
+      }),
+      tap(o => {
+        this.allServiceInstanceNames = o.map(s => s.entity.name);
+        console.log(this.allServiceInstanceNames);
       })
     ).subscribe();
   }
@@ -188,12 +229,8 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     }
   }
 
-  // nameTakenValidator = (): ValidatorFn => {
-  //   return (formField: AbstractControl): { [key: string]: any } =>
-  //     !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
-  // }
 
-  // checkName = (value: string = null) => this.allServiceInstances ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
-
+  checkName = (value: string = null) =>
+    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.stepperForm.controls.name.value) === -1 : true
 
 }
