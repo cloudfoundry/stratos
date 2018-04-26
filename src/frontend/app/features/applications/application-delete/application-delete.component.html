@@ -12,10 +12,6 @@
     <app-step title="Confirm">
       <!-- <app-action-monitor *ngIf="routes && routes.length" [data]="routes" [entityKey]="routeSchemaKey" [monitorState]="deletingState"></app-action-monitor> -->
       <app-action-monitor [data$]="selectedRoutes$" [entityKey]="routeSchemaKey" [monitorState]="deletingState" [getId]="getId" [columns]="['name']">
-        <ng-container matColumnDef="name">
-          <mat-header-cell *matHeaderCellDef> Name </mat-header-cell>
-          <mat-cell *matCellDef="let element"> name </mat-cell>
-        </ng-container>
       </app-action-monitor>
       <app-action-monitor [data$]="selectedServiceInstances$" [entityKey]="serviceInstancesSchemaKey" [monitorState]="deletingState" [getId]="getId"></app-action-monitor>
       <button (click)="startDelete()">delete</button>

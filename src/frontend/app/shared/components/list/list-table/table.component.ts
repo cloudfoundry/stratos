@@ -1,5 +1,4 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
 import { MatSort, Sort } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -7,13 +6,12 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { ListSort } from '../../../../store/actions/list.actions';
 import { AppState } from '../../../../store/app-state';
-import { IListDataSource } from '../data-sources-controllers/list-data-source-types';
+import { IListDataSource, ITableListDataSource } from '../data-sources-controllers/list-data-source-types';
 import { IListPaginationController } from '../data-sources-controllers/list-pagination-controller';
-import { IListConfig } from '../list.component.types';
 import { TableCellActionsComponent } from './table-cell-actions/table-cell-actions.component';
 import { TableCellSelectComponent } from './table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from './table-header-select/table-header-select.component';
-import { ITableColumn, ITableText } from './table.types';
+import { ITableColumn } from './table.types';
 
 const tableColumnSelect = {
   columnId: 'select',
@@ -46,7 +44,7 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
   @Input('hideTable') hideTable = false;
   @Input('addSelect') addSelect = false;
   @Input('addActions') addActions = false;
-  @Input('dataSource') dataSource: IListDataSource<T>;
+  @Input('dataSource') dataSource: ITableListDataSource<T>;
   @Input('paginationController') paginationController = null as IListPaginationController<T>;
   @Input('columns') columns: ITableColumn<T>[];
   private columnNames: string[];
@@ -98,6 +96,13 @@ export class TableComponent<T extends object> implements OnInit, OnDestroy {
       sortStoreToWidget,
       sortWidgetToStore,
     ).subscribe();
+  }
+
+  getRowState(row: T) {
+    if (this.dataSource.getRowState) {
+      return this.dataSource.getRowState(row);
+    }
+    return {};
   }
 
   ngOnDestroy() {
