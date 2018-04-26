@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, map, share, switchMap, tap, first } from 'rxjs/operators';
+import { combineLatest, filter, map, share, switchMap, tap, first, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -72,7 +72,11 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       combineLatest(this.orgs$),
       map(([guid, orgs]) => orgs.filter(org => org.metadata.guid === guid)[0]),
       map(org => org.entity.spaces),
-      share()
+      tap(spaces => {
+        const selectedSpaceId = spaces[0].metadata.guid;
+        this.stepperForm.controls.space.setValue(selectedSpaceId);
+        this.store.dispatch(new SetSpace(selectedSpaceId));
+      })
     );
   }
 
@@ -81,9 +85,8 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
   }
+
   ngOnInit() {
-
-
   }
 
   ngAfterContentInit() {
@@ -91,14 +94,6 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       .map(() => {
         return this.stepperForm.valid;
       });
-    this.spaceSubscription = this.spaces$.pipe(
-      tap(o => {
-        const selectedSpaceId = o[0].metadata.guid;
-        this.stepperForm.controls.space.setValue(selectedSpaceId);
-        this.store.dispatch(new SetSpace(selectedSpaceId));
-
-      })
-    ).subscribe();
 
     this.orgSubscription = this.orgs$.pipe(
       tap(o => {

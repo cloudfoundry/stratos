@@ -94,6 +94,8 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
       this.subscription.unsubscribe();
     }
 
+    this.changeSubscription.unsubscribe();
+
   }
 
   getSelectedPlan = (): Observable<ServicePlan> => this.servicePlans$.pipe(
