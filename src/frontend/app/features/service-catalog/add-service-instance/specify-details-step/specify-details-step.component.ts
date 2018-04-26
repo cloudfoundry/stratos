@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, AfterContentInit, AfterContentChecked } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MatSnackBar, MatChipInputEvent } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -77,12 +77,18 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     this.spaces$ = this.store.select(selectOrgGuid).pipe(
       filter(p => !!p),
       combineLatest(this.orgs$),
-      map(([guid, orgs]) => orgs.filter(org => org.metadata.guid === guid)[0]),
+      map(([guid, orgs]) => {
+        const filteredOrgs = orgs.filter(org => org.metadata.guid === guid);
+        return filteredOrgs.length > 0 ? filteredOrgs[0] : null;
+      }),
+      filter(p => !!p),
       map(org => org.entity.spaces),
       tap(spaces => {
-        const selectedSpaceId = spaces[0].metadata.guid;
-        this.stepperForm.controls.space.setValue(selectedSpaceId);
-        this.store.dispatch(new SetSpace(selectedSpaceId));
+        if (spaces.length > 0) {
+          const selectedSpaceId = spaces[0].metadata.guid;
+          this.stepperForm.controls.space.setValue(selectedSpaceId);
+          this.store.dispatch(new SetSpace(selectedSpaceId));
+        }
       })
     );
   }
@@ -104,6 +110,7 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
 
     this.orgSubscription = this.orgs$.pipe(
       tap(o => {
+        // TODO select first org that has spaces
         const selectedOrgId = o[0].metadata.guid;
         this.stepperForm.controls.org.setValue(selectedOrgId);
         this.store.dispatch(new SetOrg(selectedOrgId));
@@ -178,6 +185,13 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       this.tags.splice(index, 1);
     }
   }
+
+  // nameTakenValidator = (): ValidatorFn => {
+  //   return (formField: AbstractControl): { [key: string]: any } =>
+  //     !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
+  // }
+
+  // checkName = (value: string = null) => this.allServiceInstances ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
 
 
 }
