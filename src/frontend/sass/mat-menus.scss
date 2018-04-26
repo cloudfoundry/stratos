@@ -1,0 +1,12 @@
+// Desktop overrides fo popup menu
+// See: https://material.io/guidelines/components/menus.html#menus-specs
+.md-desktop {
+  .mat-menu-item {
+    font-size: 14px;
+    height: 32px;
+    line-height: 32px;
+    min-width: 128px;
+    padding-left: 24px;
+    padding-right: 0;
+  }
+}

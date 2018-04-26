@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnInit } from '@angular/core';
+import { AfterContentInit, Component, OnInit, Inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { create } from 'rxjs-spy';
@@ -6,6 +6,7 @@ import { create } from 'rxjs-spy';
 import { environment } from '../environments/environment';
 import { LoggedInService } from './logged-in.service';
 import { AppState } from './store/app-state';
+import { DOCUMENT } from '@angular/platform-browser';
 
 
 @Component({
@@ -17,7 +18,8 @@ export class AppComponent implements OnInit, AfterContentInit {
   constructor(
     private store: Store<AppState>,
     private router: Router,
-    private loggedInService: LoggedInService
+    private loggedInService: LoggedInService,
+    @Inject(DOCUMENT) private document: Document,
   ) {
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
@@ -42,7 +44,17 @@ export class AppComponent implements OnInit, AfterContentInit {
   }
   title = 'app';
 
-  ngOnInit() { }
+  ngOnInit() {
+    // Material design defines smaller sizes when on desktop but angular-material uses larger mobile sizes
+    // Add a style to the body if we detect a desktop browser, so we can adjust styling to match the MD Specification
+
+    // Approximation for detecting desktop browser - see: Stack Overflow: https://goo.gl/e1KuJR
+    const isTouchDevice = function() {  return 'ontouchstart' in window || 'onmsgesturechange' in window; };
+    const isDesktop = window.screenX !== 0 && !isTouchDevice() ? true : false;
+    if (isDesktop) {
+      this.document.body.classList.add('md-desktop');
+    }
+  }
 
   ngAfterContentInit() { }
 }
