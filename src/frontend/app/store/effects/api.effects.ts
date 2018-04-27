@@ -108,7 +108,22 @@ export class APIEffect {
         return this.handleMultiEndpoints(response, actionClone);
       }),
       mergeMap(response => {
-        const { entities, totalResults, totalPages } = response;
+        const { entities, totalResults, totalPages, errors = [] } = response;
+        errors.forEach(error => {
+          if (error.error) {
+            const fakedAction = { ...actionClone, endpointGuid: error.guid };
+            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction));
+            this.store.dispatch(new WrapperRequestActionFailed(
+              error.errorCode,
+              { ...actionClone, endpointGuid: error.guid },
+              requestType
+            ));
+          }
+        });
+        const hasError = errors.findIndex(error => error.error) >= 0;
+        if (hasError) {
+          return [];
+        }
         return [new ValidateEntitiesStart(
           actionClone,
           entities.result,
@@ -171,15 +186,19 @@ export class APIEffect {
     return result;
   }
 
-  checkForErrors(resData, action: ICFAction): APIErrorCheck[] {
+  checkForErrors(resData, action): APIErrorCheck[] {
+    if (!resData) {
+      return null;
+    }
     return Object.keys(resData)
       .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
-        const endpoints = resData[cfGuid];
+        const endpoint = resData ? resData[cfGuid] : null;
+        const succeded = !endpoint || !endpoint.error;
         return {
-          error: !!endpoints.error,
-          errorCode: endpoints.error ? '500' : '200',
+          error: !succeded,
+          errorCode: endpoint.error ? '500' : '200',
           guid: cfGuid,
           url: action.options.url
         };
@@ -307,14 +326,15 @@ export class APIEffect {
     });
   }
 
-  private handleMultiEndpoints(resData, apiAction: ICFAction): {
+  private handleMultiEndpoints(resData, apiAction: IRequestAction): {
     resData,
     entities,
     totalResults,
-    totalPages
+    totalPages,
+    errors: APIErrorCheck[]
   } {
-    if (resData) {
-      const endpointChecks = this.checkForErrors(resData, apiAction);
+    const endpointChecks = this.checkForErrors(resData, apiAction);
+    if (endpointChecks) {
       this.handleApiEvents(endpointChecks);
     }
     let entities;
@@ -337,7 +357,8 @@ export class APIEffect {
       resData,
       entities,
       totalResults,
-      totalPages
+      totalPages,
+      errors: endpointChecks
     };
   }
 

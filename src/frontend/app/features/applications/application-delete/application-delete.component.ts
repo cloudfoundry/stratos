@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, first, map, startWith, switchMap, tap, delay } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap, tap, delay, takeWhile } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -42,6 +42,7 @@ import {
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
 import { interval } from 'rxjs/observable/interval';
+import { appReducers } from '../../../store/reducers.module';
 
 @Component({
   selector: 'app-application-delete',
@@ -121,7 +122,7 @@ export class ApplicationDeleteComponent<T> {
       map(([fetchingInstances, fetchingRoutes]) => fetchingInstances || fetchingRoutes),
       filter(fetching => !fetching),
       first(),
-      startWith(true)
+      startWith(false)
     );
 
     this.fetchingApplication$ = this.isFetchingApplication(this.fetchingRelated$);
@@ -175,8 +176,14 @@ export class ApplicationDeleteComponent<T> {
   }
 
   private isFetchingApplication(fetchingRelated$: Observable<boolean>) {
-    return combineLatest(fetchingRelated$, this.applicationService.isFetchingApp$).pipe(
-      map(([fetchingRelated, fetching]) => fetchingRelated || fetching)
+    return combineLatest(this.appMonitor.entityRequest$, fetchingRelated$).pipe(
+      tap(([appRequest]) => {
+        if (appRequest.error) {
+          this.redirectToAppWall();
+        }
+      }),
+      takeWhile(([appRequest]) => !appRequest.error),
+      map(([appRequest, fetchingRelated]) => appRequest.error || appRequest.fetching || fetchingRelated)
     );
   }
 
