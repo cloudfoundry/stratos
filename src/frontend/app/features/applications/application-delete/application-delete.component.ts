@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, first, map, startWith, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, startWith, switchMap, tap, delay } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -41,6 +41,7 @@ import {
   AppServiceBindingListConfigService
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
+import { interval } from 'rxjs/observable/interval';
 
 @Component({
   selector: 'app-application-delete',
@@ -52,8 +53,8 @@ import { DeleteServiceInstance } from '../../../store/actions/service-instances.
     CloudFoundrySpaceService
   ]
 })
-export class ApplicationDeleteComponent<T> implements OnDestroy {
-
+export class ApplicationDeleteComponent<T> {
+  public deleteStarted = false;
   public instanceDeleteColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
     {
       headerCell: () => 'Name',
@@ -88,7 +89,6 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
   public selectedApplication$: Observable<APIResource<IApp>[]>;
   public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
   public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
-  private redirectAfterDeleteSub: Subscription;
   private appWallFetchAction: GetAllApplications;
   public routes: APIResource<IRoute>[];
   public instances: AppInstanceStats[];
@@ -99,17 +99,21 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
   public applicationSchemaKey = applicationSchemaKey;
   public deletingState = AppMonitorComponentTypes.DELETE;
 
+  public appMonitor: EntityMonitor<APIResource<IApp>>;
+
+  public cancelUrl: string;
+
   constructor(
     private store: Store<AppState>,
     private applicationService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory
   ) {
-    const appMonitor = this.getApplicationMonitor();
+    this.appMonitor = this.getApplicationMonitor();
     this.selectedApplication$ = applicationService.app$.pipe(
       map(entityInfo => [entityInfo.entity])
     );
-    this.redirectAfterDeleteSub = this.getRedirectSub(appMonitor);
+    this.cancelUrl = `/application/${applicationService.cfGuid}/${applicationService.appGuid}`;
 
     const [instanceMonitor, routeMonitor] = this.fetchRelatedEntities();
 
@@ -133,17 +137,12 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
         this.routes = routes;
         this.instances = instances;
       });
-    // this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
-  }
-
-  ngOnDestroy() {
-    this.redirectAfterDeleteSub.unsubscribe();
   }
 
   public redirectToAppWall() {
-    this.store.dispatch(this.appWallFetchAction);
     this.store.dispatch(new RouterNav({ path: '/applications' }));
   }
+
   public getApplicationMonitor() {
     return this.entityMonitorFactory.create<APIResource<IApp>>(
       this.applicationService.appGuid,
@@ -180,21 +179,6 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
       map(([fetchingRelated, fetching]) => fetchingRelated || fetching)
     );
   }
-  private getRedirectSub(appMonitor: EntityMonitor<APIResource<IApp>>) {
-    return appMonitor.entityRequest$.pipe(
-      filter(entityRequestInfo => entityRequestInfo.deleting.deleted),
-      first(),
-      tap(entityRequestInfo => {
-        this.dispatchAppWallFetch();
-        if (!Array.isArray(this.routes) || !this.routes.length) {
-          this.redirectToAppWall();
-        }
-      })
-    ).subscribe();
-  }
-  private dispatchAppWallFetch() {
-    this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-  }
 
   private setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
     this.selectedServiceInstances = selected;
@@ -210,17 +194,30 @@ export class ApplicationDeleteComponent<T> implements OnDestroy {
     return element.metadata.guid;
   }
 
-  public startDelete() {
+  public startDelete = () => {
+    if (this.deleteStarted) {
+      return this.redirectToAppWall();
+    }
+    this.deleteStarted = true;
     this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
-    if (this.selectedRoutes && this.selectedRoutes.length) {
-      this.selectedRoutes.forEach(route => {
-        this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
-      });
-    }
-    if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
-      this.selectedServiceInstances.forEach(instance => {
-        this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.metadata.guid));
-      });
-    }
+    return this.appMonitor.entityRequest$.pipe(
+      filter(request => !request.deleting.busy && (request.deleting.deleted || request.deleting.error)),
+      map((request) => ({ success: request.deleting.deleted })),
+      tap(({ success }) => {
+        if (success) {
+          if (this.selectedRoutes && this.selectedRoutes.length) {
+            this.selectedRoutes.forEach(route => {
+              this.store.dispatch(new DeleteRoute(route.metadata.guid, this.applicationService.cfGuid));
+            });
+          }
+          if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
+            this.selectedServiceInstances.forEach(instance => {
+              this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.metadata.guid));
+            });
+          }
+        }
+      }),
+
+    );
   }
 }

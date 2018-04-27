@@ -73,7 +73,7 @@ export interface IListDataSource<T> extends ITableListDataSource<T> {
   startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
-
+  destroy();
   getFilterFromParams(pag: PaginationEntityState): string;
   setFilterParam(filter: string, pag: PaginationEntityState);
   refresh();

@@ -52,7 +52,6 @@ export class AppActionMonitorIconComponent implements OnInit {
   }
 
   private getStateObservable(entityMonitor: EntityMonitor, monitorState: AppMonitorComponentTypes) {
-    console.log(this.entityKey, monitorState);
     switch (monitorState) {
       case AppMonitorComponentTypes.DELETE:
         return this.getDeletingState(entityMonitor);
@@ -67,7 +66,6 @@ export class AppActionMonitorIconComponent implements OnInit {
 
   private getDeletingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
     return entityMonitor.entityRequest$.pipe(
-      tap(r => console.log(this.entityKey, r)),
       map(requestState => ({
         busy: requestState.deleting.busy,
         error: requestState.deleting.error,
