@@ -6,7 +6,7 @@
       </mat-select>
     </mat-form-field>
   </form>
-  <mat-card *ngIf="getSelectedPlan() | async as selPlan">
+  <mat-card class="select-plan__details" *ngIf="getSelectedPlan() | async as selPlan">
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.entity.description}} </app-metadata-item>
     <app-metadata-item label="Public"> {{selPlan.entity.entity.public}} </app-metadata-item>
