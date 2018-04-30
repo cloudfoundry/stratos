@@ -166,7 +166,7 @@ export class ApplicationDeleteComponent<T> {
       map(([fetchingInstances, fetchingRoutes]) => fetchingInstances || fetchingRoutes),
       startWith(true)
     );
-    // Wait until we've finished fetching the application, fetch the related entities and monitor there progress. 
+    // Wait until we've finished fetching the application, fetch the related entities and monitor there progress.
     this.fetchingApplicationData$ = this.finishedFetchingApplication().pipe(
       filter(finished => finished),
       first(),

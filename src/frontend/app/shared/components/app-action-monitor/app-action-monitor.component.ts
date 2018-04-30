@@ -7,7 +7,10 @@ import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/table';
 import { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
 import { ITableColumn } from '../list/list-table/table.types';
-import { TableCellRequestMonitorIconComponent, ITableCellRequestMonitorIconConfig } from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import {
+  TableCellRequestMonitorIconComponent,
+  ITableCellRequestMonitorIconConfig
+} from '../list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 
 @Component({
   selector: 'app-action-monitor',
