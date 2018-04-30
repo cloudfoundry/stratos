@@ -4,18 +4,20 @@ import * as request from 'request';
 import { ElementFinder } from 'protractor/built/element';
 import { protractor } from 'protractor/built';
 import { getConsole } from '@ngrx/effects/src/effects_module';
-import { e2eSecrets } from '../e2e.secrets';
 import { browser, element, by, ElementArrayFinder, promise } from 'protractor';
 import { LoginPage } from '../login/login.po';
+import { E2EConfig, E2EConfigCloudFoundry } from '../e2e.types';
+import { SecretsHelpers } from './secrets-helpers';
 
 export enum ConsoleUserType {
   admin = 1,
   user = 2
 }
 
+
 export class E2EHelpers {
 
-  secrets = e2eSecrets;
+  secrets = new SecretsHelpers();
 
   constructor() { }
 
@@ -23,21 +25,6 @@ export class E2EHelpers {
     return browser.baseUrl;
   }
 
-  getConsoleAdminUsername(): string {
-    return this.secrets.consoleUsers.admin.username;
-  }
-
-  getConsoleAdminPassword(): string {
-    return this.secrets.consoleUsers.admin.password;
-  }
-
-  getConsoleNonAdminUsername(): string {
-    return this.secrets.consoleUsers.nonAdmin.username;
-  }
-
-  getConsoleNonAdminPassword(): string {
-    return this.secrets.consoleUsers.nonAdmin.password;
-  }
 
   newBrowser() {
     return browser.forkNewDriverInstance(true);
@@ -55,9 +42,9 @@ export class E2EHelpers {
       // Guide through login pages
       const loginPage = new LoginPage();
       if (loginUser as ConsoleUserType === ConsoleUserType.admin) {
-        return loginPage.login(this.getConsoleAdminUsername(), this.getConsoleAdminPassword());
+        return loginPage.login(this.secrets.getConsoleAdminUsername(), this.secrets.getConsoleAdminPassword());
       } else {
-        return loginPage.login(this.getConsoleNonAdminUsername(), this.getConsoleNonAdminPassword());
+        return loginPage.login(this.secrets.getConsoleNonAdminUsername(), this.secrets.getConsoleNonAdminPassword());
       }
     }
   }
@@ -117,8 +104,8 @@ export class E2EHelpers {
     if (!optionalReq) {
       req = this.newRequest();
 
-      username = username || this.getConsoleAdminUsername();
-      password = password || this.getConsoleAdminPassword();
+      username = username || this.secrets.getConsoleAdminUsername();
+      password = password || this.secrets.getConsoleAdminPassword();
 
       return this.createSession(req, username, password).then(() => {
         return req;
@@ -167,7 +154,7 @@ export class E2EHelpers {
    * @param {object?} body - the request body
    * @param {object?} formData - the form data
    */
-  sendRequest(req, options, body, formData): promise.Promise<any> {
+  sendRequest(req, options, body?, formData?): promise.Promise<any> {
     return new promise.Promise((resolve, reject) => {
       options.url = this.getHost() + '/' + options.url;
       if (body) {

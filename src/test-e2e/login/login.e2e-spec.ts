@@ -1,16 +1,16 @@
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { AppPage } from '../app.po';
 import { LoginPage } from './login.po';
-import { e2eSecrets } from '../e2e.secrets';
 import { browser } from 'protractor';
 import { DashboardPage } from '../dashboard/dashboard.po';
+import { SecretsHelpers } from '../helpers/secrets-helpers';
 
 
 describe('Login', () => {
   const helpers = new E2EHelpers();
   const loginPage = new LoginPage();
   const dashboardPage = new DashboardPage();
-  const secrets = e2eSecrets;
+  const secrets = new SecretsHelpers();
 
   beforeAll(() => {
     helpers.setupApp();
@@ -36,7 +36,7 @@ describe('Login', () => {
   });
 
   it('- should reject bad password', () => {
-    loginPage.enterLogin(helpers.getConsoleAdminUsername(), 'badpassword');
+    loginPage.enterLogin(secrets.getConsoleAdminUsername(), 'badpassword');
     expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
     loginPage.loginButton().click();
@@ -45,7 +45,7 @@ describe('Login', () => {
   });
 
   it('- should accept correct details', () => {
-    loginPage.enterLogin(helpers.getConsoleAdminUsername(), helpers.getConsoleAdminPassword());
+    loginPage.enterLogin(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
     expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
     loginPage.loginButton().click();
