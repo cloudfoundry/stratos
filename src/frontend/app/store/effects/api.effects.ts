@@ -139,7 +139,7 @@ export class APIEffect {
     ).catch(error => {
       const endpoints: string[] = options.headers.get(endpointHeader).split((','));
       endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
-        eventCode: error.status || 500,
+        eventCode: error.status || '500',
         severity: InternalEventSeverity.ERROR,
         message: 'Jetstream API request error',
         metadata: {
