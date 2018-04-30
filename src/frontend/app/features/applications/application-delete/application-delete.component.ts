@@ -50,8 +50,6 @@ import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
   templateUrl: './application-delete.component.html',
   styleUrls: ['./application-delete.component.scss'],
   providers: [
-    // getActiveRouteCfOrgSpaceProvider,
-    // CloudFoundrySpaceService,
     CfAppRoutesListConfigService,
     AppServiceBindingListConfigService
   ]

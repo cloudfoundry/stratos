@@ -188,17 +188,24 @@ export class APIEffect {
 
   checkForErrors(resData, action): APIErrorCheck[] {
     if (!resData) {
+      if (action.endpointGuid) {
+        return [{
+          error: false,
+          errorCode: '200',
+          guid: action.endpointGuid,
+          url: action.options.url
+        }];
+      }
       return null;
     }
     return Object.keys(resData)
-      .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
         const endpoint = resData ? resData[cfGuid] : null;
         const succeeded = !endpoint || !endpoint.error;
         return {
           error: !succeeded,
-          errorCode: endpoint.error ? '500' : '200',
+          errorCode: succeeded ? '200' : '500',
           guid: cfGuid,
           url: action.options.url
         };

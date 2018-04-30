@@ -5,7 +5,7 @@
   <ng-container *ngIf="!(fetchingApplicationData$ | async)">
     <app-steppers [cancel]="cancelUrl">
       <ng-container *ngIf="routeMonitor.currentPage$ | async as routes">
-        <app-step *ngIf="routes.length" title="Routes">
+        <app-step *ngIf="routes && routes.length" title="Routes">
           <div class="app-delete__monitors">
             <p>Please select any attached application routes you would like to delete.</p>
             <app-delete-app-routes class="app-delete__step-table" (selected)="setSelectedRoutes($event)"></app-delete-app-routes>
@@ -13,7 +13,7 @@
         </app-step>
       </ng-container>
       <ng-container *ngIf="instanceMonitor.currentPage$ | async as instances">
-        <app-step title="Service Instances" *ngIf="instances.length">
+        <app-step title="Service Instances" *ngIf="instances && instances.length">
           <div class="app-delete__monitors">
             <p>Please select any attached application service instances you would like to delete.</p>
             <app-delete-app-instances class="app-delete__step-table" (selected)="setSelectedServiceInstances($event)"></app-delete-app-instances>
