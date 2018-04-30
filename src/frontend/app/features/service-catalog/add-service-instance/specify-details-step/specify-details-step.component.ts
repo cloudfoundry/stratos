@@ -1,25 +1,25 @@
-import { Component, OnDestroy, OnInit, AfterContentInit, AfterContentChecked } from '@angular/core';
-import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
-import { MatSnackBar, MatChipInputEvent } from '@angular/material';
+import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
+import { AfterContentInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, map, share, switchMap, tap, first, distinctUntilChanged } from 'rxjs/operators';
+import { combineLatest, filter, first, map, share, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
-import { ENTER, COMMA } from '@angular/cdk/keycodes';
 
+import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
-  SetApp,
   SetCreateServiceInstance,
   SetOrg,
-  SetSpace,
   SetServiceInstanceGuid,
+  SetSpace,
 } from '../../../../store/actions/create-service-instance.actions';
-import { RouterNav } from '../../../../store/actions/router.actions';
 import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, organizationSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
@@ -27,8 +27,6 @@ import { selectOrgGuid, selectServicePlan } from '../../../../store/selectors/cr
 import { APIResource } from '../../../../store/types/api.types';
 import { CloudFoundryEndpointService } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ServicesService } from '../../services.service';
-import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -48,7 +46,7 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
   tagsSelectable = true;
   tagsRemovable = true;
   tagsAddOnBlur = true;
-  separatorKeysCodes = [ENTER, COMMA];
+  separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
 
   spaces$: Observable<APIResource<ISpace>[]>;
