@@ -36,6 +36,7 @@ import { createEntityRelationPaginationKey } from '../../../../store/helpers/ent
   styleUrls: ['./specify-details-step.component.scss'],
 })
 export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterContentInit {
+
   stepperForm: FormGroup;
   serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
@@ -72,58 +73,48 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       params: new FormControl(''),
       tags: new FormControl(''),
     });
+
     const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(servicesService.cfGuid);
-    this.orgs$ = getPaginationObservables<APIResource<IOrganization>>({
-      store: this.store,
-      action: getAllOrgsAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        getAllOrgsAction.paginationKey,
-        entityFactory(organizationSchemaKey)
-      )
-    }, true).entities$.pipe(
-      share(),
-      first()
-      );
+    this.orgs$ = this.initOrgsObservable(getAllOrgsAction);
 
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.servicesService.serviceGuid);
 
-    this.allServiceInstances$ = getPaginationObservables<APIResource<IServiceInstance>>({
-      store: this.store,
-      action: new GetServiceInstances(this.servicesService.cfGuid, paginationKey),
-      paginationMonitor: this.paginationMonitorFactory.create(
-        paginationKey,
-        entityFactory(serviceInstancesSchemaKey)
-      )
-    }, true).entities$.pipe(
-      share(),
-      first()
-      );
+    this.allServiceInstances$ = this.initServiceInstances(paginationKey);
 
-    this.spaces$ = this.store.select(selectOrgGuid).pipe(
-      filter(p => !!p),
-      combineLatest(this.orgs$),
-      map(([guid, orgs]) => {
-        const filteredOrgs = orgs.filter(org => org.metadata.guid === guid);
-        return filteredOrgs.length > 0 ? filteredOrgs[0] : null;
-      }),
-      filter(p => !!p),
-      map(org => org.entity.spaces),
-      tap(spaces => {
-        if (spaces.length > 0) {
-          const selectedSpaceId = spaces[0].metadata.guid;
-          this.stepperForm.controls.space.setValue(selectedSpaceId);
-          this.store.dispatch(new SetSpace(selectedSpaceId));
-        }
-      })
-    );
+    this.spaces$ = this.initSpacesObservable();
   }
 
   setOrg = (guid) => this.store.dispatch(new SetOrg(guid));
 
+  initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
+    store: this.store,
+    action: new GetServiceInstances(this.servicesService.cfGuid, paginationKey),
+    paginationMonitor: this.paginationMonitorFactory.create(
+      paginationKey,
+      entityFactory(serviceInstancesSchemaKey)
+    )
+  }, true)
+    .entities$.pipe(
+    share(),
+    first()
+    )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
     this.serviceInstanceNameSub.unsubscribe();
   }
+
+  initOrgsObservable = (action) => getPaginationObservables<APIResource<IOrganization>>({
+    store: this.store,
+    action: action,
+    paginationMonitor: this.paginationMonitorFactory.create(
+      action.paginationKey,
+      entityFactory(organizationSchemaKey)
+    )
+  }, true)
+    .entities$.pipe(
+    share(),
+    first()
+    )
 
   ngOnInit() {
   }
@@ -147,6 +138,24 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
 
     this.updateServiceInstanceNames();
   }
+
+  initSpacesObservable = () => this.store.select(selectOrgGuid).pipe(
+    filter(p => !!p),
+    combineLatest(this.orgs$),
+    map(([guid, orgs]) => {
+      const filteredOrgs = orgs.filter(org => org.metadata.guid === guid);
+      return filteredOrgs.length > 0 ? filteredOrgs[0] : null;
+    }),
+    filter(p => !!p),
+    map(org => org.entity.spaces),
+    tap(spaces => {
+      if (spaces.length > 0) {
+        const selectedSpaceId = spaces[0].metadata.guid;
+        this.stepperForm.controls.space.setValue(selectedSpaceId);
+        this.store.dispatch(new SetSpace(selectedSpaceId));
+      }
+    })
+  )
 
   updateServiceInstanceNames = () => {
     this.serviceInstanceNameSub = this.stepperForm.controls.space.statusChanges.pipe(

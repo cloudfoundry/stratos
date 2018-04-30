@@ -36,11 +36,7 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       };
     case SET_CREATE_SERVICE_INSTANCE:
       return {
-        ...state,
-        spaceGuid: action.spaceGuid,
-        name: action.name,
-        params: action.jsonParams,
-        tags: action.tags
+        ...state, spaceGuid: action.spaceGuid, name: action.name, params: action.jsonParams, tags: action.tags
       };
     default:
       return state;
