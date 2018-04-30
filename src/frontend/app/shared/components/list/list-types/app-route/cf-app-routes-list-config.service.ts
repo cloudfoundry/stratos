@@ -29,6 +29,7 @@ import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 
 @Injectable()
 export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
+
   routesDataSource: CfAppRoutesDataSource;
   public multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
@@ -158,6 +159,14 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
   };
   isLocal = true;
 
+  static createAction(appGuid: string, cfGuid: string) {
+    return new GetAppRoutes(
+      appGuid,
+      cfGuid,
+      createEntityRelationPaginationKey(applicationSchemaKey, appGuid),
+    );
+  }
+
   dispatchDeleteAction(route) {
     return this.store.dispatch(
       new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
@@ -190,18 +199,16 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     private confirmDialog: ConfirmationDialogService
   ) {
     super();
+
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetAppRoutes(
-        appService.appGuid,
-        appService.cfGuid,
-        createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
-      ),
+      CfAppRoutesListConfigService.createAction(appService.appGuid, appService.cfGuid),
       createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
       this
     );
   }
+
 
   private deleteSingleRoute(item: APIResource) {
     this.store

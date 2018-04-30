@@ -1,10 +1,9 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, first, map, startWith, switchMap, tap, delay, takeWhile } from 'rxjs/operators';
+import { filter, first, map, shareReplay, startWith, switchMap, tap, delay, pairwise } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
 import { IApp, IRoute } from '../../../core/cf-api.types';
@@ -13,16 +12,22 @@ import {
 } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import {
+  CfAppRoutesListConfigService,
+} from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+import {
   AppServiceBindingDataSource,
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
-import { CfAppsDataSource, createGetAllAppAction } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
+import {
+  AppServiceBindingListConfigService,
+} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
-import { GetAllApplications, DeleteApplication } from '../../../store/actions/application.actions';
+import { DeleteApplication, GetAllApplications, GetApplication } from '../../../store/actions/application.actions';
 import { DeleteRoute } from '../../../store/actions/route.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
+import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
 import { AppState } from '../../../store/app-state';
 import {
   applicationSchemaKey,
@@ -36,22 +41,19 @@ import { APIResource } from '../../../store/types/api.types';
 import { AppInstanceStats } from '../../../store/types/app-metadata.types';
 import { CloudFoundrySpaceService } from '../../cloud-foundry/services/cloud-foundry-space.service';
 import { ApplicationService } from '../application.service';
-import { CfAppRoutesListConfigService } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
-import {
-  AppServiceBindingListConfigService
-} from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
-import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
-import { interval } from 'rxjs/observable/interval';
-import { appReducers } from '../../../store/reducers.module';
+import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 
 @Component({
   selector: 'app-application-delete',
   templateUrl: './application-delete.component.html',
   styleUrls: ['./application-delete.component.scss'],
   providers: [
+    // getActiveRouteCfOrgSpaceProvider,
+    // CloudFoundrySpaceService,
     CfAppRoutesListConfigService,
-    AppServiceBindingListConfigService,
-    CloudFoundrySpaceService
+    AppServiceBindingListConfigService
   ]
 })
 export class ApplicationDeleteComponent<T> {
@@ -91,14 +93,14 @@ export class ApplicationDeleteComponent<T> {
   public selectedRoutes$ = new ReplaySubject<APIResource<IRoute>[]>(1);
   public selectedServiceInstances$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
   private appWallFetchAction: GetAllApplications;
-  public routes: APIResource<IRoute>[];
-  public instances: AppInstanceStats[];
-  public fetchingApplication$: Observable<boolean>;
+  public fetchingApplicationData$: Observable<boolean>;
 
   public serviceInstancesSchemaKey = serviceInstancesSchemaKey;
   public routeSchemaKey = routeSchemaKey;
   public applicationSchemaKey = applicationSchemaKey;
   public deletingState = AppMonitorComponentTypes.DELETE;
+  public routeMonitor: PaginationMonitor<APIResource<IRoute>>;
+  public instanceMonitor: PaginationMonitor<APIResource<IServiceBinding>>;
 
   public appMonitor: EntityMonitor<APIResource<IApp>>;
 
@@ -110,34 +112,35 @@ export class ApplicationDeleteComponent<T> {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory
   ) {
+
     this.appMonitor = this.getApplicationMonitor();
-    this.selectedApplication$ = applicationService.app$.pipe(
-      map(entityInfo => [entityInfo.entity])
+    this.selectedApplication$ = this.appMonitor.entity$.pipe(
+      filter(app => !!app),
+      map(app => [app])
     );
+
     this.cancelUrl = `/application/${applicationService.cfGuid}/${applicationService.appGuid}`;
 
-    const [instanceMonitor, routeMonitor] = this.fetchRelatedEntities();
+    const { fetch, monitors } = this.buildRelatedEntitiesActionMonitors();
+    const { instanceMonitor, routeMonitor } = monitors;
+    this.instanceMonitor = instanceMonitor;
+    this.routeMonitor = routeMonitor;
 
+    // Are we fetching application routes or service instances?
     this.fetchingRelated$ = combineLatest(instanceMonitor.fetchingCurrentPage$, routeMonitor.fetchingCurrentPage$).pipe(
       map(([fetchingInstances, fetchingRoutes]) => fetchingInstances || fetchingRoutes),
-      filter(fetching => !fetching),
-      first(),
-      startWith(false)
+      startWith(true)
     );
-
-    this.fetchingApplication$ = this.isFetchingApplication(this.fetchingRelated$);
-
-    this.fetchingRelated$.pipe(
-      switchMap(() => combineLatest(
-        instanceMonitor.currentPage$,
-        routeMonitor.currentPage$
-      )),
-      first()
-    )
-      .subscribe(([instances, routes]) => {
-        this.routes = routes;
-        this.instances = instances;
-      });
+    // Wait until we've finished fetching the application, fetch the related entities and monitor there progress. 
+    this.fetchingApplicationData$ = this.finishedFetchingApplication().pipe(
+      filter(finished => finished),
+      first(),
+      tap(fetch),
+      switchMap(() => this.fetchingRelated$),
+      shareReplay(1),
+      startWith(true)
+    );
+    this.store.dispatch(new GetApplication(applicationService.appGuid, applicationService.cfGuid));
   }
 
   public redirectToAppWall() {
@@ -151,39 +154,48 @@ export class ApplicationDeleteComponent<T> {
       entityFactory(applicationSchemaKey)
     );
   }
-  public fetchRelatedEntities() {
+  /**
+   * Builds the related entities actions and monitors to monitor the state of the entities.
+   */
+  public buildRelatedEntitiesActionMonitors() {
     const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
-    const routesAction = new GetAppRoutes(
-      appGuid,
-      cfGuid,
-      createEntityRelationPaginationKey(applicationSchemaKey, appGuid)
-    );
+    const routesAction = CfAppRoutesListConfigService.createAction(appGuid, cfGuid);
     const instancePaginationKey = instanceAction.paginationKey;
     const routesPaginationKey = routesAction.paginationKey;
-    this.store.dispatch(instanceAction);
-    this.store.dispatch(routesAction);
+
     const instanceMonitor = this.paginationMonitorFactory.create<APIResource<IServiceBinding>>(
       instancePaginationKey,
       instanceAction.entity[0]
     );
-    const routesMonitor = this.paginationMonitorFactory.create<APIResource<IRoute>>(routesPaginationKey, routesAction.entity[0]);
-    return [
-      instanceMonitor,
-      routesMonitor
-    ];
+    const routeMonitor = this.paginationMonitorFactory.create<APIResource<IRoute>>(routesPaginationKey, routesAction.entity[0]);
+    return {
+      fetch: () => {
+        this.store.dispatch(instanceAction);
+        this.store.dispatch(routesAction);
+      },
+      monitors: {
+        instanceMonitor,
+        routeMonitor
+      }
+    };
   }
-
-  private isFetchingApplication(fetchingRelated$: Observable<boolean>) {
-    return combineLatest(this.appMonitor.entityRequest$, fetchingRelated$).pipe(
-      tap(([appRequest]) => {
-        if (appRequest.error) {
+  /**
+   * Returns an observable that emits a if the application fetch has finished or not.
+   * Redirects to the app wall if we encounter an error when fetching the application.
+   */
+  private finishedFetchingApplication() {
+    return this.appMonitor.entityRequest$.pipe(
+      tap(entityRequestInfo => {
+        if (entityRequestInfo.error) {
           this.redirectToAppWall();
         }
       }),
-      takeWhile(([appRequest]) => !appRequest.error),
-      map(([appRequest, fetchingRelated]) => appRequest.error || appRequest.fetching || fetchingRelated)
+      pairwise(),
+      map(([oldEntityRequestInfo, entityRequestInfo]) => {
+        return !entityRequestInfo.error && (oldEntityRequestInfo.fetching && !entityRequestInfo.fetching);
+      })
     );
   }
 
@@ -201,6 +213,10 @@ export class ApplicationDeleteComponent<T> {
     return element.metadata.guid;
   }
 
+  /**
+   * Starts the deletion or the application and related entities.
+   * It ensures that the application is deleted before attempting to delete the other entities.
+   */
   public startDelete = () => {
     if (this.deleteStarted) {
       return this.redirectToAppWall();
@@ -223,8 +239,7 @@ export class ApplicationDeleteComponent<T> {
             });
           }
         }
-      }),
-
+      })
     );
   }
 }

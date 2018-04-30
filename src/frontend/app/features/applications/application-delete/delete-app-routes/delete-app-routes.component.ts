@@ -8,7 +8,9 @@ import { AppDeleteRoutesListConfigService } from './app-delete-routes-list-confi
 import { Subscription } from 'rxjs/Subscription';
 import { IServiceBinding } from '../../../../core/cf-api-svc.types';
 import { CloudFoundrySpaceService } from '../../../cloud-foundry/services/cloud-foundry-space.service';
-import { AppServiceBindingListConfigService } from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
+import {
+  AppServiceBindingListConfigService
+} from '../../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
 
 @Component({
   selector: 'app-delete-app-routes',

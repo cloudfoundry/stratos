@@ -195,9 +195,9 @@ export class APIEffect {
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
         const endpoint = resData ? resData[cfGuid] : null;
-        const succeded = !endpoint || !endpoint.error;
+        const succeeded = !endpoint || !endpoint.error;
         return {
-          error: !succeded,
+          error: !succeeded,
           errorCode: endpoint.error ? '500' : '200',
           guid: cfGuid,
           url: action.options.url
