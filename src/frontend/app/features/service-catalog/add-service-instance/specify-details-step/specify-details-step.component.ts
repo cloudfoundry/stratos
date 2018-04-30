@@ -165,7 +165,6 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       }),
       tap(o => {
         this.allServiceInstanceNames = o.map(s => s.entity.name);
-        console.log(this.allServiceInstanceNames);
       })
     ).subscribe();
   }
