@@ -2,6 +2,9 @@ import { userInfo } from 'os';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { element, by, browser, promise, protractor } from 'protractor';
 
+const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
+const until = protractor.ExpectedConditions;
+
 export class LoginPage {
 
   helpers = new E2EHelpers();
@@ -39,11 +42,19 @@ export class LoginPage {
     this.enterLogin(username, password);
     this.loginButton().click();
     // Wait for the backend to catch up
-    this.waitForLoggedIn();
+    //this.waitForLoggedIn();
+  }
+  
+  waitForLoggedIn() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
   }
 
-  waitForLoggedIn() {
-    const until = protractor.ExpectedConditions;
-    return browser.wait(until.presenceOf(element(by.css('app-dashboard-base'))), 5000);
+  isLoginError() {
+    return this.getLoginError().then(text => text === LOGIN_FAIL_MSG);
   }
+
+  waitForApplicationPage() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
+  }
+  
 }

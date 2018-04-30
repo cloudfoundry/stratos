@@ -22,7 +22,8 @@ describe('Login', () => {
 
   it('- should reach log in page', () => {
     expect(loginPage.isLoginPage()).toBeTruthy();
-    expect<any>(loginPage.getTitle()).toEqual('Login');
+    expect<any>(loginPage.getTitle()).toEqual('STRATOS');
+    expect(loginPage.loginButton().isPresent()).toBeTruthy();
   });
 
   it('- should reject bad user', () => {
@@ -30,7 +31,7 @@ describe('Login', () => {
     expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
     loginPage.loginButton().click();
-    expect(loginPage.getLoginError()).toEqual(`Couldn't log in, please try again.`);
+    expect(loginPage.isLoginError()).toBeTruthy();
     expect(loginPage.isLoginPage()).toBeTruthy();
   });
 
@@ -39,7 +40,7 @@ describe('Login', () => {
     expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
     loginPage.loginButton().click();
-    expect(loginPage.getLoginError()).toEqual(`Couldn't log in, please try again.`);
+    expect(loginPage.isLoginError()).toBeTruthy();
     expect(loginPage.isLoginPage()).toBeTruthy();
   });
 
@@ -49,9 +50,10 @@ describe('Login', () => {
 
     loginPage.loginButton().click();
 
-    loginPage.waitForLoggedIn();
+    loginPage.waitForApplicationPage();
 
     expect(loginPage.isLoginPage()).toBeFalsy();
-    expect(dashboardPage.isDashboardPage(false)).toBeTruthy();
+
+
   });
 });
