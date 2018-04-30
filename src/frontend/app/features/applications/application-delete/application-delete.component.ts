@@ -66,6 +66,7 @@ import {
   ]
 })
 export class ApplicationDeleteComponent<T> {
+  relatedEntities$: Observable<{ instances: APIResource<IServiceBinding>[], routes: APIResource<IRoute>[] }>;
   public deleteStarted = false;
   public instanceDeleteColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
     {
@@ -160,6 +161,12 @@ export class ApplicationDeleteComponent<T> {
     const { instanceMonitor, routeMonitor } = monitors;
     this.instanceMonitor = instanceMonitor;
     this.routeMonitor = routeMonitor;
+
+    this.relatedEntities$ = combineLatest(instanceMonitor.currentPage$, routeMonitor.currentPage$).pipe(
+      tap(console.log),
+      filter(([instances, routes]) => !!routes && !!instances),
+      map(([instances, routes]) => ({ instances, routes }))
+    );
 
     // Are we fetching application routes or service instances?
     this.fetchingRelated$ = combineLatest(instanceMonitor.fetchingCurrentPage$, routeMonitor.fetchingCurrentPage$).pipe(

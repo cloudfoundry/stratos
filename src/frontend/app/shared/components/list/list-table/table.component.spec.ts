@@ -62,6 +62,7 @@ describe('TableComponent', () => {
     } as IListPaginationController<any>;
     component.listConfig = {
       getDataSource: () => ({
+        pagination$: Observable.of(defaultPaginationEntityState),
         connect() { return Observable.of([]); },
       } as IListDataSource<ListAppEnvVar>),
       getMultiActions: () => [],

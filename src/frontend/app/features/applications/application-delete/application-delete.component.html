@@ -2,24 +2,20 @@
   <app-page-header>
     <h1>Delete application</h1>
   </app-page-header>
-  <ng-container *ngIf="!(fetchingApplicationData$ | async)">
+  <ng-container *ngIf="relatedEntities$ | async as entities">
     <app-steppers [cancel]="cancelUrl">
-      <ng-container *ngIf="routeMonitor.currentPage$ | async as routes">
-        <app-step *ngIf="routes && routes.length" title="Routes">
-          <div class="app-delete__monitors">
-            <p>Please select any attached application routes you would like to delete.</p>
-            <app-delete-app-routes class="app-delete__step-table" (selected)="setSelectedRoutes($event)"></app-delete-app-routes>
-          </div>
-        </app-step>
-      </ng-container>
-      <ng-container *ngIf="instanceMonitor.currentPage$ | async as instances">
-        <app-step title="Service Instances" *ngIf="instances && instances.length">
-          <div class="app-delete__monitors">
-            <p>Please select any attached application service instances you would like to delete.</p>
-            <app-delete-app-instances class="app-delete__step-table" (selected)="setSelectedServiceInstances($event)"></app-delete-app-instances>
-          </div>
-        </app-step>
-      </ng-container>
+      <app-step *ngIf="entities.routes && entities.routes.length" title="Routes">
+        <div class="app-delete__monitors">
+          <p>Please select any attached application routes you would like to delete.</p>
+          <app-delete-app-routes class="app-delete__step-table" (selected)="setSelectedRoutes($event)"></app-delete-app-routes>
+        </div>
+      </app-step>
+      <app-step title="Service Instances" *ngIf="entities.instances && entities.instances.length">
+        <div class="app-delete__monitors">
+          <p>Please select any attached application service instances you would like to delete.</p>
+          <app-delete-app-instances class="app-delete__step-table" (selected)="setSelectedServiceInstances($event)"></app-delete-app-instances>
+        </div>
+      </app-step>
       <app-step title="Confirm" class="app-delete__monitors" [canClose]="!deleteStarted" [disablePrevious]="deleteStarted" [destructiveStep]="!deleteStarted" [onNext]="startDelete" [finishButtonText]="deleteStarted ? 'Close' : 'Delete'">
         <div class="app-delete__monitors">
           <p>Please confirm that you would like to delete the following application and related entities:</p>

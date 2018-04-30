@@ -3,14 +3,14 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellRequestMonitorIconComponent } from './table-cell-request-monitor-icon.component';
 
 describe('TableCellRequestMonitorIconComponent', () => {
-  let component: TableCellRequestMonitorIconComponent;
-  let fixture: ComponentFixture<TableCellRequestMonitorIconComponent>;
+  let component: TableCellRequestMonitorIconComponent<any>;
+  let fixture: ComponentFixture<TableCellRequestMonitorIconComponent<any>>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellRequestMonitorIconComponent ]
+      declarations: [TableCellRequestMonitorIconComponent]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
