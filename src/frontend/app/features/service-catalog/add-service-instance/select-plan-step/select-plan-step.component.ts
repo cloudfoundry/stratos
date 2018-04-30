@@ -33,6 +33,7 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
 
   constructor(private store: Store<AppState>, private servicesService: ServicesService) {
     this.servicePlans$ = servicesService.servicePlans$.pipe(
+      filter(p => !!p && p.length > 0),
       map(o => o.filter(s => s.entity.bindable)),
       map(o => o.map(p => ({
         id: p.metadata.guid,

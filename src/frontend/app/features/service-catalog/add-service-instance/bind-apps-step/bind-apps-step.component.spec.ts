@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BindAppsStepComponent } from './bind-apps-step.component';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServicesService } from '../../services.service';
+import { ServicesServiceMock } from '../../services.service.mock';
 
 describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
@@ -8,9 +11,15 @@ describe('BindAppsStepComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ BindAppsStepComponent ]
+      declarations: [BindAppsStepComponent],
+      imports: [BaseTestModules],
+      providers: [
+        { provide: ServicesService, useClass: ServicesServiceMock },
+      ]
+
+
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
