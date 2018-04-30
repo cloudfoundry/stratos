@@ -6,7 +6,7 @@ Weekly status updates are published here.
 
 The team have been working on the following issues this week:
 
-- GitHub tab/deploy updates [#2067](https://github.com/cloudfoundry-incubator/stratos/issues/2067) - When deploying and application from GitHub, we now allow the user to select a commit from the chose branch. When viewing the GitHub tab of an application, the user can see the list of commits and update the application from a different commit on the branch.
+- GitHub tab/deploy updates [#2067](https://github.com/cloudfoundry-incubator/stratos/issues/2067) - When deploying an application from GitHub, we now allow the user to select a commit from their selected branch. When viewing the GitHub tab of an application, the user can see the list of commits and update the application from a different commit on the branch.
 
 - Deploy App: Add support for an archive file or local folder  [#2040](https://github.com/cloudfoundry-incubator/stratos/issues/2040) - In addition to Git deployment, users can now browse to a local application archive file or folder and deploy using that.
 
