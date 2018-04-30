@@ -1,19 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { ListConfig, IListConfig, ListViewTypes } from '../../list/list.component.types';
-import { ActivatedRoute } from '@angular/router';
-import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
-import { ListView } from '../../../../store/actions/list.actions';
-import { TableCellAppNameComponent } from '../../list/list-types/app/table-cell-app-name/table-cell-app-name.component';
-import { APIResource } from '../../../../store/types/api.types';
-import { ITableColumn } from '../../list/list-table/table.types';
-import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { filter, map, concatMap, first, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { first, map, tap } from 'rxjs/operators';
+
+import { IOrganization, ISpace } from '../../../../core/cf-api.types';
+import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../../store/app-state';
+import { APIResource } from '../../../../store/types/api.types';
 
 function appDataSort(app1: APIResource<ISpace>, app2: APIResource<ISpace>): number {
   const app1Date = new Date(app1.metadata.updated_at);

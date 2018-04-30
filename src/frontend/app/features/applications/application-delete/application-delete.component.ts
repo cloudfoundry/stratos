@@ -6,7 +6,7 @@ import { filter, first, map, shareReplay, startWith, switchMap, tap, delay, pair
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
-import { IApp, IRoute } from '../../../core/cf-api.types';
+import { IApp, IRoute, ISpace } from '../../../core/cf-api.types';
 import {
   AppMonitorComponentTypes,
 } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
@@ -44,6 +44,17 @@ import { ApplicationService } from '../application.service';
 import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
+import { TableCellRouteComponent } from '../../../shared/components/list/list-types/app-route/table-cell-route/table-cell-route.component';
+import {
+  TableCellAppInstancesComponent
+} from '../../../shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';
+import {
+  TableCellAppStatusComponent
+} from '../../../shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
+import { DatePipe } from '@angular/common';
+import {
+  TableCellTCPRouteComponent
+} from '../../../shared/components/list/list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
 
 @Component({
   selector: 'app-application-delete',
@@ -62,16 +73,21 @@ export class ApplicationDeleteComponent<T> {
       columnId: 'name',
       cellDefinition: {
         getValue: row => row.entity.service_instance.entity.name
-      }
+      },
+      cellFlex: '0 0 200px'
     }
   ];
   public routeDeleteColumns: ITableColumn<APIResource<IRoute>>[] = [
     {
       headerCell: () => 'Host',
       columnId: 'host',
-      cellDefinition: {
-        getValue: row => row.entity.host
-      }
+      cellComponent: TableCellRouteComponent,
+      cellFlex: '0 0 200px'
+    },
+    {
+      columnId: 'tcproute',
+      headerCell: () => 'TCP Route',
+      cellComponent: TableCellTCPRouteComponent,
     }
   ];
   public appDeleteColumns: ITableColumn<APIResource<IApp>>[] = [
@@ -79,7 +95,27 @@ export class ApplicationDeleteComponent<T> {
       headerCell: () => 'Name',
       columnId: 'name',
       cellDefinition: {
-        getValue: row => row.entity.name
+        getValue: row => row.entity.name,
+        getLink: row => `/applications/${row.metadata.guid}`,
+        newTab: true,
+      },
+      cellFlex: '0 0 200px'
+    },
+    {
+      columnId: 'status',
+      headerCell: () => 'Status',
+      cellComponent: TableCellAppStatusComponent,
+    },
+    {
+      columnId: 'instances',
+      headerCell: () => 'Instances',
+      cellComponent: TableCellAppInstancesComponent
+    },
+    {
+      columnId: 'creation',
+      headerCell: () => 'Creation Date',
+      cellDefinition: {
+        getValue: (row: APIResource) => this.datePipe.transform(row.metadata.created_at, 'medium')
       }
     }
   ];
@@ -108,7 +144,8 @@ export class ApplicationDeleteComponent<T> {
     private store: Store<AppState>,
     private applicationService: ApplicationService,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityMonitorFactory: EntityMonitorFactory
+    private entityMonitorFactory: EntityMonitorFactory,
+    private datePipe: DatePipe
   ) {
 
     this.appMonitor = this.getApplicationMonitor();

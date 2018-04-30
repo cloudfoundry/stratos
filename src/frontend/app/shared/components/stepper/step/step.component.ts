@@ -56,8 +56,8 @@ export class StepComponent implements OnInit {
   @Input('blocked$')
   blocked$: Observable<boolean>;
 
-  @Input('distructiveStep')
-  public distructiveStep = false;
+  @Input('destructiveStep')
+  public destructiveStep = false;
 
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
@@ -70,11 +70,11 @@ export class StepComponent implements OnInit {
 
   constructor() {
     this._onEnter = () => {
-      if (this.distructiveStep) {
+      if (this.destructiveStep) {
         this.busy = true;
         setTimeout(() => {
           this.busy = false;
-        }, 3000);
+        }, 1000);
       }
       this.onEnter();
     };

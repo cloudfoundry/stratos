@@ -60,7 +60,8 @@ export class AppActionMonitorComponent<T> implements OnInit {
     const monitorColumn = {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
-      cellConfig
+      cellConfig,
+      cellFlex: '0 0 40px'
     };
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {

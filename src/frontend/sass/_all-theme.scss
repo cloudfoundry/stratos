@@ -27,6 +27,7 @@
 @import '../app/shared/components/page-header/page-header.component.theme';
 @import '../app/shared/components/page-header/page-header-events/page-header-events.component.theme';
 @import '../app/shared/components/user-profile-banner/user-profile-banner.component.theme';
+@import '../app/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
@@ -93,6 +94,7 @@ $side-nav-light-active: #484848;
   @include app-page-header-theme($theme, $app-theme);
   @include app-page-header-events($theme, $app-theme);
   @include app-user-profile-banner-component-theme($theme, $app-theme);
+  @include action-monitor-icon-theme($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {

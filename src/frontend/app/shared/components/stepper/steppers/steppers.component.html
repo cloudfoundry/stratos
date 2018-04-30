@@ -2,8 +2,7 @@
   <div class="steppers" *ngIf="steps && steps.length">
     <div class="steppers__inner">
       <div class="steppers__headers" *ngIf="steps.length > 1">
-        <div *ngFor="let step of steps; let i = index" (click)="setActive(i)" [ngClass]="{'steppers__header--active': step.active || step.complete}"
-          class="steppers__header">
+        <div *ngFor="let step of steps; let i = index" (click)="setActive(i)" [ngClass]="{'steppers__header--active': step.active || step.complete}" class="steppers__header">
           <div class="steppers__header-inner" *ngIf="steps.length !== 1">
             <mat-spinner *ngIf="(step.blocked$ | async)" diameter="20"></mat-spinner>
             <app-dot-content *ngIf="!(step.blocked$ | async)" class="buildpack-card__title-dot" [disabled]="step.complete">
@@ -22,10 +21,8 @@
           <button *ngIf="steps.length !== 1" color="accent" mat-button mat-raised-button (click)="setActive(currentIndex - 1)" [disabled]="!canGoto(currentIndex - 1)">Previous</button>
         </div>
         <div class="steppers__navigation-right">
-          <button color="primary" mat-button [routerLink]="cancel$ | async" [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)"
-            *ngIf="cancel">{{ this.getCancelButtonText(currentIndex) }}</button>
-          <button [color]="steps[currentIndex].distructiveStep ? 'warn' : 'primary'" type="submit" mat-button mat-raised-button (click)="goNext(currentIndex)"
-            [disabled]="(steps[currentIndex].blocked$ | async) || !canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex) }}</button>
+          <button color="primary" mat-button [routerLink]="cancel$ | async" [queryParams]="cancelQueryParams$ | async" [disabled]="!canCancel(currentIndex)" *ngIf="cancel">{{ this.getCancelButtonText(currentIndex) }}</button>
+          <button [color]="steps[currentIndex].destructiveStep ? 'warn' : 'primary'" type="submit" mat-button mat-raised-button (click)="goNext(currentIndex)" [disabled]="(steps[currentIndex].blocked$ | async) || !canGoNext(currentIndex)">{{ this.getNextButtonText(currentIndex) }}</button>
         </div>
       </div>
     </div>
