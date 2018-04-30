@@ -8,6 +8,9 @@ import { CoreModule } from '../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
+import { PageHeaderModule } from './page-header.module';
+import { SharedModule } from '../../shared.module';
+import { InternalEventMonitorFactory } from '../../monitors/internal-event-monitor.factory';
 
 describe('PageHeaderComponent', () => {
   let component: PageHeaderComponent;
@@ -15,18 +18,21 @@ describe('PageHeaderComponent', () => {
   const URL_KEY = 'key';
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [PageHeaderComponent],
-      providers: [{
-        provide: ActivatedRoute,
-        useValue: {
-          snapshot: {
-            queryParams: { breadcrumbs: URL_KEY }
+      providers: [
+        InternalEventMonitorFactory,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParams: { breadcrumbs: URL_KEY }
+            }
           }
-        }
-      }],
+        }],
       imports: [
         MDAppModule,
         CoreModule,
+        SharedModule,
+        PageHeaderModule,
         RouterTestingModule,
         StoreModule.forRoot(
           appReducers
