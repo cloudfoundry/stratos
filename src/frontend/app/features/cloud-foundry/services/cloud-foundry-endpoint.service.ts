@@ -165,25 +165,6 @@ export class CloudFoundryEndpointService {
 
   }
 
-
-  getRecentApps(orgGuid: string = null, spaceGuid: string = null, count: number = 10) {
-    return this.orgs$.pipe(
-      map((orgs: APIResource<IOrganization>[]) => {
-        return orgs.filter((org) => !orgGuid ||
-          !!orgGuid && org.metadata.guid === orgGuid);
-      }),
-      map((orgs: APIResource<IOrganization>[]) => {
-        return [].concat(...orgs.map((org) => org.entity.spaces));
-      }),
-      map((spaces: APIResource<ISpace>[]) => {
-        return spaces.filter((space) => !spaceGuid ||
-          !!spaceGuid && space.metadata.guid === spaceGuid);
-      }),
-      map((spaces: APIResource<ISpace>[]) => {
-        return [].concat(...spaces.map((space) => space.entity.apps)).slice(0, count).sort(appDataSort);
-      })
-    );
-  }
   getAppsInOrg(
     org: APIResource<IOrganization>
   ): Observable<APIResource<IApp>[]> {
