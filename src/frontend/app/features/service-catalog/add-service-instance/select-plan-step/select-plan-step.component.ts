@@ -11,6 +11,7 @@ import { SetServicePlan } from '../../../../store/actions/create-service-instanc
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesService } from '../../services.service';
+import { CardStatus } from '../../../../shared/components/application-state/application-state.service';
 
 interface ServicePlan {
   id: string;
@@ -24,7 +25,7 @@ interface ServicePlan {
   styleUrls: ['./select-plan-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
+export class SelectPlanStepComponent implements OnDestroy {
   changeSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
@@ -55,8 +56,6 @@ export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
       }),
       first()
     ).subscribe();
-
-
   }
 
   getDisplayName(selectedPlan: ServicePlan) {
@@ -77,10 +76,6 @@ export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
       }).subscribe();
   }
 
-  ngAfterContentInit() {
-
-  }
-
   onNext = () => {
     this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
     return Observable.of({ success: true });
@@ -93,12 +88,21 @@ export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
     if (this.changeSubscription) {
       this.changeSubscription.unsubscribe();
     }
-
   }
 
   getSelectedPlan = (): Observable<ServicePlan> => this.servicePlans$.pipe(
     map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
     filter(p => !!p)
   )
+
+  getPlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<CardStatus> => {
+
+    if (servicePlan.entity.public) {
+      return Observable.of(CardStatus.OK);
+    }
+
+    return Observable.of(CardStatus.WARNING);
+
+  }
 
 }

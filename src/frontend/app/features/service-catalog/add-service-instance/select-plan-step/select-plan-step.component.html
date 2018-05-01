@@ -7,9 +7,12 @@
     </mat-form-field>
   </form>
   <mat-card class="select-plan__details" *ngIf="getSelectedPlan() | async as selPlan">
+    <app-card-status *ngIf="(getPlanAccessibility(selPlan.entity) | async)" [status$]="getPlanAccessibility(selPlan.entity)"></app-card-status>
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.entity.description}} </app-metadata-item>
-    <app-metadata-item label="Public"> {{selPlan.entity.entity.public}} </app-metadata-item>
+    <app-metadata-item label="Public">
+      {{selPlan.entity.entity.public}} <span *ngIf="(getPlanAccessibility(selPlan.entity) | async) === 'warning'"> (Service plan has limited availability)</span>
+    </app-metadata-item>
     <app-metadata-item label="Free"> {{selPlan.entity.entity.free}} </app-metadata-item>
     <app-metadata-item label="Additional Information" *ngIf="hasAdditionalInfo(selPlan)">
       <ul>
