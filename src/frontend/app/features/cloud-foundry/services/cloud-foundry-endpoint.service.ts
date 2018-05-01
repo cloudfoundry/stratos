@@ -33,6 +33,19 @@ import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types
 import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
+export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
+  const app1Date = new Date(app1.metadata.updated_at);
+  const app2Date = new Date(app2.metadata.updated_at);
+  if (app1Date > app2Date) {
+    return -1;
+  }
+  if (app1Date < app2Date) {
+    return 1;
+  }
+  return 0;
+}
+
+
 @Injectable()
 export class CloudFoundryEndpointService {
 
@@ -152,6 +165,25 @@ export class CloudFoundryEndpointService {
 
   }
 
+
+  getRecentApps(orgGuid: string = null, spaceGuid: string = null, count: number = 10) {
+    return this.orgs$.pipe(
+      map((orgs: APIResource<IOrganization>[]) => {
+        return orgs.filter((org) => !orgGuid ||
+          !!orgGuid && org.metadata.guid === orgGuid);
+      }),
+      map((orgs: APIResource<IOrganization>[]) => {
+        return [].concat(...orgs.map((org) => org.entity.spaces));
+      }),
+      map((spaces: APIResource<ISpace>[]) => {
+        return spaces.filter((space) => !spaceGuid ||
+          !!spaceGuid && space.metadata.guid === spaceGuid);
+      }),
+      map((spaces: APIResource<ISpace>[]) => {
+        return [].concat(...spaces.map((space) => space.entity.apps)).slice(0, count).sort(appDataSort);
+      })
+    );
+  }
   getAppsInOrg(
     org: APIResource<IOrganization>
   ): Observable<APIResource<IApp>[]> {

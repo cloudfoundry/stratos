@@ -8,7 +8,7 @@ import { IApp } from '../../../../core/cf-api.types';
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 import { selectSpaceGuid, selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
-import { tap, filter, map } from 'rxjs/operators';
+import { tap, filter, map, first } from 'rxjs/operators';
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { spaceSchemaKey, entityFactory, applicationSchemaKey, serviceBindingSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -20,12 +20,14 @@ import { CreateServiceBinding } from '../../../../store/actions/service-bindings
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { MatSnackBar } from '@angular/material';
 import { RouterNav } from '../../../../store/actions/router.actions';
+import { appDataSort } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-bind-apps-step',
   templateUrl: './bind-apps-step.component.html',
   styleUrls: ['./bind-apps-step.component.scss']
 })
+
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   validate: Observable<boolean>;
   serviceInstanceGuid: string;
@@ -44,6 +46,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       params: new FormControl(''),
     });
 
+
     this.allAppsSubscription = this.store.select(selectCreateServiceInstance).pipe(
       filter(selectCreateServiceInstance => !!selectCreateServiceInstance.spaceGuid),
       tap(createServiceInstanceState => {
@@ -55,7 +58,12 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
             paginationKey,
             entityFactory(applicationSchemaKey)
           )
-        }, true).entities$;
+        }, true).entities$
+          .pipe(
+          map(apps => apps.sort(appDataSort)),
+          first(),
+          map(apps => apps.slice(0, 50))
+          );
 
         this.serviceInstanceGuid = createServiceInstanceState.serviceInstanceGuid;
 
