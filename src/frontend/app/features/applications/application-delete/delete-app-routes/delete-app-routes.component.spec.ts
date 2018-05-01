@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DeleteAppRoutesComponent } from './delete-app-routes.component';
+import { SharedModule } from '../../../../shared/shared.module';
+import { CoreModule } from '../../../../core/core.module';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('DeleteAppRoutesComponent', () => {
   let component: DeleteAppRoutesComponent;
@@ -8,9 +11,11 @@ describe('DeleteAppRoutesComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ DeleteAppRoutesComponent ]
+      declarations: [DeleteAppRoutesComponent],
+      imports: BaseTestModules
+
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

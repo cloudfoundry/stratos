@@ -1,6 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ApplicationDeleteComponent } from './application-delete.component';
+import { BaseTestModules } from '../../../test-framework/cloud-foundry-endpoint-service.helper';
 
 describe('ApplicationDeleteComponent', () => {
   let component: ApplicationDeleteComponent<any>;
@@ -8,7 +9,8 @@ describe('ApplicationDeleteComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ApplicationDeleteComponent]
+      declarations: [ApplicationDeleteComponent],
+      imports: BaseTestModules
     })
       .compileComponents();
   }));

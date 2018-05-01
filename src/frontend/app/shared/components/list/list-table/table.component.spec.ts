@@ -60,14 +60,6 @@ describe('TableComponent', () => {
     component.paginationController = {
       sort$: Observable.of({} as ListSort)
     } as IListPaginationController<any>;
-    component.listConfig = {
-      getDataSource: () => ({
-        pagination$: Observable.of(defaultPaginationEntityState),
-        connect() { return Observable.of([]); },
-      } as IListDataSource<ListAppEnvVar>),
-      getMultiActions: () => [],
-      getSingleActions: () => []
-    } as IListConfig<ListAppEnvVar>;
     fixture.detectChanges();
   });
 
