@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, share, tap, switchMap } from 'rxjs/operators';
+import { filter, first, map, share, tap, switchMap, combineLatest } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServicePlan, IServicePlanExtra, IServicePlanVisibility } from '../../../../core/cf-api-svc.types';
@@ -26,9 +26,9 @@ interface ServicePlan {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnDestroy {
+  servicePlans: ServicePlan[];
 
   servicePlanVisibilitySub: Subscription;
-  allVisibilities: APIResource<IServicePlanVisibility>[];
   changeSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
@@ -39,6 +39,20 @@ export class SelectPlanStepComponent implements OnDestroy {
     this.servicePlans$ = servicesService.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
       map(o => o.filter(s => s.entity.bindable)),
+      combineLatest(this.servicesService.servicePlanVisibilities$),
+      map(([svcPlans, svcPlanVis]) => {
+
+        const visiblePlans = [];
+        svcPlans.forEach(p => {
+          if (p.entity.public) {
+            visiblePlans.push(p);
+          } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
+
+            visiblePlans.push(p);
+          }
+        });
+        return visiblePlans;
+      }),
       map(o => o.map(p => ({
         id: p.metadata.guid,
         name: p.entity.name,
@@ -49,21 +63,17 @@ export class SelectPlanStepComponent implements OnDestroy {
       first()
     );
     this.stepperForm = new FormGroup({
-      servicePlans: new FormControl('', [Validators.required, this.hasVisibilityValidator()]),
+      servicePlans: new FormControl('', Validators.required),
     });
     this.subscription = this.servicePlans$.pipe(
       tap(o => {
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
+        this.servicePlans = o;
         this.validate.next(this.stepperForm.valid);
+
 
       }),
       first()
-    ).subscribe();
-
-    this.servicePlanVisibilitySub = this.servicesService.servicePlanVisibilities$.pipe(
-      tap(vis => {
-        this.allVisibilities = vis;
-      })
     ).subscribe();
   }
 
@@ -103,15 +113,6 @@ export class SelectPlanStepComponent implements OnDestroy {
       this.servicePlanVisibilitySub.unsubscribe();
     }
   }
-  hasVisibility = (servicePlanId: string = null) => {
-    return this.allVisibilities ? this.allVisibilities.filter(v => v.entity.service_plan_guid === servicePlanId).length > 0 : false;
-  }
-
-  hasVisibilityValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } =>
-      !this.hasVisibility(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
-  }
-
 
   getSelectedPlan = (): Observable<ServicePlan> => this.servicePlans$.pipe(
     map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
