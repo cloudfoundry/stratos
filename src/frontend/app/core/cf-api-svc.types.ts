@@ -95,3 +95,10 @@ export interface IServiceExtra {
   documentationUrl: string;
   supportUrl: string;
 }
+
+export interface IServicePlanVisibility {
+  service_plan_guid: string;
+  organization_guid: string;
+  service_plan_url?: string;
+  organization_url?: string;
+}

@@ -1,12 +1,12 @@
 import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, share, tap } from 'rxjs/operators';
+import { filter, first, map, share, tap, switchMap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
+import { IServicePlan, IServicePlanExtra, IServicePlanVisibility } from '../../../../core/cf-api-svc.types';
 import { SetServicePlan } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
@@ -26,6 +26,9 @@ interface ServicePlan {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnDestroy {
+
+  servicePlanVisibilitySub: Subscription;
+  allVisibilities: APIResource<IServicePlanVisibility>[];
   changeSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
@@ -46,7 +49,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       first()
     );
     this.stepperForm = new FormGroup({
-      servicePlans: new FormControl('', Validators.required)
+      servicePlans: new FormControl('', [Validators.required, this.hasVisibilityValidator()]),
     });
     this.subscription = this.servicePlans$.pipe(
       tap(o => {
@@ -55,6 +58,12 @@ export class SelectPlanStepComponent implements OnDestroy {
 
       }),
       first()
+    ).subscribe();
+
+    this.servicePlanVisibilitySub = this.servicesService.servicePlanVisibilities$.pipe(
+      tap(vis => {
+        this.allVisibilities = vis;
+      })
     ).subscribe();
   }
 
@@ -88,7 +97,21 @@ export class SelectPlanStepComponent implements OnDestroy {
     if (this.changeSubscription) {
       this.changeSubscription.unsubscribe();
     }
+
+    if (this.servicePlanVisibilitySub) {
+
+      this.servicePlanVisibilitySub.unsubscribe();
+    }
   }
+  hasVisibility = (servicePlanId: string = null) => {
+    return this.allVisibilities ? this.allVisibilities.filter(v => v.entity.service_plan_guid === servicePlanId).length > 0 : false;
+  }
+
+  hasVisibilityValidator = (): ValidatorFn => {
+    return (formField: AbstractControl): { [key: string]: any } =>
+      !this.hasVisibility(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
+  }
+
 
   getSelectedPlan = (): Observable<ServicePlan> => this.servicePlans$.pipe(
     map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
@@ -101,8 +124,38 @@ export class SelectPlanStepComponent implements OnDestroy {
       return Observable.of(CardStatus.OK);
     }
 
-    return Observable.of(CardStatus.WARNING);
-
+    return this.servicesService.servicePlanVisibilities$.pipe(
+      filter(p => !!p),
+      map(servicePlanVisibilities => servicePlanVisibilities.filter(s => s.entity.service_plan_guid === servicePlan.metadata.guid)),
+      map(filteredPlans => {
+        if (filteredPlans.length === 0) {
+          // No service visibility defined for this service
+          return CardStatus.ERROR;
+        } else {
+          return CardStatus.WARNING;
+        }
+      }),
+      first()
+    );
   }
 
+  getAccessibilityMessage = (servicePlan: APIResource<IServicePlan>): Observable<string> => {
+
+    return this.getPlanAccessibility(servicePlan).pipe(
+      map(o => {
+        if (o === CardStatus.WARNING) {
+          return 'Service Plan has limited visibility';
+        } else if (o === CardStatus.ERROR) {
+          return 'Service Plan has no visibility';
+        }
+      })
+    );
+  }
+
+  planHasNoVisibility = (): Observable<boolean> => {
+    return this.getSelectedPlan().pipe(
+      switchMap(o => this.getPlanAccessibility(o.entity)),
+      map(s => s === CardStatus.ERROR)
+    );
+  }
 }

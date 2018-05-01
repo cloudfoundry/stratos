@@ -30,6 +30,7 @@ export const privateDomainsSchemaKey = 'private_domains';
 export const spaceQuotaSchemaKey = 'space_quota_definition';
 export const metricSchemaKey = 'metrics';
 export const userProfileSchemaKey = 'userProfile';
+export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 
@@ -119,6 +120,9 @@ entityCache[metricSchemaKey] = MetricSchema;
 
 const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
+
+const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
 const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
   entity: {

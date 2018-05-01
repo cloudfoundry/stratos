@@ -11,7 +11,8 @@
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.entity.description}} </app-metadata-item>
     <app-metadata-item label="Public">
-      {{selPlan.entity.entity.public}} <span *ngIf="(getPlanAccessibility(selPlan.entity) | async) === 'warning'"> (Service plan has limited availability)</span>
+      {{selPlan.entity.entity.public}}
+      <span *ngIf="(getPlanAccessibility(selPlan.entity) | async) !== 'ok'"> ({{ getAccessibilityMessage(selPlan.entity) | async }})</span>
     </app-metadata-item>
     <app-metadata-item label="Free"> {{selPlan.entity.entity.free}} </app-metadata-item>
     <app-metadata-item label="Additional Information" *ngIf="hasAdditionalInfo(selPlan)">
