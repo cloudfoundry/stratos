@@ -20,7 +20,7 @@ import {
 export class AppActionMonitorComponent<T> implements OnInit {
 
   @Input('data$')
-  private data$: Observable<Array<T>>;
+  private data$: Observable<Array<T>> = Observable.never();
 
   @Input('entityKey')
   public entityKey: string;
@@ -53,7 +53,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    const cellConfig: ITableCellRequestMonitorIconConfig<T> = {
+    const cellConfig: ITableCellRequestMonitorIconConfig = {
       entityKey: this.entityKey,
       schema: this.schema,
       monitorState: this.monitorState,

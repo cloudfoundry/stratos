@@ -9,7 +9,6 @@ describe('AppActionMonitorIconComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [AppActionMonitorIconComponent],
       imports: BaseTestModules
     })
       .compileComponents();

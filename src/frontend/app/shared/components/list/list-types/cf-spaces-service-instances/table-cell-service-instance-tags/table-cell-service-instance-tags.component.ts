@@ -22,13 +22,14 @@ export class TableCellServiceInstanceTagsComponent<T> extends TableCellCustom<T>
   }
 
   ngOnInit() {
-    this.row.entity.service_instance.entity.tags.forEach(t => {
-      this.tags.push({
-        value: t,
-        key: this.row,
-        hideClearButton: true
+    if (this.row.entity && this.row.entity.service_instance) {
+      this.row.entity.service_instance.entity.tags.forEach(t => {
+        this.tags.push({
+          value: t,
+          key: this.row,
+          hideClearButton: true
+        });
       });
-    });
+    }
   }
-
 }

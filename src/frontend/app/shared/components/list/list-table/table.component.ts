@@ -34,7 +34,7 @@ const tableColumnAction = {
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss']
 })
-export class TableComponent<T extends object> implements OnInit, OnDestroy {
+export class TableComponent<T> implements OnInit, OnDestroy {
 
   private uberSub: Subscription;
 

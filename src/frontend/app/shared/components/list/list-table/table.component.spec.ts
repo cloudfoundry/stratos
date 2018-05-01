@@ -52,7 +52,7 @@ describe('TableComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableComponent);
+    fixture = TestBed.createComponent<TableComponent<ListAppEnvVar>>(TableComponent);
     component = fixture.componentInstance;
 
     const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
@@ -60,6 +60,11 @@ describe('TableComponent', () => {
     component.paginationController = {
       sort$: Observable.of({} as ListSort)
     } as IListPaginationController<any>;
+    component.dataSource = {
+      trackBy: () => '1',
+      connect: () => Observable.empty(),
+      disconnect: () => null
+    }
     fixture.detectChanges();
   });
 
