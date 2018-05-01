@@ -1,60 +1,47 @@
+import { DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, first, map, shareReplay, startWith, switchMap, tap, delay, pairwise } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
-
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { filter, first, map, pairwise, shareReplay, startWith, switchMap, tap } from 'rxjs/operators';
 import { IServiceBinding } from '../../../core/cf-api-svc.types';
-import { IApp, IRoute, ISpace } from '../../../core/cf-api.types';
-import {
-  AppMonitorComponentTypes,
-} from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { IApp, IRoute } from '../../../core/cf-api.types';
+import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
+import { CfAppRoutesListConfigService } from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+import { TableCellRouteComponent } from '../../../shared/components/list/list-types/app-route/table-cell-route/table-cell-route.component';
 import {
-  CfAppRoutesListConfigService,
-} from '../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+  TableCellTCPRouteComponent
+} from '../../../shared/components/list/list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
 import {
-  AppServiceBindingDataSource,
+  AppServiceBindingDataSource
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import {
-  AppServiceBindingListConfigService,
+  AppServiceBindingListConfigService
 } from '../../../shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
-import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
-import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
-import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
-import { DeleteApplication, GetAllApplications, GetApplication } from '../../../store/actions/application.actions';
-import { DeleteRoute } from '../../../store/actions/route.actions';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
-import { AppState } from '../../../store/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-} from '../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
-import { APIResource } from '../../../store/types/api.types';
-import { AppInstanceStats } from '../../../store/types/app-metadata.types';
-import { CloudFoundrySpaceService } from '../../cloud-foundry/services/cloud-foundry-space.service';
-import { ApplicationService } from '../application.service';
-import { ActiveRouteCfOrgSpace } from '../../cloud-foundry/cf-page.types';
-import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
-import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
-import { TableCellRouteComponent } from '../../../shared/components/list/list-types/app-route/table-cell-route/table-cell-route.component';
 import {
   TableCellAppInstancesComponent
 } from '../../../shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';
 import {
   TableCellAppStatusComponent
 } from '../../../shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
-import { DatePipe } from '@angular/common';
+import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
+import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { DeleteApplication, GetAllApplications, GetApplication } from '../../../store/actions/application.actions';
+import { DeleteRoute } from '../../../store/actions/route.actions';
+import { RouterNav } from '../../../store/actions/router.actions';
+import { DeleteServiceInstance } from '../../../store/actions/service-instances.actions';
+import { AppState } from '../../../store/app-state';
 import {
-  TableCellTCPRouteComponent
-} from '../../../shared/components/list/list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
+  applicationSchemaKey, entityFactory, routeSchemaKey, serviceBindingSchemaKey, serviceInstancesSchemaKey
+} from '../../../store/helpers/entity-factory';
+import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
+import { APIResource } from '../../../store/types/api.types';
+import { ApplicationService } from '../application.service';
+
 
 @Component({
   selector: 'app-application-delete',
@@ -148,22 +135,14 @@ export class ApplicationDeleteComponent<T> {
     private entityMonitorFactory: EntityMonitorFactory,
     private datePipe: DatePipe
   ) {
-
-    this.appMonitor = this.getApplicationMonitor();
-    this.selectedApplication$ = this.appMonitor.entity$.pipe(
-      filter(app => !!app),
-      map(app => [app])
-    );
-
+    this.setupAppMonitor();
     this.cancelUrl = `/application/${applicationService.cfGuid}/${applicationService.appGuid}`;
-
     const { fetch, monitors } = this.buildRelatedEntitiesActionMonitors();
     const { instanceMonitor, routeMonitor } = monitors;
     this.instanceMonitor = instanceMonitor;
     this.routeMonitor = routeMonitor;
 
     this.relatedEntities$ = combineLatest(instanceMonitor.currentPage$, routeMonitor.currentPage$).pipe(
-      tap(console.log),
       filter(([instances, routes]) => !!routes && !!instances),
       map(([instances, routes]) => ({ instances, routes }))
     );
@@ -183,6 +162,14 @@ export class ApplicationDeleteComponent<T> {
       startWith(true)
     );
     this.store.dispatch(new GetApplication(applicationService.appGuid, applicationService.cfGuid));
+  }
+
+  private setupAppMonitor() {
+    this.appMonitor = this.getApplicationMonitor();
+    this.selectedApplication$ = this.appMonitor.entity$.pipe(
+      filter(app => !!app),
+      map(app => [app])
+    );
   }
 
   public redirectToAppWall() {
