@@ -3,20 +3,26 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
-import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { DeleteServiceBinding, DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
-import { ServiceInstancesListConfigService } from '../service-instances/service-instances-list-config.service';
 import { ITableColumn } from '../../list-table/table.types';
-import { TableCellServiceNameComponent } from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import { TableCellServicePlanComponent } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { TableCellServiceInstanceTagsComponent } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import { TableCellServiceInstanceAppsAttachedComponent } from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
+import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
+import {
+  TableCellServiceInstanceAppsAttachedComponent,
+} from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
+import {
+  TableCellServiceInstanceTagsComponent,
+} from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
+import {
+  TableCellServiceNameComponent,
+} from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
+import {
+  TableCellServicePlanComponent,
+} from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
