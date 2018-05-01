@@ -16,9 +16,6 @@
         A service instance with this name already exists. Please enter a different one.
       </mat-error>
     </mat-form-field>
-    <!-- <mat-form-field>
-      <textarea matInput placeholder="Tags" matTextareaAutosize matAutosizeMinRows="2" matAutosizeMaxRows="5" ></textarea>
-    </mat-form-field> -->
     <mat-form-field class="tags-chip-list">
       <mat-chip-list #chipList formControlName="tags">
         <mat-chip *ngFor="let tag of tags" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">

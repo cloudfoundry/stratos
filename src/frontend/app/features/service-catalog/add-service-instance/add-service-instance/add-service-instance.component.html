@@ -9,7 +9,7 @@
     <app-step title="Specify Details" [onNext]="step2.onNext" [valid]="step2.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
       <app-specify-details-step #step2></app-specify-details-step>
     </app-step>
-    <app-step title="Bind Apps" [onNext]="step3.submit" [valid]="step3.validate | async" cancelButtonText="Close" finishButtonText="Bind">
+    <app-step title="Bind App" [onNext]="step3.submit" [valid]="step3.validate | async" cancelButtonText="Close" finishButtonText="Bind">
       <app-bind-apps-step #step3></app-bind-apps-step>
     </app-step>
   </app-steppers>

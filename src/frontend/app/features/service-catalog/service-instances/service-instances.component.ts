@@ -18,13 +18,5 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers
     }
   ]
 })
-export class ServiceInstancesComponent implements OnInit {
-
-  constructor(private servicesService: ServicesService) {
-
-
-  }
-  ngOnInit() {
-  }
-
+export class ServiceInstancesComponent {
 }

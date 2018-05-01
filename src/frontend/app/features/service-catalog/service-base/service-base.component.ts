@@ -34,14 +34,11 @@ function servicesServiceFactory(
     }
   ]
 })
-export class ServiceBaseComponent implements OnInit, OnDestroy {
+export class ServiceBaseComponent implements OnDestroy {
   servicesSubscription: Subscription;
 
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
     this.servicesSubscription = this.servicesService.service$.subscribe();
-  }
-
-  ngOnInit() {
   }
 
   addServiceInstanceLink = () => [

@@ -24,7 +24,7 @@ interface ServicePlan {
   styleUrls: ['./select-plan-step.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentInit {
+export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
   changeSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
@@ -56,10 +56,6 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy, AfterContentI
       first()
     ).subscribe();
 
-
-  }
-
-  ngOnInit() {
 
   }
 

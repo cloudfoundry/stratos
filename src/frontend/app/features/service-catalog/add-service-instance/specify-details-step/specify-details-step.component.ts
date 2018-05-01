@@ -12,9 +12,9 @@ import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
   SetCreateServiceInstance,
-  SetOrg,
+  SetCreateServiceInstanceOrg,
   SetServiceInstanceGuid,
-  SetSpace,
+  SetCreateServiceInstanceSpace,
 } from '../../../../store/actions/create-service-instance.actions';
 import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
@@ -33,7 +33,7 @@ import { ServicesService } from '../../services.service';
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
 })
-export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterContentInit {
+export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
 
   stepperForm: FormGroup;
   serviceInstanceNameSub: Subscription;
@@ -82,7 +82,7 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     this.spaces$ = this.initSpacesObservable();
   }
 
-  setOrg = (guid) => this.store.dispatch(new SetOrg(guid));
+  setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
   initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
     store: this.store,
@@ -114,9 +114,6 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
     first()
     )
 
-  ngOnInit() {
-  }
-
   ngAfterContentInit() {
     this.validate = this.stepperForm.statusChanges
       .map(() => {
@@ -129,7 +126,7 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
         if (orgWithSpaces.length > 0) {
           const selectedOrgId = orgWithSpaces[0].metadata.guid;
           this.stepperForm.controls.org.setValue(selectedOrgId);
-          this.store.dispatch(new SetOrg(selectedOrgId));
+          this.store.dispatch(new SetCreateServiceInstanceOrg(selectedOrgId));
         }
       })
     ).subscribe();
@@ -150,7 +147,7 @@ export class SpecifyDetailsStepComponent implements OnInit, OnDestroy, AfterCont
       if (spaces.length > 0) {
         const selectedSpaceId = spaces[0].metadata.guid;
         this.stepperForm.controls.space.setValue(selectedSpaceId);
-        this.store.dispatch(new SetSpace(selectedSpaceId));
+        this.store.dispatch(new SetCreateServiceInstanceSpace(selectedSpaceId));
       }
     })
   )

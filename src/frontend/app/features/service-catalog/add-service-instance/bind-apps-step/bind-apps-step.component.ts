@@ -15,7 +15,7 @@ import { getPaginationObservables } from '../../../../store/reducers/pagination-
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { ServicesService } from '../../services.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { SetApp, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
+import { SetCreateServiceInstanceApp, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { MatSnackBar } from '@angular/material';
@@ -26,7 +26,7 @@ import { RouterNav } from '../../../../store/actions/router.actions';
   templateUrl: './bind-apps-step.component.html',
   styleUrls: ['./bind-apps-step.component.scss']
 })
-export class BindAppsStepComponent implements OnInit, OnDestroy, AfterContentInit {
+export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   validate: Observable<boolean>;
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
@@ -64,9 +64,6 @@ export class BindAppsStepComponent implements OnInit, OnDestroy, AfterContentIni
 
   }
 
-  ngOnInit() {
-  }
-
   ngAfterContentInit() {
     this.validate = this.stepperForm.statusChanges
       .map(() => {
@@ -102,7 +99,7 @@ export class BindAppsStepComponent implements OnInit, OnDestroy, AfterContentIni
 
     const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
     let params = this.stepperForm.controls.params.value;
-    params = params === '' ? null : params;
+    params = params || null;
 
     this.store.dispatch(new CreateServiceBinding(
       this.servicesService.cfGuid,
@@ -116,7 +113,7 @@ export class BindAppsStepComponent implements OnInit, OnDestroy, AfterContentIni
     return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
 
   }
-  setApp = (guid) => this.store.dispatch(new SetApp(guid));
+  setApp = (guid) => this.store.dispatch(new SetCreateServiceInstanceApp(guid));
 
   ngOnDestroy(): void {
     this.allAppsSubscription.unsubscribe();

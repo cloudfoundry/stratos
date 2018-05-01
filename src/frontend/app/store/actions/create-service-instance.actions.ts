@@ -17,15 +17,15 @@ export class SetServicePlan implements Action {
   constructor(public servicePlanGuid: string) { }
   type = SET_SERVICE_PLAN;
 }
-export class SetOrg implements Action {
+export class SetCreateServiceInstanceOrg implements Action {
   constructor(public orgGuid: string) { }
   type = SET_ORG;
 }
-export class SetSpace implements Action {
+export class SetCreateServiceInstanceSpace implements Action {
   constructor(public spaceGuid: string) { }
   type = SET_SPACE;
 }
-export class SetApp implements Action {
+export class SetCreateServiceInstanceApp implements Action {
   constructor(public appGuid: string) { }
   type = SET_APP;
 }
