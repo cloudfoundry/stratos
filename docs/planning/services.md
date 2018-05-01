@@ -87,5 +87,21 @@ Shows:
 
 ### Service Instance Creation
 
-TODO
+Stratos will support the following two flows for creating service instances:
+1. Service Plan driven Flow: In this flow the user starts off by selecting the service plan for the instance they want to create.
+2. Org/Space driven Flow: In this flow, the user starts off by selecting the organisation and space in which they desire to create an instance.
 
+The following outlines these two flows in more detail.
+
+#### Service Plan driven Flow
+From the Marketplace, the user should be able to select a service plan and provision a service instance using that plan.
+
+When a specific service plan is selected, the following considerations need to be made:
+1. If a service plan is `public`, it is available to all organisations and spaces. Therefore, the user should be able to select any organisation or space.
+2. If a service plan is not `public`, then service visibilities should be checked and the user should only be allowed to selected the organisation for which a service visibility has been defined by the admin.
+3. If a service plan is not `public` and no service visibility exists for it, the user should not be able to select the plan.
+4. If the service plan is provided by a service broker that is space-scoped, then the values for the organisation and space should be pre-populated and locked.
+
+#### Org/Space driven Flow
+From the top level Services view, the user should be able to create a new instance. In this flow however, the user starts with selecting the organisation and space they want to create the service instance in.
+Based on that selection, the appropriate service definitions and service plans should be displayed, following the same considerations as specified for the previous flow.
