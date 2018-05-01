@@ -1,17 +1,26 @@
 # Stratos
 
-<a href="https://travis-ci.org/cloudfoundry-incubator/stratos"><img src="https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=master"></a>
-<a href="https://codeclimate.com/github/cloudfoundry-incubator/stratos"><img src="https://img.shields.io/codeclimate/maintainability/cloudfoundry-incubator/stratos.svg"></a>
-<a href="https://codecov.io/gh/cloudfoundry-incubator/stratos"><img src="https://codecov.io/gh/cloudfoundry-incubator/stratos/branch/master/graph/badge.svg"/></a>
+<a href="https://travis-ci.org/cloudfoundry-incubator/stratos"><img src="https://travis-ci.org/cloudfoundry-incubator/stratos.svg?branch=master"></a><a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry-incubator/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
+<a href="https://codecov.io/gh/cloudfoundry-incubator/stratos">
+<img src="https://codecov.io/gh/cloudfoundry-incubator/stratos/branch/master/graph/badge.svg"/></a>
 <a href="https://app.zenhub.com/workspace/o/cloudfoundry-incubator/stratos/boards"><img src="https://raw.githubusercontent.com/ZenHubIO/support/master/zenhub-badge.png"/></a>
 [![GitHub release](https://img.shields.io/github/release/cloudfoundry-incubator/stratos.svg)](https://github.com/cloudfoundry-incubator/stratos/releases/latest)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/cloudfoundry-incubator/stratos/blob/master/LICENSE)
 
-> **NOTE** This is a work-in-progress Angular 2.x version of Stratos. For the current Angular 1 based version see [https://github.com/cloudfoundry-incubator/stratos/tree/master](https://github.com/cloudfoundry-incubator/stratos/tree/master). This version is at an early development stage and we welcome feedback, input and contributions. This version does not currently have feature parity with the Angular 1 version - see the [Development Roadmap](docs/roadmap.md) for more information.
+---
+> **NOTE**
+> If you are looking for the Stable, V1 version of Stratos, this is in the
+> [master](https://github.com/cloudfoundry-incubator/stratos/tree/master) branch.
+>
+> Development effort has switched over to Version 2. This is being developed in the v2-master branch which is set to be the GitHub project default.
+>
+> Version 2 does not currently have feature parity with the Version 1 - see the 
+> [Development Roadmap](docs/roadmap.md) for more information. Development efforts are focused on getting to a release of V2.
+---
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
-<!-- ![Stratos Application view](docs/images/screenshots/app-wall.png) -->
+![Stratos Application view](docs/images/screenshots/app-summary.png)
 
 ## Deploying Stratos
 
@@ -44,7 +53,7 @@ Take a look at the [Feature Set](docs/features.md) for details on the feature se
  
 Get an [Overview](docs/overview.md) of Stratos, its components and the different ways in which it can be deployed.
 
-Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading.
+Take a look at the [Development Roadmap](docs/roadmap.md) to see where we are heading. We update our status page each week to summarize what we are working on - see the [Status Page](docs/status_updates.md).
 
 Browse through features and issues in the project's [issues](https://github.com/SUSE/stratos-ui/issues) page or [Zenhub Board](https://github.com/SUSE/stratos-ui#boards).
 
