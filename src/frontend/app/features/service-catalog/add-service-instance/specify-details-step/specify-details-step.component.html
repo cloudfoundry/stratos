@@ -27,6 +27,9 @@
     </mat-form-field>
     <mat-form-field>
       <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
+      <mat-error *ngIf="stepperForm.controls.params?.hasError('notValidJson')">
+        Not valid JSON. Please specify a valid JSON Object
+      </mat-error>
     </mat-form-field>
   </form>
 </div>

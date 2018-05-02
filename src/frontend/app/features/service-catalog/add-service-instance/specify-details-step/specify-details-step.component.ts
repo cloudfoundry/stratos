@@ -55,6 +55,23 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
 
+  static isValidJsonValidatorFn = (): ValidatorFn => {
+    return (formField: AbstractControl): { [key: string]: any } => {
+
+      try {
+        if (formField.value) {
+          const jsonObj = JSON.parse(formField.value);
+          // Check if jsonObj is actually an obj
+          if (jsonObj.constructor !== {}.constructor) {
+            throw new Error('not an object');
+          }
+        }
+      } catch (e) {
+        return { 'notValidJson': { value: formField.value } };
+      }
+      return null;
+    };
+  }
   nameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } =>
       !this.checkName(formField.value) ? { 'nameTaken': { value: formField.value } } : null;
@@ -71,7 +88,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
       org: new FormControl('', Validators.required),
       space: new FormControl('', Validators.required),
-      params: new FormControl(''),
+      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
     });
 
@@ -191,7 +208,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.stepperForm.controls.name.value;
     const spaceGuid = this.stepperForm.controls.space.value;
     let params = this.stepperForm.controls.params.value;
-    params = params === '' ? null : params;
+    params = params ? JSON.parse(params) : null;
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 

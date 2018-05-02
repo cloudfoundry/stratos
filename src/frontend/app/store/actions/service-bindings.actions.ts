@@ -10,7 +10,7 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
     public guid: string,
     public appGuid: string,
     public serviceInstanceGuid: string,
-    public params: string,
+    public params: Object,
   ) {
     super();
     this.options = new RequestOptions();

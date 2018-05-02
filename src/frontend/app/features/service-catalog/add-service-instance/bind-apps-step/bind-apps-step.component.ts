@@ -26,6 +26,7 @@ import { selectCreateServiceInstance } from '../../../../store/selectors/create-
 import { APIResource } from '../../../../store/types/api.types';
 import { appDataSort } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ServicesService } from '../../services.service';
+import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -48,7 +49,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   ) {
     this.stepperForm = new FormGroup({
       apps: new FormControl(''),
-      params: new FormControl(''),
+      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
 
 
@@ -112,7 +113,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
     const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
     let params = this.stepperForm.controls.params.value;
-    params = params || null;
+    params = JSON.parse(params) || null;
 
     this.store.dispatch(new CreateServiceBinding(
       this.servicesService.cfGuid,

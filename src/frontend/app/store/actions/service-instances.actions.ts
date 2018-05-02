@@ -128,7 +128,7 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
     public name: string,
     public servicePlanGuid: string,
     public spaceGuid: string,
-    public params: string,
+    public params: Object,
     public tags: string[],
   ) {
     super();
