@@ -42,7 +42,7 @@ export class LoginPage {
     this.enterLogin(username, password);
     this.loginButton().click();
     // Wait for the backend to catch up
-    //this.waitForLoggedIn();
+    // this.waitForLoggedIn();
   }
   
   waitForLoggedIn() {

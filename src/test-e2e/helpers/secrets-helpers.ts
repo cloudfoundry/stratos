@@ -1,15 +1,17 @@
-import { browser } from "protractor";
-import { E2EConfig, E2EConfigCloudFoundry, E2EEndpointConfig, E2EEndpointsConfig } from "../e2e.types";
+import { browser } from 'protractor';
+import { E2EConfig, E2EConfigCloudFoundry, E2EEndpointConfig, E2EEndpointsConfig, E2EEndpointTypeConfig } from '../e2e.types';
 
 const DEFAULT_CF_NAME = 'cf';
+
+const ENDPOINT_TYPE_TO_LABEL = {
+  'cf': 'Cloud Foundry'
+};
 
 export class SecretsHelpers {
 
   secrets = browser.params as E2EConfig;
 
-  constructor() {
-    console.log(this.secrets);
-  }
+  constructor() { }
 
   getConsoleAdminUsername(): string {
     return this.secrets.consoleUsers.admin.username;
@@ -42,5 +44,20 @@ export class SecretsHelpers {
     return null;
   }
 
+  getEndpointByName(name: string): E2EEndpointTypeConfig {
+    let endpoint = null;
+    Object.keys(this.secrets.endpoints).forEach(type => {
+      const endpointsForType = this.secrets.endpoints[type];
+      const found = endpointsForType.find(ep => ep.name === name);
+      if (found) {
+        endpoint = {
+          ...found,
+          type: type,
+          typeLabel: ENDPOINT_TYPE_TO_LABEL[type]
+        };
+      }
+    });
+    return endpoint;
+  }
 
 }

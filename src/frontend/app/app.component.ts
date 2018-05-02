@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnInit } from '@angular/core';
+import { AfterContentInit, Component, OnInit, HostBinding } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { create } from 'rxjs-spy';
@@ -14,6 +14,10 @@ import { AppState } from './store/app-state';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, AfterContentInit {
+
+  @HostBinding('@.disabled')
+  public animationsDisabled = false;
+
   constructor(
     private store: Store<AppState>,
     private router: Router,
@@ -37,6 +41,11 @@ export class AppComponent implements OnInit, AfterContentInit {
           spy.pause('poll');
         }
       }
+    }
+
+    // Disable animations for e2e tests
+    if (window.sessionStorage.getItem('STRATOS_DISABLE_ANIMATIONS')) {
+      this.animationsDisabled = true;
     }
 
   }

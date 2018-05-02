@@ -4,7 +4,7 @@ import * as request from 'request';
 import { ElementFinder } from 'protractor/built/element';
 import { protractor } from 'protractor/built';
 import { getConsole } from '@ngrx/effects/src/effects_module';
-import { browser, element, by, ElementArrayFinder, promise } from 'protractor';
+import { browser, element, by, ElementArrayFinder } from 'protractor';
 import { LoginPage } from '../login/login.po';
 import { E2EConfig, E2EConfigCloudFoundry } from '../e2e.types';
 import { SecretsHelpers } from './secrets-helpers';
@@ -13,6 +13,8 @@ export enum ConsoleUserType {
   admin = 1,
   user = 2
 }
+
+const DEBUG_LOGGING = false;
 
 
 export class E2EHelpers {
@@ -35,6 +37,11 @@ export class E2EHelpers {
     if (!keepCookies) {
       browser.manage().deleteAllCookies();
     }
+
+    browser.get('/').then(() => {
+      browser.executeScript('window.sessionStorage.setItem("STRATOS_DISABLE_ANIMATIONS", true);');
+    });
+
     if (loginUser) {
       // When required we should check that the PP is setup correctly (contains correct endpoints with correct state) before running
       // attempting to log in.
@@ -98,7 +105,7 @@ export class E2EHelpers {
    * @description
    * @param {object?} optionalReq - convenience, wraps in promise as if req did not exist
    */
-  createReqAndSession(optionalReq, username: string, password: string): promise.Promise<any> {
+  createReqAndSession(optionalReq, username: string, password: string): Promise<any> {
     let req;
 
     if (!optionalReq) {
@@ -111,7 +118,7 @@ export class E2EHelpers {
         return req;
       });
     } else {
-      return new promise.Promise(() => optionalReq);
+      return new Promise(() => optionalReq);
     }
   }
 
@@ -146,6 +153,12 @@ export class E2EHelpers {
     });
   }
 
+  debugLogRequest(log) {
+    if (DEBUG_LOGGING) {
+      console.log(log);
+    }
+  }
+
   /**
    * @sendRequest
    * @description Send request
@@ -154,14 +167,20 @@ export class E2EHelpers {
    * @param {object?} body - the request body
    * @param {object?} formData - the form data
    */
-  sendRequest(req, options, body?, formData?): promise.Promise<any> {
-    return new promise.Promise((resolve, reject) => {
+  sendRequest(req, options, body?, formData?): Promise<any> {
+
+    this.debugLogRequest('sendRequest');
+
+    return new Promise((resolve, reject) => {
       options.url = this.getHost() + '/' + options.url;
       if (body) {
         options.body = JSON.stringify(body);
       } else if (formData) {
         options.formData = formData;
       }
+
+      this.debugLogRequest('REQ: ' + options.method + ' ' + options.url);
+      this.debugLogRequest(options);
 
       let data = '';
       let rejected;
@@ -174,12 +193,15 @@ export class E2EHelpers {
         })
         .on('response', (response) => {
           if (response.statusCode > 399) {
+            this.debugLogRequest('ERROR');
+            this.debugLogRequest(response.statusCode);
             reject('failed to send request: ' + JSON.stringify(response));
             rejected = true;
           }
         })
         .on('end', () => {
           if (!rejected) {
+            this.debugLogRequest('OK');
             resolve(data);
           }
         });
@@ -191,8 +213,8 @@ export class E2EHelpers {
    * @description Create a session
    * @param {object} req - the request
    */
-  createSession(req, username: string, password: string): promise.Promise<any> {
-    return new promise.Promise((resolve, reject) => {
+  createSession(req, username: string, password: string): Promise<any> {
+    return new Promise((resolve, reject) => {
       const options = {
         formData: {
           username: username || 'dev',
