@@ -1,5 +1,5 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -13,8 +13,8 @@ import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination
 import {
   SetCreateServiceInstance,
   SetCreateServiceInstanceOrg,
-  SetServiceInstanceGuid,
   SetCreateServiceInstanceSpace,
+  SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
@@ -23,7 +23,10 @@ import { createEntityRelationPaginationKey } from '../../../../store/helpers/ent
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
-import { selectOrgGuid, selectServicePlan } from '../../../../store/selectors/create-service-instance.selectors';
+import {
+  selectCreateServiceInstanceOrgGuid,
+  selectCreateServiceInstanceServicePlan,
+} from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CloudFoundryEndpointService } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ServicesService } from '../../services.service';
@@ -93,8 +96,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     )
   }, true)
     .entities$.pipe(
-    share(),
-    first()
+      share(),
+      first()
     )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
@@ -110,8 +113,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     )
   }, true)
     .entities$.pipe(
-    share(),
-    first()
+      share(),
+      first()
     )
 
   ngAfterContentInit() {
@@ -134,7 +137,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.updateServiceInstanceNames();
   }
 
-  initSpacesObservable = () => this.store.select(selectOrgGuid).pipe(
+  initSpacesObservable = () => this.store.select(selectCreateServiceInstanceOrgGuid).pipe(
     filter(p => !!p),
     combineLatest(this.orgs$),
     map(([guid, orgs]) => {
@@ -165,7 +168,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   onNext = () => {
-    return this.store.select(selectServicePlan).pipe(
+    return this.store.select(selectCreateServiceInstanceServicePlan).pipe(
       filter(p => !!p),
       switchMap(p => this.createServiceInstance(p)),
       filter(s => !s.creating),

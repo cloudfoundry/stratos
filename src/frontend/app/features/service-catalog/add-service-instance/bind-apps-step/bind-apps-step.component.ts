@@ -1,26 +1,31 @@
-import { Component, OnDestroy, OnInit, AfterContentInit } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { filter, first, map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp } from '../../../../core/cf-api.types';
-import { AppState } from '../../../../store/app-state';
-import { APIResource } from '../../../../store/types/api.types';
-import { selectSpaceGuid, selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
-import { tap, filter, map, first } from 'rxjs/operators';
-import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
-import { spaceSchemaKey, entityFactory, applicationSchemaKey, serviceBindingSchemaKey } from '../../../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
-import { ServicesService } from '../../services.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { SetCreateServiceInstanceApp, SetServiceInstanceGuid } from '../../../../store/actions/create-service-instance.actions';
-import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
-import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
-import { MatSnackBar } from '@angular/material';
+import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
+import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
+import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
+import { AppState } from '../../../../store/app-state';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  serviceBindingSchemaKey,
+  spaceSchemaKey,
+} from '../../../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
+import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
+import { APIResource } from '../../../../store/types/api.types';
 import { appDataSort } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { ServicesService } from '../../services.service';
 
 @Component({
   selector: 'app-bind-apps-step',
@@ -60,9 +65,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
           )
         }, true).entities$
           .pipe(
-          map(apps => apps.sort(appDataSort)),
-          first(),
-          map(apps => apps.slice(0, 50))
+            map(apps => apps.sort(appDataSort)),
+            first(),
+            map(apps => apps.slice(0, 50))
           );
 
         this.serviceInstanceGuid = createServiceInstanceState.serviceInstanceGuid;
