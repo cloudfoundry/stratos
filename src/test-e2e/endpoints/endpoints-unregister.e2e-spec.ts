@@ -36,7 +36,7 @@ describe('Endpoints', () => {
           const toUnregister = secrets.getDefaultCFEndpoint();
 
           // Should have a single row initially
-          endpointsPage.table.getRows().then(rows => { expect(rows.length).toBe(1) });
+          endpointsPage.table.getRows().then(rows => { expect(rows.length).toBe(1); });
 
           // Get the row in the table for this endpoint
           endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {

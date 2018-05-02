@@ -44,7 +44,7 @@ export class LoginPage {
     // Wait for the backend to catch up
     // this.waitForLoggedIn();
   }
-  
+
   waitForLoggedIn() {
     return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
   }
@@ -60,5 +60,5 @@ export class LoginPage {
   waitForLogin() {
     return browser.wait(until.presenceOf(element(by.tagName('app-login-page'))), 10000);
   }
-  
+
 }

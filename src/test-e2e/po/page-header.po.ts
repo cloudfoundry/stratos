@@ -41,7 +41,7 @@ export class PageHeader extends Component {
       menu.clickItem('Logout');
       browser.driver.sleep(2000);
       return browser.waitForAngular();
-    })
+    });
   }
 
 }

@@ -44,7 +44,7 @@ describe('Endpoints', () => {
           return menu.getItemMap().then(items => {
             expect(items['connect']).toBeDefined();
             items['connect'].click();
-
+            connectDialog.waitUntilShown();
             // Connect dialog should be shown
             expect(connectDialog.isPresent()).toBeTruthy();
             expect(connectDialog.isDisplayed()).toBeTruthy();
@@ -55,7 +55,7 @@ describe('Endpoints', () => {
 
       it('should have empty username and password fields in the form', () => {
         connectDialog.form.getControlsMap().then((ctrls: FormItemMap) => {
-          expect(ctrls['authtype']).toBeDefined
+          expect(ctrls['authtype']).toBeDefined();
           expect(ctrls['username']).toBeDefined();
           expect(ctrls['password']).toBeDefined();
           expect(ctrls['authtype'].value).toEqual('creds');
@@ -82,7 +82,7 @@ describe('Endpoints', () => {
         connectDialog.snackBar.waitUntilShown();
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
           expect(ep.connected).toBeTruthy();
-        })
+        });
 
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
           endpointsPage.table.openActionMenu(row);
@@ -113,7 +113,7 @@ describe('Endpoints', () => {
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
         loginPage.login(secrets.getConsoleNonAdminUsername(), secrets.getConsoleNonAdminPassword());
-        //loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
+        // loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
         loginPage.waitForApplicationPage();
         const appPage = new ApplicationsPage();
         expect(appPage.isActivePage()).toBeTruthy();
@@ -133,15 +133,14 @@ describe('Endpoints', () => {
           const menu = new MenuComponent();
           menu.waitUntilShown();
           return menu.getItemMap().then(items => {
-            expect(items['disconnect']).not.toBeDefined();
+            expect(items['connect']).not.toBeDefined();
             expect(items['disconnect']).toBeDefined();
             items['disconnect'].click();
 
             // Wait for snackbar
             const snackBar = new SnackBarComponent();
             snackBar.waitUntilShown();
-
-            //helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf)'/);
+            expect(endpointsPage.isNoneConnectedSnackBar(snackBar)).toBeTruthy();
 
             endpointsPage.table.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
               expect(data.connected).toBeFalsy();
