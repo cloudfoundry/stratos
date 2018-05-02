@@ -61,8 +61,7 @@ export class ApplicationDeleteComponent<T> {
       columnId: 'name',
       cellDefinition: {
         getValue: row => row.entity.service_instance.entity.name
-      },
-      cellFlex: '0 0 200px'
+      }
     }
   ];
   public routeDeleteColumns: ITableColumn<APIResource<IRoute>>[] = [
@@ -158,6 +157,8 @@ export class ApplicationDeleteComponent<T> {
       first(),
       tap(fetch),
       switchMap(() => this.fetchingRelated$),
+      filter(fetching => !fetching),
+      first(),
       shareReplay(1),
       startWith(true)
     );
@@ -230,6 +231,7 @@ export class ApplicationDeleteComponent<T> {
 
   private setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
     this.selectedServiceInstances = selected;
+    console.log(selected);
     this.selectedServiceInstances$.next(selected);
   }
 
@@ -240,6 +242,10 @@ export class ApplicationDeleteComponent<T> {
 
   public getId(element: APIResource) {
     return element.metadata.guid;
+  }
+
+  public getInstanceId(service: APIResource<IServiceBinding>) {
+    return service.entity.service_instance_guid;
   }
 
   /**
@@ -264,7 +270,7 @@ export class ApplicationDeleteComponent<T> {
           }
           if (this.selectedServiceInstances && this.selectedServiceInstances.length) {
             this.selectedServiceInstances.forEach(instance => {
-              this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.metadata.guid));
+              this.store.dispatch(new DeleteServiceInstance(this.applicationService.cfGuid, instance.entity.service_instance_guid));
             });
           }
         }
