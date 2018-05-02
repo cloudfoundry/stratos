@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 
 export class ServicesServiceMock {
+  servicePlanVisibilities$ = Observable.of([]);
   servicePlans$ = Observable.of([{
     entity: {
       name: 'shared',
