@@ -13,7 +13,7 @@ import { IService, IServiceExtra, IServicePlan, IServicePlanVisibility } from '.
 import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute } from '@angular/router';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { filter, map, tap, publish, refCount, publishReplay } from 'rxjs/operators';
+import { filter, map, tap, publish, refCount, publishReplay, first } from 'rxjs/operators';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
@@ -77,6 +77,12 @@ export class ServicesService {
       },
       true
     ).entities$;
-
+  }
+  getServicePlanVisibilitiesForPlan = (servicePlanGuid: string): Observable<APIResource<IServicePlanVisibility>[]> => {
+    return this.servicePlanVisibilities$.pipe(
+      filter(p => !!p),
+      map(vis => vis.filter(s => s.entity.service_plan_guid === servicePlanGuid)),
+      first()
+    );
   }
 }

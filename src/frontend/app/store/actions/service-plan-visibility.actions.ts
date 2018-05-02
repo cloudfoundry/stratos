@@ -1,15 +1,26 @@
 import { RequestOptions, URLSearchParams } from '@angular/http';
 
+import {
+  entityFactory,
+  organizationSchemaKey,
+  servicePlanSchemaKey,
+  servicePlanVisibilitySchemaKey,
+  spaceSchemaKey,
+} from '../helpers/entity-factory';
+import { createEntityRelationKey } from '../helpers/entity-relations.types';
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction } from '../types/request.types';
 import { getActions } from './action.helper';
-import { entityFactory, servicePlanVisibilitySchemaKey } from '../helpers/entity-factory';
 
 export class GetServicePlanVisibilities extends CFStartAction implements PaginationAction {
   constructor(
     public endpointGuid: string,
     public paginationKey: string,
-    public includeRelations: string[] = [],
+    public includeRelations: string[] = [
+      createEntityRelationKey(servicePlanVisibilitySchemaKey, servicePlanSchemaKey),
+      createEntityRelationKey(servicePlanVisibilitySchemaKey, organizationSchemaKey),
+      createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+    ],
     public populateMissing = true
   ) {
     super();

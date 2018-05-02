@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, first, map, share, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { IServiceInstance } from '../../../../core/cf-api-svc.types';
+import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
@@ -92,8 +92,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       tags: new FormControl(''),
     });
 
-    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(servicesService.cfGuid);
-    this.orgs$ = this.initOrgsObservable(getAllOrgsAction);
+    this.orgs$ = this.initOrgsObservable();
 
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.servicesService.serviceGuid);
 
@@ -113,26 +112,47 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     )
   }, true)
     .entities$.pipe(
-      share(),
-      first()
+    share(),
+    first()
     )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
     this.serviceInstanceNameSub.unsubscribe();
   }
 
-  initOrgsObservable = (action) => getPaginationObservables<APIResource<IOrganization>>({
-    store: this.store,
-    action: action,
-    paginationMonitor: this.paginationMonitorFactory.create(
-      action.paginationKey,
-      entityFactory(organizationSchemaKey)
-    )
-  }, true)
-    .entities$.pipe(
-      share(),
-      first()
-    )
+  initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {
+    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.servicesService.cfGuid);
+    return Observable.combineLatest(this.servicesService.servicePlans$, this.store.select(selectCreateServiceInstanceServicePlan)).pipe(
+      filter(([p, q]) => !!p && !!q),
+      map(([servicePlans, selectedPlanGuid]) => servicePlans.filter(s => s.metadata.guid === selectedPlanGuid)[0]),
+      switchMap((servicePlanEntity: APIResource<IServicePlan>) => {
+        if (servicePlanEntity.entity.public) {
+          return getPaginationObservables<APIResource<IOrganization>>({
+            store: this.store,
+            action: getAllOrgsAction,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              getAllOrgsAction.paginationKey,
+              entityFactory(organizationSchemaKey)
+            )
+          }, true)
+            .entities$.pipe(
+            share(),
+            first()
+            );
+        } else {
+          // Service plan is not public, fetch visibilities
+          return this.servicesService.getServicePlanVisibilitiesForPlan(servicePlanEntity.metadata.guid)
+            .pipe(
+            tap(o => console.log(o)),
+            map(s => s.map(o => o.entity.organization)),
+            share(),
+            first()
+            );
+        }
+      })
+    );
+  }
+
 
   ngAfterContentInit() {
     this.validate = this.stepperForm.statusChanges
@@ -141,6 +161,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       });
 
     this.orgSubscription = this.orgs$.pipe(
+      filter(p => !!p && p.length > 0),
       tap(o => {
         const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
         if (orgWithSpaces.length > 0) {

@@ -1,5 +1,5 @@
 import { APIResource } from '../store/types/api.types';
-import { IApp } from './cf-api.types';
+import { IApp, IOrganization } from './cf-api.types';
 
 export interface ILastOperation {
   type: string;
@@ -101,4 +101,6 @@ export interface IServicePlanVisibility {
   organization_guid: string;
   service_plan_url?: string;
   organization_url?: string;
+  organization?: APIResource<IOrganization>;
+  service_plan?: APIResource<IServicePlan>;
 }

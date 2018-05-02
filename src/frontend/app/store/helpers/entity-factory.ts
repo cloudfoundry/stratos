@@ -121,8 +121,6 @@ entityCache[metricSchemaKey] = MetricSchema;
 const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
 
-const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {}, { idAttribute: getAPIResourceGuid });
-entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
 const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
   entity: {
@@ -228,6 +226,14 @@ const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   }
 }, { idAttribute: getAPIResourceGuid }, spaceWithOrgKey);
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
+
+const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {
+  entity: {
+    organization: OrganizationSchema,
+    service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,
