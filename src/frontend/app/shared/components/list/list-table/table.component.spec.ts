@@ -64,7 +64,7 @@ describe('TableComponent', () => {
       trackBy: () => '1',
       connect: () => Observable.empty(),
       disconnect: () => null
-    }
+    };
     fixture.detectChanges();
   });
 
