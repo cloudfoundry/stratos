@@ -16,9 +16,9 @@
         A service instance with this name already exists. Please enter a different one.
       </mat-error>
     </mat-form-field>
-    <mat-form-field class="tags-chip-list">
-      <mat-chip-list #chipList formControlName="tags">
-        <mat-chip *ngFor="let tag of tags" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">
+    <mat-form-field class="stepper-form__tags">
+      <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
+        <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">
           {{tag.label}}
           <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
         </mat-chip>
@@ -27,6 +27,9 @@
     </mat-form-field>
     <mat-form-field>
       <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
+      <mat-error *ngIf="stepperForm.controls.params?.hasError('notValidJson')">
+        Not valid JSON. Please specify a valid JSON Object
+      </mat-error>
     </mat-form-field>
   </form>
 </div>

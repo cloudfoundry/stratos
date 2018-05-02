@@ -5,20 +5,20 @@ import { CreateServiceInstanceState } from '../types/create-service-instance.typ
 
 export const selectCreateServiceInstance = (state: AppState) => state.createServiceInstance;
 
-export const getOrgGuid = (state: CreateServiceInstanceState) => state.orgGuid;
-export const getSpaceGuid = (state: CreateServiceInstanceState) => state.spaceGuid;
-export const getServicePlanGuid = (state: CreateServiceInstanceState) => state.servicePlanGuid;
+const getOrgGuid = (state: CreateServiceInstanceState) => state.orgGuid;
+const getSpaceGuid = (state: CreateServiceInstanceState) => state.spaceGuid;
+const getServicePlanGuid = (state: CreateServiceInstanceState) => state.servicePlanGuid;
 
 
-export const selectOrgGuid = compose(
+export const selectCreateServiceInstanceOrgGuid = compose(
   getOrgGuid,
   selectCreateServiceInstance
 );
-export const selectSpaceGuid = compose(
+export const selectCreateServiceInstanceSpaceGuid = compose(
   getSpaceGuid,
   selectCreateServiceInstance
 );
-export const selectServicePlan = compose(
+export const selectCreateServiceInstanceServicePlan = compose(
   getServicePlanGuid,
   selectCreateServiceInstance
 );
