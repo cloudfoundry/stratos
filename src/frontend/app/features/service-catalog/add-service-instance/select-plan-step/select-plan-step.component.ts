@@ -6,11 +6,11 @@ import { Observable } from 'rxjs/Observable';
 import { filter, first, map, share, tap, switchMap, combineLatest } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { IServicePlan, IServicePlanExtra, IServicePlanVisibility } from '../../../../core/cf-api-svc.types';
-import { SetServicePlan } from '../../../../store/actions/create-service-instance.actions';
+import { IServicePlan, IServicePlanExtra, IServicePlanVisibility, IServiceBroker } from '../../../../core/cf-api-svc.types';
+import { SetServicePlan, SetCreateServiceInstanceSpaceScoped } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
-import { ServicesService } from '../../services.service';
+import { ServicesService, ServicePlanAccessibility } from '../../services.service';
 import { CardStatus } from '../../../../shared/components/application-state/application-state.service';
 
 interface ServicePlan {
@@ -36,11 +36,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   servicePlans$: Observable<ServicePlan[]>;
 
   constructor(private store: Store<AppState>, private servicesService: ServicesService) {
-    this.servicePlans$ = servicesService.servicePlans$.pipe(
-      filter(p => !!p && p.length > 0),
-      map(o => o.filter(s => s.entity.bindable)),
-      combineLatest(this.servicesService.servicePlanVisibilities$),
-      map(([svcPlans, svcPlanVis]) => this.fetchVisiblePlans(svcPlans, svcPlanVis)),
+    this.servicePlans$ = servicesService.getVisibleServicePlans().pipe(
       map(o => this.mapToServicePlan(o)),
       share(),
       first()
@@ -58,18 +54,6 @@ export class SelectPlanStepComponent implements OnDestroy {
     ).subscribe();
   }
 
-  fetchVisiblePlans =
-  (svcPlans: APIResource<IServicePlan>[], svcPlanVis: APIResource<IServicePlanVisibility>[]): APIResource<IServicePlan>[] => {
-    const visiblePlans: APIResource<IServicePlan>[] = [];
-    svcPlans.forEach(p => {
-      if (p.entity.public) {
-        visiblePlans.push(p);
-      } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
-        visiblePlans.push(p);
-      }
-    });
-    return visiblePlans;
-  }
 
   mapToServicePlan = (visiblePlans: APIResource<IServicePlan>[]): ServicePlan[] => visiblePlans.map(p => ({
     id: p.metadata.guid,
@@ -121,23 +105,16 @@ export class SelectPlanStepComponent implements OnDestroy {
   )
 
   getPlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<CardStatus> => {
-
-    if (servicePlan.entity.public) {
-      return Observable.of(CardStatus.OK);
-    }
-
-    return this.servicesService.servicePlanVisibilities$.pipe(
-      filter(p => !!p),
-      map(servicePlanVisibilities => servicePlanVisibilities.filter(s => s.entity.service_plan_guid === servicePlan.metadata.guid)),
-      map(filteredPlans => {
-        if (filteredPlans.length === 0) {
-          // No service visibility defined for this service
-          return CardStatus.ERROR;
-        } else {
+    return this.servicesService.getServicePlanAccessibility(servicePlan).pipe(
+      map((servicePlanAccessibility: ServicePlanAccessibility) => {
+        if (servicePlanAccessibility.isPublic) {
+          return CardStatus.OK;
+        } else if (servicePlanAccessibility.spaceScoped || servicePlanAccessibility.hasVisibilities) {
           return CardStatus.WARNING;
+        } else {
+          return CardStatus.ERROR;
         }
-      }),
-      first()
+      })
     );
   }
 

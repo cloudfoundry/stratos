@@ -95,7 +95,6 @@ export interface IServiceExtra {
   documentationUrl: string;
   supportUrl: string;
 }
-
 export interface IServicePlanVisibility {
   service_plan_guid: string;
   organization_guid: string;
@@ -103,4 +102,11 @@ export interface IServicePlanVisibility {
   organization_url?: string;
   organization?: APIResource<IOrganization>;
   service_plan?: APIResource<IServicePlan>;
+}
+
+export interface IServiceBroker {
+  name: string;
+  broker_url: string;
+  auth_username: string;
+  space_guid?: string;
 }
