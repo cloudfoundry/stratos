@@ -41,6 +41,7 @@ import {
 import { createEntityRelationKey } from '../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
+import { DataFunctionDefinition } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 
 
 @Component({
@@ -61,7 +62,29 @@ export class ApplicationDeleteComponent<T> {
       columnId: 'name',
       cellDefinition: {
         getValue: row => row.entity.service_instance.entity.name
-      }
+      },
+      cellFlex: '0 0 200px'
+    },
+    {
+      columnId: 'service',
+      headerCell: () => 'Service',
+      cellDefinition: {
+        getValue: (row) => row.entity.service_instance.entity.service.entity.label
+      },
+      cellFlex: '2'
+    },
+    {
+      columnId: 'creation',
+      headerCell: () => 'Creation Date',
+      cellDefinition: {
+        getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'creation',
+        field: 'metadata.created_at'
+      } as DataFunctionDefinition,
+      cellFlex: '1'
     }
   ];
   public routeDeleteColumns: ITableColumn<APIResource<IRoute>>[] = [
