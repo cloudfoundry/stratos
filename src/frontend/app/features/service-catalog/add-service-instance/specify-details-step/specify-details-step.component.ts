@@ -125,6 +125,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return Observable.combineLatest(this.servicesService.servicePlans$, this.store.select(selectCreateServiceInstanceServicePlan)).pipe(
       filter(([p, q]) => !!p && !!q),
       map(([servicePlans, selectedPlanGuid]) => servicePlans.filter(s => s.metadata.guid === selectedPlanGuid)[0]),
+      filter(p => !!p),
       switchMap((servicePlanEntity: APIResource<IServicePlan>) => {
         if (servicePlanEntity.entity.public) {
           return getPaginationObservables<APIResource<IOrganization>>({
@@ -143,7 +144,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           // Service plan is not public, fetch visibilities
           return this.servicesService.getServicePlanVisibilitiesForPlan(servicePlanEntity.metadata.guid)
             .pipe(
-            tap(o => console.log(o)),
             map(s => s.map(o => o.entity.organization)),
             share(),
             first()
