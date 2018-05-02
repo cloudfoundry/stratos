@@ -80,7 +80,7 @@ describe('Endpoints', () => {
       });
     });
 
-    fdescribe('As User -', () => {
+    describe('As User -', () => {
 
       beforeAll(() => {
         resetToLoggedIn(resets.resetAllEndpoints, false);
@@ -91,7 +91,7 @@ describe('Endpoints', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Should have a single row initially
-        endpointsPage.table.getRows().then(rows => { expect(rows.length).toBe(1) });
+        endpointsPage.table.getRows().then(rows => { expect(rows.length).toBe(1); });
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
