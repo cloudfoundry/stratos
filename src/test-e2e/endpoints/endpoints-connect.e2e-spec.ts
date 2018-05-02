@@ -9,6 +9,9 @@ import { ServicesPage } from '../services/services.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { MenuComponent } from '../po/menu.po';
+import { ConnectDialogComponent } from './connect-dialog.po';
+import { FormComponent, FormItemMap } from '../po/form.po';
+import { LoginPage } from '../login/login.po';
 
 describe('Endpoints', () => {
   const helpers = new E2EHelpers();
@@ -27,130 +30,131 @@ describe('Endpoints', () => {
 
     describe('endpoint `Connect` -', () => {
 
+      const toConnect = secrets.getDefaultCFEndpoint();
+      const connectDialog = new ConnectDialogComponent();
+
       it('should open the credentials form', () => {
-        const toUnregister = secrets.getDefaultCFEndpoint();
         expect(endpointsPage.isActivePage()).toBeTruthy();
 
         // Get the row in the table for this endpoint
-        endpointsPage.table.getRowForEndpoint(toUnregister.name).then(row => {
-          browser.driver.sleep(500);
+        endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
           endpointsPage.table.openActionMenu(row);
           const menu = new MenuComponent();
-          // menu.waitUntilShown();
-          // menu.getItemMap().then(items => {
-          //   expect(items['connect']).toBeDefined();
-          //   browser.driver.sleep(500);
-          //   menu.clickItem('connect');
-          // });
-        });
+          menu.waitUntilShown();
+          return menu.getItemMap().then(items => {
+            expect(items['connect']).toBeDefined();
+            items['connect'].click();
 
-        // expect(endpointsPage.credentialsForm().isDisplayed()).toBeTruthy();
+            // Connect dialog should be shown
+            expect(connectDialog.isPresent()).toBeTruthy();
+            expect(connectDialog.isDisplayed()).toBeTruthy();
+
+          });
+        });
+      });
+
+      it('should have empty username and password fields in the form', () => {
+        connectDialog.form.getControlsMap().then((ctrls: FormItemMap) => {
+          expect(ctrls['authtype']).toBeDefined
+          expect(ctrls['username']).toBeDefined();
+          expect(ctrls['password']).toBeDefined();
+          expect(ctrls['authtype'].value).toEqual('creds');
+          expect(ctrls['username'].text).toEqual('');
+          expect(ctrls['password'].text).toEqual('');
+        });
+      });
+
+      it('should disable connect button if username and password are blank', () => {
+        expect(connectDialog.canConnect()).toBeFalsy();
+      });
+
+      it('should enable connect button if username and password are not blank', () => {
+        connectDialog.form.fill({
+          username: toConnect.creds.admin.username,
+          password: toConnect.creds.admin.password
+        });
+        expect(connectDialog.canConnect()).toBeTruthy();
+      });
+
+      it('should update service instance data on register', () => {
+        connectDialog.connect();
+        // Wait for snackbar
+        connectDialog.snackBar.waitUntilShown();
+        endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
+          expect(ep.connected).toBeTruthy();
+        })
+
+        endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
+          endpointsPage.table.openActionMenu(row);
+          const menu = new MenuComponent();
+          menu.waitUntilShown();
+          return menu.getItemMap().then(items => {
+            expect(items['connect']).not.toBeDefined();
+            expect(items['disconnect']).toBeDefined();
+            expect(items['unregister']).toBeDefined();
+            return menu.close();
+          });
+
+        });
+      });
+
+      // NOTE: We connected as the User not the Admin, so logging in as admin will NOT have the endpoint connected
+      it('should go directly to endpoints view on logout and login (as admin)', () => {
+        endpointsPage.header.logout();
+        const loginPage = new LoginPage();
+        loginPage.waitForLogin();
+        loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
+        loginPage.waitForApplicationPage();
+        expect(endpointsPage.isActivePage()).toBeTruthy();
+      });
+
+      it('should go directly to applications view on logout and login', () => {
+        endpointsPage.header.logout();
+        const loginPage = new LoginPage();
+        loginPage.waitForLogin();
+        loginPage.login(secrets.getConsoleNonAdminUsername(), secrets.getConsoleNonAdminPassword());
+        //loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
+        loginPage.waitForApplicationPage();
+        const appPage = new ApplicationsPage();
+        expect(appPage.isActivePage()).toBeTruthy();
+      });
+
+    });
+
+    describe('endpoint `Disconnect` -', () => {
+
+      const toDisconnect = secrets.getDefaultCFEndpoint();
+
+      it('should update row in table when disconnected', () => {
+        endpointsPage.navigateTo();
+
+        endpointsPage.table.getRowForEndpoint(toDisconnect.name).then(row => {
+          endpointsPage.table.openActionMenu(row);
+          const menu = new MenuComponent();
+          menu.waitUntilShown();
+          return menu.getItemMap().then(items => {
+            expect(items['disconnect']).not.toBeDefined();
+            expect(items['disconnect']).toBeDefined();
+            items['disconnect'].click();
+
+            // Wait for snackbar
+            const snackBar = new SnackBarComponent();
+            snackBar.waitUntilShown();
+
+            //helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf)'/);
+
+            endpointsPage.table.getEndpointDataForEndpoint(toDisconnect.name).then((data: EndpointMetadata) => {
+              expect(data.connected).toBeFalsy();
+            });
+          });
+        });
       });
     });
   });
 });
 
 
-    //     var cf = helpers.getRegisteredService();
-    //     var cfRowIndex;
-    //     beforeAll(function (done) {
-    //       resetToLoggedIn(resetTo.resetAllCnsi, false)
-    //         .then(() => {
-    //           endpointsPage.isEndpoints().then(function (isEndpoints) {
-    //             expect(isEndpoints).toBe(true);
-    //           });
-    //         })
-    //         .then(() => {
-    //           // Find the CF row to test on
-    //           return endpointsPage.getRowWithEndpointName(helpers.getRegisteredService().register.cnsi_name);
-    //         })
-    //         .then(function (index) {
-    //           expect(index).toBeDefined();
-    //           cfRowIndex = index;
-    //           done();
-    //         });
     //     });
-
-    //     describe('endpoint `Connect` -', () => {
-
-    //       beforeAll(function (done) {
-    //         endpointsPage.endpointConnectLink(cfRowIndex).then(function (button) {
-    //           button.click().then(done);
-    //         });
-    //       });
-
-    //       it('should open the credentials form', () => {
-    //         expect(endpointsPage.credentialsForm().isDisplayed()).toBeTruthy();
-    //       });
-
-    //       it('should show the cluster name and URL as readonly in the credentials form', () => {
-    //         var endpointsTable = endpointsPage.getEndpointTable();
-    //         var name = helpers.getTableCellAt(endpointsTable, cfRowIndex, 0).getText().then(function (text) {
-    //           return text.toLowerCase();
-    //         });
-    //         var url = helpers.getTableCellAt(endpointsTable, cfRowIndex, 3).getText().then(function (text) {
-    //           return text.replace('https://', '');
-    //         });
-
-    //         var fields = endpointsPage.credentialsFormFields();
-    //         expect(fields.get(0).getAttribute('value')).toBe(name);
-    //         expect(fields.get(1).getAttribute('value')).toBe(url);
-    //         expect(fields.get(2).getAttribute('value')).toBe('');
-    //         expect(fields.get(3).getAttribute('value')).toBe('');
-    //       });
-
-    //       it('should disable connect button if username and password are blank', () => {
-    //         expect(endpointsPage.credentialsFormConnectButton().isEnabled()).toBeFalsy();
-    //       });
-
-    //       it('should enable connect button if username and password are not blank', () => {
-    //         endpointsPage.credentialsFormFill(cf.admin.username, cf.admin.password);
-    //         expect(endpointsPage.credentialsFormConnectButton().isEnabled()).toBeTruthy();
-    //       });
-
-    //       it('should update service instance data on register', () => {
-    //         endpointsPage.credentialsFormEndpointConnect().then(() => {
-    //           helpers.checkAndCloseToast(/Successfully connected to '(?:cf)'/);
-    //           var endpointsTable = endpointsPage.getEndpointTable();
-    //           expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 5).getText()).toBe('DISCONNECT');
-    //           expect(endpointsPage.endpointIsConnected(cfRowIndex)).toBeTruthy();
-    //         });
-    //       });
-
-    //       it('should go directly to endpoint view on logout and login (as admin)', () => {
-    //         // This would be better in the 'non admin' section, however it's easier to test here with a service registered
-    //         // This removes the need to go through/test the endpoint dashboard registration process alongside this test
-    //         navbar.logout();
-    //         loginPage.waitForLogin();
-    //         loginPage.login(helpers.getAdminUser(), helpers.getAdminPassword());
-
-    //         expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#!/endpoint');
-    //       });
-
-    //       it('should go directly to applications view on logout and login', () => {
-    //         navbar.logout();
-    //         loginPage.waitForLogin();
-    //         loginPage.login(helpers.getUser(), helpers.getPassword());
-
-    //         expect(browser.getCurrentUrl()).toBe(helpers.getHost() + '/#!/cf/applications/list/gallery-view');
-    //       });
-
-    //     });
-
-    //     describe('endpoint `Disconnect` -', () => {
-    //       it('should update row in table when disconnected', () => {
-    //         endpointsPage.goToEndpoints();
-    //         endpointsPage.waitForEndpointTable();
-    //         endpointsPage.endpointDisconnectLink(cfRowIndex)
-    //           .then(function (button) {
-    //             return button.click();
-    //           })
-    //           .then(() => {
-    //             helpers.checkAndCloseToast(/Successfully disconnected endpoint '(?:cf)'/);
-    //             var endpointsTable = endpointsPage.getEndpointTable();
-    //             expect(helpers.getTableCellAt(endpointsTable, cfRowIndex, 5).getText()).toBe('CONNECT');
-    //           });
-    //       });
 
     //     });
 
@@ -194,4 +198,3 @@ describe('Endpoints', () => {
     //     });
     //   });
     //   });
-

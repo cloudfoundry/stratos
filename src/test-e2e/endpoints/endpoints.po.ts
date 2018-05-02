@@ -70,7 +70,7 @@ export class EndpointsTable extends ListTableComponent {
     return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then(data => {
       return {
         name: data[1],
-        connected: data[2] === 'cloud',
+        connected: data[2] === 'cloud_done',
         type: data[3],
         url: data[4]
       } as EndpointMetadata;
@@ -86,6 +86,10 @@ export class EndpointsTable extends ListTableComponent {
       const index = data.findIndex((ep: E2EEndpointConfig) => ep.name === name);
       return this.getRows().get(index);
     });
+  }
+
+  getEndpointDataForEndpoint(name: string) {
+    return this.getAllData().then(data => data.find((d: EndpointMetadata) => d.name === name));
   }
 
   openActionMenu(row: ElementFinder) {

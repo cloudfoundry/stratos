@@ -30,7 +30,7 @@ describe('Endpoints', () => {
         it('Should reach endpoints dashboard after log in', () => {
           expect(endpointsPage.isActivePage()).toBeTruthy();
           expect(endpointsPage.isWelcomeMessageAdmin()).toBeTruthy();
-          expect(endpointsPage.list.isDisplayed()).toBeFalsy();
+          expect(endpointsPage.list.isPresent()).toBeFalsy();
         });
 
         it('should show register button', () => {

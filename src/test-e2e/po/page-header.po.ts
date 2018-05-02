@@ -1,6 +1,7 @@
 import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
 import { browser, element, by } from 'protractor';
 import { Component } from './component.po';
+import { MenuComponent } from './menu.po';
 
 /**
  * Page Objeect for page header
@@ -12,7 +13,7 @@ export class PageHeader extends Component {
   }
 
   getIconButtons(): ElementArrayFinder {
-    return this.locator.all(by.css('.page-header-right button.mat-icon-button'));
+    return this.locator.all(by.css('.page-header button.mat-icon-button'));
   }
 
   getIconButton(iconName: string) {
@@ -30,6 +31,17 @@ export class PageHeader extends Component {
 
   hasIconButton(iconName: string) {
     return this.getIconButton(iconName).then(btn => btn && btn.isDisplayed());
+  }
+
+  logout() {
+    return this.clickIconButton('more_vert').then(() => {
+      browser.driver.sleep(2000);
+      const menu = new MenuComponent();
+      menu.waitUntilShown();
+      menu.clickItem('Logout');
+      browser.driver.sleep(2000);
+      return browser.waitForAngular();
+    })
   }
 
 }

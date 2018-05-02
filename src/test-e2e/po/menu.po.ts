@@ -7,15 +7,16 @@ export class MenuItem {
   index: number;
   label: string;
   class: string;
-  element: ElementFinder;
+  click: Function;
+  disabled: boolean;
 }
 /**
  * Page Objeect for popup menu component
  */
 export class MenuComponent extends Component {
 
-  constructor() {
-    super(element(by.css('.mat-menu-content')));
+  constructor(locator = element(by.css('.mat-menu-content'))) {
+    super(locator);
   }
 
   getItems() {
@@ -24,7 +25,8 @@ export class MenuComponent extends Component {
         index: index,
         label: elm.getText(),
         class: elm.getAttribute('class'),
-        element: elm,
+        click: elm.click,
+        disabled: elm.getAttribute('disabled').then((v => v === 'true'))
       };
     });
   }
@@ -47,8 +49,13 @@ export class MenuComponent extends Component {
       items.forEach((item: MenuItem) => {
         menuItems[item.label.toLowerCase()] = item;
       });
-      return items;
+      return menuItems;
     });
+  }
+
+  // Click at the very top to close the menu
+  close() {
+    element(by.tagName('body')).click();
   }
 
 }

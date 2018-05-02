@@ -56,5 +56,9 @@ export class LoginPage {
   waitForApplicationPage() {
     return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
   }
+
+  waitForLogin() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-login-page'))), 10000);
+  }
   
 }
