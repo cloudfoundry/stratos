@@ -1,28 +1,14 @@
-import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
+import { Headers, RequestOptions } from '@angular/http';
 
 import { IApp } from '../../core/cf-api.types';
-import {
-  applicationSchemaKey,
-  appStatsSchemaKey,
-  domainSchemaKey,
-  entityFactory,
-  routeSchemaKey,
-  serviceBindingSchemaKey,
-  serviceInstancesSchemaKey,
-} from '../helpers/entity-factory';
-import {
-  createEntityRelationKey,
-  EntityInlineChildAction,
-  EntityInlineParentAction,
-} from '../helpers/entity-relations.types';
+import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpers/entity-factory';
+import { EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { pick } from '../helpers/reducer.helper';
 import { ActionMergeFunction } from '../types/api.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { ICFAction } from '../types/request.types';
 import { CFStartAction } from './../types/request.types';
 import { AppMetadataTypes } from './app-metadata.actions';
-import { getPaginationKey } from './pagination.actions';
-import { getActions } from './action.helper';
 
 export const GET_ALL = '[Application] Get all';
 export const GET_ALL_SUCCESS = '[Application] Get all success';

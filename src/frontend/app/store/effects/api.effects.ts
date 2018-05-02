@@ -25,8 +25,34 @@ import { APIResource, NormalizedResponse, instanceOfAPIResource } from './../typ
 import { StartRequestAction, WrapperRequestActionFailed } from './../types/request.types';
 import { isEntityInlineParentAction, EntityInlineParentAction } from '../helpers/entity-relations.types';
 import { listEntityRelations } from '../helpers/entity-relations';
+import { endpointSchemaKey } from '../helpers/entity-factory';
+import { SendEventAction } from '../actions/internal-events.actions';
+import { InternalEventSeverity, APIEventState } from '../types/internal-events.types';
 
 const { proxyAPIVersion, cfAPIVersion } = environment;
+const endpointHeader = 'x-cap-cnsi-list';
+
+interface APIErrorCheck {
+  error: boolean;
+  errorCode: string;
+  guid: string;
+  url: string;
+  errorResponse: JetStreamCFErrorResponse;
+}
+
+interface JetStreamError {
+  error: {
+    status: string;
+    statusCode: number;
+  };
+  errorResponse: JetStreamCFErrorResponse;
+}
+
+interface JetStreamCFErrorResponse {
+  code: number;
+  description: string;
+  error_code: string;
+}
 
 @Injectable()
 export class APIEffect {
@@ -110,12 +136,20 @@ export class APIEffect {
           }
         )];
       }),
-    ).catch(errObservable => {
-      this.logger.warn(`API request process failed`, errObservable.error || errObservable);
+    ).catch(error => {
+      const endpoints: string[] = options.headers.get(endpointHeader).split((','));
+      endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
+        eventCode: error.status || '500',
+        severity: InternalEventSeverity.ERROR,
+        message: 'Jetstream API request error',
+        metadata: {
+          url: error.url || apiAction.options.url
+        }
+      })));
       return [
         new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
         new WrapperRequestActionFailed(
-          errObservable.message,
+          error.message,
           actionClone,
           requestType
         )
@@ -153,18 +187,42 @@ export class APIEffect {
     return result;
   }
 
-  getErrors(resData) {
+  checkForErrors(resData, action: ICFAction): APIErrorCheck[] {
     return Object.keys(resData)
       .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
-        const endpoints = resData[cfGuid];
-        return endpoints.error ? {
-          error: endpoints.error,
-          guid: cfGuid
-        } : null;
-      })
-      .filter(endpointErrors => !!endpointErrors);
+        const endpoints = resData[cfGuid] as JetStreamError;
+        const hasError = !!endpoints.error;
+        return {
+          error: hasError,
+          errorCode: hasError ? endpoints.error.statusCode.toString() : '200',
+          guid: cfGuid,
+          url: action.options.url,
+          errorResponse: hasError ? endpoints.errorResponse : null,
+        };
+      });
+  }
+
+  handleApiEvents(errorChecks: APIErrorCheck[]) {
+    errorChecks.forEach(check => {
+      if (check.error) {
+        this.store.dispatch(
+          new SendEventAction(
+            endpointSchemaKey,
+            check.guid,
+            {
+              eventCode: check.errorCode,
+              severity: InternalEventSeverity.ERROR,
+              message: 'API request error',
+              metadata: {
+                url: check.url,
+                errorResponse: check.errorResponse,
+              }
+            }
+          ));
+      }
+    });
   }
 
   getEntities(apiAction: IRequestAction, data): {
@@ -229,7 +287,6 @@ export class APIEffect {
   }
 
   addBaseHeaders(endpoints: IRequestEntityTypeState<EndpointModel> | string, header: Headers): Headers {
-    const endpointHeader = 'x-cap-cnsi-list';
     const headers = header || new Headers();
     if (typeof endpoints === 'string') {
       headers.set(endpointHeader, endpoints);
@@ -269,18 +326,15 @@ export class APIEffect {
     });
   }
 
-  private handleMultiEndpoints(resData, apiAction): {
+  private handleMultiEndpoints(resData, apiAction: ICFAction): {
     resData,
     entities,
     totalResults,
     totalPages
   } {
     if (resData) {
-      const endpointsErrors = this.getErrors(resData);
-      if (endpointsErrors.length) {
-        // We should consider not completely failing the whole if some endpoints return.
-        throw Observable.throw(`Error from endpoints: ${endpointsErrors.map(res => `${res.guid}: ${res.error}.`).join(', ')}`);
-      }
+      const endpointChecks = this.checkForErrors(resData, apiAction);
+      this.handleApiEvents(endpointChecks);
     }
     let entities;
     let totalResults = 0;

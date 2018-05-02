@@ -16,15 +16,7 @@ import { Observable } from 'rxjs/Observable';
 import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-
-// Context used in the CLI Info template
-interface CFAppCLIInfoContext {
-  appName: string;
-  spaceName: string;
-  orgName: string;
-  apiEndpoint: string;
-  username: string;
-}
+import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 
 @Component({
   selector: 'app-cli-info-application',

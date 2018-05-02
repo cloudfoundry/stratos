@@ -1,0 +1,32 @@
+<div class="cli-info" *ngIf="context">
+  <div class="cli-info__content">
+    <div>
+      <p>Use the Cloud Foundry CLI to execute commands directly against a Cloud Foundry instance.</p>
+      <h4>Getting Started</h4>
+      <p>Before starting follow these steps:</p>
+
+      <span>1. Download and install the CLI - </span>
+      <a href="https://github.com/cloudfoundry/cli#downloads" rel="noopener noreferrer" target="_blank">see here</a>
+
+      <p>2. Set the api endpoint</p>
+      <app-code-block>cf api {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}</app-code-block>
+
+      <p>3. Login</p>
+      <app-code-block codeBlockStyle="pre" hide-copy="true">$ cf login
+        API endpoint: {{context.apiEndpoint || '[Cloud Foundry API endpoint]'}}
+
+        Email> {{context.username || '[username]'}}
+
+        Password> [password]
+        Authenticating...
+        OK
+      </app-code-block>
+
+      <p>4. Target an org and space</p>
+      <app-code-block>cf target -o {{context.orgName || '[organization name]'}} -s {{context.spaceName || '[space name]'}}
+      </app-code-block>
+    </div>
+
+    <ng-content></ng-content>
+
+  </div>

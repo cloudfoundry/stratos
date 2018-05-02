@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
   <h1> {{ name$ | async }}</h1>
   <div class="page-header-right">
     <button mat-icon-button name="rename" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/edit-space">
@@ -10,10 +10,11 @@
     <button mat-icon-button name="user-management" *ngIf="isDevEnvironment && (cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/manage-users">
         <mat-icon>people</mat-icon>
       </button>
-  </div>
+      <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/cli" matTooltip="CLI Info">
+        <mat-icon>keyboard</mat-icon>
+      </button>
+    </div>
 </app-page-header>
-<app-page-subheader [tabs]="tabLinks">
-</app-page-subheader>
 <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving space'">
   <router-outlet></router-outlet>
 </app-loading-page>

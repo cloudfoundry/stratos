@@ -1,6 +1,6 @@
 <span *ngIf="!chips || !chips.length">None</span>
 <mat-chip-list class="app-chips" [ngClass]="{'mat-chip-list__stacked': stacked, 'mat-chip-list__rtl': orientation==='rtl'}" *ngIf="chips && chips.length">
-  <mat-chip class="app-chip" *ngFor="let chip of chips | slice:0:limit" [ngClass]="chip.color ? chip.color : ''">{{chip.value}}
+  <mat-chip class="app-chip" *ngFor="let chip of chips | slice:0:limit" [ngClass]="chip.color ? chip.color : ''">{{chip[displayProperty]}}
     <ng-container *ngIf="chip.clearAction && !chip.hideClearButton">
       <mat-icon *ngIf="!chip.busy || !(chip.busy | async)" (click)="chip.clearAction(chip)" class="app-chip__close">close</mat-icon>
       <mat-spinner *ngIf="chip.busy && (chip.busy | async)" diameter="15" class="app-chip__busy-spinner"></mat-spinner>
