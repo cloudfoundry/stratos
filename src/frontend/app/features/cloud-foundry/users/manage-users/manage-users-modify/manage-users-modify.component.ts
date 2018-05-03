@@ -35,14 +35,14 @@ import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space
 })
 export class UsersRolesModifyComponent implements OnInit {
 
-  // @Input() initialUsers$: Observable<CfUser[]>;
-
   @ViewChild('spaceRolesTable', { read: ViewContainerRef })
   spaceRolesTable: ViewContainerRef;
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
-
+  /**
+   * Observable which is populated if only a single org is to be used
+   */
   singleOrg$: Observable<APIResource<IOrganization>>;
   organizations$: Observable<APIResource<IOrganization>[]>;
   selectedOrgGuid: string;
@@ -71,6 +71,7 @@ export class UsersRolesModifyComponent implements OnInit {
     } else {
       this.singleOrg$ = Observable.of(null);
       const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.cfGuid);
+
       this.organizations$ = getPaginationObservables<APIResource<IOrganization>>({
         store: this.store,
         action: new GetAllOrganizations(paginationKey, this.activeRouteCfOrgSpace.cfGuid, [
@@ -85,6 +86,7 @@ export class UsersRolesModifyComponent implements OnInit {
       ).entities$.pipe(
         map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name)))
       );
+
       this.organizations$.pipe(
         filter(orgs => orgs && !!orgs.length),
         first()
@@ -92,6 +94,7 @@ export class UsersRolesModifyComponent implements OnInit {
         this.updateOrg(orgs[0].metadata.guid);
       });
     }
+
     this.users$ = this.store.select(selectUsersRolesPicked).pipe(
       distinctUntilChanged(),
     );
@@ -114,6 +117,7 @@ export class UsersRolesModifyComponent implements OnInit {
       filter(newRoles => newRoles && newRoles.orgGuid === orgGuid),
       first()
     ).subscribe(null, null, () => {
+      // The org has changed, completely recreate the roles table
       if (this.wrapperRef) {
         this.wrapperRef.destroy();
       }

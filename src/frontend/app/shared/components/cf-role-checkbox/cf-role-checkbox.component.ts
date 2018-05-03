@@ -17,6 +17,16 @@ import {
 } from '../../../store/types/user.types';
 import { CfUserRolesSelected, UserRoleLabels } from '../../../store/types/users-roles.types';
 
+/**
+ * Component to manage the display and change of a specific org or space role. Will be checked if all users have role or user has selected
+ * role to change. Will be `semi checked` if one but not all of the selected users have the role.
+ * Special rules apply to an org user role. If there are any other roles set this will be disabled.
+ *
+ * @export
+ * @class CfRoleCheckboxComponent
+ * @implements {OnInit}
+ * @implements {OnDestroy}
+ */
 @Component({
   selector: 'app-cf-role-checkbox',
   templateUrl: './cf-role-checkbox.component.html',

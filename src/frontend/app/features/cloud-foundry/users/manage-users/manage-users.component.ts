@@ -54,7 +54,6 @@ export class UsersRolesComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    console.log('DESTROYING');
     this.store.dispatch(new UsersRolesClear());
   }
 

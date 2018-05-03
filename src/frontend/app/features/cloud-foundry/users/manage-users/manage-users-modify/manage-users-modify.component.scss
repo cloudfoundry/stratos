@@ -3,8 +3,6 @@
 }
 
 .modify-users {
-  // &__spaces-roles
-  // &__selected-users,
   &__org-roles {
     padding-bottom: 20px;
     app-cf-role-checkbox {
@@ -12,7 +10,7 @@
     }
   }
   &__selected-users {
-    display: flex; // padding-bottom: 20px;
+    display: flex;
     app-enumerate {
       padding-left: 5px;
     }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
@@ -31,7 +31,7 @@ import { CfRolesService } from '../cf-roles.service';
     }
   ],
 })
-export class UsersRolesSelectComponent implements OnInit {
+export class UsersRolesSelectComponent {
 
   selectedUsers$: Observable<CfUser[]>;
   valid$ = new BehaviorSubject<boolean>(false);
@@ -50,9 +50,6 @@ export class UsersRolesSelectComponent implements OnInit {
         return users;
       })
     );
-  }
-
-  ngOnInit() {
   }
 
   onNext = () => {
