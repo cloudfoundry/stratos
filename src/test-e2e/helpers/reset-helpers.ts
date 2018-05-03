@@ -86,12 +86,8 @@ export class ResetsHelpers {
   connectAllEndpoints(username, password, isAdmin) {
     let req;
     return helpers.createReqAndSession(null, username, password)
-      .then(function (createdReq) {
-        req = createdReq;
-      })
-      .then(() => {
-        return helpers.sendRequest(req, {method: 'GET', url: 'pp/v1/cnsis'});
-      })
+      .then(function (createdReq) { req = createdReq; })
+      .then(() => helpers.sendRequest(req, {method: 'GET', url: 'pp/v1/cnsis'}))
       .then(response => {
         const cnsis = JSON.parse(response);
         const promises = [];
@@ -125,17 +121,13 @@ export class ResetsHelpers {
           if (registerMultipleCf) {
             // Only do this if we only have one endpoint
             if (endpointsOfType.length === 1) {
-              // duplicates the current definition
-              const newEndpoint = { ...endpointsOfType[0] };
-              const key = newEndpoint.name;
-              newEndpoint.name = newEndpoint.name + ' Copy';
+              // duplicates the current definition and changes the name
+              const newEndpoint = { ...endpointsOfType[0], name: endpointsOfType[0].name +  'Copy' };
               endpointsOfType.push(newEndpoint);
             }
           } else {
             // Only want one
-            endpointsOfType = [
-              endpointsOfType[0]
-            ];
+            endpointsOfType = [ endpointsOfType[0] ];
           }
           endpointsOfType.forEach((ep) => {
             if (!endpointName || ep.name === endpointName) {
@@ -145,12 +137,7 @@ export class ResetsHelpers {
             }
           });
         });
-
-        Promise.all(promises).then(() => {
-          resolve();
-        }, function (error) {
-          reject(error);
-        });
+        Promise.all(promises).then(() => resolve(), (error) => reject(error));
       }, reject).catch(reject);
     });
   }
