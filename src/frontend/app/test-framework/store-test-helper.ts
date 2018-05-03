@@ -3,6 +3,7 @@ import { StoreModule } from '@ngrx/store';
 
 import { AppState } from '../store/app-state';
 import { appReducers } from '../store/reducers.module';
+import { createUserRoleInOrg } from '../store/types/user.types';
 
 /* tslint:disable */
 const testInitialStoreState: AppState = {
@@ -21634,9 +21635,25 @@ const testInitialStoreState: AppState = {
       }
     }
   },
+  manageUsersRoles: {
+    users: [],
+    cfGuid: '',
+    newRoles: {
+      name: '',
+      orgGuid: '',
+      spaces: {},
+      permissions: createUserRoleInOrg(
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      )
+    },
+    changedRoles: []
+  },
   internalEvents: {
     types: {}
-  }
+  },
 };
 /* tslint:enable */
 

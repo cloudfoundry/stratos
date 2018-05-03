@@ -6,11 +6,11 @@ import { CreateNewApplicationState } from './types/create-application.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
 import { IRequestDataState, IRequestState } from './types/entity.types';
+import { InternalEventsState } from './types/internal-events.types';
 import { PaginationState } from './types/pagination.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
-import { UserProfileInfo } from './types/user-profile.types';
-import { InternalEventsState } from './types/internal-events.types';
+import { UsersRolesState } from './types/users-roles.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
@@ -31,5 +31,6 @@ export interface AppState {
   deployApplication: DeployApplicationState;
   lists: ListsState;
   routing: RoutingHistory;
+  manageUsersRoles: UsersRolesState;
   internalEvents: InternalEventsState;
 }

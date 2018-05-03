@@ -1,0 +1,30 @@
+<div class="modify-users__selected-users">
+  Selected Users:
+  <app-enumerate [collection]="users$" [labelPath]="'username'"></app-enumerate>
+</div>
+<div class="modify-users__orgs">
+  <div *ngIf="(singleOrg$ | async); then singleOrg else manyOrgs"></div>
+  <ng-template #singleOrg>
+    <div class="modify-users__orgs__single">Organisation: {{(singleOrg$ | async).entity.name }}</div>
+  </ng-template>
+  <ng-template #manyOrgs>
+    <div class="stepper-form">
+      <mat-form-field>
+        <mat-select #cfSelect="ngModel" [ngModel]="selectedOrgGuid" (change)="updateOrg($event.value)" required placeholder="Organization">
+          <mat-option *ngFor="let org of organizations$ | async;trackBy:org?.metadata?.guid" [value]="org.metadata.guid">
+            {{org.entity.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </ng-template>
+</div>
+<div class="modify-users__org-roles" *ngIf="selectedOrgGuid">
+  <app-cf-role-checkbox [role]="orgRoles.MANAGER"></app-cf-role-checkbox>
+  <app-cf-role-checkbox [role]="orgRoles.AUDITOR"></app-cf-role-checkbox>
+  <app-cf-role-checkbox [role]="orgRoles.BILLING_MANAGERS"></app-cf-role-checkbox>
+  <app-cf-role-checkbox [role]="orgRoles.USER"></app-cf-role-checkbox>
+</div>
+<div class="modify-users__spaces-roles">
+  <div #spaceRolesTable></div>
+</div>

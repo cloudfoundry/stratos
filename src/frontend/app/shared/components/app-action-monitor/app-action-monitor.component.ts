@@ -40,6 +40,17 @@ export class AppActionMonitorComponent<T> implements OnInit {
   @Input('trackBy')
   public trackBy = ((index: number, item: T) => index.toString());
 
+  @Input('getCellConfig')
+  public getCellConfig = ((element): ITableCellRequestMonitorIconConfig => {
+    return {
+      entityKey: this.entityKey,
+      schema: this.schema,
+      monitorState: this.monitorState,
+      updateKey: this.updateKey,
+      getId: this.getId
+    };
+  });
+
   @Input('columns')
   public columns: ITableColumn<T>[] = [];
 
@@ -63,7 +74,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
     const monitorColumn = {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
-      cellConfig,
+      cellConfig: this.getCellConfig,
       cellFlex: '0 0 40px'
     };
     this.allColumns = [...this.columns, monitorColumn];

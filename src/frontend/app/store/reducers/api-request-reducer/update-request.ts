@@ -17,7 +17,7 @@ export function updateRequest(state, action: IUpdateRequestAction) {
     apiAction,
     requestState.updating,
     {
-      busy: !!apiAction.updatingKey,
+      busy: action.busy,
       error: !!action.error,
       message: '',
     }

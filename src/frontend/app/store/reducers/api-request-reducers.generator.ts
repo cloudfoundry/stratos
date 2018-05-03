@@ -35,7 +35,7 @@ import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-appl
 import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 import { routeReducer } from './routes.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
-import { userReducer } from './users.reducer';
+import { userReducer, userSpaceOrgReducer } from './users.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -126,10 +126,14 @@ export function requestDataReducer(state, action) {
       updateApplicationRoutesReducer(),
       endpointDisconnectApplicationReducer('application')
     ],
-    [spaceSchemaKey]: [endpointDisconnectApplicationReducer('space')],
+    [spaceSchemaKey]: [
+      endpointDisconnectApplicationReducer('space'),
+      userSpaceOrgReducer(true)
+    ],
     [organizationSchemaKey]: [
       updateOrganizationSpaceReducer(),
-      endpointDisconnectApplicationReducer('organization')
+      endpointDisconnectApplicationReducer('organization'),
+      userSpaceOrgReducer(false)
     ]
   };
 

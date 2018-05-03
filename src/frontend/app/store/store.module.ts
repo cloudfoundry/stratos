@@ -23,6 +23,7 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { RequestEffect } from './effects/request.effects';
 import { UserProfileEffect } from './effects/user-profile.effects';
+import { UsersRolesEffects } from './effects/users-roles.effects';
 
 @NgModule({
   imports: [
@@ -49,6 +50,7 @@ import { UserProfileEffect } from './effects/user-profile.effects';
       MetricsEffect,
       RequestEffect,
       UserProfileEffect,
+      UsersRolesEffects
     ])
   ]
 })

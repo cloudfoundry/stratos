@@ -44,9 +44,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     },
     {
       link: 'users',
-      label: 'Users',
-      // Hide the users tab unless we are in development
-      hidden: environment.production
+      label: 'Users'
     }
   ];
 

@@ -1,15 +1,21 @@
-import { Store, compose } from '@ngrx/store';
+import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
+import { tag } from 'rxjs-spy/operators/tag';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, startWith, withLatestFrom, tap, share } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
 import {
-  getAPIRequestDataState,
-  selectEntity,
-  selectRequestInfo,
-  getUpdateSectionById,
-  getEntityUpdateSections
-} from '../../store/selectors/api.selectors';
+  distinctUntilChanged,
+  filter,
+  map,
+  publishReplay,
+  refCount,
+  share,
+  startWith,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
+import { Observable } from 'rxjs/Rx';
+
+import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
 import { AppState } from './../../store/app-state';
 import {
@@ -19,7 +25,6 @@ import {
   RequestInfoState,
   UpdatingSection,
 } from './../../store/reducers/api-request-reducer/types';
-import { tag } from 'rxjs-spy/operators/tag';
 
 export class EntityMonitor<T = any> {
   constructor(
@@ -32,7 +37,8 @@ export class EntityMonitor<T = any> {
     this.entityRequest$ = store.select(selectRequestInfo(entityKey, id)).pipe(
       map(request => request ? request : defaultRequestState),
       distinctUntilChanged(),
-      startWith(defaultRequestState),
+      publishReplay(1),
+      refCount()
     );
     this.isDeletingEntity$ = this.entityRequest$.map(request => request.deleting.busy).pipe(
       distinctUntilChanged()
@@ -41,8 +47,9 @@ export class EntityMonitor<T = any> {
       distinctUntilChanged()
     );
     this.updatingSection$ = this.entityRequest$.map(request => request.updating).pipe(
-      distinctUntilChanged(),
+      distinctUntilChanged()
     );
+
     this.apiRequestData$ = this.store.select(getAPIRequestDataState).publishReplay(1).refCount();
     this.entity$ = this.getEntityObservable(
       schema,

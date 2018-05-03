@@ -29,8 +29,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
-  @Input('cancel')
-  cancel = null;
+  @Input('cancel') cancel = null;
 
   steps: StepComponent[] = [];
 
@@ -47,7 +46,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {
-        return previousState ? previousState.url.split('?')[0] : this.cancel;
+        // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
+        // cancel state is
+        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : this.cancel;
       })
     );
     this.cancelQueryParams$ = previousRoute$.pipe(

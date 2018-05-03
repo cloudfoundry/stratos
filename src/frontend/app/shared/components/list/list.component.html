@@ -22,7 +22,7 @@
       </div>
       <div class="list-component__header__right">
         <!-- Filter by text input -->
-        <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
+        <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async)">
           <mat-form-field floatPlaceholder="never">
             <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
           </mat-form-field>
