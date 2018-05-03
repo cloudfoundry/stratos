@@ -85,15 +85,19 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 		cnsiResponse, ok := responses[guid]
 		switch {
 		case !ok:
-			response = []byte(`{"error": "Request timed out"}`)
+			response = []byte(`{"error": {"statusCode": 500, "status": "Request timed out"}}`)
 		case cnsiResponse.Error != nil:
-			response = []byte(fmt.Sprintf(`{"error": %q}`, cnsiResponse.Error.Error()))
+			response = []byte(fmt.Sprintf(`{"error": {"statusCode": 500, "status": "%q"}}`, cnsiResponse.Error.Error()))
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
 		}
 		// Check the HTTP Status code to make sure that it is actually a valid response
 		if cnsiResponse.StatusCode >= 400 {
-			response = []byte(fmt.Sprintf(`{"error": "Unexpected HTTP status code: %d"}`, cnsiResponse.StatusCode))
+			errorJson, err := json.Marshal(cnsiResponse)
+			if err != nil {
+				errorJson = []byte(fmt.Sprintf(`{"statusCode": 500, "status": "Failed to proxy request"}"`))
+			}
+			response = []byte(fmt.Sprintf(`{"error": %s, "errorResponse": %s}`, errorJson, string(cnsiResponse.Response)))
 		}
 		if len(response) > 0 {
 			jsonResponse[guid] = (*json.RawMessage)(&response)
@@ -324,7 +328,7 @@ func (p *portalProxy) doRequest(cnsiRequest *interfaces.CNSIRequest, done chan<-
 	case interfaces.AuthTypeOIDC:
 		res, err = p.doOidcFlowRequest(cnsiRequest, req)
 	default:
-	res, err = p.doOauthFlowRequest(cnsiRequest, req)
+		res, err = p.doOauthFlowRequest(cnsiRequest, req)
 	}
 
 	if err != nil {
