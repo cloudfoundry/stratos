@@ -48,7 +48,7 @@ export class InternalEventMonitor {
   public hasErroredOverTime(minutes = 5) {
     return Observable.of([]);
   }
-  
+
   public _hasErroredOverTime(minutes = 5) {
     const interval$ = new IntervalObservable(30000).pipe(
       startWith(-1)
