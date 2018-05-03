@@ -205,7 +205,7 @@
   gulp.task('build-dbmigrator', [], function (done) {
     buildUtils.init();
     var dbMigratorPath = prepareBuild.getDbMigratorSourcePath();
-    buildUtils.build(dbMigratorPath, conf.dbMigratorName)
+    buildUtils.build(dbMigratorPath, conf.dbMigratorName, true)
       .then(function () {
         done();
       })
