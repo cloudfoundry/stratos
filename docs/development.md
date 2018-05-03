@@ -222,7 +222,7 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 #### Dependencies
 * go
   * GOPATH, GOBIN env vars set
-* glide
+* glide (see https://github.com/Masterminds/glide for installation instructions)
 * UAA instance
 
 #### Running portal-proxy in a container
