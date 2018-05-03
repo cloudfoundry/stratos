@@ -1,0 +1,16 @@
+{
+  "errors": {
+    "server_comms": "The Console encountered a problem communicating with the server. Please try again.",
+    "needs-registration": "In order to use the [[@:product.console]] you must connect to a registered service endpoint. Registered service endpoints are provided by your system administrator. Please contact your administrator about registering endpoints.",
+    "unexpected": "[[@:product.name]] encountered an unexpected error.",
+    "upgrading": "[[@:product.console]] is being upgraded.",
+    "contact-admin": "Please contact your administrator.",
+    "upgrade-wait": "Please wait for the upgrade to complete and then refresh or contact your administrator for further information.",
+    "nothing-registered": "There are no registered endpoints.",
+    "setup-required": "[[@:product.console]] has not been setup.",
+    "nothing-connected": "There are no connected endpoints.",
+    "endpoint-retrieval": "[[@:product.console]] could not retrieve Endpoint information.",
+    "generic-async-failure": "There was a problem carrying out the action. Please try again. If this error persists, please contact the administrator."
+  },
+  "error-format": "{{errorMsg}}, Error Code: {{errorCode}}"
+}

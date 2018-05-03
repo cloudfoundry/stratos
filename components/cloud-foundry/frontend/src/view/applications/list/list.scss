@@ -7,6 +7,7 @@ $applications-msg-height: 50px;
   @include flex-vertical-centered();
   font-size: $console-unit-space;
   height: $main-nav-title-height;
+  white-space:nowrap;
 
   &.apps-header {
     padding: 0 $padding-base-horizontal;

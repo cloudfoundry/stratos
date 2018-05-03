@@ -2,6 +2,46 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v1
+    created: 2018-05-03T00:53:11.129382804Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 327cbca812e64c302d58e8800ac4feb3419b93a59168ebea786a694d6ec08160
+    name: console
+    urls:
+    - https://github.com/cloudfoundry-incubator/stratos/releases/download/2.0.0-dev/console-helm-chart-v2.0.0-dev-b1cc5fb1.tgz
+    version: 2.0.0-dev-b1cc5fb1
+  - apiVersion: v1
+    created: 2018-04-12T13:14:55.249329644Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 7c8d2c2524ce035254a1efff72c2a2731b4425830b95603b30dc7ad4a9a5120e
+    name: console
+    urls:
+    - https://github.com/SUSE/stratos-ui/releases/download/1.1.0/console-helm-chart-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v1
+    created: 2018-03-06T10:50:26.932728235Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 12e246b9dc3a41b0f22a0c1738864f4d7b29cef21419ffe6d1d6128df94b4900
+    name: console
+    urls:
+    - https://github.com/SUSE/stratos-ui/releases/download/1.0.2/console-helm-chart-1.0.2.tgz
+    version: 1.0.2
+  - apiVersion: v1
+    created: 2018-01-09T11:48:55.233833731Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 378df78adeebfad7d81b63a9f01afbb830c35cf948e3b662349e1d20a0972955
+    name: console
+    urls:
+    - https://github.com/SUSE/stratos-ui/releases/download/1.0.0/console-helm-chart-1.0.0.tgz
+    version: 1.0.0
+  - apiVersion: v1
+    created: 2017-12-08T13:21:38.611521378Z
+    description: A Helm chart for deploying Stratos UI Console
+    digest: 8e8994171cf7ba37c4b37564c8efa07f1fd66dda347900b592ebfaae5407bf3d
+    name: console
+    urls:
+    - https://github.com/SUSE/stratos-ui/releases/download/0.9.9/console-helm-chart-0.9.9.tgz
+    version: 0.9.9
+  - apiVersion: v1
     created: 2017-11-23T16:31:10.781104928Z
     description: A Helm chart for deploying Stratos UI Console
     digest: 97bdf40f53053815016e223d49082ba16984b9b5a0a5a2d237ef45bb42183ad8
@@ -57,4 +97,14 @@ entries:
     urls:
     - https://github.com/suse/stratos-ui/releases/download/0.9.0/console-helm-chart-0.9.0.tgz
     version: 0.9.0
-generated: 2017-11-23T16:31:10.780380577Z
+  metrics:
+  - apiVersion: v1
+    created: 2018-04-12T11:14:42.658213114Z
+    description: Stratos Metrics component to fetch metrics data from S/CF. Uses Prometheus
+      and Firehose Exporter
+    digest: 9c6bac79b2f8a6c9b52a077eaf4343c61fed764913c8d2d40d7baddcf7e34866
+    name: metrics
+    urls:
+    - https://github.com/suse/stratos-metrics/releases/download/2.0.0-metrics-dev/console-metrics-helm-chart-v2.0.0-metrics-dev-b5272b2d.tgz
+    version: 2.0.0-metrics-dev-b5272b2d
+generated: 2018-04-12T13:14:55.247840854Z

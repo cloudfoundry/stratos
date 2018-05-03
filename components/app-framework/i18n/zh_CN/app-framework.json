@@ -1,0 +1,11 @@
+{
+  "select-input": {
+    "placeholder": "选择"
+  },
+  "code-block": {
+    "copied-msg": "已复制到剪贴板"
+  },
+  "search-box": {
+    "busy": "读取中..."
+  }
+}

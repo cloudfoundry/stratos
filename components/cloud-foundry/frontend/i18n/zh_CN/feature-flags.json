@@ -1,0 +1,31 @@
+{
+  "cf.cf-tabs": {
+    "feature-flags": {
+      "feature-flags": "功能标识",
+      "descriptions": {
+        "user_org_creation": "任何用户都可以创建组织",
+        "private_domain_creation": " 一个组织管理员可以为这个组织创建私有域",
+        "app_bits_upload": "空间开发者可以上传应用位",
+        "app_scaling": "空间开发者可以进行调节操作（比如更改内存，磁盘或实例）",
+        "route_creation": "空间开发者可以在空间创建路由",
+        "service_instance_creation": "空间开发者可以在空间创建服务实例",
+        "diego_docker": "空间开发者可以推送 Docker 应用",
+        "set_roles_by_username": "组织管理员和空间管理员可以根据用户名添加角色",
+        "unset_roles_by_username": "组织管理员和空间管理员可以根据用户名移除角色",
+        "task_creation": "Space开发者可以在他们的应用上创建任务。这个功能还在开发中",
+        "env_var_visibility": "所有用户都可以查看环境变量",
+        "space_scoped_private_broker_creation": "空间开发者可以创建空间范围的私有服务代理",
+        "space_developer_env_var_visibility": "空间开发者可以查看他们的 V2 环境变量。组织管理员和空间管理员可以查看他们的 V3 环境变量"
+      },
+      "empty": "没有功能标识",
+      "error": "调用功能标识元数据时出现了一个错误。",
+      "labels": {
+        "name": "名称",
+        "description": "描述",
+        "state": "状态",
+        "enabled": "开启",
+        "disabled": "关闭"
+      }
+    }
+  }
+}

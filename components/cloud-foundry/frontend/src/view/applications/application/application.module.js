@@ -101,7 +101,24 @@
         name: 'app.app-info.app-actions.stop',
         id: 'stop',
         execute: function () {
-          vm.model.stopApp(cnsiGuid, vm.id);
+          var appName = vm.model.application.summary.name;
+          frameworkDialogConfirm({
+            title: 'app.app-info.stop-app.title',
+            description: $translate.instant('app.app-info.stop-app.description', { app: appName }),
+            errorMessage: 'app.app-info.stop-app.error-message',
+            submitCommit: true,
+            buttonText: {
+              yes: 'app.app-info.stop-app.button.yes',
+              no: 'app.app-info.stop-app.button.no'
+            },
+            callback: function () {
+              return vm.model.stopApp(cnsiGuid, vm.id)
+                .then(function () {
+                  var message = $translate.instant('app.app-info.stop-app.success', { app: appName });
+                  appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
+                });
+            }
+          });
         },
         disabled: true,
         icon: 'stop'
@@ -110,7 +127,24 @@
         name: 'app.app-info.app-actions.restart',
         id: 'restart',
         execute: function () {
-          vm.model.restartApp(cnsiGuid, vm.id);
+          var appName = vm.model.application.summary.name;
+          frameworkDialogConfirm({
+            title: 'app.app-info.restart-app.title',
+            description: $translate.instant('app.app-info.restart-app.description', { app: appName }),
+            errorMessage: 'app.app-info.restart-app.error-message',
+            submitCommit: true,
+            buttonText: {
+              yes: 'app.app-info.restart-app.button.yes',
+              no: 'app.app-info.restart-app.button.no'
+            },
+            callback: function () {
+              return vm.model.restartApp(cnsiGuid, vm.id)
+                .then(function () {
+                  var message = $translate.instant('app.app-info.restart-app.success', { app: appName });
+                  appEventService.$emit('events.NOTIFY_SUCCESS', {message: message});
+                });
+            }
+          });
         },
         disabled: true,
         icon: 'settings_backup_restore'

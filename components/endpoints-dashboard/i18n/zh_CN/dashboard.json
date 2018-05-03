@@ -1,0 +1,42 @@
+{
+  "endpoints-dashboard": {
+    "title": "端点",
+    "register-button": "注册端点",
+    "busy": "正在检索端点元数据",
+    "table": {
+      "name": "名称",
+      "connection": "连接",
+      "connection-disconnected": "已断开",
+      "type": "类型",
+      "address": "地址"
+    },
+    "intro": {
+      "start": "为了开发请使用[[@:console]]和[[@:product.name]]交互,",
+      "link": "请注册端点。",
+      "end": "端点的注册过程可使其被任何登录到 [[@:product.console]] 的用户发现。注册端点后，我们建议将其连接到您的帐户，以便管理。",
+      "admin": "要访问您位于的云上的本地工作负载和其他相关的第三方服务，请将您的个人凭证与相应的注册服务进行连接。",
+      "non-admin": "要访问您位于的云上的本地工作负载和其他相关的第三方服务，请将您的个人凭证与相应的注册服务进行连接。已注册的服务由系统管理员提供。"
+    },
+    "no-endpoints": {
+      "message": "没有已注册端点。",
+      "admin-message-link-text": "注册一个端点",
+      "admin-message-text": " 使其可供开发人员使用。",
+      "non-admin-message": "请联系您的管理员。"
+    }
+  },
+  "register-dialog": {
+    "title": "注册一个端点",
+    "address-label": "端点地址",
+    "address-error-required": "需要提供 Url",
+    "address-error-invalid": "Url 格式无效",
+    "address-error-unique": "Url 不是唯一的",
+    "name-label": "名称",
+    "name-error-required": "需要提供名称",
+    "name-error-unique": "名称不是唯一的",
+    "skip-ssl-label": "跳过端点的SSL验证",
+    "register-button": "注册",
+    "success-notice": "端点'{{name}}'注册成功",
+    "failure-ssl-notice": "{{sllError}}。如果证书颁发者是可信的，请检查 \"跳过端点的 SSL 验证\"",
+    "failure-notice": "创建端点时出现问题。请确保终端地址是正确的，然后重试。如果此错误仍然存在，请联系管理员。"
+  }
+}

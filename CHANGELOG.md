@@ -1,5 +1,42 @@
 # Change Log
 
+## 1.1.0 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.2...1.1.0)
+
+**Improvements:**
+
+- Added support for SUSE Cloud Foundry 1.1 configuration values to the Helm chart [\#1950](https://github.com/cloudfoundry-incubator/stratos/pull/1950)
+
+**Fixes:**
+
+- Fix width of top nav bar menu's bottom border [\#1739](https://github.com/cloudfoundry-incubator/stratos/pull/1739)
+
+## 1.0.2 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/1.0.0...1.0.2)
+
+**Improvements:**
+
+- Added Confirmation prompts for stopping and restarting apps [\#1437](https://github.com/SUSE/stratos-ui/pull/1437)
+
+**Fixes:**
+
+- Memory and disk usage should respect the number of app instances [\#1625](https://github.com/SUSE/stratos-ui/pull/1625)
+- Fix issue around apps and routes missing from space entity [\#1447](https://github.com/SUSE/stratos-ui/pull/1447)
+- Fix minor localisation issue [\#1596](https://github.com/cloudfoundry-incubator/stratos/pull/1596)
+
+## 1.0.0 Release
+
+[Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.9...1.0.0)
+
+**Improvements:**
+- Added French localization (*Open Source build only*) [\#1419](https://github.com/SUSE/stratos-ui/pull/1419)
+
+**Fixes:**
+- Removed dependency `jsdocs` because of security vulnerability [\#1428](https://github.com/SUSE/stratos-ui/pull/1428)
+- Fix vertical alignment for setup screens (*Open Source build only*) [\#1417](https://github.com/SUSE/stratos-ui/pull/1417)
+
 ## 0.9.9 Release Candidate 1 Release
 
 [Full Changelog](https://github.com/SUSE/stratos-ui/compare/0.9.8...0.9.9)
@@ -11,7 +48,7 @@ This is the first Release Candidate of the Stratos UI Console. It contains the f
 - Open Source build now uses a generic theme [\#1403](https://github.com/SUSE/stratos-ui/pull/1403)
 - SUSE build uses SUSE theme and contains EULA in the about screen [\#1404](https://github.com/SUSE/stratos-ui/pull/1404)
 - Run Mariadb mysqld process as mysql user [\#1397](https://github.com/SUSE/stratos-ui/pull/1397)
-
+- Helm Chart: Persistent Volume size increased from 1Mi to 20Mi to avoid issues with some storage providers [\#1409](https://github.com/SUSE/stratos-ui/pull/1409)
 
 ## 0.9.8 Beta-3 Release 2
 

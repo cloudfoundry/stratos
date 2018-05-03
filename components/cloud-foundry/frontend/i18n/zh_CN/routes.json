@@ -1,0 +1,27 @@
+{
+  "cf.routes": {
+    "unknown-domain": "未知",
+    "unmap-app": {
+      "title": "取消应用的路由映射",
+      "description": "您确定要取消'{{ route }}'映射吗？",
+      "button-yes": "取消映射",
+      "error": "取消映射时碰到了一个问题，请重新尝试。如果问题依然存在，请联系管理员。",
+      "success": "成功取消路由映射"
+    },
+    "unmap-apps": {
+      "title": "取消应用的路由映射",
+      "description": "@:cf.routes.unmap-app.description",
+      "button-yes": "@:cf.routes.unmap-app.button-yes",
+      "error": "@:cf.routes.unmap-app.error",
+      "partial-error": "无法取消有些应用的映射",
+      "success": "@:cf.routes.unmap-app.success"
+    },
+    "delete": {
+      "title": "删除路由",
+      "description": "您确定要删除'{{ route }}'吗?",
+      "button-yes": "删除",
+      "error": "删除路由时遇到问题，请重试。如果问题依然存在，请联系管理员。",
+      "success": "路由已被成功删除"
+    }
+  }
+}

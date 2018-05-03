@@ -1,5 +1,8 @@
 {
   "cloud-foundry": "Le Cloud Foundry",
+  "org": "Org",
+  "organization": "Organisation",
+  "space": "Espace",
   "menu": {
     "cloud-foundry": "@:cloud-foundry"
   }

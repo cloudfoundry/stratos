@@ -18,7 +18,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Mi
+      storage: 20Mi
 ---
 {{- if and .Values.mariadb.persistence.enabled (not .Values.mariadb.persistence.existingClaim) }}
 kind: PersistentVolumeClaim
@@ -64,4 +64,4 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Mi
+      storage: 20Mi

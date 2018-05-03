@@ -1,0 +1,21 @@
+{
+  "cf.cf-tabs": {
+    "firehose": {
+      "firehose": "Firehose",
+      "title": "Le flux de Firehose",
+      "scroll-bottom-button": "Faites défiler vers le bas",
+      "labels": {
+        "select": "Selectionner: ",
+        "select-all": "Tout",
+        "select-none": "Aucun",
+        "regex": "Regex",
+        "apps": "Applications",
+        "api": "API",
+        "metrics": "Métriques",
+        "counters": "Compteurs",
+        "container-metrics": "Métriques du conteneur",
+        "errors": "Erreurs"
+      }
+    }
+  }
+}

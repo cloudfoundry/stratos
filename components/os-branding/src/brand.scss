@@ -25,6 +25,11 @@ $console-primary: $brand-primary;
 // Hide welcome text panel on the login page
 $login-page-text-panel-display: none;
 
+$app-setup-btn-fg: #fff;
+$app-setup-btn-cancel-bg: #ccc;
+$app-setup-btn-cancel-fg: #333;
+$app-setup-wizard-nav-border: $brand-primary;
+
 // The normal status-okay green is close to suse primary, so just use it instead
 $status-okay: $suse-primary;
 

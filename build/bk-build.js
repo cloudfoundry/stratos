@@ -350,10 +350,11 @@
       'delete-temp'
     );
   });
-  gulp.task('cf-get-backend-deps', function () {
+  gulp.task('cf-get-backend-deps', function (cb) {
     return runSequence(
       'init-build',
-      'dedup-vendor'
+      'dedup-vendor',
+      cb
     );
   });
 

@@ -1,0 +1,25 @@
+{
+  "cf": {
+    "users": {
+      "users": "Utilisateurs",
+      "table": {
+        "buttons": {
+          "manage": "gérer les rôles",
+          "change": "changer les rôles",
+          "remove": "supprimer tous les rôles",
+          "remove-org": "retirer de l'organisation"
+        },
+        "users-label": "UTILISATEURS ",
+        "org-roles-label": "LES RÔLES D'ORGANISATION",
+        "space-roles-label": "LES RÔLES DE L'ESPACE",
+        "action-label": "ACTION",
+        "no-roles": {
+          "none-assigned": "Aucun assigné",
+          "not-applicable": "N'est pas applicable"
+        },
+        "show-all-users": "Afficher Tout"
+      }
+
+    }
+  }
+}

@@ -31,6 +31,7 @@ vendor/
 **/vendor
 **/*.so
 .glide
+.deps/
 tools/ssl
 build/secrets.json
 
@@ -47,3 +48,4 @@ deploy/stratos-ui-release/blobs
 deploy/stratos-ui-release/.blobs
 deploy/stratos-ui-release/dev_releases/
 output/fissile
+deploy/ci/travis/temp/

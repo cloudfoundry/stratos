@@ -61,9 +61,9 @@ uaa:
   skipSSLValidation: false
  # SCF values compatability 
 env:
+  DOMAIN:
   UAA_HOST: 
-  UAA_ADMIN_CLIENT_SECRET: 
-  UAA_PORT:
+  UAA_PORT: 2793
 kube:
   external_console_https_port: 8443
   storage_class:

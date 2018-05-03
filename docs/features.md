@@ -1,6 +1,6 @@
 # Features
 
-Stratos UI provides the feature set outline below. Some of these are illustrated in the [Screenshots gallery](images/screenshots/README.md).
+Stratos provides the feature set outline below. Some of these are illustrated in the [Screenshots gallery](images/screenshots/README.md).
 
 * Authentication
    * User authentication using a configured UAA instance

@@ -295,10 +295,14 @@
     function _sortFilteredApplications() {
       var path = model.currentSortOption;
       var sortOrder = model.sortAscending ? 'asc' : 'desc';
+      var multipleByInstances = path === 'entity.memory' || path === 'entity.disk_quota';
       model.filteredApplications = _.orderBy(model.filteredApplications, function (app) {
         var value = _.get(app, path);
         if (_.isString(value)) {
           return value.toLowerCase();
+        }
+        if (_.isNumber(value) && multipleByInstances) {
+          return value * app.entity.instances;
         }
         return value;
       }, sortOrder);
@@ -793,12 +797,13 @@
      * @description restart an application
      * @param {string} cnsiGuid - The GUID of the cloud-foundry server.
      * @param {string} guid - the application id
+     * @returns {promise} a promise object
      * @public
      */
     function restartApp(cnsiGuid, guid) {
 
-      stopApp(cnsiGuid, guid).then(function () {
-        startApp(cnsiGuid, guid);
+      return stopApp(cnsiGuid, guid).then(function () {
+        return startApp(cnsiGuid, guid);
       });
     }
 

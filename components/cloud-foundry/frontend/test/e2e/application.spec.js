@@ -342,9 +342,17 @@
           editApplicationModal.save();
           browser.wait(until.not(until.presenceOf(editApplicationModal.getElement())), 5000);
 
+          var newMemAllInstances = protractor.promise.all([
+            newMem,
+            newInstance
+          ]).then(function (res) {
+            var newMem = parseInt(res[0], 10) * parseInt(res[1], 10);
+            return newMem.toString();
+          });
+
           // App values should be correct
           expect(application.getHeaderAppName().getText()).toBe(newName);
-          expect(getMemoryUtilisation()).toBe(newMem);
+          expect(getMemoryUtilisation()).toBe(newMemAllInstances);
           expect(getInstances()).toBe(newInstance);
         });
 

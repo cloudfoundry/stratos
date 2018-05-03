@@ -1,0 +1,37 @@
+{
+  "product": {
+    "name": "SUSE Cloud Foundry",
+    "console": "SUSE Console Cloud Foundry",
+    "cf": "Cloud Foundry",
+    "ce": "Code Engine"
+  },
+  "company": {
+    "name": "SUSE",
+    "terms": "Légal",
+    "terms.href": "https://www.suse.com/company/legal/",
+    "PRIVACY_HREF": "", 
+    "PRODUCT_FAMILY_HREF": "",
+    "www-link": "http://www.suse.com"
+  },
+  "about": {
+    "footer": {
+      "company.logo": "images/suse_logo_light_bg.png",
+      "company.terms-href": "",
+      "company.privacy-href": ""
+    }
+  },
+  "navbar": {
+    "title": "@:product.name",
+    "logo": "svg:SUSE_Geeko.svg"
+  },
+  "login": {
+    "title":"Se connecter",
+    "console": "SUSE<br>Console Cloud Foundry"
+  },
+  "landing": {
+    "footer": {
+      "company.terms-href": "",
+      "company.privacy-href": ""
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "app-setup": {
+    "intro-title": "[[@:product.console]]设置",
+    "step-intro": {
+      "title": "介绍",
+      "p1": "欢迎使用[[@:product.console]].",
+      "p2": "[[@:product.console]]是一个管理 Cloud Foundry 的开源 Web 应用。同时允许用户和管理员来管理运行在 Cloud Foundry 集群上的应用，并且执行集群的管理任务。",
+      "p3": "在第一次进入控制台前，需要做一些配置。",
+      "p4": "点击 <b>NEXT</b> 开始。",
+      "p5": ""
+    },
+    "step-1": {
+      "title": "UAA 端点",
+      "p1": "[[@:product.console]]使用 Cloud Foundry 用户帐户和身份验证（UAA）服务对用户进行身份验证。控制台必须配置与 UAA 通信所需的详细信息。",
+      "p2": "必须提供 UAA api 端点的地址，以及是否应执行 SSL 验证。",
+      "p3": "客户端凭证是必需的，包括 UAA 管理员用户名和密码。",
+      "p4": "在进入下一步之前，将对配置进行验证。",
+      "p5": "有关 Cloud Foundry UAA 的更多信息，请参阅<a href=\"https://docs.cloudfoundry.org/concepts/architecture/uaa.html\" rel=\"noopener noreferrer\" target=\"_blank\">点击这里</a>.",
+      "p6": "有关控制台和 UAA 的各种部署类型的更多信息，请参阅<a href=\"https://github.com/SUSE/stratos-ui/blob/master/docs/access.md\" rel=\"noopener noreferrer\" target=\"_blank\">点击这里</a>.",
+      "busy-message": "验证中...",
+      "uaa-intro": "UAA 端点",
+      "uaa-url": {
+        "label": "API 地址",
+        "placeholder": "UAA API 地址",
+        "error-required": "需要填入地址",
+        "error-pattern": "无效地址"
+      },
+      "uaa-url-skip-ssl": {
+        "label": "跳过端点的 SSL 验证。"
+      },
+      "console-intro": "UAA 的控制台凭据",
+      "console-client": {
+        "label": "客户端 Id",
+        "placeholder": "",
+        "error-required": "需要填入 Id"
+      },
+      "console-secret": {
+        "label": "客服端密钥",
+        "placeholder": ""
+      },
+      "console-admin": {
+        "label": "管理员用户名",
+        "placeholder": "",
+        "error-required": "需要填入用户名"
+      },
+      "console-password": {
+        "label": "管理员密码",
+        "placeholder": "",
+        "error-required": "需要填入密码"
+      },
+      "error-request": "无法发送设置信息。如果此错误仍然存在，请联系管理员。",
+      "error-request-reason": "[[@:app-setup.step-1.error-request]]. 原因: {{reason}}."
+    },
+    "step-2": {
+      "title": "管理控制台权限组",
+      "p1": "基本配置已被验证，并发现了一系列 UAA 权限组。",
+      "p2": "控制台使用一个权限组从常规用户中识别控制台管理员。",
+      "p3": "请选择您想要使用的权限组。",
+      "p4": "",
+      "p5": "",
+      "busy-message": "应用配置中...",
+      "intro": "管理控制台权限组",
+      "console-scope": {
+        "label": "权限组",
+        "placeholder": "UAA管理权限组认证控制台管理员。"
+      },
+      "error-request": "无法发送设置信息。 如果此错误仍然存在，请联系管理员。",
+      "error-request-reason": "[[@:app-setup.step-2.error-request]]. 原因:{{reason}}."
+    },
+    "buttonComplete": "完成"
+  }
+}

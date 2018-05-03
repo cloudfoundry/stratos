@@ -19,13 +19,13 @@ cache:
   - "/home/travis/.npm/"
 jobs:
   include:
-  - stage: e2e tests
+  - stage: front-end
     before_script:
-    - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     - npm install -g bower
     - bower install
     script:
-    - "./deploy/ci/travis/run-e2e-tests.sh"
+    - npm build
+    - npm run gate-check
   - stage: back-end
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
@@ -34,13 +34,13 @@ jobs:
     - curl https://glide.sh/get | sh
     script:
     - npm run test-backend
-  - stage: front-end
+  - stage: e2e tests
     before_script:
+    - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
     - npm install -g bower
     - bower install
     script:
-    - npm build
-    - npm run gate-check
+    - "./deploy/ci/travis/run-e2e-tests.sh"
 notifications:
   slack:
     secure: s5SFnFKwzfxLrjGR5lJ2AJG1FSWCKtHdQi8K2Kmx5ZhrYL/7P+KLc/ks18WnzCPoy705LbHCBSULcnWbLjqCpnkKxNjsFAyFl2nZZPxBjl2/mHpulbr3gmultDOrMDbmYL4oWPKBlxKResElz9nQwknlLWZ/L94AIx8zuMfRIWdEt1bJBDAQts4fx2D4cIEx0yZUq7JGAKjSiXKR9eDyMWFb+SWw6mvr5WtFM8uq35rPvRVEfm56LIgSuMUpVeYtnYiY2JP7W8iKX0gD+54wAiSXRZiQVCLJq606/TlJo7j8Na9Dn1Q5XDkX3b3XzcgmEZThoO1GFtv3yNYOVxv+50p2tSnc8CT0VEVOYOGJuz17AESZAYK+AyjEmeZmDiroj1czmIq8/ZYKbmvDYSZgGuDcSkQurX/6BPac6ra69WmSQmwv0tS3A/IzDw7X+CuC+3QubQ7GfaiVe25PUU+tRSEDM4PMUJY8QRF5Q+oeN5NjjWmJBqf/ic2TO2xTU1j+qysdqK34qIV1qyVcPMUIiYW+5ltH71qiy05TSvvfGS+oatRBMzINRl3zl2gOV1CKNU801XehRKCx9XDCw5NL1HSx5HD5psOyBRpAMYYBOqa+rv9VAza9MsfpslCoibg5rdrq4rZqqUgRhayNp/LKzlhe/g62+qbGNT+iFuHtB+Y=

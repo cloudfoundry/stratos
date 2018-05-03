@@ -157,9 +157,9 @@ spec:
         {{- if .Values.socksProxy }}
           value: {{.Values.socksProxy}}
         {{- end }}
-        {{- if .Values.env.UAA_HOST }}  
+        {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
         - name: UAA_ENDPOINT 
-          value: https://scf.{{.Values.env.UAA_HOST}}:{{.Values.env.UAA_PORT}}
+          value: {{ template "scfUaaEndpoint" . }}
         - name: CONSOLE_CLIENT 
           value: cf
         - name: CONSOLE_CLIENT_SECRET
