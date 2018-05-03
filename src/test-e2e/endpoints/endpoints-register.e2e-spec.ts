@@ -149,7 +149,8 @@ describe('Endpoints', () => {
         });
         register.stepper.next();
 
-        // TODO: The dialog should stay and show an error
+        // NOTE: The dialog should stay and show an error
+        // Fix this test once this is implemented
         fail('not complete');
       });
 
@@ -163,8 +164,6 @@ describe('Endpoints', () => {
 
         expect(endpointsPage.isActivePage()).toBeTruthy();
         expect(endpointsPage.table.isPresent()).toBeTruthy();
-
-        // TODO: Check toast (f there is one)
 
         endpointsPage.table.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
           expect(data.name).toEqual(validEndpoint.name);

@@ -113,11 +113,11 @@ describe('Endpoints', () => {
           });
 
           it('should show correct table content', () => {
-            // For each cnsi endpoint
+            // For each endpoint
             // 1) we show the correct type
             // 2) the icon is the correct 'disconnected' one
             // 3) the address is correct
-            // 4) the 'connect' button is available
+            // 4) the 'connect' button is available in the action menu
 
             const endpointsTable = endpointsPage.table;
             endpointsTable.getRows().map(row => endpointsTable.getEndpointData(row)).then(data => {
@@ -127,7 +127,16 @@ describe('Endpoints', () => {
                 expect(endpointConfig.url).toEqual(ep.url);
                 expect(endpointConfig.typeLabel).toEqual(ep.type);
 
-                // TODO: Need to check that the connect menu item is available
+                endpointsPage.table.getRowForEndpoint(ep.name).then(row => {
+                  endpointsPage.table.openActionMenu(row);
+                  const menu = new MenuComponent();
+                  menu.waitUntilShown();
+                  menu.getItemMap().then(items => {
+                    expect(items['connect']).toBeDefined();
+                    expect(items['disconnect']).not.toBeDefined();
+                  });
+                  menu.close();
+                });
               });
             });
           });
