@@ -18,6 +18,7 @@ import { selectPaginationState } from '../../../../store/selectors/pagination.se
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
 import { entityFactory } from '../../../../store/helpers/entity-factory';
 import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
@@ -44,7 +45,9 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   endpointTypes = getEndpointTypes();
   urlValidation: string;
 
-  constructor(private store: Store<AppState>, private utilsService: UtilsService) {
+  snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+
+  constructor(private store: Store<AppState>, private utilsService: UtilsService, private snackBar: MatSnackBar) {
 
     this.existingEndpoints = store.select(selectPaginationState(endpointStoreNames.type, GetAllEndpoints.storeKey))
       .pipe(
@@ -71,6 +74,12 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   ngOnInit() { }
 
   onNext: StepOnNextFunction = () => {
+
+    // Close previous error snackbar if there was omne
+    if (this.snackBarRef) {
+      this.snackBar.dismiss();
+    }
+
     const action = new RegisterEndpoint(
       this.typeField.value,
       this.nameField.value,
@@ -90,6 +99,9 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
       .map(result => {
         if (!result.error) {
           this.store.dispatch(new RouterNav({ path: ['endpoints'] }));
+        } else {
+          // Snackbar
+          this.snackBarRef = this.snackBar.open(result.message, 'Dismiss');
         }
         return {
           success: !result.error
