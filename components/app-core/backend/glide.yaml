@@ -1,4 +1,13 @@
 package: github.com/SUSE/stratos-ui/components/app-core/backend
+ignore:
+- github.com/SUSE/stratos-ui/components/app-core/backend/config
+- github.com/SUSE/stratos-ui/components/app-core/backend/datastore
+- github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis
+- github.com/SUSE/stratos-ui/components/app-core/backend/repository/console_config
+- github.com/SUSE/stratos-ui/components/app-core/backend/repository/crypto
+- github.com/SUSE/stratos-ui/components/app-core/backend/repository/goose-db-version
+- github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces
+- github.com/SUSE/stratos-ui/components/app-core/backend/repository/tokens
 import:
 - package: github.com/Sirupsen/logrus
   version: 0.11.5
