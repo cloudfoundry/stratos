@@ -216,32 +216,41 @@ This env var can be set in `outputs/config.properties` if running the backend lo
 > **NOTE** WIP Instructions!
 
 #### Introduction
-* Golang
-* Dependency Management (Glide)
+ç* Dependency Management (Glide)
 
 #### Dependencies
-* go
-  * GOPATH, GOBIN env vars set
-* glide (see https://github.com/Masterminds/glide for installation instructions)
-* UAA instance
+* GoLang - Ensure you have a recent version of go installed (see https://golang.org/dl/)
+* glide for dependency management (see https://github.com/Masterminds/glide for installation instructions)
+* UAA instance (see below for how to run one in docker)
 
 #### Running portal-proxy in a container
 * Follow instructions in the deploy/docker-compose docs
 * To apply changes (build and update docker image) simply run `deploy/tools/restart_proxy.sh`  
 
-#### Running "like a dev"
+#### Running locally (developmenty)
 
 1. Set up developer certs
     - Execute `deploy/tools/generate_cert.sh`
     - Copy `portal-proxy-output/dev-certs` to `./`
-1. Update `build/dev_config.json` with `"localDevBuild": true`
-1. Run `gulp local-dev-build`
-1. cd ./outputs
+1. Update (or create the file) `build/dev_config.json` and ensure it has `"localDevBuild": true`, e.g. minimally:
+```
+{
+  localDevBuild: true
+}
+```
+3. cd `./outputs`
 1. Run `gulp build-backend`
 1. Update `config.propeties` and ensure that..
+    - PORT is set (you may want to change this from the default of 443)
     - the UAA points to a valid instance
-    - the `CONSOLE_CLIENT` and `CONSOLE_ADMIN_SCOPE` are valid in the UAA instance
+    - the `CONSOLE_CLIENT` and `CONSOLE_ADMIN_SCOPE` are valid in the UAA instance (if you are not using the UAA as below)
 1. Run `portal-proxy`
+
+> Note: You can run a UAA instance for testing with docker, with:
+>
+> ```docker run -d -p 8080:8080 splatform/stratos-uaa```
+>
+> If you do this, you should not need to edit any UAA configuration in the `config.properties` file.
 
 #### Tests
 
