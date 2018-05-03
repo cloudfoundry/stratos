@@ -123,7 +123,6 @@ export class StartRequestAction extends RequestAction {
   }
 }
 
-
 export class WrapperRequestActionSuccess extends RequestSuccessAction implements ISuccessRequestAction {
   constructor(
     public response: NormalizedResponse,

@@ -23,6 +23,7 @@ import { APIResource } from '../../../store/types/api.types';
 import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { Observable } from 'rxjs/Observable';
+import { GetCFUser } from '../../../store/actions/users.actions';
 
 @Component({
   selector: 'app-application-wall',
@@ -60,7 +61,8 @@ export class ApplicationWallComponent implements OnDestroy {
   ) {
     const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+      tap(endpoints => endpoints.forEach(endpoint => this.store.dispatch(new GetCFUser(endpoint.user.guid, endpoint.guid)))),
+      map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
     this.statsSub = dataSource.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes

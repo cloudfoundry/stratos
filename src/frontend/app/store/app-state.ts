@@ -11,6 +11,7 @@ import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
 import { UserProfileInfo } from './types/user-profile.types';
 import { InternalEventsState } from './types/internal-events.types';
+import { PermissionState } from './types/permissions.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
@@ -32,4 +33,5 @@ export interface AppState {
   lists: ListsState;
   routing: RoutingHistory;
   internalEvents: InternalEventsState;
+  permissions: PermissionState;
 }
