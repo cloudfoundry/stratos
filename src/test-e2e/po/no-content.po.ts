@@ -1,5 +1,5 @@
 import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 
 
@@ -12,14 +12,14 @@ export class NoContentComponent extends Component {
     super(element(by.css('.app-no-content-container')));
   }
 
-  checkFirstLineMessage(msg: string) {
+  checkFirstLineMessage(msg: string): promise.Promise<boolean> {
     const textEl = this.getComponent().element(by.css('.first-line'));
     return textEl.getText().then((text) => {
       return text.trim().indexOf(msg) === 0;
     });
   }
 
-  checkSecondLineMessage(msg: string) {
+  checkSecondLineMessage(msg: string): promise.Promise<boolean> {
     const textEl = this.getComponent().element(by.css('.second-line'));
     return textEl.getText().then((text) => {
       return text.trim().indexOf(msg) === 0;

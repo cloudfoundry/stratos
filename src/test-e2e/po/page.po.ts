@@ -1,5 +1,5 @@
 import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { browser, element, by, promise } from 'protractor';
 import { SideNavigation } from './side-nav.po';
 import { PageHeader } from './page-header.po';
 import { E2EHelpers } from '../helpers/e2e-helpers';
@@ -20,17 +20,17 @@ export abstract class Page {
 
   constructor(public navLink?: string) {}
 
-  navigateTo() {
+  navigateTo(): promise.Promise<any> {
     return browser.get(this.navLink);
   }
 
-  isActivePage() {
+  isActivePage(): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
       return url === browser.baseUrl + this.navLink;
     });
   }
 
-  isActivePageOrChildPage() {
+  isActivePageOrChildPage(): promise.Promise<boolean> {
     return browser.getCurrentUrl().then(url => {
       return url.startsWith(browser.baseUrl + this.navLink);
     });

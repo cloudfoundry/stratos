@@ -11,8 +11,6 @@ var fs = require('fs');
 var path = require('path');
 var yaml = require('js-yaml');
 
-console.log(__dirname);
-
 const secretsPath = path.join(__dirname, SECRETS_FILE)
 if (!fs.existsSync(secretsPath)) {
   console.log('No secrets.yaml was found! Please provide a secrets.yson, see `secrets.yson.sample` as reference.');
@@ -27,8 +25,6 @@ try {
   console.log(e);
   process.exit(1);
 }
-
-console.log(secrets);
 
 exports.config = {
   allScriptsTimeout: 11000,

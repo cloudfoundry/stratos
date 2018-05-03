@@ -41,8 +41,7 @@ export class LoginPage {
     this.navigateTo();
     this.enterLogin(username, password);
     this.loginButton().click();
-    // Wait for the backend to catch up
-    // this.waitForLoggedIn();
+    // this.waitForApplicationPage();
   }
 
   waitForLoggedIn() {
@@ -53,12 +52,17 @@ export class LoginPage {
     return this.getLoginError().then(text => text === LOGIN_FAIL_MSG);
   }
 
+  // Wait until an application page is shown (one that uses the dashboard base)
   waitForApplicationPage() {
     return browser.wait(until.presenceOf(element(by.tagName('app-dashboard-base'))), 5000);
   }
 
   waitForLogin() {
     return browser.wait(until.presenceOf(element(by.tagName('app-login-page'))), 10000);
+  }
+
+  waitForNoEndpoints() {
+    return browser.wait(until.presenceOf(element(by.tagName('app-no-endpoints-non-admin'))), 10000);
   }
 
 }

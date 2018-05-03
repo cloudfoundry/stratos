@@ -9,6 +9,7 @@ import { ServicesPage } from '../services/services.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { MenuComponent } from '../po/menu.po';
+import { LoginPage } from '../login/login.po';
 
 describe('Endpoints', () => {
   const helpers = new E2EHelpers();
@@ -18,6 +19,7 @@ describe('Endpoints', () => {
   const applications = new ApplicationsPage();
   const services = new ServicesPage();
   const cloudFoundry = new CloudFoundryPage();
+  const login = new LoginPage();
 
   describe('Workflow on log in (admin/non-admin + no endpoints/some endpoints) -', () => {
     describe('As Admin -', () => {
@@ -83,6 +85,7 @@ describe('Endpoints', () => {
         });
 
         it('Should not display endpoint dashboard', () => {
+          login.waitForNoEndpoints();
           expect(endpointsPage.isNonAdminNoEndpointsPage()).toBeTruthy();
           expect(endpointsPage.isWelcomeMessageNonAdmin()).toBeTruthy();
         });

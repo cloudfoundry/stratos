@@ -30,6 +30,7 @@ export class SecretsHelpers {
   }
 
   getCloudFoundryEndpoints(): any {
+    throw new Error('Not implemented');
   }
 
   getEndpoints(): E2EEndpointsConfig {

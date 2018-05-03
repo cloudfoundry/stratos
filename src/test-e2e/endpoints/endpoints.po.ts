@@ -28,6 +28,10 @@ export class EndpointsPage extends Page {
     super('/endpoints');
   }
 
+  register() {
+    return this.header.getIconButton('add').then(elm => elm.click());
+  }
+
   isNonAdminNoEndpointsPage() {
     return browser.getCurrentUrl().then(url => {
       return url === browser.baseUrl + '/noendpoints';

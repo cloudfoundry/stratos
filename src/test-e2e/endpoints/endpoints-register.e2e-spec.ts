@@ -9,6 +9,8 @@ import { ServicesPage } from '../services/services.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
 import { MenuComponent } from '../po/menu.po';
+import { FormComponent } from '../po/form.po';
+import { RegisterDialog } from './register-dialog.po';
 
 describe('Endpoints', () => {
   const helpers = new E2EHelpers();
@@ -18,214 +20,158 @@ describe('Endpoints', () => {
   const applications = new ApplicationsPage();
   const services = new ServicesPage();
   const cloudFoundry = new CloudFoundryPage();
+  const register = new RegisterDialog();
 
   describe('Register Endpoints -', () => {
+
+    beforeAll(() => {
+      resetToLoggedIn(resets.removeAllEndpoints, true);
+    });
+
+    beforeEach(() => {
+      endpointsPage.sideNav.goto(SideNavMenuItem.Endpoints);
+      endpointsPage.register();
+      expect(register.isRegisterDialog()).toBeTruthy();
+      expect(register.stepper.canCancel()).toBeTruthy();
+    });
+
+    it('should show add form detail view when btn in tile is pressed', () => {
+      expect(register.stepper.canNext()).toBeFalsy();
+      expect(register.stepper.canCancel()).toBeTruthy();
+      expect(register.stepper.canPrevious()).toBeFalsy();
+    });
+
+    describe('Form -', () => {
+
+      const validEndpoint = secrets.getDefaultCFEndpoint();
+
+      describe('Invalid address -', () => {
+
+        const invalidUrl = 'Invalid API URL';
+
+        beforeEach(() => {
+          // Enter a name so the form will become valid on valid address
+          register.name.set('abc');
+          expect(register.stepper.canNext()).toBeFalsy();
+        });
+
+        it('Incorrect format', () => {
+          register.address.set(invalidUrl);
+          // Move focus so that we get the validation of the address field
+          register.name.focus();
+
+          // Check address is invalid
+          expect(register.stepper.canNext()).toBeFalsy();
+          expect(register.address.isInvalid()).toBeTruthy();
+          expect(register.address.getError()).toEqual(invalidUrl);
+        });
+
+        it('Valid format', () => {
+          register.address.set(validEndpoint.url);
+          // Move focus so that we get the validation of the address field
+          register.name.focus();
+
+          expect(register.stepper.canNext()).toBeTruthy();
+          expect(register.address.isInvalid()).toBeFalsy();
+        });
+
+        it('Invalid to valid to invalid', () => {
+          // Invalid
+          register.address.set(invalidUrl);
+          // Move focus so that we get the validation of the address field
+          register.name.focus();
+          expect(register.stepper.canNext()).toBeFalsy();
+          expect(register.address.isInvalid()).toBeTruthy();
+          expect(register.address.getError()).toEqual(invalidUrl);
+
+          // Valid
+          register.address.clear();
+          register.address.set(validEndpoint.url);
+          // Move focus so that we get the validation of the address field
+          register.name.focus();
+
+          expect(register.stepper.canNext()).toBeTruthy();
+          expect(register.address.isInvalid()).toBeFalsy();
+
+          // Invalid
+          register.address.set(invalidUrl);
+          // Move focus so that we get the validation of the address field
+          register.name.focus();
+          expect(register.stepper.canNext()).toBeFalsy();
+          expect(register.address.isInvalid()).toBeTruthy();
+          expect(register.address.getError()).toEqual(invalidUrl);
+
+        });
+      });
+
+      describe('Invalid name -', () => {
+
+        beforeEach(() => {
+          // Enter a url so the form will become valid on valid Name
+          register.address.set(validEndpoint.url);
+          expect(register.stepper.canNext()).toBeFalsy();
+        });
+
+        it('Valid', () => {
+          register.name.set(validEndpoint.name);
+          expect(register.stepper.canNext()).toBeTruthy();
+          expect(register.name.isInvalid()).toBeFalsy();
+        });
+
+        it('Invalid', () => {
+          register.name.clear();
+          register.address.focus();
+          expect(register.stepper.canNext()).toBeFalsy();
+          expect(register.name.isInvalid()).toBeTruthy();
+          expect(register.name.getError()).toEqual('Name is required');
+        });
+
+        it('Valid to invalid to valid', () => {
+          register.name.set(validEndpoint.name);
+          expect(register.stepper.canNext()).toBeTruthy();
+          expect(register.name.isInvalid()).toBeFalsy();
+
+          register.name.clear();
+          expect(register.stepper.canNext()).toBeFalsy();
+          expect(register.name.isInvalid()).toBeFalsy();
+
+          register.name.set(validEndpoint.name);
+          expect(register.stepper.canNext()).toBeTruthy();
+          expect(register.name.isInvalid()).toBeFalsy();
+        });
+      });
+
+      it('Should hint at SSL errors', () => {
+        register.form.fill({
+          name: validEndpoint.name,
+          url: validEndpoint.url,
+          skipsll: false
+        });
+        register.stepper.next();
+
+        // TODO: The dialog should stay and show an error
+        fail('not complete');
+      });
+
+      it('Successful register', () => {
+        register.form.fill({
+          name: validEndpoint.name,
+          url: validEndpoint.url,
+          skipsll: true
+        });
+        register.stepper.next();
+
+        expect(endpointsPage.isActivePage()).toBeTruthy();
+        expect(endpointsPage.table.isPresent()).toBeTruthy();
+
+        // TODO: Check toast (f there is one)
+
+        endpointsPage.table.getEndpointDataForEndpoint(validEndpoint.name).then((data: EndpointMetadata) => {
+          expect(data.name).toEqual(validEndpoint.name);
+          expect(data.url).toEqual(validEndpoint.url);
+          expect(data.connected).toBeFalsy();
+        });
+      });
+    });
   });
-
 });
-
-
-  // // The following tests are all carried out as non-admin
-  // describe('Dashboard tests -', () => {
-
-  //   describe('Register endpoints -', () => {
-
-  //     function registerTests(type) {
-  //       beforeAll(() => {
-  //         resetToLoggedIn(resetTo.removeAllCnsi, true)
-  //           .then(() => {
-  //             return endpointsPage.isEndpoints();
-  //           })
-  //           .then(function (isEndpoints) {
-  //             expect(isEndpoints).toBe(true);
-
-  //             // No endpoints ... no table
-  //             expect(endpointsPage.getEndpointTable().isDisplayed()).toBeFalsy();
-  //           });
-  //       });
-
-  //       beforeEach(() => {
-  //         registerEndpoint.safeClose();
-  //       });
-
-  //       it('should show add form detail view when btn in welcome is pressed', () => {
-  //         endpointsPage.clickAddClusterInWelcomeMessage().then(() => {
-  //           expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-  //         });
-  //       });
-
-  //       it('should show add form detail view when btn in tile is pressed', () => {
-  //         endpointsPage.headerRegister().then(() => {
-  //           expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-  //         });
-  //       });
-
-  //       describe('Form', () => {
-  //         var service = helpers.getRegisteredService();
-
-  //         beforeEach(() => {
-  //           endpointsPage.headerRegister()
-  //             .then(() => {
-  //               expect(registerEndpoint.isVisible().isDisplayed()).toBeTruthy();
-  //               expect(registerEndpoint.getStep()).toBe(2);
-  //               registerEndpoint.closeEnabled(true);
-  //               // registerEndpoint.selectType(type);
-  //             });
-  //         });
-
-  //         describe('endpoint details step', () => {
-  //           it('is endpoint details step', () => {
-  //             expect(registerEndpoint.getStep()).toBe(2);
-  //             expect(registerEndpoint.getStepTwoType()).toBe(type);
-  //           });
-
-  //           if (type === 'cf') {
-  //             describe('Invalid address', () => {
-
-  //               var invalidUrl = 'This is an invalid URL';
-
-  //               beforeEach(() => {
-  //                 // Enter a name so the form will become valid on valid address
-  //                 registerEndpoint.enterName('abc').then(() => {
-  //                   return registerEndpoint.registerEnabled(false);
-  //                 });
-  //               });
-
-  //               it('Incorrect format', () => {
-  //                 registerEndpoint.enterAddress(invalidUrl)
-  //                   .then(() => {
-  //                     return registerEndpoint.isAddressValid(false);
-  //                   })
-  //                   .then(() => {
-  //                     registerEndpoint.registerEnabled(false);
-  //                   });
-  //               });
-
-  //               it('Valid format', () => {
-  //                 registerEndpoint.enterAddress(service.register.api_endpoint)
-  //                   .then(() => {
-  //                     return registerEndpoint.isAddressValid(true);
-  //                   })
-  //                   .then(() => {
-  //                     registerEndpoint.registerEnabled(true);
-  //                   });
-  //               });
-
-  //               it('Invalid to valid to invalid', () => {
-  //                 registerEndpoint.enterAddress(invalidUrl)
-  //                   .then(() => {
-  //                     return registerEndpoint.isAddressValid(false);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.registerEnabled(false);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.clearAddress();
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.enterAddress(service.register.api_endpoint);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.isAddressValid(true);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.registerEnabled(true);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.clearAddress();
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.enterAddress(invalidUrl);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.isAddressValid(false);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.registerEnabled(false);
-  //                   });
-  //               });
-  //             });
-
-  //             describe('Invalid name', () => {
-
-  //               beforeEach(() => {
-  //                 // Enter a url so the form will become valid on valid Name
-  //                 registerEndpoint.enterAddress(service.register.api_endpoint).then(() => {
-  //                   return registerEndpoint.registerEnabled(false);
-  //                 });
-  //               });
-
-  //               it('Valid', () => {
-  //                 registerEndpoint.enterName(service.register.cnsi_name)
-  //                   .then(() => {
-  //                     registerEndpoint.isNameValid(true);
-  //                     registerEndpoint.registerEnabled(true);
-  //                   });
-  //               });
-
-  //               it('Invalid to valid to invalid', () => {
-  //                 registerEndpoint.enterName(service.register.cnsi_name)
-  //                   .then(() => {
-  //                     registerEndpoint.isNameValid(true);
-  //                     registerEndpoint.registerEnabled(true);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.clearName();
-  //                   })
-  //                   .then(() => {
-  //                     registerEndpoint.isNameValid(false);
-  //                     registerEndpoint.registerEnabled(false);
-  //                   })
-  //                   .then(() => {
-  //                     return registerEndpoint.enterName(service.register.cnsi_name);
-  //                   })
-  //                   .then(() => {
-  //                     registerEndpoint.isNameValid(true);
-  //                     registerEndpoint.registerEnabled(true);
-  //                   });
-  //               });
-  //             });
-  //           }
-
-  //           it('Should hint at SSL errors', () => {
-  //             registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name, false)
-  //               .then(() => {
-  //                 return registerEndpoint.checkError(/SSL/);
-  //               });
-  //           });
-
-  //           it('Successful register', () => {
-  //             var endpointIndex;
-  //             registerEndpoint.populateAndRegister(service.register.api_endpoint, service.register.cnsi_name,
-  //               service.register.skip_ssl_validation)
-  //               .then(() => {
-  //                 var toastText = new RegExp("Endpoint '" + service.register.cnsi_name + "' successfully registered");
-  //                 return helpers.checkAndCloseToast(toastText);
-  //               })
-  //               .then(() => {
-
-  //                 var endpointsTable = endpointsPage.getEndpointTable();
-  //                 var endpointsRows = helpers.getTableRows(endpointsTable);
-
-  //                 return endpointsRows.each(function (element, index) {
-  //                   return element.all(by.css('td')).first().getText().then(function (name) {
-  //                     if (name.toLowerCase() === service.register.cnsi_name.toLowerCase()) {
-  //                       endpointIndex = index;
-  //                     }
-  //                   });
-  //                 });
-  //               })
-  //               .then(() => {
-  //                 expect(endpointIndex).toBeDefined();
-  //                 expect(endpointsPage.endpointIsDisconnected(endpointIndex)).toBeTruthy();
-  //               });
-  //           });
-  //         });
-  //       });
-  //     }
-
-  //     describe('Register cf -', () => {
-  //       registerTests('cf');
-  //     });
-
-  //   });

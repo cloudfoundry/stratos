@@ -22,7 +22,7 @@ describe('Endpoints', () => {
   const services = new ServicesPage();
   const cloudFoundry = new CloudFoundryPage();
 
-  fdescribe('Connect/Disconnect endpoints -', () => {
+  describe('Connect/Disconnect endpoints -', () => {
 
     beforeAll(() => {
       resetToLoggedIn(resets.resetAllEndpoints, false);

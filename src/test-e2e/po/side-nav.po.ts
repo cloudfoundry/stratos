@@ -1,5 +1,5 @@
 import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 
 export enum SideNavMenuItem {
@@ -19,7 +19,7 @@ export class SideNavigation extends Component {
   }
 
   // Goto the specified menu item
-  goto(menuItem: SideNavMenuItem) {
+  goto(menuItem: SideNavMenuItem): promise.Promise<void> {
     return element(by.cssContainingText('.side-nav__item', menuItem)).click();
   }
 

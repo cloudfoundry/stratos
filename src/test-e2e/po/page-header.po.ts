@@ -1,5 +1,5 @@
 import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 import { MenuComponent } from './menu.po';
 
@@ -25,15 +25,19 @@ export class PageHeader extends Component {
     });
   }
 
-  clickIconButton(iconName: string) {
+  clickIconButton(iconName: string): promise.Promise<void> {
     return this.getIconButton(iconName).then(btn => btn.click());
   }
 
-  hasIconButton(iconName: string) {
+  hasIconButton(iconName: string): promise.Promise<boolean> {
     return this.getIconButton(iconName).then(btn => btn && btn.isDisplayed());
   }
 
-  logout() {
+  getTitle(): promise.Promise<string> {
+    return this.locator.element(by.css('.page-header h1')).getText();
+  }
+
+  logout(): promise.Promise<any> {
     return this.clickIconButton('more_vert').then(() => {
       browser.driver.sleep(2000);
       const menu = new MenuComponent();

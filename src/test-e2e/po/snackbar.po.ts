@@ -1,5 +1,5 @@
 import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 
 /**
@@ -11,23 +11,23 @@ export class SnackBarComponent extends Component {
     super(element(by.css('.mat-simple-snackbar')));
   }
 
-  close() {
+  close(): promise.Promise<void> {
     return this.locator.element(by.tagName('button')).click();
     // return browser.wait(protractor.until.elementIsNotVisible(this.locator.getWebElement()));
   }
 
-  getButtonText() {
+  getButtonText(): promise.Promise<string> {
     return this.locator.element(by.tagName('button')).getText();
   }
 
   // The text has the button text as well - so just check that the text starts with expected text
-  hasMessage(expected: string) {
+  hasMessage(expected: string): promise.Promise<boolean> {
     return this.locator.getText().then(actual => {
       return actual.startsWith(expected);
     });
   }
 
-  getMessage() {
+  getMessage(): promise.Promise<string> {
     return this.locator.getText();
   }
 }

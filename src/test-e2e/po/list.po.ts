@@ -1,9 +1,9 @@
 import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 
 /**
- * Page Objeect for list component
+ * Page Objeect for the List component
  */
 export class ListComponent extends Component {
 
@@ -14,19 +14,19 @@ export class ListComponent extends Component {
     this.table = new ListTableComponent(locator);
    }
 
-   isTableView() {
+   isTableView(): promise.Promise<boolean> {
      const listElement = this.locator.element(by.css('.list-component'));
      return this.hasClass('list-component__table', listElement);
   }
 
-  isCardsView() {
+  isCardsView(): promise.Promise<boolean> {
     const listElement = this.locator.element(by.css('.list-component'));
     return this.hasClass('list-component__cards', listElement);
  }
 
 }
 
-// Table View
+// Page Object for the List Table View
 export class ListTableComponent extends Component {
 
   constructor(locator: ElementFinder) {
@@ -37,16 +37,8 @@ export class ListTableComponent extends Component {
     return this.locator.all(by.css('.app-table__row'));
   }
 
-  getCell(row, column) {
+  getCell(row, column): ElementFinder {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
   }
-
-  // getData() {
-  //   return this.getRows(ele).map(function (row) {
-  //     return row.all(by.css('td')).map(function (col) {
-  //       return col.getText();
-  //     });
-  //   });
-  // }
 
 }

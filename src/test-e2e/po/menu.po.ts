@@ -1,7 +1,10 @@
 import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 
+export class MenuItemMap {
+  [key: string]: MenuItem
+}
 
 export class MenuItem {
   index: number;
@@ -19,7 +22,7 @@ export class MenuComponent extends Component {
     super(locator);
   }
 
-  getItems() {
+  getItems(): promise.Promise<MenuItem[]> {
     return this.locator.all(by.tagName('button')).map((elm, index) => {
       return {
         index: index,
@@ -31,19 +34,15 @@ export class MenuComponent extends Component {
     });
   }
 
-  getItem(name: string) {
+  getItem(name: string): ElementFinder {
     return this.locator.element(by.cssContainingText('button', name));
   }
 
-  clickItem(name: string) {
+  clickItem(name: string): promise.Promise<void> {
     return this.getItem(name).click();
   }
 
-  // isItemEnabled(name: string) {
-  //   return this.hasClass('')
-  // }
-
-  getItemMap() {
+  getItemMap(): promise.Promise<MenuItemMap> {
     return this.getItems().then(items => {
       const menuItems = {};
       items.forEach((item: MenuItem) => {
@@ -54,8 +53,8 @@ export class MenuComponent extends Component {
   }
 
   // Click at the very top to close the menu
-  close() {
-    element(by.tagName('body')).click();
+  close(): promise.Promise<void> {
+    return element(by.tagName('body')).click();
   }
 
 }
