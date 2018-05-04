@@ -13,7 +13,7 @@ spec:
         component: "console"
     spec:
       containers:
-      - image: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}"
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.console}}:{{.Values.consoleVersion}}
         name: ui
         env:
         - name: ENCRYPTION_KEY_VOLUME
@@ -32,7 +32,7 @@ spec:
         - containerPort: 443
           name: https
           protocol: TCP
-      - image: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}"
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.postflight}}:{{.Values.consoleVersion}}
         name: "postflight"
         env:
         - name: DB_HOST
@@ -82,7 +82,7 @@ spec:
             name: "{{ .Release.Name }}-upgrade-volume"
           - mountPath: /etc/secrets/
             name: "{{ .Release.Name }}-secret"
-      - image: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}"
+      - image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.proxy}}:{{.Values.consoleVersion}}
         name: proxy
         env:
         - name: DB_USER
@@ -139,46 +139,46 @@ spec:
           value: "true"
         - name: HTTP_PROXY
         {{- if .Values.httpProxy }}
-          value: "{{.Values.httpProxy}}"
+          value: {{.Values.httpProxy}}
         {{- end }}
         - name: HTTPS_PROXY
         {{- if .Values.httpsProxy }}
-          value: "{{.Values.httpsProxy}}"
+          value: {{.Values.httpsProxy}}
         {{- end }}
         - name: NO_PROXY
         {{- if .Values.noProxy }}
-          value: "{{.Values.noProxy}}"
+          value: {{.Values.noProxy}}
         {{- end }}
         - name: FTP_PROXY
         {{- if .Values.ftpProxy }}
-          value: "{{.Values.ftpProxy}}"
+          value: {{.Values.ftpProxy}}
         {{- end }}
         - name: SOCKS_PROXY
         {{- if .Values.socksProxy }}
-          value: "{{.Values.socksProxy}}"
+          value: {{.Values.socksProxy}}
         {{- end }}
         {{- if or .Values.env.UAA_HOST .Values.env.DOMAIN }}  
         - name: UAA_ENDPOINT 
-          value: "{{ template "scfUaaEndpoint" . }}"
+          value: {{ template "scfUaaEndpoint" . }}
         - name: CONSOLE_CLIENT 
           value: cf
         - name: CONSOLE_CLIENT_SECRET
           value:
         - name: AUTO_REG_CF_URL
-          value: "https://api.{{.Values.env.DOMAIN}}"
+          value: https://api.{{.Values.env.DOMAIN}}
         - name: CONSOLE_ADMIN_SCOPE 
           value: cloud_controller.admin
         - name: SKIP_SSL_VALIDATION 
           value: "true"
         {{- else if .Values.uaa.host }}  
         - name: UAA_ENDPOINT 
-          value: "{{default "https://" .Values.uaa.protocol}}{{.Values.uaa.host}}:{{.Values.uaa.port}}"
+          value: {{default "https://" .Values.uaa.protocol}}{{.Values.uaa.host}}:{{.Values.uaa.port}}
         - name: CONSOLE_CLIENT 
-          value: "{{.Values.uaa.consoleClient}}"
+          value: {{.Values.uaa.consoleClient}}
         - name: CONSOLE_CLIENT_SECRET 
-          value: "{{.Values.uaa.consoleClientSecret}}"
+          value: {{.Values.uaa.consoleClientSecret}}
         - name: CONSOLE_ADMIN_SCOPE 
-          value: "{{.Values.uaa.consoleAdminIdentifier}}"
+          value: {{.Values.uaa.consoleAdminIdentifier}}
         - name: SKIP_SSL_VALIDATION 
           value: {{default "true" .Values.uaa.skipSSLValidation | quote}}
         {{- end }}
@@ -223,7 +223,7 @@ spec:
     spec:
       containers:
       - name: mariadb
-        image: "{{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}"
+        image: {{.Values.kube.registry.hostname}}/{{.Values.kube.organization}}/{{.Values.images.mariadb}}:{{.Values.consoleVersion}}
         env:
         {{- if .Values.mariadb.usePassword }}
         - name: MYSQL_ROOT_PASSWORD
@@ -270,13 +270,13 @@ spec:
           mountPath: /var/lib/mysql
       {{- if and .Values.kube.registry.username .Values.kube.registry.password }}
       imagePullSecrets:
-      - name: "{{.Values.dockerRegistrySecret}}"
+      - name: {{.Values.dockerRegistrySecret}}
       {{- end }}
       volumes:
       - name: data
       {{- if .Values.mariadb.persistence.enabled }}
         persistentVolumeClaim:
-          claimName: "{{ .Values.mariadb.persistence.existingClaim | default "console-mariadb" }}"
+          claimName: {{ .Values.mariadb.persistence.existingClaim | default "console-mariadb" }}
       {{- else }}
         emptyDir: {}
       {{- end -}}
