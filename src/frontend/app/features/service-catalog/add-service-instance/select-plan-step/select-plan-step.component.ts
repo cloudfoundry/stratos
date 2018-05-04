@@ -37,7 +37,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   constructor(private store: Store<AppState>, private servicesService: ServicesService) {
     this.servicePlans$ = servicesService.getVisibleServicePlans().pipe(
-      filter(p => !!p && p.length > 0),    
+      filter(p => !!p && p.length > 0),
       map(o => this.mapToServicePlan(o)),
       share(),
       first()

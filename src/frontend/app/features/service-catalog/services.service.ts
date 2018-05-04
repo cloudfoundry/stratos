@@ -1,23 +1,31 @@
 import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store/store';
-
-import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { AppState } from '../../store/app-state';
-import { entityFactory, serviceSchemaKey, servicePlanVisibilitySchemaKey, serviceBrokerSchemaKey } from '../../store/helpers/entity-factory';
-import { ActiveRouteCfOrgSpace } from '../cloud-foundry/cf-page.types';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { GetService } from '../../store/actions/service.actions';
-import { EntityService } from '../../core/entity-service';
-import { APIResource, EntityInfo } from '../../store/types/api.types';
-import { IService, IServiceExtra, IServicePlan, IServicePlanVisibility, IServiceBroker } from '../../core/cf-api-svc.types';
-import { Observable } from 'rxjs/Observable';
 import { ActivatedRoute } from '@angular/router';
-import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { filter, map, tap, publish, refCount, publishReplay, first, combineLatest, switchMap } from 'rxjs/operators';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
-import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
+import { Store } from '@ngrx/store/store';
+import { Observable } from 'rxjs/Observable';
+import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+
+import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
+import { IOrganization } from '../../core/cf-api.types';
+import { EntityService } from '../../core/entity-service';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceBrokers } from '../../store/actions/service-broker.actions';
+import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
+import { GetService } from '../../store/actions/service.actions';
+import { AppState } from '../../store/app-state';
+import {
+  entityFactory,
+  organizationSchemaKey,
+  serviceBrokerSchemaKey,
+  servicePlanVisibilitySchemaKey,
+  serviceSchemaKey,
+} from '../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectCreateServiceInstanceServicePlan } from '../../store/selectors/create-service-instance.selectors';
+import { APIResource } from '../../store/types/api.types';
+import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -185,41 +193,41 @@ export class ServicesService {
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
     return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
       .pipe(
-        filter(([p, q]) => !!p && !!q),
-        map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
-        map(p => p[0]),
-        filter(p => !!p)
+      filter(([p, q]) => !!p && !!q),
+      map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
+      map(p => p[0]),
+      filter(p => !!p)
       );
   }
 
   getOrgsForSelectedServicePlan = (): Observable<APIResource<IOrganization>[]> => {
     return this.getSelectedServicePlan()
       .pipe(
-        switchMap(servicePlan => {
-          if (servicePlan.entity.public) {
-            const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.cfGuid);
-            return getPaginationObservables<APIResource<IOrganization>>({
-              store: this.store,
-              action: getAllOrgsAction,
-              paginationMonitor: this.paginationMonitorFactory.create(
-                getAllOrgsAction.paginationKey,
-                entityFactory(organizationSchemaKey)
-              )
-            }, true)
-              .entities$.pipe(
-                share(),
-                first()
-              );
-          } else {
-            // Service plan is not public, fetch visibilities
-            return this.getServicePlanVisibilitiesForPlan(servicePlan.metadata.guid)
-              .pipe(
-                map(s => s.map(o => o.entity.organization)),
-                share(),
-                first()
-              );
-          }
-        })
+      switchMap(servicePlan => {
+        if (servicePlan.entity.public) {
+          const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.cfGuid);
+          return getPaginationObservables<APIResource<IOrganization>>({
+            store: this.store,
+            action: getAllOrgsAction,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              getAllOrgsAction.paginationKey,
+              entityFactory(organizationSchemaKey)
+            )
+          }, true)
+            .entities$.pipe(
+            share(),
+            first()
+            );
+        } else {
+          // Service plan is not public, fetch visibilities
+          return this.getServicePlanVisibilitiesForPlan(servicePlan.metadata.guid)
+            .pipe(
+            map(s => s.map(o => o.entity.organization)),
+            share(),
+            first()
+            );
+        }
+      })
       );
   }
 }
