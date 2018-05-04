@@ -348,9 +348,7 @@ func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, pas
 
 	body := url.Values{}
 	body.Set("grant_type", "password")
-	body.Set("username", username)
-	body.Set("password", password)
-	body.Set("response_type", "token")
+	body.Set("passcode", username)
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
@@ -375,7 +373,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 		return nil, fmt.Errorf(msg, err)
 	}
 
-	req.SetBasicAuth(client, clientSecret)
+	req.SetBasicAuth("cf", "")
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	var h http.Client
