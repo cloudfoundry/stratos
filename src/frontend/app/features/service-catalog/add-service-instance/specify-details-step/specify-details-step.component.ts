@@ -200,7 +200,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.stepperForm.controls.name.value;
     const spaceGuid = this.stepperForm.controls.space.value;
     let params = this.stepperForm.controls.params.value;
-    params = params ? JSON.parse(params) : null;
+    try {
+      params = JSON.parse(params) || null;
+    } catch (e) {
+      params = null;
+    }
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 

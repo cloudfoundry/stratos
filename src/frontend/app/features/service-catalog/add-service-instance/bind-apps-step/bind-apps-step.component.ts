@@ -113,8 +113,11 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
     const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
     let params = this.stepperForm.controls.params.value;
-    params = JSON.parse(params) || null;
-
+    try {
+      params = JSON.parse(params) || null;
+    } catch (e) {
+      params = null;
+    }
     this.store.dispatch(new CreateServiceBinding(
       this.servicesService.cfGuid,
       guid,
