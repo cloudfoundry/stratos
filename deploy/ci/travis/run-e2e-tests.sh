@@ -2,7 +2,15 @@
 
 set -e
 
-echo "Running Stratos e2e tests..."
+echo "Stratos e2e tests"
+echo "================="
+
+echo "Checking docker version"
+
+docker version
+docker-compose version
+
+echo "Preparing for e2e tests..."
 
 curl -sLk -o ./build/secrets.yaml https://travis.capbristol.com/yaml
 
