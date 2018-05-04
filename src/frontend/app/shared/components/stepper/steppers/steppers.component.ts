@@ -72,6 +72,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
+      if (this.nextSub) {
+        this.nextSub.unsubscribe();
+      }
       this.nextSub = obs$
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false }))
@@ -97,7 +100,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       map(([path, params]) => {
         this.store.dispatch(new RouterNav({ path: path, query: params }));
       })
-      );
+    );
   }
 
   setActive(index: number) {

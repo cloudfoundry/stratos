@@ -254,7 +254,6 @@ export class ApplicationDeleteComponent<T> {
 
   private setSelectedServiceInstances(selected: APIResource<IServiceBinding>[]) {
     this.selectedServiceInstances = selected;
-    console.log(selected);
     this.selectedServiceInstances$.next(selected);
   }
 
