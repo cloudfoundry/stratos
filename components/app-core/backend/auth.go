@@ -108,6 +108,11 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
+	_, err = p.saveCNSIToken("cnsi-guid-0", *u, uaaRes.AccessToken, uaaRes.RefreshToken, false)
+	if err != nil {
+		return err
+	}
+
 	if p.Config.LoginHook != nil {
 		err = p.Config.LoginHook(c)
 		if err != nil {

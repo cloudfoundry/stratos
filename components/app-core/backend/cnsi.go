@@ -11,7 +11,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
-	uuid "github.com/satori/go.uuid"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/cnsis"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
@@ -19,6 +18,7 @@ import (
 )
 
 const dbReferenceError = "Unable to establish a database reference: '%v'"
+var cnsiGuidCounter = 0
 
 func isSSLRelatedError(err error) (bool, string) {
 	if urlErr, ok := err.(*url.Error); ok {
@@ -102,7 +102,8 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 			err)
 	}
 
-	guid := uuid.NewV4().String()
+	guid := fmt.Sprintf("cnsi-guid-%d",cnsiGuidCounter)
+	cnsiGuidCounter++
 
 	newCNSI.Name = cnsiName
 	newCNSI.APIEndpoint = apiEndpointURL
