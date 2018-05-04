@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap, tap } from 'rxjs/operators';
 
 import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
-import { IOrganization } from '../../core/cf-api.types';
+import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
@@ -19,18 +19,24 @@ import {
   serviceBrokerSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
+  spaceSchemaKey,
+  spaceWithOrgKey,
 } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCreateServiceInstanceServicePlan } from '../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { selectEntity } from '../../store/selectors/api.selectors';
+import { GetSpace } from '../../store/actions/space.actions';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
   hasVisibilities?: boolean;
   isPublic: boolean;
+  guid?: string;
+  spaceGuid?: string;
 }
 
 @Injectable()
@@ -49,7 +55,7 @@ export class ServicesService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     public activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory
+    private paginationMonitorFactory: PaginationMonitorFactory,
 
   ) {
 
@@ -138,7 +144,6 @@ export class ServicesService {
     );
   }
 
-
   fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
     svcPlanVis: APIResource<IServicePlanVisibility>[],
@@ -162,7 +167,8 @@ export class ServicesService {
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
       return Observable.of({
-        isPublic: true
+        isPublic: true,
+        guid: servicePlan.metadata.guid
       });
     }
     return this.service$.pipe(
@@ -173,7 +179,9 @@ export class ServicesService {
         if (serviceBroker.entity.space_guid) {
           return {
             isPublic: false,
-            spaceScoped: true
+            spaceScoped: true,
+            guid: servicePlan.metadata.guid,
+            spaceGuid: serviceBroker.entity.space_guid
           };
         } else {
           const servicePlanVisibilities = allServicePlanVisibilities.filter(
@@ -183,13 +191,17 @@ export class ServicesService {
             return {
               isPublic: false,
               spaceScoped: false,
-              hasVisibilities: true
+              hasVisibilities: true,
+              guid: servicePlan.metadata.guid
+
             };
           }
         }
       })
     );
   }
+
+
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
     return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
       .pipe(
@@ -200,11 +212,20 @@ export class ServicesService {
       );
   }
 
+
+  getSelectedServicePlanAccessibility = () => {
+    return this.getSelectedServicePlan().pipe(
+      switchMap(plan => this.getServicePlanAccessibility(plan))
+    );
+  }
+
+
   getOrgsForSelectedServicePlan = (): Observable<APIResource<IOrganization>[]> => {
     return this.getSelectedServicePlan()
       .pipe(
-      switchMap(servicePlan => {
-        if (servicePlan.entity.public) {
+      switchMap(servicePlan => this.getServicePlanAccessibility(servicePlan)),
+      switchMap(servicePlanAccessbility => {
+        if (servicePlanAccessbility.isPublic) {
           const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.cfGuid);
           return getPaginationObservables<APIResource<IOrganization>>({
             store: this.store,
@@ -218,9 +239,33 @@ export class ServicesService {
             share(),
             first()
             );
-        } else {
+        } else if (servicePlanAccessbility.spaceScoped) {
+          // Service plan is not public, but is space-scoped
+          const action = new GetSpace(servicePlanAccessbility.spaceGuid, this.cfGuid,
+            [
+              createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+            ]
+          );
+          action.entity = [entityFactory(spaceWithOrgKey)];
+          return this.entityServiceFactory.create<APIResource<ISpace>>(
+            spaceSchemaKey,
+            entityFactory(spaceWithOrgKey),
+            servicePlanAccessbility.spaceGuid,
+            action,
+            true
+          ).waitForEntity$
+            .pipe(
+            filter(p => !!p),
+            map((p) => {
+              const orgEntity = { ...p.entity.entity.organization.entity, spaces: [p.entity] };
+              return [{ ...p.entity.entity.organization, entity: orgEntity }];
+            }),
+            share(),
+            first()
+            );
+        } else if (servicePlanAccessbility.hasVisibilities) {
           // Service plan is not public, fetch visibilities
-          return this.getServicePlanVisibilitiesForPlan(servicePlan.metadata.guid)
+          return this.getServicePlanVisibilitiesForPlan(servicePlanAccessbility.guid)
             .pipe(
             map(s => s.map(o => o.entity.organization)),
             share(),

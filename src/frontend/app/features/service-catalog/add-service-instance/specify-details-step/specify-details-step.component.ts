@@ -112,8 +112,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     )
   }, true)
     .entities$.pipe(
-      share(),
-      first()
+    share(),
+    first()
     )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
@@ -155,7 +155,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }),
     filter(p => !!p),
     map(org => org.entity.spaces),
-    tap(spaces => {
+    combineLatest(this.servicesService.getSelectedServicePlanAccessibility()),
+    map(([spaces, servicePlanAccessibility]) => {
+      if (servicePlanAccessibility.spaceScoped) {
+        return spaces.filter(s => s.metadata.guid === servicePlanAccessibility.spaceGuid);
+      }
+    }),
+    tap((spaces) => {
       if (spaces.length > 0) {
         const selectedSpaceId = spaces[0].metadata.guid;
         this.stepperForm.controls.space.setValue(selectedSpaceId);
@@ -200,7 +206,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.stepperForm.controls.name.value;
     const spaceGuid = this.stepperForm.controls.space.value;
     let params = this.stepperForm.controls.params.value;
-    params = params ? JSON.parse(params) : null;
+    try {
+      params = params ? JSON.parse(params) : null;
+    } catch (e) {
+      params = null;
+    }
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 
