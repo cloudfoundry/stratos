@@ -8,7 +8,7 @@
       <button mat-icon-button name="edit" *ngIf="(this.applicationService.applicationState$ | async)" routerLink="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}/edit" matTooltip="Edit">
         <mat-icon>edit</mat-icon>
       </button>
-      <button mat-icon-button name="delete" (click)="deleteApplication()" matTooltip="Delete">
+      <button mat-icon-button name="delete" (click)="redirectToDeletePage()" matTooltip="Delete">
         <mat-icon>delete</mat-icon>
       </button>
       <span>

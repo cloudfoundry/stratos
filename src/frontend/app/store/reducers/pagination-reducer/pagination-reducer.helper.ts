@@ -125,8 +125,8 @@ function getObservables<T = any>(
   let lastValidationFootprint: string;
 
   const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-    publishReplay(1),
-    refCount()
+    // publishReplay(1),
+    // refCount()
   );
   const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 

@@ -10,6 +10,8 @@ import {
   entityFactory,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
+  serviceSchemaKey,
+  servicePlanSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -24,8 +26,10 @@ export class AppServiceBindingDataSource extends ListDataSource<APIResource> {
     const paginationKey = createEntityRelationPaginationKey(serviceBindingSchemaKey, appGuid);
     return new GetAppServiceBindings(
       appGuid, cfGuid, paginationKey, [
+        createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+        createEntityRelationKey(serviceInstancesSchemaKey, serviceSchemaKey),
         createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey),
-        createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+        createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
       ]);
   }
 

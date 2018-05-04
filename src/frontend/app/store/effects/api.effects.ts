@@ -37,7 +37,7 @@ interface APIErrorCheck {
   errorCode: string;
   guid: string;
   url: string;
-  errorResponse: JetStreamCFErrorResponse;
+  errorResponse?: JetStreamCFErrorResponse;
 }
 
 interface JetStreamError {
@@ -124,7 +124,22 @@ export class APIEffect {
         return this.handleMultiEndpoints(response, actionClone);
       }),
       mergeMap(response => {
-        const { entities, totalResults, totalPages } = response;
+        const { entities, totalResults, totalPages, errors = [] } = response;
+        errors.forEach(error => {
+          if (error.error) {
+            const fakedAction = { ...actionClone, endpointGuid: error.guid };
+            this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction));
+            this.store.dispatch(new WrapperRequestActionFailed(
+              error.errorCode,
+              { ...actionClone, endpointGuid: error.guid },
+              requestType
+            ));
+          }
+        });
+        const hasError = errors.findIndex(error => error.error) >= 0;
+        if (hasError) {
+          return [];
+        }
         return [new ValidateEntitiesStart(
           actionClone,
           entities.result,
@@ -187,19 +202,31 @@ export class APIEffect {
     return result;
   }
 
-  checkForErrors(resData, action: ICFAction): APIErrorCheck[] {
+  checkForErrors(resData, action): APIErrorCheck[] {
+    if (!resData) {
+      if (action.endpointGuid) {
+        return [{
+          error: false,
+          errorCode: '200',
+          guid: action.endpointGuid,
+          url: action.options.url
+        }];
+      }
+      return null;
+    }
     return Object.keys(resData)
-      .filter(guid => resData[guid] !== null)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
-        const endpoints = resData[cfGuid] as JetStreamError;
-        const hasError = !!endpoints.error;
+        const endpoint = resData ? resData[cfGuid] as JetStreamError : null;
+        const succeeded = !endpoint || !endpoint.error;
+        const errorCode = endpoint && endpoint.error ? endpoint.error.statusCode.toString() : '500';
+        const errorResponse = endpoint ? endpoint.errorResponse : { code: 0, description: 'Unknown', error_code: '0' };
         return {
-          error: hasError,
-          errorCode: hasError ? endpoints.error.statusCode.toString() : '200',
+          error: !succeeded,
+          errorCode: succeeded ? '200' : errorCode,
           guid: cfGuid,
           url: action.options.url,
-          errorResponse: hasError ? endpoints.errorResponse : null,
+          errorResponse: succeeded ? null : errorResponse,
         };
       });
   }
@@ -326,14 +353,15 @@ export class APIEffect {
     });
   }
 
-  private handleMultiEndpoints(resData, apiAction: ICFAction): {
+  private handleMultiEndpoints(resData, apiAction: IRequestAction): {
     resData,
     entities,
     totalResults,
-    totalPages
+    totalPages,
+    errors: APIErrorCheck[]
   } {
-    if (resData) {
-      const endpointChecks = this.checkForErrors(resData, apiAction);
+    const endpointChecks = this.checkForErrors(resData, apiAction);
+    if (endpointChecks) {
       this.handleApiEvents(endpointChecks);
     }
     let entities;
@@ -356,7 +384,8 @@ export class APIEffect {
       resData,
       entities,
       totalResults,
-      totalPages
+      totalPages,
+      errors: endpointChecks
     };
   }
 

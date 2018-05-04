@@ -7,7 +7,7 @@ import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
 import {
   appDataSort,
-  CloudFoundryEndpointService,
+  CloudFoundryEndpointService
 } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../../store/app-state';
