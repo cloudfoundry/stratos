@@ -35,7 +35,10 @@ exports.config = {
     './src/test-e2e/dashboard/dashboard.e2e-spec.ts',
   ],
   capabilities: {
-    'browserName': 'chrome'
+    'browserName': 'chrome',
+    chromeOptions: {
+      args: ['--no-sandbox']
+    }
   },
   directConnect: true,
   framework: 'jasmine',
@@ -56,3 +59,9 @@ exports.config = {
     }));
   }
 };
+
+if (secrets.headless) {
+  exports.config.capabilities.chromeOptions.args = ['--headless', '--allow-insecure-localhost', '--disable-gpu', '--window-size=1366,768', '--no-sandbox'];
+}
+
+
