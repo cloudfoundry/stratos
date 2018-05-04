@@ -207,7 +207,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const spaceGuid = this.stepperForm.controls.space.value;
     let params = this.stepperForm.controls.params.value;
     try {
-      params = params ? JSON.parse(params) : null;
+      params = JSON.parse(params) || null;
     } catch (e) {
       params = null;
     }
