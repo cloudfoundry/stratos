@@ -37,19 +37,25 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
         ...state, serviceInstanceGuid: action.guid
       };
     case SET_SERVICE_INSTANCE_SPACE_SCOPED:
-      return {
-        ...state, spaceScoped: action.spaceScoped, spaceGuid: action.spaceGuid
-      };
+      return setSpaceScopedFlag(state, action);
     case SET_CREATE_SERVICE_INSTANCE:
-      return {
-        ...state,
-        spaceScoped: action.spaceScoped,
-        spaceGuid: action.spaceGuid,
-        name: action.name, params:
-        action.jsonParams,
-        tags: action.tags
-      };
+      return setCreateServiceInstance(state, action);
     default:
       return state;
   }
 }
+
+const setCreateServiceInstance = (state: CreateServiceInstanceState, action) => ({
+  ...state,
+  spaceScoped: action.spaceScoped,
+  spaceGuid: action.spaceGuid,
+  name: action.name, params:
+  action.jsonParams,
+  tags: action.tags
+});
+
+const setSpaceScopedFlag = (state: CreateServiceInstanceState, action) => ({
+  ...state,
+  spaceScoped: action.spaceScoped,
+  spaceGuid: action.spaceGuid
+});
