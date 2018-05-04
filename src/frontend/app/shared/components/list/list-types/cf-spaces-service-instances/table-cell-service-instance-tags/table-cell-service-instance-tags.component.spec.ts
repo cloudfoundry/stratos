@@ -32,7 +32,12 @@ describe('TableCellServiceInstanceTagsComponent', () => {
         plan_updateable: false,
         tags: [],
         url: '',
-        version: ''
+        version: '',
+        service_instance: {
+          entity: {
+            tags: []
+          }
+        }
       },
       metadata: null
     };

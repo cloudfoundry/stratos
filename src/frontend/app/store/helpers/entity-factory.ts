@@ -120,19 +120,29 @@ entityCache[metricSchemaKey] = MetricSchema;
 const SpaceQuotaSchema = new EntitySchema(spaceQuotaSchemaKey, {}, { idAttribute: getAPIResourceGuid });
 entityCache[spaceQuotaSchemaKey] = SpaceQuotaSchema;
 
-const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
-  entity: {
-    app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid })
-  }
-}, { idAttribute: getAPIResourceGuid });
-entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
-
 const ServicePlanSchema = new EntitySchema(servicePlanSchemaKey, {
   entity: {
-    service: ServiceNoPlansSchema
+    service: ServiceSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanSchemaKey] = ServicePlanSchema;
+
+const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
+  entity: {
+    app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    service_instance: new EntitySchema(serviceInstancesSchemaKey, {
+      entity: {
+        service_bindings: [new EntitySchema(serviceBindingSchemaKey, {
+          app: new EntitySchema(applicationSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+        }, { idAttribute: getAPIResourceGuid })],
+        service: new EntitySchema(serviceSchemaKey, {}, { idAttribute: getAPIResourceGuid })
+      },
+      service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+    }, { idAttribute: getAPIResourceGuid }),
+    service: ServiceNoPlansSchema
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
 
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
