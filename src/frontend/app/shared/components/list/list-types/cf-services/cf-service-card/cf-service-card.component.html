@@ -1,4 +1,4 @@
-<app-meta-card class="service-card">
+<app-meta-card class="service-card" [clickAction]="goToServiceInstances">
   <app-meta-card-title>
     <div class="service-card__title">
       <div class="service-card__title__link">{{ getDisplayName() }}</div>
@@ -28,7 +28,7 @@
   <app-meta-card-item *ngIf="hasDocumentationUrl()">
     <app-meta-card-key>Documentation Link</app-meta-card-key>
     <app-meta-card-value>
-      <a [href]="getDocumentationUrl()" target="_blank">
+      <a [href]="getDocumentationUrl()" target="_blank" appClickStopPropagation>
         <mat-icon>launch</mat-icon>
       </a>
     </app-meta-card-value>
@@ -36,7 +36,7 @@
   <app-meta-card-item *ngIf="hasSupportUrl()">
     <app-meta-card-key>Support Link</app-meta-card-key>
     <app-meta-card-value>
-      <a [href]="getSupportUrl()" target="_blank">
+      <a [href]="getSupportUrl()" target="_blank" appClickStopPropagation>
         <mat-icon>launch</mat-icon>
       </a>
     </app-meta-card-value>
