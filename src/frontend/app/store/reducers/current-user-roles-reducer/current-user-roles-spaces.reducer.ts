@@ -1,12 +1,9 @@
 import { GetUserRelationsComplete } from '../../actions/permissions.actions';
 import { ISpacesRoleState } from '../../types/current-user-roles.types';
 import { currentUserSpaceRoleReducer } from './current-user-roles-space.reducer';
+import { addNewRoles, removeOldRoles } from './current-user-reducer.helpers';
 
 export function currentUserSpaceRolesReducer(state: ISpacesRoleState = {}, action: GetUserRelationsComplete) {
-  return action.data.reduce((currentState, data) => {
-    return {
-      ...currentState,
-      [data.metadata.guid]: currentUserSpaceRoleReducer(currentState[data.metadata.guid], action.relationType, !!action.data.length)
-    };
-  }, state);
+  const { newState, addedIds } = addNewRoles(state, action, currentUserSpaceRoleReducer);
+  return removeOldRoles(newState, action, addedIds, currentUserSpaceRoleReducer);
 }
