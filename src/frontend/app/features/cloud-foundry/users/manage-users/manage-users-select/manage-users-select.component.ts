@@ -43,11 +43,11 @@ export class UsersRolesSelectComponent {
     public cfRolesService: CfRolesService
   ) {
     const dataSource = listConfig.getDataSource();
-    this.selectedUsers$ = dataSource.isSelecting$.pipe(
-      map(isSelecting => {
-        const users = Array.from<APIResource<CfUser>>(dataSource.selectedRows.values()).map(row => row.entity);
-        this.valid$.next(!!users.length);
-        return users;
+    this.selectedUsers$ = dataSource.selectedRows$.pipe(
+      map(users => {
+        const arrayUsers = Array.from<APIResource<CfUser>>(users.values()).map(row => row.entity);
+        this.valid$.next(!!arrayUsers.length);
+        return arrayUsers;
       })
     );
   }

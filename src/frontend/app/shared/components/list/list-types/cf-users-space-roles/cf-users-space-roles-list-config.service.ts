@@ -20,9 +20,11 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   dataSource: CfUsersSpaceRolesDataSourceService;
   defaultView = 'table' as ListView;
   enableTextFilter = true;
+  // This is a list of spaces and refresh will update the spaces rather than the roles as might have been expected. Until then disable
+  hideRefresh = true;
   text = {
     title: null,
-    filter: 'Search by name',
+    filter: 'Search by space name',
     noEntries: 'There are no spaces'
   };
   columns: ITableColumn<APIResource<ISpace>>[] = [{

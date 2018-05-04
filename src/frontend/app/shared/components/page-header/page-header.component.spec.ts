@@ -1,16 +1,15 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
+import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
 import { appReducers } from '../../../store/reducers.module';
-import { PageHeaderComponent } from './page-header.component';
-import { CoreModule } from '../../../core/core.module';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import { PageHeaderModule } from './page-header.module';
-import { SharedModule } from '../../shared.module';
 import { InternalEventMonitorFactory } from '../../monitors/internal-event-monitor.factory';
+import { SharedModule } from '../../shared.module';
+import { PageHeaderComponent } from './page-header.component';
+import { PageHeaderModule } from './page-header.module';
 
 describe('PageHeaderComponent', () => {
   let component: PageHeaderComponent;
