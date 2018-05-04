@@ -64,7 +64,13 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
       return orgRoles.permissions[role];
     }
   }
-
+  /**
+   * Determine if the role has been assigned or selected
+   * True - All selected users have this role OR user has selected this role
+   * Null - Some selected users have this role
+   * False - No user has this role OR user has unselected this role
+   * Also provides a tooltip of comma separated users if not all selected user have the role
+   */
   private static getCheckedState(
     role: string,
     users: CfUser[],
@@ -76,45 +82,49 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
       tooltip: string;
     } {
     let tooltip = '';
-    // Has the user set any state for this role?
+    // Has the user set any state for this role? If so this overrides all other settings
     let checked = CfRoleCheckboxComponent.hasRole(role, newRoles, spaceGuid);
-    // No? Has the user got a existing/previous state for this role?
-    if (checked === undefined) { //
-      // Do all or some have the role?
-      if (users.length === 1) {
-        const userGuid = users[0].guid;
-        checked = CfRoleCheckboxComponent.hasExistingRole(role, existingRoles, userGuid, orgGuid, spaceGuid);
-      } else {
-        let oneWithout = false;
-        tooltip = '';
-        for (let i = 0; i < users.length; i++) {
-          const user = users[i];
-          if (CfRoleCheckboxComponent.hasExistingRole(role, existingRoles, user.guid, orgGuid, spaceGuid)) {
-            tooltip += `${user.username}, `;
-          } else {
-            oneWithout = true;
-          }
-        }
+    if (checked !== undefined) {
+      // User has set a state for this role, display it
+      return { checked, tooltip };
+    }
 
-        // Does any one of these users have this role?
-        if (tooltip.length) {
-          // Do all users have the role, or has one not got the role
-          if (!oneWithout) {
-            // All have role
-            checked = true;
-            // All have this state, no need to show the list of users
-            tooltip = '';
-          } else {
-            // At least one does not have role, tertiary state
-            checked = null;
-            tooltip = tooltip.substring(0, tooltip.length - 2);
-          }
-        } else {
-          // No user has the role
-          checked = false;
-        }
+    // Is only one user selected? If so just display true/false given their existing roles
+    if (users.length === 1) {
+      checked = CfRoleCheckboxComponent.hasExistingRole(role, existingRoles, users[0].guid, orgGuid, spaceGuid);
+      return { checked, tooltip };
+    }
+
+    // Do all selected users have this role (true) or only some (null)
+    let oneWithout = false;
+    tooltip = '';
+    // Loop through users, determine who hasn't got the role and if there are any that don't
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
+      if (CfRoleCheckboxComponent.hasExistingRole(role, existingRoles, user.guid, orgGuid, spaceGuid)) {
+        tooltip += `${user.username}, `;
+      } else {
+        oneWithout = true;
       }
     }
+
+    // Has all selected users not got the role?
+    if (!tooltip.length) {
+      // No user has the role
+      return { checked: false, tooltip };
+    }
+
+    // Do all users have the role, or has one not got the role
+    if (!oneWithout) {
+      // All have role, no need to show the list of users
+      checked = true;
+      tooltip = '';
+    } else {
+      // At least one does not have role, tertiary state
+      checked = null;
+      tooltip = tooltip.substring(0, tooltip.length - 2);
+    }
+
     return { checked, tooltip };
   }
 
@@ -159,8 +169,7 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     const manager = CfRoleCheckboxComponent.getCheckedState(OrgUserRoleNames.MANAGER, users, existingRoles, newRoles, orgGuid);
     const billing = CfRoleCheckboxComponent.getCheckedState(OrgUserRoleNames.BILLING_MANAGERS, users, existingRoles, newRoles, orgGuid);
     const auditor = CfRoleCheckboxComponent.getCheckedState(OrgUserRoleNames.AUDITOR, users, existingRoles, newRoles, orgGuid);
-    const hasOrgRole = manager.checked !== false || billing.checked !== false || auditor.checked !== false;
-    if (hasOrgRole) {
+    if (manager.checked !== false || billing.checked !== false || auditor.checked !== false) {
       return true;
     }
 

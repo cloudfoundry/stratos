@@ -122,34 +122,9 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   constructor(private store: Store<AppState>, private cfRolesService: CfRolesService, private cfUserService: CfUserService) { }
 
   ngOnInit() {
-    this.cfAndOrgGuid$ = this.store.select(selectUsersRoles).pipe(
-      map(mu => ({ cfGuid: mu.cfGuid, orgGuid: mu.newRoles.orgGuid })),
-      filter(mu => !!mu.cfGuid && !!mu.orgGuid),
-      distinctUntilChanged((oldMU, newMU) => {
-        return oldMU.cfGuid === newMU.cfGuid && oldMU.orgGuid === newMU.orgGuid;
-      }),
-    );
+    this.createCfAndOrgObs();
 
-    this.changes$ = this.updateChanges.pipe(
-      withLatestFrom(this.cfAndOrgGuid$),
-      mergeMap(([changed, { cfGuid, orgGuid }]) => {
-        return Observable.combineLatest(
-          this.cfUserService.getUsers(cfGuid),
-          this.cfRolesService.fetchOrg(cfGuid, orgGuid)
-        );
-      }),
-      withLatestFrom(
-        this.store.select(selectUsersRolesChangedRoles),
-      ),
-      map(([[users, org], changes]) => {
-        return changes.map(change => ({
-          ...change,
-          userName: this.fetchUserName(change.userGuid, users),
-          spaceName: this.fetchSpaceName(change.spaceGuid, org),
-          roleName: this.fetchRoleName(change.role, !change.spaceGuid)
-        }));
-      }),
-    );
+    this.createChangesObs();
   }
 
   ngAfterContentInit() {
@@ -200,6 +175,39 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     }
     this.updateStarted = true;
     this.store.dispatch(new UsersRolesExecuteChanges());
+  }
+
+  private createCfAndOrgObs() {
+    this.cfAndOrgGuid$ = this.store.select(selectUsersRoles).pipe(
+      map(mu => ({ cfGuid: mu.cfGuid, orgGuid: mu.newRoles.orgGuid })),
+      filter(mu => !!mu.cfGuid && !!mu.orgGuid),
+      distinctUntilChanged((oldMU, newMU) => {
+        return oldMU.cfGuid === newMU.cfGuid && oldMU.orgGuid === newMU.orgGuid;
+      }),
+    );
+  }
+
+  private createChangesObs() {
+    this.changes$ = this.updateChanges.pipe(
+      withLatestFrom(this.cfAndOrgGuid$),
+      mergeMap(([changed, { cfGuid, orgGuid }]) => {
+        return Observable.combineLatest(
+          this.cfUserService.getUsers(cfGuid),
+          this.cfRolesService.fetchOrg(cfGuid, orgGuid)
+        );
+      }),
+      withLatestFrom(
+        this.store.select(selectUsersRolesChangedRoles),
+      ),
+      map(([[users, org], changes]) => {
+        return changes.map(change => ({
+          ...change,
+          userName: this.fetchUserName(change.userGuid, users),
+          spaceName: this.fetchSpaceName(change.spaceGuid, org),
+          roleName: this.fetchRoleName(change.role, !change.spaceGuid)
+        }));
+      }),
+    );
   }
 
 }

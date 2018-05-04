@@ -80,36 +80,38 @@ export class CfRolesService {
     }
 
     const userGuids = selectedUsers.map(user => user.guid);
-
     return this.cfUserService.getUsers(cfGuid).pipe(
       map(users => {
         const roles = {};
-        // For each user....
+        // For each user (excluding those that are not selected)....
         users.forEach(user => {
-          if (userGuids.indexOf(user.metadata.guid) < 0) {
-            return;
+          if (userGuids.indexOf(user.metadata.guid) >= 0) {
+            this.populateUserRoles(user, roles);
           }
-          const mappedUser = {};
-          const orgRoles = this.cfUserService.getOrgRolesFromUser(user.entity);
-          const spaceRoles = this.cfUserService.getSpaceRolesFromUser(user.entity);
-          // ... populate org roles ...
-          orgRoles.forEach(org => {
-            mappedUser[org.orgGuid] = {
-              ...org,
-              spaces: {}
-            };
-          });
-          // ... and for each space, populate space roles
-          spaceRoles.forEach(space => {
-            mappedUser[space.orgGuid].spaces[space.spaceGuid] = {
-              ...space
-            };
-          });
-          roles[user.metadata.guid] = mappedUser;
         });
         return roles;
       }),
     );
+  }
+
+  private populateUserRoles(user: APIResource<CfUser>, roles: CfUserRolesSelected) {
+    const mappedUser = {};
+    const orgRoles = this.cfUserService.getOrgRolesFromUser(user.entity);
+    const spaceRoles = this.cfUserService.getSpaceRolesFromUser(user.entity);
+    // ... populate org roles ...
+    orgRoles.forEach(org => {
+      mappedUser[org.orgGuid] = {
+        ...org,
+        spaces: {}
+      };
+    });
+    // ... and for each space, populate space roles
+    spaceRoles.forEach(space => {
+      mappedUser[space.orgGuid].spaces[space.spaceGuid] = {
+        ...space
+      };
+    });
+    roles[user.metadata.guid] = mappedUser;
   }
 
   /**
@@ -125,38 +127,38 @@ export class CfRolesService {
       first(),
       map(([existingRoles, newRoles, pickedUsers]) => {
         const changes = [];
-
         // For each user, loop through the new roles and compare with any existing. If there's a diff, add it to a changes collection to be
         // returned
         pickedUsers.forEach(user => {
-          const existingUserRoles = existingRoles[user.guid] || {};
-
-          // Compare org roles
-          const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid);
-          changes.push(...this.comparePermissions({
-            userGuid: user.guid,
-            orgGuid,
-            add: false,
-            role: null
-          }, existingOrgRoles.permissions, newRoles.permissions));
-
-          // Compare space roles
-          Object.keys(newRoles.spaces).forEach(spaceGuid => {
-            const newSpace = newRoles.spaces[spaceGuid];
-            const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, spaceGuid);
-            changes.push(...this.comparePermissions({
-              userGuid: user.guid,
-              orgGuid,
-              spaceGuid,
-              add: false,
-              role: null
-            }, oldSpace.permissions, newSpace.permissions));
-          });
+          this.createRolesUserDiff(existingRoles, newRoles, changes, user, orgGuid);
         });
         this.store.dispatch(new UsersRolesSetChanges(changes));
         return changes;
       })
     );
+  }
+
+  private createRolesUserDiff(
+    existingRoles: CfUserRolesSelected,
+    newRoles: IUserPermissionInOrg,
+    changes: CfRoleChange[],
+    user: CfUser,
+    orgGuid: string
+  ) {
+    const existingUserRoles = existingRoles[user.guid] || {};
+
+    // Compare org roles
+    const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid);
+    changes.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, add: false, role: null },
+      existingOrgRoles.permissions, newRoles.permissions));
+
+    // Compare space roles
+    Object.keys(newRoles.spaces).forEach(spaceGuid => {
+      const newSpace = newRoles.spaces[spaceGuid];
+      const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, spaceGuid);
+      changes.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, spaceGuid, add: false, role: null },
+        oldSpace.permissions, newSpace.permissions));
+    });
   }
 
   fetchOrg(cfGuid: string, orgGuid: string): Observable<APIResource<IOrganization>> {

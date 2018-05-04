@@ -97,50 +97,65 @@ function setPermission(roles: IUserPermissionInOrg | IUserPermissionInSpace, rol
 }
 
 function setRole(existingState: UsersRolesState, orgGuid: string, spaceGuid: string, role: string, setRole: boolean): UsersRolesState {
-  const existingOrgRoles = existingState.newRoles;
-  let newOrgRoles = existingOrgRoles ? {
-    ...existingOrgRoles,
-    spaces: {
-      ...existingOrgRoles.spaces
-    }
-  } : createDefaultOrgRoles(orgGuid);
+  // Create a fresh instance of the org roles
+  let newOrgRoles = cloneOrgRoles(existingState.newRoles, orgGuid);
 
   if (spaceGuid) {
-    if (!newOrgRoles.spaces[spaceGuid]) {
-      newOrgRoles.spaces[spaceGuid] = createDefaultSpaceRoles(orgGuid, spaceGuid);
-    }
-    const spaceRoles = newOrgRoles.spaces[spaceGuid] = {
-      ...newOrgRoles.spaces[spaceGuid]
-    };
-    newOrgRoles = setPermission(spaceRoles, role, setRole) ? newOrgRoles : null;
-    // If the user has applied any space role they must also have the org user role applied too.
-    if (newOrgRoles && setRole) {
-      newOrgRoles.permissions = {
-        ...newOrgRoles.permissions,
-        [OrgUserRoleNames.USER]: true
-      };
-    }
+    // Space role change
+    setSpaceRole(newOrgRoles, orgGuid, spaceGuid, role, setRole);
   } else {
-    newOrgRoles = setPermission(newOrgRoles, role, setRole) ? newOrgRoles : null;
-    // If the user has applied the org manager, auditor or billing manager role they must also have the org user role applied too.
-    if (newOrgRoles && role !== 'user' && setRole) {
-      newOrgRoles.permissions = {
-        ...newOrgRoles.permissions,
-        [OrgUserRoleNames.USER]: true
-      };
-    }
+    // Org role change
+    newOrgRoles = setOrgRole(newOrgRoles, orgGuid, role, setRole);
   }
 
-  if (newOrgRoles) {
-    return {
-      ...existingState,
-      newRoles: {
-        ...existingState.newRoles,
-        ...newOrgRoles,
-      }
+  // There's been no change to the existing state, just return the existing state;
+  if (!newOrgRoles) {
+    return existingState;
+  }
+  return {
+    ...existingState,
+    newRoles: {
+      ...existingState.newRoles,
+      ...newOrgRoles,
+    }
+  };
+}
+
+function cloneOrgRoles(orgRoles: IUserPermissionInOrg, orgGuid: string): IUserPermissionInOrg {
+  return orgRoles ? {
+    ...orgRoles,
+    spaces: {
+      ...orgRoles.spaces
+    }
+  } : createDefaultOrgRoles(orgGuid);
+}
+
+function setSpaceRole(orgRoles: IUserPermissionInOrg, orgGuid: string, spaceGuid: string, role: string, setRole: boolean) {
+  if (!orgRoles.spaces[spaceGuid]) {
+    orgRoles.spaces[spaceGuid] = createDefaultSpaceRoles(orgGuid, spaceGuid);
+  }
+  const spaceRoles = orgRoles.spaces[spaceGuid] = {
+    ...orgRoles.spaces[spaceGuid]
+  };
+  orgRoles = setPermission(spaceRoles, role, setRole) ? orgRoles : null;
+  // If the user has applied any space role they must also have the org user role applied too.
+  if (orgRoles && setRole) {
+    orgRoles.permissions = {
+      ...orgRoles.permissions,
+      [OrgUserRoleNames.USER]: true
     };
   }
+}
 
-  return existingState;
+function setOrgRole(orgRoles: IUserPermissionInOrg, orgGuid: string, role: string, setRole: boolean): IUserPermissionInOrg {
+  orgRoles = setPermission(orgRoles, role, setRole) ? orgRoles : null;
+  // If the user has applied the org manager, auditor or billing manager role they must also have the org user role applied too.
+  if (orgRoles && role !== 'user' && setRole) {
+    orgRoles.permissions = {
+      ...orgRoles.permissions,
+      [OrgUserRoleNames.USER]: true
+    };
+  }
+  return orgRoles;
 }
 

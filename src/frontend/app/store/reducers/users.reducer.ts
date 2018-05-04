@@ -78,25 +78,28 @@ function newEntityState<T extends StateEntity>(state: StateEntities<T>, action: 
   }
   let roles: string[] = apiResource.entity[action.permissionTypeKey];
   if (!roles) {
+    // No roles in entity, we can't modify them if they don't exist
     return state;
   }
+
   const index = roles.findIndex(guid => guid === action.userGuid);
-  if (add) {
-    // Add the user to the role... but only if it doesn't exist already
-    if (index >= 0) {
-      return state;
-    }
+  const exists = index >= 0;
+
+  if (add && !exists) {
+    // Add the user to the role as it doesn't exist already
     roles = [
       ...roles,
       action.userGuid
     ];
-  } else {
+  } else if (!add && !exists) {
     // Remove the user from the role... but only if it exists already
-    if (index >= 0) {
-      roles = [...roles];
-      roles.splice(index, 1);
-    }
+    roles = [...roles];
+    roles.splice(index, 1);
+  } else {
+    // There's been no change, return the original state
+    return state;
   }
+
   return {
     ...state,
     [action.guid]: {

@@ -62,37 +62,9 @@ export class UsersRolesModifyComponent implements OnInit {
 
   ngOnInit() {
     if (this.activeRouteCfOrgSpace.orgGuid) {
-      this.singleOrg$ = this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid);
-      this.singleOrg$.pipe(
-        first()
-      ).subscribe(null, null, () => {
-        this.updateOrg(this.activeRouteCfOrgSpace.orgGuid);
-      });
+      this.setUpSingleOrgConfig();
     } else {
-      this.singleOrg$ = Observable.of(null);
-      const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.cfGuid);
-
-      this.organizations$ = getPaginationObservables<APIResource<IOrganization>>({
-        store: this.store,
-        action: new GetAllOrganizations(paginationKey, this.activeRouteCfOrgSpace.cfGuid, [
-          createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
-        ], true),
-        paginationMonitor: this.paginationMonitorFactory.create(
-          paginationKey,
-          entityFactory(organizationSchemaKey)
-        ),
-      },
-        true
-      ).entities$.pipe(
-        map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name)))
-      );
-
-      this.organizations$.pipe(
-        filter(orgs => orgs && !!orgs.length),
-        first()
-      ).subscribe(orgs => {
-        this.updateOrg(orgs[0].metadata.guid);
-      });
+      this.setUpMultiOrgConfig();
     }
 
     this.users$ = this.store.select(selectUsersRolesPicked).pipe(
@@ -135,6 +107,42 @@ export class UsersRolesModifyComponent implements OnInit {
       })
     ).catch(err => {
       return Observable.of({ success: false });
+    });
+  }
+
+  private setUpSingleOrgConfig() {
+    this.singleOrg$ = this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid);
+    this.singleOrg$.pipe(
+      first()
+    ).subscribe(null, null, () => {
+      this.updateOrg(this.activeRouteCfOrgSpace.orgGuid);
+    });
+  }
+
+  private setUpMultiOrgConfig() {
+    this.singleOrg$ = Observable.of(null);
+    const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.cfGuid);
+
+    this.organizations$ = getPaginationObservables<APIResource<IOrganization>>({
+      store: this.store,
+      action: new GetAllOrganizations(paginationKey, this.activeRouteCfOrgSpace.cfGuid, [
+        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
+      ], true),
+      paginationMonitor: this.paginationMonitorFactory.create(
+        paginationKey,
+        entityFactory(organizationSchemaKey)
+      ),
+    },
+      true
+    ).entities$.pipe(
+      map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name)))
+    );
+
+    this.organizations$.pipe(
+      filter(orgs => orgs && !!orgs.length),
+      first()
+    ).subscribe(orgs => {
+      this.updateOrg(orgs[0].metadata.guid);
     });
   }
 }
