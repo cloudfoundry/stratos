@@ -14,7 +14,9 @@ export type StepOnNextFunction = () => Observable<{
   success: boolean,
   message?: string,
   // Should we redirect to the store previous state?
-  redirect?: boolean
+  redirect?: boolean,
+  // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
+  ignoreSuccess?: boolean
 }>;
 
 @Component({

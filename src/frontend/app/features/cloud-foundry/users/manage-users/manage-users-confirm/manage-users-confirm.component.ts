@@ -13,7 +13,7 @@ import {
 } from '../../../../../shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { UsersRolesClearUpdateState, UsersRolesExecuteChanges } from '../../../../../store/actions/users-roles.actions';
+import { UsersRolesClearUpdateState } from '../../../../../store/actions/users-roles.actions';
 import { ChangeUserPermission } from '../../../../../store/actions/users.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
@@ -48,21 +48,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       cellDefinition: {
         valuePath: 'userName'
       },
-      cellFlex: '1',
-      sort: {
-        type: 'sort',
-        orderKey: 'user',
-        field: 'userName',
-      }
+      cellFlex: '1'
     },
-    // {
-    //   headerCell: () => 'Organization',
-    //   columnId: 'org',
-    //   cellDefinition: {
-    //     valuePath: 'orgGuid'
-    //   },
-    //   cellFlex: '1'
-    // },
     {
       headerCell: () => 'Space',
       columnId: 'space',
@@ -91,7 +78,6 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   changes$: Observable<CfRoleChangeWithNames[]>;
   userSchemaKey = cfUserSchemaKey;
   monitorState = AppMonitorComponentTypes.UPDATE;
-  updateStarted = false;
   private cfAndOrgGuid$: Observable<{ cfGuid: string, orgGuid: string }>;
   private orgName$ = new BehaviorSubject('');
 
@@ -169,14 +155,6 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     return isOrg ? UserRoleLabels.org.long[roleName] : UserRoleLabels.space.long[roleName];
   }
 
-  startApply = () => {
-    if (this.updateStarted) {
-      return;
-    }
-    this.updateStarted = true;
-    this.store.dispatch(new UsersRolesExecuteChanges());
-  }
-
   private createCfAndOrgObs() {
     this.cfAndOrgGuid$ = this.store.select(selectUsersRoles).pipe(
       map(mu => ({ cfGuid: mu.cfGuid, orgGuid: mu.newRoles.orgGuid })),
@@ -200,12 +178,16 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
         this.store.select(selectUsersRolesChangedRoles),
       ),
       map(([[users, org], changes]) => {
-        return changes.map(change => ({
-          ...change,
-          userName: this.fetchUserName(change.userGuid, users),
-          spaceName: this.fetchSpaceName(change.spaceGuid, org),
-          roleName: this.fetchRoleName(change.role, !change.spaceGuid)
-        }));
+        return changes
+          .map(change => ({
+            ...change,
+            userName: this.fetchUserName(change.userGuid, users),
+            spaceName: this.fetchSpaceName(change.spaceGuid, org),
+            roleName: this.fetchRoleName(change.role, !change.spaceGuid)
+          }))
+          .sort((a, b) => {
+            return a.userName.localeCompare(b.userName);
+          });
       }),
     );
   }

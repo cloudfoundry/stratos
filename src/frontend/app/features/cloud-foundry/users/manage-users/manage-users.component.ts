@@ -3,8 +3,13 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, first, map, withLatestFrom } from 'rxjs/operators';
 
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { UsersRolesClear, UsersRolesSetUsers } from '../../../../store/actions/users-roles.actions';
+import {
+  UsersRolesClear,
+  UsersRolesExecuteChanges,
+  UsersRolesSetUsers,
+} from '../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../store/app-state';
 import { selectUsersRoles, selectUsersRolesPicked } from '../../../../store/selectors/users-roles.selector';
 import { CfUser } from '../../../../store/types/user.types';
@@ -23,6 +28,7 @@ export class UsersRolesComponent implements OnDestroy {
   initialUsers$: Observable<CfUser[]>;
   singleUser$: Observable<CfUser>;
   defaultCancelUrl: string;
+  applyStarted = false;
 
   constructor(
     private store: Store<AppState>,
@@ -74,5 +80,14 @@ export class UsersRolesComponent implements OnDestroy {
     }
     route += `/users`;
     return route;
+  }
+
+  startApply: StepOnNextFunction = () => {
+    if (this.applyStarted) {
+      return Observable.of({ success: true, redirect: true });
+    }
+    this.applyStarted = true;
+    this.store.dispatch(new UsersRolesExecuteChanges());
+    return Observable.of({ success: true, ignoreSuccess: true });
   }
 }
