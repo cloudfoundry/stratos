@@ -182,4 +182,44 @@ export class ServicesService {
       })
     );
   }
+  getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
+    return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
+      .pipe(
+        filter(([p, q]) => !!p && !!q),
+        map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
+        map(p => p[0]),
+        filter(p => !!p)
+      );
+  }
+
+  getOrgsForSelectedServicePlan = (): Observable<APIResource<IOrganization>[]> => {
+    return this.getSelectedServicePlan()
+      .pipe(
+        switchMap(servicePlan => {
+          if (servicePlan.entity.public) {
+            const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.cfGuid);
+            return getPaginationObservables<APIResource<IOrganization>>({
+              store: this.store,
+              action: getAllOrgsAction,
+              paginationMonitor: this.paginationMonitorFactory.create(
+                getAllOrgsAction.paginationKey,
+                entityFactory(organizationSchemaKey)
+              )
+            }, true)
+              .entities$.pipe(
+                share(),
+                first()
+              );
+          } else {
+            // Service plan is not public, fetch visibilities
+            return this.getServicePlanVisibilitiesForPlan(servicePlan.metadata.guid)
+              .pipe(
+                map(s => s.map(o => o.entity.organization)),
+                share(),
+                first()
+              );
+          }
+        })
+      );
+  }
 }

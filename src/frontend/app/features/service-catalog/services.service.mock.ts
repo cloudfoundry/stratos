@@ -26,4 +26,6 @@ export class ServicesServiceMock {
       updated_at: '2017-11-27T17:07:03Z'
     }
   }]);
+
+  getVisiblePlans = () => this.servicePlans$;
 }

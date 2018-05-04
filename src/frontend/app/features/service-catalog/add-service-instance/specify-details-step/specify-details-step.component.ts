@@ -112,8 +112,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     )
   }, true)
     .entities$.pipe(
-    share(),
-    first()
+      share(),
+      first()
     )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
@@ -121,36 +121,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {
-    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.servicesService.cfGuid);
-    return Observable.combineLatest(this.servicesService.servicePlans$, this.store.select(selectCreateServiceInstanceServicePlan)).pipe(
-      filter(([p, q]) => !!p && !!q),
-      map(([servicePlans, selectedPlanGuid]) => servicePlans.filter(s => s.metadata.guid === selectedPlanGuid)[0]),
-      filter(p => !!p),
-      switchMap((servicePlanEntity: APIResource<IServicePlan>) => {
-        if (servicePlanEntity.entity.public) {
-          return getPaginationObservables<APIResource<IOrganization>>({
-            store: this.store,
-            action: getAllOrgsAction,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              getAllOrgsAction.paginationKey,
-              entityFactory(organizationSchemaKey)
-            )
-          }, true)
-            .entities$.pipe(
-            share(),
-            first()
-            );
-        } else {
-          // Service plan is not public, fetch visibilities
-          return this.servicesService.getServicePlanVisibilitiesForPlan(servicePlanEntity.metadata.guid)
-            .pipe(
-            map(s => s.map(o => o.entity.organization)),
-            share(),
-            first()
-            );
-        }
-      })
-    );
+    return this.servicesService.getOrgsForSelectedServicePlan();
   }
 
 
