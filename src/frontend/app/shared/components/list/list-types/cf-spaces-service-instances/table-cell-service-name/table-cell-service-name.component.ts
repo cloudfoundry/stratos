@@ -1,12 +1,13 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { CfServiceInstance, CfService } from '../../../../../../store/types/service.types';
-import { TableCellCustom } from '../../../list.types';
+import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { filter, map } from 'rxjs/operators';
+
+import { IService } from '../../../../../../core/cf-api-svc.types';
 import { AppState } from '../../../../../../store/app-state';
 import { selectEntity } from '../../../../../../store/selectors/api.selectors';
-import { map, filter } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
+import { APIResource } from '../../../../../../store/types/api.types';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-service-name',
@@ -22,10 +23,10 @@ export class TableCellServiceNameComponent<T> extends TableCellCustom<T> impleme
   }
 
   ngOnInit() {
-    this.serviceName$ = this.store.select(selectEntity<APIResource<CfService>>('service', this.row.entity.service_guid))
+    this.serviceName$ = this.store.select(selectEntity<APIResource<IService>>('service', this.row.entity.service_guid))
       .pipe(
-        filter(s => !!s),
-        map(s => s.entity.label)
+      filter(s => !!s),
+      map(s => s.entity.label)
       );
   }
 

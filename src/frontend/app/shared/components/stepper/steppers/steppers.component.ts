@@ -97,7 +97,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       map(([path, params]) => {
         this.store.dispatch(new RouterNav({ path: path, query: params }));
       })
-    );
+      );
   }
 
   setActive(index: number) {

@@ -14,10 +14,10 @@ export const GET_ALL_DOMAIN_SUCCESS = '[domain] Get all domain success';
 export const GET_ALL_DOMAIN_FAILED = '[domain] Get all domain failed';
 
 export class FetchDomain extends CFStartAction implements ICFAction {
-  constructor(public domainGuid: string, public endpointGuid: string) {
+  constructor(public guid: string, public endpointGuid: string) {
     super();
     this.options = new RequestOptions();
-    this.options.url = `shared_domains/${domainGuid}`;
+    this.options.url = `shared_domains/${guid}`;
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
   }

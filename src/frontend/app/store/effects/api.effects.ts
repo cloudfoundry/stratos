@@ -37,7 +37,23 @@ interface APIErrorCheck {
   errorCode: string;
   guid: string;
   url: string;
+  errorResponse?: JetStreamCFErrorResponse;
 }
+
+interface JetStreamError {
+  error: {
+    status: string;
+    statusCode: number;
+  };
+  errorResponse: JetStreamCFErrorResponse;
+}
+
+interface JetStreamCFErrorResponse {
+  code: number;
+  description: string;
+  error_code: string;
+}
+
 @Injectable()
 export class APIEffect {
 
@@ -138,7 +154,7 @@ export class APIEffect {
     ).catch(error => {
       const endpoints: string[] = options.headers.get(endpointHeader).split((','));
       endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
-        eventCode: error.status || 500,
+        eventCode: error.status || '500',
         severity: InternalEventSeverity.ERROR,
         message: 'Jetstream API request error',
         metadata: {
@@ -201,13 +217,16 @@ export class APIEffect {
     return Object.keys(resData)
       .map(cfGuid => {
         // Return list of guid+error objects for those endpoints with errors
-        const endpoint = resData ? resData[cfGuid] : null;
+        const endpoint = resData ? resData[cfGuid] as JetStreamError : null;
         const succeeded = !endpoint || !endpoint.error;
+        const errorCode = endpoint && endpoint.error ? endpoint.error.statusCode.toString() : '500';
+        const errorResponse = endpoint ? endpoint.errorResponse : { code: 0, description: 'Unknown', error_code: '0' };
         return {
           error: !succeeded,
-          errorCode: succeeded ? '200' : '500',
+          errorCode: succeeded ? '200' : errorCode,
           guid: cfGuid,
-          url: action.options.url
+          url: action.options.url,
+          errorResponse: succeeded ? null : errorResponse,
         };
       });
   }
@@ -224,7 +243,8 @@ export class APIEffect {
               severity: InternalEventSeverity.ERROR,
               message: 'API request error',
               metadata: {
-                url: check.url
+                url: check.url,
+                errorResponse: check.errorResponse,
               }
             }
           ));

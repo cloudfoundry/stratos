@@ -43,7 +43,7 @@ export interface IServiceInstance {
   service_plan_url: string;
   service_plan?: APIResource<IServicePlan>;
   service_bindings_url: string;
-  service_binding?: APIResource<IServiceBinding>[];
+  service_bindings?: APIResource<IServiceBinding>[];
   service_keys_url: string;
   routes_url: string;
   service_url: string;
@@ -55,7 +55,7 @@ export interface IServicePlan {
   free: boolean;
   description: string;
   service_guid: string;
-  extra: string;
+  extra: string; // stringified IServiceExtra
   unique_id: string;
   public: boolean;
   bindable: number;
@@ -63,6 +63,11 @@ export interface IServicePlan {
   service_url: string;
   service_instances_url: string;
   service?: APIResource<IService>;
+}
+
+export interface IServicePlanExtra {
+  displayName: string;
+  bullets: string[];
 }
 export interface IService {
   label: string;
@@ -77,6 +82,9 @@ export interface IService {
   plan_updateable: number;
   service_plans_url: string;
   service_plans: APIResource<IServicePlan>[];
+  cfGuid?: string;
+  guid?: string;
+
 }
 
 export interface IServiceExtra {
