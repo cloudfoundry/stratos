@@ -26,7 +26,7 @@ stages:
 jobs:
  allow_failures:
  # For now, run the e2e tests, but allow them to fail without failing the buiil
-  - "./deploy/ci/travis/run-e2e-tests.sh"
+  - script: "./deploy/ci/travis/run-e2e-tests.sh"
  include:
   - stage: Frontend Lint
     script:
