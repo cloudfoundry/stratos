@@ -32,4 +32,7 @@ export class ServicesServiceMock {
   getSelectedServicePlanAccessibility = () => Observable.of({
     isPublic: true
   })
+  getServicePlanAccessibility = () => Observable.of({
+    isPublic: true
+  })
 }
