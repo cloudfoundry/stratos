@@ -2,11 +2,34 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
-import { distinctUntilChanged, filter, map, tap, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, tap, startWith, share } from 'rxjs/operators';
 
 import { InternalEventSeverity, InternalEventSubjectState } from '../../store/types/internal-events.types';
 
 import { NgZone } from '@angular/core';
+
+
+export function newNonnAngularInterval(ngZone: NgZone, intervalTime: number) {
+  return new Observable<number>((observer) => {
+    let intervalTimer;
+    let counter = 0;
+    observer.add(() => {
+      clearInterval(intervalTimer);
+      counter = 0;
+    });
+    // Start the interval timer outsidse of angulae
+    ngZone.runOutsideAngular(() => {
+      intervalTimer = setInterval(() => {
+        ngZone.run(() => {
+          observer.next(counter);
+          counter++;
+        });
+      }, intervalTime);
+    });
+  }).pipe(
+    share()
+  );
+}
 
 export class InternalEventMonitor {
 
@@ -44,13 +67,9 @@ export class InternalEventMonitor {
     );
   }
 
-  // TODO: Need to fix this for the tests
-  public hasErroredOverTime(minutes = 5) {
-    return Observable.of([]);
-  }
 
-  public _hasErroredOverTime(minutes = 5) {
-    const interval$ = new IntervalObservable(30000).pipe(
+  public hasErroredOverTime(minutes = 5) {
+    const interval$ = newNonnAngularInterval(this.ngZone, 30000).pipe(
       startWith(-1)
     );
     return combineLatest(this.events$, interval$).pipe(

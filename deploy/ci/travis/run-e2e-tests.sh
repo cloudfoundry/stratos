@@ -2,42 +2,9 @@
 
 set -e
 
-echo "Running e2e tests..."
+echo "Running Stratos e2e tests..."
 
-cat << EOF > ./build/secrets.json
-{
-  "headless": true,
-  "cloudFoundry": {
-    "url": "${CF_LOCATION}",
-    "admin": {
-      "username": "${CF_ADMIN_USER}",
-      "password": "${CF_ADMIN_PASSWORD}"
-    },
-    "user": {
-      "username": "${CF_E2E_USER}",
-      "password": "${CF_E2E_USER_PASSWORD}"
-    }
-  },
-  "console": {
-    "host": "localhost",
-    "port": "443",
-    "admin": {
-      "username": "${CONSOLE_ADMIN_USER}",
-      "password": "${CONSOLE_ADMIN_PASSWORD}"
-    },
-    "user": {
-      "username": "${CONSOLE_USER_USER}",
-      "password": "${CONSOLE_USER_PASSWORD}"
-    }
-  },
-  "uaa": {
-    "url": "http://uaa:8080",
-    "clientId": "console",
-    "adminUsername": "admin",
-    "adminPassword": "hscadmin"
-  }
-}
-EOF
+curl -sLk -o ./build/secrets.yaml https://travis.capbristol.com/yaml
 
 echo "Generating certificate"
 export CERTS_PATH=./dev-certs
@@ -51,7 +18,7 @@ echo "Building images locally"
 echo "Build Finished"
 docker images
 
-echo "Running Console in Docker Compose"
+echo "Running Stratos in Docker Compose"
 pushd deploy/ci/travis
 docker-compose up -d
 popd
@@ -63,7 +30,7 @@ mv /tmp/node_modules ./node_modules
 
 set +e
 echo "Running e2e tests"
-npm run e2e:nocov
+npm run e2e-local
 RESULT=$?
 set -e
 
