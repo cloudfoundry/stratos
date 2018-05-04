@@ -42,6 +42,9 @@ export class PageHeaderComponent {
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
   }
 
+  // Used when non-admin logs in with no-endpoints -> only show logout in the menu
+  @Input('logoutOnly') logoutOnly: boolean;
+
   private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
     if (!breadcrumbs || !breadcrumbs.length) {
       return [];
