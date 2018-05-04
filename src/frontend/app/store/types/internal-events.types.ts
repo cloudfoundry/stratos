@@ -7,7 +7,7 @@ export const CLEAR_EVENTS = '[Internal Event] Clear';
 export interface InternalEventState {
   message?: string;
   timestamp?: number;
-  eventCode: string | number;
+  eventCode: string;
   severity: InternalEventSeverity;
   metadata: {
     [key: string]: any;
