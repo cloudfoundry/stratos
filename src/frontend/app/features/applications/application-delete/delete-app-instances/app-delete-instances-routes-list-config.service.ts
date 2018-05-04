@@ -26,7 +26,6 @@ import { CloudFoundrySpaceService } from '../../../cloud-foundry/services/cloud-
 import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
 import { APIResource } from '../../../../store/types/api.types';
-import { CfServiceInstance } from '../../../../store/types/service.types';
 import {
   AppServiceBindingListConfigService
   // tslint:disable-next-line:max-line-length
