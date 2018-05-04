@@ -3,6 +3,8 @@ import { Action } from '@ngrx/store';
 import { GET_CURRENT_USER_RELATION_SUCCESS, GetUserRelationsComplete } from '../../actions/permissions.actions';
 import { ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { currentUserBaseCFRolesReducer } from './current-user-base-cf-role.reducer';
+import { VerifiedSession, SESSION_VERIFIED } from '../../actions/auth.actions';
+import { roleInfoFromSessionReducer } from './current-user-role-session.reducer';
 
 const defaultState = {
   internal: {
@@ -18,6 +20,8 @@ export function currentUserRolesReducer(state: ICurrentUserRolesState = defaultS
         ...state,
         cf: currentUserBaseCFRolesReducer(state.cf, action as GetUserRelationsComplete)
       };
+    case SESSION_VERIFIED:
+      return roleInfoFromSessionReducer(state, action as VerifiedSession);
   }
   return state;
 }

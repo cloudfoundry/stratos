@@ -1,6 +1,5 @@
 import { ISpacesRoleState, IOrgRoleState } from '../../types/current-user-roles.types';
 import { GetUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
-import { STORE_DEVTOOLS_CONFIG } from '@ngrx/store-devtools';
 
 export interface IKeyedByIDObject<T> {
   [id: string]: T;

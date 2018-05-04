@@ -11,8 +11,14 @@ import { Observable } from 'rxjs/Observable';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { Action } from '@ngrx/store';
-import { permissionTypes, RawPermissionData, EndpointRawPermissionData, PermissionRelationType, userOrgRelationsTypes, userSpaceRelationsTypes, EndpointRoleState } from '../types/permissions.types';
-import { GetCurrentUsersRelations, UserRelationTypes, GetUserRelations, GET_CURRENT_USER_RELATIONS, GET_CURRENT_USER_RELATION, GetUserRelationsComplete } from '../actions/permissions.actions';
+import {
+  GetUserRelations,
+  GetUserRelationsComplete,
+  GetCurrentUsersRelations,
+  UserRelationTypes,
+  GET_CURRENT_USER_RELATIONS,
+  GET_CURRENT_USER_RELATION
+} from '../actions/permissions.actions';
 
 function getRequestFromAction(action: GetUserRelations, httpClient: HttpClient) {
   return httpClient.get<{ [guid: string]: { resources: APIResource[] } }>(

@@ -21642,6 +21642,12 @@ const testInitialStoreState: AppState = {
   },
   internalEvents: {
     types: {}
+  },
+  currentUserRoles: {
+    internal: {
+      isAdmin: false
+    },
+    cf: {}
   }
 };
 /* tslint:enable */

@@ -17,6 +17,7 @@ export function getDefaultEndpointRoles(): ICfRolesState {
   };
 }
 
+
 export interface IGlobalRolesState {
   isAdmin: boolean;
   isReadOnlyAdmin: boolean;

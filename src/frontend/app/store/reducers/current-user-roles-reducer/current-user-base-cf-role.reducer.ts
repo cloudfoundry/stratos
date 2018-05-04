@@ -11,6 +11,6 @@ export function currentUserBaseCFRolesReducer(state: IAllCfRolesState = {}, acti
   }
   return {
     ...state,
-    [action.endpointGuid]: currentUserCFRolesReducer(state[action.endpointGuid], action);
+    [action.endpointGuid]: currentUserCFRolesReducer(state[action.endpointGuid], action)
   };
 }
