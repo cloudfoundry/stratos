@@ -36,11 +36,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   servicePlans$: Observable<ServicePlan[]>;
 
   constructor(private store: Store<AppState>, private servicesService: ServicesService) {
-    this.servicePlans$ = servicesService.servicePlans$.pipe(
-      filter(p => !!p && p.length > 0),
-      map(o => o.filter(s => s.entity.bindable)),
-      combineLatest(this.servicesService.servicePlanVisibilities$),
-      map(([svcPlans, svcPlanVis]) => this.fetchVisiblePlans(svcPlans, svcPlanVis)),
+    this.servicePlans$ = servicesService.getVisiblePlans().pipe(
       map(o => this.mapToServicePlan(o)),
       share(),
       first()
@@ -58,18 +54,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     ).subscribe();
   }
 
-  fetchVisiblePlans =
-  (svcPlans: APIResource<IServicePlan>[], svcPlanVis: APIResource<IServicePlanVisibility>[]): APIResource<IServicePlan>[] => {
-    const visiblePlans: APIResource<IServicePlan>[] = [];
-    svcPlans.forEach(p => {
-      if (p.entity.public) {
-        visiblePlans.push(p);
-      } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
-        visiblePlans.push(p);
-      }
-    });
-    return visiblePlans;
-  }
+
 
   mapToServicePlan = (visiblePlans: APIResource<IServicePlan>[]): ServicePlan[] => visiblePlans.map(p => ({
     id: p.metadata.guid,
@@ -110,7 +95,6 @@ export class SelectPlanStepComponent implements OnDestroy {
     }
 
     if (this.servicePlanVisibilitySub) {
-
       this.servicePlanVisibilitySub.unsubscribe();
     }
   }
