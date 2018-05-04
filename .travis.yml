@@ -23,6 +23,7 @@ stages:
 - Frontend Lint
 - Frontend Unit Tests
 - Backend
+- e2e tests
 jobs:
  allow_failures:
  # For now, run the e2e tests, but allow them to fail without failing the buiil
