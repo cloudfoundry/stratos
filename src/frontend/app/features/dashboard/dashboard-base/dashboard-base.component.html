@@ -5,6 +5,7 @@
   </mat-sidenav>
   <div class="dashboard__inner">
     <div class="dashboard__content" [ngClass]="{'dashboard___subHeader': fullView}">
+      <button (click)="dispatchRelations()">GO-GO-GO!</button>
       <router-outlet></router-outlet>
     </div>
   </div>

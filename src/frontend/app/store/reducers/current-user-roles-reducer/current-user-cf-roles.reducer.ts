@@ -16,10 +16,8 @@ const defaultState = {
   }
 };
 
-
 export function currentUserCFRolesReducer(state: ICfRolesState = defaultState, action: GetUserRelationsComplete) {
   if (isOrgRelation(action.relationType)) {
-    console.log(action);
     return {
       ...state,
       organizations: currentUserOrgRolesReducer(state.organizations, action)

@@ -45,7 +45,6 @@ export class PermissionsEffects {
       return combineLatest(this.getRequests(endpointsArray)).pipe(
         mergeMap(actions => {
           actions.push({ type: 'all-complete' });
-          console.log(actions);
           return actions;
         })
       );

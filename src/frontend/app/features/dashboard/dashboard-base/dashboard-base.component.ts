@@ -81,9 +81,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   ];
 
   sideNaveMode = 'side';
-
-  ngOnInit() {
+  dispatchRelations() {
     this.store.dispatch(new GetCurrentUsersRelations());
+  }
+  ngOnInit() {
+    this.dispatchRelations();
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.routeChangeSubscription = this.router.events.pipe(
