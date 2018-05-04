@@ -17,6 +17,7 @@ import { RunningInstancesComponent } from '../../../running-instances/running-in
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppChipsComponent } from '../../../chips/chips.component';
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
+import { AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -25,6 +26,7 @@ describe('TableCellComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
+        AppActionMonitorIconComponent,
         TableCellComponent,
         ...listTableCells,
         EventTabActorIconPipe,

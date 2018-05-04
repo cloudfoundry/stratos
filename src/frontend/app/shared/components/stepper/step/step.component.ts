@@ -26,6 +26,7 @@ export type StepOnNextFunction = () => Observable<{
 
 export class StepComponent implements OnInit {
 
+  public _onEnter: () => void;
   active = false;
   complete = false;
   error = false;
@@ -55,6 +56,9 @@ export class StepComponent implements OnInit {
   @Input('blocked$')
   blocked$: Observable<boolean>;
 
+  @Input('destructiveStep')
+  public destructiveStep = false;
+
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
 
@@ -65,6 +69,15 @@ export class StepComponent implements OnInit {
   onEnter: () => void = () => { }
 
   constructor() {
+    this._onEnter = () => {
+      if (this.destructiveStep) {
+        this.busy = true;
+        setTimeout(() => {
+          this.busy = false;
+        }, 1000);
+      }
+      this.onEnter();
+    };
   }
 
   ngOnInit() {

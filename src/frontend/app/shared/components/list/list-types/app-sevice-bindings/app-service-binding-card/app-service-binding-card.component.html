@@ -13,17 +13,9 @@
       {{ (service$ | async)?.entity.entity.description}}
     </app-meta-card-value>
   </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Service Name</app-meta-card-key>
-    <app-meta-card-value>{{ (service$ | async)?.entity.entity.label}} </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Service Plan</app-meta-card-key>
-    <app-meta-card-value>{{ (serviceInstance$ | async)?.entity.entity.service_plan.entity.name}} </app-meta-card-value>
-  </app-meta-card-item>
-  <app-meta-card-item>
-    <app-meta-card-key>Date Created On</app-meta-card-key>
-    <app-meta-card-value>{{ row.metadata.created_at | date:'medium'}} </app-meta-card-value>
+  <app-meta-card-item *ngFor="let data of listData">
+    <app-meta-card-key>{{ data.label }}</app-meta-card-key>
+    <app-meta-card-value>{{ data.data$ | async }} </app-meta-card-value>
   </app-meta-card-item>
   <app-meta-card-item>
     <app-meta-card-key>Environment Variables</app-meta-card-key>
