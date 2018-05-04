@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { ActionReducer, StoreModule } from '@ngrx/store';
+import { ActionReducer, StoreModule, combineReducers } from '@ngrx/store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { storeFreeze } from 'ngrx-store-freeze';
 import { storeLogger } from 'ngrx-store-logger';
@@ -18,6 +18,9 @@ import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
 import { ActionReducerMap } from '@ngrx/store/src/models';
 import { routingReducer } from './reducers/routing.reducer';
 import { internalEventReducer } from './reducers/internal-events.reducer';
+import { currentUserOrgRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles-org.reducer';
+import { currentUserSpaceRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles-space.reducer';
+import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 
 
 export function logger(reducer) {
@@ -38,7 +41,8 @@ export const appReducers = {
   actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,
-  internalEvents: internalEventReducer
+  internalEvents: internalEventReducer,
+  currentUserRoles: currentUserRolesReducer
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];

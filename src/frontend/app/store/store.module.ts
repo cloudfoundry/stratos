@@ -23,7 +23,7 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
 import { MetricsEffect } from './effects/metrics.effects';
 import { RequestEffect } from './effects/request.effects';
 import { UserProfileEffect } from './effects/user-profile.effects';
-import { PermissionEffects } from './effects/permissions.effect';
+import { PermissionsEffects, PermissionEffects } from './effects/permissions.effect';
 
 @NgModule({
   imports: [
@@ -50,6 +50,7 @@ import { PermissionEffects } from './effects/permissions.effect';
       MetricsEffect,
       RequestEffect,
       UserProfileEffect,
+      PermissionsEffects,
       PermissionEffects
     ])
   ]

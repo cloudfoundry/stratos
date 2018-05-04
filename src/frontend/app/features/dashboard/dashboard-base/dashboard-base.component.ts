@@ -15,7 +15,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { GetCurrentUsersPermissions } from '../../../store/actions/permissions.actions';
+import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -83,7 +83,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   sideNaveMode = 'side';
 
   ngOnInit() {
-    this.store.dispatch(new GetCurrentUsersPermissions());
+    this.store.dispatch(new GetCurrentUsersRelations());
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.routeChangeSubscription = this.router.events.pipe(
