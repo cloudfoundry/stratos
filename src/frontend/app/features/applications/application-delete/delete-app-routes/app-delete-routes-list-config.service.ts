@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
-import { CfAppRoutesListConfigService } from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { ApplicationService } from '../../application.service';
+
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
-import { ListViewTypes } from '../../../../shared/components/list/list.component.types';
-import { ListView } from '../../../../store/actions/list.actions';
-import { APIResource } from '../../../../store/types/api.types';
-import { CfServiceInstance } from '../../../../store/types/service.types';
 import { ITableColumn } from '../../../../shared/components/list/list-table/table.types';
+import {
+  CfAppRoutesListConfigService,
+} from '../../../../shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
+import { ListView } from '../../../../store/actions/list.actions';
+import { AppState } from '../../../../store/app-state';
+import { APIResource } from '../../../../store/types/api.types';
+import { ApplicationService } from '../../application.service';
+import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 
 @Injectable()
 export class AppDeleteRoutesListConfigService extends CfAppRoutesListConfigService {
-  serviceInstanceColumns: ITableColumn<APIResource<CfServiceInstance>>[];
+  serviceInstanceColumns: ITableColumn<APIResource<IServiceInstance>>[];
   defaultView: ListView;
   constructor(
     store: Store<AppState>,

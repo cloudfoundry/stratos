@@ -106,7 +106,11 @@ const DomainSchema = new EntitySchema(domainSchemaKey, {}, { idAttribute: getAPI
 entityCache[domainSchemaKey] = DomainSchema;
 
 const ServiceSchema = new EntitySchema(serviceSchemaKey, {
-  service_plans: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
+  entity: {
+    service_plans: [new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid })]
+  }
+}, { idAttribute: getAPIResourceGuid });
+const ServiceNoPlansSchema = new EntitySchema(serviceSchemaKey, {
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceSchemaKey] = ServiceSchema;
 
@@ -135,13 +139,13 @@ const ServiceBindingsSchema = new EntitySchema(serviceBindingSchemaKey, {
       },
       service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
     }, { idAttribute: getAPIResourceGuid }),
+    service: ServiceNoPlansSchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[serviceBindingSchemaKey] = ServiceBindingsSchema;
 
 const ServiceInstancesSchema = new EntitySchema(serviceInstancesSchemaKey, {
   entity: {
-    service: ServiceSchema,
     service_plan: ServicePlanSchema,
     service_bindings: [ServiceBindingsSchema]
   }

@@ -5,22 +5,14 @@ import { first, map, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../features/cloud-foundry/cf-page.types';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import {
+  appDataSort,
+  CloudFoundryEndpointService
+} from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { GetAppStatsAction } from '../../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 
-function appDataSort(app1: APIResource<ISpace>, app2: APIResource<ISpace>): number {
-  const app1Date = new Date(app1.metadata.updated_at);
-  const app2Date = new Date(app2.metadata.updated_at);
-  if (app1Date > app2Date) {
-    return -1;
-  }
-  if (app1Date < app2Date) {
-    return 1;
-  }
-  return 0;
-}
 
 const RECENT_ITEMS_COUNT = 10;
 

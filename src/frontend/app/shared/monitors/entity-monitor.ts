@@ -37,8 +37,8 @@ export class EntityMonitor<T = any> {
     this.entityRequest$ = store.select(selectRequestInfo(entityKey, id)).pipe(
       map(request => request ? request : defaultRequestState),
       distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
+      startWith(defaultRequestState),
+      publishReplay(1), refCount()
     );
     this.isDeletingEntity$ = this.entityRequest$.map(request => request.deleting.busy).pipe(
       distinctUntilChanged()

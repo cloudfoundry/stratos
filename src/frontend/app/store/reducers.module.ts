@@ -10,15 +10,16 @@ import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestDataReducer, requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
+import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { endpointsReducer } from './reducers/endpoints.reducer';
 import { internalEventReducer } from './reducers/internal-events.reducer';
 import { listReducer } from './reducers/list.reducer';
-import { UsersRolesReducer } from './reducers/users-roles.reducer';
 import { requestPaginationReducer } from './reducers/pagination-reducer.generator';
 import { routingReducer } from './reducers/routing.reducer';
 import { uaaSetupReducer } from './reducers/uaa-setup.reducers';
+import { UsersRolesReducer } from './reducers/users-roles.reducer';
 
 
 export function logger(reducer) {
@@ -36,6 +37,7 @@ export const appReducers = {
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   deployApplication: deployAppReducer,
+  createServiceInstance: createServiceInstanceReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,
