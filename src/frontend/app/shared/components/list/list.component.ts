@@ -142,7 +142,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     // Set up an observable containing the current view (card/table)
     this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
     const { view, } = getListStateObservables(this.store, this.listViewKey);
-    this.view$ = view;
+    this.view$ = view.pipe(
+      map(listView => {
+        if (this.config.viewType === ListViewTypes.CARD_ONLY) {
+          return 'cards';
+        }
+        if (this.config.viewType === ListViewTypes.TABLE_ONLY) {
+          return 'table';
+        }
+        return listView;
+      })
+    );
 
     // If this is the first time the user has used this list then set the view to the default
     this.view$.first().subscribe(listView => {

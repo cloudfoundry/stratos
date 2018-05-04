@@ -10,6 +10,7 @@ import { actionHistoryReducer } from './reducers/action-history-reducer';
 import { requestDataReducer, requestReducer } from './reducers/api-request-reducers.generator';
 import { authReducer } from './reducers/auth.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
+import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
 import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { deployAppReducer } from './reducers/deploy-app.reducer';
@@ -36,6 +37,7 @@ export const appReducers = {
   dashboard: dashboardReducer,
   createApplication: createAppReducer,
   deployApplication: deployAppReducer,
+  createServiceInstance: createServiceInstanceReducer,
   actionHistory: actionHistoryReducer,
   lists: listReducer,
   routing: routingReducer,

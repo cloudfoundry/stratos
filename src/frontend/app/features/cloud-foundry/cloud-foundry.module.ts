@@ -110,12 +110,7 @@ import { CliInfoCloudFoundryComponent } from './cli-info-cloud-foundry/cli-info-
   providers: [
     CFEndpointsListConfigService,
     EndpointsListConfigService,
-    {
-      provide: ActiveRouteCfOrgSpace,
-      useValue: {}
-    },
-    CloudFoundryOrganizationService,
-    CloudFoundryEndpointService
+    CloudFoundryOrganizationService
   ]
 })
 export class CloudFoundryModule { }

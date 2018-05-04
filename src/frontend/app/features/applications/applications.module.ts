@@ -28,6 +28,9 @@ import { AddRoutesComponent } from './routes/add-routes/add-routes.component';
 import { MapRoutesComponent } from './routes/map-routes/map-routes.component';
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
+import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
+import { DeleteAppRoutesComponent } from './application-delete/delete-app-routes/delete-app-routes.component';
+import { DeleteAppServiceInstancesComponent } from './application-delete/delete-app-instances/delete-app-instances.component';
 
 @NgModule({
   imports: [
@@ -55,6 +58,9 @@ import { CliInfoApplicationComponent } from './cli-info-application/cli-info-app
     CliInfoApplicationComponent,
     MetricsTabComponent,
     RoutesTabComponent,
+    ApplicationDeleteComponent,
+    DeleteAppRoutesComponent,
+    DeleteAppServiceInstancesComponent,
   ],
   providers: [
     ApplicationService,

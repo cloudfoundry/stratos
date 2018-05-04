@@ -68,7 +68,7 @@ function buildEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, s
   });
 }
 
-export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [])
+export function parseEntityTree(tree: EntityTree, entityRelation: EntityTreeRelation, includeRelations: string[] = [], )
   : EntityTreeRelation[] {
   const newChildRelations = new Array<EntityTreeRelation>();
   entityRelation.childRelations.forEach((relation) => {
