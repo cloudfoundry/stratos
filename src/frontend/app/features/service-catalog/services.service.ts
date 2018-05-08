@@ -178,11 +178,7 @@ export class ServicesService {
       map(([serviceBroker, allServicePlanVisibilities]) => {
 
         const svcAvailability = {
-          isPublic: false,
-          spaceScoped: false,
-          hasVisibilities: false,
-          guid: servicePlan.metadata.guid,
-          spaceGuid: null
+          isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
         };
         if (serviceBroker.entity.space_guid) {
           svcAvailability.spaceScoped = true;
@@ -205,8 +201,7 @@ export class ServicesService {
       .pipe(
       filter(([p, q]) => !!p && !!q),
       map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
-      map(p => p[0]),
-      filter(p => !!p)
+      map(p => p[0]), filter(p => !!p)
       );
   }
 
@@ -233,10 +228,7 @@ export class ServicesService {
               entityFactory(organizationSchemaKey)
             )
           }, true)
-            .entities$.pipe(
-            share(),
-            first()
-            );
+            .entities$.pipe(share(), first());
         } else if (servicePlanAccessbility.spaceScoped) {
           // Service plan is not public, but is space-scoped
           const action = new GetSpace(servicePlanAccessbility.spaceGuid, this.cfGuid,
@@ -268,8 +260,7 @@ export class ServicesService {
           );
         }
       }),
-      share(),
-      first()
+      share(), first()
       );
   }
 
