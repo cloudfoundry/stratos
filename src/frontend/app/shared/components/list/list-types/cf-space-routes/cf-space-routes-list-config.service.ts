@@ -171,20 +171,20 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-      take(1),
-      tap(domain => {
-        const routeUrl = getRoute(item, false, false, domain);
-        const confirmation = new ConfirmationDialogConfig(
-          'Delete Route',
-          `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
-          'Delete',
-          true
-        );
-        this.confirmDialog.open(confirmation, () => {
-          this.dispatchDeleteAction(item);
-          this.getDataSource().selectClear();
-        });
-      })
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialogConfig(
+            'Delete Route',
+            `Are you sure you want to delete the route \n\'${routeUrl}\'?`,
+            'Delete',
+            true
+          );
+          this.confirmDialog.open(confirmation, () => {
+            this.dispatchDeleteAction(item);
+            this.getDataSource().selectClear();
+          });
+        })
       )
       .subscribe();
   }
@@ -193,20 +193,20 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     this.store
       .select(selectEntity<EntityInfo>('domain', item.entity.domain_guid))
       .pipe(
-      take(1),
-      tap(domain => {
-        const routeUrl = getRoute(item, false, false, domain);
-        const confirmation = new ConfirmationDialogConfig(
-          'Unmap Route from Application',
-          `Are you sure you want to unmap the route \'${routeUrl}\'?`,
-          'Unmap',
-          true
-        );
-        this.confirmDialog.open(confirmation, () => {
-          this.dispatchUnmapAction(item);
-          this.getDataSource().selectClear();
-        });
-      })
+        take(1),
+        tap(domain => {
+          const routeUrl = getRoute(item, false, false, domain);
+          const confirmation = new ConfirmationDialogConfig(
+            'Unmap Route from Application',
+            `Are you sure you want to unmap the route \'${routeUrl}\'?`,
+            'Unmap',
+            true
+          );
+          this.confirmDialog.open(confirmation, () => {
+            this.dispatchUnmapAction(item);
+            this.getDataSource().selectClear();
+          });
+        })
       )
       .subscribe();
   }
