@@ -15,6 +15,7 @@ export class CodeBlockComponent implements OnInit {
   }
 
   @Input() hideCopy: boolean;
+  @Input() codeBlockStyle: string;
   _canCopy = false;
   _copySuccessfull = false;
   _copySuccessWait = false;

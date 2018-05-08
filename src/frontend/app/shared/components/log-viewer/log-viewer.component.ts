@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { filter, map, share, switchMap, tap } from 'rxjs/operators';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs/Rx';
 
 import { AnsiColors } from './ansi-colors';
@@ -45,8 +46,11 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     this.stopped$ = new BehaviorSubject<boolean>(false);
 
-    const stoppableLogStream$ = this.stopped$.switchMap(
-      stopped => (stopped ? Observable.never() : this.logStream)
+    const stoppableLogStream$ = this.stopped$.pipe(
+      switchMap(
+        stopped => (stopped ? Observable.never() : this.logStream)
+      ),
+      share()
     );
 
     // Locked indicates auto-scroll - scroll position is "locked" to the bottom
@@ -90,28 +94,32 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     const addedLogs$ = stoppableLogStream$
       .buffer(buffer$)
-      .filter(log => !!log.length)
-      .do(logs => {
-        this.logLinesCount += logs.length;
-        const elementString = logs
-          .map(log => {
-            let formatted = this.filter ? this.filter(log) : log;
-            formatted = this.colorizer.ansiColorsToHtml(formatted);
-            return `<div>${formatted}</div>`;
-          })
-          .join('');
-        let removedElement;
-        if (this.logLinesCount > this.maxLogLines) {
-          removedElement = this.binElement();
-        }
-        const ele =
-          removedElement || (document.createElement('div') as HTMLDivElement);
-        if (logs.length > 1) {
-          ele.setAttribute(this.countAttribute, '' + logs.length);
-        }
-        ele.innerHTML = elementString;
-        contentElement.append(ele);
-      });
+      .pipe(
+        filter(log => !!log.length),
+        // Apply filter to messages if applicable
+        map(logs => logs.map(log => this.filter ? this.filter(log) : log).filter(log => !!log)),
+        filter(log => !!log.length),
+        tap(logs => {
+          this.logLinesCount += logs.length;
+          const elementString = logs
+            .map(log => {
+              const formatted = this.colorizer.ansiColorsToHtml(log);
+              return `<div>${formatted}</div>`;
+            })
+            .join('');
+          let removedElement;
+          if (this.logLinesCount > this.maxLogLines) {
+            removedElement = this.binElement();
+          }
+          const ele =
+            removedElement || (document.createElement('div') as HTMLDivElement);
+          if (logs.length > 1) {
+            ele.setAttribute(this.countAttribute, '' + logs.length);
+          }
+          ele.innerHTML = elementString;
+          contentElement.append(ele);
+        })
+      );
 
     this.listeningSub = Observable.combineLatest(this.isLocked$, addedLogs$)
       .do(([isLocked, logs]) => {

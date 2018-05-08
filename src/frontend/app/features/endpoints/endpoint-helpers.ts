@@ -1,5 +1,5 @@
 import { urlValidationExpression } from '../../core/utils.service';
-import { EndpointModel } from './../../store/types/endpoint.types';
+import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
 
 export function getFullEndpointApiUrl(endpoint: EndpointModel) {
   return endpoint && endpoint.api_endpoint ? `${endpoint.api_endpoint.Scheme}://${endpoint.api_endpoint.Host}` : 'Unknown';
@@ -8,7 +8,7 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
 
 export interface EndpointTypeHelper {
-  value: string;
+  value: EndpointType;
   label: string;
   urlValidation?: string;
 }

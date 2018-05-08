@@ -149,6 +149,7 @@ export abstract class BaseSpaceAction extends CFStartAction implements ICFAction
   entity = [entityFactory(spaceSchemaKey)];
   entityKey = spaceSchemaKey;
   options: RequestOptions;
+  removeEntityOnDelete?: boolean;
 }
 
 export class DeleteSpace extends BaseSpaceAction {
@@ -162,6 +163,7 @@ export class DeleteSpace extends BaseSpaceAction {
     this.options.params.append('async', 'false');
   }
   actions = [DELETE_SPACE, DELETE_SPACE_SUCCESS, DELETE_SPACE_FAILED];
+  removeEntityOnDelete = true;
 }
 
 export class CreateSpace extends BaseSpaceAction {
@@ -213,4 +215,11 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     this.options.url = `spaces/${guid}/user_roles`;
   }
   actions = getActions('Spaces', 'List all user roles');
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'username',
+  };
+  flattenPagination = true;
 }

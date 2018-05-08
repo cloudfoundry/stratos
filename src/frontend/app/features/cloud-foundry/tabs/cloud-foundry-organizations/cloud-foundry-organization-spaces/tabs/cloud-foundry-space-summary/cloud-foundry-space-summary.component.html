@@ -9,7 +9,7 @@
 
     <app-tile-group>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps" icon="apps" label="Applications" value="{{ (cfSpaceService.apps$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps" icon="apps" label="Applications" labelSingular="Application" value="{{ (cfSpaceService.apps$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
         <app-card-number-metric icon="content_copy" label="App Instances" value="{{ (cfSpaceService.appInstances$ | async) }}" limit="{{ (cfSpaceService.quotaDefinition$ | async)?.entity.app_instance_limit}}"></app-card-number-metric>
@@ -25,7 +25,7 @@
         <app-card-number-metric icon="memory" label="Memory Usage" units="mb" value="{{ (cfSpaceService.totalMem$ | async) }}" limit="{{ (cfSpaceService.quotaDefinition$ | async)?.entity.memory_limit }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
-        <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users" icon="person" label="Users" value="{{(cfSpaceService.allSpaceUsers.entities$ | async)?.length}}"></app-card-number-metric>
+        <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users" icon="person" label="Users" labelSingular="User" value="{{(cfSpaceService.allSpaceUsers.entities$ | async)?.length}}"></app-card-number-metric>
       </app-tile>
       <app-tile>
         <app-card-number-metric link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes" icon="language" label="Routes" value="{{ (cfSpaceService.routes$ | async)?.length }}" limit="{{ (cfSpaceService.quotaDefinition$ | async)?.entity.total_routes}}"></app-card-number-metric>

@@ -24,7 +24,7 @@ function getFilterFunction(def: DataFunctionDefinition): DataFunction<any> {
   return (entities, paginationState) => {
     const upperCaseFilter = paginationState.clientPagination.filter.string.toUpperCase();
     return entities.filter(e => {
-      const value = getValue(e, fieldArray);
+      const value = getValue(e, fieldArray, 0, true);
       if (!value) {
         return false;
       }
@@ -44,8 +44,8 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
       }
 
       return entities.sort((a, b) => {
-        const valueA = getValue(a, fieldArray).toUpperCase();
-        const valueB = getValue(b, fieldArray).toUpperCase();
+        const valueA = checkAndUpperCase(getValue(a, fieldArray));
+        const valueB = checkAndUpperCase(getValue(b, fieldArray));
         if (valueA > valueB) {
           return orderDirection === 'desc' ? 1 : -1;
         }
@@ -60,10 +60,19 @@ function getSortFunction(def: DataFunctionDefinition): DataFunction<any> {
   };
 }
 
-function getValue(obj, fieldArray: string[], index = 0): string {
+function checkAndUpperCase(value: any) {
+  if (typeof value.toUpperCase === 'function') {
+    value = value.toUpperCase();
+  }
+  return value;
+}
+function getValue(obj, fieldArray: string[], index = 0, castToString = false): string {
   const field = fieldArray[index];
   if (!field) {
-    return obj + '';
+    if (castToString) {
+      return obj + '';
+    }
+    return obj;
   }
   if (typeof obj[field] === 'undefined') {
     return '';

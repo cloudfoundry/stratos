@@ -2,7 +2,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { map, mergeMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -14,7 +14,6 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
-  GetAllEndpoints,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
   REGISTER_ENDPOINTS_FAILED,
@@ -25,12 +24,12 @@ import {
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
 } from '../actions/endpoint.actions';
-import { ClearPages, ClearPaginationOfEntity } from '../actions/pagination.actions';
-import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
+import { ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointStoreNames, EndpointType, StateUpdateAction } from '../types/endpoint.types';
+import { EndpointModel, endpointStoreNames, EndpointType } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
@@ -53,12 +52,9 @@ export class EndpointsEffect {
 
   @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
     .pipe(mergeMap(action => {
-      const endpointsActions = new GetAllEndpoints(action.login);
+      const { associatedAction } = action;
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
-
       const endpoints = action.payload.endpoints;
-
       // Data is an array of endpoints
       const mappedData = {
         entities: {
@@ -82,8 +78,8 @@ export class EndpointsEffect {
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
       return [
-        new WrapperRequestActionSuccess(mappedData, endpointsActions, actionType),
-        new GetAllEndpointsSuccess(mappedData, endpointsActions.login),
+        new WrapperRequestActionSuccess(mappedData, associatedAction, actionType),
+        new GetAllEndpointsSuccess(mappedData, associatedAction.login),
       ];
     }));
 
@@ -107,7 +103,7 @@ export class EndpointsEffect {
         params,
         null,
         [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
-        action.type,
+        action.endpointType,
         action.body,
       );
     });
@@ -127,19 +123,10 @@ export class EndpointsEffect {
         '/pp/v1/auth/logout/cnsi',
         params,
         null,
-        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED]
+        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
-
-  @Effect({ dispatch: false }) connectSuccess$ = this.actions$.ofType<StateUpdateAction>(CONNECT_ENDPOINTS_SUCCESS)
-    .pipe(
-      map(action => {
-        if (action.endpointType === 'cloud-foundry') {
-          this.store.dispatch(new ClearPages('application', 'applicationWall'));
-        }
-      })
-    );
-
 
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
@@ -156,7 +143,8 @@ export class EndpointsEffect {
         '/pp/v1/unregister',
         params,
         'delete',
-        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED]
+        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
@@ -177,10 +165,10 @@ export class EndpointsEffect {
         '/pp/v1/register/' + action.endpointType,
         params,
         'create',
-        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED]
+        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
-
 
   private getEndpointUpdateAction(guid, type, updatingKey) {
     return {
@@ -205,7 +193,7 @@ export class EndpointsEffect {
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
     actionStrings: [string, string] = [null, null],
-    endpointType: EndpointType = 'cloud-foundry',
+    endpointType: EndpointType = 'cf',
     body?: string,
   ) {
     const headers = new HttpHeaders();
@@ -214,20 +202,27 @@ export class EndpointsEffect {
     return this.http.post(url, body || {}, {
       headers,
       params
-    }).map(endpoint => {
+    }).mergeMap((endpoint: EndpointModel) => {
+      const actions = [];
       if (actionStrings[0]) {
-        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType });
+        actions.push({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType, endpoint });
       }
       if (apiActionType === 'delete') {
-        this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+        actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
       }
-      return new WrapperRequestActionSuccess(null, apiAction, apiActionType);
+      if (apiActionType === 'create') {
+        actions.push(new GetSystemInfo());
+      }
+      actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
+      return actions;
     })
       .catch(e => {
+        const actions = [];
         if (actionStrings[1]) {
-          this.store.dispatch({ type: actionStrings[1], guid: apiAction.guid });
+          actions.push({ type: actionStrings[1], guid: apiAction.guid });
         }
-        return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
+        actions.push(new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType));
+        return actions;
       });
   }
 }

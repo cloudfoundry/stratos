@@ -4,8 +4,11 @@ import { Store } from '@ngrx/store';
 import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
 import { Observable } from 'rxjs/Observable';
+import { first, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
+import { IApp } from '../../../core/cf-api.types';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../shared/components/ssh-viewer/ssh-viewer.component';
 import { AppState } from '../../../store/app-state';
 import { ApplicationService } from '../application.service';
@@ -35,7 +38,22 @@ export class SshApplicationComponent implements OnInit {
 
   public instanceId: string;
 
+  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+
   @ViewChild('sshViewer') sshViewer: SshViewerComponent;
+
+  private getBreadcrumbs(
+    application: IApp,
+  ) {
+    return [
+      {
+        breadcrumbs: [
+          { value: 'Applications', routerLink: '/applications' },
+          { value: application.name, routerLink: `/applications/${application.cfGuid}/${application.guid}/instances` }
+        ]
+      },
+    ];
+  }
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -77,6 +95,11 @@ export class SshApplicationComponent implements OnInit {
         });
 
       this.connectionStatus = connection.connectionStatus;
+
+      this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
+        map(app => this.getBreadcrumbs(app.entity.entity)),
+        first()
+      );
     }
   }
 }

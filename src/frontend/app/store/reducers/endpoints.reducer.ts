@@ -1,4 +1,3 @@
-import { GET_SYSTEM_INFO_SUCCESS } from '../actions/system.actions';
 import { GET_ENDPOINTS, GET_ENDPOINTS_FAILED, GET_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
 import { EndpointState } from '../types/endpoint.types';
 

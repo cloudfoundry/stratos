@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
@@ -99,8 +100,10 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     }
   ];
   viewType = ListViewTypes.TABLE_ONLY;
+  enableTextFilter = true;
   text = {
     title: null,
+    filter: 'Search by state',
     noEntries: 'There are no application instances'
   };
 
@@ -125,17 +128,24 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
 
   private listActionSsh: IListAction<any> = {
     action: (item) => {
-      const index = item.index;
-      const sshRoute = (
-        `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
-      );
-      this.router.navigate([sshRoute]);
-    },
+        const index = item.index;
+        const sshRoute = (
+          `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
+        );
+        this.router.navigate([sshRoute]);
+      },
     label: 'SSH',
     description: ``, // Description depends on console user permission
     visible: row => true,
-    enabled: row => !!(row.value && row.value.state === 'RUNNING'),
-  };
+    enabled: row =>
+      this.appService.app$.pipe(
+        map(app => {
+          return row.value &&
+            row.value.state === 'RUNNING' &&
+            app.entity.entity.enable_ssh;
+        })
+      )
+    };
 
   private singleActions = [
     this.listActionTerminate,

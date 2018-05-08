@@ -1,24 +1,20 @@
-import { Observable } from 'rxjs/Rx';
-
 import { async, ComponentFixture, inject, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../../../core/core.module';
+import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { SharedModule } from '../../../../../../shared/shared.module';
 import { appReducers } from '../../../../../../store/reducers.module';
 import { AppStoreModule } from '../../../../../../store/store.module';
+import { endpointStoreNames } from '../../../../../../store/types/endpoint.types';
+import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
+import { ApplicationService } from '../../../../application.service';
+import { ApplicationEnvVarsService } from './application-env-vars.service';
 import { BuildTabComponent } from './build-tab.component';
 import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
-import { ApplicationService } from '../../../../application.service';
-import { ApplicationServiceMock } from '../../../../../../test-framework/application-service-helper';
-import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
-import { ApplicationEnvVarsService } from './application-env-vars.service';
-import { APIResource } from '../../../../../../store/types/api.types';
-import { endpointStoreNames } from '../../../../../../store/types/endpoint.types';
-import { RoutesComponent } from '../../../../routes/routes.component';
 
 describe('BuildTabComponent', () => {
   let component: BuildTabComponent;
@@ -29,8 +25,7 @@ describe('BuildTabComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         BuildTabComponent,
-        ViewBuildpackComponent,
-        RoutesComponent
+        ViewBuildpackComponent
       ],
       imports: [
         CoreModule,

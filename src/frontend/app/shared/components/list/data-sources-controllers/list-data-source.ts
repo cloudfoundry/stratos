@@ -16,6 +16,7 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -54,6 +55,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public isAdding$ = new BehaviorSubject<boolean>(false);
 
   // Select item/s
+  public selectedRows$ = new ReplaySubject<Map<string, T>>();
   public selectedRows = new Map<string, T>();
   public isSelecting$ = new BehaviorSubject(false);
   public selectAllChecked = false;
@@ -87,6 +89,8 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
   private seedSyncSub: Subscription;
+
+  public refresh: () => void;
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -124,20 +128,14 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
 
-    const setResultCount = entities => {
-      this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
-      pagination$.pipe(
-        first()
-      ).subscribe((paginationEntity) => {
-        const validPagesCountChange = this.transformEntity;
-        if (
-          validPagesCountChange &&
-          (paginationEntity.totalResults !== entities.length ||
-            paginationEntity.clientPagination.totalResults !== entities.length)
-        ) {
-          this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
-        }
-      });
+    const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
+      const validPagesCountChange = this.transformEntity;
+      if (
+        paginationEntity.totalResults !== entities.length ||
+        paginationEntity.clientPagination.totalResults !== entities.length
+      ) {
+        this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+      }
     };
     this.page$ = this.isLocal ?
       new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
@@ -151,6 +149,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   init(config: IListDataSourceConfig<A, T>) {
     this.store = config.store;
     this.action = config.action;
+    this.refresh = this.getRefreshFunction(config);
     this.sourceScheme = config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
@@ -164,6 +163,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+  }
+
+  private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
+    if (config.listConfig && config.listConfig.hideRefresh) {
+      return null;
+    }
+    return config.refresh ? config.refresh : () => {
+      this.store.dispatch(this.action);
+    };
   }
   /**
    * Will return the row state with default values filled in.
@@ -214,6 +222,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.selectedRows.set(this.getRowUniqueId(row), row);
       this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
     }
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
   }
 
@@ -226,11 +235,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.selectedRows.delete(this.getRowUniqueId(row));
       }
     }
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
 
   selectClear() {
     this.selectedRows.clear();
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(false);
   }
 

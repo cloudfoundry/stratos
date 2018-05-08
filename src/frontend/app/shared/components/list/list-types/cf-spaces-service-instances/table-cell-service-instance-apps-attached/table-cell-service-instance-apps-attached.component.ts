@@ -28,7 +28,8 @@ export class TableCellServiceInstanceAppsAttachedComponent<T> extends TableCellC
       .map(a => {
         return {
           appName: a.entity.app.entity.name,
-          url: `applications/${cfGuid}/${a.entity.app.metadata.guid}?breadcrumbs=space-services`
+          url: `/applications/${cfGuid}/${a.entity.app.metadata.guid}`,
+          params: { breadcrumbs: 'space-services' }
         };
       });
   }

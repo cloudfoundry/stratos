@@ -11,11 +11,11 @@ import { SetResultCount } from '../../../../store/actions/pagination.actions';
 export class LocalListController<T = any> {
   public page$: Observable<T[]>;
   constructor(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>,
-    postSplit?: (entities: (T | T[])[]) => void, dataFunctions?) {
+    private setResultCount: (pagination: PaginationEntityState, entities: (T | T[])[]) => void, dataFunctions?) {
     const pagesObservable$ = this.buildPagesObservable(page$, pagination$, dataFunctions);
     const currentPageIndexObservable$ = this.buildCurrentPageNumberObservable(pagination$);
     const currentPageSizeObservable$ = this.buildCurrentPageSizeObservable(pagination$);
-    this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$, currentPageSizeObservable$, postSplit);
+    this.page$ = this.buildCurrentPageObservable(pagesObservable$, currentPageIndexObservable$, currentPageSizeObservable$);
   }
 
   private pageSplitCache: (T | T[])[] = null;
@@ -27,7 +27,7 @@ export class LocalListController<T = any> {
 
     const cleanPage$ = this.buildCleanPageObservable(page$, pagination$);
 
-    return this.buildFullCleanPageObservable(page$, pagination$, dataFunctions);
+    return this.buildFullCleanPageObservable(page$, cleanPagination$, dataFunctions);
   }
 
   private buildCleanPageObservable(page$: Observable<T[]>, pagination$: Observable<PaginationEntityState>) {
@@ -56,15 +56,17 @@ export class LocalListController<T = any> {
       map(([paginationEntity, entities]) => {
         this.pageSplitCache = null;
         if (!entities || !entities.length) {
-          return [];
+          return { paginationEntity, entities: [] };
         }
         if (dataFunctions && dataFunctions.length) {
           entities = dataFunctions.reduce((value, fn) => {
             return fn(value, paginationEntity);
           }, entities);
         }
-        return entities;
-      })
+        return { paginationEntity, entities };
+      }),
+      tap(({ paginationEntity, entities }) => this.setResultCount(paginationEntity, entities)),
+      map(({ entities }) => entities)
     );
   }
 
@@ -85,8 +87,7 @@ export class LocalListController<T = any> {
   private buildCurrentPageObservable(
     entities$: Observable<T[]>,
     currentPageNumber$: Observable<number>,
-    currentPageSizeObservable$: Observable<number>,
-    postSplit?: (entities: (T | T[])[]) => void
+    currentPageSizeObservable$: Observable<number>
   ) {
     return combineLatest(
       entities$,
@@ -101,9 +102,6 @@ export class LocalListController<T = any> {
           currentPage
         );
         this.pageSplitCache = data.entities;
-        if (postSplit) {
-          postSplit(entities);
-        }
         return (data.entities[data.index] || []) as T[];
       }),
       publishReplay(1),

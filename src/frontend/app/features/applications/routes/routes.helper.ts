@@ -1,7 +1,6 @@
 import { APIResource, EntityInfo } from './../../../store/types/api.types';
 
-export const isTCPRoute = (route: APIResource) =>
-  route.entity.port !== null && route.entity.port !== '';
+export const isTCPRoute = (route: APIResource) => route.entity.port !== null && route.entity.port !== '';
 
 export interface Domain {
   name: string;

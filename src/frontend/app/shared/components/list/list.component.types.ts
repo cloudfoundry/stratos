@@ -6,6 +6,7 @@ import { ITableColumn, ITableText } from './list-table/table.types';
 import { Type } from '@angular/core';
 import { ListView } from '../../../store/actions/list.actions';
 import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
+import { ListDataSource } from './data-sources-controllers/list-data-source';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -44,7 +45,7 @@ export interface IListConfig<T> {
   /**
    * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
-  pageSizeOptions?: Number[];
+  pageSizeOptions?: number[];
   /**
    * What different views the user can select (table/cards)
    */
@@ -69,6 +70,8 @@ export interface IListConfig<T> {
    * The card component used in card view
    */
   cardComponent?: any;
+  hideRefresh?: boolean;
+  allowSelection?: boolean;
 }
 
 export interface IListMultiFilterConfig {
@@ -97,11 +100,12 @@ export class ListConfig<T> implements IListConfig<T> {
   tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
+  allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = () => null;
+  getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }
 
@@ -110,7 +114,7 @@ export interface IBaseListAction<T> {
   label: string;
   description: string;
   visible: (row: T) => boolean;
-  enabled: (row: T) => boolean;
+  enabled: (row: T) => boolean | Observable<T>;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {

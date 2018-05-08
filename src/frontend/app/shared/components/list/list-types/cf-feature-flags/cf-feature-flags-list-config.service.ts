@@ -18,8 +18,10 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
   defaultView = 'table' as ListView;
   pageSizeOptions = [25, 50, 100];
   viewType = ListViewTypes.TABLE_ONLY;
+  enableTextFilter = true;
   text = {
     title: null,
+    filter: 'Search by name',
     noEntries: 'There are no feature flags'
   };
 
@@ -31,7 +33,12 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
         getValue: (row) => `${row.entity.name}`
       },
       class: 'table-column-select',
-      cellFlex: '2'
+      cellFlex: '2',
+      sort: {
+        type: 'sort',
+        orderKey: 'name',
+        field: 'entity.name'
+      }
     },
     {
       columnId: 'description',
@@ -51,7 +58,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
         orderKey: 'state',
         field: 'entity.enabled'
       },
-      cellFlex: '1'
+      cellFlex: '1',
     }
   ];
   constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {

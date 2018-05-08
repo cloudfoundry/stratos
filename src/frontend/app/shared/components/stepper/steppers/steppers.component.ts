@@ -22,8 +22,9 @@ import { empty } from 'rxjs/observable/empty';
   providers: [SteppersService],
   encapsulation: ViewEncapsulation.None
 })
-export class SteppersComponent implements OnInit, AfterContentInit {
+export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
+  private nextSub: Subscription;
   cancel$: Observable<string>;
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
@@ -63,13 +64,21 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   }
 
   goNext() {
+    this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      step.onNext()
+      const obs$ = step.onNext();
+      if (!(obs$ instanceof Observable)) {
+        return;
+      }
+      if (this.nextSub) {
+        this.nextSub.unsubscribe();
+      }
+      this.nextSub = obs$
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false }))
-        .switchMap(({ success, message, redirect }) => {
+        .subscribe(({ success, message, redirect }) => {
           step.error = !success;
           step.busy = false;
           if (success) {
@@ -79,8 +88,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
               this.setActive(this.currentIndex + 1);
             }
           }
-          return [];
-        }).subscribe();
+        });
     }
   }
 
@@ -110,6 +118,8 @@ export class SteppersComponent implements OnInit, AfterContentInit {
         _step.active = i === index ? true : false;
       });
       this.currentIndex = index;
+      this.steps[this.currentIndex]._onEnter();
+
     }
   }
 
@@ -147,6 +157,16 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     return true;
   }
 
+  canCancel(index) {
+    if (
+      !this.steps[index] ||
+      !this.steps[index].canClose
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   getIconLigature(step: StepComponent, index: number): 'done' {
     return 'done';
   }
@@ -159,6 +179,14 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   getCancelButtonText(currentIndex: number): string {
     return this.steps[currentIndex].cancelButtonText;
+  }
+  private unsubscribeNext() {
+    if (this.nextSub) {
+      this.nextSub.unsubscribe();
+    }
+  }
+  ngOnDestroy() {
+    this.unsubscribeNext();
   }
 
 }

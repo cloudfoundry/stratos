@@ -1,3 +1,5 @@
+import { InternalEventSeverity } from '../../../store/types/internal-events.types';
+
 export interface IHeaderBreadcrumbLink {
   value: string;
   routerLink?: string;
@@ -9,3 +11,8 @@ export interface IHeaderBreadcrumb {
 }
 
 export const BREADCRUMB_URL_PARAM = 'breadcrumbs';
+
+export interface PageHeaderNotice {
+  message: string;
+  serverity: InternalEventSeverity;
+}

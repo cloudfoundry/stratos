@@ -76,6 +76,7 @@ import { ICellDefinition } from '../table.types';
 import { CfSpacePermissionCellComponent } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellEndpointNameComponent } from '../../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellRequestMonitorIconComponent } from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -105,7 +106,8 @@ export const listTableCells = [
   TableCellRouteAppsAttachedComponent,
   TableCellCfUserPermissionComponent,
   CfSpacePermissionCellComponent,
-  TableCellFeatureFlagStateComponent
+  TableCellFeatureFlagStateComponent,
+  TableCellRequestMonitorIconComponent
 ];
 
 @Component({
@@ -161,7 +163,9 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
-      this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+      if (this.dataSource.getRowState) {
+        this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+      }
       if (this.cellDefinition) {
         const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;
         defaultTableCell.cellDefinition = this.cellDefinition;

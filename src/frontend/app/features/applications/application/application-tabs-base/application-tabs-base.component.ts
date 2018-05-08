@@ -112,6 +112,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   tabLinks: ISubHeaderTabs[] = [
     { link: 'summary', label: 'Summary' },
     { link: 'instances', label: 'Instances' },
+    { link: 'routes', label: 'Routes' },
     { link: 'log-stream', label: 'Log Stream' },
     { link: 'services', label: 'Services' },
     { link: 'variables', label: 'Variables' },
@@ -209,10 +210,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
   }
 
-  deleteApplication() {
-    this.confirmDialog.open(appDeleteConfirmation, () => {
-      this.store.dispatch(new DeleteApplication(this.applicationService.appGuid, this.applicationService.cfGuid));
-    });
+  redirectToDeletePage() {
+    this.router.navigate(['./delete'], { relativeTo: this.route });
   }
 
   ngOnInit() {

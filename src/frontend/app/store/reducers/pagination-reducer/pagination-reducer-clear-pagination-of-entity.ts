@@ -20,16 +20,18 @@ export function paginationClearOfEntity(state: PaginationState, action) {
         const index = page.indexOf(guid);
         if (index >= 0) {
           // Recreate the pagination section with new values
-          const newEntityPaginationState = {
+          const newEntityPagState = {
             ...entityPaginationState,
             ids: { ...entityPaginationState.ids },
             clientPagination: spreadClientPagination(entityPaginationState.clientPagination)
           };
-          newEntityPaginationState.ids[pageKey] = [...newEntityPaginationState.ids[pageKey]];
-          newEntityPaginationState.ids[pageKey].splice(index, 1);
-          newEntityPaginationState.totalResults--;
-          newEntityPaginationState.clientPagination.totalResults--;
-          newEntityState[key] = newEntityPaginationState;
+          newEntityPagState.ids[pageKey] = [...newEntityPagState.ids[pageKey]];
+          newEntityPagState.ids[pageKey].splice(index, 1);
+          newEntityPagState.totalResults--;
+          const clientPag = newEntityPagState.clientPagination;
+          clientPag.totalResults--;
+          clientPag.currentPage = 1;
+          newEntityState[key] = newEntityPagState;
         }
       });
     });

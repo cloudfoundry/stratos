@@ -15,7 +15,7 @@ import { MatPaginator, MatSelect, PageEvent, SortDirection } from '@angular/mate
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, pairwise, startWith, tap, withLatestFrom, takeUntil, takeWhile } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
@@ -49,11 +49,11 @@ import {
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateY(0)' }))
       ]),
       transition('* => left, * => repeatLeft', [
-        style({ opacity: '0', transform: 'translateX(-20px)' }),
+        style({ opacity: '0', transform: 'translateX(-2%)' }),
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ]),
       transition('* => right, * => repeatRight', [
-        style({ opacity: '0', transform: 'translateX(20px)' }),
+        style({ opacity: '0', transform: 'translateX(2%)' }),
         animate('350ms ease-out', style({ opacity: '1', transform: 'translateX(0)' })),
       ])
     ])
@@ -101,6 +101,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   isFiltering$: Observable<boolean>;
   noRowsNotFiltering$: Observable<boolean>;
   showProgressBar$: Observable<boolean>;
+  isRefreshing$: Observable<boolean>;
 
   // Observable which allows you to determine if the paginator control should be hidden
   hidePaginator$: Observable<boolean>;
@@ -141,7 +142,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     // Set up an observable containing the current view (card/table)
     this.listViewKey = this.dataSource.entityKey + '-' + this.dataSource.paginationKey;
     const { view, } = getListStateObservables(this.store, this.listViewKey);
-    this.view$ = view;
+    this.view$ = view.pipe(
+      map(listView => {
+        if (this.config.viewType === ListViewTypes.CARD_ONLY) {
+          return 'cards';
+        }
+        if (this.config.viewType === ListViewTypes.TABLE_ONLY) {
+          return 'table';
+        }
+        return listView;
+      })
+    );
 
     // If this is the first time the user has used this list then set the view to the default
     this.view$.first().subscribe(listView => {
@@ -160,7 +171,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         this.multiActions && this.multiActions.length ||
         viewType === 'cards' && this.sortColumns && this.sortColumns.length ||
         this.multiFilterConfigs && this.multiFilterConfigs.length ||
-        this.config.enableTextFilter);
+        this.config.enableTextFilter
+      );
     });
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
@@ -346,10 +358,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     const canShowLoading$ = this.dataSource.pagination$.pipe(
       map(pag => pag.currentPage),
-      distinctUntilChanged(),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
-      startWith(true),
+      startWith(true)
     );
 
     this.showProgressBar$ = this.dataSource.isLoadingPage$.pipe(
@@ -357,6 +368,14 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       withLatestFrom(canShowLoading$),
       map(([loading, canShowLoading]) => {
         return canShowLoading && loading;
+      }),
+      distinctUntilChanged()
+    );
+
+    this.isRefreshing$ = this.dataSource.isLoadingPage$.pipe(
+      withLatestFrom(canShowLoading$),
+      map(([loading, canShowLoading]) => {
+        return !canShowLoading && loading;
       }),
       distinctUntilChanged()
     );
@@ -406,4 +425,17 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     listActionConfig.action();
   }
 
+  public refresh() {
+    if (this.dataSource.refresh) {
+      this.dataSource.refresh();
+      this.dataSource.isLoadingPage$.pipe(
+        tap(isLoading => {
+          if (!isLoading) {
+            this.paginator.firstPage();
+          }
+        }),
+        takeWhile(isLoading => isLoading)
+      ).subscribe();
+    }
+  }
 }

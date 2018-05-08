@@ -43,6 +43,7 @@ export class CfAppInstancesDataSource extends ListDataSource<ListAppInstance, AP
         schema: entityFactory(appStatsSchemaKey),
         getRowUniqueId: (row: ListAppInstance) => row.index.toString(),
         paginationKey,
+        transformEntities: [{ type: 'filter', field: 'value.state' }],
         transformEntity: map(instances => {
           if (!instances || instances.length === 0) {
             return [];

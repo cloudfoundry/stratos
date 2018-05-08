@@ -23,6 +23,8 @@ export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction
   entityLocation = RequestEntityLocation.ARRAY;
   initialParams = {
     page: 1,
+    'order-direction': 'desc',
+    'order-direction-field': 'name',
     'results-per-page': 25,
   };
 }

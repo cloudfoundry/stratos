@@ -23,6 +23,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   cfUrl: string;
   createSpaceForm: FormGroup;
+  get spaceName(): any { return this.createSpaceForm ? this.createSpaceForm.get('spaceName') : { value: '' }; }
 
   constructor(
     store: Store<AppState>,
@@ -40,19 +41,12 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     });
   }
 
-  validate = (spaceName: string = null) => {
-    const currValue = spaceName ? spaceName : this.createSpaceForm && this.createSpaceForm.value['spaceName'];
-    if (this.allSpacesInOrg) {
-      return this.allSpacesInOrg.indexOf(currValue) === -1;
-    }
-    return true;
-  }
+  validate = (spaceName: string = null) =>
+    this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true
 
   spaceNameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
-      const nameInvalid = this.validate();
-      return nameInvalid ? { 'spaceNameTaken': { value: formField.value } } : null;
-    };
+    return (formField: AbstractControl): { [key: string]: any } =>
+      !this.validate(formField.value) ? { 'spaceNameTaken': { value: formField.value } } : null;
   }
 
   submit = () => {
@@ -71,7 +65,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
     return Observable.of({ success: true });
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.destroy();
   }
 }

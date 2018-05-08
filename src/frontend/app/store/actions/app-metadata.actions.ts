@@ -32,7 +32,7 @@ export class GetAppStatsAction extends CFStartAction implements PaginatedAction,
     '[App Metadata] Stats success',
     '[App Metadata] Stats failed',
   ];
-  flattenPagination: false;
+  flattenPagination = false;
   initialParams = {
     'order-direction': 'desc',
     'order-direction-field': 'index',

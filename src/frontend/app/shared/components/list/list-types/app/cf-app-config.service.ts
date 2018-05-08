@@ -65,7 +65,7 @@ export class CfAppConfigService extends ListConfig<APIResource> implements IList
       }
     },
     {
-      columnId: 'disk', headerCell: () => 'Disk Quota',
+      columnId: 'disk_quota', headerCell: () => 'Disk Quota',
       cellDefinition: {
         getValue: (row: APIResource) => `${this.utilsService.mbToHumanSize(row.entity.disk_quota)}`
       },
