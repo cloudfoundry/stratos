@@ -15,6 +15,7 @@ import { AppServiceBindingCardComponent } from './app-service-binding-card.compo
 import { ApplicationStateService } from '../../../../application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { DatePipe } from '@angular/common';
 
 describe('AppServiceBindingCardComponent', () => {
   let component: AppServiceBindingCardComponent;
@@ -35,7 +36,8 @@ describe('AppServiceBindingCardComponent', () => {
         ApplicationEnvVarsService,
         ApplicationStateService,
         PaginationMonitorFactory,
-        ConfirmationDialogService
+        ConfirmationDialogService,
+        DatePipe
       ]
     })
       .compileComponents();
