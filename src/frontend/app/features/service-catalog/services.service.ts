@@ -99,17 +99,17 @@ export class ServicesService {
   }
 
   fetchVisiblePlans =
-    (svcPlans: APIResource<IServicePlan>[], svcPlanVis: APIResource<IServicePlanVisibility>[]): APIResource<IServicePlan>[] => {
-      const visiblePlans: APIResource<IServicePlan>[] = [];
-      svcPlans.forEach(p => {
-        if (p.entity.public) {
-          visiblePlans.push(p);
-        } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
-          visiblePlans.push(p);
-        }
-      });
-      return visiblePlans;
-    }
+  (svcPlans: APIResource<IServicePlan>[], svcPlanVis: APIResource<IServicePlanVisibility>[]): APIResource<IServicePlan>[] => {
+    const visiblePlans: APIResource<IServicePlan>[] = [];
+    svcPlans.forEach(p => {
+      if (p.entity.public) {
+        visiblePlans.push(p);
+      } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
+        visiblePlans.push(p);
+      }
+    });
+    return visiblePlans;
+  }
 
   getServicePlanByGuid = (servicePlanGuid: string) => {
     return this.servicePlans$.pipe(
@@ -122,41 +122,53 @@ export class ServicesService {
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
     return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
       .pipe(
-        filter(([p, q]) => !!p && !!q),
-        map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
-        map(p => p[0]),
-        filter(p => !!p)
+      filter(([p, q]) => !!p && !!q),
+      map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
+      map(p => p[0]),
+      filter(p => !!p)
       );
   }
 
   getOrgsForSelectedServicePlan = (): Observable<APIResource<IOrganization>[]> => {
     return this.getSelectedServicePlan()
       .pipe(
-        switchMap(servicePlan => {
-          if (servicePlan.entity.public) {
-            const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.cfGuid);
-            return getPaginationObservables<APIResource<IOrganization>>({
-              store: this.store,
-              action: getAllOrgsAction,
-              paginationMonitor: this.paginationMonitorFactory.create(
-                getAllOrgsAction.paginationKey,
-                entityFactory(organizationSchemaKey)
-              )
-            }, true)
-              .entities$.pipe(
-                share(),
-                first()
-              );
-          } else {
-            // Service plan is not public, fetch visibilities
-            return this.getServicePlanVisibilitiesForPlan(servicePlan.metadata.guid)
-              .pipe(
-                map(s => s.map(o => o.entity.organization)),
-                share(),
-                first()
-              );
-          }
-        })
+      switchMap(servicePlan => {
+        if (servicePlan.entity.public) {
+          const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.cfGuid);
+          return getPaginationObservables<APIResource<IOrganization>>({
+            store: this.store,
+            action: getAllOrgsAction,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              getAllOrgsAction.paginationKey,
+              entityFactory(organizationSchemaKey)
+            )
+          }, true)
+            .entities$.pipe(
+            share(),
+            first()
+            );
+        } else {
+          // Service plan is not public, fetch visibilities
+          return this.getServicePlanVisibilitiesForPlan(servicePlan.metadata.guid)
+            .pipe(
+            map(s => s.map(o => o.entity.organization)),
+            share(),
+            first()
+            );
+        }
+      })
       );
+  }
+
+  getServiceName = () => {
+    return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
+      .pipe(
+      map(([extraInfo, service]) => {
+        if (extraInfo && extraInfo.displayName) {
+          return extraInfo.displayName;
+        } else {
+          return service.entity.label;
+        }
+      }));
   }
 }

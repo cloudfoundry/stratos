@@ -138,11 +138,4 @@ export class SelectPlanStepComponent implements OnDestroy {
       })
     );
   }
-
-  planHasNoVisibility = (): Observable<boolean> => {
-    return this.getSelectedPlan().pipe(
-      switchMap(o => this.getPlanAccessibility(o.entity)),
-      map(s => s === CardStatus.ERROR)
-    );
-  }
 }
