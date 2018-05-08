@@ -1,7 +1,7 @@
 <app-page-header [endpointIds$]="cfIds$">
   <h1>Applications</h1>
   <div class="page-header-right">
-    <button mat-icon-button [routerLink]="'/applications/new/'">
+    <button *ngIf="canCreateApplication$ | async" mat-icon-button [routerLink]="'/applications/new/'">
       <mat-icon>add</mat-icon>
     </button>
     <button mat-icon-button [routerLink]="'/applications/deploy/'">
