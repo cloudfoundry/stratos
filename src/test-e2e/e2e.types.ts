@@ -12,7 +12,7 @@ export interface E2ECreds {
 export interface E2EEndpointConfig {
   name: string;
   url: string;
-  skip_ssl_validation: boolean;
+  skipSSLValidation: boolean;
   creds: E2ECreds;
 }
 
@@ -35,4 +35,6 @@ export interface E2EEndpointsConfig {
 export interface E2EConfig {
   consoleUsers: E2ECreds;
   endpoints: E2EEndpointsConfig;
+  skipSSLValidation: boolean;
+  headless: boolean;
 }

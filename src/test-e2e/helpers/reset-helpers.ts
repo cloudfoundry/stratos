@@ -1,6 +1,6 @@
-import { E2EHelpers} from './e2e-helpers';
-import { SecretsHelpers } from './secrets-helpers';
 import { E2EEndpointConfig } from '../e2e.types';
+import { E2EHelpers } from './e2e-helpers';
+import { SecretsHelpers } from './secrets-helpers';
 
 
 const helpers = new E2EHelpers();
@@ -146,7 +146,7 @@ export class ResetsHelpers {
     return {
       api_endpoint: ep.url,
       cnsi_name: ep.name,
-      skip_ssl_validation: ep.skip_ssl_validation ? 'true' : 'false'
+      skip_ssl_validation: ep.skipSSLValidation ? 'true' : 'false'
     };
   }
 

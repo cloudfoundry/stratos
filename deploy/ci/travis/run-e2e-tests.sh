@@ -51,4 +51,10 @@ pushd deploy/ci/travis
 docker-compose down
 popd
 
+# Check environment variable that will ignore E2E failures
+if [ -n "${STRATOS_ALLOW_E2E_FAILURES}" ]; then
+  echo "Ignoring E2E test failures (if any) because STRATOS_ALLOW_E2E_FAILURES is set"
+  exit 0
+fi
+
 exit $RESULT

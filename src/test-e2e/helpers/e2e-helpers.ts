@@ -1,12 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as request from 'request';
-import { ElementFinder } from 'protractor/built/element';
+import { ElementArrayFinder, browser, by, element } from 'protractor';
 import { protractor } from 'protractor/built';
-import { getConsole } from '@ngrx/effects/src/effects_module';
-import { browser, element, by, ElementArrayFinder } from 'protractor';
+import { ElementFinder } from 'protractor/built/element';
+import * as request from 'request';
 import { LoginPage } from '../login/login.po';
-import { E2EConfig, E2EConfigCloudFoundry } from '../e2e.types';
 import { SecretsHelpers } from './secrets-helpers';
 
 export enum ConsoleUserType {
@@ -128,10 +126,10 @@ export class E2EHelpers {
    */
   newRequest() {
     const cookieJar = request.jar();
-    const skipSSlValidation = browser.params.skipSSlValidation;
+    const skipSSLValidation = browser.params.skipSSLValidation;
     let ca;
 
-    if (skipSSlValidation) {
+    if (skipSSLValidation) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     } else if (browser.params.caCert) {
       let caCertFile = path.join(__dirname, '..', 'dev-ssl');
