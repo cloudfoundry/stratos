@@ -18,7 +18,8 @@ export class GetServicePlanVisibilities extends CFStartAction implements Paginat
     public paginationKey: string,
     public includeRelations: string[] = [
       createEntityRelationKey(servicePlanVisibilitySchemaKey, servicePlanSchemaKey),
-      createEntityRelationKey(servicePlanVisibilitySchemaKey, organizationSchemaKey)
+      createEntityRelationKey(servicePlanVisibilitySchemaKey, organizationSchemaKey),
+      createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
     ],
     public populateMissing = true
   ) {
