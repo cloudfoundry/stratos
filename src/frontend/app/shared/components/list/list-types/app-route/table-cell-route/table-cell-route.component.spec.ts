@@ -25,7 +25,13 @@ describe('TableCellRouteComponent', () => {
     fixture = TestBed.createComponent(TableCellRouteComponent);
     component = fixture.componentInstance;
     component.row = {
-      entity: {}
+      entity: {
+        domain: {
+          entity: {
+            name: 'test'
+          }
+        }
+      }
     } as EntityInfo;
     fixture.detectChanges();
   });

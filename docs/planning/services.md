@@ -82,8 +82,15 @@ Clicking of a Service Instance will drill down into a Service Instance Detail vi
 Shows:
 
 - General Metadata
+- Service plan
+- Service parameters (in the future thanks to OSB GET endpoints see [servicebroker/issues/159](https://github.com/openservicebrokerapi/servicebroker/issues/159)
 - Service keys for this instance
 
+Enable updates:
+- in service plans
+- in parameters
+
+Enable delete
 
 ### Service Instance Creation
 
@@ -102,6 +109,22 @@ When a specific service plan is selected, the following considerations need to b
 3. If a service plan is not `public` and no service visibility exists for it, the user should not be able to select the plan.
 4. If the service plan is provided by a service broker that is space-scoped, then the values for the organisation and space should be pre-populated and locked.
 
+The wizard should support parameters with generated form created from JSON schema, see [stratos/issues/1434](https://github.com/cloudfoundry-incubator/stratos/issues/1434) 
 #### Org/Space driven Flow
 From the top level Services view, the user should be able to create a new instance. In this flow however, the user starts with selecting the organisation and space they want to create the service instance in.
 Based on that selection, the appropriate service definitions and service plans should be displayed, following the same considerations as specified for the previous flow.
+### Services Binding Detail view
+
+This will show a Service Binding.
+
+Shows:
+
+- Service Instance 
+- Bound Application (optional)
+- Service binding parameters (in the future thanks to OSB GET endpoints see [servicebroker/issues/159](https://github.com/openservicebrokerapi/servicebroker/issues/159)
+- Credentials (using JSON or in the future generated form thanks to binding credentials output JSON schemas [servicebroker/issues/116](https://github.com/openservicebrokerapi/servicebroker/issues/116)
+
+Enables updates:
+- in parameters (in future OSB spec version)
+
+Enables delete (i.e. unbind service from app)
