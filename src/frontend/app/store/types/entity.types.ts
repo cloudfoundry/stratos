@@ -1,3 +1,10 @@
+import {
+  IService,
+  IServiceBinding,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+} from '../../core/cf-api-svc.types';
 import { IApp, IDomain, IFeatureFlag, IOrganization, IRoute, ISecurityGroup, ISpace, IStack } from '../../core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
 import {
@@ -20,6 +27,7 @@ import {
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
   servicePlanSchemaKey,
+  servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
   spaceQuotaSchemaKey,
   spaceSchemaKey,
@@ -31,7 +39,6 @@ import { APIResource } from './api.types';
 import { IMetrics } from './base-metric.types';
 import { EndpointModel } from './endpoint.types';
 import { GitBranch, GithubCommit } from './github.types';
-import { CfService, CfServiceBinding, CfServiceInstance, CfServicePlan } from './service.types';
 import { SystemInfo } from './system.types';
 import { CfUser } from './user.types';
 
@@ -49,11 +56,12 @@ export interface IRequestDataState extends IRequestTypeState {
   githubCommits: IRequestEntityTypeState<APIResource<GithubCommit>>;
   domain: IRequestEntityTypeState<APIResource<IDomain>>;
   user: IRequestEntityTypeState<APIResource<CfUser>>;
-  serviceInstance: IRequestEntityTypeState<APIResource<CfServiceInstance>>;
-  servicePlan: IRequestEntityTypeState<APIResource<CfServicePlan>>;
-  service: IRequestEntityTypeState<APIResource<CfService>>;
-  serviceBinding: IRequestEntityTypeState<APIResource<CfServiceBinding>>;
+  serviceInstance: IRequestEntityTypeState<APIResource<IServiceInstance>>;
+  servicePlan: IRequestEntityTypeState<APIResource<IServicePlan>>;
+  service: IRequestEntityTypeState<APIResource<IService>>;
+  serviceBinding: IRequestEntityTypeState<APIResource<IServiceBinding>>;
   securityGroup: IRequestEntityTypeState<APIResource<ISecurityGroup>>;
+  servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
   metrics: IRequestEntityTypeState<IMetrics>;
 }
 
@@ -76,6 +84,7 @@ export interface IRequestState extends IRequestTypeState {
   service: IRequestEntityTypeState<RequestInfoState>;
   serviceBinding: IRequestEntityTypeState<RequestInfoState>;
   securityGroup: IRequestEntityTypeState<RequestInfoState>;
+  servicePlanVisibility: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -103,5 +112,6 @@ export const defaultCfEntitiesState = {
   [featureFlagSchemaKey]: {},
   [privateDomainsSchemaKey]: {},
   [spaceQuotaSchemaKey]: {},
-  [metricSchemaKey]: {}
+  [metricSchemaKey]: {},
+  [servicePlanVisibilitySchemaKey]: {}
 };

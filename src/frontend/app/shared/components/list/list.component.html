@@ -99,7 +99,8 @@
   <div class="list-component__body">
     <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
       <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-      <app-table *ngIf="(view$ | async) === 'table'" #table [listConfig]="config" [paginationController]="paginationController" [columns]="columns" [text]="config.text" [enableFilter]="config.enableTextFilter" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
+      <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (config.getMultiActions() || []).length > 0" [paginationController]="paginationController"
+        [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
       </app-table>
     </div>
     <mat-card class="list-component__paginator" [hidden]="(hidePaginator$ | async)">

@@ -103,6 +103,7 @@ const testInitialStoreState: AppState = {
   pagination: {
     featureFlag: {},
     securityGroup: {},
+    servicePlanVisibility: {},
     buildpack: {},
     application: {
       applicationWall: {
@@ -583,6 +584,12 @@ const testInitialStoreState: AppState = {
       name: ''
     }
   },
+  createServiceInstance: {
+    name: '',
+    servicePlanGuid: '',
+    spaceGuid: '',
+    orgGuid: ''
+  },
   deployApplication: {
     cloudFoundryDetails: null,
     applicationSource: {
@@ -598,6 +605,7 @@ const testInitialStoreState: AppState = {
     }
   },
   request: {
+    servicePlanVisibility: {},
     serviceInstance: {},
     servicePlan: {},
     service: {},
@@ -3853,6 +3861,7 @@ const testInitialStoreState: AppState = {
     space_quota_definition: {},
   },
   requestData: {
+    servicePlanVisibility: {},
     serviceInstance: {},
     servicePlan: {},
     service: {},
@@ -4359,7 +4368,7 @@ const testInitialStoreState: AppState = {
           detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
           environment_json: {
             STRATOS_PROJECT: '{"deploySource":{"type":"github","timestamp":1506186204,"project":"nwmac/cf-demo-app"' +
-              ',"branch":"master","url":"https://github.com/nwmac/cf-demo-app","commit":"9249fe2f739b93770e0d85ce5578df0cd22355b8\\n"}}'
+            ',"branch":"master","url":"https://github.com/nwmac/cf-demo-app","commit":"9249fe2f739b93770e0d85ce5578df0cd22355b8\\n"}}'
           },
           memory: 64,
           instances: 1,
@@ -4414,8 +4423,8 @@ const testInitialStoreState: AppState = {
                   username: 'Ylgy7uLdvkyzTMKe',
                   password: 'wScrF2EvIdScRHgW',
                   uri: 'mysql://Ylgy7uLdvkyzTMKe:wScrF2EvIdScRHgW@mysql-proxy.cf.svc.cluster.local'
-                    +
-                    ':3306/cf_bfae68fb_b981_4ee2_88ec_70176f7a7c93?reconnect=true',
+                  +
+                  ':3306/cf_bfae68fb_b981_4ee2_88ec_70176f7a7c93?reconnect=true',
                   jdbcUrl: 'jdbc:mysql://mysql-proxy.cf.svc.cluster.local:3306/cf_bfae68fb_b981_4ee2_88ec_70176f7a7c93?user=Ylgy7uLdvkyzTMKe&password=wScrF2EvIdScRHgW'
                 },
                 binding_options: {},
@@ -5192,8 +5201,8 @@ const testInitialStoreState: AppState = {
           detected_buildpack_guid: 'e9635bf5-a0aa-42d6-bdda-b703fb080677',
           environment_json: {
             STRATOS_PROJECT:
-              '{"url":"https://github.com/troytop/presentation-template", ' +
-              ' "commit":"bcb2cd228ed26fa72f5e029f6979f4e0c971de29\\n","branch":"cap-roadmap","timestamp":1505336909}'
+            '{"url":"https://github.com/troytop/presentation-template", ' +
+            ' "commit":"bcb2cd228ed26fa72f5e029f6979f4e0c971de29\\n","branch":"cap-roadmap","timestamp":1505336909}'
           },
           memory: 64,
           instances: 1,

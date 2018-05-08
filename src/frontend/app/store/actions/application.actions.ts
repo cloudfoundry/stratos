@@ -1,4 +1,4 @@
-import { Headers, RequestOptions } from '@angular/http';
+import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import { IApp } from '../../core/cf-api.types';
 import { applicationSchemaKey, appStatsSchemaKey, entityFactory } from '../helpers/entity-factory';
@@ -159,6 +159,8 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     this.options.headers = new Headers();
     const endpointPassthroughHeader = 'x-cap-passthrough';
     this.options.headers.set(endpointPassthroughHeader, 'true');
+    this.options.params = new URLSearchParams();
+    this.options.params.set('recursive', 'true');
   }
   actions = [DELETE, DELETE_SUCCESS, DELETE_FAILED];
   entity = [applicationEntitySchema];

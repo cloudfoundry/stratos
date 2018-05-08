@@ -6,6 +6,7 @@ import {
 import { generateTestApplicationServiceProvider } from '../../../../../test-framework/application-service-helper';
 import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { AppServiceBindingListConfigService } from './app-service-binding-list-config.service';
+import { DatePipe } from '@angular/common';
 
 describe('AppServiceBindingListConfigService', () => {
   beforeEach(() => {
@@ -13,7 +14,8 @@ describe('AppServiceBindingListConfigService', () => {
       providers: [
         AppServiceBindingListConfigService,
         generateTestApplicationServiceProvider('1', '1'),
-        ApplicationEnvVarsService
+        ApplicationEnvVarsService,
+        DatePipe
       ],
       imports: [...BaseTestModules]
     });

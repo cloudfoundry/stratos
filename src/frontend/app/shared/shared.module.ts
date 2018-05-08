@@ -11,6 +11,8 @@ import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -60,6 +62,9 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import {
+  TableCellRequestMonitorIconComponent,
+} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -178,7 +183,11 @@ import { ValuesPipe } from './pipes/values.pipe';
     CliInfoComponent,
     CliCommandComponent,
     GithubCommitAuthorComponent,
-    UserProfileBannerComponent
+    UserProfileBannerComponent,
+    AppActionMonitorComponent,
+    AppActionMonitorIconComponent,
+    UserProfileBannerComponent,
+    TableCellRequestMonitorIconComponent
   ],
   exports: [
     FormsModule,
@@ -244,7 +253,10 @@ import { ValuesPipe } from './pipes/values.pipe';
     UserProfileBannerComponent,
     CliInfoComponent,
     CliCommandComponent,
-    GithubCommitAuthorComponent
+    GithubCommitAuthorComponent,
+    AppActionMonitorComponent,
+    CliCommandComponent,
+    AppActionMonitorIconComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

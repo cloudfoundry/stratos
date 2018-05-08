@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { first, map, switchMap, tap, withLatestFrom, filter } from 'rxjs/operators';
 
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
@@ -19,15 +19,17 @@ import { ConfirmationDialogConfig } from '../../../../confirmation-dialog.config
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { CardCell } from '../../../list.types';
+import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-app-service-binding-card',
   templateUrl: './app-service-binding-card.component.html',
   styleUrls: ['./app-service-binding-card.component.scss']
 })
-export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit {
+export class AppServiceBindingCardComponent extends CardCell<APIResource<IServiceBinding>> implements OnInit, IListRowCell {
 
+  listData: IListRowCellData[];
   envVarUrl: string;
   cardMenu: MetaCardMenuItem[];
   service$: Observable<EntityInfo<APIResource<IService>>>;
@@ -39,7 +41,8 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     private entityServiceFactory: EntityServiceFactory,
     private appService: ApplicationService,
     private dialog: MatDialog,
-    private confirmDialog: ConfirmationDialogService
+    private confirmDialog: ConfirmationDialogService,
+    private datePipe: DatePipe
   ) {
     super();
     this.cardMenu = [
@@ -66,8 +69,28 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
         o.entity.entity.service_guid,
         new GetService(o.entity.entity.service_guid, this.appService.cfGuid),
         true
-      ).entityObs$)
+      ).entityObs$),
+      filter(service => !!service)
     );
+
+    this.listData = [
+      {
+        label: 'Service Name',
+        data$: this.service$.pipe(
+          map(service => service.entity.entity.label)
+        )
+      },
+      {
+        label: 'Service Plan',
+        data$: this.serviceInstance$.pipe(
+          map(service => service.entity.entity.service_plan.entity.name)
+        )
+      },
+      {
+        label: 'Date Created On',
+        data$: Observable.of(this.datePipe.transform(this.row.metadata.created_at, 'medium'))
+      }
+    ];
 
     this.tags$ = this.serviceInstance$.pipe(
       map(o => o.entity.entity.tags.map(t => ({ value: t })))

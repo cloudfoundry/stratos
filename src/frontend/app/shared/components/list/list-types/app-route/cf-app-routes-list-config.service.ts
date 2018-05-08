@@ -20,6 +20,7 @@ import {
   IListConfig,
   IMultiListAction,
   ListViewTypes,
+  ListConfig,
 } from '../../list.component.types';
 import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
@@ -27,10 +28,10 @@ import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcp
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
 
 @Injectable()
-export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
-  routesDataSource: CfAppRoutesDataSource;
+export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
 
-  private multiListActionDelete: IMultiListAction<APIResource> = {
+  routesDataSource: CfAppRoutesDataSource;
+  public multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
       if (items.length === 1) {
         this.deleteSingleRoute(items[0]);
@@ -158,6 +159,14 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   };
   isLocal = true;
 
+  static createAction(appGuid: string, cfGuid: string) {
+    return new GetAppRoutes(
+      appGuid,
+      cfGuid,
+      createEntityRelationPaginationKey(applicationSchemaKey, appGuid),
+    );
+  }
+
   dispatchDeleteAction(route) {
     return this.store.dispatch(
       new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
@@ -175,7 +184,7 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
   }
 
   getGlobalActions = () => [this.listActionAdd];
-  getMultiActions() {
+  getMultiActions = () => {
     return [this.multiListActionUnmap, this.multiListActionDelete];
   }
 
@@ -189,18 +198,17 @@ export class CfAppRoutesListConfigService implements IListConfig<APIResource> {
     private appService: ApplicationService,
     private confirmDialog: ConfirmationDialogService
   ) {
+    super();
+
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetAppRoutes(
-        appService.appGuid,
-        appService.cfGuid,
-        createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
-      ),
+      CfAppRoutesListConfigService.createAction(appService.appGuid, appService.cfGuid),
       createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
       this
     );
   }
+
 
   private deleteSingleRoute(item: APIResource) {
     this.store
