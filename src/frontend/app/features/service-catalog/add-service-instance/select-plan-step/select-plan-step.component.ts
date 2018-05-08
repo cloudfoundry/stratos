@@ -9,9 +9,10 @@ import { Subscription } from 'rxjs/Subscription';
 import { IServicePlan, IServicePlanExtra, IServicePlanVisibility } from '../../../../core/cf-api-svc.types';
 import { SetServicePlan } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { ServicesService } from '../../services.service';
 import { CardStatus } from '../../../../shared/components/application-state/application-state.service';
+import { TitleCasePipe } from '@angular/common';
 
 interface ServicePlan {
   id: string;
@@ -23,6 +24,9 @@ interface ServicePlan {
   selector: 'app-select-plan-step',
   templateUrl: './select-plan-step.component.html',
   styleUrls: ['./select-plan-step.component.scss'],
+  providers: [
+    TitleCasePipe
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnDestroy {
@@ -138,4 +142,9 @@ export class SelectPlanStepComponent implements OnDestroy {
       })
     );
   }
+
+  isYesOrNo = val => val ? 'yes' : 'no';
+  isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
+  isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
+
 }

@@ -4,13 +4,15 @@ import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
 import { ServicesService } from '../../services.service';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-add-service-instance',
   templateUrl: './add-service-instance.component.html',
   styleUrls: ['./add-service-instance.component.scss'],
   providers: [
-    servicesServiceFactoryProvider
+    servicesServiceFactoryProvider,
+    TitleCasePipe
   ]
 })
 export class AddServiceInstanceComponent implements OnInit {
