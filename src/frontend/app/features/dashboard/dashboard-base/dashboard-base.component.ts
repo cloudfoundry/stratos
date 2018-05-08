@@ -63,9 +63,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/applications'
     },
     {
+      text: 'Marketplace',
+      matIcon: 'store',
+      link: '/service-catalog'
+    },
+    {
       text: 'Services',
       matIcon: 'library_books',
-      link: '/service-catalog'
+      link: '/services'
     },
     {
       text: 'Cloud Foundry',
@@ -117,13 +122,13 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       Breakpoints.HandsetPortrait
     ]).pipe(
       debounceTime(250)
-    ).subscribe(result => {
-      if (result.matches) {
-        this.enableMobileNav();
-      } else {
-        this.disableMobileNav();
-      }
-    });
+      ).subscribe(result => {
+        if (result.matches) {
+          this.enableMobileNav();
+        } else {
+          this.disableMobileNav();
+        }
+      });
 
     this.closeSub = this.sidenav.onClose.subscribe(() => {
       this.store.dispatch(new CloseSideNav());
