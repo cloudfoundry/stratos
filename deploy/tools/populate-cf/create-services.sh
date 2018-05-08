@@ -1,9 +1,31 @@
 
-
+# Change this to the test org in your CF
 DEFAULT_ORG=pcfdev-org
+# Change this to test space in the test org
 DEFAULT_SPACE=pcfdev-space
+# CF User, doesn't need to be admin
+USER_NAME=admin
+# CF User password
+USER_PASS=admin
 
-function createBroker {
+while getopts ":o:s:u:p:" opt ; do
+    case $opt in
+        o)
+            DEFAULT_ORG="${OPTARG}"
+            ;;
+        s)
+            DEFAULT_SPACE="${OPTARG}"
+            ;;
+        u)
+            USER_NAME="${OPTARG}"
+            ;;
+        p)
+            USER_PASS="${OPTARG}"
+            ;;
+    esac
+done
+
+function pushBrokerApp {
   local SERVICE=$1
   local APPNAME=$SERVICE-broker
   local TMP_DIR=$(mktemp -d)
@@ -27,22 +49,15 @@ function createService {
   export SERVICE_URL=$(cf app $APPNAME | grep routes: | awk '{print $2}')
   let SPACE_ARGS=""
   if [ ! -z $SPACE ]; then
-    cf target -o ORG -s SPACE
+    cf target -o $ORG -s $SPACE
     SPACE_ARGS="--space-scoped"
   fi
-  cf create-service-broker $SERVICE admin admin https://$SERVICE_URL $SPACE_ARGS
+  cf create-service-broker $SERVICE $USER_NAME $USER_PASS https://$SERVICE_URL $SPACE_ARGS
 }
 
 function makeServicePublic {
    local SERVICE=$1
   cf enable-service-access $SERVICE
-}
-
-function createService {
-  local SERVICE=$1
-  local APPNAME=$SERVICE-broker
-  export SERVICE_URL=$(cf app $APPNAME | grep routes: | awk '{print $2}')
-  cf create-service-broker $SERVICE admin admin https://$SERVICE_URL
 }
 
 function addServiceVisibilities {
@@ -52,15 +67,15 @@ function addServiceVisibilities {
 }
 
 # Create public service
-createBroker public-service;
+pushBrokerApp public-service;
 createService public-service;
 makeServicePublic public-service;
 
 # Create private service with one service plan visibility
-createBroker private-service;
+pushBrokerApp private-service;
 createService private-service;
 addServiceVisibilities private-service $DEFAULT_ORG
 
 # Create space scoped service
-createBroker space-scoped-service
+pushBrokerApp space-scoped-service 
 createService space-scoped-service $DEFAULT_ORG $DEFAULT_SPACE
