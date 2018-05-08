@@ -23,6 +23,7 @@ import {
   spaceSchemaKey,
   metricSchemaKey,
   userProfileSchemaKey,
+  servicePlanVisibilitySchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -103,6 +104,7 @@ const entities = [
   spaceQuotaSchemaKey,
   metricSchemaKey,
   userProfileSchemaKey,
+  servicePlanVisibilitySchemaKey,
 ];
 
 

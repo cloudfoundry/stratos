@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, first, map, share, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { IServiceInstance } from '../../../../core/cf-api-svc.types';
+import { IServiceInstance, IServicePlan } from '../../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
@@ -92,8 +92,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       tags: new FormControl(''),
     });
 
-    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(servicesService.cfGuid);
-    this.orgs$ = this.initOrgsObservable(getAllOrgsAction);
+    this.orgs$ = this.initOrgsObservable();
 
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.servicesService.serviceGuid);
 
@@ -121,18 +120,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.serviceInstanceNameSub.unsubscribe();
   }
 
-  initOrgsObservable = (action) => getPaginationObservables<APIResource<IOrganization>>({
-    store: this.store,
-    action: action,
-    paginationMonitor: this.paginationMonitorFactory.create(
-      action.paginationKey,
-      entityFactory(organizationSchemaKey)
-    )
-  }, true)
-    .entities$.pipe(
-      share(),
-      first()
-    )
+  initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {
+    return this.servicesService.getOrgsForSelectedServicePlan();
+  }
+
 
   ngAfterContentInit() {
     this.validate = this.stepperForm.statusChanges
@@ -141,6 +132,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       });
 
     this.orgSubscription = this.orgs$.pipe(
+      filter(p => !!p && p.length > 0),
       tap(o => {
         const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
         if (orgWithSpaces.length > 0) {
@@ -208,7 +200,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.stepperForm.controls.name.value;
     const spaceGuid = this.stepperForm.controls.space.value;
     let params = this.stepperForm.controls.params.value;
-    params = params ? JSON.parse(params) : null;
+    try {
+      params = JSON.parse(params) || null;
+    } catch (e) {
+      params = null;
+    }
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 

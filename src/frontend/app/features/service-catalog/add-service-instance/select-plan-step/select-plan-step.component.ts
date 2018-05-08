@@ -1,16 +1,18 @@
 import { AfterContentInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, share, tap } from 'rxjs/operators';
+import { filter, first, map, share, tap, switchMap, combineLatest } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
+import { IServicePlan, IServicePlanExtra, IServicePlanVisibility } from '../../../../core/cf-api-svc.types';
 import { SetServicePlan } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { ServicesService } from '../../services.service';
+import { CardStatus } from '../../../../shared/components/application-state/application-state.service';
+import { TitleCasePipe } from '@angular/common';
 
 interface ServicePlan {
   id: string;
@@ -22,9 +24,15 @@ interface ServicePlan {
   selector: 'app-select-plan-step',
   templateUrl: './select-plan-step.component.html',
   styleUrls: ['./select-plan-step.component.scss'],
+  providers: [
+    TitleCasePipe
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
+export class SelectPlanStepComponent implements OnDestroy {
+  servicePlans: ServicePlan[];
+
+  servicePlanVisibilitySub: Subscription;
   changeSubscription: Subscription;
   validate = new BehaviorSubject<boolean>(false);
   subscription: Subscription;
@@ -32,32 +40,33 @@ export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
   servicePlans$: Observable<ServicePlan[]>;
 
   constructor(private store: Store<AppState>, private servicesService: ServicesService) {
-    this.servicePlans$ = servicesService.servicePlans$.pipe(
+    this.servicePlans$ = servicesService.getVisiblePlans().pipe(
       filter(p => !!p && p.length > 0),
-      map(o => o.filter(s => s.entity.bindable)),
-      map(o => o.map(p => ({
-        id: p.metadata.guid,
-        name: p.entity.name,
-        entity: p,
-        extra: p.entity.extra ? JSON.parse(p.entity.extra) : null
-      }))),
+      map(o => this.mapToServicePlan(o)),
       share(),
       first()
     );
     this.stepperForm = new FormGroup({
-      servicePlans: new FormControl('', Validators.required)
+      servicePlans: new FormControl('', Validators.required),
     });
     this.subscription = this.servicePlans$.pipe(
       tap(o => {
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
+        this.servicePlans = o;
         this.validate.next(this.stepperForm.valid);
-
       }),
       first()
     ).subscribe();
-
-
   }
+
+
+
+  mapToServicePlan = (visiblePlans: APIResource<IServicePlan>[]): ServicePlan[] => visiblePlans.map(p => ({
+    id: p.metadata.guid,
+    name: p.entity.name,
+    entity: p,
+    extra: p.entity.extra ? JSON.parse(p.entity.extra) : null
+  }))
 
   getDisplayName(selectedPlan: ServicePlan) {
     let name = selectedPlan.name;
@@ -77,10 +86,6 @@ export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
       }).subscribe();
   }
 
-  ngAfterContentInit() {
-
-  }
-
   onNext = () => {
     this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
     return Observable.of({ success: true });
@@ -94,11 +99,52 @@ export class SelectPlanStepComponent implements OnDestroy, AfterContentInit {
       this.changeSubscription.unsubscribe();
     }
 
+    if (this.servicePlanVisibilitySub) {
+      this.servicePlanVisibilitySub.unsubscribe();
+    }
   }
 
   getSelectedPlan = (): Observable<ServicePlan> => this.servicePlans$.pipe(
     map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
     filter(p => !!p)
   )
+
+  getPlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<CardStatus> => {
+
+    if (servicePlan.entity.public) {
+      return Observable.of(CardStatus.OK);
+    }
+
+    return this.servicesService.servicePlanVisibilities$.pipe(
+      filter(p => !!p),
+      map(servicePlanVisibilities => servicePlanVisibilities.filter(s => s.entity.service_plan_guid === servicePlan.metadata.guid)),
+      map(filteredPlans => {
+        if (filteredPlans.length === 0) {
+          // No service visibility defined for this service
+          return CardStatus.ERROR;
+        } else {
+          return CardStatus.WARNING;
+        }
+      }),
+      first()
+    );
+  }
+
+  getAccessibilityMessage = (servicePlan: APIResource<IServicePlan>): Observable<string> => {
+
+    return this.getPlanAccessibility(servicePlan).pipe(
+      map(o => {
+        if (o === CardStatus.WARNING) {
+          return 'Service Plan has limited visibility';
+        } else if (o === CardStatus.ERROR) {
+          return 'Service Plan has no visibility';
+        }
+      })
+    );
+  }
+
+  isYesOrNo = val => val ? 'yes' : 'no';
+  isPublic = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.public);
+  isFree = (selPlan: EntityInfo<APIResource<IServicePlan>>) => this.isYesOrNo(selPlan.entity.entity.free);
 
 }
