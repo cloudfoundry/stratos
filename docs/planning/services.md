@@ -82,10 +82,35 @@ Clicking of a Service Instance will drill down into a Service Instance Detail vi
 Shows:
 
 - General Metadata
+- Service plan
+- Service parameters (in the future thanks to OSB GET endpoints see [servicebroker/issues/159](https://github.com/openservicebrokerapi/servicebroker/issues/159)
 - Service keys for this instance
 
+Enable updates:
+- in service plans
+- in parameters
+
+Enable delete
 
 ### Service Instance Creation
 
-TODO
+Selection of service plan
+Selection of org and space
+Supports parameters with generated form created from JSON schema, see [stratos/issues/1434](https://github.com/cloudfoundry-incubator/stratos/issues/1434) 
 
+
+### Services Binding Detail view
+
+This will show a Service Binding.
+
+Shows:
+
+- Service Instance 
+- Bound Application (optional)
+- Service binding parameters (in the future thanks to OSB GET endpoints see [servicebroker/issues/159](https://github.com/openservicebrokerapi/servicebroker/issues/159)
+- Credentials (using JSON or in the future generated form thanks to binding credentials output JSON schemas [servicebroker/issues/116](https://github.com/openservicebrokerapi/servicebroker/issues/116)
+
+Enables updates:
+- in parameters (in future OSB spec version)
+
+Enables delete (i.e. unbind service from app)

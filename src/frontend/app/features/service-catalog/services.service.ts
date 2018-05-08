@@ -1,32 +1,23 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap, tap } from 'rxjs/operators';
 
-import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
-import { IOrganization, ISpace } from '../../core/cf-api.types';
-import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { GetServiceBrokers } from '../../store/actions/service-broker.actions';
-import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
-import { GetService } from '../../store/actions/service.actions';
 import { AppState } from '../../store/app-state';
-import {
-  entityFactory,
-  organizationSchemaKey,
-  serviceBrokerSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  serviceSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
-} from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey, createEntityRelationKey } from '../../store/helpers/entity-relations.types';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectCreateServiceInstanceServicePlan } from '../../store/selectors/create-service-instance.selectors';
-import { APIResource } from '../../store/types/api.types';
+import { entityFactory, serviceSchemaKey, servicePlanVisibilitySchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
+import { ActiveRouteCfOrgSpace } from '../cloud-foundry/cf-page.types';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { GetService } from '../../store/actions/service.actions';
+import { EntityService } from '../../core/entity-service';
+import { APIResource, EntityInfo } from '../../store/types/api.types';
+import { IService, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
+import { Observable } from 'rxjs/Observable';
+import { ActivatedRoute } from '@angular/router';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
+import { filter, map, tap, publish, refCount, publishReplay, first, combineLatest, share, switchMap } from 'rxjs/operators';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
+import { selectCreateServiceInstanceServicePlan } from '../../store/selectors/create-service-instance.selectors';
 import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { selectEntity } from '../../store/selectors/api.selectors';
 import { GetSpace } from '../../store/actions/space.actions';
@@ -56,7 +47,7 @@ export class ServicesService {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     public activatedRoute: ActivatedRoute,
-    private paginationMonitorFactory: PaginationMonitorFactory,
+    private paginationMonitorFactory: PaginationMonitorFactory
 
   ) {
 
@@ -202,7 +193,6 @@ export class ServicesService {
     );
   }
 
-
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
     return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
       .pipe(
@@ -274,5 +264,17 @@ export class ServicesService {
         share(),
         first()
       );
+  }
+
+  getServiceName = () => {
+    return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
+      .pipe(
+      map(([extraInfo, service]) => {
+        if (extraInfo && extraInfo.displayName) {
+          return extraInfo.displayName;
+        } else {
+          return service.entity.label;
+        }
+      }));
   }
 }

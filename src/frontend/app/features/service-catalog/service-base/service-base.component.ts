@@ -35,10 +35,22 @@ function servicesServiceFactory(
   ]
 })
 export class ServiceBaseComponent implements OnDestroy {
+  toolTipText$: Observable<string>;
+  hasVisiblePlans$: Observable<boolean>;
   servicesSubscription: Subscription;
 
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
     this.servicesSubscription = this.servicesService.service$.subscribe();
+    this.hasVisiblePlans$ = this.servicesService.getVisiblePlans().pipe(
+      map(p => p.length > 0));
+    this.toolTipText$ = this.hasVisiblePlans$.pipe(
+      map(hasPlans => {
+        if (hasPlans) {
+          return 'Create a New Service Instance';
+        } else {
+          return 'No public or visible plans exist for this service.';
+        }
+      }));
   }
 
   addServiceInstanceLink = () => [
@@ -56,6 +68,7 @@ export class ServiceBaseComponent implements OnDestroy {
       refCount()
     );
   }
+
   ngOnDestroy(): void {
     this.servicesSubscription.unsubscribe();
   }
