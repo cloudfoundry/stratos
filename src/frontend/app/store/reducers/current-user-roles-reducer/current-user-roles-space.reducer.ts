@@ -1,4 +1,4 @@
-import { GetUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
+import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
 import { ISpaceRoleState } from '../../types/current-user-roles.types';
 
 const defaultState = {

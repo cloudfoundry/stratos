@@ -121,10 +121,10 @@ export class GetUserRelations implements Action {
   };
 }
 
-export class GetUserRelationsComplete {
+export class GetCurrentUserRelationsComplete {
   public type = GET_CURRENT_USER_RELATION_SUCCESS;
   constructor(
-    public guid: string, public relationType: UserRelationTypes, public endpointGuid: string, public data: APIResource[]
+    public relationType: UserRelationTypes, public endpointGuid: string, public data: APIResource[]
   ) { }
 }
 

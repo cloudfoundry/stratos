@@ -1,5 +1,5 @@
 import { ISpacesRoleState, IOrgRoleState } from '../../types/current-user-roles.types';
-import { GetUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
+import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
 
 export interface IKeyedByIDObject<T> {
   [id: string]: T;
@@ -12,10 +12,9 @@ export type roleFinalReducer<T> = (
 
 export function addNewRoles<T>(
   state: IKeyedByIDObject<T>,
-  action: GetUserRelationsComplete,
+  action: GetCurrentUserRelationsComplete,
   reducer: roleFinalReducer<T>
 ) {
-  console.log('state', state);
   return action.data.reduce((config, data) => {
     const currentState = config.newState;
     return {
@@ -30,7 +29,7 @@ export function addNewRoles<T>(
 
 export function removeOldRoles<T>(
   state: IKeyedByIDObject<T>,
-  action: GetUserRelationsComplete,
+  action: GetCurrentUserRelationsComplete,
   newIds: string[],
   reducer: roleFinalReducer<T>
 ) {
@@ -43,4 +42,17 @@ export function removeOldRoles<T>(
       [id]: reducer(currentState[id], action.relationType, false)
     };
   }, { ...state });
+}
+
+export function isOrgRelation(relationType: UserRelationTypes) {
+  return relationType === UserRelationTypes.AUDITED_ORGANIZATIONS ||
+    relationType === UserRelationTypes.BILLING_MANAGED_ORGANIZATION ||
+    relationType === UserRelationTypes.MANAGED_ORGANIZATION ||
+    relationType === UserRelationTypes.ORGANIZATIONS;
+}
+
+export function isSpaceRelation(relationType: UserRelationTypes) {
+  return relationType === UserRelationTypes.AUDITED_SPACES ||
+    relationType === UserRelationTypes.MANAGED_SPACES ||
+    relationType === UserRelationTypes.SPACES;
 }

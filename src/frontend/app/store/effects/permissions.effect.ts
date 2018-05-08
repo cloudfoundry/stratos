@@ -13,7 +13,7 @@ import { EndpointModel } from '../types/endpoint.types';
 import { Action } from '@ngrx/store';
 import {
   GetUserRelations,
-  GetUserRelationsComplete,
+  GetCurrentUserRelationsComplete,
   GetCurrentUsersRelations,
   UserRelationTypes,
   GET_CURRENT_USER_RELATIONS,
@@ -29,7 +29,7 @@ function getRequestFromAction(action: GetUserRelations, httpClient: HttpClient) 
     }
   ).pipe(
     map(data => {
-      return new GetUserRelationsComplete(action.guid, action.relationType, action.endpointGuid, data[action.endpointGuid].resources);
+      return new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data[action.endpointGuid].resources);
     })
   );
 }
