@@ -176,26 +176,25 @@ export class ServicesService {
       combineLatest(this.servicePlanVisibilities$),
       filter(([p, q]) => !!p && !!q),
       map(([serviceBroker, allServicePlanVisibilities]) => {
+
+        const svcAvailability = {
+          isPublic: false,
+          spaceScoped: false,
+          hasVisibilities: false,
+          guid: servicePlan.metadata.guid,
+          spaceGuid: null
+        };
         if (serviceBroker.entity.space_guid) {
-          return {
-            isPublic: false,
-            spaceScoped: true,
-            guid: servicePlan.metadata.guid,
-            spaceGuid: serviceBroker.entity.space_guid
-          };
+          svcAvailability.spaceScoped = true;
+          svcAvailability.spaceGuid = serviceBroker.entity.space_guid;
         } else {
           const servicePlanVisibilities = allServicePlanVisibilities.filter(
             s => s.entity.service_plan_guid === servicePlan.metadata.guid
           );
           if (servicePlanVisibilities.length > 0) {
-            return {
-              isPublic: false,
-              spaceScoped: false,
-              hasVisibilities: true,
-              guid: servicePlan.metadata.guid
-
-            };
+            svcAvailability.hasVisibilities = true;
           }
+          return svcAvailability;
         }
       })
     );
