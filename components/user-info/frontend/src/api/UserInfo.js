@@ -36,9 +36,9 @@
      * Get user metadata for the specified user
      */
     GetUser: function (userId) {
-      return this.$http.get('/pp/v1/uaa/Users/?filter=id+eq+%22'+userId+'%22&startIndex=1').then(function (response) {
-        if(response.data.resources && response.data.resources.length===1) {
-            response.data = response.data.resources[0];
+      return this.$http.get('/pp/v1/uaa/Users/?filter=id+eq+%22' + userId + '%22&startIndex=1').then(function (response) {
+        if (response.data.resources && response.data.resources.length === 1) {
+          response.data = response.data.resources[0];
         }
         if (response.data && response.data.groups) {
           response.data.groups = _.sortBy(response.data.groups, 'display');
