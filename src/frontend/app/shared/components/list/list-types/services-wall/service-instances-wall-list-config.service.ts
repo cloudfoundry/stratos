@@ -8,9 +8,11 @@ import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-inst
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
 import { createListFilterConfig } from '../../list.helper';
-import { IListMultiFilterConfig } from '../../list.component.types';
+import { IListMultiFilterConfig, ListViewTypes } from '../../list.component.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
+import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
+import { ListView } from '../../../../../store/actions/list.actions';
 
 @Injectable()
 export class ServiceInstancesWallListConfigService
@@ -55,8 +57,9 @@ export class ServiceInstancesWallListConfigService
       noEntries: 'There are no service instances'
     };
     this.enableTextFilter = true;
-
-
+    this.cardComponent = ServiceInstanceCardComponent;
+    this.defaultView = 'cards' as ListView;
+    this.viewType = ListViewTypes.BOTH;
   }
 
   getDataSource = () => this.dataSource;

@@ -1,0 +1,29 @@
+<app-meta-card class="app-service-card">
+  <app-meta-card-title>
+    <div class="app-service-card__title">
+      <div class="app-service-card__title__text">
+        <p>{{ row.entity.name }}</p>
+      </div>
+    </div>
+  </app-meta-card-title>
+  <app-meta-card-item>
+    <app-meta-card-key>Service Plan</app-meta-card-key>
+    <app-meta-card-value>{{ row.entity.service_plan.entity.name}} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Applications Attached</app-meta-card-key>
+    <app-meta-card-value>{{ row.entity.service_bindings.length }} </app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
+    <app-meta-card-key>Last Updated</app-meta-card-key>
+    <app-meta-card-value>{{ row.entity.last_operation.updated_at | date:'medium' }} </app-meta-card-value>
+  </app-meta-card-item>
+
+  <app-meta-card-item>
+    <app-meta-card-key>Tags</app-meta-card-key>
+    <app-meta-card-value>
+      <app-chips [chips]="serviceInstanceTags"></app-chips>
+    </app-meta-card-value>
+  </app-meta-card-item>
+
+</app-meta-card>
