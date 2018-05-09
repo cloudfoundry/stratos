@@ -1,0 +1,7 @@
+import { NgModule } from '@angular/core';
+
+// Default empty customization module - DO NOT EDIT
+
+@NgModule()
+export class CustomModule { }
+
