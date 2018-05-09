@@ -63,9 +63,13 @@
     }
 
     const baseFolder = path.resolve(__dirname, '../src/frontend');
-    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
     const customBaseFolder = path.resolve(__dirname, '../custom-src/frontend');
+    doCustomizeFiles(forceDefaults, reset, baseFolder, customBaseFolder);
+    doCustomizeFolders(forceDefaults, reset, baseFolder, customBaseFolder);
+  };
 
+  function doCustomizeFiles(forceDefaults, reset, baseFolder, customBaseFolder) {
+    const defaultSrcFolder = path.resolve(__dirname, '../src/frontend/misc/custom');
     // Symlink custom files
     Object.keys(customConfig.files).forEach(file => {
       const dest = customConfig.files[file];
@@ -91,6 +95,9 @@
       }
     })
 
+  }
+
+  function doCustomizeFolders(forceDefaults, reset, baseFolder, customBaseFolder) {
     // Symlink custom app folders if they are present
     customConfig.folders.forEach(folder => {
       var destFolder = path.join(baseFolder, folder);
@@ -102,7 +109,8 @@
         fs.symlinkSync(srcFolder, destFolder);
       }
     });
-  };
+  }
+  
 
   gulp.task('ng-build', function (cb) {
     var rootFolder = path.resolve(__dirname, '..');
