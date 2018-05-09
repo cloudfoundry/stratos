@@ -20,7 +20,7 @@
     "test": "ng test --preserve-symlinks --code-coverage --sourcemaps=false -sr",
     "test-debug": "ng test --preserve-symlinks --sourcemaps=false",
     "codecov": "codecov -f coverage/*.json",
-    "lint": "ng lint --preserve-symlinks --type-check --format stylish",
+    "lint": "ng lint --type-check --format stylish",
     "sass-lint": "sass-lint -v",
     "e2e": "ng e2e --preserve-symlinks --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "headless-e2e": "xvfb-run --server-args='-screen 0 1920x1080x24' protractor ./protractor.conf.js",
