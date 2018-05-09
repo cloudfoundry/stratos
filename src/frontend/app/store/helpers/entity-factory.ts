@@ -33,6 +33,7 @@ export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
+export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 
 const entityCache: {
   [key: string]: EntitySchema
@@ -235,6 +236,16 @@ const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   }
 }, { idAttribute: getAPIResourceGuid }, spaceWithOrgKey);
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
+
+
+const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaKey, {
+  entity: {
+    service_plan: ServicePlanSchema,
+    service_bindings: [ServiceBindingsSchema],
+    space: SpaceSchema
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;
 
 const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {
   entity: {

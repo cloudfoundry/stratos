@@ -8,6 +8,8 @@ import {
   spaceSchemaKey,
   serviceSchemaKey,
   applicationSchemaKey,
+  organizationSchemaKey,
+  serviceInstancesWithSpaceSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -60,6 +62,8 @@ export class GetServiceInstances
     public includeRelations: string[] = [
       createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
       createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
       createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
       createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
     ],
@@ -72,7 +76,7 @@ export class GetServiceInstances
     this.options.params = new URLSearchParams();
   }
   actions = getActions('Service Instances', 'Get all');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entity = [entityFactory(serviceInstancesWithSpaceSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
   initialParams = {
