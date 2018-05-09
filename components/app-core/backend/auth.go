@@ -409,7 +409,9 @@ func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, pas
 
 	body := url.Values{}
 	body.Set("grant_type", "password")
-	body.Set("passcode", username)
+	body.Set("username", username)
+	body.Set("password", password)
+	body.Set("response_type", "token")
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
