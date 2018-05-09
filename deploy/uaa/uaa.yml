@@ -9,7 +9,7 @@ scim:
   users:
     - admin|hscadmin|admin@test.org|Admin|User|stratos.admin,stratos.user,stratos.publisher
     - user|hscuser|user@test.org|Developer|User|stratos.user
-    - root|hscroot|root@test.org|Developer|User|uaa.admin,scim.read,zones.uaa.admin
+    - root|hscroot|root@test.org|Root|User|uaa.admin,scim.read,zones.uaa.admin
 
 disableInternalAuth: false
 disableInternalUserManagement: false
