@@ -19,7 +19,7 @@ export class GetServicePlanVisibilities extends CFStartAction implements Paginat
     public includeRelations: string[] = [
       createEntityRelationKey(servicePlanVisibilitySchemaKey, servicePlanSchemaKey),
       createEntityRelationKey(servicePlanVisibilitySchemaKey, organizationSchemaKey),
-      createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
     ],
     public populateMissing = true
   ) {

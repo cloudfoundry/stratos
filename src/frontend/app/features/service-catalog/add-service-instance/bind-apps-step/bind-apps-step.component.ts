@@ -66,9 +66,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
           )
         }, true).entities$
           .pipe(
-            map(apps => apps.sort(appDataSort)),
-            first(),
-            map(apps => apps.slice(0, 50))
+          map(apps => apps.sort(appDataSort)),
+          first(),
+          map(apps => apps.slice(0, 50))
           );
 
         this.serviceInstanceGuid = createServiceInstanceState.serviceInstanceGuid;
@@ -118,6 +118,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     } catch (e) {
       params = null;
     }
+
     this.store.dispatch(new CreateServiceBinding(
       this.servicesService.cfGuid,
       guid,
