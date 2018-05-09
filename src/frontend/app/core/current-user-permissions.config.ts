@@ -1,7 +1,10 @@
+import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
+
 export enum CurrentUserPermissions {
   APPLICATION_CREATE = 'create.application',
   SPACE_DELETE = 'delete.space',
-  SPACE_EDIT = 'edit.space'
+  SPACE_EDIT = 'edit.space',
+  ORGANIZATION_CREATE = 'create.org'
 }
 export type PermissionConfigType = PermissionConfig[] | PermissionConfigLink;
 export interface IPermissionConfigs {
@@ -23,17 +26,17 @@ export enum PermissionStrings {
 export enum PermissionTypes {
   SPACE = 'spaces',
   ORGANIZATION = 'organizations',
-  GLOBAL = 'global'
+  GLOBAL = 'global',
+  FEATURE_FLAG = 'feature-flag'
 }
 
 export class PermissionConfig {
   constructor(
     public type: PermissionTypes,
-    public permission: PermissionStrings = PermissionStrings._GLOBAL_,
+    public permission: CFFeatureFlagTypes | PermissionStrings = PermissionStrings._GLOBAL_,
     public guid?: string
   ) { }
 }
-
 export class PermissionConfigLink {
   constructor(
     public link: CurrentUserPermissions
@@ -50,5 +53,15 @@ export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.SPACE_EDIT]: [
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
+  ],
+  [CurrentUserPermissions.ORGANIZATION_CREATE]: [
+    new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation),
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_AUDITOR),
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_BILLING_MANAGER),
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_USER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_AUDITOR),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
   ]
 };
