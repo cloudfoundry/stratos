@@ -93,6 +93,7 @@ src/backend/app-core/load_plugins.go
 
 src/frontend/favicon.ico
 src/frontend/sass/custom.scss
+src/frontend/assets/eula.html
 src/frontend/assets/logo.png
 src/frontend/assets/login-bg.jpg
 src/frontend/app/custom.module.ts
