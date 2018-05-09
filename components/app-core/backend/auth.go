@@ -171,39 +171,39 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 	}
 
 	uaaToken, err :=p.GetUAATokenRecord(userID)
-	if err!=nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Could not find current user UAA token")
-	}
-
-	u, err := getUserTokenInfo(uaaToken.AuthToken)
-	if err != nil {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Could not parse current user UAA token")
-	}
-
-	// Save the console UAA token as the cnsi UAA token if:
-	// Attempting to login to auto-registered cnsi endpoint
-	// AND the auto-registered endpoint has the same UAA login server as console
-	theCNSIrecord, _ := p.GetCNSIRecord(cnsiGUID)
-	if p.GetConfig().AutoRegisterCFUrl == theCNSIrecord.APIEndpoint.String() {
-		cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
-		newCNSI, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true)
+	if err==nil { // Found the user's UAA token
+		u, err := getUserTokenInfo(uaaToken.AuthToken)
 		if err != nil {
-			log.Fatal("Could not get the info for Cloud Foundry", err)
-			return nil, err
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, "Could not parse current user UAA token")
 		}
 
-		// Override the configuration to set the authorization endpoint
-		uaaUrl, err := url.Parse(newCNSI.AuthorizationEndpoint)
-		if err != nil {
-			return nil, fmt.Errorf("invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
-		}
+		// Save the console UAA token as the cnsi UAA token if:
+		// Attempting to login to auto-registered cnsi endpoint
+		// AND the auto-registered endpoint has the same UAA login server as console
+		theCNSIrecord, _ := p.GetCNSIRecord(cnsiGUID)
+		if p.GetConfig().AutoRegisterCFUrl == theCNSIrecord.APIEndpoint.String() { // CNSI API endpoint is the auto-register endpoint
+			cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
+			newCNSI, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true)
+			if err != nil {
+				log.Fatal("Could not get the info for Cloud Foundry", err)
+				return nil, err
+			}
 
-		if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() {
-			_, err = p.saveCNSIToken(cnsiGUID, *u, uaaToken.AuthToken, uaaToken.RefreshToken, false)
-			return nil, err
-		} else {
-			log.Info("The auto-registered endpoint UAA server does not match console UAA server.")
+			// Override the configuration to set the authorization endpoint
+			uaaUrl, err := url.Parse(newCNSI.AuthorizationEndpoint)
+			if err != nil {
+				return nil, fmt.Errorf("invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
+			}
+
+			if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
+				_, err = p.saveCNSIToken(cnsiGUID, *u, uaaToken.AuthToken, uaaToken.RefreshToken, false)
+				return nil, err
+			} else {
+				log.Info("The auto-registered endpoint UAA server does not match console UAA server.")
+			}
 		}
+	} else {
+		log.Warn("Could not find current user UAA token")
 	}
 
 	uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
