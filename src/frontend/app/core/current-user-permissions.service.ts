@@ -1,31 +1,33 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { filter, map, switchMap, distinctUntilChanged } from 'rxjs/operators';
+
+import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
+import {
+  createCFFeatureFlagPaginationKey,
+} from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { AppState } from '../store/app-state';
-import { getCurrentUserCFEndpointRolesState } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-factory';
+import {
+  getCurrentUserCFEndpointRolesState,
+} from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
+import { APIResource } from '../store/types/api.types';
 import { IOrgRoleState, ISpaceRoleState } from '../store/types/current-user-roles.types';
+import { IFeatureFlag } from './cf-api.types';
 import {
   CurrentUserPermissions,
-  PermissionStrings,
-  PermissionTypes,
-  permissionConfigs,
   PermissionConfig,
   PermissionConfigLink,
-  PermissionConfigType
+  permissionConfigs,
+  PermissionConfigType,
+  PermissionStrings,
+  PermissionTypes,
 } from './current-user-permissions.config';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter } from 'rxjs/operators';
-import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
-import {
-  createCFFeatureFlagPaginationKey
-} from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
-import { selectPaginationState } from '../store/selectors/pagination.selectors';
-import { featureFlagSchemaKey, entityFactory } from '../store/helpers/entity-factory';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
-import { IFeatureFlag } from './cf-api.types';
-import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import { APIResource } from '../store/types/api.types';
+
 @Injectable()
 export class CurrentUserPermissionsService {
 
@@ -72,7 +74,8 @@ export class CurrentUserPermissionsService {
           return combineLatest(guids.map(guid => {
             return this.checkAllOfType(guid, type, cfPermissions);
           })).pipe(
-            map(checks => checks.some(check => check))
+            map(checks => checks.some(check => check)),
+            distinctUntilChanged()
           );
         })
       );
@@ -117,7 +120,9 @@ export class CurrentUserPermissionsService {
             key => new PaginationMonitor<APIResource<IFeatureFlag>>(this.store, key, entityFactory(featureFlagSchemaKey)).currentPage$
           )
         ).pipe(
-          map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))));
+          map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
+          distinctUntilChanged()
+        );
       })
     );
   }
@@ -173,6 +178,7 @@ export class CurrentUserPermissionsService {
       filter(state => !!state),
       map(state => state[type][orgOrSpaceGuid]),
       map(state => this.selectPermission(state, permission)),
+      distinctUntilChanged()
     );
   }
 
@@ -198,18 +204,22 @@ export class CurrentUserPermissionsService {
     return this.getConfig(permissionConfigs[linkConfig.link]);
   }
 
-  private combineChecks([adminChecks, cfChecks, featureFlagChecks]: [Observable<boolean>, Observable<boolean>[], Observable<boolean>[]]) {
+  private combineChecks([adminCheck$, cfChecks, featureFlagChecks]: [Observable<boolean>, Observable<boolean>[], Observable<boolean>[]]) {
     const cfChecksReduced = this.reduceChecks(featureFlagChecks, '&&');
     const featureFlagChecksReduced = this.reduceChecks(cfChecks);
-    return combineLatest(adminChecks, featureFlagChecksReduced, cfChecksReduced).pipe(
-      map(([isAdmin, featureFlagEnabled, cfPermission]) => {
+    return adminCheck$.pipe(
+      switchMap(isAdmin => {
         if (isAdmin) {
-          return true;
+          return Observable.of(true);
         }
-        if (!featureFlagEnabled) {
-          return false;
-        }
-        return cfPermission;
+        return combineLatest(featureFlagChecksReduced, cfChecksReduced).pipe(
+          map(([featureFlagEnabled, cfPermission]) => {
+            if (!featureFlagEnabled) {
+              return false;
+            }
+            return cfPermission;
+          })
+        );
       })
     );
   }
@@ -220,7 +230,8 @@ export class CurrentUserPermissionsService {
       return Observable.of(true);
     }
     return combineLatest(checks).pipe(
-      map(flags => flags[func](flag => flag))
+      map(flags => flags[func](flag => flag)),
+      distinctUntilChanged()
     );
   }
 
