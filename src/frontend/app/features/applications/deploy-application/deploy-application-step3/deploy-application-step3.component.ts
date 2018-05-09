@@ -38,6 +38,7 @@ const APP_CHECK_INTERVAL = 3000;
 export class DeployApplicationStep3Component implements OnDestroy {
 
   @Input('appGuid') appGuid: string;
+  fetchedApp = false;
   streamTitle = 'Preparing...';
   messages: Observable<string>;
   appData: AppData;
@@ -47,8 +48,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   spaceGuid: string;
 
   // Validation poller
-  validSub: Subscription;
-  valid$ = new BehaviorSubject<boolean>(false);
+  valid$ = this.createValidationPoller();
 
   error$ = new BehaviorSubject<boolean>(false);
   // Observable for when the deploy modal can be closed
@@ -66,18 +66,14 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.closeable$ = Observable.combineLatest(
       this.valid$,
       this.error$).pipe(
-        map(([validated, errored]) => {
-          return validated || errored;
+        map(([valid, errored]) => {
+          return valid || errored;
         })
       );
   }
 
   ngOnDestroy() {
     this.store.dispatch(new DeleteDeployAppSection());
-    // Unsubscribe from the websocket stream
-    if (this.validSub) {
-      this.validSub.unsubscribe();
-    }
   }
 
   onEnter = () => {
@@ -180,12 +176,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
         this.deploying = true;
-        // Set this up here to avoid any fun with redeploy case and the deploying flag
-        this.validSub = this.createValidationPoller().pipe(
-          takeWhile(valid => !valid)
-        ).subscribe(null, null, () => {
-          this.valid$.next(true);
-        });
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
@@ -252,53 +242,41 @@ export class DeployApplicationStep3Component implements OnDestroy {
     return Observable.of({ success: true });
   }
 
-
-  private createValidationPoller(): Observable<boolean> {
-    return this.appGuid ? this.handleRedeployValidation() : this.handleDeployValidation();
-  }
-
-  private handleRedeployValidation(): Observable<boolean> {
-    return interval(500).pipe(
-      map(() => {
-        if (this.deploying) {
-          return false;
-        } else {
-          this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-          this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.cfGuid));
-          return true;
-        }
-      }),
-    );
-  }
-
   /**
    * Create a poller that will be used to periodically check for the new application.
    */
-  private handleDeployValidation(): Observable<boolean> {
+  private createValidationPoller(): Observable<boolean> {
     return interval(APP_CHECK_INTERVAL).pipe(
-      takeWhile(() => !this.appGuid),
+      takeWhile(() => !this.fetchedApp),
       filter(() => this.deploying),
       switchMap(() => {
-        const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.cfGuid });
-        return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:${this.spaceGuid}&q=name:${this.appData.Name}`,
-          { headers: headers })
-          .pipe(
-            map(info => {
-              if (info && info[this.cfGuid]) {
-                const apps = info[this.cfGuid];
-                if (apps.total_results === 1) {
-                  this.appGuid = apps.resources[0].metadata.guid;
-                  // New app - so refresh the application wall data
-                  this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-                  return true;
+        if (this.appGuid) {
+          this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+          this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.cfGuid));
+          this.fetchedApp = true;
+          return Observable.of(true);
+        } else {
+          const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.cfGuid });
+          return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:${this.spaceGuid}&q=name:${this.appData.Name}`,
+            { headers: headers }).pipe(
+              map(info => {
+                if (info && info[this.cfGuid]) {
+                  const apps = info[this.cfGuid];
+                  if (apps.total_results === 1) {
+                    this.appGuid = apps.resources[0].metadata.guid;
+                    this.fetchedApp = true;
+                    // New app - so refresh the application wall data
+                    this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+                    return true;
+                  }
                 }
-              }
-              return false;
-            }),
-            catchError(err => [
-              // ignore
-            ])
-          );
+                return false;
+              }),
+              catchError(err => [
+                // ignore
+              ])
+            );
+        }
       })
     );
   }

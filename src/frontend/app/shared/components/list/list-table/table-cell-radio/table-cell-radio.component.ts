@@ -12,6 +12,6 @@ export class TableCellRadioComponent<T> extends TableCellCustom<T> implements On
   disable: boolean;
 
   ngOnInit() {
-    this.disable = this.config ? this.config.isDisabled() : false;
+    this.disable = this.config ? this.config.isDisabled(this.row) : false;
   }
 }
