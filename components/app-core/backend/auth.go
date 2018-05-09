@@ -75,6 +75,12 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 	return u.UserName, nil
 }
 
+func (p *portalProxy) initSSOlogin(c echo.Context) error {
+	redirectUrl:=fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_url=%s/pp/v1/auth/sso_login_callback&state=somestatecode", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, p.GetConfig().SSOredirectURL)
+	c.Redirect(http.StatusTemporaryRedirect,redirectUrl)
+	return nil
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
 
@@ -118,7 +124,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
 
 	resp := &interfaces.LoginRes{
-		Account:     c.FormValue("username"),
+		Account:     u.UserName,
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: nil,
 		Admin:       uaaAdmin,
@@ -126,6 +132,10 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	jsonString, err := json.Marshal(resp)
 	if err != nil {
 		return err
+	}
+
+	if c.Request().Method()==http.MethodGet {
+		return c.Redirect(http.StatusTemporaryRedirect,p.GetConfig().SSOredirectURL)
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -192,7 +202,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 			_, err = p.saveCNSIToken(cnsiGUID, *u, uaaToken.AuthToken, uaaToken.RefreshToken, false)
 			return nil, err
 		} else {
-			log.Println("The auto-registered endpoint UAA server does not match console UAA server.")
+			log.Info("The auto-registered endpoint UAA server does not match console UAA server.")
 		}
 	}
 
@@ -346,14 +356,19 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 
 func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
 	log.Debug("login")
-	username := c.FormValue("username")
-	password := c.FormValue("password")
 
-	if len(username) == 0 || len(password) == 0 {
-		return uaaRes, u, errors.New("Needs username and password")
+	if c.Request().Method()==http.MethodGet {
+		code := c.QueryParam("code")
+		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint)
+	} else {
+		username := c.FormValue("username")
+		password := c.FormValue("password")
+
+		if len(username) == 0 || len(password) == 0 {
+			return uaaRes, u, errors.New("Needs username and password")
+		}
+	 	uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, username, password, client, clientSecret, endpoint)
 	}
-
-	uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, username, password, client, clientSecret, endpoint)
 	if err != nil {
 		return uaaRes, u, err
 	}
@@ -377,6 +392,16 @@ func (p *portalProxy) logout(c echo.Context) error {
 	}
 
 	return err
+}
+
+func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+	log.Debug("getUAATokenWithCreds")
+
+	body := url.Values{}
+	body.Set("grant_type", "authorization_code")
+	body.Set("code", code)
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
 func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
@@ -409,7 +434,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 		return nil, fmt.Errorf(msg, err)
 	}
 
-	req.SetBasicAuth("cf", "")
+	req.SetBasicAuth(client, clientSecret)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	var h http.Client

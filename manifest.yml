@@ -6,3 +6,7 @@ applications:
   timeout: 180
   buildpack: https://github.com/SUSE/stratos-buildpack
   health-check-type: port
+  env:
+      CF_CLIENT: stratos_clientid
+      CF_CLIENT_SECRET: stratos_secret
+      SSO_REDIRECT_URL: https://console.andrew-cfee-cluster.us-south.containers.mybluemix.net
