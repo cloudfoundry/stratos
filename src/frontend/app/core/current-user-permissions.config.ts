@@ -1,9 +1,11 @@
 export enum CurrentUserPermissions {
-  CREATE_APPLICATION = 'create.application'
+  APPLICATION_CREATE = 'create.application',
+  SPACE_DELETE = 'delete.space',
+  SPACE_EDIT = 'edit.space'
 }
-
+export type PermissionConfigType = PermissionConfig[] | PermissionConfigLink;
 export interface IPermissionConfigs {
-  [permissionString: string]: PermissionConfig[];
+  [permissionString: string]: PermissionConfigType;
 }
 
 export enum PermissionStrings {
@@ -32,8 +34,21 @@ export class PermissionConfig {
   ) { }
 }
 
-export const permissionConfigs = {
-  [CurrentUserPermissions.CREATE_APPLICATION]: [
+export class PermissionConfigLink {
+  constructor(
+    public link: CurrentUserPermissions
+  ) { }
+}
+
+export const permissionConfigs: IPermissionConfigs = {
+  [CurrentUserPermissions.APPLICATION_CREATE]: [
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
+  ],
+  [CurrentUserPermissions.SPACE_DELETE]: [
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER)
+  ],
+  [CurrentUserPermissions.SPACE_EDIT]: [
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
   ]
 };

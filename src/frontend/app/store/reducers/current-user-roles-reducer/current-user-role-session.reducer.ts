@@ -28,7 +28,7 @@ function propagateEndpointAdminPermissions(state: ICfRolesState = getDefaultEndp
     ...state,
     global: {
       ...state.global,
-      isAdmin: endpoint.user.admin
+      isAdmin: endpoint.user ? endpoint.user.admin : false
     }
   };
 }

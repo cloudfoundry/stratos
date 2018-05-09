@@ -69,7 +69,7 @@ export class ApplicationWallComponent implements OnDestroy {
       tap(endpoints => endpoints.forEach(endpoint => this.store.dispatch(new GetCFUser(endpoint.user.guid, endpoint.guid)))),
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
-    this.canCreateApplication$ = currentUserPermissionsService.can(CurrentUserPermissions.CREATE_APPLICATION);
+    this.canCreateApplication$ = currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_CREATE);
     this.statsSub = dataSource.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(dataSource)),
