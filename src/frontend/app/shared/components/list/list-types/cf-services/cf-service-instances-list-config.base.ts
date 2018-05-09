@@ -32,6 +32,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
   defaultView = 'table' as ListView;
   text = {
     title: null,
+    filter: null,
     noEntries: 'There are no service instances'
   };
 

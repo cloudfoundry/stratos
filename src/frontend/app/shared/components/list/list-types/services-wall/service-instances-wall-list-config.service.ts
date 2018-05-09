@@ -48,6 +48,15 @@ export class ServiceInstancesWallListConfigService
 
     this.dataSource = new ServiceInstancesWallDataSource(store, transformEntities, this);
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
+
+    this.text = {
+      title: null,
+      filter: 'Search by name',
+      noEntries: 'There are no service instances'
+    };
+    this.enableTextFilter = true;
+
+
   }
 
   getDataSource = () => this.dataSource;
