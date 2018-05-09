@@ -31,6 +31,7 @@ export const spaceQuotaSchemaKey = 'space_quota_definition';
 export const metricSchemaKey = 'metrics';
 export const userProfileSchemaKey = 'userProfile';
 export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
+export const serviceBrokerSchemaKey = 'serviceBroker';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 
@@ -243,6 +244,9 @@ const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchema
   }
 }, { idAttribute: getAPIResourceGuid });
 entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
+
+const ServiceBrokerSchema = new EntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceBrokerSchemaKey] = ServiceBrokerSchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,

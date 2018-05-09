@@ -4,6 +4,7 @@ import {
   IServiceInstance,
   IServicePlan,
   IServicePlanVisibility,
+  IServiceBroker,
 } from '../../core/cf-api-svc.types';
 import { IApp, IDomain, IFeatureFlag, IOrganization, IRoute, ISecurityGroup, ISpace, IStack } from '../../core/cf-api.types';
 import { IRequestEntityTypeState, IRequestTypeState } from '../app-state';
@@ -33,6 +34,7 @@ import {
   spaceSchemaKey,
   stackSchemaKey,
   githubCommitSchemaKey,
+  serviceBrokerSchemaKey,
 } from '../helpers/entity-factory';
 import { RequestInfoState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
@@ -62,6 +64,7 @@ export interface IRequestDataState extends IRequestTypeState {
   serviceBinding: IRequestEntityTypeState<APIResource<IServiceBinding>>;
   securityGroup: IRequestEntityTypeState<APIResource<ISecurityGroup>>;
   servicePlanVisibility: IRequestEntityTypeState<APIResource<IServicePlanVisibility>>;
+  serviceBroker: IRequestEntityTypeState<APIResource<IServiceBroker>>;
   metrics: IRequestEntityTypeState<IMetrics>;
 }
 
@@ -85,6 +88,7 @@ export interface IRequestState extends IRequestTypeState {
   serviceBinding: IRequestEntityTypeState<RequestInfoState>;
   securityGroup: IRequestEntityTypeState<RequestInfoState>;
   servicePlanVisibility: IRequestEntityTypeState<RequestInfoState>;
+  serviceBroker: IRequestEntityTypeState<RequestInfoState>;
 }
 
 
@@ -113,5 +117,6 @@ export const defaultCfEntitiesState = {
   [privateDomainsSchemaKey]: {},
   [spaceQuotaSchemaKey]: {},
   [metricSchemaKey]: {},
-  [servicePlanVisibilitySchemaKey]: {}
+  [servicePlanVisibilitySchemaKey]: {},
+  [serviceBrokerSchemaKey]: {}
 };
