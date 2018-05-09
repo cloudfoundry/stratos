@@ -28,8 +28,6 @@ export class GithubCommitsListConfigServiceDeploy extends GithubCommitsListConfi
       cellFlex: '1'
     });
 
-
-
     this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
       map((appSource: DeployApplicationSource) => appSource.type.id === 'git' && appSource.type.subType === 'github' ? {
         projectName: appSource.projectName,

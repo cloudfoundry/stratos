@@ -37,13 +37,11 @@ const APP_CHECK_INTERVAL = 3000;
 })
 export class DeployApplicationStep3Component implements OnDestroy {
 
-  @Input('isRedeploy') isRedeploy: string;
-  connectSub: Subscription;
+  @Input('appGuid') appGuid: string;
   streamTitle = 'Preparing...';
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  appGuid: string;
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
@@ -77,18 +75,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
   ngOnDestroy() {
     this.store.dispatch(new DeleteDeployAppSection());
     // Unsubscribe from the websocket stream
-    if (this.connectSub) {
-      this.connectSub.unsubscribe();
-    }
     if (this.validSub) {
       this.validSub.unsubscribe();
     }
   }
 
   onEnter = () => {
-    if (this.isRedeploy) {
-      this.appGuid = this.isRedeploy;
-    }
     this.store.select(selectDeployAppState).pipe(
       filter(appDetail => !!appDetail.cloudFoundryDetails
         && !!appDetail.applicationSource
@@ -262,7 +254,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
 
   private createValidationPoller(): Observable<boolean> {
-    return this.isRedeploy ? this.handleRedeployValidation() : this.handleDeployValidation();
+    return this.appGuid ? this.handleRedeployValidation() : this.handleDeployValidation();
   }
 
   private handleRedeployValidation(): Observable<boolean> {

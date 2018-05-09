@@ -57,7 +57,7 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
       this.store.dispatch(
         new RouterNav({
           path: ['/applications/deploy'],
-          query: { redeploy: this.appGuid }
+          query: { appGuid: this.appGuid }
         })
       );
     },

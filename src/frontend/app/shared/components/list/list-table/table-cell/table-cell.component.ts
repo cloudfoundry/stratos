@@ -70,9 +70,6 @@ import {
 import {
   TableCellCommitAuthorComponent,
 } from '../../list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
-import {
-  TableCellCommitParentsComponent,
-} from '../../list-types/github-commits/table-cell-commit-parents/table-cell-commit-parents.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
@@ -114,7 +111,6 @@ export const listTableCells = [
   TableCellCfUserPermissionComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
-  TableCellCommitParentsComponent,
   TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent
 ];
