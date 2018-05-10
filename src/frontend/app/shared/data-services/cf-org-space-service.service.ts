@@ -2,7 +2,7 @@ import { Injectable, Optional, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { distinctUntilChanged, map, tap, withLatestFrom, first, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, map, tap, withLatestFrom, first, startWith, filter } from 'rxjs/operators';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
@@ -19,6 +19,7 @@ import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { APIResource } from '../../store/types/api.types';
 import { Subscription } from 'rxjs/Subscription';
+import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
@@ -36,6 +37,29 @@ export const enum CfOrgSpaceSelectMode {
    */
   ANY = 2
 }
+
+
+export const InitCfOrgSpaceService = (store: Store<AppState>,
+  cfOrgSpaceService: CfOrgSpaceDataService,
+  schemaKey: string,
+  paginationKey: string): Observable<any> => {
+  return store.select(selectPaginationState(schemaKey, paginationKey)).pipe(
+    filter((pag) => !!pag),
+    first(),
+    tap(pag => {
+      if (pag.clientPagination.filter.items.cf) {
+        cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+      }
+      if (pag.clientPagination.filter.items.org) {
+        cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+      }
+      if (pag.clientPagination.filter.items.space) {
+        cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+      }
+    })
+  );
+};
+
 
 @Injectable()
 export class CfOrgSpaceDataService implements OnDestroy {
@@ -94,7 +118,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.space.loading$
     ).pipe(
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
-    );
+      );
 
   }
 
@@ -139,7 +163,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         }
         return [];
       }
-    );
+      );
 
     this.org = {
       list$: orgList$,
