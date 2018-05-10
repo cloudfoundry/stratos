@@ -23,7 +23,9 @@ const serviceCatalog: Routes = [
       {
         path: '',
         component: ServiceTabsBaseComponent,
-
+        data: {
+          uiFullView: true
+        },
         children: [
           {
             path: '',
