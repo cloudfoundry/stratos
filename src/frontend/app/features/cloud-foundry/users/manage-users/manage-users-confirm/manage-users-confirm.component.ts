@@ -31,14 +31,8 @@ import {
 import { selectUsersRoles, selectUsersRolesChangedRoles } from '../../../../../store/selectors/users-roles.selector';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
-import { CfRoleChange, UserRoleLabels } from '../../../../../store/types/users-roles.types';
+import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { CfRolesService } from '../cf-roles.service';
-
-class CfRoleChangeWithNames extends CfRoleChange {
-  userName: string; // Why are all these names set out flat? So we can easily sort in future
-  spaceName?: string;
-  roleName: string;
-}
 
 @Component({
   selector: 'app-manage-users-confirm',
@@ -57,24 +51,6 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       cellFlex: '1'
     },
     {
-      headerCell: () => 'Org Change',
-      columnId: 'orgChange',
-      cellComponent: TableCellConfirmOrgSpaceComponent,
-      cellConfig: {
-        isSpace: false
-      },
-      cellFlex: '1'
-    },
-    {
-      headerCell: () => 'Space Change',
-      columnId: 'spaceChange',
-      cellComponent: TableCellConfirmOrgSpaceComponent,
-      cellConfig: {
-        isSpace: true
-      },
-      cellFlex: '1'
-    },
-    {
       headerCell: () => 'Action',
       columnId: 'action',
       cellComponent: TableCellConfirmRoleAddRemComponent,
@@ -88,6 +64,12 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       },
       cellFlex: '1'
     },
+    {
+      headerCell: () => 'Target',
+      columnId: 'target',
+      cellComponent: TableCellConfirmOrgSpaceComponent,
+      cellFlex: '1'
+    }
   ];
   changes$: Observable<CfRoleChangeWithNames[]>;
   userSchemaKey = cfUserSchemaKey;
@@ -99,10 +81,12 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   private nameCache: {
     user: { [guid: string]: string },
     space: { [guid: string]: string },
+    org: { [guid: string]: string },
     role: { [guid: string]: string },
   } = {
       user: {},
       space: {},
+      org: {},
       role: {}
     };
 
@@ -152,6 +136,19 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     return res;
   }
 
+  fetchOrgName = (orgGuid: string, org: APIResource<IOrganization>): string => {
+    if (!orgGuid) {
+      return '';
+    }
+    let res = this.nameCache.org[orgGuid];
+    if (res) {
+      return res;
+    }
+    res = org.entity.name;
+    this.nameCache.org[orgGuid] = res;
+    return res;
+  }
+
   fetchSpaceName = (spaceGuid: string, org: APIResource<IOrganization>): string => {
     if (!spaceGuid) {
       return '';
@@ -197,6 +194,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
             ...change,
             userName: this.fetchUserName(change.userGuid, users),
             spaceName: this.fetchSpaceName(change.spaceGuid, org),
+            orgName: this.fetchOrgName(change.orgGuid, org),
             roleName: this.fetchRoleName(change.role, !change.spaceGuid)
           }))
           .sort((a, b) => {

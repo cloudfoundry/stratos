@@ -21,6 +21,13 @@ export class CfRoleChange {
   role: OrgUserRoleNames | SpaceUserRoleNames;
 }
 
+export class CfRoleChangeWithNames extends CfRoleChange {
+  userName: string; // Why are all these names set out flat? So we can easily sort in future
+  orgName: string;
+  spaceName?: string;
+  roleName: string;
+}
+
 export const UserRoleLabels = {
   org: {
     short: {

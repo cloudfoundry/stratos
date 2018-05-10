@@ -1,3 +1,1 @@
-<div>
-  <mat-icon *ngIf="(config.isSpace && !!row.spaceGuid) || (!config.isSpace && !row.spaceGuid)">check</mat-icon><span *ngIf="config.isSpace"> {{row.spaceName}}</span>
-</div>
+<app-chips [chips]="chipsConfig"></app-chips>
