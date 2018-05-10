@@ -1,17 +1,15 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
+import { DeleteServiceBinding, DeleteServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
-import { CardCell } from '../../../list.types';
-import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
-import { DeleteServiceInstance, DeleteServiceBinding } from '../../../../../../store/actions/service-instances.actions';
-import { RouterNav } from '../../../../../../store/actions/router.actions';
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs';
+import { CardCell } from '../../../list.types';
 
 @Component({
   selector: 'app-service-instance-card',
