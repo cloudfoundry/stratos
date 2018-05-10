@@ -1,11 +1,7 @@
-<div class="modify-users__selected-users">
-  Selected Users:
-  <app-enumerate [collection]="users$" [labelPath]="'username'"></app-enumerate>
-</div>
 <div class="modify-users__orgs">
   <div *ngIf="(singleOrg$ | async); then singleOrg else manyOrgs"></div>
   <ng-template #singleOrg>
-    <div class="modify-users__orgs__single">Organisation: {{(singleOrg$ | async).entity.name }}</div>
+    <div class="modify-users__orgs__single">Organization: {{(singleOrg$ | async).entity.name }}</div>
   </ng-template>
   <ng-template #manyOrgs>
     <div class="stepper-form">

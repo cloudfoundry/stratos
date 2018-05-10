@@ -27,6 +27,8 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { CfRoleChange, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { CfRolesService } from '../cf-roles.service';
+import { TableCellConfirmRoleAddRemComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import { TableCellConfirmOrgSpaceComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 
 class CfRoleChangeWithNames extends CfRoleChange {
   userName: string; // Why are all these names set out flat? So we can easily sort in future
@@ -51,19 +53,27 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       cellFlex: '1'
     },
     {
-      headerCell: () => 'Space',
-      columnId: 'space',
-      cellDefinition: {
-        valuePath: 'spaceName'
+      headerCell: () => 'Org Change',
+      columnId: 'orgChange',
+      cellComponent: TableCellConfirmOrgSpaceComponent,
+      cellConfig: {
+        isSpace: false
+      },
+      cellFlex: '1'
+    },
+    {
+      headerCell: () => 'Space Change',
+      columnId: 'spaceChange',
+      cellComponent: TableCellConfirmOrgSpaceComponent,
+      cellConfig: {
+        isSpace: true
       },
       cellFlex: '1'
     },
     {
       headerCell: () => 'Action',
       columnId: 'action',
-      cellDefinition: {
-        getValue: row => row.add ? 'Add' : 'Remove'
-      },
+      cellComponent: TableCellConfirmRoleAddRemComponent,
       cellFlex: '1'
     },
     {
@@ -152,7 +162,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   }
 
   fetchRoleName = (roleName: OrgUserRoleNames | SpaceUserRoleNames, isOrg: boolean): string => {
-    return isOrg ? UserRoleLabels.org.long[roleName] : UserRoleLabels.space.long[roleName];
+    return isOrg ? UserRoleLabels.org.short[roleName] : UserRoleLabels.space.short[roleName];
   }
 
   private createCfAndOrgObs() {

@@ -79,6 +79,8 @@ import { TableCellSelectComponent } from '../table-cell-select/table-cell-select
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
 import { TableCellRequestMonitorIconComponent } from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { TableCellConfirmRoleAddRemComponent } from '../../list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import { TableCellConfirmOrgSpaceComponent } from '../../list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 /* tslint:enable:max-line-length */
 
 export const listTableCells = [
@@ -111,7 +113,9 @@ export const listTableCells = [
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
   TableCellSpaceRoleComponent,
-  TableCellRequestMonitorIconComponent
+  TableCellRequestMonitorIconComponent,
+  TableCellConfirmRoleAddRemComponent,
+  TableCellConfirmOrgSpaceComponent
 ];
 
 @Component({

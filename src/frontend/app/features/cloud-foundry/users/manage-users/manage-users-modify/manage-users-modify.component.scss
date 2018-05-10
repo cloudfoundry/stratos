@@ -9,12 +9,6 @@
       padding-right: 15px;
     }
   }
-  &__selected-users {
-    display: flex;
-    app-enumerate {
-      padding-left: 5px;
-    }
-  }
   &__orgs {
     &__single {
       padding: 15px 0;
