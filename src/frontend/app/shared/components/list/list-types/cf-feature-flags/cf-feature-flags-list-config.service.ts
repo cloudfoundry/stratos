@@ -58,7 +58,7 @@ export class CfFeatureFlagsListConfigService extends BaseCfListConfig<APIResourc
         orderKey: 'state',
         field: 'entity.enabled'
       },
-      cellFlex: '1',
+      cellFlex: '1'
     }
   ];
   constructor(private store: Store<AppState>, private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
