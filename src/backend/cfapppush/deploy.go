@@ -86,16 +86,6 @@ const (
 )
 
 const (
-
-	// Time allowed to read the next pong message from the peer
-	pongWait = 30 * time.Second
-
-	// Send ping messages to peer with this period (must be less than pongWait)
-	pingPeriod = (pongWait * 9) / 10
-
-	// Time allowed to write a ping message
-	pingWriteTimeout = 10 * time.Second
-
 	stratosProjectKey = "STRATOS_PROJECT"
 )
 
