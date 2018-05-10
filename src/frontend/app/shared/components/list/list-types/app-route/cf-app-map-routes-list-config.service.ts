@@ -81,22 +81,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
   };
   isLocal = true;
 
-  dispatchDeleteAction(route) {
-    return this.store.dispatch(
-      new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
-    );
-  }
-
-  dispatchUnmapAction(route) {
-    return this.store.dispatch(
-      new UnmapRoute(
-        route.metadata.guid,
-        this.routesDataSource.appGuid,
-        this.routesDataSource.cfGuid
-      )
-    );
-  }
-
   getGlobalActions = () => [];
   getMultiActions = () => [];
   getSingleActions = () => [];
@@ -112,14 +96,16 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     private snackBar: MatSnackBar
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
+    const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [
+      createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
+      createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
+    ]);
+    action.initialParams['order-direction-field'] = 'route';
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [
-        createEntityRelationKey(spaceSchemaKey, routeSchemaKey),
-        createEntityRelationKey(routeSchemaKey, domainSchemaKey),
-        createEntityRelationKey(routeSchemaKey, applicationSchemaKey)
-      ]),
+      action,
       createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid),
       this
     );

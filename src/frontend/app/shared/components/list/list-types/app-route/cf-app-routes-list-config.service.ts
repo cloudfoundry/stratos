@@ -51,7 +51,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'delete',
     label: 'Delete',
-    description: 'Unmap and delete route',
+    description: 'Unmap and delete routes',
     visible: (row: APIResource) => true,
     enabled: (row: APIResource) => true
   };
@@ -76,7 +76,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'block',
     label: 'Unmap',
-    description: 'Unmap route',
+    description: 'Unmap routes',
     visible: (row: APIResource) => true,
     enabled: (row: APIResource) => true
   };
@@ -92,7 +92,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
-    description: 'Unmap route',
+    description: '',
     visible: (row: APIResource) => true,
     enabled: (row: APIResource) => true
   };
