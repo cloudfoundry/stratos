@@ -55,7 +55,6 @@ export class ServiceInstancesWallListConfigService
     const transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
     this.dataSource = new ServiceInstancesWallDataSource(store, transformEntities, this);
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
-    this.getSingleActions = () => [];
 
   }
 
