@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs/Observable';
 
 export class ServicesServiceMock {
+  servicePlanVisibilities$ = Observable.of([]);
   servicePlans$ = Observable.of([{
     entity: {
       name: 'shared',
@@ -25,4 +26,13 @@ export class ServicesServiceMock {
       updated_at: '2017-11-27T17:07:03Z'
     }
   }]);
+
+  getVisibleServicePlans = () => this.servicePlans$;
+  getOrgsForSelectedServicePlan = () => Observable.of([]);
+  getSelectedServicePlanAccessibility = () => Observable.of({
+    isPublic: true
+  })
+  getServicePlanAccessibility = () => Observable.of({
+    isPublic: true
+  })
 }

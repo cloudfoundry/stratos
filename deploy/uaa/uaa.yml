@@ -9,6 +9,7 @@ scim:
   users:
     - admin|hscadmin|admin@test.org|Admin|User|stratos.admin,stratos.user,stratos.publisher
     - user|hscuser|user@test.org|Developer|User|stratos.user
+    - root|hscroot|root@test.org|Root|User|uaa.admin,scim.read,zones.uaa.admin
 
 disableInternalAuth: false
 disableInternalUserManagement: false
@@ -39,6 +40,15 @@ oauth:
       - user_attributes
 
   clients:
+    admin:
+      id: admin
+      secret: notchangeme
+      override: true
+      authorized-grant-types: client_credentials,implicit,password,refresh_token
+      scope: scim.me,stratos.user,openid,profile,roles,notification_preferences.read user_attributes,uaa.user,notification_preferences.write,stratos.publisher,cloud_controller.read,password.write,approvals.me,cloud_controller.write,cloud_controller_service_permissions.read,stratos.admin,oauth.approvals,uaa.admin,scim.read,zones.uaa.admin
+      authorities: clients.read,clients.write,clients.secret,uaa.admin,scim.read,scim.write,password.write,zone.admin,stratos.admin,stratos.user,stratos.publisher
+      access-token-validity: 3600
+      refresh-token-validity: 2592000
     console:
       id: console
       override: true

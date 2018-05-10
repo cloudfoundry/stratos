@@ -90,7 +90,7 @@ export abstract class RequestUpdateAction implements Action {
 
 export class UpdateCfAction extends RequestUpdateAction implements IUpdateRequestAction {
   constructor(
-    public apiAction: ICFAction | PaginatedAction,
+    public apiAction: IRequestAction,
     public busy: boolean,
     public error: string,
   ) {
