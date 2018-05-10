@@ -1,8 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { GithubCommitAuthorComponent } from '../../../../github-commit-author/github-commit-author.component';
 import { TableCellCommitAuthorComponent } from './table-cell-commit-author.component';
-import { pathSet } from '../../../../../../core/utils.service';
 
 describe('TableCellCommitAuthorComponent', () => {
   let component: TableCellCommitAuthorComponent<any>;
@@ -10,7 +10,7 @@ describe('TableCellCommitAuthorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [TableCellCommitAuthorComponent],
+      declarations: [TableCellCommitAuthorComponent, GithubCommitAuthorComponent],
       imports: [...BaseTestModulesNoShared]
     })
       .compileComponents();

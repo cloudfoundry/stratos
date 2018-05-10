@@ -11,6 +11,8 @@ import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -49,6 +51,7 @@ import { EndpointsMissingComponent } from './components/endpoints-missing/endpoi
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
+import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
@@ -59,6 +62,9 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import {
+  TableCellRequestMonitorIconComponent,
+} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -84,6 +90,7 @@ import { TileGroupComponent } from './components/tile/tile-group/tile-group.comp
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
+import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
@@ -95,7 +102,6 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { UploadProgressIndicatorComponent } from './components/upload-progress-indicator/upload-progress-indicator.component';
 
 @NgModule({
@@ -177,8 +183,13 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     IntroScreenComponent,
     CliInfoComponent,
     CliCommandComponent,
+    UploadProgressIndicatorComponent,
+    GithubCommitAuthorComponent,
     UserProfileBannerComponent,
-    UploadProgressIndicatorComponent
+    AppActionMonitorComponent,
+    AppActionMonitorIconComponent,
+    UserProfileBannerComponent,
+    TableCellRequestMonitorIconComponent
   ],
   exports: [
     FormsModule,
@@ -245,6 +256,10 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     CliInfoComponent,
     CliCommandComponent,
     UploadProgressIndicatorComponent,
+    GithubCommitAuthorComponent,
+    AppActionMonitorComponent,
+    CliCommandComponent,
+    AppActionMonitorIconComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

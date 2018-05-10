@@ -8,7 +8,6 @@ import { interval } from 'rxjs/observable/interval';
 import { catchError, filter, map, switchMap, takeWhile } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
-import { environment } from '../../../../../environments/environment';
 import {
   CfAppsDataSource,
   createGetAllAppAction,
@@ -25,8 +24,6 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
 // Interval to check for new application
 const APP_CHECK_INTERVAL = 3000;
 
-const proxyAPIVersion = environment.proxyAPIVersion;
-
 @Component({
   selector: 'app-deploy-application-step3',
   templateUrl: './deploy-application-step3.component.html',
@@ -34,13 +31,13 @@ const proxyAPIVersion = environment.proxyAPIVersion;
 })
 export class DeployApplicationStep3Component implements OnDestroy {
 
-  @Input('isRedeploy') isRedeploy: string;
-  appGuid: string;
+  @Input('appGuid') appGuid: string;
+  fetchedApp = false;
 
   // Validation poller
-  validSub: Subscription;
-  valid$ = new BehaviorSubject<boolean>(false);
+  valid$ = this.createValidationPoller();
 
+  error$ = new BehaviorSubject<boolean>(false);
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
 
@@ -78,12 +75,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
       filter(status => status.deploying),
     ).subscribe(deploying => {
       // Deploying
-        // Set this up here to avoid any fun with redeploy case and the deploying flag
-        this.validSub = this.createValidationPoller().pipe(
-          takeWhile(valid => !valid)
-        ).subscribe(null, null, () => {
-          this.valid$.next(true);
-        });
     });
   }
 
@@ -100,10 +91,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
     // If we were passed data, then we came from the File System step
-    if (this.isRedeploy) {
-      this.appGuid = this.isRedeploy;
-    }
-
     if (fsDeployer) {
       // Kill off the deployer we created in out constructor and use the one supplied to us
       this.destroyDeployer();
@@ -128,54 +115,42 @@ export class DeployApplicationStep3Component implements OnDestroy {
     return Observable.of({ success: true });
   }
 
-  private createValidationPoller(): Observable<boolean> {
-    return this.isRedeploy ? this.handleRedeployValidation() : this.handleDeployValidation();
-  }
-
-  private handleRedeployValidation(): Observable<boolean> {
-    return interval(500).pipe(
-      map(() => {
-        if (this.deployer.deploying) {
-          return false;
-        } else {
-          const { cfGuid } = this.deployer;
-          this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-          this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
-          return true;
-        }
-      }),
-    );
-  }
-
   /**
    * Create a poller that will be used to periodically check for the new application.
    */
-  private handleDeployValidation(): Observable<boolean> {
+  private createValidationPoller(): Observable<boolean> {
     return interval(APP_CHECK_INTERVAL).pipe(
-      takeWhile(() => !this.appGuid),
+      takeWhile(() => !this.fetchedApp),
       filter(() => this.deployer.deploying),
       switchMap(() => {
-        const { cfGuid, orgGuid, spaceGuid, appData } = this.deployer;
-        const headers = new HttpHeaders({ 'x-cap-cnsi-list': cfGuid });
-        return this.http.get(`/pp/${proxyAPIVersion}/proxy/v2/apps?q=space_guid:${spaceGuid}&q=name:${appData.Name}`,
-          { headers: headers })
-          .pipe(
-            map(info => {
-              if (info && info[cfGuid]) {
-                const apps = info[cfGuid];
-                if (apps.total_results === 1) {
-                  this.appGuid = apps.resources[0].metadata.guid;
-                  // New app - so refresh the application wall data
-                  this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-                  return true;
+        const { cfGuid, spaceGuid, appData, proxyAPIVersion } = this.deployer;
+        if (this.appGuid) {
+          this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+          this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
+          this.fetchedApp = true;
+          return Observable.of(true);
+        } else {
+          const headers = new HttpHeaders({ 'x-cap-cnsi-list': cfGuid });
+          return this.http.get(`/pp/${proxyAPIVersion}/proxy/v2/apps?q=space_guid:${spaceGuid}&q=name:${appData.Name}`,
+            { headers: headers }).pipe(
+              map(info => {
+                if (info && info[cfGuid]) {
+                  const apps = info[cfGuid];
+                  if (apps.total_results === 1) {
+                    this.appGuid = apps.resources[0].metadata.guid;
+                    this.fetchedApp = true;
+                    // New app - so refresh the application wall data
+                    this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+                    return true;
+                  }
                 }
-              }
-              return false;
-            }),
-            catchError(err => [
-              // ignore
-            ])
-          );
+                return false;
+              }),
+              catchError(err => [
+                // ignore
+              ])
+            );
+        }
       })
     );
   }

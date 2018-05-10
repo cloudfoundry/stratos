@@ -5,11 +5,4 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './create-endpoint.component.html',
   styleUrls: ['./create-endpoint.component.scss']
 })
-export class CreateEndpointComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class CreateEndpointComponent { }

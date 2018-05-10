@@ -28,7 +28,7 @@
                 <div class="github-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}} branch has been updated since this app was deployed. Redeploy to update</div>
               </div>
             </div>
-            <app-metadata-item label="Deployed at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
+            <app-metadata-item label="Deployed:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
           </div>
         </mat-card-content>
       </mat-card>
@@ -50,8 +50,8 @@
               </app-metadata-item>
               <app-metadata-item label="Owner">{{ githubRepo.owner.login }}</app-metadata-item>
               <app-metadata-item label="Description">{{ githubRepo.description }}</app-metadata-item>
-              <app-metadata-item label="Created at:">{{ githubRepo.created_at | date:'medium' }}</app-metadata-item>
-              <app-metadata-item label="Last Pushed at:">{{ githubRepo.pushed_at | date:'medium' }}</app-metadata-item>
+              <app-metadata-item label="Created:">{{ githubRepo.created_at | date:'medium' }}</app-metadata-item>
+              <app-metadata-item label="Last Pushed:">{{ githubRepo.pushed_at | date:'medium' }}</app-metadata-item>
             </div>
           </div>
         </mat-card-content>
@@ -72,8 +72,8 @@
               <app-metadata-item label="SHA">
                 <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
               </app-metadata-item>
-              <app-metadata-item label="Author">{{ commitInfo.commit.author.name }}
-                <{{ commitInfo.commit.author.email }}>
+              <app-metadata-item label="Author">
+                <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
               </app-metadata-item>
               <app-metadata-item label="Date:">{{ commitInfo.commit.author.date | date:'medium' }}</app-metadata-item>
             </div>

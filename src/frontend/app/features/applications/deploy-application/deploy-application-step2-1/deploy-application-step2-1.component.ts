@@ -16,8 +16,6 @@ import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
 import { GithubCommit } from '../../../../store/types/github.types';
 import { CommitListWrapperComponent } from './commit-list-wrapper/commit-list-wrapper.component';
-import { selectApplicationSource } from '../../../../store/selectors/deploy-application.selector';
-import { DeployApplicationSource } from '../../../../store/types/deploy-application.types';
 
 @Component({
   selector: 'app-deploy-application-step2-1',
@@ -30,7 +28,6 @@ import { DeployApplicationSource } from '../../../../store/types/deploy-applicat
 export class DeployApplicationStep21Component {
 
   validate: Observable<boolean>;
-  skip$: Observable<boolean> = Observable.of(false);
   selectedCommit$: Observable<APIResource<GithubCommit>>;
 
   @ViewChild('target', { read: ViewContainerRef })
@@ -44,14 +41,6 @@ export class DeployApplicationStep21Component {
     private injector: Injector
   ) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(CommitListWrapperComponent);
-    this.skip$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
-      map((appSource: DeployApplicationSource) => {
-        if (appSource && appSource.type && appSource.type) {
-          return appSource.type.id === 'git' && appSource.type.subType === 'giturl';
-        }
-        return false;
-      })
-    );
   }
 
   onLeave = () => {

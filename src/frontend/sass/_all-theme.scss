@@ -28,6 +28,7 @@
 @import '../app/shared/components/page-header/page-header-events/page-header-events.component.theme';
 @import '../app/shared/components/user-profile-banner/user-profile-banner.component.theme';
 @import '../app/features/applications/deploy-application/deploy-application-step2/deploy-application-fs/deploy-application-fs.component.theme';
+@import '../app/shared/components/app-action-monitor-icon/app-action-monitor-icon.component.theme';
 @import '../app/shared/components/upload-progress-indicator/upload-progress-indicator.component.theme';
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
@@ -95,6 +96,7 @@ $side-nav-light-active: #484848;
   @include app-page-header-theme($theme, $app-theme);
   @include app-page-header-events($theme, $app-theme);
   @include app-user-profile-banner-component-theme($theme, $app-theme);
+  @include action-monitor-icon-theme($theme, $app-theme);
   @include app-deploy-app-fs-component-theme($theme, $app-theme);
   @include app-upload-progress-indicator-component-theme($theme, $app-theme);
 }

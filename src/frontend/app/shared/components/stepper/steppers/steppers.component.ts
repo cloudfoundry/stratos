@@ -25,6 +25,7 @@ import { NoSubstitutionTemplateLiteral } from 'typescript';
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
+  private nextSub: Subscription;
   cancel$: Observable<string>;
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
@@ -60,11 +61,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     );
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
   ngOnDestroy() {
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
+    this.unsubscribeNext();
   }
 
   ngAfterContentInit() {
@@ -84,13 +85,21 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   goNext() {
+    this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      step.onNext()
+      const obs$ = step.onNext();
+      if (!(obs$ instanceof Observable)) {
+        return;
+      }
+      if (this.nextSub) {
+        this.nextSub.unsubscribe();
+      }
+      this.nextSub = obs$
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {} }))
-        .switchMap(({ success, data, message, redirect }) => {
+        .subscribe(({ success, data, message, redirect }) => {
           step.error = !success;
           step.busy = false;
           this.enterData = data;
@@ -101,8 +110,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               this.setActive(this.currentIndex + 1);
             }
           }
-          return [];
-        }).subscribe();
+        });
     }
   }
 
@@ -137,7 +145,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.steps[this.currentIndex].onLeave(index > this.currentIndex);
     index = this.steps[index].skip ? ++index : index;
     this.currentIndex = index;
-    this.steps[this.currentIndex].onEnter(this.enterData);
+    this.steps[this.currentIndex]._onEnter(this.enterData);
     this.enterData = undefined;
   }
 
@@ -198,5 +206,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   getCancelButtonText(currentIndex: number): string {
     return this.steps[currentIndex].cancelButtonText;
   }
-
+  private unsubscribeNext() {
+    if (this.nextSub) {
+      this.nextSub.unsubscribe();
+    }
+  }
 }

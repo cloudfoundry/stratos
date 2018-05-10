@@ -7,6 +7,7 @@ import { generateTestApplicationServiceProvider } from '../../../../../../test-f
 import { ApplicationEnvVarsService } from '../build-tab/application-env-vars.service';
 import { ApplicationStateService } from '../../../../../../shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../../shared/monitors/pagination-monitor.factory';
+import { DatePipe } from '@angular/common';
 
 describe('ServicesTabComponent', () => {
   let component: ServicesTabComponent;
@@ -21,7 +22,8 @@ describe('ServicesTabComponent', () => {
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsService,
         ApplicationStateService,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        DatePipe
       ]
     })
       .compileComponents();

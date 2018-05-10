@@ -7,7 +7,7 @@ import { Observable } from 'rxjs/Observable';
 export interface IStepperStep {
   validate: Observable<boolean>;
   onNext: StepOnNextFunction;
-  onEnter?: () => void;
+  onEnter?: (data?: any) => void;
 }
 
 export type StepOnNextFunction = () => Observable<{
@@ -25,8 +25,9 @@ export type StepOnNextFunction = () => Observable<{
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-export class StepComponent implements OnInit {
+export class StepComponent {
 
+  public _onEnter: (data?: any) => void;
   active = false;
   complete = false;
   error = false;
@@ -70,6 +71,9 @@ export class StepComponent implements OnInit {
   @Input('blocked')
   blocked: boolean;
 
+  @Input('destructiveStep')
+  public destructiveStep = false;
+
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
 
@@ -85,8 +89,16 @@ export class StepComponent implements OnInit {
   @Input()
   onLeave: (isNext?: boolean) => void = () => { }
 
-  constructor() { }
-
-  ngOnInit() { }
+  constructor() {
+    this._onEnter = (data?: any) => {
+      if (this.destructiveStep) {
+        this.busy = true;
+        setTimeout(() => {
+          this.busy = false;
+        }, 1000);
+      }
+      this.onEnter(data);
+    };
+  }
 
 }

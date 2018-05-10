@@ -11,7 +11,7 @@ import {
   ViewContainerRef,
   ViewEncapsulation,
 } from '@angular/core';
-
+/* tslint:disable:max-line-length */
 import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import {
   TableCellEventActionComponent,
@@ -27,7 +27,6 @@ import {
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import { TableCellAppRouteComponent } from '../../list-types/app-route/table-cell-app-route/table-cell-app-route.component';
-import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from '../../list-types/app-route/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from '../../list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
 import {
@@ -44,11 +43,9 @@ import {
 import {
   TableCellRouteAppsAttachedComponent,
 } from '../../list-types/cf-space-routes/table-cell-route-apps-attached/table-cell-route-apps-attached.component';
-/* tslint:disable:max-line-length */
 import {
   TableCellServiceInstanceAppsAttachedComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
-/* tslint:enable:max-line-length */
 import {
   TableCellServiceInstanceTagsComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
@@ -73,17 +70,18 @@ import {
 import {
   TableCellCommitAuthorComponent,
 } from '../../list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
-import {
-  TableCellCommitParentsComponent,
-} from '../../list-types/github-commits/table-cell-commit-parents/table-cell-commit-parents.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
+import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
+import {
+  TableCellRequestMonitorIconComponent,
+} from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-
+/* tslint:enable:max-line-length */
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
@@ -113,8 +111,8 @@ export const listTableCells = [
   TableCellCfUserPermissionComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
-  TableCellCommitParentsComponent,
-  TableCellCommitAuthorComponent
+  TableCellCommitAuthorComponent,
+  TableCellRequestMonitorIconComponent
 ];
 
 @Component({
@@ -170,7 +168,9 @@ export class TableCellComponent<T> implements OnInit, OnChanges {
       this.cellComponent.row = this.row;
       this.cellComponent.dataSource = this.dataSource;
       this.cellComponent.config = this.config;
-      this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+      if (this.dataSource.getRowState) {
+        this.cellComponent.rowState = this.dataSource.getRowState(this.row);
+      }
       if (this.cellDefinition) {
         const defaultTableCell = this.cellComponent as TableCellDefaultComponent<T>;
         defaultTableCell.cellDefinition = this.cellDefinition;
