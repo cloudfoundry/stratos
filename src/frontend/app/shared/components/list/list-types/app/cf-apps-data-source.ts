@@ -1,7 +1,10 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
+import { tag } from 'rxjs-spy/operators/tag';
+import { debounceTime, distinctUntilChanged, tap, withLatestFrom } from 'rxjs/operators';
 
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
+import { GetAppStatsAction } from '../../../../../store/actions/app-metadata.actions';
 import { GetAllApplications } from '../../../../../store/actions/application.actions';
 import { CreatePagination } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -15,8 +18,9 @@ import {
 import { createEntityRelationKey } from '../../../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../../../store/types/api.types';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
-import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { distinctPageUntilChanged, ListDataSource } from '../../data-sources-controllers/list-data-source';
 import { IListConfig } from '../../list.component.types';
+import { Subscription } from 'rxjs/Subscription';
 
 export function createGetAllAppAction(paginationKey): GetAllApplications {
   return new GetAllApplications(paginationKey, [
@@ -42,6 +46,7 @@ const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEn
 export class CfAppsDataSource extends ListDataSource<APIResource> {
 
   public static paginationKey = 'applicationWall';
+  private statsSub: Subscription;
 
   constructor(
     store: Store<AppState>,
@@ -74,7 +79,30 @@ export class CfAppsDataSource extends ListDataSource<APIResource> {
       paginationKey,
       isLocal: true,
       transformEntities: transformEntities,
-      listConfig
+      listConfig,
+      destroy: () => this.statsSub.unsubscribe()
     });
+
+    this.statsSub = this.page$.pipe(
+      // The page observable will fire often, here we're only interested in updating the stats on actual page changes
+      distinctUntilChanged(distinctPageUntilChanged(this)),
+      withLatestFrom(this.pagination$),
+      // Ensure we keep pagination smooth
+      debounceTime(250),
+      tap(([page, pagination]) => {
+        if (!page) {
+          return;
+        }
+        page.forEach(app => {
+          const appState = app.entity.state;
+          const appGuid = app.metadata.guid;
+          const cfGuid = app.entity.cfGuid;
+          const dispatching = false;
+          if (appState === 'STARTED') {
+            this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+          }
+        });
+      }),
+      tag('stat-obs')).subscribe();
   }
 }
