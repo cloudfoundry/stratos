@@ -12,7 +12,7 @@ import { AppState } from '../../../store/app-state';
 import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, InitCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { Subscription } from 'rxjs/Subscription';
 
 @Component({
@@ -39,23 +39,10 @@ export class ServicesWallComponent implements OnInit, OnDestroy {
       map(endpoints => endpoints.map(endpoint => endpoint.guid))
     );
 
-    this.initCfOrgSpaceService = this.store.select(selectPaginationState(
+    this.initCfOrgSpaceService = InitCfOrgSpaceService(this.store,
+      this.cfOrgSpaceService,
       serviceInstancesSchemaKey,
-      createEntityRelationPaginationKey(serviceInstancesSchemaKey, 'all'))).pipe(
-      filter((pag) => !!pag),
-      first(),
-      tap(pag => {
-        if (pag.clientPagination.filter.items.cf) {
-          this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
-        }
-        if (pag.clientPagination.filter.items.org) {
-          this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
-        }
-        if (pag.clientPagination.filter.items.space) {
-          this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
-        }
-      })
-      ).subscribe();
+      'all').subscribe();
   }
 
   ngOnInit() {

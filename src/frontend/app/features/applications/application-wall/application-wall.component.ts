@@ -14,7 +14,7 @@ import { CardAppComponent } from '../../../shared/components/list/list-types/app
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, InitCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
@@ -84,21 +84,10 @@ export class ApplicationWallComponent implements OnDestroy {
       }),
       tag('stat-obs')).subscribe();
 
-    this.initCfOrgSpaceService = this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey)).pipe(
-      filter((pag) => !!pag),
-      first(),
-      tap(pag => {
-        if (pag.clientPagination.filter.items.cf) {
-          this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
-        }
-        if (pag.clientPagination.filter.items.org) {
-          this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
-        }
-        if (pag.clientPagination.filter.items.space) {
-          this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
-        }
-      })
-    ).subscribe();
+    this.initCfOrgSpaceService = InitCfOrgSpaceService(this.store,
+      this.cfOrgSpaceService,
+      applicationSchemaKey,
+      CfAppsDataSource.paginationKey).subscribe();
   }
 
   cardComponent = CardAppComponent;

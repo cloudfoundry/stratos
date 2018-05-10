@@ -118,6 +118,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     } catch (e) {
       params = null;
     }
+
     this.store.dispatch(new CreateServiceBinding(
       this.servicesService.cfGuid,
       guid,

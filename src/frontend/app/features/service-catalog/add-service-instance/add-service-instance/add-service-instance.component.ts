@@ -25,7 +25,7 @@ export class AddServiceInstanceComponent implements OnInit {
     const serviceGuid = servicesService.serviceGuid;
     this.serviceInstancesUrl = `/marketplace/${cfId}/${serviceGuid}/instances`;
     this.title$ = this.servicesService.getServiceName().pipe(
-      map(label => `Create ${label} Instance`)
+      map(label => `Create Instance: ${label}`)
     );
   }
 
