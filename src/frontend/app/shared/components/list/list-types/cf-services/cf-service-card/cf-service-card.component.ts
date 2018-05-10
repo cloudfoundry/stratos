@@ -60,6 +60,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
 
   goToServiceInstances = () =>
     this.store.dispatch(new RouterNav({
-      path: ['service-catalog', this.row.entity.cfGuid, this.row.metadata.guid]
+      path: ['marketplace', this.row.entity.cfGuid, this.row.metadata.guid]
     }))
 }

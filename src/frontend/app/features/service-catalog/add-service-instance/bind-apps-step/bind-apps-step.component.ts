@@ -66,9 +66,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
           )
         }, true).entities$
           .pipe(
-            map(apps => apps.sort(appDataSort)),
-            first(),
-            map(apps => apps.slice(0, 50))
+          map(apps => apps.sort(appDataSort)),
+          first(),
+          map(apps => apps.slice(0, 50))
           );
 
         this.serviceInstanceGuid = createServiceInstanceState.serviceInstanceGuid;
@@ -95,7 +95,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
         } else {
 
           this.store.dispatch(new RouterNav({
-            path: ['service-catalog',
+            path: ['marketplace',
               this.servicesService.cfGuid,
               this.servicesService.serviceGuid,
               'instances']

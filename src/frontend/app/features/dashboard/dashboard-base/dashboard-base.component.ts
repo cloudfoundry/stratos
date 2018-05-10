@@ -65,7 +65,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     {
       text: 'Marketplace',
       matIcon: 'store',
-      link: '/service-catalog'
+      link: '/marketplace'
     },
     {
       text: 'Services',
