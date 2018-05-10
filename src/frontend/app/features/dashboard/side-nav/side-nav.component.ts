@@ -9,6 +9,7 @@ export interface SideNavItem {
   text: string;
   matIcon: string;
   link: string;
+  hidden?: Observable<boolean>;
 }
 
 @Component({
@@ -25,7 +26,6 @@ export class SideNavComponent implements OnInit {
   // Button is not always visible on load, so manually push through an event
   logoClicked: BehaviorSubject<any> = new BehaviorSubject(true);
 
-
   ngOnInit() {
     const toLength = a => a.length;
     const debounced$ = this.logoClicked.debounceTime(250); // debounce the click stream
@@ -35,6 +35,4 @@ export class SideNavComponent implements OnInit {
       .filter(x => x === 3)
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
   }
-
-
 }

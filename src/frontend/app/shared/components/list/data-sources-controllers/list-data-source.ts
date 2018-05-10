@@ -1,26 +1,22 @@
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { tag } from 'rxjs-spy/operators/tag';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { OperatorFunction } from 'rxjs/interfaces';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged } from 'rxjs/operators';
-import { map, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
-import {
-  getCurrentPageRequestInfo,
-  getPaginationObservables,
-} from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginatedAction, PaginationEntityState } from '../../../../store/types/pagination.types';
+import { PaginationMonitor } from '../../../monitors/pagination-monitor';
 import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
-import { PaginationMonitor } from '../../../monitors/pagination-monitor';
+import { LocalListController } from './local-list-controller';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -59,6 +55,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public isAdding$ = new BehaviorSubject<boolean>(false);
 
   // Select item/s
+  public selectedRows$ = new ReplaySubject<Map<string, T>>();
   public selectedRows = new Map<string, T>();
   public isSelecting$ = new BehaviorSubject(false);
   public selectAllChecked = false;
@@ -76,6 +73,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   // ------------- Private
   private entities$: Observable<T>;
   private paginationToStringFn: (PaginationEntityState) => string;
+  private externalDestroy: () => void;
 
   protected store: Store<AppState>;
   protected action: PaginatedAction;
@@ -90,6 +88,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
 
   private pageSubscription: Subscription;
   private transformedEntitiesSubscription: Subscription;
+  private seedSyncSub: Subscription;
+
+  public refresh: () => void;
 
   constructor(
     private config: IListDataSourceConfig<A, T>
@@ -113,28 +114,42 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     // Add any additional functions via an optional listConfig, such as sorting from the column definition
     const listColumns = this.config.listConfig ? this.config.listConfig.getColumns() : [];
     listColumns.forEach(column => {
+      if (!column.sort) {
+        return;
+      }
       if (DataFunctionDefinition.is(column.sort)) {
         transformEntities.push(column.sort as DataFunctionDefinition);
+      } else if (typeof column.sort !== 'boolean') {
+        transformEntities.push(column.sort as DataFunction<T>);
       }
     });
 
     const dataFunctions = getDataFunctionList(transformEntities);
     const transformedEntities$ = this.attachTransformEntity(entities$, this.transformEntity);
     this.transformedEntitiesSubscription = transformedEntities$.do(items => this.transformedEntities = items).subscribe();
+
+    const setResultCount = (paginationEntity: PaginationEntityState, entities: T[]) => {
+      const validPagesCountChange = this.transformEntity;
+      if (
+        paginationEntity.totalResults !== entities.length ||
+        paginationEntity.clientPagination.totalResults !== entities.length
+      ) {
+        this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
+      }
+    };
     this.page$ = this.isLocal ?
-      this.getLocalPagesObservable(transformedEntities$, pagination$, dataFunctions)
-      : transformedEntities$.pipe(shareReplay(1));
+      new LocalListController(transformedEntities$, pagination$, setResultCount, dataFunctions).page$
+      : transformedEntities$.pipe(publishReplay(1), refCount());
 
     this.pageSubscription = this.page$.do(items => this.filteredRows = items).subscribe();
     this.pagination$ = pagination$;
-    this.isLoadingPage$ = this.pagination$.map((pag: PaginationEntityState) => {
-      return getCurrentPageRequestInfo(pag).busy && !pag.ids[pag.currentPage];
-    });
+    this.isLoadingPage$ = paginationMonitor.fetchingCurrentPage$;
   }
 
   init(config: IListDataSourceConfig<A, T>) {
     this.store = config.store;
     this.action = config.action;
+    this.refresh = this.getRefreshFunction(config);
     this.sourceScheme = config.schema;
     this.getRowUniqueId = config.getRowUniqueId;
     this.getEmptyType = config.getEmptyType ? config.getEmptyType : () => ({} as T);
@@ -143,11 +158,20 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isLocal = config.isLocal || false;
     this.transformEntities = config.transformEntities;
     this.rowsState = config.rowsState ? config.rowsState.pipe(
-      shareReplay(1)
+      publishReplay(1), refCount()
     ) : Observable.of({}).first();
-
+    this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+  }
+
+  private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
+    if (config.listConfig && config.listConfig.hideRefresh) {
+      return null;
+    }
+    return config.refresh ? config.refresh : () => {
+      this.store.dispatch(this.action);
+    };
   }
   /**
    * Will return the row state with default values filled in.
@@ -160,13 +184,15 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         ...(state[this.getRowUniqueId(row)] || {})
       })),
       distinctUntilChanged(),
-      shareReplay(1)
+      publishReplay(1), refCount()
     );
   }
 
   disconnect() {
     this.pageSubscription.unsubscribe();
     this.transformedEntitiesSubscription.unsubscribe();
+    if (this.seedSyncSub) { this.seedSyncSub.unsubscribe(); }
+    this.externalDestroy();
   }
 
   destroy() {
@@ -184,14 +210,20 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.isAdding$.next(false);
   }
 
-  selectedRowToggle(row: T) {
+  selectedRowToggle(row: T, multiMode: boolean = true) {
     const exists = this.selectedRows.has(this.getRowUniqueId(row));
     if (exists) {
       this.selectedRows.delete(this.getRowUniqueId(row));
+      this.selectAllChecked = false;
     } else {
+      if (!multiMode) {
+        this.selectedRows.clear();
+      }
       this.selectedRows.set(this.getRowUniqueId(row), row);
+      this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
     }
-    this.isSelecting$.next(this.selectedRows.size > 0);
+    this.selectedRows$.next(this.selectedRows);
+    this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
   }
 
   selectAllFilteredRows() {
@@ -203,11 +235,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.selectedRows.delete(this.getRowUniqueId(row));
       }
     }
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
 
   selectClear() {
     this.selectedRows.clear();
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(false);
   }
 
@@ -237,60 +271,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     }
   }
 
-  getLocalPagesObservable(page$, pagination$: Observable<PaginationEntityState>, dataFunctions) {
-    return combineLatest(
-      pagination$,
-      page$
-    ).pipe(
-      map(([paginationEntity, entities]) => {
-        if (dataFunctions && dataFunctions.length) {
-          entities = dataFunctions.reduce((value, fn) => {
-            return fn(value, paginationEntity);
-          }, entities);
-        }
-        const pages = this.splitClientPages(entities, paginationEntity.clientPagination.pageSize);
-        if (
-          paginationEntity.totalResults !== entities.length ||
-          paginationEntity.clientPagination.totalResults !== entities.length
-        ) {
-          this.store.dispatch(new SetResultCount(this.entityKey, this.paginationKey, entities.length));
-        }
-        const pageIndex = paginationEntity.clientPagination.currentPage - 1;
-        return pages[pageIndex];
-      }),
-      shareReplay(1),
-      tag('local-list')
-      );
-  }
-
-  getPaginationCompareString(paginationEntity: PaginationEntityState) {
-    return Object.values(paginationEntity.clientPagination).join('.')
-      + paginationEntity.params['order-direction-field']
-      + paginationEntity.params['order-direction']
-      + paginationEntity.clientPagination.filter.string
-      + Object.values(paginationEntity.clientPagination.filter.items)
-      + getCurrentPageRequestInfo(paginationEntity).busy;
-    // Some outlier cases actually fetch independently from this list (looking at you app variables)
-  }
-
-  splitClientPages(entites: T[], pageSize: number): T[][] {
-    if (!entites || !entites.length) {
-      return [];
-    }
-    if (entites.length <= pageSize) {
-      return [entites];
-    }
-    const array = [...entites];
-    const pages = [];
-
-    for (let i = 0; i < array.length; i += pageSize) {
-      pages.push(array.slice(i, i + pageSize));
-    }
-    return pages;
-  }
-
   connect(): Observable<T[]> {
-    return this.page$.tag('actual-page-obs');
+    return this.page$
+      .tag('actual-page-obs');
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {

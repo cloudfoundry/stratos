@@ -1,12 +1,14 @@
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
 
-import { EventSchema, GetAllAppEvents } from '../../../../../store/actions/app-event.actions';
+import { GetAllAppEvents } from '../../../../../store/actions/app-event.actions';
 import { AddParams, RemoveParams } from '../../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../../store/app-state';
 import { EntityInfo } from '../../../../../store/types/api.types';
 import { PaginationEntityState, QParam } from '../../../../../store/types/pagination.types';
 import { ListDataSource } from '../../data-sources-controllers/list-data-source';
+import { entityFactory } from '../../../../../store/helpers/entity-factory';
+import { appEventSchemaKey } from '../../../../../store/helpers/entity-factory';
 
 export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
 
@@ -43,7 +45,7 @@ export class CfAppEventsDataSource extends ListDataSource<EntityInfo> {
       {
         store,
         action,
-        schema: EventSchema,
+        schema: entityFactory(appEventSchemaKey),
         getRowUniqueId: (object: EntityInfo) => {
           return object.entity.metadata ? object.entity.metadata.guid : null;
         },

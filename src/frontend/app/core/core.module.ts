@@ -1,21 +1,25 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 
 import { AuthGuardService } from './auth-guard.service';
+import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
+import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
+import { ClickStopPropagationDirective } from './click-stop-propagation';
+import { DotContentComponent } from './dot-content/dot-content.component';
+import { EndpointsService } from './endpoints.service';
+import { EntityServiceFactory } from './entity-service-factory.service';
 import { EventWatcherService } from './event-watcher/event-watcher.service';
-import { MDAppModule } from './md.module';
-import { PageHeaderService } from './page-header-service/page-header.service';
-import { UtilsService } from './utils.service';
-import { WindowRef } from './window-ref/window-ref.service';
+import { InfinityPipe } from './infinity.pipe';
 import { LogOutDialogComponent } from './log-out-dialog/log-out-dialog.component';
 import { LoggerService } from './logger.service';
-import { EndpointsService } from './endpoints.service';
-import { UserService } from './user.service';
-import { EntityServiceFactory } from './entity-service-factory.service';
+import { MDAppModule } from './md.module';
+import { PageHeaderService } from './page-header-service/page-header.service';
+import { SafeImgPipe } from './safe-img.pipe';
 import { TruncatePipe } from './truncate.pipe';
+import { UserService } from './user.service';
+import { UtilsService } from './utils.service';
+import { WindowRef } from './window-ref/window-ref.service';
 
 @NgModule({
   imports: [
@@ -27,7 +31,14 @@ import { TruncatePipe } from './truncate.pipe';
     FormsModule,
     ReactiveFormsModule,
     LogOutDialogComponent,
-    TruncatePipe
+    TruncatePipe,
+    InfinityPipe,
+    BytesToHumanSize,
+    MegaBytesToHumanSize,
+    SafeImgPipe,
+    ClickStopPropagationDirective,
+    DotContentComponent,
+    ButtonBlurOnClickDirective
   ],
   providers: [
     AuthGuardService,
@@ -42,7 +53,14 @@ import { TruncatePipe } from './truncate.pipe';
   ],
   declarations: [
     LogOutDialogComponent,
-    TruncatePipe
+    TruncatePipe,
+    InfinityPipe,
+    BytesToHumanSize,
+    MegaBytesToHumanSize,
+    SafeImgPipe,
+    ClickStopPropagationDirective,
+    DotContentComponent,
+    ButtonBlurOnClickDirective
   ],
   entryComponents: [
     LogOutDialogComponent

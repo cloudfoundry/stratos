@@ -1,26 +1,25 @@
-import { GetApplication, ApplicationSchema } from '../../../store/actions/application.actions';
-import { ApplicationService } from '../application.service';
-import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
-import { EntityService } from '../../../core/entity-service';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
+import { Component, HostBinding } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { Store } from '@ngrx/store';
+
+import { EntityService } from '../../../core/entity-service';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { ApplicationStateService } from '../../../shared/components/application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { AppState } from '../../../store/app-state';
+import { applicationSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { ApplicationService, createGetApplicationAction } from '../application.service';
+import { ApplicationEnvVarsService } from './application-tabs-base/tabs/build-tab/application-env-vars.service';
 
 
-const applicationServiceFactory = (
+function applicationServiceFactory(
   store: Store<AppState>,
   activatedRoute: ActivatedRoute,
   entityServiceFactory: EntityServiceFactory,
   appStateService: ApplicationStateService,
   appEnvVarsService: ApplicationEnvVarsService,
   paginationMonitorFactory: PaginationMonitorFactory
-) => {
+) {
   const { id, cfId } = activatedRoute.snapshot.params;
   return new ApplicationService(
     cfId,
@@ -31,21 +30,22 @@ const applicationServiceFactory = (
     appEnvVarsService,
     paginationMonitorFactory
   );
-};
+}
 
-const entityServiceFactory = (
+function entityServiceFactory(
   _entityServiceFactory: EntityServiceFactory,
   activatedRoute: ActivatedRoute
-) => {
+) {
   const { id, cfId } = activatedRoute.snapshot.params;
   // const entityMonitor = new en
   return _entityServiceFactory.create(
-    ApplicationSchema.key,
-    ApplicationSchema,
+    applicationSchemaKey,
+    entityFactory(applicationSchemaKey),
     id,
-    new GetApplication(id, cfId)
+    createGetApplicationAction(id, cfId),
+    true
   );
-};
+}
 
 @Component({
   selector: 'app-application-base',
@@ -62,17 +62,9 @@ const entityServiceFactory = (
       provide: EntityService,
       useFactory: entityServiceFactory,
       deps: [EntityServiceFactory, ActivatedRoute]
-    }
+    },
+
   ]
 })
-export class ApplicationBaseComponent implements OnInit, OnDestroy {
-
-  constructor(
-  ) { }
-
-  ngOnInit(): void {
-  }
-
-  ngOnDestroy(): void {
-  }
+export class ApplicationBaseComponent {
 }

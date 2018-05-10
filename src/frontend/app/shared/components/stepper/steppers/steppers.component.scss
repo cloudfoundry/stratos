@@ -7,10 +7,12 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    padding: 50px;
+    padding: 24px;
   }
   &__headers {
     display: flex;
+    flex: 0 0 72px;
+    height: 72px;
   }
   &__header {
     align-items: center;
@@ -39,46 +41,56 @@
         content: none;
       }
     }
-    &-icon {
-      align-items: center;
-      border-radius: 50%;
-      display: flex;
-      height: 15px;
-      justify-content: center;
-      padding: 15px;
-      width: 15px;
+    &--active {
+      .steppers__header-text {
+        font-weight: 600;
+      }
+    }
+    &-complete {
+      font-size: 20px;
+      line-height: 24px;
+      text-align: center;
     }
     &-text {
-      padding-left: 10px;
+      line-height: 24px;
+      padding-left: 8px;
       white-space: nowrap;
     }
   }
   &__contents {
+    display: flex;
     flex: 1;
-    height: 100%;
-    margin: 30px 80px;
+    height: 0;
+    margin: 12px 36px;
+    min-height: 160px;
+    overflow-y: auto;
   }
   &__wrapper {
     display: flex;
     min-height: 100%;
   }
   &__navigation {
+    align-items: flex-end;
     display: flex;
+    flex: 0 0 60px;
     justify-content: space-between;
-    margin-top: 50px;
   }
   &__navigation-right {
     flex: 1;
     text-align: right;
   }
-  form {
+  .stepper-form {
+    // Use a specific style instead of form element selected. This prevents these generic styles bleading into child components of a stepper
     display: flex;
     flex-direction: column;
-    max-width: 60%;
-    mat-select,
+    margin-top: 10px;
+    max-width: 450px;
     mat-form-field {
-      margin-top: 20px;
       width: 100%;
+    }
+    mat-form-field,
+    mat-slide-toggle {
+      padding-top: 10px;
     }
   }
 }

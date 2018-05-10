@@ -9,7 +9,7 @@ import (
 
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -176,11 +176,11 @@ func TestPgSQLCNSIs(t *testing.T) {
 
 		var (
 			rowFieldsForCluster = []string{"guid", "name", "cnsi_type", "api_endpoint", "account", "token_expiry", "skip_ssl_validation"}
-			expectedList        []*RegisteredCluster
+			expectedList        []*interfaces.ConnectedEndpoint
 			mockAccount         = "asd-gjfg-bob"
 		)
 
-		expectedList = make([]*RegisteredCluster, 0)
+		expectedList = make([]*interfaces.ConnectedEndpoint, 0)
 
 		db, mock, err := sqlmock.New()
 		if err != nil {

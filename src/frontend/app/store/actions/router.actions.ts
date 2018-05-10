@@ -11,10 +11,14 @@ export class RouterNav implements Action, LoggerAction {
   public message: string;
   type = RouterActions.GO;
   constructor(public payload: {
-    path: any[];
-    query?: object;
+    path: string[] | string;
+    query?: {
+      [key: string]: any
+    };
     extras?: NavigationExtras;
   }, public redirectPath?: string) {
-    this.message = payload.path.join('/');
+    const path = payload.path as string[];
+    const pathString = payload.path as string;
+    this.message = path.join ? path.join('/') : pathString;
   }
 }

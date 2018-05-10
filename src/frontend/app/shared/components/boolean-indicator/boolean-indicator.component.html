@@ -1,0 +1,10 @@
+<div class="boolean-indicator">
+  <div class="boolean-indicator__container" *ngIf="isTrue">
+    <mat-icon class="boolean-indicator__container__icon-true">{{ getIcon() }}</mat-icon>
+    <div>{{ getText() }}</div>
+  </div>
+  <div class="boolean-indicator__container" *ngIf="!isTrue">
+    <mat-icon class="boolean-indicator__container__icon-false">{{ getIcon() }}</mat-icon>
+    <div>{{ getText() }}</div>
+  </div>
+</div>

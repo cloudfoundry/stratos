@@ -8,13 +8,14 @@ import (
 	"testing"
 	"time"
 
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
+
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/crypto"
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/crypto"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	"github.com/labstack/echo"
 	. "github.com/smartystreets/goconvey/convey"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 const (
@@ -132,7 +133,7 @@ func TestLoginToUAAButCantSaveToken(t *testing.T) {
 			// WithArgs(mockUserGUID).
 			WillReturnRows(sqlmock.NewRows([]string{"COUNT(*)"}).AddRow("0"))
 
-		// --- set up the database expectation for pp.saveUAAToken
+		// --- set up the database expectation for pp.saveAuthToken
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
 
@@ -403,7 +404,7 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 		badCNSIID := ""
 		badAuthToken := ""
 		badRefreshToken := ""
-		badUserInfo := userTokenInfo{
+		badUserInfo := interfaces.JWTUserTokenInfo{
 			UserGUID:    "",
 			TokenExpiry: 0,
 		}
@@ -415,7 +416,9 @@ func TestSaveCNSITokenWithInvalidInput(t *testing.T) {
 
 		mock.ExpectExec(insertIntoTokens).
 			WillReturnError(errors.New("Unknown Database Error"))
-		tr, err := pp.saveCNSIToken(badCNSIID, badUserInfo, badAuthToken, badRefreshToken, false)
+
+		tr := pp.InitEndpointTokenRecord(badUserInfo.TokenExpiry, badAuthToken, badRefreshToken, false)
+		err := pp.setCNSITokenRecord(badCNSIID, badUserInfo.UserGUID, tr)
 
 		log.Printf("tr is: %T %+v", tr, tr)
 		log.Printf("emptyTokenRecord is: %T %+v", emptyTokenRecord, emptyTokenRecord)

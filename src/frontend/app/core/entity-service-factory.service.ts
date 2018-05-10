@@ -15,19 +15,20 @@ export class EntityServiceFactory {
     private entityMonitorFactory: EntityMonitorFactory
   ) { }
 
-  create(
+  create<T>(
     entityKey: string,
     schema: schema.Entity,
     entityId: string,
     action: IRequestAction,
-    entitySection: TRequestTypeKeys = RequestSectionKeys.CF
+    validateRelations = true,
+    entitySection: TRequestTypeKeys = RequestSectionKeys.CF,
   ) {
-    const entityMonitor = this.entityMonitorFactory.create(
+    const entityMonitor = this.entityMonitorFactory.create<T>(
       entityId,
       entityKey,
       schema
     );
-    return new EntityService(this.store, entityMonitor, action, entitySection);
+    return new EntityService<T>(this.store, entityMonitor, action, validateRelations, entitySection);
   }
 
 }

@@ -2,7 +2,7 @@ import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, map, shareReplay } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, pairwise, tap, distinctUntilChanged, publish } from 'rxjs/operators';
 import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
 
 import { getAPIRequestDataState, selectEntities } from '../../store/selectors/api.selectors';
@@ -31,8 +31,8 @@ export class PaginationMonitor<T = any> {
 
   constructor(
     private store: Store<AppState>,
-    private paginationKey: string,
-    private schema: schema.Entity
+    public paginationKey: string,
+    public schema: schema.Entity
   ) {
     this.init(
       store,
@@ -91,6 +91,7 @@ export class PaginationMonitor<T = any> {
       schema
     );
     this.currentPageError$ = this.createErrorObservable(this.pagination$);
+    this.fetchingCurrentPage$ = this.createFetchingObservable(this.pagination$);
   }
 
   private createPaginationObservable(
@@ -98,7 +99,8 @@ export class PaginationMonitor<T = any> {
     entityKey: string,
     paginationKey: string
   ) {
-    return store.select(selectPaginationState(entityKey, paginationKey)).pipe(shareReplay(1));
+    return store.select(selectPaginationState(entityKey, paginationKey))
+      .pipe(distinctUntilChanged(), filter(pag => !!pag));
   }
 
   private createPageObservable(
@@ -115,9 +117,8 @@ export class PaginationMonitor<T = any> {
       map(([[pagination, entities], allEntities]) => {
         const page = pagination.ids[pagination.currentPage] || [];
         return page.length ? denormalize(page, [schema], allEntities).filter(ent => !!ent) : [];
-      }),
-      shareReplay(1)
-      );
+      })
+    );
   }
 
   private createErrorObservable(pagination$: Observable<PaginationEntityState>) {
@@ -126,6 +127,16 @@ export class PaginationMonitor<T = any> {
         const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
         return !currentPageRequest.busy && currentPageRequest.error;
       })
+    );
+  }
+
+  private createFetchingObservable(pagination$: Observable<PaginationEntityState>) {
+    return pagination$.pipe(
+      map(pagination => {
+        const currentPageRequest = this.getCurrentPageRequestInfo(pagination);
+        return currentPageRequest.busy;
+      }),
+      distinctUntilChanged()
     );
   }
   // ### Initialization methods end.

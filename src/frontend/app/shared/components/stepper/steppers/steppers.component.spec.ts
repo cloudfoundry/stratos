@@ -5,6 +5,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
 import { SteppersComponent } from './steppers.component';
+import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
 
 describe('SteppersComponent', () => {
   let component: SteppersComponent;
@@ -17,7 +18,8 @@ describe('SteppersComponent', () => {
         MDAppModule,
         RouterTestingModule,
         CommonModule,
-        CoreModule
+        CoreModule,
+        createBasicStoreModule()
       ]
     })
       .compileComponents();

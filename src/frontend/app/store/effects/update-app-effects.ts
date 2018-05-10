@@ -1,15 +1,17 @@
-import { GetAppEnvVarsAction, GetAppStatsAction, AppMetadataTypes, GetAppSummaryAction } from './../actions/app-metadata.actions';
-import { WrapperRequestActionSuccess } from '../types/request.types';
 import { Injectable } from '@angular/core';
-import { Headers, Http } from '@angular/http';
+import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
-import { environment } from '../../../environments/environment';
+import { UPDATE_SUCCESS, UpdateExistingApplication } from '../actions/application.actions';
+import { WrapperRequestActionSuccess } from '../types/request.types';
+import {
+  AppMetadataTypes,
+  GetAppEnvVarsAction,
+  GetAppStatsAction,
+  GetAppSummaryAction,
+} from './../actions/app-metadata.actions';
 import { AppState } from './../app-state';
-import { UpdateExistingApplication, UPDATE_SUCCESS, GetApplication, UPDATE } from '../actions/application.actions';
-import { ApiActionTypes } from '../actions/request.actions';
 
 
 @Injectable()
@@ -34,14 +36,22 @@ export class UpdateAppEffects {
             actions.push(new GetAppEnvVarsAction(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
           case AppMetadataTypes.STATS:
-            // Should only fire this if app is running
-            actions.push(new GetAppStatsAction(action.apiAction.guid, action.apiAction.endpointGuid));
+            const statsAction = new GetAppStatsAction(action.apiAction.guid, action.apiAction.endpointGuid);
+            // Application has changed and the associated app stats need to also be updated.
+            // Apps that are started can just make the stats call to update cached stats, however this call will fail for stopped apps.
+            // For those cases create a fake stats request response that should result in the same thing
+            if (updateAction.newApplication.state === 'STOPPED') {
+              actions.push(new WrapperRequestActionSuccess({ entities: {}, result: [] }, statsAction, 'fetch', 0, 0));
+            } else {
+              actions.push(statsAction);
+            }
             break;
           case AppMetadataTypes.SUMMARY:
             actions.push(new GetAppSummaryAction(action.apiAction.guid, action.apiAction.endpointGuid));
             break;
         }
       });
+
 
       return actions;
     });

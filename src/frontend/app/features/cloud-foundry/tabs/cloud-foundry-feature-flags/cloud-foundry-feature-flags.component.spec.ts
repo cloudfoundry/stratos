@@ -1,6 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { CloudFoundryFeatureFlagsComponent } from './cloud-foundry-feature-flags.component';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
 describe('CloudFoundryFeatureFlagsComponent', () => {
   let component: CloudFoundryFeatureFlagsComponent;
@@ -8,9 +10,11 @@ describe('CloudFoundryFeatureFlagsComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ CloudFoundryFeatureFlagsComponent ]
+      declarations: [CloudFoundryFeatureFlagsComponent],
+      imports: [...BaseTestModules],
+      providers: [ActiveRouteCfOrgSpace]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

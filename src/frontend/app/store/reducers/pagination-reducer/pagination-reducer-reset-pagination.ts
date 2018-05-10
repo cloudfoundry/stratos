@@ -9,6 +9,7 @@ export function paginationResetPagination(state: PaginationState, action) {
     [action.paginationKey]: {
       ...newState[action.entityKey][action.paginationKey],
       ids: {},
+      pageRequests: {},
       fetching: false,
       pageCount: 0,
       currentPage: 1,

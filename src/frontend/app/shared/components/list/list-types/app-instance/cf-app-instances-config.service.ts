@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { map } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../../core/utils.service';
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { DeleteApplicationInstance } from '../../../../../store/actions/application.actions';
 import { AppState } from '../../../../../store/app-state';
-import { ConfirmationDialog, ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
@@ -18,14 +20,24 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
   instancesSource: CfAppInstancesDataSource;
   columns: Array<ITableColumn<ListAppInstance>> = [
     {
-      columnId: 'index', headerCell: () => 'Index', cell: (row) => `${row.index}`, sort: {
+      columnId: 'index',
+      headerCell: () => 'Index',
+      cellDefinition: {
+        getValue: (row) => `${row.index}`
+      },
+      sort: {
         type: 'sort',
         orderKey: 'index',
         field: 'index',
       }, cellFlex: '1'
     },
     {
-      columnId: 'state', headerCell: () => 'State', cell: (row) => `${row.value.state}`, sort: {
+      columnId: 'state',
+      headerCell: () => 'State',
+      cellDefinition: {
+        getValue: (row) => `${row.value.state}`
+      },
+      sort: {
         type: 'sort',
         orderKey: 'state',
         field: 'value.state'
@@ -75,53 +87,65 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
       }, cellFlex: '2'
     },
     {
-      columnId: 'uptime', headerCell: () => 'Uptime', cell: (row) =>
-        (row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'), sort: {
-          type: 'sort',
-          orderKey: 'uptime',
-          field: 'value.stats.uptime'
-        }, cellFlex: '5'
+      columnId: 'uptime',
+      headerCell: () => 'Uptime',
+      cellDefinition: {
+        getValue: (row) => row.usage.hasStats ? this.utilsService.formatUptime(row.value.stats.uptime) : '-'
+      },
+      sort: {
+        type: 'sort',
+        orderKey: 'uptime',
+        field: 'value.stats.uptime'
+      }, cellFlex: '5'
     }
   ];
-  pageSizeOptions = [5, 25, 50];
   viewType = ListViewTypes.TABLE_ONLY;
-
+  enableTextFilter = true;
+  text = {
+    title: null,
+    filter: 'Search by state',
+    noEntries: 'There are no application instances'
+  };
 
   private listActionTerminate: IListAction<any> = {
     action: (item) => {
-      const confirmation = new ConfirmationDialog(
+      const confirmation = new ConfirmationDialogConfig(
         'Terminate Instance?',
         `Are you sure you want to terminate instance ${item.index}?`,
-        'Terminate');
+        'Terminate',
+        true
+      );
       this.confirmDialog.open(
         confirmation,
         () => this.store.dispatch(new DeleteApplicationInstance(this.appService.appGuid, item.index, this.appService.cfGuid))
       );
     },
-    icon: 'delete',
     label: 'Terminate',
     description: ``, // Description depends on console user permission
     visible: row => true,
     enabled: row => true,
   };
 
-
   private listActionSsh: IListAction<any> = {
     action: (item) => {
-      const index = item.index;
-      const sshRoute = (
-        `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
-      );
-      this.router.navigate([sshRoute]);
-    },
-    icon: 'computer',
+        const index = item.index;
+        const sshRoute = (
+          `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
+        );
+        this.router.navigate([sshRoute]);
+      },
     label: 'SSH',
     description: ``, // Description depends on console user permission
     visible: row => true,
-    enabled: row => !!(row.value && row.value.state === 'RUNNING'),
-  };
-
-
+    enabled: row =>
+      this.appService.app$.pipe(
+        map(app => {
+          return row.value &&
+            row.value.state === 'RUNNING' &&
+            app.entity.entity.enable_ssh;
+        })
+      )
+    };
 
   private singleActions = [
     this.listActionTerminate,

@@ -7,9 +7,12 @@ import { UtilsService } from '../../core/utils.service';
 })
 export class UptimePipe implements PipeTransform {
 
-  constructor(private utils: UtilsService) {}
+  constructor(private utils: UtilsService) { }
 
   transform(uptime): string {
+    if (uptime === 'offline') {
+      return 'Offline';
+    }
     return this.utils.formatUptime(uptime);
   }
 }

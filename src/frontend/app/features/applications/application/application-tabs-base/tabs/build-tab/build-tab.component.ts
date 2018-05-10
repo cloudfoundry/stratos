@@ -1,14 +1,14 @@
-import { AppState } from '../../../../../../store/app-state';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { AppState } from '../../../../../../store/app-state';
 import { EntityInfo } from '../../../../../../store/types/api.types';
 import { AppSummary } from '../../../../../../store/types/app-metadata.types';
-
-import { Store } from '@ngrx/store';
+import { getFullEndpointApiUrl } from '../../../../../endpoints/endpoint-helpers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
+import { ApplicationData, ApplicationService } from '../../../../application.service';
 
 @Component({
   selector: 'app-build-tab',
@@ -19,18 +19,20 @@ import { ApplicationMonitorService } from '../../../../application-monitor.servi
   ]
 })
 export class BuildTabComponent implements OnInit {
-  constructor(private route: ActivatedRoute, private applicationService: ApplicationService, private store: Store<AppState>) { }
 
-  appService = this.applicationService;
+
+  constructor(private route: ActivatedRoute, public applicationService: ApplicationService, private store: Store<AppState>) { }
 
   cardTwoFetching$: Observable<boolean>;
 
   public async: any;
 
+  getFullApiUrl = getFullEndpointApiUrl;
+
   ngOnInit() {
-    this.cardTwoFetching$ = this.appService.application$
+    this.cardTwoFetching$ = this.applicationService.application$
       .combineLatest(
-      this.appService.appSummary$
+        this.applicationService.appSummary$
       )
       .map(([app, appSummary]: [ApplicationData, EntityInfo<AppSummary>]) => {
         return app.fetching || appSummary.entityRequestInfo.fetching;

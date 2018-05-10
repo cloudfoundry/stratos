@@ -1,8 +1,10 @@
-<h1 mat-dialog-title>{{data.title}}</h1>
-<div mat-dialog-content>
-  <p>{{ data.msg }}</p>
+<h1 class="confirm-dialog__header" mat-dialog-title>
+  {{data.title}}
+  <mat-icon class="confirm-dialog__warn-icon" color="warn" *ngIf="data.critical">warning</mat-icon>
+</h1>
+<div class="confirm-dialog__message" mat-dialog-content [innerHtml]="data.msg">
 </div>
 <div mat-dialog-actions class="confirm-dialog__actions">
   <button color="primary" mat-button (click)="onNoClick()">Cancel</button>
-  <button color="primary" mat-button [mat-dialog-close]="true" cdkFocusInitial>{{ data.confirm }}</button>
+  <button *ngIf="data.confirm" [color]="data.critical ? 'warn' : 'primary'" mat-button [mat-dialog-close]="true" cdkFocusInitial [innerHtml]="">{{ data.confirm }}</button>
 </div>

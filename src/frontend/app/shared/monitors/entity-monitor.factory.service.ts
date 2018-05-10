@@ -13,16 +13,16 @@ export class EntityMonitorFactory {
     [key: string]: EntityMonitor
   } = {};
 
-  public create(
+  public create<T>(
     id: string,
     entityKey: string,
     schema: schema.Entity,
-  ) {
+  ): EntityMonitor<T> {
     const cacheKey = id + entityKey;
     if (this.monitorCache[cacheKey]) {
       return this.monitorCache[cacheKey];
     } else {
-      const monitor = new EntityMonitor(
+      const monitor = new EntityMonitor<T>(
         this.store,
         id,
         entityKey,

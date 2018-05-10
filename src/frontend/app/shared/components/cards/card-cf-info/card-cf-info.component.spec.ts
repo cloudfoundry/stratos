@@ -1,14 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CardCfInfoComponent } from './card-cf-info.component';
 import {
-  getBaseTestModules,
-  generateTestCfEndpointServiceProvider,
-  getBaseTestModulesNoShared
+  generateTestCfEndpointService,
+  BaseTestModulesNoShared,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { MetadataItemComponent } from '../../metadata-item/metadata-item.component';
-import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
-import { testSCFGuid } from '../../../../test-framework/store-test-helper';
+import { CardCfInfoComponent } from './card-cf-info.component';
 
 describe('CardCfInfoComponent', () => {
   let component: CardCfInfoComponent;
@@ -17,11 +14,8 @@ describe('CardCfInfoComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CardCfInfoComponent, MetadataItemComponent],
-        imports: [...getBaseTestModulesNoShared],
-        providers: [
-          generateTestCfEndpointServiceProvider(),
-          EntityMonitorFactory
-        ]
+        imports: [...BaseTestModulesNoShared],
+        providers: [generateTestCfEndpointService()]
       }).compileComponents();
     })
   );

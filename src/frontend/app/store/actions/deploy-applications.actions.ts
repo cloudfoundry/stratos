@@ -1,9 +1,10 @@
 import { Action } from '@ngrx/store';
 
 import { GitAppDetails, SourceType } from '../types/deploy-application.types';
-import { GitBranch, GithubBranchSchema, GithubCommit, GithubCommitSchema } from '../types/github.types';
+import { GitBranch, GithubCommit } from '../types/github.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { IRequestAction } from '../types/request.types';
+import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
 
 export const SET_APP_SOURCE_DETAILS = '[Deploy App] Application Source';
 export const SET_APP_SOURCE_SUB_TYPE = '[Deploy App] Set App Source Sub Type';
@@ -59,7 +60,7 @@ export class FetchBranchesForProject implements PaginatedAction {
     FETCH_BRANCH_FAILED
   ];
   type = FETCH_BRANCHES_FOR_PROJECT;
-  entityKey = GithubBranchSchema.key;
+  entityKey = githubBranchesSchemaKey;
   paginationKey: 'branches';
 }
 
@@ -78,7 +79,7 @@ export class FetchCommit implements IRequestAction {
     };
   }
   type = FETCH_COMMIT;
-  entityKey = GithubCommitSchema.key;
+  entityKey = githubCommitSchemaKey;
 }
 
 export class StoreCFSettings implements Action {

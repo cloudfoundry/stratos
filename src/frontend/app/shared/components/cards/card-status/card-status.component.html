@@ -1,5 +1,5 @@
-<div class="app-card-status" [ngClass]="{'app-card-status__ok': (status === 'ok'),
-  'app-card-status__warning': (status === 'warning'),
-  'app-card-status__tentative': (status === 'tentative'),
-  'app-card-status__incomplete': (status === 'incomplete'),
-  'app-card-status__error': (status === 'error')}"></div>
+<div *ngIf="(status$ | async) as status" class="app-card-status" [ngClass]="{'app-card-status--ok': (status === cardStatus.OK),
+  'app-card-status--warning': (status === cardStatus.WARNING),
+  'app-card-status--tentative': (status === cardStatus.TENTATIVE),
+  'app-card-status--incomplete': (status === cardStatus.INCOMPLETE),
+  'app-card-status--error': (status === cardStatus.ERROR)}"></div>

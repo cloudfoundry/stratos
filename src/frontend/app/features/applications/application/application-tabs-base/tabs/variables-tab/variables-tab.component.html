@@ -1,7 +1,7 @@
 <div class="variables-tab">
   <div class="variables-tab__env-table">
     <app-list [addForm]="addForm">
-      <div app-table-add>
+      <div app-table-add class="variables-tab__env-table--add-form">
         <form #addForm="ngForm" novalidate>
           <mat-form-field floatPlaceholder="never">
             <input matInput id="envVarName" name="envVarName" #envVarName="ngModel" placeholder="Name" [(ngModel)]="envVarsDataSource.addItem.name" required [appUnique]="(envVars$ | async)?.names">

@@ -25,23 +25,23 @@ echo "DBCONFIG: $DBCONF_KEY"
 echo "Connection string: $DB_USER:********@tcp($DB_HOST:$DB_PORT)/$DB_DATABASE_NAME?parseTime=true"
 # Check the version
 echo "Checking database version."
-stratos-dbmigrator --env=$DBCONF_KEY dbversion
+portal-proxy --env=$DBCONF_KEY dbversion
 
 # Check the status
 echo "Checking database status."
-stratos-dbmigrator --env=$DBCONF_KEY status
+portal-proxy --env=$DBCONF_KEY status
 
 # Run migrations
 echo "Attempting database migrations."
-stratos-dbmigrator --env=$DBCONF_KEY up
+portal-proxy --env=$DBCONF_KEY up
 
 # CHeck the status
 echo "Checking database status."
-stratos-dbmigrator --env=$DBCONF_KEY status
+portal-proxy --env=$DBCONF_KEY status
 
 # Check the version
 echo "Checking database version."
-stratos-dbmigrator --env=$DBCONF_KEY dbversion
+portal-proxy --env=$DBCONF_KEY dbversion
 
 echo "Database operation(s) complete."
 

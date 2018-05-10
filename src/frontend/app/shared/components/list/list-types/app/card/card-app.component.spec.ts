@@ -15,6 +15,7 @@ import { APIResourceMetadata } from '../../../../../../store/types/api.types';
 import { CardStatusComponent } from '../../../../cards/card-status/card-status.component';
 import { RunningInstancesComponent } from '../../../../running-instances/running-instances.component';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
+import { SharedModule } from '../../../../../shared.module';
 
 describe('CardAppComponent', () => {
   let component: CardAppComponent;
@@ -22,18 +23,11 @@ describe('CardAppComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CardAppComponent,
-        CardStatusComponent,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        RunningInstancesComponent,
-      ],
       imports: [
         CoreModule,
         RouterTestingModule,
-        createBasicStoreModule()
+        createBasicStoreModule(),
+        SharedModule
       ],
       providers: [
         ApplicationStateService,

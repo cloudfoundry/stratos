@@ -14,6 +14,10 @@ import { UtilsService } from '../../../../../core/utils.service';
 import { SharedModule } from '../../../../shared.module';
 import { PercentagePipe } from '../../../../pipes/percentage.pipe';
 import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { AppChipsComponent } from '../../../chips/chips.component';
+import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
+import { AppActionMonitorIconComponent } from '../../../app-action-monitor-icon/app-action-monitor-icon.component';
 
 describe('TableCellComponent', () => {
   let component: TableCellComponent<any>;
@@ -22,6 +26,7 @@ describe('TableCellComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
+        AppActionMonitorIconComponent,
         TableCellComponent,
         ...listTableCells,
         EventTabActorIconPipe,
@@ -31,10 +36,12 @@ describe('TableCellComponent', () => {
         ApplicationStateIconPipe,
         UsageGaugeComponent,
         PercentagePipe,
-        RunningInstancesComponent
+        RunningInstancesComponent,
+        AppChipsComponent,
+        BooleanIndicatorComponent
       ],
       imports: [
-        CoreModule,
+        CoreModule
       ],
       providers: [
         ApplicationStateService,

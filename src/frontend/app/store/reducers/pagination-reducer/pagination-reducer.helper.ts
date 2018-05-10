@@ -1,13 +1,14 @@
 import { Store } from '@ngrx/store';
-import { denormalize, Schema } from 'normalizr';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { filter, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { filter, first, publishReplay, refCount, switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { AddParams, SetInitialParams, SetParams } from '../../actions/pagination.actions';
+import { ValidateEntitiesStart } from '../../actions/request.actions';
 import { AppState } from '../../app-state';
-import { getAPIRequestDataState, selectEntities } from '../../selectors/api.selectors';
+import { populatePaginationFromParent } from '../../helpers/entity-relations';
+import { selectEntities } from '../../selectors/api.selectors';
 import { selectPaginationState } from '../../selectors/pagination.selectors';
 import { PaginatedAction, PaginationEntityState, PaginationParam, QParam } from '../../types/pagination.types';
 import { ActionState } from '../api-request-reducer/types';
@@ -90,7 +91,8 @@ export const getPaginationObservables = <T = any>(
   { store, action, paginationMonitor }: { store: Store<AppState>, action: PaginatedAction, paginationMonitor: PaginationMonitor },
   isLocal = false
 ): PaginationObservables<T> => {
-  const { entityKey, paginationKey } = action;
+  const paginationKey = paginationMonitor.paginationKey;
+  const entityKey = paginationMonitor.schema.key;
 
   // FIXME: This will reset pagination every time regardless of if we need to (or just want the pag settings/entities from pagination
   // section)
@@ -120,9 +122,13 @@ function getObservables<T = any>(
 )
   : PaginationObservables<T> {
   let hasDispatchedOnce = false;
+  let lastValidationFootprint: string;
 
-  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).shareReplay(1);
-  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination).shareReplay(1);
+  const paginationSelect$ = store.select(selectPaginationState(entityKey, paginationKey)).pipe(
+    // publishReplay(1),
+    // refCount()
+  );
+  const pagination$: Observable<PaginationEntityState> = paginationSelect$.filter(pagination => !!pagination);
 
   // Keep this separate, we don't want tap executing every time someone subscribes
   const fetchPagination$ = paginationSelect$.pipe(
@@ -132,10 +138,14 @@ function getObservables<T = any>(
         !(isLocal && hasDispatchedOnce) && !hasError(pagination) && !hasValidOrGettingPage(pagination)
       ) {
         hasDispatchedOnce = true; // Ensure we set this first, otherwise we're called again instantly
-        store.dispatch(action);
+        populatePaginationFromParent(store, action).pipe(
+          first(),
+          tap(newAction => {
+            store.dispatch(newAction || action);
+          })
+        ).subscribe();
       }
-    }),
-    shareReplay(1)
+    })
   );
 
   const entities$: Observable<T[]> =
@@ -144,16 +154,31 @@ function getObservables<T = any>(
       fetchPagination$
     )
       .pipe(
-      filter(([ent, pagination]) => {
-        return !!pagination && (isLocal && pagination.currentPage !== 1) || isPageReady(pagination);
-      }),
-      switchMap(() => paginationMonitor.currentPage$),
-      shareReplay(1)
-      );
+        filter(([ent, pagination]) => {
+          return !!pagination && isPageReady(pagination);
+        }),
+        publishReplay(1), refCount(),
+        tap(([ent, pagination]) => {
+          const newValidationFootprint = getPaginationCompareString(pagination);
+          if (lastValidationFootprint !== newValidationFootprint) {
+            lastValidationFootprint = newValidationFootprint;
+            store.dispatch(new ValidateEntitiesStart(
+              action,
+              pagination.ids[pagination.currentPage],
+              false
+            ));
+          }
+        }),
+        switchMap(() => paginationMonitor.currentPage$),
+    );
 
   return {
-    pagination$,
-    entities$
+    pagination$: pagination$.pipe(
+      distinctUntilChanged()
+    ),
+    entities$: entities$.pipe(
+      distinctUntilChanged()
+    )
   };
 }
 
@@ -170,10 +195,19 @@ function getPaginationCompareString(paginationEntity: PaginationEntityState) {
 }
 
 export function isPageReady(pagination: PaginationEntityState) {
-  return !!pagination && !!pagination.ids[pagination.currentPage];
+  return !!pagination && !!pagination.ids[pagination.currentPage] && !isFetchingPage(pagination);
 }
 
-export function hasValidOrGettingPage(pagination: PaginationEntityState) {
+export function isFetchingPage(pagination: PaginationEntityState): boolean {
+  if (pagination) {
+    const currentPageRequest = getCurrentPageRequestInfo(pagination);
+    return currentPageRequest.busy;
+  } else {
+    return false;
+  }
+}
+
+export function hasValidOrGettingPage(pagination: PaginationEntityState): boolean {
   if (pagination && Object.keys(pagination).length) {
     const hasPage = !!pagination.ids[pagination.currentPage];
     const currentPageRequest = getCurrentPageRequestInfo(pagination);
@@ -183,7 +217,7 @@ export function hasValidOrGettingPage(pagination: PaginationEntityState) {
   }
 }
 
-export function hasError(pagination: PaginationEntityState) {
+export function hasError(pagination: PaginationEntityState): boolean {
   return pagination && getCurrentPageRequestInfo(pagination).error;
 }
 

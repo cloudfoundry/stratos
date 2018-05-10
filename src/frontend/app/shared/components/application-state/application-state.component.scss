@@ -8,4 +8,9 @@
   &__with-icon {
     height: 25px;
   }
+  &__label,
+  &__sub-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

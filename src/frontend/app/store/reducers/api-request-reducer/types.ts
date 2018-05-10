@@ -62,6 +62,7 @@ export function getDefaultRequestState() {
 export type IRequestArray = [
   string,
   string,
+  string,
   string
 ];
 

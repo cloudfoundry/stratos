@@ -1,11 +1,12 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CloudFoundryFirehoseComponent } from './cloud-foundry-firehose.component';
 import {
-  getBaseTestModules,
-  generateTestCfEndpointServiceProvider
+  generateTestCfEndpointServiceProvider,
+  BaseTestModules,
 } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CloudFoundryEndpointService } from '../../cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryFirehoseComponent } from './cloud-foundry-firehose.component';
+import { UtilsService } from '../../../../core/utils.service';
+import { LoggerService } from '../../../../core/logger.service';
 
 describe('CloudFoundryFirehoseComponent', () => {
   let component: CloudFoundryFirehoseComponent;
@@ -15,8 +16,8 @@ describe('CloudFoundryFirehoseComponent', () => {
     async(() => {
       TestBed.configureTestingModule({
         declarations: [CloudFoundryFirehoseComponent],
-        imports: [...getBaseTestModules],
-        providers: [generateTestCfEndpointServiceProvider()]
+        imports: [...BaseTestModules],
+        providers: [...generateTestCfEndpointServiceProvider()]
       }).compileComponents();
     })
   );
@@ -24,7 +25,7 @@ describe('CloudFoundryFirehoseComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryFirehoseComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // fixture.detectChanges();
   });
 
   it('should create', () => {

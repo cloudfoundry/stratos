@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -19,6 +19,7 @@ import {
   SetDeployBranch,
 } from '../../../../store/actions/deploy-applications.actions';
 import { AppState } from '../../../../store/app-state';
+import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
@@ -27,15 +28,9 @@ import {
   selectSourceSubType,
   selectSourceType,
 } from '../../../../store/selectors/deploy-application.selector';
-import { APIResource } from '../../../../store/types/api.types';
-import { BranchSchema, GITHUB_BRANCHES_ENTITY_KEY, SourceType } from '../../../../store/types/deploy-application.types';
-import {
-  GitBranch,
-  GithubBranchSchema,
-  GithubCommit,
-  GithubCommitSchema,
-  GithubRepo,
-} from '../../../../store/types/github.types';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
+import { SourceType } from '../../../../store/types/deploy-application.types';
+import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
 
 @Component({
@@ -45,6 +40,9 @@ import { PaginatedAction } from '../../../../store/types/pagination.types';
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
+
+  @Input('isRedeploy') isRedeploy = false;
+
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
   sourceTypes: SourceType[] = [{ name: 'Git', id: 'git' }];
@@ -60,16 +58,15 @@ export class DeployApplicationStep2Component
   validate: Observable<boolean>;
   projectInfo$: Observable<GithubRepo>;
   commitSubscription: Subscription;
-
   // ngModel Properties
   sourceType: SourceType;
   sourceSubType: SourceType;
   repositoryBranch: GitBranch = { name: null, commit: null };
   repository: string;
+  stepperText = 'Please specify the source';
 
   @ViewChild('sourceSelectionForm') sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
-  isReDeploy = false;
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -99,7 +96,9 @@ export class DeployApplicationStep2Component
   }
 
   ngOnInit() {
-    this.isReDeploy = this.route.snapshot.queryParams['redeploy'];
+    if (this.isRedeploy) {
+      this.stepperText = 'Review source details';
+    }
 
     this.sourceType$ = this.store.select(selectSourceType);
     this.sourceSubType$ = this.store.select(selectSourceSubType);
@@ -119,7 +118,7 @@ export class DeployApplicationStep2Component
             action,
             paginationMonitor: this.paginationMonitorFactory.create(
               action.paginationKey,
-              GithubBranchSchema
+              entityFactory(githubBranchesSchemaKey)
             )
           },
           true
@@ -131,7 +130,7 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(fetchBranches);
 
     const action = {
-      entityKey: GITHUB_BRANCHES_ENTITY_KEY,
+      entityKey: githubBranchesSchemaKey,
       paginationKey: 'branches'
     } as PaginatedAction;
     this.projectInfo$ = this.store.select(selectProjectExists).pipe(
@@ -140,7 +139,7 @@ export class DeployApplicationStep2Component
       }),
       map(p => p.data),
       tap(p => {
-        if (!this.isReDeploy) {
+        if (!this.isRedeploy) {
           this.store.dispatch(new SetDeployBranch(p.default_branch));
         }
       })
@@ -150,7 +149,7 @@ export class DeployApplicationStep2Component
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
       action.paginationKey,
-      BranchSchema
+      entityFactory(githubBranchesSchemaKey)
     );
 
     this.repositoryBranches$ = paginationMonitor.currentPage$.pipe(
@@ -175,11 +174,12 @@ export class DeployApplicationStep2Component
         if (branch) {
           this.store.dispatch(new SetBranch(branch));
 
-          const commitEntityService = this.entityServiceFactory.create(
-            GithubCommitSchema.key,
-            GithubCommitSchema,
+          const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
+            githubCommitSchemaKey,
+            entityFactory(githubCommitSchemaKey),
             branch.commit.sha,
-            new FetchCommit(branch.commit.sha, projectInfo.full_name)
+            new FetchCommit(branch.commit.sha, projectInfo.full_name),
+            false
           );
 
           if (this.commitSubscription) {
@@ -240,7 +240,7 @@ export class DeployApplicationStep2Component
 
   ngAfterContentInit() {
     this.validate = this.sourceSelectionForm.statusChanges.map(() => {
-      return this.sourceSelectionForm.valid || this.isReDeploy;
+      return this.sourceSelectionForm.valid || this.isRedeploy;
     });
   }
 }

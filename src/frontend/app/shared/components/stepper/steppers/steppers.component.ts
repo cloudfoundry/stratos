@@ -1,8 +1,19 @@
-import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation } from '@angular/core';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation, OnDestroy } from '@angular/core';
+import { Observable, Subscription, BehaviorSubject } from 'rxjs/Rx';
 
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../store/app-state';
+import { EntityService } from '../../../../core/entity-service';
+import { selectEntity } from '../../../../store/selectors/api.selectors';
+import { getPreviousRoutingState } from '../../../../store/types/routing.type';
+import { tap, filter, map, first, mergeMap } from 'rxjs/operators';
+import { RoutesRecognized } from '@angular/router';
+import { EmptyObservable } from 'rxjs/observable/EmptyObservable';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { empty } from 'rxjs/observable/empty';
 
 @Component({
   selector: 'app-steppers',
@@ -11,14 +22,14 @@ import { StepComponent } from './../step/step.component';
   providers: [SteppersService],
   encapsulation: ViewEncapsulation.None
 })
-export class SteppersComponent implements OnInit, AfterContentInit {
+export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
-  constructor(
-    private steppersService: SteppersService) { }
+  private nextSub: Subscription;
+  cancel$: Observable<string>;
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
-  @Input()
+  @Input('cancel')
   cancel = null;
 
   steps: StepComponent[] = [];
@@ -26,8 +37,25 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   stepValidateSub: Subscription = null;
 
   currentIndex = 0;
+  cancelQueryParams$: Observable<{
+    [key: string]: string;
+  }>;
+  constructor(
+    private steppersService: SteppersService,
+    private store: Store<AppState>
+  ) {
+    const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
+    this.cancel$ = previousRoute$.pipe(
+      map(previousState => {
+        return previousState ? previousState.url.split('?')[0] : this.cancel;
+      })
+    );
+    this.cancelQueryParams$ = previousRoute$.pipe(
+      map(previousState => previousState ? previousState.state.queryParams : {})
+    );
+  }
 
-   ngOnInit() {
+  ngOnInit() {
   }
 
   ngAfterContentInit() {
@@ -36,20 +64,43 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   }
 
   goNext() {
+    this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      step.onNext()
+      const obs$ = step.onNext();
+      if (!(obs$ instanceof Observable)) {
+        return;
+      }
+      if (this.nextSub) {
+        this.nextSub.unsubscribe();
+      }
+      this.nextSub = obs$
         .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed' }))
-        .subscribe(({ success, message }) => {
+        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false }))
+        .subscribe(({ success, message, redirect }) => {
           step.error = !success;
           step.busy = false;
           if (success) {
-            this.setActive(this.currentIndex + 1);
+            if (redirect) {
+              return this.redirect();
+            } else {
+              this.setActive(this.currentIndex + 1);
+            }
           }
         });
     }
+  }
+
+  redirect() {
+    return combineLatest(
+      this.cancel$,
+      this.cancelQueryParams$
+    ).pipe(
+      map(([path, params]) => {
+        this.store.dispatch(new RouterNav({ path: path, query: params }));
+      })
+    );
   }
 
   setActive(index: number) {
@@ -67,6 +118,8 @@ export class SteppersComponent implements OnInit, AfterContentInit {
         _step.active = i === index ? true : false;
       });
       this.currentIndex = index;
+      this.steps[this.currentIndex]._onEnter();
+
     }
   }
 
@@ -104,18 +157,36 @@ export class SteppersComponent implements OnInit, AfterContentInit {
     return true;
   }
 
+  canCancel(index) {
+    if (
+      !this.steps[index] ||
+      !this.steps[index].canClose
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   getIconLigature(step: StepComponent, index: number): 'done' {
     return 'done';
   }
 
   getNextButtonText(currentIndex: number): string {
     return currentIndex + 1 < this.steps.length ?
-      this.steps[ currentIndex ].nextButtonText :
-      this.steps[ currentIndex ].finishButtonText;
+      this.steps[currentIndex].nextButtonText :
+      this.steps[currentIndex].finishButtonText;
   }
 
   getCancelButtonText(currentIndex: number): string {
-      return this.steps[ currentIndex ].cancelButtonText;
+    return this.steps[currentIndex].cancelButtonText;
+  }
+  private unsubscribeNext() {
+    if (this.nextSub) {
+      this.nextSub.unsubscribe();
+    }
+  }
+  ngOnDestroy() {
+    this.unsubscribeNext();
   }
 
 }

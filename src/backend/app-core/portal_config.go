@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 )
 
 func (p *portalProxy) GetConfig() *interfaces.PortalConfig {

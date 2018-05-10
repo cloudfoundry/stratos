@@ -3,6 +3,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TableCellAppNameComponent } from './table-cell-app-name.component';
 import { CoreModule } from '../../../../../../core/core.module';
 import { RouterTestingModule } from '@angular/router/testing';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 
 describe('TableCellAppNameComponent', () => {
   let component: TableCellAppNameComponent<any>;
@@ -13,7 +14,8 @@ describe('TableCellAppNameComponent', () => {
       declarations: [TableCellAppNameComponent],
       imports: [
         CoreModule,
-        RouterTestingModule
+        RouterTestingModule,
+        createBasicStoreModule()
       ]
     })
       .compileComponents();
@@ -22,7 +24,7 @@ describe('TableCellAppNameComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellAppNameComponent);
     component = fixture.componentInstance;
-    component.row = { entity: {} };
+    component.row = { entity: {}, metadata: {} };
     fixture.detectChanges();
   });
 

@@ -205,9 +205,9 @@ function buildProxy {
              -e USER_NAME=$(id -nu) \
              -e USER_ID=$(id -u)  \
              -e GROUP_ID=$(id -g) \
-             --name stratos-proxy-builder \
+             --name stratos-jetstream-builder \
              --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-proxy-builder:opensuse
+             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:opensuse
   popd > /dev/null 2>&1
   popd > /dev/null 2>&1
 

@@ -3,7 +3,9 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
-import { PaginationEntityState } from '../../../../store/types/pagination.types';
+import { PaginationEntityState, PaginatedAction } from '../../../../store/types/pagination.types';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { DataSource } from '@angular/cdk/table';
 
 export interface AppEvent {
   actee_name: string;
@@ -35,9 +37,13 @@ export class ListActions<T> {
   multiActions = new Array<ListActionConfig<T>>();
   singleActions = new Array<ListActionConfig<T>>();
 }
-export interface IListDataSource<T> {
-  // state$: Observable<ListState>;
+
+export interface ITableListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
+  getRowState?(row: T): Observable<RowsState>;
+  trackBy(index: number, item: T);
+}
+export interface IListDataSource<T> extends ITableListDataSource<T> {
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
   localDataFunctions?: ((
@@ -52,13 +58,14 @@ export interface IListDataSource<T> {
   addItem: T;
   isAdding$: BehaviorSubject<boolean>;
   isSelecting$: BehaviorSubject<boolean>;
+  isLoadingPage$: Observable<boolean>;
 
   editRow: T; // Edit items - remove once ng-content can exist in md-table
 
   selectAllChecked: boolean; // Select items - remove once ng-content can exist in md-table
   selectedRows: Map<string, T>; // Select items - remove once ng-content can exist in md-table
+  selectedRows$: ReplaySubject<Map<string, T>>; // Select items - remove once ng-content can exist in md-table
   getRowUniqueId: getRowUniqueId<T>;
-  trackBy(index: number, item: T);
   selectAllFilteredRows(); // Select items - remove once ng-content can exist in md-table
   selectedRowToggle(row: T); // Select items - remove once ng-content can exist in md-table
   selectClear();
@@ -66,11 +73,10 @@ export interface IListDataSource<T> {
   startEdit(row: T); // Edit items - remove once ng-content can exist in md-table
   saveEdit(); // Edit items - remove once ng-content can exist in md-table
   cancelEdit(); // Edit items - remove once ng-content can exist in md-table
-
+  destroy();
   getFilterFromParams(pag: PaginationEntityState): string;
   setFilterParam(filter: string, pag: PaginationEntityState);
-  connect(): Observable<T[]>;
-  destroy();
+  refresh();
 }
 
 export type getRowUniqueId<T> = (T) => string;

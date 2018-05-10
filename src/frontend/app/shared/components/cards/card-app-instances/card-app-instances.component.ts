@@ -1,3 +1,4 @@
+import { CardStatus } from './../../application-state/application-state.service';
 import { Component, ElementRef, Input, OnDestroy, OnInit, Renderer, ViewChild } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -6,10 +7,12 @@ import { Subscription } from 'rxjs/Subscription';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../../store/app-state';
-import { ConfirmationDialog, ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { ConfirmationDialogService } from '../../confirmation-dialog.service';
+import { map } from 'rxjs/operators';
+import { ConfirmationDialogConfig } from '../../confirmation-dialog.config';
 
-const appInstanceScaleToZeroConfirmation = new ConfirmationDialog('Set Instance count to 0',
-  'Are you sure you want to set the instance count to 0?', 'Confirm');
+const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig('Set Instance count to 0',
+  'Are you sure you want to set the instance count to 0?', 'Confirm', true);
 
 @Component({
   selector: 'app-card-app-instances',
@@ -25,11 +28,17 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   @ViewChild('instanceField') instanceField: ElementRef;
 
+  status$: Observable<CardStatus>;
+
   constructor(
     private store: Store<AppState>,
-    public applicationService: ApplicationService,
+    public appService: ApplicationService,
     private renderer: Renderer,
-    private confirmDialog: ConfirmationDialogService) { }
+    private confirmDialog: ConfirmationDialogService) {
+    this.status$ = this.appService.applicationState$.pipe(
+      map(state => state.indicator)
+    );
+  }
 
   private currentCount: 0;
   private editCount: 0;
@@ -43,13 +52,13 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
   // Observable on the running instances count for the application
   private runningInstances$: Observable<number>;
 
-  private isRunning = false;
+  private app: any;
 
   ngOnInit() {
-    this.sub = this.applicationService.application$.subscribe(app => {
+    this.sub = this.appService.application$.subscribe(app => {
       if (app.app.entity) {
         this.currentCount = app.app.entity.instances;
-        this.isRunning = app.app.entity.state === 'STARTED';
+        this.app = app.app.entity;
       }
     });
   }
@@ -83,7 +92,7 @@ export class CardAppInstancesComponent implements OnInit, OnDestroy {
 
   // Set instance count. Ask for confirmation if setting count to 0
   private setInstanceCount(value: number) {
-    const doUpdate = () => this.applicationService.updateApplication({ instances: value }, [AppMetadataTypes.STATS]);
+    const doUpdate = () => this.appService.updateApplication({ instances: value }, [AppMetadataTypes.STATS], this.app);
     if (value === 0) {
       this.confirmDialog.open(appInstanceScaleToZeroConfirmation, doUpdate);
     } else {

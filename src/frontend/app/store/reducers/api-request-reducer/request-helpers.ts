@@ -4,6 +4,7 @@ import { mergeState } from '../../helpers/reducer.helper';
 import { RequestMethod } from '@angular/http';
 import { getDefaultActionState, defaultDeletingActionState, getDefaultRequestState, RequestInfoState, rootUpdatingKey } from './types';
 import { IRequestTypeState } from '../../app-state';
+import { pathGet } from '../../../core/utils.service';
 
 
 export function getEntityRequestState(state: IRequestTypeState, action: SingleEntityAction): RequestInfoState {
@@ -47,7 +48,8 @@ export function createRequestStateFromResponse(response: NormalizedResponse, sta
 
 export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
-export function getRequestTypeFromMethod(method): ApiRequestTypes {
+export function getRequestTypeFromMethod(action): ApiRequestTypes {
+  let method = pathGet('options.method', action);
   if (typeof method === 'string') {
     method = method.toString().toLowerCase();
     if (method === 'post') {

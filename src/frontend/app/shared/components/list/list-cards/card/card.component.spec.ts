@@ -18,6 +18,7 @@ import { appReducers } from '../../../../../store/reducers.module';
 import { CardStatusComponent } from '../../../cards/card-status/card-status.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { PercentagePipe } from '../../../../pipes/percentage.pipe';
+import { SharedModule } from '../../../../shared.module';
 
 describe('CardComponent', () => {
   let component: CardComponent<EntityInfo>;
@@ -25,23 +26,9 @@ describe('CardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        CardComponent,
-        CardStatusComponent,
-        ...listCards,
-        TableCellComponent,
-        ...listTableCells,
-        EventTabActorIconPipe,
-        ValuesPipe,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        UsageGaugeComponent,
-        PercentagePipe,
-        RunningInstancesComponent
-      ],
       imports: [
         CoreModule,
+        SharedModule
       ]
     })
       .compileComponents();

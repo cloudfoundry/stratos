@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/cloud-foundry-base/cloud-foundry-endpoint.service';
+import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -26,6 +26,10 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   getApiEndpointUrl(apiEndpoint) {
     const path = apiEndpoint.Path ? `/${apiEndpoint.Path}` : '';
     return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
+  }
+
+  isAdmin(user) {
+    return user && user.admin ? 'Yes' : 'No';
   }
 
   ngOnDestroy(): void {

@@ -20,6 +20,9 @@ import { UAASetupEffect } from './effects/uaa-setup.effects';
 import { UpdateAppEffects } from './effects/update-app-effects';
 import { AppReducersModule } from './reducers.module';
 import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
+import { MetricsEffect } from './effects/metrics.effects';
+import { RequestEffect } from './effects/request.effects';
+import { UserProfileEffect } from './effects/user-profile.effects';
 
 @NgModule({
   imports: [
@@ -42,8 +45,11 @@ import { CloudFoundryEffects } from './effects/cloud-foundry.effects';
       SetClientFilterEffect,
       DeployAppEffects,
       GithubEffects,
-      CloudFoundryEffects
+      CloudFoundryEffects,
+      MetricsEffect,
+      RequestEffect,
+      UserProfileEffect,
     ])
   ]
 })
-export class AppStoreModule {}
+export class AppStoreModule { }

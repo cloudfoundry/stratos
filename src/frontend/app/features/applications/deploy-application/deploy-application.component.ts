@@ -7,13 +7,14 @@ import { filter, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
-import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { ApplicationSchema } from '../../../store/actions/application.actions';
+import { CfOrgSpaceDataService, CfOrgSpaceSelectMode } from '../../../shared/data-services/cf-org-space-service.service';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { selectCfDetails } from '../../../store/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
+import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 
 @Component({
   selector: 'app-deploy-application',
@@ -23,13 +24,17 @@ import { selectPaginationState } from '../../../store/selectors/pagination.selec
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 
+  isRedeploy: boolean;
   initCfOrgSpaceService: Subscription[] = [];
+  deployButtonText = 'Deploy';
 
   constructor(
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
-  ) { }
+  ) {
+    this.isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'] === 'true';
+  }
 
   onNext = () => {
     this.store.dispatch(new StoreCFSettings({
@@ -46,9 +51,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    const isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'];
-
-    if (isRedeploy) {
+    if (this.isRedeploy) {
+      this.deployButtonText = 'Redeploy';
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !!p),
         tap(p => {
@@ -65,16 +69,30 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
         })
       ).subscribe());
     } else {
-      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(ApplicationSchema.key, CfAppsDataSource.paginationKey)).pipe(
+      this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey)).pipe(
         filter((pag) => !!pag),
         tap(pag => {
-          this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
-          this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
-          this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+          if (pag.clientPagination.filter.items.cf) {
+            this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+          }
+          if (pag.clientPagination.filter.items.org) {
+            this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+          }
+          if (pag.clientPagination.filter.items.space) {
+            this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+          }
         })
       ).subscribe());
       // Delete any state in deployApplication
       this.store.dispatch(new DeleteDeployAppSection());
+    }
+  }
+
+  getTitle = () => {
+    if (this.isRedeploy) {
+      return 'Redeploy';
+    } else {
+      return 'Deploy';
     }
   }
 }

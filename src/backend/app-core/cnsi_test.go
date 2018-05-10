@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	_ "github.com/satori/go.uuid"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )

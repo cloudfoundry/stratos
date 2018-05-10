@@ -5,8 +5,9 @@ import { map } from 'rxjs/operators';
 
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
-import { AppStatSchema } from '../../../store/types/app-metadata.types';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { entityFactory } from '../../../store/helpers/entity-factory';
+import { appStatsSchemaKey } from '../../../store/helpers/entity-factory';
 
 @Component({
   selector: 'app-running-instances',
@@ -31,15 +32,15 @@ export class RunningInstancesComponent implements OnInit {
     const dummyAction = new GetAppStatsAction(this.appGuid, this.cfGuid);
     const paginationMonitor = this.paginationMonitorFactory.create(
       dummyAction.paginationKey,
-      AppStatSchema
+      entityFactory(appStatsSchemaKey)
     );
     this.runningInstances$ =
       paginationMonitor.currentPage$
         .pipe(
-        map(appInstancesPages => {
-          const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
-          return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
-        })
+          map(appInstancesPages => {
+            const allInstances = [].concat.apply([], Object.values(appInstancesPages || [])).filter(instance => !!instance);
+            return allInstances.filter(stat => stat.entity.state === 'RUNNING').length;
+          })
         );
   }
 

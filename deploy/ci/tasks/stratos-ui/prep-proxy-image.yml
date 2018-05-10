@@ -3,7 +3,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository:  ci-registry.capbristol.com:5000/splatform/stratos-proxy-builder
+    repository:  ci-registry.capbristol.com:5000/splatform/stratos-jetstream-builder
     tag: "opensuse"
     insecure_registries: [ "ci-registry.capbristol.com:5000" ]
 
@@ -17,7 +17,7 @@ run:
   - -exc
   - |
     cd stratos-ui
-    npm install --production
+    npm install
     npm run build-backend
     cd -
     cp -r ./stratos-ui/outputs ./portal-proxy-output

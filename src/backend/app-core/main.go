@@ -25,13 +25,13 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/nwmac/sqlitestore"
 
-	"github.com/SUSE/stratos-ui/app-core/config"
-	"github.com/SUSE/stratos-ui/app-core/datastore"
-	"github.com/SUSE/stratos-ui/app-core/repository/cnsis"
-	"github.com/SUSE/stratos-ui/app-core/repository/console_config"
-	"github.com/SUSE/stratos-ui/app-core/repository/crypto"
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
-	"github.com/SUSE/stratos-ui/app-core/repository/tokens"
+	"github.com/SUSE/stratos-ui/config"
+	"github.com/SUSE/stratos-ui/datastore"
+	"github.com/SUSE/stratos-ui/repository/cnsis"
+	"github.com/SUSE/stratos-ui/repository/console_config"
+	"github.com/SUSE/stratos-ui/repository/crypto"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/tokens"
 )
 
 // TimeoutBoundary represents the amount of time we'll wait for the database
@@ -65,10 +65,21 @@ func cleanup(dbc *sql.DB, ss HttpSessionStore) {
 func main() {
 	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
 	log.SetOutput(os.Stdout)
+
+	log.Info("========================================")
+	log.Info("=== Stratos Jetstream Backend Server ===")
+	log.Info("========================================")
+	log.Info("")
 	log.Info("Initialization started.")
 
 	// Register time.Time in gob
 	gob.Register(time.Time{})
+
+	// Check to see if we are running as the database migrator
+	if migrateDatabase() {
+		// End execution
+		return
+	}
 
 	// Load the portal configuration from env vars
 	var portalConfig interfaces.PortalConfig
@@ -333,13 +344,18 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 func loadDatabaseConfig(dc datastore.DatabaseConfig) (datastore.DatabaseConfig, error) {
 	log.Debug("loadDatabaseConfig")
 
-	if datastore.ParseCFEnvs(&dc) == true {
+	parsedDBConfig, err := datastore.ParseCFEnvs(&dc)
+	if err != nil {
+		return dc, errors.New("Could not parse Cloud Foundry Services environment")
+	}
+
+	if parsedDBConfig {
 		log.Info("Using Cloud Foundry DB service")
 	} else if err := config.Load(&dc); err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
 
-	dc, err := datastore.NewDatabaseConnectionParametersFromConfig(dc)
+	dc, err = datastore.NewDatabaseConnectionParametersFromConfig(dc)
 	if err != nil {
 		return dc, fmt.Errorf("Unable to load database configuration. %v", err)
 	}
@@ -436,7 +452,12 @@ func start(config interfaces.PortalConfig, p *portalProxy, addSetupMiddleware *s
 	if !isUpgrade {
 		e.Use(sessionCleanupMiddleware)
 	}
-	e.Use(middleware.Logger())
+	customLoggerConfig := middleware.LoggerConfig{
+		Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
+			`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
+			`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
+	}
+	e.Use(middleware.LoggerWithConfig(customLoggerConfig))
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.AllowedOrigins,
@@ -562,9 +583,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// Connect to CF cluster
 	sessionGroup.POST("/auth/login/cnsi", p.loginToCNSI)
 
-	// Verify credentials for CF cluster
-	sessionGroup.POST("/auth/login/cnsi/verify", p.verifyLoginToCNSI)
-
 	// Disconnect CF cluster
 	sessionGroup.POST("/auth/logout/cnsi", p.logoutOfCNSI)
 
@@ -587,7 +605,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 		routePlugin.AddSessionGroupRoutes(sessionGroup)
 	}
 
-	// This is used for passthru of CF/HCE requests
+	// This is used for passthru of requests
 	group := sessionGroup.Group("/proxy")
 	group.Any("/*", p.proxy)
 

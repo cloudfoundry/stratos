@@ -5,6 +5,8 @@ import { IListDataSource } from './data-sources-controllers/list-data-source-typ
 import { ITableColumn, ITableText } from './list-table/table.types';
 import { Type } from '@angular/core';
 import { ListView } from '../../../store/actions/list.actions';
+import { defaultClientPaginationPageSize } from '../../../store/reducers/pagination-reducer/pagination.reducer';
+import { ListDataSource } from './data-sources-controllers/list-data-source';
 
 export enum ListViewTypes {
   CARD_ONLY = 'cardOnly',
@@ -36,19 +38,14 @@ export interface IListConfig<T> {
   getDataSource: () => IListDataSource<T>;
   /**
    * Collection of configuration objects to support multiple drops downs for filtering local lists. For example the application wall filters
-   * by cloud foundry, organisation and space. This mechanism supports only the showing and storing of such filters. An additional function
+   * by cloud foundry, organization and space. This mechanism supports only the showing and storing of such filters. An additional function
    * to the data sources transformEntities collection should be used to apply these custom settings to the data.
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   /**
-   * Local lists expect ALL entries to be fetched by the data sources action. This allows custom sorting and filtering. Non-local lists
-   * must sort and filter via their supporting api requests.
+   * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
-  isLocal?: boolean;
-  /**
-   * A collection of numbers used to define how many entries per page should be shown
-   */
-  pageSizeOptions: Number[];
+  pageSizeOptions?: number[];
   /**
    * What different views the user can select (table/cards)
    */
@@ -73,6 +70,8 @@ export interface IListConfig<T> {
    * The card component used in card view
    */
   cardComponent?: any;
+  hideRefresh?: boolean;
+  allowSelection?: boolean;
 }
 
 export interface IListMultiFilterConfig {
@@ -89,29 +88,33 @@ export interface IListMultiFilterConfigItem {
   value: string;
 }
 
+export const defaultPaginationPageSizeOptionsCards = [defaultClientPaginationPageSize, 30, 80];
+export const defaultPaginationPageSizeOptionsTable = [5, 20, 80];
+
 export class ListConfig<T> implements IListConfig<T> {
   isLocal = false;
-  pageSizeOptions = [9, 45, 90];
+  pageSizeOptions = defaultPaginationPageSizeOptionsCards;
   viewType = ListViewTypes.BOTH;
   text = null;
   enableTextFilter = false;
   tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
+  allowSelection = false;
   getGlobalActions = (): IGlobalListAction<T>[] => null;
   getMultiActions = (): IMultiListAction<T>[] => null;
   getSingleActions = (): IListAction<T>[] => null;
   getColumns = (): ITableColumn<T>[] => null;
-  getDataSource = () => null;
+  getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
 }
 
 export interface IBaseListAction<T> {
-  icon: string;
+  icon?: string;
   label: string;
   description: string;
   visible: (row: T) => boolean;
-  enabled: (row: T) => boolean;
+  enabled: (row: T) => boolean | Observable<T>;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {
@@ -119,7 +122,12 @@ export interface IListAction<T> extends IBaseListAction<T> {
 }
 
 export interface IMultiListAction<T> extends IBaseListAction<T> {
-  action: (items: T[]) => void;
+  /**
+   * Return true if the selection should be cleared
+   *
+   * @memberof IMultiListAction
+   */
+  action: (items: T[]) => boolean;
 }
 
 export interface IGlobalListAction<T> extends IBaseListAction<T> {

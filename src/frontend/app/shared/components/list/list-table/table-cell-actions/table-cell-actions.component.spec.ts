@@ -7,6 +7,7 @@ import { TableCellActionsComponent } from './table-cell-actions.component';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
 import { ListActions, IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { ListConfig } from '../../list.component.types';
+import { Observable } from 'rxjs/Observable';
 
 describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;
@@ -31,6 +32,7 @@ describe('TableCellActionsComponent', () => {
     component = fixture.componentInstance;
     component.dataSource = {
     } as IListDataSource<APIResource>;
+    component.rowState = Observable.of({});
     fixture.detectChanges();
   });
 

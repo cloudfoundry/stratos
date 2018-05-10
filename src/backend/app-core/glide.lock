@@ -52,7 +52,7 @@ imports:
 - name: github.com/mattn/go-isatty
   version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
 - name: github.com/mattn/go-sqlite3
-  version: ca5e3819723d8eeaf170ad510e7da1d6d2e94a08
+  version: 6c771bb9887719704b210e87e934f08be014bdb1
 - name: github.com/nwmac/sqlitestore
   version: 3f93bd4dbffb827c47572d6d1342272be36bd6b0
 - name: github.com/pkg/errors
@@ -75,6 +75,20 @@ imports:
   version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
   subpackages:
   - unix
+- name: bitbucket.org/liamstask/goose
+  version: 8488cc47d90c8a502b1c41a462a6d9cc8ee0a895
+  subpackages:
+  - lib/goose
+- name: github.com/kylelemons/go-gypsy
+  version: 08cad365cd28a7fba23bb1e57aa43c5e18ad8bb8
+  subpackages:
+  - yaml
+- name: github.com/ziutek/mymysql
+  version: 1d19cbf98d83564cc561192ae7d7183d795f7ac7
+  subpackages:
+  - godrv
+  - mysql
+  - native
 testImports:
 - name: github.com/gopherjs/gopherjs
   version: 9659c814f1d54d63f9c623449a7111d3864c1361

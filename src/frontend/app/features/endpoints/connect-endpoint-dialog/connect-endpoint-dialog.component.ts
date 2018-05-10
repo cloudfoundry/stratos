@@ -1,20 +1,20 @@
-import { GetSystemInfo } from '../../../store/actions/system.actions';
-import { SystemEffects } from '../../../store/effects/system.effects';
-import { systemStoreNames } from '../../../store/types/system.types';
-import { endpointStoreNames, EndpointModel } from '../../../store/types/endpoint.types';
-import { ActionState, RequestSectionKeys } from '../../../store/reducers/api-request-reducer/types';
-import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
-import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { Observable } from 'rxjs/Rx';
+import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { ConnectEndpoint, EndpointSchema } from '../../../store/actions/endpoint.actions';
+import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Component, Inject, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatSnackBar } from '@angular/material';
-import { AppState } from '../../../store/app-state';
-import { FormControl } from '@angular/forms';
+import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
+import { Observable } from 'rxjs/Rx';
 import { Subscription } from 'rxjs/Subscription';
+
+import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
+import { GetSystemInfo } from '../../../store/actions/system.actions';
+import { AppState } from '../../../store/app-state';
+import { EndpointsEffect } from '../../../store/effects/endpoint.effects';
+import { SystemEffects } from '../../../store/effects/system.effects';
+import { ActionState } from '../../../store/reducers/api-request-reducer/types';
+import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
+import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -35,11 +35,29 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   connectingSub: Subscription;
   fetchSub: Subscription;
-  public endpointForm = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required]
-  });
+  public endpointForm;
 
+  private bodyContent = '';
+
+  private authTypes = [
+    {
+      name: 'Username and Password',
+      value: 'creds',
+      form: {
+        username: ['', Validators.required],
+        password: ['', Validators.required],
+      },
+      types: new Array<EndpointType>('cf', 'metrics')
+    },
+  ];
+
+  private hasAttemptedConnect: boolean;
+  private authTypesForEndpoint = [];
+
+  // We need a delay to ensure the BE has finished registering the endpoint.
+  // If we don't do this and if we're quick enough, we can navigate to the application page
+  // and end up with an empty list where we should have results.
+  public connectDelay = 1000;
 
   constructor(
     public store: Store<AppState>,
@@ -48,11 +66,33 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     public snackBar: MatSnackBar,
     @Inject(MAT_DIALOG_DATA) public data: {
       name: string,
-      guid: string
+      guid: string,
+      type: EndpointType,
     }
   ) {
+    // Populate the valid auth types for the endpoint that we want to connect to
+    this.authTypes.forEach(authType => {
+      if (authType.types.find(t => t === this.data.type)) {
+        this.authTypesForEndpoint.push(authType);
+      }
+    });
+
+    // Create the endpoint form
+    const autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : {};
+    this.endpointForm = this.fb.group({
+      authType: [autoSelected.value || '', Validators.required],
+      authValues: this.fb.group(autoSelected.form || {})
+    });
+
     this.setupObservables();
     this.setupSubscriptions();
+  }
+
+  authChanged(e) {
+    const authType = this.authTypesForEndpoint.find(ep => ep.value === this.endpointForm.value.authType);
+    this.endpointForm.removeControl('authValues');
+    this.endpointForm.addControl('authValues', this.fb.group(authType.form));
+    this.bodyContent = '';
   }
 
   setupSubscriptions() {
@@ -67,6 +107,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
     this.connectingSub = this.endpointConnected$
       .filter(connected => connected)
+      .delay(this.connectDelay)
       .subscribe(() => {
         this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
@@ -88,14 +129,25 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       this.getEntitySelector()
     )
       .map(request => !!(request && request.api_endpoint && request.user));
+    const busy$ = this.update$.map(update => update.busy).startWith(false);
+    this.connecting$ = busy$.pipe(
+      pairwise(),
+      switchMap(([oldBusy, newBusy]) => {
+        if (oldBusy === true && newBusy === false) {
+          return busy$.pipe(
+            delay(this.connectDelay),
+            startWith(true)
+          );
+        }
+        return Observable.of(newBusy);
+      })
+    );
+    this.connectingError$ = this.update$.pipe(
+      filter(() => this.hasAttemptedConnect),
+      map(update => update.error)
+    );
 
-    this.connecting$ =
-      this.update$
-        .map(update => update.busy);
-    this.connectingError$ = this.update$.map(update => update.error);
-
-    this.valid$ = this.endpointForm.valueChanges
-      .map(() => this.endpointForm.valid);
+    this.valid$ = this.endpointForm.valueChanges.map(() => this.endpointForm.valid);
 
     this.setupCombinedObservables();
   }
@@ -138,11 +190,14 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   submit(event) {
-    const { guid, username, password } = this.endpointForm.value;
+    this.hasAttemptedConnect = true;
+    const { guid, authType, authValues } = this.endpointForm.value;
     this.store.dispatch(new ConnectEndpoint(
       this.data.guid,
-      username,
-      password
+      this.data.type,
+      authType,
+      authValues,
+      this.bodyContent,
     ));
   }
 

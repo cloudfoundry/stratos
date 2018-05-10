@@ -1,11 +1,16 @@
-import { ApplicationData } from './../../../features/applications/application.service';
-import { APIResource } from './../../types/api.types';
-import { IRequestEntityTypeState } from './../../app-state';
-import { IRequestArray } from '../api-request-reducer/types';
-import { generateDefaultState } from '../api-request-reducer/request-helpers';
-import { ISuccessRequestAction } from '../../types/request.types';
-import { deepMergeState } from '../../helpers/reducer.helper';
 import { Action } from '@ngrx/store';
+
+import { pathGet } from '../../../core/utils.service';
+import { fetchEntityTree } from '../../helpers/entity-relations.tree';
+import {
+  createEntityRelationKey,
+  EntityInlineChildAction,
+  isEntityInlineChildAction,
+} from '../../helpers/entity-relations.types';
+import { deepMergeState } from '../../helpers/reducer.helper';
+import { ISuccessRequestAction } from '../../types/request.types';
+import { generateDefaultState } from '../api-request-reducer/request-helpers';
+import { IRequestArray } from '../api-request-reducer/types';
 
 export function requestDataReducerFactory(entityList = [], actions: IRequestArray) {
   const [startAction, successAction, failedAction] = actions;
@@ -17,7 +22,10 @@ export function requestDataReducerFactory(entityList = [], actions: IRequestArra
         if (!success.apiAction.updatingKey && success.requestType === 'delete') {
           return deleteEntity(state, success.apiAction.entityKey, success.apiAction.guid);
         } else if (success.response) {
-          return deepMergeState(state, success.response.entities);
+          // Does the entity associated with the action have a parent property that requires the result to be stored with it?
+          // For example we have fetched a list of spaces that need to be stored in an organization's entity?
+          const entities = populateParentEntity(state, success) || success.response.entities;
+          return deepMergeState(state, entities);
         }
         return state;
       default:
@@ -41,4 +49,49 @@ function deleteEntity(state, entityKey, guid) {
     }
   }
   return newState;
+}
+
+function populateParentEntity(state, successAction) {
+  if (!isEntityInlineChildAction(successAction.apiAction)) {
+    return;
+  }
+
+  const action: EntityInlineChildAction = successAction.apiAction as EntityInlineChildAction;
+  const response = successAction.response;
+  const entities = pathGet(`entities.${successAction.apiAction.entityKey}`, response) || {};
+  if (!Object.values(entities)) {
+    return;
+  }
+
+  // Create a new entity with the inline result. For instance an new organization containing a list of spaces
+  // First create the required consts
+  const parentGuid = action.parentGuid;
+  const parentEntityKey = action.parentEntitySchema.key;
+  // We need to find out the entity param name. For instance an org with spaces in will store them in a `spaces` property
+  const parentEntityTree = fetchEntityTree({
+    type: '',
+    entity: action.parentEntitySchema,
+    entityKey: parentEntityKey,
+    includeRelations: [createEntityRelationKey(parentEntityKey, successAction.apiAction.entityKey)],
+    populateMissing: null,
+  });
+  const childRelation = parentEntityTree.rootRelation.childRelations.find(rel => rel.entityKey === successAction.apiAction.entityKey);
+  const entityParamName = childRelation.paramName;
+
+  let newParentEntity = pathGet(`${parentEntityKey}.${parentGuid}`, state) || {};
+  newParentEntity = {
+    ...newParentEntity,
+    entity: {
+      ...newParentEntity.entity,
+      [entityParamName]: childRelation.isArray ? successAction.response.result : successAction.response.result[0]
+    }
+  };
+
+  // Apply the new entity to the response which will me merged into the store's state
+  successAction.response.entities[parentEntityKey] = {
+    ...successAction.response.entities[parentEntityKey],
+    [parentGuid]: newParentEntity
+  };
+
+  return successAction.response.entities;
 }

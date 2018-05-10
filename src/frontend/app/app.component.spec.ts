@@ -26,7 +26,6 @@ describe('AppComponent', () => {
         { provide: LoggedInService, useClass: LoggedInServiceMock }
       ],
       imports: [
-        // CoreModule,
         SharedModule,
         RouterTestingModule,
         createBasicStoreModule(),

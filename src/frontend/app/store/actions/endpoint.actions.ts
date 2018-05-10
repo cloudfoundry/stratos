@@ -1,10 +1,8 @@
-import { RequestAction } from '../types/request.types';
-import { RequestOptions } from '@angular/http';
-import { Schema, schema } from 'normalizr';
-import { Action, createSelector } from '@ngrx/store';
+import { Action } from '@ngrx/store';
 
-import { AppState } from '../app-state';
+import { endpointSchemaKey } from '../helpers/entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
+import { EndpointType } from '../types/endpoint.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -28,14 +26,28 @@ export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
 
-export const EndpointSchema = new schema.Entity('endpoint', {}, {
-  idAttribute: 'guid'
-});
+export class EndpointAction implements Action {
+  type: string;
+  endpointType: EndpointType = 'cf';
+}
+
+// Different Auth Type support for connecting to Endpoints
+export interface AuthParamsUsernamePassword {
+  username: string;
+  password: string;
+}
+
+export interface AuthParamsToken {
+  token: string;
+}
+
+// All supported auth params types
+export type AuthParams = AuthParamsUsernamePassword | AuthParamsToken;
 
 export class GetAllEndpoints implements PaginatedAction {
   public static storeKey = 'endpoint-list';
   constructor(public login = false) { }
-  entityKey = EndpointSchema.key;
+  entityKey = endpointSchemaKey;
   paginationKey = GetAllEndpoints.storeKey;
   type = GET_ENDPOINTS;
   actions = [
@@ -61,35 +73,48 @@ export class GetAllEndpointsFailed implements Action {
   type = GET_ENDPOINTS_FAILED;
 }
 
-export class ConnectEndpoint implements Action {
+export class ConnectEndpoint extends EndpointAction {
   constructor(
     public guid: string,
-    public username: string,
-    public password: string,
-  ) { }
+    public endpointType: EndpointType,
+    public authType: string,
+    public authValues: AuthParams,
+    public body: string,
+  ) {
+    super();
+  }
   type = CONNECT_ENDPOINTS;
 }
 
-export class DisconnectEndpoint implements Action {
+export class DisconnectEndpoint extends EndpointAction {
   constructor(
-    public guid: string
-  ) { }
+    public guid: string,
+    public endpointType: EndpointType,
+  ) {
+    super();
+  }
   type = DISCONNECT_ENDPOINTS;
 }
 
-export class UnregisterEndpoint implements Action {
+export class UnregisterEndpoint extends EndpointAction {
   constructor(
-    public guid: string
-  ) { }
+    public guid: string,
+    public endpointType: EndpointType,
+  ) {
+    super();
+  }
   type = UNREGISTER_ENDPOINTS;
 }
 
-export class RegisterEndpoint implements Action {
+export class RegisterEndpoint extends EndpointAction {
   constructor(
+    public endpointType: EndpointType,
     public name: string,
     public endpoint: string,
     public skipSslValidation: boolean,
-  ) { }
+  ) {
+    super();
+  }
   type = REGISTER_ENDPOINTS;
 
   public guid(): string {

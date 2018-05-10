@@ -9,6 +9,11 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MatDialogModule } from '@angular/material';
 
 import { DeployApplicationStep3Component } from './deploy-application-step3.component';
+import { HttpModule, ConnectionBackend, Http } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
+import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
 describe('DeployApplicationStep3Component', () => {
   let component: DeployApplicationStep3Component;
@@ -18,11 +23,14 @@ describe('DeployApplicationStep3Component', () => {
     TestBed.configureTestingModule({
       declarations: [ DeployApplicationStep3Component ],
       imports: [
+        CommonModule,
         CoreModule,
         SharedModule,
         RouterTestingModule,
         createBasicStoreModule(),
-        BrowserAnimationsModule
+        BrowserAnimationsModule,
+        HttpClientModule,
+        HttpClientTestingModule,
       ]
     })
     .compileComponents();

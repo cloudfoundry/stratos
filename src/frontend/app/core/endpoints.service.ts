@@ -1,19 +1,24 @@
-import { endpointEntitiesSelector, endpointStatusSelector } from '../store/selectors/endpoint.selectors';
+import {
+  endpointEntitiesSelector,
+  endpointStatusSelector,
+  endpointsEntityRequestDataSelector
+} from '../store/selectors/endpoint.selectors';
 import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
-import { AppState } from '../store/app-state';
+import { AppState, IRequestEntityTypeState } from '../store/app-state';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
 import { RouterNav } from '../store/actions/router.actions';
+import { map, first, filter } from 'rxjs/operators';
 
 
 @Injectable()
 export class EndpointsService implements CanActivate {
 
-  endpoints$: any;
+  endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   haveRegistered$: Observable<boolean>;
   haveConnected$: Observable<boolean>;
 
@@ -24,7 +29,7 @@ export class EndpointsService implements CanActivate {
     this.endpoints$ = store.select(endpointEntitiesSelector);
     this.haveRegistered$ = this.endpoints$.map(endpoints => !!Object.keys(endpoints).length);
     this.haveConnected$ = this.endpoints$.map(endpoints =>
-      Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected'));
+      !!Object.values(endpoints).find(endpoint => endpoint.connectionStatus === 'connected' || endpoint.connectionStatus === 'checking'));
   }
 
   canActivate(route: ActivatedRouteSnapshot, routeState: RouterStateSnapshot): Observable<boolean> {
@@ -37,9 +42,9 @@ export class EndpointsService implements CanActivate {
         return !state.loggedIn || endpointState.loading;
       })
       .withLatestFrom(
-      this.haveRegistered$,
-      this.haveConnected$,
-      this.userService.isAdmin$,
+        this.haveRegistered$,
+        this.haveConnected$,
+        this.userService.isAdmin$,
     )
       .map(([state, haveRegistered, haveConnected, isAdmin]: [[AuthState, EndpointState], boolean, boolean, boolean]) => {
         const [authState] = state;
@@ -62,5 +67,13 @@ export class EndpointsService implements CanActivate {
 
         return false;
       });
+  }
+
+  hasMetrics(endpointId: string) {
+    return this.store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
+      filter(endpoint => !!endpoint),
+      map(endpoint => endpoint.metricsAvailable),
+      first()
+    );
   }
 }

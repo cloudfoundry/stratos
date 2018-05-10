@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 
 import { ApplicationService } from '../../../../../../features/applications/application.service';
 import { getMappedApps } from '../../../../../../features/applications/routes/routes.helper';
-import { TableCellCustom } from '../../../list-table/table-cell/table-cell-custom';
+import { TableCellCustom } from '../../../list.types';
 
 @Component({
   selector: 'app-table-cell-app-route',
@@ -20,7 +20,7 @@ export class TableCellAppRouteComponent<T> extends TableCellCustom<T>
 
   ngOnInit(): void {
     const apps = this.row.entity.apps;
-    this.mappedAppsCount = getMappedApps(this.row).length;
+    this.mappedAppsCount = this.row.entity.mappedAppsCount;
     const foundApp =
       apps && apps.find(a => a.metadata.guid === this.appService.appGuid);
     if (foundApp && foundApp.length !== 0) {

@@ -28,6 +28,7 @@ import { CdkTableModule } from '@angular/cdk/table';
 import { TableRowComponent } from './table-row/table-row.component';
 import { RunningInstancesComponent } from '../../running-instances/running-instances.component';
 import { IListConfig } from '../list.component.types';
+import { SharedModule } from '../../../shared.module';
 
 
 describe('TableComponent', () => {
@@ -36,25 +37,12 @@ describe('TableComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        ...listTableCells,
-        TableComponent,
-        TableCellComponent,
-        EventTabActorIconPipe,
-        ValuesPipe,
-        ApplicationStateComponent,
-        ApplicationStateIconComponent,
-        ApplicationStateIconPipe,
-        UsageGaugeComponent,
-        PercentagePipe,
-        TableRowComponent,
-        RunningInstancesComponent
-      ],
       imports: [
         CoreModule,
         CdkTableModule,
         NoopAnimationsModule,
         createBasicStoreModule(),
+        SharedModule
       ],
       providers: [
         UtilsService,
@@ -64,7 +52,7 @@ describe('TableComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableComponent);
+    fixture = TestBed.createComponent<TableComponent<ListAppEnvVar>>(TableComponent);
     component = fixture.componentInstance;
 
     const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
@@ -72,13 +60,11 @@ describe('TableComponent', () => {
     component.paginationController = {
       sort$: Observable.of({} as ListSort)
     } as IListPaginationController<any>;
-    component.listConfig = {
-      getDataSource: () => ({
-        connect() { return Observable.of([]); },
-      } as IListDataSource<ListAppEnvVar>),
-      getMultiActions: () => [],
-      getSingleActions: () => []
-    } as IListConfig<ListAppEnvVar>;
+    component.dataSource = {
+      trackBy: () => '1',
+      connect: () => Observable.empty(),
+      disconnect: () => null
+    };
     fixture.detectChanges();
   });
 

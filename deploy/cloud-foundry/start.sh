@@ -22,7 +22,7 @@ function handleGooseResult {
 # Only migrate on instance index 0
 if [ "$CF_INSTANCE_INDEX" -eq "0" ]; then
   echo "Attempting to migrate database"
-  ./stratos-dbmigrator -cf --path ${DB_CONF_DIR} up
+  ./portal-proxy -cf --path ${DB_CONF_DIR} up
   handleGooseResult
 else
   echo "Skipping DB migration => not index 0 ($CF_INSTANCE_INDEX)"  

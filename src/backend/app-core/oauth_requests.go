@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SUSE/stratos-ui/app-core/repository/interfaces"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 )
 
-func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Request) (*http.Response, error) {
+func (p *portalProxy) doOauthFlowRequest(cnsiRequest *interfaces.CNSIRequest, req *http.Request) (*http.Response, error) {
 	log.Debug("doOauthFlowRequest")
 
 	// get a cnsi token record and a cnsi record
@@ -20,19 +20,22 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 	}
 
 	got401 := false
-	expTime := time.Unix(tokenRec.TokenExpiry, 0)
-	for {
-		clientID, err := p.GetClientId(cnsi.CNSIType)
-		if err != nil {
-			return nil, interfaces.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Endpoint type has not been registered",
-				"Endpoint type has not been registered %s: %s", cnsi.CNSIType, err)
-		}
 
+	// Only need to get Client ID once
+	clientID, err := p.GetClientId(cnsi.CNSIType)
+	if err != nil {
+		return nil, interfaces.NewHTTPShadowError(
+			http.StatusBadRequest,
+			"Endpoint type has not been registered",
+			"Endpoint type has not been registered %s: %s", cnsi.CNSIType, err)
+	}
+
+	for {
+		expTime := time.Unix(tokenRec.TokenExpiry, 0)
 		if got401 || expTime.Before(time.Now()) {
-			refreshedTokenRec, err := p.RefreshToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
+			refreshedTokenRec, err := p.RefreshOAuthToken(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, clientID, "", cnsi.TokenEndpoint)
 			if err != nil {
+				log.Info(err)
 				return nil, fmt.Errorf("Couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
 			}
 			tokenRec = refreshedTokenRec
@@ -61,7 +64,7 @@ func (p *portalProxy) doOauthFlowRequest(cnsiRequest *CNSIRequest, req *http.Req
 	}
 }
 
-func (p *portalProxy) getCNSIRequestRecords(r *CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
+func (p *portalProxy) getCNSIRequestRecords(r *interfaces.CNSIRequest) (t interfaces.TokenRecord, c interfaces.CNSIRecord, err error) {
 	log.Debug("getCNSIRequestRecords")
 	// look up token
 	t, ok := p.GetCNSITokenRecord(r.GUID, r.UserGUID)
@@ -77,31 +80,32 @@ func (p *portalProxy) getCNSIRequestRecords(r *CNSIRequest) (t interfaces.TokenR
 	return t, c, nil
 }
 
-func (p *portalProxy) RefreshToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
+func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t interfaces.TokenRecord, err error) {
 	log.Debug("refreshToken")
-	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
-
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("Info could not be found for user with GUID %s", userGUID)
 	}
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath)
+	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
 	if err != nil {
 		return t, fmt.Errorf("Token refresh request failed: %v", err)
 	}
 
-	u, err := getUserTokenInfo(uaaRes.AccessToken)
+	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
 		return t, fmt.Errorf("Could not get user token info from access token")
 	}
 
 	u.UserGUID = userGUID
 
-	t, err = p.saveCNSIToken(cnsiGUID, *u, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	tokenRecord := p.InitEndpointTokenRecord(u.TokenExpiry, uaaRes.AccessToken, uaaRes.RefreshToken, userToken.Disconnected)
+	err = p.setCNSITokenRecord(cnsiGUID, userGUID, tokenRecord)
 	if err != nil {
 		return t, fmt.Errorf("Couldn't save new token: %v", err)
 	}
 
-	return t, nil
+	return tokenRecord, nil
 }

@@ -7,6 +7,7 @@ import { SharedModule } from '../../../../shared.module';
 import { CdkTableModule } from '@angular/cdk/table';
 import { setTimeout } from 'timers';
 import { Component } from '@angular/core';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('TableRowComponent', () => {
 
@@ -43,7 +44,8 @@ describe('TableRowComponent', () => {
       declarations: [TableRowComponent, TestHostComponent],
       imports: [
         CoreModule,
-        CdkTableModule
+        CdkTableModule,
+        NoopAnimationsModule,
       ]
     })
       .compileComponents();
@@ -71,18 +73,4 @@ describe('TableRowComponent', () => {
       expect(errorShown).toBeTruthy();
     });
   }));
-
-  it('should show block', async(() => {
-    fixture.detectChanges();
-    const [blocked1, blocked2] = getElements('table-row__blocker');
-    const blockedShown = elementShown(blocked1);
-    const blockedNotShown = !elementShown(blocked2);
-
-    fixture.whenStable().then(() => {
-      fixture.detectChanges();
-      expect(blockedNotShown).toBeTruthy();
-      expect(blockedShown).toBeTruthy();
-    });
-  }));
-
 });

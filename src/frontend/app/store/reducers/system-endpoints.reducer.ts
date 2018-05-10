@@ -1,8 +1,15 @@
+import { SESSION_VERIFIED, VERIFY_SESSION } from '../actions/auth.actions';
+import {
+  CONNECT_ENDPOINTS,
+  CONNECT_ENDPOINTS_FAILED,
+  CONNECT_ENDPOINTS_SUCCESS,
+  DISCONNECT_ENDPOINTS,
+  DISCONNECT_ENDPOINTS_FAILED,
+  DISCONNECT_ENDPOINTS_SUCCESS,
+} from '../actions/endpoint.actions';
 import { IRequestEntityTypeState } from '../app-state';
-import { APIResource } from '../types/api.types';
-import { EndpointModel } from '../types/endpoint.types';
-import { GetSystemSuccess, GET_SYSTEM_INFO_SUCCESS, GET_SYSTEM_INFO } from './../actions/system.actions';
-import { VERIFY_SESSION, SESSION_VERIFIED } from '../actions/auth.actions';
+import { endpointConnectionStatus, EndpointModel } from '../types/endpoint.types';
+import { GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS } from './../actions/system.actions';
 
 export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointModel>, action) {
   switch (action.type) {
@@ -12,6 +19,15 @@ export function systemEndpointsReducer(state: IRequestEntityTypeState<EndpointMo
     case SESSION_VERIFIED:
     case GET_SYSTEM_INFO_SUCCESS:
       return succeedEndpointInfo(state, action);
+    case CONNECT_ENDPOINTS_FAILED:
+    case DISCONNECT_ENDPOINTS_SUCCESS:
+      return changeEndpointConnectionStatus(state, action, 'disconnected');
+    case DISCONNECT_ENDPOINTS_FAILED:
+    case CONNECT_ENDPOINTS_SUCCESS:
+      return changeEndpointConnectionStatus(state, action, 'connected');
+    case CONNECT_ENDPOINTS:
+    case DISCONNECT_ENDPOINTS:
+      return changeEndpointConnectionStatus(state, action, 'checking');
     default:
       return state;
   }
@@ -36,16 +52,41 @@ function fetchingEndpointInfo(state) {
 function succeedEndpointInfo(state, action) {
   const newState = { ...state };
   const payload = action.type === GET_SYSTEM_INFO_SUCCESS ? action.payload : action.sessionData;
-  getAllEnpointIds(newState, payload.endpoints.cf).forEach(guid => {
-    const endpointInfo = payload.endpoints.cf[guid];
-    newState[guid] = {
-      ...newState[guid],
-      ...endpointInfo
-    };
+  Object.keys(payload.endpoints).forEach(type => {
+    getAllEnpointIds(newState[type], payload.endpoints[type]).forEach(guid => {
+      const endpointInfo = payload.endpoints[type][guid] as EndpointModel;
+      newState[guid] = {
+        ...newState[guid],
+        ...endpointInfo,
+        metricsAvailable: endpointHasMetrics(endpointInfo)
+      };
+    });
   });
   return newState;
 }
 
-function getAllEnpointIds(endpoints, payloadEndpoints = {}) {
+function endpointHasMetrics(endpoint: EndpointModel) {
+  if (!endpoint || !endpoint.metadata) {
+    return false;
+  }
+  return !!endpoint.metadata.metrics;
+}
+
+function changeEndpointConnectionStatus(state: IRequestEntityTypeState<EndpointModel>, action: {
+  guid: string
+}, connectionStatus: endpointConnectionStatus) {
+  if (!action.guid) {
+    return state;
+  }
+  return {
+    ...state,
+    [action.guid]: {
+      ...state[action.guid],
+      connectionStatus
+    }
+  };
+}
+
+function getAllEnpointIds(endpoints = {}, payloadEndpoints = {}) {
   return new Set(Object.keys(endpoints).concat(Object.keys(payloadEndpoints)));
 }

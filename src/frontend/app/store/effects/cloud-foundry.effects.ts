@@ -1,24 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers } from '@angular/http';
+import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { flatMap, mergeMap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators/catchError';
 
-import {
-  CF_INFO_ENTITY_KEY,
-  GET_INFO,
-  GetEndpointInfo
-} from '../actions/cloud-foundry.actions';
+import { GET_INFO, GetCFInfo } from '../actions/cloud-foundry.actions';
 import { NormalizedResponse } from '../types/api.types';
-import { GITHUB_BRANCHES_ENTITY_KEY } from '../types/deploy-application.types';
-import {
-  StartRequestAction,
-  WrapperRequestActionFailed,
-  WrapperRequestActionSuccess
-} from '../types/request.types';
+import { StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from '../types/request.types';
 import { environment } from './../../../environments/environment';
 import { AppState } from './../app-state';
-import { catchError } from 'rxjs/operators/catchError';
+import { cfInfoSchemaKey } from '../helpers/entity-factory';
 
 @Injectable()
 export class CloudFoundryEffects {
@@ -27,14 +19,14 @@ export class CloudFoundryEffects {
     private http: Http,
     private actions$: Actions,
     private store: Store<AppState>
-  ) {}
+  ) { }
 
   @Effect()
-  fetchInfo$ = this.actions$.ofType<GetEndpointInfo>(GET_INFO).pipe(
+  fetchInfo$ = this.actions$.ofType<GetCFInfo>(GET_INFO).pipe(
     flatMap(action => {
       const actionType = 'fetch';
       const apiAction = {
-        entityKey: CF_INFO_ENTITY_KEY,
+        entityKey: cfInfoSchemaKey,
         type: action.type
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
@@ -48,12 +40,12 @@ export class CloudFoundryEffects {
           mergeMap(response => {
             const info = response.json();
             const mappedData = {
-              entities: { cloudFoundryInfo: {} },
+              entities: { [cfInfoSchemaKey]: {} },
               result: []
             } as NormalizedResponse;
             const id = action.cfGuid;
 
-            mappedData.entities[CF_INFO_ENTITY_KEY][id] = {
+            mappedData.entities[cfInfoSchemaKey][id] = {
               entity: info[id],
               metadata: {}
             };

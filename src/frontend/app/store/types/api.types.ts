@@ -17,6 +17,9 @@ export interface APIResource<T = any> {
   metadata: APIResourceMetadata;
   entity: T;
 }
+export function instanceOfAPIResource(object: any): boolean {
+  return object && typeof object === 'object' && 'metadata' in object && 'entity' in object;
+}
 
 export interface APIResourceMetadata {
   created_at: string;
@@ -27,7 +30,7 @@ export interface APIResourceMetadata {
 
 export interface NormalizedResponse {
   entities: IRequestEntityTypeState<any>;
-  result: any[];
+  result: string[];
 }
 
 export type ActionMergeFunction = (oldEntities: IRequestDataState, newEntities: NormalizedResponseEntities)

@@ -71,17 +71,14 @@ function uaa_downloads {
     ./uaa/prepare.sh
 }
 
+function dev_certs {
+    CERTS_PATH="${PROG_DIR}/../dev-certs"
+    if [ ! -d "${CERTS_PATH}" ]; then
+        CERTS_PATH=${CERTS_PATH} ./tools/generate_cert.sh
+    fi
+}
+
 function build {
-    echo "===== Building the portal proxy"
-    export USER_ID=$(id -u)
-    export GROUP_ID=$(id -g)
-    export USER_NAME=$(id -nu)
-    echo "==== User set to ${USER_NAME} with IDs ${USER_ID}:${GROUP_ID}"
-
-    pushd ${PROXY_PATH}/deploy/
-    ./build_portal_proxy.sh
-    popd
-
     if [ "$NO_UI" = true ]; then
         echo "===== Standing up the Stratos UI Console without the UI"
     else
@@ -123,7 +120,7 @@ fi
 
 mkdir -p ${STRATOS_UI_PATH}/.dist
 # Copy in the page to tell the user that the UI is being built
-cp ./docker-compose/index.html ${STRATOS_UI_PATH}/.dist
+cp ./docker-compose/building.html ${STRATOS_UI_PATH}/.dist
 
 pushd "$PROG_DIR"
 env_vars
@@ -131,6 +128,7 @@ if [ "$CLEAN" = true ] ; then
     clean
 fi
 uaa_downloads
+dev_certs
 build
 docker ps
 popd

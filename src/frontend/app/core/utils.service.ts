@@ -1,17 +1,6 @@
 import { Injectable } from '@angular/core';
 
-@Injectable()
-export class UtilsService {
-
-  private units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
-
-  /*
-     * Expression used to validate URLs in the Endpoint registration form.
-     * Expression explanation available from https://gist.github.com/dperini/729294
-     * Passes the following criteria: https://mathiasbynens.be/demo/url-regex
-     *
-     */
-  public urlValidationExpression =
+export const urlValidationExpression =
   '^' +
   // protocol identifier
   'http(s)?://' +
@@ -48,12 +37,22 @@ export class UtilsService {
   '$'
   ;
 
+@Injectable()
+export class UtilsService {
+
+  private units = ['bytes', 'kB', 'MB', 'GB', 'TB', 'PB'];
+
+  /*
+     * Expression used to validate URLs in the Endpoint registration form.
+     * Expression explanation available from https://gist.github.com/dperini/729294
+     * Passes the following criteria: https://mathiasbynens.be/demo/url-regex
+     *
+     */
+  public urlValidationExpression = urlValidationExpression;
+
   constructor() { }
 
-  precisionIfUseful(size: number, precision?: number) {
-    if (precision == null) {
-      precision = 1;
-    }
+  precisionIfUseful(size: number, precision: number = 1) {
     const floored = Math.floor(size);
     const fixed = Number(size.toFixed(precision));
     if (floored === fixed) {
@@ -62,7 +61,7 @@ export class UtilsService {
     return fixed;
   }
 
-  mbToHumanSize(mb: number) {
+  mbToHumanSize(mb: number): string {
     if (mb == null) {
       return '';
     }
@@ -76,7 +75,29 @@ export class UtilsService {
       return this.precisionIfUseful(mb / 1024) + ' GB';
     }
     return this.precisionIfUseful(mb) + ' MB';
+  }
 
+  bytesToHumanSize(value: string): string {
+    const bytes = parseInt(value, 10);
+    let retBytes = '';
+    if (!bytes && bytes !== 0) {
+      return '';
+    }
+    if (bytes === -1) {
+      retBytes = '∞';
+    }
+    if (bytes >= 1099511627776) {
+      retBytes = this.precisionIfUseful(bytes / 1099511627776) + ' TB';
+    } else if (bytes >= 1073741824) {
+      retBytes = this.precisionIfUseful(bytes / 1073741824) + ' GB';
+    } else if (bytes >= 1048576) {
+      retBytes = this.precisionIfUseful(bytes / 1048576) + ' MB';
+    } else if (bytes >= 1024) {
+      retBytes = this.precisionIfUseful(bytes / 1024) + ' kB';
+    } else if (bytes >= 0) {
+      retBytes = this.precisionIfUseful(bytes) + ' B';
+    }
+    return retBytes;
   }
 
   getDefaultPrecision(precision: number): number {
@@ -146,14 +167,14 @@ export class UtilsService {
     const hours = Math.floor(uptime / 3600);
     uptime = uptime % 3600;
     const minutes = Math.floor(uptime / 60);
-    const  seconds = uptime % 60;
+    const seconds = uptime % 60;
 
     return (
       this.formatPart(days, 'd', 'd') +
       this.formatPart(hours, 'h', 'h') +
       this.formatPart(minutes, 'm', 'm') +
       this.formatPart(seconds, 's', 's')
-      .trim()
+        .trim()
     );
   }
 
@@ -181,5 +202,33 @@ export class UtilsService {
     const val = (value * 100).toFixed(decimals);
     return val + '%';
   }
+}
 
+/**
+* Return the value in the object for the given dot separated param path
+*/
+export function pathGet(path: string, object: any): any {
+  const params = path.split('.');
+
+  let index = 0;
+  const length = params.length;
+
+  while (object !== null && object !== undefined && index < length) {
+    object = object[params[index++]];
+  }
+  return (index && index === length) ? object : undefined;
+}
+
+export function pathSet(path: string, object: any, value: any) {
+  const params = path.split('.');
+
+  let index = 0;
+  const length = params.length - 1;
+
+  while (object !== null && object !== undefined && index < length) {
+    object = object[params[index++]];
+  }
+  if ((index && index === length)) {
+    object[params[index++]] = value;
+  }
 }

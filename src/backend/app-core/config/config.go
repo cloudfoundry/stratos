@@ -78,7 +78,13 @@ func setFieldValue(value reflect.Value, field reflect.Value, tag string) error {
 		return nil
 	}
 
+	return SetStructFieldValue(value, field, val)
+}
+
+func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) error {
+
 	var newVal interface{}
+	var err error
 	typ := field.Type()
 	kind := typ.Kind()
 

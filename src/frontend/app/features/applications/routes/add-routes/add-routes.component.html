@@ -10,7 +10,6 @@
       </mat-radio-button>
     </mat-radio-group>
   </div>
-
   <div class="add-route__form" *ngIf="addRouteMode?.id === 'create'">
     <div>
       Please specify details for the new route.
@@ -19,7 +18,7 @@
       Create TCP Route
       <mat-checkbox name="createTcp" [(ngModel)]="createTCPRoute"></mat-checkbox>
     </div>
-    <form [formGroup]="addHTTPRoute" *ngIf="!createTCPRoute">
+    <form [formGroup]="addHTTPRoute" *ngIf="!createTCPRoute" class="stepper-form">
       <div class="add-route__form__fields">
         <div>
           <mat-form-field>
@@ -41,7 +40,7 @@
       </div>
     </form>
 
-    <form [formGroup]="addTCPRoute" *ngIf="createTCPRoute">
+    <form [formGroup]="addTCPRoute" *ngIf="createTCPRoute" class="stepper-form">
       <div class="add-route__form__fields">
         <div>
           <mat-form-field>

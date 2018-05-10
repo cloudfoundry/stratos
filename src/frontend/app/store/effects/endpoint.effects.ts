@@ -1,6 +1,10 @@
-import { IRequestAction, StartCFAction } from '../types/request.types';
-import { APIResource, NormalizedResponse } from '../types/api.types';
-import { Observable } from 'rxjs/Rx';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Actions, Effect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { mergeMap } from 'rxjs/operators';
+
+import { BrowserStandardEncoder } from '../../helper';
 import {
   CONNECT_ENDPOINTS,
   CONNECT_ENDPOINTS_FAILED,
@@ -10,36 +14,28 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
-  EndpointSchema,
-  GET_ENDPOINTS,
-  GetAllEndpoints,
-  GetAllEndpointsFailed,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
+  REGISTER_ENDPOINTS_FAILED,
+  REGISTER_ENDPOINTS_SUCCESS,
   RegisterEndpoint,
   UNREGISTER_ENDPOINTS,
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
-  REGISTER_ENDPOINTS_SUCCESS,
-  REGISTER_ENDPOINTS_FAILED,
 } from '../actions/endpoint.actions';
+import { ClearPaginationOfEntity } from '../actions/pagination.actions';
+import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
-import { Injectable } from '@angular/core';
-import { Action, Store } from '@ngrx/store';
-import { Actions, Effect } from '@ngrx/effects';
-import { EndpointModel, endpointStoreNames } from '../types/endpoint.types';
+import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
+import { NormalizedResponse } from '../types/api.types';
+import { EndpointModel, endpointStoreNames, EndpointType } from '../types/endpoint.types';
 import {
+  IRequestAction,
   StartRequestAction,
   WrapperRequestActionFailed,
   WrapperRequestActionSuccess,
 } from '../types/request.types';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { PaginatedAction } from '../types/pagination.types';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { SystemInfo } from '../types/system.types';
-import { map, mergeMap, catchError } from 'rxjs/operators';
-import { GetSystemInfo, GET_SYSTEM_INFO, GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
 
 @Injectable()
 export class EndpointsEffect {
@@ -47,7 +43,6 @@ export class EndpointsEffect {
   static connectingKey = 'connecting';
   static disconnectingKey = 'disconnecting';
   static registeringKey = 'registering';
-  static unregisteringKey = 'unregistering';
 
   constructor(
     private http: HttpClient,
@@ -57,12 +52,9 @@ export class EndpointsEffect {
 
   @Effect() getAllEndpoints$ = this.actions$.ofType<GetSystemSuccess>(GET_SYSTEM_INFO_SUCCESS)
     .pipe(mergeMap(action => {
-      const endpointsActions = new GetAllEndpoints(action.login);
+      const { associatedAction } = action;
       const actionType = 'fetch';
-      this.store.dispatch(new StartRequestAction(endpointsActions, actionType));
-
-      const endpoints = action.payload.endpoints.cf; // We're only storing cf's??
-
+      const endpoints = action.payload.endpoints;
       // Data is an array of endpoints
       const mappedData = {
         entities: {
@@ -71,33 +63,38 @@ export class EndpointsEffect {
         result: []
       } as NormalizedResponse;
 
-      const data = Object.values(endpoints).forEach(endpointInfo => {
-        mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
-          ...endpointInfo,
-          connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
-          registered: !!endpointInfo.user,
-        };
-        mappedData.result.push(endpointInfo.guid);
+      Object.keys(endpoints).forEach((type: string) => {
+        const endpointsForType = endpoints[type];
+        Object.values(endpointsForType).forEach(endpointInfo => {
+          mappedData.entities[endpointStoreNames.type][endpointInfo.guid] = {
+            ...endpointInfo,
+            connectionStatus: endpointInfo.user ? 'connected' : 'disconnected',
+            registered: !!endpointInfo.user,
+          };
+          mappedData.result.push(endpointInfo.guid);
+        });
       });
 
       // Order is important. Need to ensure data is written (none cf action success) before we notify everything is loaded
       // (endpoint success)
       return [
-        new WrapperRequestActionSuccess(mappedData, endpointsActions, actionType),
-        new GetAllEndpointsSuccess(mappedData, endpointsActions.login),
+        new WrapperRequestActionSuccess(mappedData, associatedAction, actionType),
+        new GetAllEndpointsSuccess(mappedData, associatedAction.login),
       ];
     }));
 
   @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS)
     .flatMap(action => {
       const actionType = 'update';
-      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.connectingKey);
+      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
+          ...<any>action.authValues,
           'cnsi_guid': action.guid,
-          'username': action.username,
-          'password': action.password,
-        }
+          'connect_type': action.authType,
+        },
+        // Fix for #angular/18261
+        encoder: new BrowserStandardEncoder()
       });
 
       return this.doEndpointAction(
@@ -105,14 +102,16 @@ export class EndpointsEffect {
         '/pp/v1/auth/login/cnsi',
         params,
         null,
-        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED]
+        [CONNECT_ENDPOINTS_SUCCESS, CONNECT_ENDPOINTS_FAILED],
+        action.endpointType,
+        action.body,
       );
     });
 
   @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
+      const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid
@@ -124,14 +123,15 @@ export class EndpointsEffect {
         '/pp/v1/auth/logout/cnsi',
         params,
         null,
-        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED]
+        [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
   @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid, action.type, EndpointsEffect.unregisteringKey);
+      const apiAction = this.getEndpointDeleteAction(action.guid, action.type);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_guid': action.guid
@@ -143,14 +143,15 @@ export class EndpointsEffect {
         '/pp/v1/unregister',
         params,
         'delete',
-        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED]
+        [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
   @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS)
     .flatMap(action => {
 
-      const apiAction = this.getEndpointAction(action.guid(), action.type, EndpointsEffect.registeringKey);
+      const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
       const params: HttpParams = new HttpParams({
         fromObject: {
           'cnsi_name': action.name,
@@ -161,14 +162,15 @@ export class EndpointsEffect {
 
       return this.doEndpointAction(
         apiAction,
-        '/pp/v1/register/cf',
+        '/pp/v1/register/' + action.endpointType,
         params,
         'create',
-        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED]
+        [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
+        action.endpointType
       );
     });
 
-  private getEndpointAction(guid, type, updatingKey) {
+  private getEndpointUpdateAction(guid, type, updatingKey) {
     return {
       entityKey: endpointStoreNames.type,
       guid,
@@ -177,30 +179,50 @@ export class EndpointsEffect {
     } as IRequestAction;
   }
 
+  private getEndpointDeleteAction(guid, type) {
+    return {
+      entityKey: endpointStoreNames.type,
+      guid,
+      type,
+    } as IRequestAction;
+  }
+
   private doEndpointAction(
     apiAction: IRequestAction,
     url: string,
     params: HttpParams,
     apiActionType: ApiRequestTypes = 'update',
-    actionStrings: [string, string] = [null, null]
+    actionStrings: [string, string] = [null, null],
+    endpointType: EndpointType = 'cf',
+    body?: string,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     this.store.dispatch(new StartRequestAction(apiAction, apiActionType));
-    return this.http.post(url, {}, {
+    return this.http.post(url, body || {}, {
       headers,
       params
-    }).map(endpoint => {
+    }).mergeMap((endpoint: EndpointModel) => {
+      const actions = [];
       if (actionStrings[0]) {
-        this.store.dispatch({ type: actionStrings[0] });
+        actions.push({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType, endpoint });
       }
-      return new WrapperRequestActionSuccess(null, apiAction, apiActionType);
+      if (apiActionType === 'delete') {
+        actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+      }
+      if (apiActionType === 'create') {
+        actions.push(new GetSystemInfo());
+      }
+      actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
+      return actions;
     })
       .catch(e => {
+        const actions = [];
         if (actionStrings[1]) {
-          this.store.dispatch({ type: actionStrings[1] });
+          actions.push({ type: actionStrings[1], guid: apiAction.guid });
         }
-        return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
+        actions.push(new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType));
+        return actions;
       });
   }
 }
