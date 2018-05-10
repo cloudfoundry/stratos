@@ -1,10 +1,15 @@
+import { TitleCasePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
+
+import { AppState } from '../../../../store/app-state';
 import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
 import { ServicesService } from '../../services.service';
-import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { TitleCasePipe } from '@angular/common';
+import { SetCreateServiceInstanceCFDetails } from '../../../../store/actions/create-service-instance.actions';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -18,15 +23,35 @@ import { TitleCasePipe } from '@angular/common';
 export class AddServiceInstanceComponent implements OnInit {
   title$: Observable<string>;
   serviceInstancesUrl: string;
-
-  constructor(private servicesService: ServicesService
+  servicesWallCreateInstance = false;
+  stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
+  constructor(
+    private servicesService: ServicesService,
+    private activatedRoute: ActivatedRoute,
+    private store: Store<AppState>,
+    private cfOrgSpaceService: CfOrgSpaceDataService
   ) {
+
+
     const cfId = servicesService.cfGuid;
+    if (!cfId) {
+      this.servicesWallCreateInstance = true;
+    }
     const serviceGuid = servicesService.serviceGuid;
     this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
     this.title$ = this.servicesService.getServiceName().pipe(
       map(label => `Create Instance: ${label}`)
     );
+
+  }
+
+  onNext = () => {
+    this.store.dispatch(new SetCreateServiceInstanceCFDetails(
+      this.cfOrgSpaceService.cf.select.getValue(),
+      this.cfOrgSpaceService.org.select.getValue(),
+      this.cfOrgSpaceService.space.select.getValue()
+    ));
+    return Observable.of({ success: true });
   }
 
   ngOnInit() {

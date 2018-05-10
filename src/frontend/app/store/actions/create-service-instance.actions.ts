@@ -10,6 +10,7 @@ export const SET_SERVICE_PLAN = '[Create SI] Set Plan';
 export const SET_ORG = '[Create SI] Set Org';
 export const SET_SPACE = '[Create SI] Set Space';
 export const SET_CREATE_SERVICE_INSTANCE = '[Create SI] Set All';
+export const SET_CREATE_SERVICE_INSTANC_CF_DETAILS = '[Create SI] Set CF Details';
 export const SET_APP = '[Create SI] Set App';
 export const SET_SERVICE_INSTANCE_GUID = '[Create SI] Set Service Instance Guid';
 export const SET_SERVICE_INSTANCE_SPACE_SCOPED = '[Create SI] Set Service Instance Space Scoped Property';
@@ -49,4 +50,14 @@ export class SetCreateServiceInstance implements Action {
 
   }
   type = SET_CREATE_SERVICE_INSTANCE;
+}
+export class SetCreateServiceInstanceCFDetails implements Action {
+  constructor(
+    public cfGuid: string,
+    public orgGuid: string,
+    public spaceGuid: string,
+  ) {
+
+  }
+  type = SET_CREATE_SERVICE_INSTANC_CF_DETAILS;
 }

@@ -1,0 +1,9 @@
+<div class="select-service">
+  <form class="stepper-form" [formGroup]="stepperForm">
+    <mat-form-field>
+      <mat-select class="form-control" placeholder="Service" formControlName="service">
+        <mat-option *ngFor="let service of service$ | async" [value]="service.metadata.guid">{{ service.entity.label }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</div>

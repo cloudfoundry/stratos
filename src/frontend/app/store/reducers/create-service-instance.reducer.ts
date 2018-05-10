@@ -5,6 +5,7 @@ import {
   SET_SERVICE_INSTANCE_SPACE_SCOPED,
   SET_SERVICE_PLAN,
   SET_SPACE,
+  SET_CREATE_SERVICE_INSTANC_CF_DETAILS,
 } from '../actions/create-service-instance.actions';
 import { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
@@ -17,12 +18,18 @@ const defaultState: CreateServiceInstanceState = {
   spaceScoped: false
 };
 
+const setCreateServiceInstanceCfDetails = (state: CreateServiceInstanceState, action) => ({
+  ...state,
+  spaceGuid: action.spaceGuid,
+  cfGuid: action.cfGuid,
+  orgGuid: action.orgGuid,
+});
 const setCreateServiceInstance = (state: CreateServiceInstanceState, action) => ({
   ...state,
   spaceScoped: action.spaceScoped,
   spaceGuid: action.spaceGuid,
   name: action.name, params:
-    action.jsonParams,
+  action.jsonParams,
   tags: action.tags
 });
 
@@ -54,6 +61,8 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       return setSpaceScopedFlag(state, action);
     case SET_CREATE_SERVICE_INSTANCE:
       return setCreateServiceInstance(state, action);
+    case SET_CREATE_SERVICE_INSTANC_CF_DETAILS:
+      return setCreateServiceInstanceCfDetails(state, action);
     default:
       return state;
   }

@@ -50,6 +50,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       servicePlans: new FormControl('', Validators.required),
     });
     this.subscription = this.servicePlans$.pipe(
+      filter(p => !!p && p.length > 0),
       tap(o => {
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
         this.servicePlans = o;
