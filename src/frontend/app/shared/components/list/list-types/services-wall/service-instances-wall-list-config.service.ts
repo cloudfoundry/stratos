@@ -14,9 +14,31 @@ import { PaginationEntityState } from '../../../../../store/types/pagination.typ
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ListView } from '../../../../../store/actions/list.actions';
 
+
+const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+  const cfGuid = paginationState.clientPagination.filter.items['cf'];
+  const orgGuid = paginationState.clientPagination.filter.items['org'];
+  const spaceGuid = paginationState.clientPagination.filter.items['space'];
+  return entities.filter(e => {
+    const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
+    const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
+    const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
+    return validCF && validOrg && validSpace;
+  });
+};
 @Injectable()
 export class ServiceInstancesWallListConfigService
   extends CfServiceInstancesListConfigBase {
+
+  text = {
+    title: null,
+    filter: 'Search by name',
+    noEntries: 'There are no service instances'
+  };
+  enableTextFilter = true;
+  defaultView = 'cards' as ListView;
+  cardComponent = ServiceInstanceCardComponent;
+  viewType = ListViewTypes.BOTH;
 
   constructor(store: Store<AppState>,
     datePipe: DatePipe,
@@ -30,36 +52,11 @@ export class ServiceInstancesWallListConfigService
       createListFilterConfig('space', 'Space', this.cfOrgSpaceService.space),
     ];
 
-
-    const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
-      // Filter by cf/org/space
-      const cfGuid = paginationState.clientPagination.filter.items['cf'];
-      const orgGuid = paginationState.clientPagination.filter.items['org'];
-      const spaceGuid = paginationState.clientPagination.filter.items['space'];
-      return entities.filter(e => {
-        const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
-        const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
-        const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
-        return validCF && validOrg && validSpace;
-      });
-    };
-
-
-
     const transformEntities = [{ type: 'filter', field: 'entity.name' }, cfOrgSpaceFilter];
-
     this.dataSource = new ServiceInstancesWallDataSource(store, transformEntities, this);
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
+    this.getSingleActions = () => [];
 
-    this.text = {
-      title: null,
-      filter: 'Search by name',
-      noEntries: 'There are no service instances'
-    };
-    this.enableTextFilter = true;
-    this.cardComponent = ServiceInstanceCardComponent;
-    this.defaultView = 'cards' as ListView;
-    this.viewType = ListViewTypes.BOTH;
   }
 
   getDataSource = () => this.dataSource;
