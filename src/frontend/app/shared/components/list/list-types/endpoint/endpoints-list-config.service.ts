@@ -26,6 +26,7 @@ import {
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -190,13 +191,15 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private store: Store<AppState>,
     private dialog: MatDialog,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private entityMonitorFactory: EntityMonitorFactory
+    private entityMonitorFactory: EntityMonitorFactory,
+    private internalEventMonitorFactory: InternalEventMonitorFactory
   ) {
     this.dataSource = new EndpointsDataSource(
       this.store,
       this,
       paginationMonitorFactory,
-      entityMonitorFactory
+      entityMonitorFactory,
+      internalEventMonitorFactory
     );
   }
 

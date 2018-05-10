@@ -13,6 +13,7 @@ import {
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ApplicationService } from '../../../../application.service';
+import { ListDataSource } from '../../../../../../shared/components/list/data-sources-controllers/list-data-source';
 
 export interface VariableTabAllEnvVarType {
   name: string;
@@ -32,19 +33,21 @@ export class VariablesTabComponent implements OnInit {
 
 
 
+
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
     private listConfig: ListConfig<ListAppEnvVar>
   ) {
-    this.envVarsDataSource = listConfig.getDataSource() as CfAppVariablesDataSource;
+    this.envVarsDataSource = listConfig.getDataSource();
   }
 
   envVars$: Observable<{
     names: String[],
     values: {}
   }>;
-  envVarsDataSource: CfAppVariablesDataSource;
+
+  envVarsDataSource: ListDataSource<ListAppEnvVar, ListAppEnvVar>;
   allEnvVars$: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {

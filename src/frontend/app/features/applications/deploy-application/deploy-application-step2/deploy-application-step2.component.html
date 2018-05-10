@@ -1,7 +1,8 @@
 <b> {{ stepperText }}</b>
 <form novalidate #sourceSelectionForm="ngForm" class="stepper-form">
   <div class="deploy-step2-form">
-    <mat-form-field>
+    <!-- This can be flipped when we add other deploy types -->
+    <mat-form-field *ngIf="false">
       <mat-select class="reset-margin" [disabled]="isRedeploy" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
         <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
           {{ sourceType.name }}
@@ -48,7 +49,7 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <div *ngIf="commitInfo" class="deploy-step2-form__project-info-group">
+        <div *ngIf="isRedeploy && commitInfo" class="deploy-step2-form__project-info-group">
           <div>
             <img src="{{commitInfo.author.avatar_url}}">
           </div>

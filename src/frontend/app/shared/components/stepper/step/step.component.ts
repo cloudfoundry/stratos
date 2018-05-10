@@ -26,6 +26,7 @@ export type StepOnNextFunction = () => Observable<{
 
 export class StepComponent implements OnInit {
 
+  public _onEnter: () => void;
   active = false;
   complete = false;
   error = false;
@@ -52,11 +53,17 @@ export class StepComponent implements OnInit {
   @Input('disablePrevious')
   disablePrevious = false;
 
-  @Input('blocked$')
-  blocked$: Observable<boolean>;
+  @Input('blocked')
+  blocked: boolean;
+
+  @Input('destructiveStep')
+  public destructiveStep = false;
 
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
+
+  @Input()
+  skip = false;
 
   @Input()
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
@@ -64,7 +71,19 @@ export class StepComponent implements OnInit {
   @Input()
   onEnter: () => void = () => { }
 
+  @Input()
+  onLeave: () => void = () => { }
+
   constructor() {
+    this._onEnter = () => {
+      if (this.destructiveStep) {
+        this.busy = true;
+        setTimeout(() => {
+          this.busy = false;
+        }, 1000);
+      }
+      this.onEnter();
+    };
   }
 
   ngOnInit() {

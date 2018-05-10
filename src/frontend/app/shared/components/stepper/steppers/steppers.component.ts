@@ -22,8 +22,9 @@ import { empty } from 'rxjs/observable/empty';
   providers: [SteppersService],
   encapsulation: ViewEncapsulation.None
 })
-export class SteppersComponent implements OnInit, AfterContentInit {
+export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
+  private nextSub: Subscription;
   cancel$: Observable<string>;
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
@@ -63,13 +64,21 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   }
 
   goNext() {
+    this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
       step.busy = true;
-      step.onNext()
+      const obs$ = step.onNext();
+      if (!(obs$ instanceof Observable)) {
+        return;
+      }
+      if (this.nextSub) {
+        this.nextSub.unsubscribe();
+      }
+      this.nextSub = obs$
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false }))
-        .switchMap(({ success, message, redirect }) => {
+        .subscribe(({ success, message, redirect }) => {
           step.error = !success;
           step.busy = false;
           if (success) {
@@ -79,8 +88,7 @@ export class SteppersComponent implements OnInit, AfterContentInit {
               this.setActive(this.currentIndex + 1);
             }
           }
-          return [];
-        }).subscribe();
+        });
     }
   }
 
@@ -96,27 +104,30 @@ export class SteppersComponent implements OnInit, AfterContentInit {
   }
 
   setActive(index: number) {
-    if (this.canGoto(index)) {
-      // We do allow next beyond the last step to
-      // allow the last step to finish up
-      // This shouldn't effect the state of the stepper though.
-      index = Math.min(index, this.steps.length - 1);
-      this.steps.forEach((_step, i) => {
-        if (i < index) {
-          _step.complete = true;
-        } else {
-          _step.complete = false;
-        }
-        _step.active = i === index ? true : false;
-      });
-      this.currentIndex = index;
-      this.steps[this.currentIndex].onEnter();
+    if (!this.canGoto(index)) {
+      return;
     }
+    // We do allow next beyond the last step to
+    // allow the last step to finish up
+    // This shouldn't effect the state of the stepper though.
+    index = Math.min(index, this.steps.length - 1);
+    this.steps.forEach((_step, i) => {
+      if (i < index) {
+        _step.complete = true;
+      } else {
+        _step.complete = false;
+      }
+      _step.active = i === index ? true : false;
+    });
+    this.steps[this.currentIndex].onLeave();
+    index = this.steps[index].skip ? ++index : index;
+    this.currentIndex = index;
+    this.steps[this.currentIndex]._onEnter();
   }
 
-  canGoto(index: number) {
+  canGoto(index: number): boolean {
     const step = this.steps[this.currentIndex];
-    if (!step || step.busy || step.disablePrevious) {
+    if (!step || step.busy || step.disablePrevious || step.skip) {
       return false;
     }
     if (index === this.currentIndex) {
@@ -170,6 +181,14 @@ export class SteppersComponent implements OnInit, AfterContentInit {
 
   getCancelButtonText(currentIndex: number): string {
     return this.steps[currentIndex].cancelButtonText;
+  }
+  private unsubscribeNext() {
+    if (this.nextSub) {
+      this.nextSub.unsubscribe();
+    }
+  }
+  ngOnDestroy() {
+    this.unsubscribeNext();
   }
 
 }

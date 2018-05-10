@@ -23,12 +23,6 @@ import (
 // WebScoket code based on: https://github.com/gorilla/websocket/blob/master/examples/command/main.go
 
 const (
-	// Time allowed to read the next pong message from the peer
-	pongWait = 30 * time.Second
-
-	// Send ping messages to peer with this period (must be less than pongWait)
-	pingPeriod = (pongWait * 9) / 10
-
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
 
@@ -239,21 +233,6 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 			log.Error("App SSH Failed to write nessage")
 			ws.Close()
 			break
-		}
-	}
-}
-
-func ping(ws *websocket.Conn, done chan struct{}) {
-	ticker := time.NewTicker(pingPeriod)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			if err := ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(writeWait)); err != nil {
-				log.Println("ping:", err)
-			}
-		case <-done:
-			return
 		}
 	}
 }

@@ -23,13 +23,11 @@ export class AppChip<T = string> {
   templateUrl: './chips.component.html',
   styleUrls: ['./chips.component.scss']
 })
-export class AppChipsComponent {
+export class AppChipsComponent implements OnInit {
 
   constructor() { }
 
   public atLowerLimit = true;
-  private lowerLimit = 3;
-  public limit = this.lowerLimit;
 
   @Input('chips')
   public chips: AppChip[] = [];
@@ -39,6 +37,18 @@ export class AppChipsComponent {
 
   @Input('orientation')
   orientation: 'rtl' | 'ltr' = 'ltr';
+
+  @Input('lowerLimit')
+  lowerLimit = 3;
+
+  @Input('displayProperty')
+  displayProperty = 'value';
+
+  public limit;
+
+  ngOnInit() {
+    this.limit = this.lowerLimit;
+  }
 
   public toggleLimit() {
     if (this.limit === this.lowerLimit) {

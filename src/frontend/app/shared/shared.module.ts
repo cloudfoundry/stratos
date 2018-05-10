@@ -11,6 +11,8 @@ import { CoreModule } from '../core/core.module';
 import {
   ApplicationInstanceChartComponent,
 } from '../features/applications/application/application-instance-chart/application-instance-chart.component';
+import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -27,12 +29,17 @@ import { CardCfOrgUsageComponent } from './components/cards/card-cf-org-usage/ca
 import {
   CardCfOrgUserDetailsComponent,
 } from './components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
 import { CardCfSpaceDetailsComponent } from './components/cards/card-cf-space-details/card-cf-space-details.component';
 import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-usage.component';
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
+import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
+import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
+import { CliInfoComponent } from './components/cli-info/cli-info.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
 import { DetailsCardComponent } from './components/details-card/details-card.component';
@@ -44,6 +51,8 @@ import { EndpointsMissingComponent } from './components/endpoints-missing/endpoi
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
+import { GithubCommitAuthorComponent } from './components/github-commit-author/github-commit-author.component';
+import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { listCardComponents } from './components/list/list-cards/card.types';
 import {
   AppEventDetailDialogComponentComponent,
@@ -53,6 +62,9 @@ import { MetaCardItemComponent } from './components/list/list-cards/meta-card/me
 import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
 import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
 import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
+import {
+  TableCellRequestMonitorIconComponent,
+} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -66,35 +78,30 @@ import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
-import { PageSubheaderComponent } from './components/page-subheader/page-subheader.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
 import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
 import { StatefulIconComponent } from './components/stateful-icon/stateful-icon.component';
 import { SteppersModule } from './components/stepper/steppers.module';
+import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
+import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
+import { CloudFoundryService } from './data-services/cloud-foundry.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
 import { MbToHumanSizePipe } from './pipes/mb-to-human-size.pipe';
 import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
-import { CardCfRecentAppsComponent } from './components/cards/card-cf-recent-apps/card-cf-recent-apps.component';
-import { CompactAppCardComponent } from './components/cards/card-cf-recent-apps/compact-app-card/compact-app-card.component';
-import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
-import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
-import { CloudFoundryService } from './data-services/cloud-foundry.service';
-import { CliInfoComponent } from './components/cli-info/cli-info.component';
-import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
 
 @NgModule({
   imports: [
@@ -133,7 +140,6 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     ApplicationStateIconPipe,
     ApplicationStateIconComponent,
     ApplicationStateComponent,
-    PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
@@ -175,7 +181,13 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     StratosTitleComponent,
     IntroScreenComponent,
     CliInfoComponent,
-    CliCommandComponent
+    CliCommandComponent,
+    GithubCommitAuthorComponent,
+    UserProfileBannerComponent,
+    AppActionMonitorComponent,
+    AppActionMonitorIconComponent,
+    UserProfileBannerComponent,
+    TableCellRequestMonitorIconComponent
   ],
   exports: [
     FormsModule,
@@ -202,7 +214,6 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     EndpointsMissingComponent,
     ApplicationStateComponent,
     SshViewerComponent,
-    PageSubheaderComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
@@ -239,8 +250,13 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     ApplicationInstanceChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
+    UserProfileBannerComponent,
     CliInfoComponent,
-    CliCommandComponent
+    CliCommandComponent,
+    GithubCommitAuthorComponent,
+    AppActionMonitorComponent,
+    CliCommandComponent,
+    AppActionMonitorIconComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -255,7 +271,8 @@ import { CliCommandComponent } from './components/cli-info/cli-command/cli-comma
     ConfirmationDialogService,
     EntityMonitorFactory,
     PaginationMonitorFactory,
-    CloudFoundryService
+    CloudFoundryService,
+    InternalEventMonitorFactory
   ]
 })
 export class SharedModule { }
