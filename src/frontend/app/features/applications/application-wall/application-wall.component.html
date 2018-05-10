@@ -1,12 +1,15 @@
 <app-page-header [endpointIds$]="cfIds$">
+  {{canCreateApplication$ | async}}
   <h1>Applications</h1>
   <div class="page-header-right">
-    <button *ngIf="canCreateApplication$ | async" mat-icon-button [routerLink]="'/applications/new/'">
+    <ng-container *appUserPermission="canCreateApplication">
+      <button mat-icon-button [routerLink]="'/applications/new/'">
       <mat-icon>add</mat-icon>
     </button>
-    <button mat-icon-button [routerLink]="'/applications/deploy/'">
+      <button mat-icon-button [routerLink]="'/applications/deploy/'">
       <mat-icon>file_upload</mat-icon>
     </button>
+    </ng-container>
   </div>
 </app-page-header>
 <app-endpoints-missing #appEndpointsMissing></app-endpoints-missing>

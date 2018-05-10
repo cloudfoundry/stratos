@@ -55,7 +55,7 @@ export class ApplicationWallComponent implements OnDestroy {
   private statsSub: Subscription;
   private initCfOrgSpaceService: Subscription;
 
-  public canCreateApplication$: Observable<boolean>;
+  public canCreateApplication: string;
 
   constructor(
     public cloudFoundryService: CloudFoundryService,
@@ -66,10 +66,14 @@ export class ApplicationWallComponent implements OnDestroy {
   ) {
     const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      tap(endpoints => endpoints.forEach(endpoint => this.store.dispatch(new GetCFUser(endpoint.user.guid, endpoint.guid)))),
+      tap(endpoints => endpoints.forEach(endpoint => {
+        if (endpoint.user) {
+          this.store.dispatch(new GetCFUser(endpoint.user.guid, endpoint.guid));
+        }
+      })),
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
-    this.canCreateApplication$ = currentUserPermissionsService.can(CurrentUserPermissions.APPLICATION_CREATE);
+    this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
     this.statsSub = dataSource.page$.pipe(
       // The page observable will fire often, here we're only interested in updating the stats on actual page changes
       distinctUntilChanged(distinctPageUntilChanged(dataSource)),

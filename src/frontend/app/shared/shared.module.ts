@@ -100,6 +100,7 @@ import { AppActionMonitorComponent } from './components/app-action-monitor/app-a
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { TableCellRequestMonitorIconComponent } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { UserPermissionDirective } from './user-permission.directive';
 
 @NgModule({
   imports: [
@@ -183,7 +184,8 @@ import { TableCellRequestMonitorIconComponent } from './components/list/list-tab
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserProfileBannerComponent,
-    TableCellRequestMonitorIconComponent
+    TableCellRequestMonitorIconComponent,
+    UserPermissionDirective
   ],
   exports: [
     FormsModule,
@@ -250,7 +252,8 @@ import { TableCellRequestMonitorIconComponent } from './components/list/list-tab
     CliInfoComponent,
     AppActionMonitorComponent,
     CliCommandComponent,
-    AppActionMonitorIconComponent
+    AppActionMonitorIconComponent,
+    UserPermissionDirective
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

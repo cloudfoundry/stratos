@@ -8,9 +8,13 @@ import {
   IOrgRoleState,
   ISpacesRoleState,
   IOrgsRoleState,
+  IStratosRolesState,
 } from '../../types/current-user-roles.types';
 
 export const selectCurrentUserRolesState = (state: AppState) => state.currentUserRoles;
+
+export const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => state.internal;
+export const selectCurrentUserStratosRoles = (role: string) => (state: IStratosRolesState) => state[role] || false;
 
 export const selectCurrentUserCFRolesState = (state: ICurrentUserRolesState) => state.cf;
 export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) => (state: IAllCfRolesState) => state[endpointGuid];
@@ -20,6 +24,23 @@ export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => sta
 
 export const selectCurrentUserCFSpaceRolesState = (spaceId: string) => (state: ISpacesRoleState) => state[spaceId];
 export const selectCurrentUserCFOrgRolesState = (orgId: string) => (state: IOrgsRoleState) => state[orgId];
+
+// Top level stratos endpoint role objects
+// ============================
+export const getCurrentUserStratosRolesState = compose(
+  selectCurrentUserStratosRolesState,
+  selectCurrentUserRolesState
+);
+// ============================
+
+// Top level stratos endpoint role objects
+// ============================
+export const getCurrentUserStratosRole = (role: string) => compose(
+  selectCurrentUserStratosRoles(role),
+  getCurrentUserStratosRolesState
+);
+// ============================
+
 
 // Top level cf endpoint role objects
 // ============================

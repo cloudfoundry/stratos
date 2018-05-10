@@ -4,9 +4,10 @@ export enum CurrentUserPermissions {
   APPLICATION_CREATE = 'create.application',
   SPACE_DELETE = 'delete.space',
   SPACE_EDIT = 'edit.space',
-  ORGANIZATION_CREATE = 'create.org'
+  ORGANIZATION_CREATE = 'create.org',
+  ENDPOINT_REGISTER = 'register.endpoint'
 }
-export type PermissionConfigType = PermissionConfig[] | PermissionConfigLink;
+export type PermissionConfigType = PermissionConfig[] | PermissionConfig | PermissionConfigLink;
 export interface IPermissionConfigs {
   [permissionString: string]: PermissionConfigType;
 }
@@ -19,7 +20,8 @@ export enum PermissionStrings {
   ORG_MANAGER = 'isManager',
   ORG_AUDITOR = 'isAuditor',
   ORG_BILLING_MANAGER = 'isBillingManager',
-  ORG_USER = 'isUser'
+  ORG_USER = 'isUser',
+  STRATOS_ADMIN = 'isAdmin'
 }
 
 
@@ -27,7 +29,8 @@ export enum PermissionTypes {
   SPACE = 'spaces',
   ORGANIZATION = 'organizations',
   GLOBAL = 'global',
-  FEATURE_FLAG = 'feature-flag'
+  FEATURE_FLAG = 'feature-flag',
+  STRATOS = 'internal'
 }
 
 export class PermissionConfig {
@@ -63,5 +66,6 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_AUDITOR),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
-  ]
+  ],
+  [CurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN),
 };

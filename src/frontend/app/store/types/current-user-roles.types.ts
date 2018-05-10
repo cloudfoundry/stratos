@@ -50,9 +50,11 @@ export interface IAllCfRolesState {
   [guid: string]: ICfRolesState;
 }
 
+export interface IStratosRolesState {
+  isAdmin: boolean;
+}
+
 export interface ICurrentUserRolesState {
-  internal: {
-    isAdmin: boolean
-  };
+  internal: IStratosRolesState;
   cf: IAllCfRolesState;
 }
