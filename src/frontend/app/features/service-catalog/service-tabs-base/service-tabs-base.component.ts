@@ -34,7 +34,7 @@ export class ServiceTabsBaseComponent implements OnDestroy {
 
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
     this.servicesSubscription = this.servicesService.service$.subscribe();
-    this.hasVisiblePlans$ = this.servicesService.getVisiblePlans().pipe(
+    this.hasVisiblePlans$ = this.servicesService.getVisibleServicePlans().pipe(
       map(p => p.length > 0));
     this.toolTipText$ = this.hasVisiblePlans$.pipe(
       map(hasPlans => {
