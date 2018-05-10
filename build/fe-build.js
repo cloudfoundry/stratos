@@ -36,7 +36,7 @@
     cb();
   });
 
-  // Apply defaults instead of any cusotmizations that are available in custom-src
+  // Apply defaults instead of any customizations that are available in custom-src
   gulp.task('customize-default', function (cb) {
     doCustomize(true);
     cb();
