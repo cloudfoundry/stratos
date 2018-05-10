@@ -16,6 +16,7 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
+import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -54,6 +55,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   public isAdding$ = new BehaviorSubject<boolean>(false);
 
   // Select item/s
+  public selectedRows$ = new ReplaySubject<Map<string, T>>();
   public selectedRows = new Map<string, T>();
   public isSelecting$ = new BehaviorSubject(false);
   public selectAllChecked = false;
@@ -164,7 +166,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
-    if (config.hideRefresh) {
+    if (config.listConfig && config.listConfig.hideRefresh) {
       return null;
     }
     return config.refresh ? config.refresh : () => {
@@ -220,6 +222,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
       this.selectedRows.set(this.getRowUniqueId(row), row);
       this.selectAllChecked = multiMode && this.selectedRows.size === this.filteredRows.length;
     }
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(multiMode && this.selectedRows.size > 0);
   }
 
@@ -232,11 +235,13 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
         this.selectedRows.delete(this.getRowUniqueId(row));
       }
     }
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(this.selectedRows.size > 0);
   }
 
   selectClear() {
     this.selectedRows.clear();
+    this.selectedRows$.next(this.selectedRows);
     this.isSelecting$.next(false);
   }
 

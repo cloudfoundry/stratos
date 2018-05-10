@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
 
 import { ListDataSource } from '../../../shared/components/list/data-sources-controllers/list-data-source';
 import {
@@ -21,11 +23,14 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers
     }
   ]
 })
-export class ServiceCatalogPageComponent implements OnInit {
+export class ServiceCatalogPageComponent {
+
+  public cfIds$: Observable<string[]>;
 
   constructor(private listConfig: ListConfig<APIResource>, public cloudFoundryService: CloudFoundryService) {
     const dataSource: ListDataSource<APIResource> = listConfig.getDataSource();
-  }
-  ngOnInit() {
+    this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
+      map(endpoints => endpoints.map(endpoint => endpoint.guid))
+    );
   }
 }
