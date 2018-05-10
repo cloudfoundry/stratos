@@ -3,7 +3,7 @@
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
     <ng-container *ngTemplateOutlet="title.content"></ng-container>
-    <div *ngIf="_actionMenu" appClickStopPropagation>
+    <div *ngIf="_actionMenu && (showMenu$ | async)" appClickStopPropagation>
       <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
       <mat-menu class="meta-card__header__popup" #menu="matMenu">
         <ng-container *ngFor="let menuItem of _actionMenu">

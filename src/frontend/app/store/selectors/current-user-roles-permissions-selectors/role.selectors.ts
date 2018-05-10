@@ -19,6 +19,7 @@ export const selectCurrentUserStratosRoles = (role: string) => (state: IStratosR
 export const selectCurrentUserCFRolesState = (state: ICurrentUserRolesState) => state.cf;
 export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) => (state: IAllCfRolesState) => state[endpointGuid];
 
+export const selectCurrentUserCFGlobalRolesState = (state: ICfRolesState) => state.global;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
 
@@ -55,6 +56,14 @@ export const getCurrentUserCFRolesState = compose(
 export const getCurrentUserCFEndpointRolesState = (endpointGuid: string) => compose(
   selectCurrentUserCFEndpointRolesState(endpointGuid),
   getCurrentUserCFRolesState
+);
+// ============================
+
+// Global
+// ============================
+export const getCurrentUserCFGlobalState = (endpointGuid: string) => compose(
+  selectCurrentUserCFGlobalRolesState,
+  getCurrentUserCFEndpointRolesState(endpointGuid)
 );
 // ============================
 

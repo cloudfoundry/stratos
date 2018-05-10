@@ -47,12 +47,8 @@ export class PermissionConfigLink {
 }
 
 export const permissionConfigs: IPermissionConfigs = {
-  [CurrentUserPermissions.APPLICATION_CREATE]: [
-    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
-  ],
-  [CurrentUserPermissions.SPACE_DELETE]: [
-    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER)
-  ],
+  [CurrentUserPermissions.APPLICATION_CREATE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SPACE_DELETE]: new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
   [CurrentUserPermissions.SPACE_EDIT]: [
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),

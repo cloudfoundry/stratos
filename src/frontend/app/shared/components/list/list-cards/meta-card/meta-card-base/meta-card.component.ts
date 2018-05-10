@@ -5,6 +5,8 @@ import { CardStatus } from '../../../../application-state/application-state.serv
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 import { IPermissionConfigs } from '../../../../../../core/current-user-permissions.config';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { map, tap } from 'rxjs/operators';
 
 export interface MetaCardMenuItem {
   icon?: string;
@@ -36,9 +38,14 @@ export class MetaCardComponent {
       }
       return menuItem;
     });
+    this.showMenu$ = combineLatest(actionMenu.map(menuItem => menuItem.can)).pipe(
+      tap(console.log),
+      map(cans => cans.some(can => can))
+    );
   }
 
   public _actionMenu: MetaCardMenuItem[];
+  public showMenu$: Observable<boolean>;
 
   @Input('clickAction')
   clickAction: Function = null;

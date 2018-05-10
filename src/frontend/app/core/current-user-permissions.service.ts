@@ -14,6 +14,7 @@ import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-fac
 import {
   getCurrentUserCFEndpointRolesState,
   getCurrentUserStratosRole,
+  getCurrentUserCFGlobalState,
 } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { APIResource } from '../store/types/api.types';
@@ -59,6 +60,7 @@ export class CurrentUserPermissionsService {
         return this.getFeatureFlagCheck(actionConfig, endpointGuid);
       case (PermissionTypes.ORGANIZATION):
       case (PermissionTypes.SPACE):
+      case (PermissionTypes.GLOBAL):
         return this.getCfCheck(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
       case (PermissionTypes.STRATOS):
         return this.getInternalCheck(actionConfig.permission as PermissionStrings);
@@ -73,35 +75,6 @@ export class CurrentUserPermissionsService {
     return this.combineChecks([cfChecks, featureFlagChecks], endpointGuid);
   }
 
-  // TODO:
-  // public getRoleString(
-  //   endpointGuid: string,
-  //   orgOrSpace?: PermissionTypes.ORGANIZATION | PermissionTypes.SPACE,
-  //   orgOrSpaceGuid?: string,
-  //   all: boolean = false
-  // ): Observable<string> {
-  //   if (!endpointGuid && !orgOrSpace) {
-  //     return Observable.of('Unknown');
-  //   }
-  //   const cfEndpointRolesState$ = this.store.select(getCurrentUserCFEndpointRolesState(endpointGuid));
-  //   if (!orgOrSpaceGuid) {
-  //     return cfEndpointRolesState$.pipe(
-  //       map(cfPermissions => cfPermissions.global.isAdmin ? 'Admin' : 'Non-admin')
-  //     );
-  //   } else {
-  //     return cfEndpointRolesState$.pipe(
-  //       map(cfPermissions => cfPermissions[orgOrSpace] ? 'Admin' : 'Non-admin')
-  //     );
-  //   }
-  // }
-
-  // private getAllRoles(orgOrSpace?: PermissionTypes.ORGANIZATION | PermissionTypes.SPACE, state) {
-
-  // }
-
-  // private getPrimaryRole() {
-
-  // }
   private getInternalChecks(
     configs: PermissionConfig[]
   ) {
@@ -139,7 +112,9 @@ export class CurrentUserPermissionsService {
     const { type, permission } = config;
     const actualGuid = type === PermissionTypes.SPACE && spaceGuid ? spaceGuid : orgOrSpaceGuid;
     const cfPermissions = permission as PermissionStrings;
-    if (!actualGuid) {
+    if (type === PermissionTypes.GLOBAL || (endpointGuid && actualGuid)) {
+      return this.check(type, cfPermissions, endpointGuid, actualGuid);
+    } else if (!actualGuid) {
       const endpointGuids$ = !endpointGuid ? this.getAllEndpointGuids() : Observable.of([endpointGuid]);
       return endpointGuids$.pipe(
         switchMap(guids => {
@@ -151,8 +126,6 @@ export class CurrentUserPermissionsService {
           );
         })
       );
-    } else if (endpointGuid && actualGuid) {
-      return this.check(type, cfPermissions, endpointGuid, actualGuid);
     }
     return Observable.of(false);
   }
@@ -249,9 +222,13 @@ export class CurrentUserPermissionsService {
     if (type === PermissionTypes.STRATOS) {
       return this.store.select(getCurrentUserStratosRole(permission));
     }
+    if (type === PermissionTypes.GLOBAL) {
+      return this.store.select(getCurrentUserCFGlobalState(permission));
+    }
     return this.getEndpointState(endpointGuid).pipe(
       filter(state => !!state),
       map(state => state[type][orgOrSpaceGuid]),
+      filter(state => !!state),
       map(state => this.selectPermission(state, permission)),
       distinctUntilChanged()
     );
