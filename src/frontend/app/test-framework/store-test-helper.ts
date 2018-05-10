@@ -102,6 +102,7 @@ const testInitialStoreState: AppState = {
   },
   pagination: {
     featureFlag: {},
+    serviceBroker: {},
     securityGroup: {},
     servicePlanVisibility: {},
     buildpack: {},
@@ -587,13 +588,15 @@ const testInitialStoreState: AppState = {
     name: '',
     servicePlanGuid: '',
     spaceGuid: '',
-    orgGuid: ''
+    orgGuid: '',
+    spaceScoped: false
   },
   deployApplication: {
     cloudFoundryDetails: null,
   },
   request: {
     servicePlanVisibility: {},
+    serviceBroker: {},
     serviceInstance: {},
     servicePlan: {},
     service: {},
@@ -3850,6 +3853,7 @@ const testInitialStoreState: AppState = {
   },
   requestData: {
     servicePlanVisibility: {},
+    serviceBroker: {},
     serviceInstance: {},
     servicePlan: {},
     service: {},

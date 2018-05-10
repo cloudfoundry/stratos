@@ -2,6 +2,7 @@ import {
   SET_CREATE_SERVICE_INSTANCE,
   SET_ORG,
   SET_SERVICE_INSTANCE_GUID,
+  SET_SERVICE_INSTANCE_SPACE_SCOPED,
   SET_SERVICE_PLAN,
   SET_SPACE,
 } from '../actions/create-service-instance.actions';
@@ -12,9 +13,24 @@ const defaultState: CreateServiceInstanceState = {
   name: '',
   servicePlanGuid: '',
   spaceGuid: '',
-  orgGuid: ''
+  orgGuid: '',
+  spaceScoped: false
 };
 
+const setCreateServiceInstance = (state: CreateServiceInstanceState, action) => ({
+  ...state,
+  spaceScoped: action.spaceScoped,
+  spaceGuid: action.spaceGuid,
+  name: action.name, params:
+    action.jsonParams,
+  tags: action.tags
+});
+
+const setSpaceScopedFlag = (state: CreateServiceInstanceState, action) => ({
+  ...state,
+  spaceScoped: action.spaceScoped,
+  spaceGuid: action.spaceGuid
+});
 
 export function createServiceInstanceReducer(state: CreateServiceInstanceState = defaultState, action) {
   switch (action.type) {
@@ -34,11 +50,12 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       return {
         ...state, serviceInstanceGuid: action.guid
       };
+    case SET_SERVICE_INSTANCE_SPACE_SCOPED:
+      return setSpaceScopedFlag(state, action);
     case SET_CREATE_SERVICE_INSTANCE:
-      return {
-        ...state, spaceGuid: action.spaceGuid, name: action.name, params: action.jsonParams, tags: action.tags
-      };
+      return setCreateServiceInstance(state, action);
     default:
       return state;
   }
 }
+
