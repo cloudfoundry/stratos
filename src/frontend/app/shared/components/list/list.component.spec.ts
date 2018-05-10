@@ -52,7 +52,6 @@ describe('ListComponent', () => {
     fixture = TestBed.createComponent(ListComponent);
     component = fixture.componentInstance;
     component.columns = [];
-    component.paginator.pageSizeOptions = [];
     fixture.detectChanges();
   });
 

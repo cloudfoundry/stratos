@@ -14,10 +14,12 @@ export const PROJECT_EXISTS = '[Deploy App] Project exists';
 export const FETCH_BRANCHES_FOR_PROJECT = '[Deploy App] Fetch branches';
 export const SAVE_APP_DETAILS = '[Deploy App] Save app details';
 export const FETCH_COMMIT = '[Deploy App] Fetch commit';
+export const FETCH_COMMITS = '[Deploy App] Fetch commits';
 export const SET_DEPLOY_CF_SETTINGS = '[Deploy App] Set CF Settings';
 export const DELETE_DEPLOY_APP_SECTION = '[Deploy App] Delete section';
 export const SET_BRANCH = '[Deploy App] Set branch';
 export const SET_DEPLOY_BRANCH = '[Deploy App] Set deploy branch';
+export const SET_DEPLOY_COMMIT = '[Deploy App] Set deploy commit';
 export const DELETE_COMMIT = '[Deploy App] Delete commit';
 
 export const FETCH_BRANCH_START = '[GitHub] Fetch branch start';
@@ -82,6 +84,31 @@ export class FetchCommit implements IRequestAction {
   entityKey = githubCommitSchemaKey;
 }
 
+export class FetchCommits implements PaginatedAction {
+
+  /**
+   * Creates an instance of FetchCommits.
+   * @param {string} projectName For example `cloudfoundry-incubator/stratos`
+   * @param {string} sha Branch name, tag, etc
+   * @memberof FetchCommits
+   */
+  constructor(public projectName: string, public sha: string) {
+    this.paginationKey = projectName + sha;
+  }
+  actions = [
+    '[Deploy App] Fetch commits start',
+    '[Deploy App] Fetch commits success',
+    '[Deploy App] Fetch commits failed',
+  ];
+  type = FETCH_COMMITS;
+  entityKey = githubCommitSchemaKey;
+  paginationKey: string;
+  initialParams = {
+    'order-direction': 'asc',
+    'order-direction-field': 'date',
+  };
+}
+
 export class StoreCFSettings implements Action {
   constructor(public cloudFoundryDetails: any) { }
   type = SET_DEPLOY_CF_SETTINGS;
@@ -100,4 +127,9 @@ export class SetBranch implements Action {
 export class SetDeployBranch implements Action {
   constructor(private branch: string) { }
   type = SET_DEPLOY_BRANCH;
+}
+
+export class SetDeployCommit implements Action {
+  constructor(private commit: string) { }
+  type = SET_DEPLOY_COMMIT;
 }
