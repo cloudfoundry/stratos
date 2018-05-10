@@ -259,10 +259,6 @@ export class CfRoleCheckboxComponent implements OnInit, OnDestroy {
     }
   }
 
-  public getLabel(): string {
-    return this.spaceGuid ? '' : UserRoleLabels.org.long[this.role];
-  }
-
   public roleUpdated(checked: boolean) {
     this.checked = checked;
     this.cfRolesService.newRoles$.pipe(

@@ -3,29 +3,41 @@ import {
   ComponentFactory,
   ComponentFactoryResolver,
   ComponentRef,
+  OnDestroy,
   OnInit,
   ViewChild,
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { debounceTime, distinctUntilChanged, filter, first, map, switchMap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../../core/cf-api.types';
-import { PaginationMonitorFactory } from '../../../../../shared/monitors/pagination-monitor.factory';
-import { GetAllOrganizations } from '../../../../../store/actions/organization.actions';
+import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
+import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
+import {
+  TableCellRoleOrgSpaceComponent,
+} from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
+import {
+  TableCellSelectOrgComponent,
+} from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
 import { UsersRolesSetOrg } from '../../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../../store/app-state';
-import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../../../store/helpers/entity-relations.types';
-import { getPaginationObservables } from '../../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectUsersRolesPicked, selectUsersRolesRoles } from '../../../../../store/selectors/users-roles.selector';
+import {
+  selectUsersRolesOrgGuid,
+  selectUsersRolesPicked,
+  selectUsersRolesRoles,
+} from '../../../../../store/selectors/users-roles.selector';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser, OrgUserRoleNames } from '../../../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
+import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
+
+interface Org { metadata: { guid: string }; }
 
 @Component({
   selector: 'app-manage-users-modify',
@@ -33,38 +45,94 @@ import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space
   styleUrls: ['./manage-users-modify.component.scss'],
   entryComponents: [SpaceRolesListWrapperComponent]
 })
-export class UsersRolesModifyComponent implements OnInit {
+export class UsersRolesModifyComponent implements OnInit, OnDestroy {
+
+  orgColumns: ITableColumn<Org>[] = [
+    {
+      columnId: 'org',
+      headerCell: () => 'Organization',
+      cellComponent: TableCellSelectOrgComponent
+    },
+    {
+      columnId: 'manager',
+      headerCell: () => 'Manager',
+      cellComponent: TableCellRoleOrgSpaceComponent,
+      cellConfig: {
+        role: OrgUserRoleNames.MANAGER,
+      }
+    },
+    {
+      columnId: 'auditor',
+      headerCell: () => 'Auditor',
+      cellComponent: TableCellRoleOrgSpaceComponent,
+      cellConfig: {
+        role: OrgUserRoleNames.AUDITOR,
+      }
+    },
+    {
+      columnId: 'billingManager',
+      headerCell: () => 'Billing Manager',
+      cellComponent: TableCellRoleOrgSpaceComponent,
+      cellConfig: {
+        role: OrgUserRoleNames.BILLING_MANAGERS,
+      }
+    },
+    {
+      columnId: 'user',
+      headerCell: () => 'User',
+      cellComponent: TableCellRoleOrgSpaceComponent,
+      cellConfig: {
+        role: OrgUserRoleNames.USER,
+      }
+    }
+  ];
+  orgDataSource: ITableListDataSource<APIResource<IOrganization>>;
+
 
   @ViewChild('spaceRolesTable', { read: ViewContainerRef })
   spaceRolesTable: ViewContainerRef;
 
   private wrapperFactory: ComponentFactory<SpaceRolesListWrapperComponent>;
   private wrapperRef: ComponentRef<SpaceRolesListWrapperComponent>;
-  /**
-   * Observable which is populated if only a single org is to be used
-   */
-  singleOrg$: Observable<APIResource<IOrganization>>;
-  organizations$: Observable<APIResource<IOrganization>[]>;
-  selectedOrgGuid: string;
+
   users$: Observable<CfUser[]>;
   blocked$: Observable<boolean>;
   valid$: Observable<boolean>;
   orgRoles = OrgUserRoleNames;
+  selectedOrgGuid: string;
+  orgGuidChangedSub: Subscription;
 
   constructor(
     private store: Store<AppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private paginationMonitorFactory: PaginationMonitorFactory,
     private componentFactoryResolver: ComponentFactoryResolver,
     private cfRolesService: CfRolesService) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
   }
 
   ngOnInit() {
+    // Data source that will power the orgs table
+    this.orgDataSource = {
+      connect: () => {
+        return this.store.select(selectUsersRolesOrgGuid).pipe(
+          filter(orgGuid => !!orgGuid),
+          tap(orgGuid => this.updateOrg(orgGuid)),
+          switchMap(orgGuid => this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, orgGuid)),
+          map(org => [org]),
+        );
+      },
+      disconnect: () => { },
+      trackBy: (index, row) => getRowMetadata(row)
+    } as ITableListDataSource<APIResource<IOrganization>>;
+
+    // Set the starting state of the org table
     if (this.activeRouteCfOrgSpace.orgGuid) {
-      this.setUpSingleOrgConfig();
+      this.store.dispatch(new UsersRolesSetOrg(this.activeRouteCfOrgSpace.orgGuid));
     } else {
-      this.setUpMultiOrgConfig();
+      this.orgGuidChangedSub = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid).pipe(
+        filter(orgs => orgs && !!orgs.length),
+        first()
+      ).subscribe(orgs => this.store.dispatch(new UsersRolesSetOrg(orgs[0].metadata.guid)));
     }
 
     this.users$ = this.store.select(selectUsersRolesPicked).pipe(
@@ -73,9 +141,15 @@ export class UsersRolesModifyComponent implements OnInit {
 
     this.valid$ = this.store.select(selectUsersRolesRoles).pipe(
       debounceTime(150),
-      switchMap(orgRoles => this.cfRolesService.createRolesDiff(orgRoles.orgGuid)),
+      switchMap(newRoles => this.cfRolesService.createRolesDiff(newRoles.orgGuid)),
       map(changes => !!changes.length)
     );
+  }
+
+  ngOnDestroy(): void {
+    if (this.orgGuidChangedSub) {
+      this.orgGuidChangedSub.unsubscribe();
+    }
   }
 
   updateOrg(orgGuid) {
@@ -84,7 +158,6 @@ export class UsersRolesModifyComponent implements OnInit {
       return;
     }
 
-    this.store.dispatch(new UsersRolesSetOrg(orgGuid));
     this.store.select(selectUsersRolesRoles).pipe(
       filter(newRoles => newRoles && newRoles.orgGuid === orgGuid),
       first()
@@ -110,39 +183,4 @@ export class UsersRolesModifyComponent implements OnInit {
     });
   }
 
-  private setUpSingleOrgConfig() {
-    this.singleOrg$ = this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid);
-    this.singleOrg$.pipe(
-      first()
-    ).subscribe(null, null, () => {
-      this.updateOrg(this.activeRouteCfOrgSpace.orgGuid);
-    });
-  }
-
-  private setUpMultiOrgConfig() {
-    this.singleOrg$ = Observable.of(null);
-    const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, this.activeRouteCfOrgSpace.cfGuid);
-
-    this.organizations$ = getPaginationObservables<APIResource<IOrganization>>({
-      store: this.store,
-      action: new GetAllOrganizations(paginationKey, this.activeRouteCfOrgSpace.cfGuid, [
-        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
-      ], true),
-      paginationMonitor: this.paginationMonitorFactory.create(
-        paginationKey,
-        entityFactory(organizationSchemaKey)
-      ),
-    },
-      true
-    ).entities$.pipe(
-      map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name)))
-    );
-
-    this.organizations$.pipe(
-      filter(orgs => orgs && !!orgs.length),
-      first()
-    ).subscribe(orgs => {
-      this.updateOrg(orgs[0].metadata.guid);
-    });
-  }
 }

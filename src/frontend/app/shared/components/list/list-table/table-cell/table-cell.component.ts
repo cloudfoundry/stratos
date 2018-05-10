@@ -57,9 +57,6 @@ import {
   TableCellServicePlanComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import {
-  TableCellSpaceRoleComponent,
-} from '../../list-types/cf-users-space-roles/table-cell-space-role/table-cell-space-role.component';
-import {
   CfOrgPermissionCellComponent,
 } from '../../list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component';
 import {
@@ -80,7 +77,9 @@ import { TableHeaderSelectComponent } from '../table-header-select/table-header-
 import { ICellDefinition } from '../table.types';
 import { TableCellRequestMonitorIconComponent } from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { TableCellConfirmRoleAddRemComponent } from '../../list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import { TableCellRoleOrgSpaceComponent } from '../../list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
 import { TableCellConfirmOrgSpaceComponent } from '../../list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
+import { TableCellSelectOrgComponent } from '../../list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
 /* tslint:enable:max-line-length */
 
 export const listTableCells = [
@@ -112,10 +111,11 @@ export const listTableCells = [
   CfOrgPermissionCellComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
-  TableCellSpaceRoleComponent,
+  TableCellConfirmOrgSpaceComponent,
   TableCellRequestMonitorIconComponent,
   TableCellConfirmRoleAddRemComponent,
-  TableCellConfirmOrgSpaceComponent
+  TableCellRoleOrgSpaceComponent,
+  TableCellSelectOrgComponent
 ];
 
 @Component({

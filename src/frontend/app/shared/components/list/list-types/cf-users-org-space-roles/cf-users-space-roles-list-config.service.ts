@@ -11,7 +11,7 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfUsersSpaceRolesDataSourceService } from './cf-users-space-roles-data-source.service';
-import { TableCellSpaceRoleComponent } from './table-cell-space-role/table-cell-space-role.component';
+import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role/table-cell-org-space-role.component';
 import { SpaceUserRoleNames } from '../../../../../store/types/user.types';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   };
   columns: ITableColumn<APIResource<ISpace>>[] = [{
     columnId: 'name',
-    headerCell: () => 'Name',
+    headerCell: () => 'Space',
     cellDefinition: {
       valuePath: 'entity.name'
     },
@@ -41,24 +41,33 @@ export class CfUsersSpaceRolesListConfigService implements IListConfig<APIResour
   }, {
     columnId: 'manager',
     headerCell: () => 'Manager',
-    cellComponent: TableCellSpaceRoleComponent,
+    cellComponent: TableCellRoleOrgSpaceComponent,
     cellConfig: {
       role: SpaceUserRoleNames.MANAGER,
+      isSpace: true
     }
   }, {
     columnId: 'auditor',
     headerCell: () => 'Auditor',
-    cellComponent: TableCellSpaceRoleComponent,
+    cellComponent: TableCellRoleOrgSpaceComponent,
     cellConfig: {
       role: SpaceUserRoleNames.AUDITOR,
+      isSpace: true
     }
   }, {
     columnId: 'developer',
     headerCell: () => 'Developer',
-    cellComponent: TableCellSpaceRoleComponent,
+    cellComponent: TableCellRoleOrgSpaceComponent,
     cellConfig: {
       role: SpaceUserRoleNames.DEVELOPER,
+      isSpace: true
     }
+  }, {
+    columnId: 'spacer',
+    headerCell: () => '',
+    cellDefinition: {
+      getValue: () => ' '
+    },
   }];
   initialised = new BehaviorSubject<boolean>(false);
 

@@ -16,11 +16,16 @@ import {
 import { IOrganization } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { GetOrganization } from '../../../../store/actions/organization.actions';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { GetAllOrganizations, GetOrganization } from '../../../../store/actions/organization.actions';
 import { UsersRolesSetChanges } from '../../../../store/actions/users-roles.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import {
+  createEntityRelationKey,
+  createEntityRelationPaginationKey,
+} from '../../../../store/helpers/entity-relations.types';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/users-roles.reducer';
 import {
   selectUsersRolesCf,
@@ -41,7 +46,9 @@ export class CfRolesService {
   constructor(
     private store: Store<AppState>,
     private cfUserService: CfUserService,
-    private entityServiceFactory: EntityServiceFactory) {
+    private entityServiceFactory: EntityServiceFactory,
+    private paginationMonitorFactory: PaginationMonitorFactory
+  ) {
     this.existingRoles$ = this.store.select(selectUsersRolesPicked).pipe(
       combineLatest(this.store.select(selectUsersRolesCf)),
       filter(([users, cfGuid]) => !!cfGuid),
@@ -173,6 +180,24 @@ export class CfRolesService {
     ).waitForEntity$.pipe(
       filter(entityInfo => !!entityInfo.entity),
       map(entityInfo => entityInfo.entity),
+    );
+  }
+
+  fetchOrgs(cfGuid: string): Observable<APIResource<IOrganization>[]> {
+    const paginationKey = createEntityRelationPaginationKey(organizationSchemaKey, cfGuid);
+    return getPaginationObservables<APIResource<IOrganization>>({
+      store: this.store,
+      action: new GetAllOrganizations(paginationKey, cfGuid, [
+        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
+      ], true),
+      paginationMonitor: this.paginationMonitorFactory.create(
+        paginationKey,
+        entityFactory(organizationSchemaKey)
+      ),
+    },
+      true
+    ).entities$.pipe(
+      map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name)))
     );
   }
 

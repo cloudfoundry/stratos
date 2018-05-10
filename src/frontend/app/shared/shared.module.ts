@@ -103,6 +103,8 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { TableComponent } from './components/list/list-table/table.component';
+import { TableCellSelectOrgComponent } from './components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
 
 @NgModule({
   imports: [
@@ -189,7 +191,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserProfileBannerComponent,
-    TableCellRequestMonitorIconComponent
+    TableCellRequestMonitorIconComponent,
   ],
   exports: [
     FormsModule,
@@ -259,7 +261,8 @@ import { ValuesPipe } from './pipes/values.pipe';
     EnumerateComponent,
     AppActionMonitorComponent,
     CliCommandComponent,
-    AppActionMonitorIconComponent
+    AppActionMonitorIconComponent,
+    TableComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

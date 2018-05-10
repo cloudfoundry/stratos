@@ -12,6 +12,12 @@ import {
   ITableCellRequestMonitorIconConfig,
 } from '../../../../../shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
+import {
+  TableCellConfirmOrgSpaceComponent,
+} from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
+import {
+  TableCellConfirmRoleAddRemComponent,
+} from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { UsersRolesClearUpdateState } from '../../../../../store/actions/users-roles.actions';
 import { ChangeUserPermission } from '../../../../../store/actions/users.actions';
@@ -27,8 +33,6 @@ import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/user.types';
 import { CfRoleChange, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { CfRolesService } from '../cf-roles.service';
-import { TableCellConfirmRoleAddRemComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
-import { TableCellConfirmOrgSpaceComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 
 class CfRoleChangeWithNames extends CfRoleChange {
   userName: string; // Why are all these names set out flat? So we can easily sort in future

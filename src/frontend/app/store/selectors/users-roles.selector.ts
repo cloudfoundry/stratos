@@ -2,6 +2,7 @@ import { compose } from '@ngrx/store';
 
 import { AppState } from '../app-state';
 import { UsersRolesState } from '../types/users-roles.types';
+import { IUserPermissionInOrg } from '../types/user.types';
 
 export const selectUsersRoles = (state: AppState): UsersRolesState => state.manageUsersRoles;
 
@@ -26,5 +27,12 @@ export const selectUsersRolesCf = compose(
 const selectChanged = (usersRoles: UsersRolesState) => usersRoles.changedRoles;
 export const selectUsersRolesChangedRoles = compose(
   selectChanged,
+  selectUsersRoles
+);
+
+const selectNewRoleOrgGuid = (newRoles: IUserPermissionInOrg) => newRoles.orgGuid;
+export const selectUsersRolesOrgGuid = compose(
+  selectNewRoleOrgGuid,
+  selectNewRoles,
   selectUsersRoles
 );

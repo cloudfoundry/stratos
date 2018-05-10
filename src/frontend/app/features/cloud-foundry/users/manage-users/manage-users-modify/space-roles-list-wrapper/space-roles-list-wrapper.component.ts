@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import {
   CfUsersSpaceRolesListConfigService,
-} from '../../../../../../shared/components/list/list-types/cf-users-space-roles/cf-users-space-roles-list-config.service';
+} from '../../../../../../shared/components/list/list-types/cf-users-org-space-roles/cf-users-space-roles-list-config.service';
 import { ListConfig } from '../../../../../../shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/app-state';
 import { ActiveRouteCfOrgSpace } from '../../../../cf-page.types';
