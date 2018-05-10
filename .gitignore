@@ -97,4 +97,5 @@ src/frontend/assets/eula.html
 src/frontend/assets/logo.png
 src/frontend/assets/login-bg.jpg
 src/frontend/app/custom.module.ts
-src/frontend/app/custom/
+src/frontend/app/custom
+src/frontend/assets/custom

@@ -13,4 +13,7 @@
       </a>
     </li>
   </ul>
+  <div *ngIf="!!copyright" class="side-nav__bottom">
+    <div [innerHTML]="copyright"></div>
+  </div>
 </nav>
