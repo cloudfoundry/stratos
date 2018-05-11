@@ -27,12 +27,19 @@ export class TableCellDefaultComponent<T> extends TableCellCustom<T> {
   public isLink = false;
   public isExternalLink = false;
   public linkValue: string;
+  public linkTarget = '_self';
   public valueGenerator: (row: T) => string;
 
   public init() {
     this.setValueGenerator();
     this.setValue(this.row);
     this.isLink = !!this.cellDefinition.getLink;
+    if (this.isLink) {
+      this.linkValue = this.cellDefinition.getLink(this.row);
+    }
+    if (this.cellDefinition.newTab) {
+      this.linkTarget = '_blank';
+    }
     this.isExternalLink = this.isLink && this.cellDefinition.externalLink;
   }
 

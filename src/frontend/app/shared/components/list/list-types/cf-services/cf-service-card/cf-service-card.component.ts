@@ -1,8 +1,13 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
+import { RouterNav } from '../../../../../../store/actions/router.actions';
+import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
+
 interface Tag {
   value: string;
   key: APIResource<IService>;
@@ -17,7 +22,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
   @Input('row') row: APIResource<IService>;
   extraInfo: IServiceExtra;
   tags: AppChip<Tag>[] = [];
-  constructor() {
+  constructor(private store: Store<AppState>) {
     super();
   }
 
@@ -52,4 +57,9 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
   getSupportUrl() {
     return this.extraInfo && this.extraInfo.supportUrl;
   }
+
+  goToServiceInstances = () =>
+    this.store.dispatch(new RouterNav({
+      path: ['service-catalog', this.row.entity.cfGuid, this.row.metadata.guid]
+    }))
 }

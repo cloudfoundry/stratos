@@ -14,6 +14,7 @@ export interface ICellDefinition<T> {
   externalLink?: boolean;
   // Automatically turns the row into a link
   getLink?: (row: T) => string;
+  newTab?: boolean;
 }
 export interface ITableColumn<T> {
   columnId: string;

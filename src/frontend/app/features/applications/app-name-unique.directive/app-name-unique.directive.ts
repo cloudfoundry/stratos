@@ -1,15 +1,12 @@
 import { Directive, forwardRef, Input, OnInit } from '@angular/core';
-import { AbstractControl, NG_ASYNC_VALIDATORS, Validator, AsyncValidatorFn, AsyncValidator } from '@angular/forms';
+import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
+import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Rx';
 
-import { IsNewAppNameFree } from '../../../store/actions/create-applications-page.actions';
+import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
-import { Headers, Http, Request, RequestOptions, QueryEncoder, URLSearchParams } from '@angular/http';
-import { ApplicationService } from '../application.service';
-import { selectEntity } from '../../../store/selectors/api.selectors';
-import { environment } from '../../../../environments/environment';
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {

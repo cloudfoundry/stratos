@@ -61,6 +61,4 @@ export interface IListDataSourceConfig<A, T> {
   destroy?: () => void;
 
   refresh?: () => void;
-
-  hideRefresh?: boolean;
 }

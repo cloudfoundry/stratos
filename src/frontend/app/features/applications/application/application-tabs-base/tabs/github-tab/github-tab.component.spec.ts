@@ -9,6 +9,8 @@ import { ApplicationServiceMock } from '../../../../../../test-framework/applica
 import { getInitialTestStoreState } from '../../../../../../test-framework/store-test-helper';
 import { ApplicationService } from '../../../../application.service';
 import { GithubTabComponent } from './github-tab.component';
+import { DatePipe } from '@angular/common';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('GithubTabComponent', () => {
   let component: GithubTabComponent;
@@ -28,9 +30,11 @@ describe('GithubTabComponent', () => {
             initialState
           }
         ),
+        NoopAnimationsModule
       ],
       providers: [
         { provide: ApplicationService, useClass: ApplicationServiceMock },
+        DatePipe
       ]
     })
       .compileComponents();
