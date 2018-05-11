@@ -570,6 +570,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")
 	sessionGroup.Use(p.sessionMiddleware)
+	sessionGroup.Use(p.xsrfMiddleware)
 
 	for _, plugin := range p.Plugins {
 		middlewarePlugin, err := plugin.GetMiddlewarePlugin()

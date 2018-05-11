@@ -50,6 +50,37 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// Support for Angular XSRF
+func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debug("xsrfMiddleware")
+
+		// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
+		if c.Request().Method() == "GET" || c.Request().Method() == "HEAD" {
+			return h(c)
+		}
+		errMsg := "Failed to get stored XSRF token from user session"
+		token, err := p.GetSessionValue(c, XSRFTokenSessionName)
+		if err == nil {
+			// Check the token against the header
+			if (c.Request().Header().Contains(XSRFTokenHeader)) {
+				requestToken := c.Request().Header().Get(XSRFTokenHeader)
+				if (requestToken == token) {
+					return h(c)
+				}
+				errMsg = "Supplied XSRF Token does not match"
+			} else {
+				errMsg = "XSRF Token was not supplied in the header"
+			}
+		}
+		return interfaces.NewHTTPShadowError(
+			http.StatusUnauthorized,
+			"XSRF Token could not be found or does not match",
+			"XSRF Token error: %s", errMsg,
+		)
+	}
+}
+
 func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		log.Debug("sessionCleanupMiddleware")

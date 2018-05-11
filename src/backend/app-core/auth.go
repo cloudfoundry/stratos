@@ -13,6 +13,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	uuid "github.com/satori/go.uuid"
+	"github.com/gorilla/sessions"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -44,11 +46,20 @@ const CFAdminIdentifier = "cloud_controller.admin"
 // SessionExpiresOnHeader Custom header for communicating the session expiry time to clients
 const SessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 
-// SessionExpiresAfterHeader Custom header for communicating the session expiry time to clients
+// ClientRequestDateHeader Custom header for getting date form client
 const ClientRequestDateHeader = "X-Cap-Request-Date"
 
 // EmptyCookieMatcher - Used to detect and remove empty Cookies sent by certain browsers
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
+
+// XSRFTokenHeader - XSRF Token Header name
+const XSRFTokenHeader = "X-Xsf-Token"
+
+// XSRFTokenCookie - XSRF Token Cookie name
+const XSRFTokenCookie = "XSRF-TOKEN"
+
+// XSRFTokenSessionName - XSRF Token Session name
+const XSRFTokenSessionName = "xsrf_token"
 
 func (p *portalProxy) getUAAIdentityEndpoint() string {
 	log.Info("getUAAIdentityEndpoint")
@@ -93,6 +104,9 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	sessionValues["user_id"] = u.UserGUID
 	sessionValues["exp"] = u.TokenExpiry
 
+	xsrfToken := uuid.NewV4().String()	
+	sessionValues[XSRFTokenSessionName] = xsrfToken
+
 	// Ensure that login disregards cookies from the request
 	req := c.Request().(*standard.Request).Request
 	req.Header.Set("Cookie", "")
@@ -129,6 +143,12 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	session, _ := p.GetSession(c)
+	xsrfGUID := fmt.Sprintf("%s", xsrfToken)
+	w := c.Response().(*standard.Response).ResponseWriter
+	cookie := sessions.NewCookie(XSRFTokenCookie, xsrfGUID, session.Options)
+	http.SetCookie(w, cookie)
 
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
@@ -381,7 +401,20 @@ func (p *portalProxy) logout(c echo.Context) error {
 
 	p.removeEmptyCookie(c)
 
-	err := p.clearSession(c)
+	// Remove XSRF Cookie
+	session, err := p.GetSession(c)
+	if err == nil {
+		cookie := sessions.NewCookie(XSRFTokenCookie, "", session.Options)
+		cookie.MaxAge = 0
+		cookie.Expires = time.Unix(0, 0)
+		w := c.Response().(*standard.Response).ResponseWriter
+		http.SetCookie(w, cookie)
+	}
+
+	// Remove the XSRF Token from the session
+	p.unsetSessionValue(c, XSRFTokenSessionName)
+
+	err = p.clearSession(c)
 	if err != nil {
 		log.Errorf("Unable to clear session: %v", err)
 	}
