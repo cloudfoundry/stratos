@@ -13,7 +13,7 @@ var yaml = require('js-yaml');
 
 const secretsPath = path.join(__dirname, SECRETS_FILE)
 if (!fs.existsSync(secretsPath)) {
-  console.log('No secrets.yaml was found! Please provide a secrets.yson, see `secrets.yson.sample` as reference.');
+  console.log('No secrets.yaml was found! Please provide a secrets.yaml, see `secrets.yaml.sample` as reference.');
   process.exit(1);
 }
 
