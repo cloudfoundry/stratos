@@ -55,8 +55,8 @@ export class StepComponent implements OnInit {
   @Input('disablePrevious')
   disablePrevious = false;
 
-  @Input('blocked$')
-  blocked$: Observable<boolean>;
+  @Input('blocked')
+  blocked: boolean;
 
   @Input('destructiveStep')
   public destructiveStep = false;
@@ -65,10 +65,16 @@ export class StepComponent implements OnInit {
   content: TemplateRef<any>;
 
   @Input()
+  skip = false;
+
+  @Input()
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
 
   @Input()
   onEnter: () => void = () => { }
+
+  @Input()
+  onLeave: () => void = () => { }
 
   constructor() {
     this._onEnter = () => {

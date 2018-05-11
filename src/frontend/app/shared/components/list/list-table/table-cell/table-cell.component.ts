@@ -27,7 +27,6 @@ import {
 } from '../../list-types/app-event/table-cell-event-type/table-cell-event-type.component';
 import { TableCellUsageComponent } from '../../list-types/app-instance/table-cell-usage/table-cell-usage.component';
 import { TableCellAppRouteComponent } from '../../list-types/app-route/table-cell-app-route/table-cell-app-route.component';
-import { TableCellRadioComponent } from '../../list-types/app-route/table-cell-radio/table-cell-radio.component';
 import { TableCellRouteComponent } from '../../list-types/app-route/table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from '../../list-types/app-route/table-cell-tcproute/table-cell-tcproute.component';
 import {
@@ -38,6 +37,12 @@ import {
 } from '../../list-types/app/table-cell-app-instances/table-cell-app-instances.component';
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
+import {
+  TableCellConfirmOrgSpaceComponent,
+} from '../../list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
+import {
+  TableCellConfirmRoleAddRemComponent,
+} from '../../list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import {
   TableCellFeatureFlagStateComponent,
 } from '../../list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
@@ -57,6 +62,12 @@ import {
   TableCellServicePlanComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import {
+  TableCellRoleOrgSpaceComponent,
+} from '../../list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
+import {
+  TableCellSelectOrgComponent,
+} from '../../list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
+import {
   CfOrgPermissionCellComponent,
 } from '../../list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component';
 import {
@@ -68,20 +79,23 @@ import {
 import {
   TableCellEndpointStatusComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
+import {
+  TableCellCommitAuthorComponent,
+} from '../../list-types/github-commits/table-cell-commit-author/table-cell-commit-author.component';
 import { TableCellCustom } from '../../list.types';
 import { TableCellDefaultComponent } from '../app-table-cell-default/app-table-cell-default.component';
 import { TableCellActionsComponent } from '../table-cell-actions/table-cell-actions.component';
 import { TableCellEditComponent } from '../table-cell-edit/table-cell-edit.component';
+import { TableCellRadioComponent } from '../table-cell-radio/table-cell-radio.component';
+import {
+  TableCellRequestMonitorIconComponent,
+} from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
-import { TableCellRequestMonitorIconComponent } from '../table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import { TableCellConfirmRoleAddRemComponent } from '../../list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
-import { TableCellRoleOrgSpaceComponent } from '../../list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
-import { TableCellConfirmOrgSpaceComponent } from '../../list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
-import { TableCellSelectOrgComponent } from '../../list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
-/* tslint:enable:max-line-length */
 
+
+/* tslint:enable:max-line-length */
 export const listTableCells = [
   TableCellDefaultComponent,
   TableHeaderSelectComponent,
@@ -115,7 +129,9 @@ export const listTableCells = [
   TableCellRequestMonitorIconComponent,
   TableCellConfirmRoleAddRemComponent,
   TableCellRoleOrgSpaceComponent,
-  TableCellSelectOrgComponent
+  TableCellSelectOrgComponent,
+  TableCellCommitAuthorComponent,
+  TableCellRequestMonitorIconComponent
 ];
 
 @Component({

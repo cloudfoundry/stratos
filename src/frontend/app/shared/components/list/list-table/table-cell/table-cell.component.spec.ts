@@ -14,6 +14,7 @@ import { ApplicationStateService } from '../../../application-state/application-
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
 import { CfRoleCheckboxComponent } from '../../../cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from '../../../chips/chips.component';
+import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
 import { UsageGaugeComponent } from '../../../usage-gauge/usage-gauge.component';
 import { EventTabActorIconPipe } from '../../list-types/app-event/table-cell-event-action/event-tab-actor-icon.pipe';
@@ -39,7 +40,8 @@ describe('TableCellComponent', () => {
         RunningInstancesComponent,
         AppChipsComponent,
         BooleanIndicatorComponent,
-        CfRoleCheckboxComponent
+        CfRoleCheckboxComponent,
+        GithubCommitAuthorComponent
       ],
       imports: [
         CoreModule
