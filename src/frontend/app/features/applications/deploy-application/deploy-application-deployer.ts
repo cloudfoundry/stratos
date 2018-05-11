@@ -321,7 +321,6 @@ export class DeployApplicationDeployer {
   }
 
   // File Upload
-
   sendLocalSourceMetadata() {
     const metadata = {
       files: [],
@@ -348,14 +347,12 @@ export class DeployApplicationDeployer {
       wait: true
     };
 
-    const msg = {
+    // Send the source metadata
+    return JSON.stringify({
       message: JSON.stringify(transferMetadata),
       timestamp: Math.round((new Date()).getTime() / 1000),
       type: SocketEventTypes.SOURCE_FOLDER
-    };
-
-    // Send the source metadata
-    return JSON.stringify(msg);
+    });
   }
 
   // Flatten files and folders
