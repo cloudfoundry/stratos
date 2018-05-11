@@ -1,5 +1,5 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, Input, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -36,8 +36,11 @@ import { ServicesService } from '../../services.service';
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
 })
-export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
+export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterContentInit {
 
+
+  @Input('servicesWallMode')
+  servicesWallMode = false;
   stepperForm: FormGroup;
   serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
@@ -101,19 +104,32 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.spaces$ = this.initSpacesObservable();
 
-    this.spaceScopeSub = this.servicesService.getSelectedServicePlanAccessibility()
-      .pipe(
-      map(o => o.spaceScoped),
-      tap(spaceScope => {
-        if (spaceScope) {
-          this.stepperForm.get('org').disable();
-          this.stepperForm.get('space').disable();
-        } else {
-          this.stepperForm.get('org').enable();
-          this.stepperForm.get('space').enable();
-        }
-      })).subscribe();
   }
+
+  ngOnInit(): void {
+    if (this.servicesWallMode) {
+      this.stepperForm = new FormGroup({
+        name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
+        params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
+        tags: new FormControl(''),
+      });
+    }
+    if (!this.servicesWallMode) {
+      this.spaceScopeSub = this.servicesService.getSelectedServicePlanAccessibility()
+        .pipe(
+        map(o => o.spaceScoped),
+        tap(spaceScope => {
+          if (spaceScope) {
+            this.stepperForm.get('org').disable();
+            this.stepperForm.get('space').disable();
+          } else {
+            this.stepperForm.get('org').enable();
+            this.stepperForm.get('space').enable();
+          }
+        })).subscribe();
+    }
+  }
+
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
@@ -146,19 +162,20 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         return this.stepperForm.valid;
       });
 
-    this.orgSubscription = this.orgs$.pipe(
-      filter(p => !!p && p.length > 0),
-      tap(o => {
-        const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
-        if (orgWithSpaces.length > 0) {
-          const selectedOrgId = orgWithSpaces[0].metadata.guid;
-          this.stepperForm.controls.org.setValue(selectedOrgId);
-          this.store.dispatch(new SetCreateServiceInstanceOrg(selectedOrgId));
-        }
-      })
-    ).subscribe();
-
-    this.updateServiceInstanceNames();
+    if (!this.servicesWallMode) {
+      this.orgSubscription = this.orgs$.pipe(
+        filter(p => !!p && p.length > 0),
+        tap(o => {
+          const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
+          if (orgWithSpaces.length > 0) {
+            const selectedOrgId = orgWithSpaces[0].metadata.guid;
+            this.stepperForm.controls.org.setValue(selectedOrgId);
+            this.store.dispatch(new SetCreateServiceInstanceOrg(selectedOrgId));
+          }
+        })
+      ).subscribe();
+      this.updateServiceInstanceNames();
+    }
   }
 
   initSpacesObservable = () => this.store.select(selectCreateServiceInstanceOrgGuid).pipe(
@@ -268,10 +285,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     if (index >= 0) {
       this.tags.splice(index, 1);
     }
-  }
+  };
 
 
   checkName = (value: string = null) =>
-    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.stepperForm.controls.name.value) === -1 : true
+    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.stepperForm.controls.name.value) === -1 : true;
 
 }

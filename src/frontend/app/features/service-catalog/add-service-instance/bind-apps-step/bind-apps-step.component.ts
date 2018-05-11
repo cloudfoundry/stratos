@@ -78,10 +78,8 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   submit = () => {
-    if (this.stepperForm.controls.apps.value) {
-      this.setApp();
-    }
-    return { success: true };
+    this.setApp();
+    return Observable.of({ success: true });
   }
 
   // createBinding = () => {

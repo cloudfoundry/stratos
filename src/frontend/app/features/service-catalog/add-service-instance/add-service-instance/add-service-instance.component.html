@@ -16,7 +16,7 @@
       <app-bind-apps-step #step5></app-bind-apps-step>
     </app-step>
     <app-step title="Specify Details" [onNext]="step4.onNext" [valid]="step4.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
-      <app-specify-details-step #step4></app-specify-details-step>
+      <app-specify-details-step #step4 [servicesWallMode]="servicesWallCreateInstance"></app-specify-details-step>
     </app-step>
   </app-steppers>
 </div>
