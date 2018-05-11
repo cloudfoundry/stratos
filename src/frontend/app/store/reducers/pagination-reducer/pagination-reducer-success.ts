@@ -2,6 +2,7 @@ import { RequestAction } from '../../types/request.types';
 import { State } from '@ngrx/store';
 import { AppState } from '../../app-state';
 import { PaginationAction, PaginationEntityState } from '../../types/pagination.types';
+import { spreadClientPagination } from './pagination-reducer.helper';
 
 export function paginationSuccess(state: PaginationEntityState, action): PaginationEntityState {
   const { apiAction, response, result } = action;
@@ -30,7 +31,7 @@ export function paginationSuccess(state: PaginationEntityState, action): Paginat
     pageCount: totalPages,
     totalResults,
     clientPagination: {
-      ...state.clientPagination,
+      ...spreadClientPagination(state.clientPagination),
       totalResults
     }
   };

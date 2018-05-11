@@ -99,16 +99,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     enabled: row => true,
   };
 
-  private listActionDeleteMulti: IMultiListAction<EndpointModel> = {
-    action: (item) => {
-      return true;
-    },
-    label: 'Unregister',
-    description: 'Remove the endpoint',
-    visible: row => true,
-    enabled: row => true,
-  };
-
   private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
       this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
@@ -146,7 +136,6 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     this.listActionDelete
   ];
 
-  private multiActions = [this.listActionDeleteMulti];
   private globalActions = [];
 
   columns = endpointColumns;
@@ -204,7 +193,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   }
 
   public getGlobalActions = () => this.globalActions;
-  public getMultiActions = () => this.multiActions;
+  public getMultiActions = () => [];
   public getSingleActions = () => this.singleActions;
   public getColumns = () => this.columns;
   public getDataSource = () => this.dataSource;
