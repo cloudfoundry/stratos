@@ -23,8 +23,8 @@ $progress-transition-speed: 1s;
   }
   &__spinner {
     height: $progress-size;
-    position: absolute;
     opacity: 1;
+    position: absolute;
     transition: opacity $progress-transition-speed linear;
     width: $progress-size;
   }
