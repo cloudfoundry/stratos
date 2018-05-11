@@ -105,9 +105,6 @@ export class EndpointsTable extends ListTableComponent {
 
   openActionMenu(row: ElementFinder) {
     row.element(by.css('app-table-cell-actions button')).click();
-
-    // Wait for the menu to show up
-    // browser.driver.sleep(100);
   }
 
 }
