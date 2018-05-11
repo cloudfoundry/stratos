@@ -13,7 +13,6 @@ export class SnackBarComponent extends Component {
 
   close(): promise.Promise<void> {
     return this.locator.element(by.tagName('button')).click();
-    // return browser.wait(protractor.until.elementIsNotVisible(this.locator.getWebElement()));
   }
 
   getButtonText(): promise.Promise<string> {
