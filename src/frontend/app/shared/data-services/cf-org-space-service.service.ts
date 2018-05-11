@@ -118,9 +118,20 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private createCf() {
     this.cf = {
       list$: this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+        // Ensure we have endpoints
         filter(endpoints => endpoints && !!Object.keys(endpoints).length),
-        first(),
+        // Filter out non-cf endpoints
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
+        // Ensure we have at least one connected cf
+        filter(cfs => {
+          for (let i = 0; i < cfs.length; i++) {
+            if (cfs[i].connectionStatus === 'connected') {
+              return true;
+            }
+          }
+          return false;
+        }),
+        first(),
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
         })
