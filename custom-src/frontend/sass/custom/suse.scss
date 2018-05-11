@@ -1,0 +1,36 @@
+// Style overrides
+// SUSE Brand primary colour
+$suse-primary-color: #00c081;
+// Secondary blue colour
+$suse-secondary: #00243e;
+$suse-text: #fff;
+$suse-text-gray: #ccc;
+$suse-dark-blue: #06253A;
+$suse-blue: #073155;
+.stratos img.stratos-title__logo {
+  width: 160px;
+}
+
+.stratos .page-header .mat-toolbar.mat-primary {
+  background-color: #fff;
+  color: #333;
+}
+
+.stratos app-page-subheader {
+  .page-subheader {
+    background-color: #fff;
+    color: #333;
+  }
+  .mat-tab-nav-bar.mat-background-primary {
+    .mat-tab-links {
+      background-color: #fff;
+      color: #333;
+    }
+    .mat-tab-link {
+      color: #333;
+    }
+    .mat-ink-bar {
+      background-color: $suse-primary-color;
+    }
+  }
+}
