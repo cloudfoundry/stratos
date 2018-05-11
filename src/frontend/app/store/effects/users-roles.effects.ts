@@ -51,20 +51,25 @@ export class UsersRolesEffects {
       const cfGuid = usersRoles.cfGuid;
       const changes = [...usersRoles.changedRoles];
 
-      // First discover if there's a change to the org user role
-      const orgUserChangeIndex = changes.findIndex(change => {
-        return !change.spaceGuid && change.role === OrgUserRoleNames.USER;
-      });
-      const orgUserChange = changes[orgUserChangeIndex];
-      if (orgUserChangeIndex >= 0) {
-        changes.splice(orgUserChangeIndex, 1);
+      // Split changes into `org user` and `other`
+      const orgUserChanges: CfRoleChange[] = [];
+      const nonOrgUserChanges: CfRoleChange[] = [];
+      for (let i = 0; i < changes.length; i++) {
+        const change = changes[i];
+        if (!change.spaceGuid && change.role === OrgUserRoleNames.USER) {
+          orgUserChanges.push(change);
+        } else {
+          nonOrgUserChanges.push(change);
+        }
       }
-      const nonOrgUserChanges = changes;
 
-      if (orgUserChange) {
-        if (orgUserChange.add) {
-          // Do org user change first
-          return this.executeChanges(cfGuid, [orgUserChange]).pipe(
+      // Execute changes... depending on if there's any org user change and if that org user change is added (do users change first) or
+      // removed (do users change last)
+      if (orgUserChanges.length) {
+        // Are we adding the org user role (can never add to one user and remove from another)
+        if (orgUserChanges[0].add) {
+          // Do org user changes first
+          return this.executeChanges(cfGuid, orgUserChanges).pipe(
             // Then do all other changes
             mergeMap(() => this.executeChanges(cfGuid, nonOrgUserChanges))
           );
@@ -72,7 +77,7 @@ export class UsersRolesEffects {
           // Do all other changes first
           return this.executeChanges(cfGuid, nonOrgUserChanges).pipe(
             // Then do org user change
-            mergeMap(() => this.executeChanges(cfGuid, [orgUserChange]))
+            mergeMap(() => this.executeChanges(cfGuid, orgUserChanges))
           );
         }
       } else {
