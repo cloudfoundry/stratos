@@ -86,11 +86,6 @@ const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
 
-type CloneDetails struct {
-	Url    string
-	Branch string
-	Commit string
-}
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	cfAppPush.pushCommand = &application.Push{}
