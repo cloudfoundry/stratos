@@ -88,7 +88,6 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   ];
   orgDataSource: ITableListDataSource<APIResource<IOrganization>>;
 
-
   @ViewChild('spaceRolesTable', { read: ViewContainerRef })
   spaceRolesTable: ViewContainerRef;
 
@@ -102,6 +101,15 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
 
+  private orgConnect = () => {
+    return this.store.select(selectUsersRolesOrgGuid).pipe(
+      filter(orgGuid => !!orgGuid),
+      tap(orgGuid => this.updateOrg(orgGuid)),
+      switchMap(orgGuid => this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, orgGuid)),
+      map(org => [org]),
+    );
+  }
+
   constructor(
     private store: Store<AppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
@@ -113,14 +121,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   ngOnInit() {
     // Data source that will power the orgs table
     this.orgDataSource = {
-      connect: () => {
-        return this.store.select(selectUsersRolesOrgGuid).pipe(
-          filter(orgGuid => !!orgGuid),
-          tap(orgGuid => this.updateOrg(orgGuid)),
-          switchMap(orgGuid => this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, orgGuid)),
-          map(org => [org]),
-        );
-      },
+      connect: this.orgConnect,
       disconnect: () => { },
       trackBy: (index, row) => getRowMetadata(row)
     } as ITableListDataSource<APIResource<IOrganization>>;

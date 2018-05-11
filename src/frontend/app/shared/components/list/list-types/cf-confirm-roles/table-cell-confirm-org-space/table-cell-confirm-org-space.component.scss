@@ -1,7 +1,7 @@
 div {
   align-items: center;
   display: flex;
-  & > span {
+  > span {
     padding-left: 5px;
   }
 }
