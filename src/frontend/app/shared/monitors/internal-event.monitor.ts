@@ -51,7 +51,8 @@ export class InternalEventMonitor {
         return Object.keys(state).reduce<string[]>((array, key) => {
           const events = state[key];
           const hasErrorEvent = !!events.find(event => {
-            return event.severity === InternalEventSeverity.ERROR && event.timestamp > time;
+            const isError500 = event.eventCode[0] === '5';
+            return event.severity === InternalEventSeverity.ERROR && isError500 && event.timestamp > time;
           });
           if (hasErrorEvent) {
             array.push(key);

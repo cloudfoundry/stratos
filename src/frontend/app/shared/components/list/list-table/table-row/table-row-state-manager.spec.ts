@@ -17,7 +17,6 @@ describe('TableRowStateManager', () => {
         error: false
       }
     };
-    console.log(actualState, expectedState);
     expect(actualState).toEqual(expectedState);
     expect(stateManager.rowState).toEqual(expectedState);
     expect(actualState).not.toEqual(fake);

@@ -33,6 +33,19 @@ import { EndpointModel, EndpointUser } from '../../../store/types/endpoint.types
 import { CfUser } from '../../../store/types/user.types';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 
+export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): number {
+  const app1Date = new Date(app1.metadata.updated_at);
+  const app2Date = new Date(app2.metadata.updated_at);
+  if (app1Date > app2Date) {
+    return -1;
+  }
+  if (app1Date < app2Date) {
+    return 1;
+  }
+  return 0;
+}
+
+
 @Injectable()
 export class CloudFoundryEndpointService {
 
@@ -65,6 +78,16 @@ export class CloudFoundryEndpointService {
         createEntityRelationKey(spaceSchemaKey, serviceInstancesSchemaKey),
         createEntityRelationKey(spaceSchemaKey, routeSchemaKey), // Not really needed at top level, but if we drop down into an org with
         // lots of spaces it saves n x routes requests
+      ]);
+  }
+  static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
+    const paginationKey = cfGuid ?
+      createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
+      : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
+    return new GetAllOrganizations(
+      paginationKey,
+      cfGuid, [
+        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
       ]);
   }
 
