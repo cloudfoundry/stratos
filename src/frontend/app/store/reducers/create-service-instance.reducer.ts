@@ -6,6 +6,8 @@ import {
   SET_SERVICE_PLAN,
   SET_SPACE,
   SET_CREATE_SERVICE_INSTANC_CF_DETAILS,
+  SET_SERVICE_INSTANCE_SVC_GUID,
+  SET_SERVICE_INSTANCE_APP_GUID,
 } from '../actions/create-service-instance.actions';
 import { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
@@ -53,9 +55,17 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       return {
         ...state, spaceGuid: action.spaceGuid
       };
+    case SET_SERVICE_INSTANCE_SVC_GUID:
+      return {
+        ...state, serviceGuid: action.serviceGuid
+      };
     case SET_SERVICE_INSTANCE_GUID:
       return {
         ...state, serviceInstanceGuid: action.guid
+      };
+    case SET_SERVICE_INSTANCE_APP_GUID:
+      return {
+        ...state, bindAppGuid: action.appGuid
       };
     case SET_SERVICE_INSTANCE_SPACE_SCOPED:
       return setSpaceScopedFlag(state, action);

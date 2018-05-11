@@ -22,7 +22,7 @@ import {
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
-import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
+import { selectCreateServiceInstance, selectCreateServiceInstanceSpaceGuid } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { appDataSort } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ServicesService } from '../../services.service';
@@ -53,13 +53,13 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     });
 
 
-    this.allAppsSubscription = this.store.select(selectCreateServiceInstance).pipe(
-      filter(selectCreateServiceInstance => !!selectCreateServiceInstance.spaceGuid),
-      tap(createServiceInstanceState => {
-        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstanceState.spaceGuid);
+    this.allAppsSubscription = this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
+      filter(p => !!p),
+      tap(spaceGuid => {
+        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
         this.apps$ = getPaginationObservables<APIResource<IApp>>({
           store: this.store,
-          action: new GetAllAppsInSpace(this.servicesService.cfGuid, createServiceInstanceState.spaceGuid, paginationKey),
+          action: new GetAllAppsInSpace(this.servicesService.cfGuid, spaceGuid, paginationKey),
           paginationMonitor: this.paginationMonitorFactory.create(
             paginationKey,
             entityFactory(applicationSchemaKey)
@@ -70,9 +70,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
           first(),
           map(apps => apps.slice(0, 50))
           );
-
-        this.serviceInstanceGuid = createServiceInstanceState.serviceInstanceGuid;
-
       })
     ).subscribe();
 
@@ -86,52 +83,37 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   submit = () => {
-    return this.createBinding().pipe(
-      filter(s => !s.creating),
-      map(s => {
-        if (s.error) {
-          this.displaySnackBar();
-          return { success: false };
-        } else {
-
-          this.store.dispatch(new RouterNav({
-            path: ['service-catalog',
-              this.servicesService.cfGuid,
-              this.servicesService.serviceGuid,
-              'instances']
-          }
-          ));
-          return { success: true };
-        }
-      })
-    );
-  }
-
-  createBinding = () => {
-
-    const appGuid = this.stepperForm.controls.apps.value;
-
-    const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
-    let params = this.stepperForm.controls.params.value;
-    try {
-      params = JSON.parse(params) || null;
-    } catch (e) {
-      params = null;
+    if (this.stepperForm.controls.apps.value) {
+      this.setApp();
     }
-
-    this.store.dispatch(new CreateServiceBinding(
-      this.servicesService.cfGuid,
-      guid,
-      appGuid,
-      this.serviceInstanceGuid,
-      params
-
-    ));
-
-    return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
-
+    return { success: true };
   }
-  setApp = (guid) => this.store.dispatch(new SetCreateServiceInstanceApp(guid));
+
+  // createBinding = () => {
+
+  //   const appGuid = this.stepperForm.controls.apps.value;
+
+  //   const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
+  //   let params = this.stepperForm.controls.params.value;
+  //   try {
+  //     params = JSON.parse(params) || null;
+  //   } catch (e) {
+  //     params = null;
+  //   }
+
+  //   this.store.dispatch(new CreateServiceBinding(
+  //     this.servicesService.cfGuid,
+  //     guid,
+  //     appGuid,
+  //     this.serviceInstanceGuid,
+  //     params
+
+  //   ));
+
+  //   return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
+
+  // }
+  setApp = () => this.store.dispatch(new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value));
 
   ngOnDestroy(): void {
     this.allAppsSubscription.unsubscribe();

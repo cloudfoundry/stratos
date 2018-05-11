@@ -36,12 +36,14 @@ export class AddServiceInstanceComponent implements OnInit {
     const cfId = servicesService.cfGuid;
     if (!cfId) {
       this.servicesWallCreateInstance = true;
+      this.title$ = Observable.of(`Create Service Instance`);
+    } else {
+      const serviceGuid = servicesService.serviceGuid;
+      this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
+      this.title$ = this.servicesService.getServiceName().pipe(
+        map(label => `Create Instance: ${label}`)
+      );
     }
-    const serviceGuid = servicesService.serviceGuid;
-    this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
-    this.title$ = this.servicesService.getServiceName().pipe(
-      map(label => `Create Instance: ${label}`)
-    );
 
   }
 

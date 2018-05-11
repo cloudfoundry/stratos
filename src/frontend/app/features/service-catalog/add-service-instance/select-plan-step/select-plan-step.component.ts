@@ -1,10 +1,10 @@
 import { TitleCasePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, share, tap } from 'rxjs/operators';
+import { filter, first, map, share, tap, switchMap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
@@ -13,6 +13,8 @@ import { SetServicePlan } from '../../../../store/actions/create-service-instanc
 import { AppState } from '../../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { ServicePlanAccessibility, ServicesService } from '../../services.service';
+import { selectCreateServiceGuid } from '../../../../store/selectors/create-service-instance.selectors';
+import { ServicesWallService } from '../../../services/services/services-wall.service';
 
 interface ServicePlan {
   id: string;
@@ -25,11 +27,17 @@ interface ServicePlan {
   templateUrl: './select-plan-step.component.html',
   styleUrls: ['./select-plan-step.component.scss'],
   providers: [
-    TitleCasePipe
+    TitleCasePipe,
+    ServicesWallService
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectPlanStepComponent implements OnDestroy {
+export class SelectPlanStepComponent implements OnInit, OnDestroy {
+
+
+  @Input('servicesWallMode')
+  servicesWallMode = false;
+
   servicePlans: ServicePlan[];
 
   servicePlanVisibilitySub: Subscription;
@@ -38,29 +46,15 @@ export class SelectPlanStepComponent implements OnDestroy {
   subscription: Subscription;
   stepperForm: FormGroup;
   servicePlans$: Observable<ServicePlan[]>;
+  initialising$ = new BehaviorSubject(true);
 
-  constructor(private store: Store<AppState>, private servicesService: ServicesService) {
-    this.servicePlans$ = servicesService.getVisibleServicePlans().pipe(
-      filter(p => !!p && p.length > 0),
-      map(o => this.mapToServicePlan(o)),
-      share(),
-      first()
-    );
+  constructor(private store: Store<AppState>,
+    private servicesService: ServicesService,
+    private servicesWallService: ServicesWallService) {
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
     });
-    this.subscription = this.servicePlans$.pipe(
-      filter(p => !!p && p.length > 0),
-      tap(o => {
-        this.stepperForm.controls.servicePlans.setValue(o[0].id);
-        this.servicePlans = o;
-        this.validate.next(this.stepperForm.valid);
-      }),
-      first()
-    ).subscribe();
   }
-
-
 
   mapToServicePlan = (visiblePlans: APIResource<IServicePlan>[]): ServicePlan[] => visiblePlans.map(p => ({
     id: p.metadata.guid,
@@ -90,6 +84,34 @@ export class SelectPlanStepComponent implements OnDestroy {
   onNext = () => {
     this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
     return Observable.of({ success: true });
+  }
+
+  ngOnInit(): void {
+    if (this.servicesWallMode) {
+      this.servicePlans$ = this.store.select(selectCreateServiceGuid).pipe(
+        switchMap(guid => this.servicesWallService.getServicePlansForServiceById(guid)),
+        map(o => this.mapToServicePlan(o)),
+        share(),
+        first()
+      );
+    } else {
+      this.servicePlans$ = this.servicesService.getVisibleServicePlans().pipe(
+        filter(p => !!p && p.length > 0),
+        map(o => this.mapToServicePlan(o)),
+        share(),
+        first()
+      );
+    }
+
+    this.subscription = this.servicePlans$.pipe(
+      filter(p => !!p && p.length > 0),
+      tap(o => {
+        this.stepperForm.controls.servicePlans.setValue(o[0].id);
+        this.servicePlans = o;
+        this.validate.next(this.stepperForm.valid);
+      }),
+      first()
+    ).subscribe();
   }
 
   ngOnDestroy(): void {

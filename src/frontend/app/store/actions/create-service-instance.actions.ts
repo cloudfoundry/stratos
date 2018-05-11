@@ -14,6 +14,8 @@ export const SET_CREATE_SERVICE_INSTANC_CF_DETAILS = '[Create SI] Set CF Details
 export const SET_APP = '[Create SI] Set App';
 export const SET_SERVICE_INSTANCE_GUID = '[Create SI] Set Service Instance Guid';
 export const SET_SERVICE_INSTANCE_SPACE_SCOPED = '[Create SI] Set Service Instance Space Scoped Property';
+export const SET_SERVICE_INSTANCE_SVC_GUID = '[Create SI] Set Service Instance Service Guid';
+export const SET_SERVICE_INSTANCE_APP_GUID = '[Create SI] Set Service Instance App Guid';
 
 export class SetServicePlan implements Action {
   constructor(public servicePlanGuid: string) { }
@@ -38,6 +40,15 @@ export class SetServiceInstanceGuid implements Action {
 export class SetCreateServiceInstanceSpaceScoped implements Action {
   constructor(public spaceScoped: boolean, public spaceGuid: string = null) { }
   type = SET_SERVICE_INSTANCE_SPACE_SCOPED;
+}
+export class SetCreateServiceInstanceServiceGuid implements Action {
+  constructor(public serviceGuid: string = null) { }
+  type = SET_SERVICE_INSTANCE_SVC_GUID;
+}
+
+export class SetCreateServiceInstanceAppGuid implements Action {
+  constructor(public appGuid: string = null) { }
+  type = SET_SERVICE_INSTANCE_APP_GUID;
 }
 
 export class SetCreateServiceInstance implements Action {

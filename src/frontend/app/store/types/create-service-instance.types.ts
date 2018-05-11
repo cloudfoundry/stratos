@@ -10,4 +10,5 @@ export interface CreateServiceInstanceState {
   serviceInstanceGuid?: string;
   spaceScoped: boolean;
   cfGuid?: string;
+  serviceGuid?: string;
 }

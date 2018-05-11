@@ -11,7 +11,7 @@ import { APIResource } from '../../../store/types/api.types';
 import { IService } from '../../../core/cf-api-svc.types';
 import { GetAllServices } from '../../../store/actions/service.actions';
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 
 @Injectable()
 export class ServicesWallService {
@@ -22,11 +22,8 @@ export class ServicesWallService {
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-
     this.services$ = this.initServicesObservable();
-
   }
-
 
   initServicesObservable = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, 'all');
@@ -43,10 +40,15 @@ export class ServicesWallService {
     ).entities$;
   }
 
-  // fetchServiceLabel = (serviceGuid) => this.services$.pipe(
-  //   map(s => s.filter())
+  getServicesInCf = (cfGuid: string) => this.services$.pipe(
+    filter(p => !!p && p.length > 0),
+    map(services => services.filter(s => s.entity.cfGuid === cfGuid))
+  )
 
-  // )
-
-
+  getServicePlansForServiceById = (serviceGuid: string) => this.services$.pipe(
+    filter(p => !!p && p.length > 0),
+    map(svcs => svcs.filter(s => s.metadata.guid === serviceGuid)),
+    filter(p => !!p && p.length === 1),
+    map(s => s[0].entity.service_plans),
+  )
 }
