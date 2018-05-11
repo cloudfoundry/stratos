@@ -88,3 +88,14 @@ src/backend/app-core/load_plugins.go
 .v8flags*
 
 *.bak
+
+# Customisations
+
+src/frontend/favicon.ico
+src/frontend/sass/custom.scss
+src/frontend/assets/eula.html
+src/frontend/assets/logo.png
+src/frontend/assets/login-bg.jpg
+src/frontend/app/custom.module.ts
+src/frontend/app/custom
+src/frontend/assets/custom

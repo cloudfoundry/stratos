@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { AuthState } from '../../../store/reducers/auth.reducer';
+import { Component, Inject, InjectionToken, OnInit, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { Observable } from 'rxjs/Observable';
 import { filter, map } from 'rxjs/operators';
+import { AppState } from '../../../store/app-state';
+import { AuthState } from '../../../store/reducers/auth.reducer';
 import { SessionData } from '../../../store/types/auth.types';
+
+// Is there a EULA?
+export const EULA_PROVIDER = new InjectionToken<boolean>('eula_enabled');
 
 @Component({
   selector: 'app-about-page',
@@ -16,7 +19,7 @@ export class AboutPageComponent implements OnInit {
   sessionData$: Observable<SessionData>;
   versionNumber$: Observable<string>;
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, @Optional() @Inject(EULA_PROVIDER) public hasEula: boolean) {}
 
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(
