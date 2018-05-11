@@ -3,6 +3,7 @@ import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, first, map, share, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
@@ -18,7 +19,7 @@ import {
 } from '../../../../store/actions/create-service-instance.actions';
 import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, organizationSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -28,7 +29,6 @@ import {
   selectCreateServiceInstanceServicePlan,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { CloudFoundryEndpointService } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ServicesService } from '../../services.service';
 
 @Component({
@@ -51,6 +51,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   tagsAddOnBlur = true;
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
+  spaceScopeSub: Subscription;
 
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
@@ -92,14 +93,26 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       tags: new FormControl(''),
     });
 
-    const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizations(servicesService.cfGuid);
-    this.orgs$ = this.initOrgsObservable(getAllOrgsAction);
+    this.orgs$ = this.initOrgsObservable();
 
     const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.servicesService.serviceGuid);
 
     this.allServiceInstances$ = this.initServiceInstances(paginationKey);
 
     this.spaces$ = this.initSpacesObservable();
+
+    this.spaceScopeSub = this.servicesService.getSelectedServicePlanAccessibility()
+      .pipe(
+      map(o => o.spaceScoped),
+      tap(spaceScope => {
+        if (spaceScope) {
+          this.stepperForm.get('org').disable();
+          this.stepperForm.get('space').disable();
+        } else {
+          this.stepperForm.get('org').enable();
+          this.stepperForm.get('space').enable();
+        }
+      })).subscribe();
   }
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
@@ -113,26 +126,19 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     )
   }, true)
     .entities$.pipe(
-      share(),
-      first()
+    share(),
+    first()
     )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
     this.serviceInstanceNameSub.unsubscribe();
+    this.spaceScopeSub.unsubscribe();
   }
 
-  initOrgsObservable = (action) => getPaginationObservables<APIResource<IOrganization>>({
-    store: this.store,
-    action: action,
-    paginationMonitor: this.paginationMonitorFactory.create(
-      action.paginationKey,
-      entityFactory(organizationSchemaKey)
-    )
-  }, true)
-    .entities$.pipe(
-      share(),
-      first()
-    )
+  initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {
+    return this.servicesService.getOrgsForSelectedServicePlan();
+  }
+
 
   ngAfterContentInit() {
     this.validate = this.stepperForm.statusChanges
@@ -141,6 +147,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       });
 
     this.orgSubscription = this.orgs$.pipe(
+      filter(p => !!p && p.length > 0),
       tap(o => {
         const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
         if (orgWithSpaces.length > 0) {
@@ -163,7 +170,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }),
     filter(p => !!p),
     map(org => org.entity.spaces),
-    tap(spaces => {
+    combineLatest(this.servicesService.getSelectedServicePlanAccessibility()),
+    map(([spaces, servicePlanAccessibility]) => {
+      if (servicePlanAccessibility.spaceScoped) {
+        return spaces.filter(s => s.metadata.guid === servicePlanAccessibility.spaceGuid);
+      }
+      return spaces;
+    }),
+    tap((spaces) => {
       if (spaces.length > 0) {
         const selectedSpaceId = spaces[0].metadata.guid;
         this.stepperForm.controls.space.setValue(selectedSpaceId);
@@ -208,7 +222,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const name = this.stepperForm.controls.name.value;
     const spaceGuid = this.stepperForm.controls.space.value;
     let params = this.stepperForm.controls.params.value;
-    params = params ? JSON.parse(params) : null;
+    try {
+      params = JSON.parse(params) || null;
+    } catch (e) {
+      params = null;
+    }
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 

@@ -80,6 +80,16 @@ export class CloudFoundryEndpointService {
         // lots of spaces it saves n x routes requests
       ]);
   }
+  static createGetAllOrganizationsLimitedSchema(cfGuid: string) {
+    const paginationKey = cfGuid ?
+      createEntityRelationPaginationKey(endpointSchemaKey, cfGuid)
+      : createEntityRelationPaginationKey(endpointSchemaKey, 'all');
+    return new GetAllOrganizations(
+      paginationKey,
+      cfGuid, [
+        createEntityRelationKey(organizationSchemaKey, spaceSchemaKey),
+      ]);
+  }
 
   constructor(
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,

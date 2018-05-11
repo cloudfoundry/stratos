@@ -1,14 +1,14 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { map, publishReplay, refCount } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
 
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { AppState } from '../../../store/app-state';
 import { ServicesService } from '../services.service';
-import { map, tap, first, publishReplay, refCount } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 
 function servicesServiceFactory(
@@ -35,10 +35,22 @@ function servicesServiceFactory(
   ]
 })
 export class ServiceBaseComponent implements OnDestroy {
+  toolTipText$: Observable<string>;
+  hasVisiblePlans$: Observable<boolean>;
   servicesSubscription: Subscription;
 
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
     this.servicesSubscription = this.servicesService.service$.subscribe();
+    this.hasVisiblePlans$ = this.servicesService.getVisibleServicePlans().pipe(
+      map(p => p.length > 0));
+    this.toolTipText$ = this.hasVisiblePlans$.pipe(
+      map(hasPlans => {
+        if (hasPlans) {
+          return 'Create a New Service Instance';
+        } else {
+          return 'No public or visible plans exist for this service.';
+        }
+      }));
   }
 
   addServiceInstanceLink = () => [
@@ -56,6 +68,7 @@ export class ServiceBaseComponent implements OnDestroy {
       refCount()
     );
   }
+
   ngOnDestroy(): void {
     this.servicesSubscription.unsubscribe();
   }

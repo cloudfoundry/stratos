@@ -23,6 +23,31 @@ imports:
   - log
 - name: github.com/Sirupsen/logrus
   version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
+- name: code.cloudfoundry.org/cli
+  version: e3799ad7e657d4e04663af7f0440c3fc0906c9ac
+  subpackages:
+  - cf/actors
+  - cf/actors/brokerbuilder
+  - cf/actors/planbuilder
+  - cf/actors/pluginrepo
+  - cf/actors/servicebuilder
+  - cf/api
+  - cf/appfiles
+  - cf/commandregistry
+  - cf/commands/application
+  - cf/commandsloader
+  - cf/configuration
+  - cf/configuration/confighelpers
+  - cf/configuration/coreconfig
+  - cf/configuration/pluginconfig
+  - cf/flags
+  - cf/manifest
+  - cf/models
+  - cf/net
+  - cf/terminal
+  - cf/trace
+  - util
+  - util/words/generator
 - name: github.com/valyala/bytebufferpool
   version: e746df99fe4a3986f4d4f79e13c1e0117ce9c2f7
 - name: github.com/valyala/fasttemplate

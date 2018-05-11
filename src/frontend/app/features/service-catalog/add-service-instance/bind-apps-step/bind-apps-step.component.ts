@@ -66,9 +66,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
           )
         }, true).entities$
           .pipe(
-            map(apps => apps.sort(appDataSort)),
-            first(),
-            map(apps => apps.slice(0, 50))
+          map(apps => apps.sort(appDataSort)),
+          first(),
+          map(apps => apps.slice(0, 50))
           );
 
         this.serviceInstanceGuid = createServiceInstanceState.serviceInstanceGuid;
@@ -113,7 +113,11 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
     const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
     let params = this.stepperForm.controls.params.value;
-    params = JSON.parse(params) || null;
+    try {
+      params = JSON.parse(params) || null;
+    } catch (e) {
+      params = null;
+    }
 
     this.store.dispatch(new CreateServiceBinding(
       this.servicesService.cfGuid,
