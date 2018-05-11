@@ -1,18 +1,11 @@
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { FormControl, FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
-import { selectUpdateInfo } from '../../../store/selectors/api.selectors';
-
-import { Observable, Subscription } from 'rxjs/Rx';
-import { Router } from '@angular/router';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, MatSnackBar, MatSnackBarRef } from '@angular/material';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { ErrorStateMatcher, MatSnackBar, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import { Subscription } from 'rxjs/Rx';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
-import { filter } from 'rxjs/operators/filter';
 import { UserProfileService } from '../user-profile.service';
-import { DELETE_INSTANCE_SUCCESS } from '../../../store/actions/application.actions';
+
 
 @Component({
   selector: 'app-edit-profile-info',
@@ -53,6 +46,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   private emailAddress: string;
 
   private errorSnack;
+
+  // Wire up to permissions and only allow password change if user has the 'password.write' group
+  private canChangePassword = true;
 
   ngOnInit() {
     this.userProfileService.fetchUserProfile();
