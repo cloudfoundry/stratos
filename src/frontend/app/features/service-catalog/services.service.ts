@@ -26,7 +26,11 @@ import {
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectCreateServiceInstanceServicePlan, selectCreateServiceGuid, selectCreateServiceInstanceCfGuid } from '../../store/selectors/create-service-instance.selectors';
+import {
+  selectCreateServiceGuid,
+  selectCreateServiceInstanceCfGuid,
+  selectCreateServiceInstanceServicePlan,
+} from '../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -122,7 +126,7 @@ export class ServicesService {
       },
       true
     ).entities$;
-  };
+  }
 
   getServiceBrokers = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceBrokerSchemaKey, this.cfGuid);
@@ -137,14 +141,14 @@ export class ServicesService {
       },
       true
     ).entities$;
-  };
+  }
   getServicePlanVisibilitiesForPlan = (servicePlanGuid: string): Observable<APIResource<IServicePlanVisibility>[]> => {
     return this.servicePlanVisibilities$.pipe(
       filter(p => !!p),
       map(vis => vis.filter(s => s.entity.service_plan_guid === servicePlanGuid)),
       first()
     );
-  };
+  }
 
   getServiceBrokerById = (guid: string): Observable<APIResource<IServiceBroker>> => this.serviceBrokers$
     .pipe(
@@ -153,7 +157,7 @@ export class ServicesService {
     filter(s => s && s.length === 1),
     map(s => s[0]),
     first()
-    );
+    )
 
   getVisibleServicePlans = () => {
     return this.servicePlans$.pipe(
@@ -163,7 +167,7 @@ export class ServicesService {
       map(([svcPlans, svcPlanVis, svcBrokers, svc]) => this.fetchVisiblePlans(svcPlans, svcPlanVis, svcBrokers, svc)),
 
     );
-  };
+  }
 
   fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
@@ -183,7 +187,7 @@ export class ServicesService {
       }
     });
     return visiblePlans;
-  };
+  }
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
@@ -214,7 +218,7 @@ export class ServicesService {
         return svcAvailability;
       })
     );
-  };
+  }
 
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
     return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
@@ -223,14 +227,14 @@ export class ServicesService {
       map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
       map(p => p[0]), filter(p => !!p)
       );
-  };
+  }
 
 
   getSelectedServicePlanAccessibility = () => {
     return this.getSelectedServicePlan().pipe(
       switchMap(plan => this.getServicePlanAccessibility(plan))
     );
-  };
+  }
 
 
   getOrgsForSelectedServicePlan = (): Observable<APIResource<IOrganization>[]> => {
@@ -282,7 +286,7 @@ export class ServicesService {
       }),
       share(), first()
       );
-  };
+  }
 
   getServiceName = () => {
     return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
@@ -294,5 +298,5 @@ export class ServicesService {
           return service.entity.label;
         }
       }));
-  };
+  }
 }
