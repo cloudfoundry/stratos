@@ -8,7 +8,8 @@ import { roleInfoFromSessionReducer } from './current-user-role-session.reducer'
 
 const defaultState = {
   internal: {
-    isAdmin: false
+    isAdmin: false,
+    scopes: []
   },
   cf: {}
 };
@@ -21,7 +22,8 @@ export function currentUserRolesReducer(state: ICurrentUserRolesState = defaultS
         cf: currentUserBaseCFRolesReducer(state.cf, action as GetCurrentUserRelationsComplete)
       };
     case SESSION_VERIFIED:
-      return roleInfoFromSessionReducer(state, action as VerifiedSession);
+      const verifiedSession = action as VerifiedSession;
+      return roleInfoFromSessionReducer(state, verifiedSession.sessionData.user, verifiedSession.sessionData.endpoints);
   }
   return state;
 }

@@ -9,6 +9,7 @@ import {
   ISpacesRoleState,
   IOrgsRoleState,
   IStratosRolesState,
+  IGlobalRolesState,
 } from '../../types/current-user-roles.types';
 
 export const selectCurrentUserRolesState = (state: AppState) => state.currentUserRoles;
@@ -22,6 +23,8 @@ export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) => (
 export const selectCurrentUserCFGlobalRolesState = (state: ICfRolesState) => state.global;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
+export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state.scopes;
+export const selectCurrentUserCFGlobalHasScopes = (scope: string) => (scopes: string[]) => scopes.includes(scope);
 
 export const selectCurrentUserCFSpaceRolesState = (spaceId: string) => (state: ISpacesRoleState) => state[spaceId];
 export const selectCurrentUserCFOrgRolesState = (orgId: string) => (state: IOrgsRoleState) => state[orgId];
@@ -59,11 +62,27 @@ export const getCurrentUserCFEndpointRolesState = (endpointGuid: string) => comp
 );
 // ============================
 
-// Global
+// CF Global roles
 // ============================
 export const getCurrentUserCFGlobalState = (endpointGuid: string) => compose(
   selectCurrentUserCFGlobalRolesState,
   getCurrentUserCFEndpointRolesState(endpointGuid)
+);
+// ============================
+
+// Specific endpoint scopes
+// ============================
+export const getCurrentUserCFEndpointScopesState = (endpointGuid: string) => compose(
+  selectCurrentUserCFGlobalScopesState,
+  getCurrentUserCFGlobalState(endpointGuid)
+);
+// ============================
+
+// Has endpoint scopes
+// ============================
+export const getCurrentUserCFEndpointHasScope = (endpointGuid: string, scope: string) => compose(
+  selectCurrentUserCFGlobalHasScopes(scope),
+  getCurrentUserCFEndpointScopesState(endpointGuid)
 );
 // ============================
 

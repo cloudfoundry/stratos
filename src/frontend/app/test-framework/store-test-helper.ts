@@ -20,7 +20,8 @@ const testInitialStoreState: AppState = {
       user: {
         guid: '530170c7-5042-40ed-8654-c4a79e4d1302',
         name: 'admin',
-        admin: true
+        admin: true,
+        scopes: []
       },
       endpoints: {
         cf: {
@@ -29,6 +30,7 @@ const testInitialStoreState: AppState = {
             name: 'SCF-2.2.0-beta',
             version: '',
             user: {
+              scopes: [],
               guid: 'a6254a42-a218-4f41-b77e-35a8d53d9dd1',
               name: 'admin',
               admin: true
@@ -40,6 +42,7 @@ const testInitialStoreState: AppState = {
             name: 'SCF',
             version: '',
             user: {
+              scopes: [],
               guid: 'ded8a59b-b21d-4da6-a07a-0d865a9b16e2',
               name: 'admin',
               admin: true
@@ -51,6 +54,7 @@ const testInitialStoreState: AppState = {
             name: 'TEST',
             version: '',
             user: {
+              scopes: [],
               guid: 'b2a8ed5c-5c63-4b5b-bdf8-04ea66a9db00',
               name: 'admin',
               admin: true
@@ -62,6 +66,7 @@ const testInitialStoreState: AppState = {
             name: 'SAP',
             version: '',
             user: {
+              scopes: [],
               guid: '7965e2cc-ef57-4373-bb0d-b45025355883',
               name: 'macdougall.neil@gmail.com',
               admin: false
@@ -73,6 +78,7 @@ const testInitialStoreState: AppState = {
             name: 'SCF 2.1.0-beta',
             version: '',
             user: {
+              scopes: [],
               guid: 'a1e15ade-2f3d-4354-8935-0553973afb2c',
               name: 'admin',
               admin: true
@@ -21645,7 +21651,8 @@ const testInitialStoreState: AppState = {
   },
   currentUserRoles: {
     internal: {
-      isAdmin: false
+      isAdmin: false,
+      scopes:[]
     },
     cf: {}
   }

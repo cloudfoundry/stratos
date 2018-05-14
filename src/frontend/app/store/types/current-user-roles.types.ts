@@ -6,7 +6,10 @@ export function getDefaultEndpointRoles(): ICfRolesState {
     global: {
       isAdmin: false,
       isReadOnlyAdmin: false,
-      isGlobalAuditor: false
+      isGlobalAuditor: false,
+      canRead: false,
+      canWrite: false,
+      scopes: []
     },
     spaces: {
 
@@ -22,6 +25,9 @@ export interface IGlobalRolesState {
   isAdmin: boolean;
   isReadOnlyAdmin: boolean;
   isGlobalAuditor: boolean;
+  canRead: boolean;
+  canWrite: boolean;
+  scopes: string[];
 }
 export interface ISpaceRoleState {
   isManager: boolean;
@@ -52,6 +58,7 @@ export interface IAllCfRolesState {
 
 export interface IStratosRolesState {
   isAdmin: boolean;
+  scopes: string[];
 }
 
 export interface ICurrentUserRolesState {

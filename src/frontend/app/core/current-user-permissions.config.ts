@@ -5,7 +5,8 @@ export enum CurrentUserPermissions {
   SPACE_DELETE = 'delete.space',
   SPACE_EDIT = 'edit.space',
   ORGANIZATION_CREATE = 'create.org',
-  ENDPOINT_REGISTER = 'register.endpoint'
+  ENDPOINT_REGISTER = 'register.endpoint',
+  PASSWORD_CHANGE = 'change-password'
 }
 export type PermissionConfigType = PermissionConfig[] | PermissionConfig | PermissionConfigLink;
 export interface IPermissionConfigs {
@@ -24,19 +25,30 @@ export enum PermissionStrings {
   STRATOS_ADMIN = 'isAdmin'
 }
 
+export enum ScopeStrings {
+  CF_ADMIN_GROUP = 'cloud_controller.admin',
+  CF_READ_ONLY_ADMIN_GROUP = 'cloud_controller.admin_read_only',
+  CF_ADMIN_GLOBAL_AUDITOR_GROUP = 'cloud_controller.global_auditor',
+  CF_WRITE_SCOPE = 'cloud_controller.write',
+  CF_READ_SCOPE = 'cloud_controller.write',
+  STRATOS_CHANGE_PASSWORD = 'password.write'
+}
 
 export enum PermissionTypes {
   SPACE = 'spaces',
   ORGANIZATION = 'organizations',
-  GLOBAL = 'global',
+  ENDPOINT = 'endpoint',
+  ENDPOINT_SCOPE = 'endpoint-scope',
   FEATURE_FLAG = 'feature-flag',
-  STRATOS = 'internal'
+  STRATOS = 'internal',
+  STRATOS_SCOPE = 'internal-scope'
 }
 
+export type PermissionValues = ScopeStrings | CFFeatureFlagTypes | PermissionStrings;
 export class PermissionConfig {
   constructor(
     public type: PermissionTypes,
-    public permission: CFFeatureFlagTypes | PermissionStrings = PermissionStrings._GLOBAL_,
+    public permission: PermissionValues = PermissionStrings._GLOBAL_,
     public guid?: string
   ) { }
 }
@@ -64,4 +76,5 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
   ],
   [CurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN),
+  [CurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(PermissionTypes.STRATOS_SCOPE, ScopeStrings.STRATOS_CHANGE_PASSWORD),
 };
