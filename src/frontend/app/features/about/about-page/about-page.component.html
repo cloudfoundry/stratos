@@ -7,7 +7,7 @@
   </div>
 </mat-card>
 
-<mat-card *ngIf="hasEula" class="about-page__card about-page__eula">
+<mat-card *ngIf="customizations.hasEula" class="about-page__card about-page__eula">
   <div>Use of this software is subject to the End-User License Agreement</div>
   <button [routerLink]="['eula']" mat-button mat-raised-button color="primary">View EULA</button>
 </mat-card>
