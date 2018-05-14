@@ -19,6 +19,7 @@ import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
 
+
 @Component({
   selector: 'app-steppers',
   templateUrl: './steppers.component.html',
@@ -92,8 +93,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             }
           }
           return [];
-        })
-        .subscribe();
+        }).subscribe();
     }
   }
 
