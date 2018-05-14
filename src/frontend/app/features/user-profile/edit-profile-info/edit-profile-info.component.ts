@@ -50,6 +50,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   // Wire up to permissions and only allow password change if user has the 'password.write' group
   private canChangePassword = true;
 
+  private passwordRequired = false;
+
   ngOnInit() {
     this.userProfileService.fetchUserProfile();
     this.userProfileService.userProfile$.subscribe(profile => {
@@ -77,6 +79,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   onChanges() {
     this.sub = this.editProfileForm.valueChanges.subscribe(values => {
       const required = values.emailAddress !== this.emailAddress || values.newPassword.length;
+      this.passwordRequired = !!required;
       if (required !== this.lastRequired) {
         this.lastRequired = required;
         const validators = required ? [Validators.required] : [];

@@ -7,7 +7,7 @@
   </div>
 </app-page-header>
 <app-steppers cancel="/userProfile">
-  <app-step [title]="'Edit User Profile'" [valid]="editProfileForm.valid && editProfileForm.dirty" [onNext]="updateProfile">
+  <app-step [title]="'Edit User Profile'" [valid]="editProfileForm.valid && editProfileForm.dirty" [onNext]="updateProfile" finishButtonText="Save">
     <div>
       <form [formGroup]="editProfileForm" validate class="edit-profile edit-profile__group">
         <mat-form-field>
@@ -22,7 +22,7 @@
         <p *ngIf="!canChangePassword">Current password is required when changing email address</p>
         <p *ngIf="canChangePassword">Current password is required when changing email address or password</p>
         <mat-form-field>
-          <input matInput placeholder="Current Password" type="password" formControlName="currentPassword">
+          <input matInput placeholder="Current Password" type="password" formControlName="currentPassword" [required]="passwordRequired">
         </mat-form-field>
         <div *ngIf="canChangePassword" class="edit-profile__group">
           <p>Change Password (Leave blank to keep current password)</p>
