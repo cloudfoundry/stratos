@@ -10,6 +10,7 @@ import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
 import { ServicesService } from '../../services.service';
 import { SetCreateServiceInstanceCFDetails } from '../../../../store/actions/create-service-instance.actions';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -17,6 +18,7 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
   styleUrls: ['./add-service-instance.component.scss'],
   providers: [
     servicesServiceFactoryProvider,
+    CreateServiceInstanceHelperService,
     TitleCasePipe
   ]
 })
@@ -26,21 +28,20 @@ export class AddServiceInstanceComponent implements OnInit {
   servicesWallCreateInstance = false;
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   constructor(
-    private servicesService: ServicesService,
+    private cSIHelperService: CreateServiceInstanceHelperService,
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService
   ) {
 
 
-    const cfId = servicesService.cfGuid;
-    if (!cfId) {
+    if (!cSIHelperService.marketPlaceMode) {
       this.servicesWallCreateInstance = true;
       this.title$ = Observable.of(`Create Service Instance`);
     } else {
-      const serviceGuid = servicesService.serviceGuid;
-      this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
-      this.title$ = this.servicesService.getServiceName().pipe(
+      const serviceGuid = cSIHelperService.serviceGuid;
+      this.serviceInstancesUrl = `/service-catalog/${cSIHelperService.cfGuid}/${serviceGuid}/instances`;
+      this.title$ = this.cSIHelperService.getServiceName().pipe(
         map(label => `Create Instance: ${label}`)
       );
     }

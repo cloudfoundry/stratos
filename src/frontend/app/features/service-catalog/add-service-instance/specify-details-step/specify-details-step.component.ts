@@ -27,9 +27,12 @@ import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstanceOrgGuid,
   selectCreateServiceInstanceServicePlan,
+  selectCreateServiceInstance,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesService } from '../../services.service';
+import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -37,10 +40,8 @@ import { ServicesService } from '../../services.service';
   styleUrls: ['./specify-details-step.component.scss'],
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterContentInit {
+  constructorSubscription: Subscription; // TODO unsubscriber()
 
-
-  @Input('servicesWallMode')
-  servicesWallMode = false;
   stepperForm: FormGroup;
   serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
@@ -83,7 +84,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   constructor(
     private store: Store<AppState>,
-    private servicesService: ServicesService,
+    private cSIHelperService: CreateServiceInstanceHelperService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar,
   ) {
@@ -96,46 +97,52 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       tags: new FormControl(''),
     });
 
-    this.orgs$ = this.initOrgsObservable();
+    if (cSIHelperService.marketPlaceMode) {
+      this.orgs$ = this.initOrgsObservable();
+      this.spaces$ = this.initSpacesObservable();
+    }
 
-    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.servicesService.serviceGuid);
+    this.constructorSubscription = cSIHelperService.initialised$.pipe(
+      filter(p => !!p),
+      tap(o => {
+        const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.cSIHelperService.serviceGuid);
+        this.allServiceInstances$ = this.initServiceInstances(paginationKey);
 
-    this.allServiceInstances$ = this.initServiceInstances(paginationKey);
-
-    this.spaces$ = this.initSpacesObservable();
+      })
+    ).subscribe();
 
   }
 
   ngOnInit(): void {
-    if (this.servicesWallMode) {
+    if (!this.cSIHelperService.marketPlaceMode) {
       this.stepperForm = new FormGroup({
         name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
         params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
         tags: new FormControl(''),
       });
-    }
-    if (!this.servicesWallMode) {
-      this.spaceScopeSub = this.servicesService.getSelectedServicePlanAccessibility()
-        .pipe(
-        map(o => o.spaceScoped),
-        tap(spaceScope => {
-          if (spaceScope) {
-            this.stepperForm.get('org').disable();
-            this.stepperForm.get('space').disable();
-          } else {
-            this.stepperForm.get('org').enable();
-            this.stepperForm.get('space').enable();
-          }
-        })).subscribe();
+    } else {
+      if (this.cSIHelperService.marketPlaceMode) {
+        this.spaceScopeSub = this.cSIHelperService.getSelectedServicePlanAccessibility()
+          .pipe(
+          map(o => o.spaceScoped),
+          tap(spaceScope => {
+            if (spaceScope) {
+              this.stepperForm.get('org').disable();
+              this.stepperForm.get('space').disable();
+            } else {
+              this.stepperForm.get('org').enable();
+              this.stepperForm.get('space').enable();
+            }
+          })).subscribe();
+      }
     }
   }
-
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
   initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
     store: this.store,
-    action: new GetServiceInstances(this.servicesService.cfGuid, paginationKey),
+    action: new GetServiceInstances(this.cSIHelperService.cfGuid, paginationKey),
     paginationMonitor: this.paginationMonitorFactory.create(
       paginationKey,
       entityFactory(serviceInstancesSchemaKey)
@@ -152,7 +159,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
 
   initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {
-    return this.servicesService.getOrgsForSelectedServicePlan();
+    return this.cSIHelperService.getOrgsForSelectedServicePlan();
   }
 
 
@@ -162,7 +169,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
         return this.stepperForm.valid;
       });
 
-    if (!this.servicesWallMode) {
+    if (this.cSIHelperService.marketPlaceMode) {
       this.orgSubscription = this.orgs$.pipe(
         filter(p => !!p && p.length > 0),
         tap(o => {
@@ -187,7 +194,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     }),
     filter(p => !!p),
     map(org => org.entity.spaces),
-    combineLatest(this.servicesService.getSelectedServicePlanAccessibility()),
+    combineLatest(this.cSIHelperService.getSelectedServicePlanAccessibility()),
     map(([spaces, servicePlanAccessibility]) => {
       if (servicePlanAccessibility.spaceScoped) {
         return spaces.filter(s => s.metadata.guid === servicePlanAccessibility.spaceGuid);
@@ -216,7 +223,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
 
   onNext = () => {
-    return this.store.select(selectCreateServiceInstanceServicePlan).pipe(
+    // TODO debug this place
+    return this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p),
       switchMap(p => this.createServiceInstance(p)),
       filter(s => !s.creating),
@@ -225,7 +233,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
           this.displaySnackBar();
           return { success: false };
         } else {
-
           const serviceInstanceGuid = s.response.result[0];
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           return { success: true };
@@ -234,10 +241,20 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     );
   }
 
-  createServiceInstance(servicePlanGuid: string): Observable<RequestInfoState> {
+  createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
     const name = this.stepperForm.controls.name.value;
-    const spaceGuid = this.stepperForm.controls.space.value;
+    let spaceGuid = '';
+    let cfGuid = '';
+    if (!this.cSIHelperService.marketPlaceMode) {
+      spaceGuid = createServiceInstance.spaceGuid;
+      cfGuid = createServiceInstance.cfGuid;
+    } else {
+      spaceGuid = this.stepperForm.controls.space.value;
+      cfGuid = this.cSIHelperService.cfGuid;
+    }
+    const servicePlanGuid = createServiceInstance.servicePlanGuid;
+
     let params = this.stepperForm.controls.params.value;
     try {
       params = JSON.parse(params) || null;
@@ -250,7 +267,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
 
     this.store.dispatch(new CreateServiceInstance(
-      this.servicesService.cfGuid,
+      this.cSIHelperService.cfGuid,
       newServiceInstanceGuid,
       name,
       servicePlanGuid,
@@ -285,10 +302,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     if (index >= 0) {
       this.tags.splice(index, 1);
     }
-  };
+  }
 
 
   checkName = (value: string = null) =>
-    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.stepperForm.controls.name.value) === -1 : true;
+    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.stepperForm.controls.name.value) === -1 : true
 
 }

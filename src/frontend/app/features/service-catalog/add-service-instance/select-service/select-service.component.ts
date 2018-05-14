@@ -1,18 +1,21 @@
-import { Component, OnInit, AfterContentInit, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, share, switchMap, tap, filter } from 'rxjs/operators';
+import { filter, first, map, share, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IService } from '../../../../core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
-import { selectCreateServiceInstanceCfGuid } from '../../../../store/selectors/create-service-instance.selectors';
+import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { ServicesService } from '../../services.service';
+import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 @Component({
   selector: 'app-select-service',
@@ -23,6 +26,7 @@ import { ServicesService } from '../../services.service';
   ]
 })
 export class SelectServiceComponent implements OnDestroy, AfterContentInit {
+  cfGuid: string;
   serviceSubscription: Subscription;
   services$: Observable<APIResource<IService>[]>;
   stepperForm: FormGroup;
@@ -31,28 +35,31 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
   constructor(
     private store: Store<AppState>,
-    private servicesService: ServicesService,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private servicesWallService: ServicesWallService
+    private servicesWallService: ServicesWallService,
+    private entityServiceFactory: EntityServiceFactory,
   ) {
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
     });
 
-    this.services$ = this.store.select(selectCreateServiceInstanceCfGuid).pipe(
-      filter(p => !!p),
-      tap(p => console.log(`cfGuid: ${p}`)),
-      switchMap(guid => servicesWallService.getServicesInCf(guid)),
-      tap(ss => console.log(ss)),
+    this.services$ = this.store.select(selectCreateServiceInstance).pipe(
+      filter(p => !!p && !!p.cfGuid),
+      tap((p: CreateServiceInstanceState) => this.cfGuid = p.cfGuid),
+      switchMap(p => servicesWallService.getServicesInCf(p.cfGuid)),
       filter(p => !!p),
       first(),
       share()
     );
+
   }
 
-  onNext = () => Observable.of({
-    success: true
-  })
+  onNext = () => {
+
+    const serviceGuid = this.stepperForm.controls.service.value;
+    this.store.dispatch(new SetCreateServiceInstanceServiceGuid());
+    return Observable.of({ success: true });
+  }
 
   ngAfterContentInit() {
 

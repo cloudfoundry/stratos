@@ -1,17 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { filter, map } from 'rxjs/operators';
 
+import { IService, IServiceBroker, IServicePlanVisibility } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { GetServiceBrokers } from '../../../store/actions/service-broker.actions';
+import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
+import { GetAllServices } from '../../../store/actions/service.actions';
 import { AppState } from '../../../store/app-state';
+import {
+  entityFactory,
+  serviceBrokerSchemaKey,
+  servicePlanVisibilitySchemaKey,
+  serviceSchemaKey,
+} from '../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
-import { serviceSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../store/types/api.types';
-import { IService } from '../../../core/cf-api-svc.types';
-import { GetAllServices } from '../../../store/actions/service.actions';
-import { Observable } from 'rxjs/Observable';
-import { map, filter } from 'rxjs/operators';
 
 @Injectable()
 export class ServicesWallService {
@@ -23,6 +30,7 @@ export class ServicesWallService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
     this.services$ = this.initServicesObservable();
+
   }
 
   initServicesObservable = () => {
@@ -44,6 +52,46 @@ export class ServicesWallService {
     filter(p => !!p && p.length > 0),
     map(services => services.filter(s => s.entity.cfGuid === cfGuid))
   )
+
+  getVisisbleServices = (cfGuid: string) => this.services$.pipe(
+    filter(p => !!p && p.length > 0),
+    map(services => services.filter(s => s.entity.cfGuid === cfGuid)),
+    // filter out private with no visibilities
+    map(services => {
+      const servicePlans = services.map(s => s.entity.service_plans);
+    })
+  )
+
+
+  getServicePlanVisibilitiesForCf = (cfGuid: string) => {
+    const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, cfGuid);
+    return getPaginationObservables<APIResource<IServicePlanVisibility>>(
+      {
+        store: this.store,
+        action: new GetServicePlanVisibilities(cfGuid, paginationKey),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          paginationKey,
+          entityFactory(servicePlanVisibilitySchemaKey)
+        )
+      },
+      true
+    ).entities$;
+  }
+
+  getServiceBrokersForCf = (cfGuid: string) => {
+    const paginationKey = createEntityRelationPaginationKey(serviceBrokerSchemaKey, cfGuid);
+    return getPaginationObservables<APIResource<IServiceBroker>>(
+      {
+        store: this.store,
+        action: new GetServiceBrokers(cfGuid, paginationKey),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          paginationKey,
+          entityFactory(serviceBrokerSchemaKey)
+        )
+      },
+      true
+    ).entities$;
+  }
 
   getServicePlansForServiceById = (serviceGuid: string) => this.services$.pipe(
     filter(p => !!p && p.length > 0),

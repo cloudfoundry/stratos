@@ -14,7 +14,7 @@ import { AppState } from '../../../../store/app-state';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { ServicePlanAccessibility, ServicesService } from '../../services.service';
 import { selectCreateServiceGuid } from '../../../../store/selectors/create-service-instance.selectors';
-import { ServicesWallService } from '../../../services/services/services-wall.service';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 interface ServicePlan {
   id: string;
@@ -28,15 +28,11 @@ interface ServicePlan {
   styleUrls: ['./select-plan-step.component.scss'],
   providers: [
     TitleCasePipe,
-    ServicesWallService
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnInit, OnDestroy {
 
-
-  @Input('servicesWallMode')
-  servicesWallMode = false;
 
   servicePlans: ServicePlan[];
 
@@ -49,8 +45,9 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy {
   initialising$ = new BehaviorSubject(true);
 
   constructor(private store: Store<AppState>,
-    private servicesService: ServicesService,
-    private servicesWallService: ServicesWallService) {
+    private cSIHelperService: CreateServiceInstanceHelperService,
+  ) {
+
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
     });
@@ -87,30 +84,23 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.servicesWallMode) {
-      this.servicePlans$ = this.store.select(selectCreateServiceGuid).pipe(
-        switchMap(guid => this.servicesWallService.getServicePlansForServiceById(guid)),
+    this.servicePlans$ = this.cSIHelperService.initialised$.pipe(
+
+      switchMap(p => this.cSIHelperService.getVisibleServicePlans().pipe(
+        filter(o => !!o && o.length > 0),
         map(o => this.mapToServicePlan(o)),
         share(),
         first()
-      );
-    } else {
-      this.servicePlans$ = this.servicesService.getVisibleServicePlans().pipe(
-        filter(p => !!p && p.length > 0),
-        map(o => this.mapToServicePlan(o)),
-        share(),
-        first()
-      );
-    }
+      )));
 
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
       tap(o => {
+        console.log('Updating...');
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
         this.servicePlans = o;
         this.validate.next(this.stepperForm.valid);
       }),
-      first()
     ).subscribe();
   }
 
@@ -128,12 +118,15 @@ export class SelectPlanStepComponent implements OnInit, OnDestroy {
   }
 
   getSelectedPlan = (): Observable<ServicePlan> => this.servicePlans$.pipe(
+    tap(o => console.log(o)),
+    tap(o => console.log(this.stepperForm.controls.servicePlans.value)),
     map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
+    tap(o => console.log('selected plan: ' + JSON.stringify(o))),
     filter(p => !!p)
   )
 
   getPlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<CardStatus> => {
-    return this.servicesService.getServicePlanAccessibility(servicePlan).pipe(
+    return this.cSIHelperService.getServicePlanAccessibility(servicePlan).pipe(
       map((servicePlanAccessibility: ServicePlanAccessibility) => {
         if (servicePlanAccessibility.isPublic) {
           return CardStatus.OK;
