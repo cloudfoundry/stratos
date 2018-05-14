@@ -65,7 +65,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
 
     this.closeable$ = Observable.combineLatest(
-      this.valid$,
+      this.valid$.startWith(false),
       this.deployer.status$).pipe(
         map(([validated, status]) => {
           return validated || status.error;
