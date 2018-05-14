@@ -47,14 +47,15 @@ export const InitCfOrgSpaceService = (store: Store<AppState>,
     filter((pag) => !!pag),
     first(),
     tap(pag => {
-      if (pag.clientPagination.filter.items.cf) {
-        cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+      const { cf, org, space } = pag.clientPagination.filter.items;
+      if (cf) {
+        this.cfOrgSpaceService.cf.select.next(cf);
       }
-      if (pag.clientPagination.filter.items.org) {
-        cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+      if (org) {
+        this.cfOrgSpaceService.org.select.next(org);
       }
-      if (pag.clientPagination.filter.items.space) {
-        cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+      if (space) {
+        this.cfOrgSpaceService.space.select.next(space);
       }
     })
   );
@@ -118,7 +119,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.space.loading$
     ).pipe(
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
-      );
+    );
 
   }
 
@@ -163,7 +164,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         }
         return [];
       }
-      );
+    );
 
     this.org = {
       list$: orgList$,
