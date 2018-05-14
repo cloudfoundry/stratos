@@ -10,12 +10,12 @@ import { createBasicStoreModule } from '../../../../../../test-framework/store-t
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 import { CfRoleCheckboxComponent } from '../../../../cf-role-checkbox/cf-role-checkbox.component';
-import { TableCellSpaceRoleComponent } from './table-cell-space-role.component';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
+import { TableCellRoleOrgSpaceComponent } from './table-cell-org-space-role.component';
 
 describe('TableCellSpaceRoleComponent', () => {
-  let component: TableCellSpaceRoleComponent;
-  let fixture: ComponentFixture<TableCellSpaceRoleComponent>;
+  let component: TableCellRoleOrgSpaceComponent;
+  let fixture: ComponentFixture<TableCellRoleOrgSpaceComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -32,7 +32,7 @@ describe('TableCellSpaceRoleComponent', () => {
         EntityMonitorFactory
       ],
       declarations: [
-        TableCellSpaceRoleComponent,
+        TableCellRoleOrgSpaceComponent,
         CfRoleCheckboxComponent
       ]
     })
@@ -40,7 +40,7 @@ describe('TableCellSpaceRoleComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableCellSpaceRoleComponent);
+    fixture = TestBed.createComponent(TableCellRoleOrgSpaceComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {}, metadata: {

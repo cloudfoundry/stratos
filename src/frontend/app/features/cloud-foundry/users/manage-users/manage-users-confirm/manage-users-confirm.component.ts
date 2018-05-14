@@ -14,9 +14,11 @@ import {
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import {
   TableCellConfirmOrgSpaceComponent,
+  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
   TableCellConfirmRoleAddRemComponent,
+  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
 import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { UsersRolesClearUpdateState } from '../../../../../store/actions/users-roles.actions';

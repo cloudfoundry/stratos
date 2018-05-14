@@ -1,6 +1,9 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableCellConfirmRoleAddRemComponent } from './table-cell-confirm-role-add-rem.component';
+import { BooleanIndicatorComponent } from '../../../../boolean-indicator/boolean-indicator.component';
+import { MDAppModule } from '../../../../../../core/md.module';
+import { OrgUserRoleNames } from '../../../../../../store/types/user.types';
 
 describe('TableCellConfirmRoleAddRemComponent', () => {
   let component: TableCellConfirmRoleAddRemComponent;
@@ -8,14 +11,29 @@ describe('TableCellConfirmRoleAddRemComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TableCellConfirmRoleAddRemComponent ]
+      imports: [
+        MDAppModule,
+      ],
+      declarations: [
+        TableCellConfirmRoleAddRemComponent,
+        BooleanIndicatorComponent
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellConfirmRoleAddRemComponent);
     component = fixture.componentInstance;
+    component.row = {
+      userName: '',
+      userGuid: '',
+      orgName: '',
+      orgGuid: '',
+      roleName: '',
+      add: false,
+      role: OrgUserRoleNames.AUDITOR,
+    };
     fixture.detectChanges();
   });
 

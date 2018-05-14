@@ -19,6 +19,7 @@ import { ITableListDataSource } from '../../../../../shared/components/list/data
 import { ITableColumn } from '../../../../../shared/components/list/list-table/table.types';
 import {
   TableCellRoleOrgSpaceComponent,
+  // tslint:disable-next-line:max-line-length
 } from '../../../../../shared/components/list/list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
 import {
   TableCellSelectOrgComponent,
