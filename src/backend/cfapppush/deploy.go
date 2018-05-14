@@ -33,7 +33,8 @@ import (
 	"code.cloudfoundry.org/cli/cf/terminal"
 	"code.cloudfoundry.org/cli/cf/trace"
 	"code.cloudfoundry.org/cli/util"
-	"code.cloudfoundry.org/cli/util/words/generator"
+	"code.cloudfoundry.org/cli/util/randomword"
+	"github.com/SUSE/stratos-ui/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
@@ -85,16 +86,6 @@ const (
 )
 
 const (
-
-	// Time allowed to read the next pong message from the peer
-	pongWait = 30 * time.Second
-
-	// Send ping messages to peer with this period (must be less than pongWait)
-	pingPeriod = (pongWait * 9) / 10
-
-	// Time allowed to write a ping message
-	pingWriteTimeout = 10 * time.Second
-
 	stratosProjectKey = "STRATOS_PROJECT"
 )
 
@@ -169,7 +160,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	spaceName := echoContext.QueryParam("space")
 	orgName := echoContext.QueryParam("org")
 
-	clientWebSocket, pingTicker, err := upgradeToWebSocket(echoContext)
+	clientWebSocket, pingTicker, err := interfaces.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
 		return err
@@ -545,7 +536,7 @@ func initialiseDependency(writer io.Writer, logger trace.Printer, envDialTimeout
 		deps.ServiceBuilder,
 	)
 
-	deps.WordGenerator = generator.NewWordGenerator()
+	deps.WordGenerator = new(randomword.Generator)
 
 	deps.AppZipper = appfiles.ApplicationZipper{}
 	deps.AppFiles = appfiles.ApplicationFiles{}

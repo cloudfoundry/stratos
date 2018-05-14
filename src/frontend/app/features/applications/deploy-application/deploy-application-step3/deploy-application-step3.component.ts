@@ -1,28 +1,31 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { tap, filter, map, mergeMap, combineLatest, switchMap, share, catchError, takeWhile } from 'rxjs/operators';
-import { getEntityById, selectEntity, selectEntities } from '../../../../store/selectors/api.selectors';
-import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
-import websocketConnect from 'rxjs-websockets';
-import { QueueingSubject } from 'queueing-subject/lib';
-import { Subscription } from 'rxjs/Subscription';
-import { selectDeployAppState } from '../../../../store/selectors/deploy-application.selector';
-import { DeployApplicationSource, SocketEventTypes, AppData } from '../../../../store/types/deploy-application.types';
-import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
-import * as moment from 'moment';
-import { MatSnackBar } from '@angular/material';
-import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { GetAllApplications } from '../../../../store/actions/application.actions';
-import { environment } from '../../../../../environments/environment';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { CfAppsDataSource, createGetAllAppAction } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { interval } from 'rxjs/observable/interval';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
+import { Store } from '@ngrx/store';
+import { QueueingSubject } from 'queueing-subject/lib';
+import websocketConnect from 'rxjs-websockets';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { interval } from 'rxjs/observable/interval';
+import { catchError, filter, map, mergeMap, share, switchMap, takeWhile, tap, first } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { environment } from '../../../../../environments/environment';
+import {
+  CfAppsDataSource,
+  createGetAllAppAction,
+} from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { GetAppEnvVarsAction } from '../../../../store/actions/app-metadata.actions';
+import { DeleteDeployAppSection } from '../../../../store/actions/deploy-applications.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppState } from '../../../../store/app-state';
+import { organizationSchemaKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import { selectEntity } from '../../../../store/selectors/api.selectors';
+import { selectDeployAppState } from '../../../../store/selectors/deploy-application.selector';
+import { AppData, DeployApplicationSource, SocketEventTypes } from '../../../../store/types/deploy-application.types';
+import { createGetApplicationAction } from '../../application.service';
 
 // Interval to check for new application
 const APP_CHECK_INTERVAL = 3000;
@@ -32,17 +35,21 @@ const APP_CHECK_INTERVAL = 3000;
   templateUrl: './deploy-application-step3.component.html',
   styleUrls: ['./deploy-application-step3.component.scss']
 })
-export class DeployApplicationStep3Component implements OnInit, OnDestroy {
+export class DeployApplicationStep3Component implements OnDestroy {
 
-  connect$: Subscription;
+  @Input('appGuid') appGuid: string;
+  fetchedApp = false;
   streamTitle = 'Preparing...';
   messages: Observable<string>;
   appData: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
-  appGuid: string;
+  cfGuid: string;
+  orgGuid: string;
+  spaceGuid: string;
 
   // Validation poller
-  validate = this.createValidationPoller();
+  valid$ = this.createValidationPoller();
+
   error$ = new BehaviorSubject<boolean>(false);
   // Observable for when the deploy modal can be closed
   closeable$: Observable<boolean>;
@@ -57,38 +64,37 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     private http: HttpClient,
   ) {
     this.closeable$ = Observable.combineLatest(
-      this.validate,
+      this.valid$,
       this.error$).pipe(
-        map(([validated, errored]) => {
-          return validated || errored;
+        map(([valid, errored]) => {
+          return valid || errored;
         })
       );
   }
 
   ngOnDestroy() {
-    // Unsubscribe from the websocket stream
-    if (this.connect$) {
-      this.connect$.unsubscribe();
-    }
+    this.store.dispatch(new DeleteDeployAppSection());
   }
 
-  ngOnInit() {
-    this.connect$ = this.store.select(selectDeployAppState).pipe(
+  onEnter = () => {
+    this.store.select(selectDeployAppState).pipe(
       filter(appDetail => !!appDetail.cloudFoundryDetails
         && !!appDetail.applicationSource
         && !!appDetail.applicationSource.projectName),
-      mergeMap(p => {
-        const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, p.cloudFoundryDetails.org));
-        const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, p.cloudFoundryDetails.space));
-        return Observable.of(p).combineLatest(orgSubscription, spaceSubscription);
+      mergeMap(appDetails => {
+        const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, appDetails.cloudFoundryDetails.org));
+        const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, appDetails.cloudFoundryDetails.space));
+        return Observable.of(appDetails).combineLatest(orgSubscription, spaceSubscription);
       }),
-      tap(p => {
-        this.connect$.unsubscribe();
+      first(),
+      tap(([appDetail, org, space]) => {
+        this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
+        this.orgGuid = appDetail.cloudFoundryDetails.org;
+        this.spaceGuid = appDetail.cloudFoundryDetails.space;
         const host = window.location.host;
         const streamUrl = (
-          `wss://${host}/pp/${this.proxyAPIVersion}/${p[0].cloudFoundryDetails.cloudFoundry}/` +
-          `${p[0].cloudFoundryDetails.org}/${p[0].cloudFoundryDetails.space}/deploy` +
-          `?org=${p[1].entity.name}&space=${p[2].entity.name}`
+          `wss://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
+          `?org=${org.entity.name}&space=${space.entity.name}`
         );
 
         const inputStream = new QueueingSubject<string>();
@@ -112,7 +118,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
             filter((log) => log.type === SocketEventTypes.DATA),
             map((log) => log.message)
           );
-        inputStream.next(this.sendProjectInfo(p[0].applicationSource));
+        inputStream.next(this.sendProjectInfo(appDetail.applicationSource));
       })
     ).subscribe();
   }
@@ -133,7 +139,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     const github = {
       project: appSource.projectName,
       branch: appSource.branch.name,
-      type: appSource.type.subType
+      type: appSource.type.subType,
+      commit: appSource.commit
     };
 
     const msg = {
@@ -145,14 +152,14 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
-    const giturl = {
+    const gitUrl = {
       url: appSource.projectName,
       branch: appSource.branch.name,
       type: appSource.type.subType
     };
 
     const msg = {
-      message: JSON.stringify(giturl),
+      message: JSON.stringify(gitUrl),
       timestamp: Math.round((new Date()).getTime() / 1000),
       type: SocketEventTypes.SOURCE_GITURL
     };
@@ -165,9 +172,6 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         this.streamTitle = 'Starting deployment...';
         // This info is will be used to retrieve the app Id
         this.appData = JSON.parse(log.message).Applications[0];
-        this.appData.cloudFoundry = this.cfOrgSpaceService.cf.select.getValue();
-        this.appData.org = this.cfOrgSpaceService.org.select.getValue();
-        this.appData.space = this.cfOrgSpaceService.space.select.getValue();
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
         this.streamTitle = 'Deploying...';
@@ -179,23 +183,23 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
         this.deploying = false;
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
-        this.close(log, null, null, true);
+        this.close(log, null, null);
         break;
       case SocketEventTypes.CLOSE_INVALID_MANIFEST:
         this.close(log, 'Deploy Failed - Invalid manifest!',
-          'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!', true);
+          'Failed to deploy app! Please make sure that a valid manifest.yaml was provided!');
         break;
       case SocketEventTypes.CLOSE_NO_MANIFEST:
         this.close(log, 'Deploy Failed - No manifest present!',
-          'Failed to deploy app! Please make sure that a valid manifest.yaml is present!', true);
+          'Failed to deploy app! Please make sure that a valid manifest.yaml is present!');
         break;
       case SocketEventTypes.CLOSE_FAILED_CLONE:
         this.close(log, 'Deploy Failed - Failed to clone repository!',
-          'Failed to deploy app! Please make sure the repository is public!', true);
+          'Failed to deploy app! Please make sure the repository is public!');
         break;
       case SocketEventTypes.CLOSE_FAILED_NO_BRANCH:
         this.close(log, 'Deploy Failed - Failed to located branch!',
-          'Failed to deploy app! Please make sure that branch exists!', true);
+          'Failed to deploy app! Please make sure that branch exists!');
         break;
       case SocketEventTypes.CLOSE_FAILURE:
       case SocketEventTypes.CLOSE_PUSH_ERROR:
@@ -203,7 +207,7 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
       case SocketEventTypes.CLOSE_NO_CNSI:
       case SocketEventTypes.CLOSE_NO_CNSI_USERTOKEN:
         this.close(log, 'Deploy Failed!',
-          'Failed to deploy app!', true);
+          'Failed to deploy app!');
         break;
       case SocketEventTypes.SOURCE_REQUIRED:
       case SocketEventTypes.EVENT_CLONED:
@@ -215,11 +219,8 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     }
   }
 
-  close(log, title, error, deleteAppSection) {
+  close(log, title, error) {
     this.error$.next(true);
-    if (deleteAppSection) {
-      this.store.dispatch(new DeleteDeployAppSection());
-    }
 
     if (title) {
       this.streamTitle = title;
@@ -237,38 +238,45 @@ export class DeployApplicationStep3Component implements OnInit, OnDestroy {
     // Delete Deploy App Section
     this.store.dispatch(new DeleteDeployAppSection());
     // Take user to applications
-    this.store.dispatch(new RouterNav({ path: ['applications', this.appData.cloudFoundry, this.appGuid] }));
+    this.store.dispatch(new RouterNav({ path: ['applications', this.cfGuid, this.appGuid] }));
     return Observable.of({ success: true });
   }
 
   /**
    * Create a poller that will be used to periodically check for the new application.
    */
-  private createValidationPoller() {
+  private createValidationPoller(): Observable<boolean> {
     return interval(APP_CHECK_INTERVAL).pipe(
-      takeWhile(() => !this.appGuid),
+      takeWhile(() => !this.fetchedApp),
       filter(() => this.deploying),
       switchMap(() => {
-        const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.appData.cloudFoundry });
-        return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:` +
-          this.appData.space + '&q=name:' + this.appData.Name, { headers: headers })
-          .pipe(
-            mergeMap(info => {
-              if (info && info[this.appData.cloudFoundry]) {
-                const apps = info[this.appData.cloudFoundry];
-                if (apps.total_results === 1) {
-                  this.appGuid = apps.resources[0].metadata.guid;
-                  // New app - so refresh the application wall data
-                  this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
-                  return Observable.of(true);
+        if (this.appGuid) {
+          this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+          this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, this.cfGuid));
+          this.fetchedApp = true;
+          return Observable.of(true);
+        } else {
+          const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.cfGuid });
+          return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/v2/apps?q=space_guid:${this.spaceGuid}&q=name:${this.appData.Name}`,
+            { headers: headers }).pipe(
+              map(info => {
+                if (info && info[this.cfGuid]) {
+                  const apps = info[this.cfGuid];
+                  if (apps.total_results === 1) {
+                    this.appGuid = apps.resources[0].metadata.guid;
+                    this.fetchedApp = true;
+                    // New app - so refresh the application wall data
+                    this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
+                    return true;
+                  }
                 }
-              }
-              return Observable.of(false);
-            }),
-            catchError(err => [
-              // ignore
-            ])
-          );
+                return false;
+              }),
+              catchError(err => [
+                // ignore
+              ])
+            );
+        }
       })
     );
   }

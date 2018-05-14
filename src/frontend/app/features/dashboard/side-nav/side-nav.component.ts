@@ -1,7 +1,8 @@
-import { Component, Inject, InjectionToken, Input, OnInit, Optional } from '@angular/core';
+import { Component, Inject, InjectionToken, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ActionHistoryDump } from '../../../store/actions/action-history.actions';
 import { AppState } from '../../../store/app-state';
 
@@ -24,7 +25,8 @@ export class SideNavComponent implements OnInit {
 
   constructor(
     private store: Store<AppState>,
-    @Optional() @Inject(SIDENAV_COPYRIGHT) private copyright: string) { }
+    @Inject(Customizations) public customizations: CustomizationsMetadata
+  ) { }
 
   @Input() tabs: SideNavItem[];
   // Button is not always visible on load, so manually push through an event

@@ -1,6 +1,6 @@
 # Customizing Stratos
 
-Stratos provides a mechanism to allow you to customize Stratos - the following customizations are currently supported:
+Stratos provides a mechanism for customization - the following customizations are currently supported:
 
 - Changing the theme colors
 - Changing certain image assets (favorite icon, login background and logo)
