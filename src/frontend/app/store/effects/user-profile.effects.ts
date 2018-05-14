@@ -2,12 +2,25 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { FetchUserProfileAction, GET_USERPROFILE, UPDATE_USERPASSWORD, UPDATE_USERPROFILE, UpdateUserPasswordAction, UpdateUserProfileAction } from '../actions/user-profile.actions';
+
+import {
+  FetchUserProfileAction,
+  GET_USERPROFILE,
+  UPDATE_USERPASSWORD,
+  UPDATE_USERPROFILE,
+  UpdateUserPasswordAction,
+  UpdateUserProfileAction,
+} from '../actions/user-profile.actions';
 import { AppState } from '../app-state';
 import { rootUpdatingKey } from '../reducers/api-request-reducer/types';
 import { UserProfileInfo, userProfileStoreNames } from '../types/user-profile.types';
 import { environment } from './../../../environments/environment.prod';
-import { IRequestAction, StartRequestAction, WrapperRequestActionFailed, WrapperRequestActionSuccess } from './../types/request.types';
+import {
+  IRequestAction,
+  StartRequestAction,
+  WrapperRequestActionFailed,
+  WrapperRequestActionSuccess,
+} from './../types/request.types';
 
 
 const { proxyAPIVersion } = environment;
@@ -60,12 +73,12 @@ export class UserProfileEffect {
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       const guid = action.profile.id;
       const version = action.profile.meta.version;
-      const headers = {'If-Match': version.toString()};
+      const headers = { 'If-Match': version.toString() };
       if (action.password) {
         headers['x-stratos-password'] = action.password;
       }
 
-      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}`, action.profile, { headers } )
+      return this.httpClient.put(`/pp/${proxyAPIVersion}/uaa/Users/${guid}`, action.profile, { headers })
         .mergeMap((info: UserProfileInfo) => {
           return [
             new WrapperRequestActionSuccess({
@@ -80,7 +93,7 @@ export class UserProfileEffect {
         });
     });
 
-    @Effect() updateUserPrassword$ = this.actions$.ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD)
+  @Effect() updateUserPrassword$ = this.actions$.ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD)
     .mergeMap(action => {
       const apiAction = {
         entityKey: userProfileStoreNames.type,
