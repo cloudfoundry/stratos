@@ -1,20 +1,24 @@
+import {
+  AfterContentInit,
+  Component,
+  ContentChildren,
+  Input,
+  OnDestroy,
+  OnInit,
+  QueryList,
+  ViewEncapsulation,
+} from '@angular/core';
+import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { AfterContentInit, Component, ContentChildren, Input, OnInit, QueryList, ViewEncapsulation, OnDestroy } from '@angular/core';
-import { Observable, Subscription, BehaviorSubject } from 'rxjs/Rx';
+import { first, map } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs/Rx';
 
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { AppState } from '../../../../store/app-state';
+import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../../store/app-state';
-import { EntityService } from '../../../../core/entity-service';
-import { selectEntity } from '../../../../store/selectors/api.selectors';
-import { getPreviousRoutingState } from '../../../../store/types/routing.type';
-import { tap, filter, map, first, mergeMap } from 'rxjs/operators';
-import { RoutesRecognized } from '@angular/router';
-import { EmptyObservable } from 'rxjs/observable/EmptyObservable';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { empty } from 'rxjs/observable/empty';
-import { NoSubstitutionTemplateLiteral } from 'typescript';
+
 
 @Component({
   selector: 'app-steppers',
@@ -93,13 +97,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
-      if (this.nextSub) {
-        this.nextSub.unsubscribe();
-      }
       this.nextSub = obs$
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {} }))
-        .subscribe(({ success, data, message, redirect }) => {
+        .switchMap(({ success, data, message, redirect }) => {
           step.error = !success;
           step.busy = false;
           this.enterData = data;
@@ -110,7 +111,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               this.setActive(this.currentIndex + 1);
             }
           }
-        });
+          return [];
+        }).subscribe();
     }
   }
 
