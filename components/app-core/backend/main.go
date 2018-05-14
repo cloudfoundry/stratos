@@ -23,7 +23,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
-	"github.com/nwmac/sqlitestore"
+	"github.com/andrewghobrial/sqlitestore"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
@@ -542,6 +542,9 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	pp.POST("/v1/auth/login/uaa", p.loginToUAA)
 	pp.POST("/v1/auth/logout", p.logout)
+
+	pp.GET("/v1/auth/sso_login", p.initSSOlogin)
+	pp.GET("/v1/auth/sso_login_callback", p.loginToUAA)
 
 	// Version info
 	pp.GET("/v1/version", p.getVersions)

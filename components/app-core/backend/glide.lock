@@ -1,6 +1,8 @@
-hash: c790bcfd2741c2e94175d40e1a44d7c595d4d57fd34753a61b065fecdfcc5f76
-updated: 2017-08-21T09:55:31.917609969+01:00
+hash: efd9b757b1bdad35eb93d2a625839b8638c62c575e1010d3c99db25a6f453199
+updated: 2018-05-03T17:04:49.212602-04:00
 imports:
+- name: github.com/andrewghobrial/sqlitestore
+  version: 1a9dd2bb84de93d899197324e770f7e4eff39710
 - name: github.com/antonlindstrom/pgstore
   version: 4f1dbba445e540bf071eb9572262edb8fe4a593a
 - name: github.com/cloudfoundry/noaa
@@ -19,7 +21,7 @@ imports:
 - name: github.com/gorilla/context
   version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
 - name: github.com/gorilla/securecookie
-  version: 667fe4e3466a040b780561fe9b51a83a3753eefc
+  version: e59506cc896acb7f7bf732d4fdf5e25f7ccd8983
 - name: github.com/gorilla/sessions
   version: ca9ada44574153444b00d3fd9c8559e4cc95f896
 - name: github.com/gorilla/websocket
@@ -53,12 +55,10 @@ imports:
   version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
 - name: github.com/mattn/go-sqlite3
   version: ca5e3819723d8eeaf170ad510e7da1d6d2e94a08
-- name: github.com/nwmac/sqlitestore
-  version: 3f93bd4dbffb827c47572d6d1342272be36bd6b0
 - name: github.com/pkg/errors
   version: c605e284fe17294bda444b34710735b29d1a9d90
 - name: github.com/satori/go.uuid
-  version: 879c5887cd475cd7864858769793b2ceb0d44feb
+  version: f58768cc1a7a7e77a3bd49e98cdd21419399b6a3
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/valyala/bytebufferpool
@@ -69,21 +69,19 @@ imports:
   version: 59a0b19b5533c7977ddeb86b017bf507ed407b12
   subpackages:
   - context
-  - html
-  - websocket
 - name: golang.org/x/sys
   version: 0b25a408a50076fbbcae6b7ac0ea5fbb0b085e79
   subpackages:
   - unix
 testImports:
 - name: github.com/gopherjs/gopherjs
-  version: 9659c814f1d54d63f9c623449a7111d3864c1361
+  version: 8dffc02ea1cb8398bb73f30424697c60fcf8d4c5
   subpackages:
   - js
 - name: github.com/jtolds/gls
   version: 77f18212c9c7edc9bd6a33d383a7b545ce62f064
 - name: github.com/smartystreets/assertions
-  version: f8459f92181409546d2762c9e9c4bedc23c92d76
+  version: 7678a5452ebea5b7090a6b163f844c133f523da2
   subpackages:
   - internal/go-render/render
   - internal/oglematchers

@@ -75,6 +75,12 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 	return u.UserName, nil
 }
 
+func (p *portalProxy) initSSOlogin(c echo.Context) error {
+	redirectUrl:=fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_url=%s/pp/v1/auth/sso_login_callback&state=somestatecode", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, p.GetConfig().SSOredirectURL)
+	c.Redirect(http.StatusTemporaryRedirect,redirectUrl)
+	return nil
+}
+
 func (p *portalProxy) loginToUAA(c echo.Context) error {
 	log.Debug("loginToUAA")
 
@@ -118,7 +124,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)
 
 	resp := &interfaces.LoginRes{
-		Account:     c.FormValue("username"),
+		Account:     u.UserName,
 		TokenExpiry: u.TokenExpiry,
 		APIEndpoint: nil,
 		Admin:       uaaAdmin,
@@ -126,6 +132,10 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	jsonString, err := json.Marshal(resp)
 	if err != nil {
 		return err
+	}
+
+	if c.Request().Method()==http.MethodGet {
+		return c.Redirect(http.StatusTemporaryRedirect,p.GetConfig().SSOredirectURL)
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -154,16 +164,52 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 }
 
 func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interfaces.LoginRes, error) {
-	uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
-
-	if err != nil {
-		return nil, err
-	}
-
 	// save the CNSI token against the Console user guid, not the CNSI user guid so that we can look it up easily
 	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
+	}
+
+	uaaToken, err :=p.GetUAATokenRecord(userID)
+	if err==nil { // Found the user's UAA token
+		u, err := getUserTokenInfo(uaaToken.AuthToken)
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, "Could not parse current user UAA token")
+		}
+
+		// Save the console UAA token as the cnsi UAA token if:
+		// Attempting to login to auto-registered cnsi endpoint
+		// AND the auto-registered endpoint has the same UAA login server as console
+		theCNSIrecord, _ := p.GetCNSIRecord(cnsiGUID)
+		if p.GetConfig().AutoRegisterCFUrl == theCNSIrecord.APIEndpoint.String() { // CNSI API endpoint is the auto-register endpoint
+			cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
+			newCNSI, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true)
+			if err != nil {
+				log.Fatal("Could not get the info for Cloud Foundry", err)
+				return nil, err
+			}
+
+			// Override the configuration to set the authorization endpoint
+			uaaUrl, err := url.Parse(newCNSI.AuthorizationEndpoint)
+			if err != nil {
+				return nil, fmt.Errorf("invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
+			}
+
+			if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
+				_, err = p.saveCNSIToken(cnsiGUID, *u, uaaToken.AuthToken, uaaToken.RefreshToken, false)
+				return nil, err
+			} else {
+				log.Info("The auto-registered endpoint UAA server does not match console UAA server.")
+			}
+		}
+	} else {
+		log.Warn("Could not find current user UAA token")
+	}
+
+	uaaRes, u, cnsiRecord, err := p.fetchToken(cnsiGUID, c)
+
+	if err != nil {
+		return nil, err
 	}
 	u.UserGUID = userID
 
@@ -310,14 +356,19 @@ func (p *portalProxy) RefreshUAALogin(username, password string, store bool) err
 
 func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *UAAResponse, u *userTokenInfo, err error) {
 	log.Debug("login")
-	username := c.FormValue("username")
-	password := c.FormValue("password")
 
-	if len(username) == 0 || len(password) == 0 {
-		return uaaRes, u, errors.New("Needs username and password")
+	if c.Request().Method()==http.MethodGet {
+		code := c.QueryParam("code")
+		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint)
+	} else {
+		username := c.FormValue("username")
+		password := c.FormValue("password")
+
+		if len(username) == 0 || len(password) == 0 {
+			return uaaRes, u, errors.New("Needs username and password")
+		}
+	 	uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, username, password, client, clientSecret, endpoint)
 	}
-
-	uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, username, password, client, clientSecret, endpoint)
 	if err != nil {
 		return uaaRes, u, err
 	}
@@ -341,6 +392,16 @@ func (p *portalProxy) logout(c echo.Context) error {
 	}
 
 	return err
+}
+
+func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
+	log.Debug("getUAATokenWithCreds")
+
+	body := url.Values{}
+	body.Set("grant_type", "authorization_code")
+	body.Set("code", code)
+
+	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
 func (p *portalProxy) getUAATokenWithCreds(skipSSLValidation bool, username, password, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
