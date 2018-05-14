@@ -13,7 +13,8 @@ var yaml = require('js-yaml');
 
 const secretsPath = path.join(__dirname, SECRETS_FILE)
 if (!fs.existsSync(secretsPath)) {
-  console.log('No secrets.yaml was found! Please provide a secrets.yaml, see `secrets.yaml.sample` as reference.');
+  console.log('No secrets.yaml found at ... ', secretsPath);
+  console.log('Please provide a secrets.yaml, see `src/test-e2e/secrets.yaml.example` as reference.');
   process.exit(1);
 }
 
@@ -63,5 +64,3 @@ exports.config = {
 if (secrets.headless) {
   exports.config.capabilities.chromeOptions.args = ['--headless', '--allow-insecure-localhost', '--disable-gpu', '--window-size=1366,768', '--no-sandbox'];
 }
-
-
