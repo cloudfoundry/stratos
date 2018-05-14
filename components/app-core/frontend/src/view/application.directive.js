@@ -79,6 +79,8 @@
     vm.hideNavigation = $stateParams.hideNavigation;
     vm.hideAccount = $stateParams.hideAccount;
     vm.navbarIconsOnly = false;
+    vm.ssoLogin = false;
+    vm.accountModel = modelManager.retrieve('app.model.account');
 
     vm.login = login;
     vm.logout = logout;
@@ -125,7 +127,10 @@
       return modelManager.retrieve('app.model.account')
         .verifySession()
         .then(function () {
+          vm.ssoLogin = vm.accountModel.isSSOLogin();
           onLoggedIn();
+        }).catch(function () {
+          vm.ssoLogin = vm.accountModel.isSSOLogin();
         });
     }
 

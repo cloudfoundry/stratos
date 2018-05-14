@@ -4,7 +4,7 @@
         <h1 class="login-page-headline " translate>login.console</h1>
         <p class="login-page-tagline" translate>login.welcome</p>
     </div>
-    <div id="section-login-panel" class="login-right text-left">
+    <div id="section-login-panel" class="login-right text-left" ng-class="{'login-sso': applicationCtrl.ssoLogin}">
       <login-form></login-form>
     </div>
   </div>

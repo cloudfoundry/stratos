@@ -11,8 +11,8 @@
     .module('app.api')
     .run(registerAccountApi);
 
-  function registerAccountApi($http, $httpParamSerializer, apiManager) {
-    apiManager.register('app.api.account', new AccountApi($http, $httpParamSerializer));
+  function registerAccountApi($http, $httpParamSerializer, $window, apiManager) {
+    apiManager.register('app.api.account', new AccountApi($http, $httpParamSerializer, $window));
   }
 
   /**
@@ -25,13 +25,15 @@
    * @property {object} $httpParamSerializer - the Angular $httpParamSerializer service
    * @class
    */
-  function AccountApi($http, $httpParamSerializer) {
+  function AccountApi($http, $httpParamSerializer, $window) {
 
     return {
       login: login,
       logout: logout,
       verifySession: verifySession,
-      userInfo: userInfo
+      userInfo: userInfo,
+      isSSOLogin: isSSOLogin,
+      ssoLogin: ssoLogin
     };
 
     /**
@@ -52,6 +54,15 @@
       };
       var data = $httpParamSerializer({ username: username, password: password });
       return $http.post('/pp/v1/auth/login/uaa', data, config);
+    }
+
+    function ssoLogin() {
+      var returnUrl = encodeURI($window.location.href);
+      $window.open('/pp/v1/auth/sso_login?state=' + returnUrl, '_self');
+      return {
+        then: function () {},
+        catch: function () {}
+      };
     }
 
     /**
@@ -83,6 +94,10 @@
 
     function userInfo() {
       return $http.get('/pp/v1/userinfo');
+    }
+
+    function isSSOLogin(e) {
+      return e.headers && e.headers('x-stratos-sso-login') === 'true';
     }
 
   }
