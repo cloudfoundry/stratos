@@ -27,6 +27,7 @@
 * [https://github.com/angular/angular-cli](https://github.com/angular/angular-cli)
 
 ### Example Apps
+
 * https://github.com/aviabird/angularspree (covers everything)
 
 ## Redux
@@ -46,6 +47,7 @@
 There's no mandated IDE, but if you choose VS Code here's some helpful plug-ins
 
 ### Super Helpful
+
 * TSLint
 * SassLint
 * TS Hero
@@ -62,20 +64,24 @@ There's no mandated IDE, but if you choose VS Code here's some helpful plug-ins
 * TODO Parser
   * see icon bottom left for todo's in current file
   * Add the following config to settings to exclude some folders
-   ```    
+
+   ```
    "TodoParser": {
         "folderExclude": ["node_modules", ".vscode"]
    }
    ```
+
   * F1 + `Parse TODOs (all files)` to see all TODOs
 * Move TS - Move files and automatically update imports
 
 ### Of Interest
+
 * Eclipse Keymap
 * Code Spell Checker
-   * List of words to exclude coming soon
+  * List of words to exclude coming soon
 
 Example settings
+
 ```
 {
     "gitlens.blame.line.enabled": false,
@@ -194,6 +200,7 @@ Example settings
 * https://github.com/angular/angular/issues/6005
 
 #### In summary
+
 * AVOID
   * setTimeout
   * forcing change detecting
