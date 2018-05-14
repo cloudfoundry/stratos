@@ -7,6 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
+import { UserProfileService } from '../user-profile.service';
 
 describe('ProfileInfoComponent', () => {
   let component: ProfileInfoComponent;
@@ -22,7 +23,8 @@ describe('ProfileInfoComponent', () => {
         RouterTestingModule,
         BrowserAnimationsModule,
         createBasicStoreModule()
-      ]
+      ],
+      providers: [UserProfileService]
     })
       .compileComponents();
   }));

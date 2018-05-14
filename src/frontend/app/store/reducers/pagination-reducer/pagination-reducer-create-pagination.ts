@@ -1,5 +1,6 @@
 import { CreatePagination } from '../../actions/pagination.actions';
 import { PaginationEntityState, PaginationState } from '../../types/pagination.types';
+import { spreadClientPagination } from './pagination-reducer.helper';
 
 /**
  * Creates new pagination from default values or a seed pagination section.
@@ -57,8 +58,8 @@ function mergePaginationSections(
   seedPagination: PaginationEntityState,
   defaultState: PaginationEntityState
 ) {
-  const currentClientPagination = currentPagination.clientPagination;
-  const seedClientPagination = seedPagination.clientPagination;
+  const currentClientPagination = spreadClientPagination(currentPagination.clientPagination);
+  const seedClientPagination = spreadClientPagination(seedPagination.clientPagination);
   return {
     ...currentClientPagination,
     totalResults: seedClientPagination.totalResults,

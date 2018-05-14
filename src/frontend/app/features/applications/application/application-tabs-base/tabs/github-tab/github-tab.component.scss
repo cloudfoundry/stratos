@@ -1,5 +1,4 @@
 .github-tab {
-
   &__deployment {
     &__commit-warning {
       display: flex;
@@ -8,16 +7,12 @@
     &__commit-warning__msg {
       padding-left: 24px;
     }
-    &__deploy {
-      display: flex;
-      flex-flow: row-reverse;
-    }
   }
   .github-tab__avatar {
     img {
       float: right;
-      height: 100px;
-      width: 100px;
+      height: 84px;
+      width: 84px;
     }
   }
 }
