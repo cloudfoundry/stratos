@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   ComponentFactory,
   ComponentFactoryResolver,
@@ -10,7 +11,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { debounceTime, distinctUntilChanged, filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, first, map, share, startWith, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../../core/cf-api.types';
@@ -101,27 +102,28 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   selectedOrgGuid: string;
   orgGuidChangedSub: Subscription;
 
-  private orgConnect = () => {
-    return this.store.select(selectUsersRolesOrgGuid).pipe(
-      filter(orgGuid => !!orgGuid),
-      tap(orgGuid => this.updateOrg(orgGuid)),
-      switchMap(orgGuid => this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, orgGuid)),
-      map(org => [org]),
-    );
-  }
-
   constructor(
     private store: Store<AppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private componentFactoryResolver: ComponentFactoryResolver,
-    private cfRolesService: CfRolesService) {
+    private cfRolesService: CfRolesService,
+    private cd: ChangeDetectorRef) {
     this.wrapperFactory = this.componentFactoryResolver.resolveComponentFactory(SpaceRolesListWrapperComponent);
   }
 
   ngOnInit() {
+    const orgConnect$ = this.store.select(selectUsersRolesOrgGuid).pipe(
+      startWith(''),
+      distinctUntilChanged(),
+      filter(orgGuid => !!orgGuid),
+      tap(orgGuid => this.updateOrg(orgGuid)),
+      switchMap(orgGuid => this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, orgGuid)),
+      map(org => [org]),
+      share()
+    );
     // Data source that will power the orgs table
     this.orgDataSource = {
-      connect: this.orgConnect,
+      connect: () => orgConnect$,
       disconnect: () => { },
       trackBy: (index, row) => getRowMetadata(row)
     } as ITableListDataSource<APIResource<IOrganization>>;
@@ -147,30 +149,39 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnDestroy(): void {
+  private destroySpacesList() {
+    if (this.wrapperRef) {
+      this.wrapperRef.destroy();
+    }
+    if (this.spaceRolesTable) {
+      this.spaceRolesTable.clear();
+    }
+  }
+
+  ngOnDestroy() {
     if (this.orgGuidChangedSub) {
       this.orgGuidChangedSub.unsubscribe();
     }
+    this.destroySpacesList();
   }
 
   updateOrg(orgGuid) {
     this.selectedOrgGuid = orgGuid;
-    if (!orgGuid) {
+    if (!this.selectedOrgGuid) {
       return;
     }
 
+    // When the state is ready (org guid is correct), recreate the space roles table for the selected org
     this.store.select(selectUsersRolesRoles).pipe(
+      // Wait for the store to have the correct org
       filter(newRoles => newRoles && newRoles.orgGuid === orgGuid),
       first()
     ).subscribe(null, null, () => {
       // The org has changed, completely recreate the roles table
-      if (this.wrapperRef) {
-        this.wrapperRef.destroy();
-      }
-      if (this.spaceRolesTable) {
-        this.spaceRolesTable.clear();
-      }
+      this.destroySpacesList();
+
       this.wrapperRef = this.spaceRolesTable.createComponent(this.wrapperFactory);
+      this.cd.detectChanges();
     });
   }
 
