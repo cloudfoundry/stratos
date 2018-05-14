@@ -1,10 +1,9 @@
 @import '../../../sass/custom/suse-colors';
 
-
 .suse-login {
   align-items: center;
   background-color: $suse-blue;
-  border-bottom: 10px solid $suse-primary-color;
+  border-bottom: 10px solid $suse-primary;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -53,12 +52,34 @@
     flex: 1;
     margin-right: 24px;
   }
-  &__form {
+  &__box {
+    display: flex;
     flex: 1;
+    flex-direction: column;
+    justify-content: center;
     margin-left: 24px;
+    height: 260px;
+  }
+  &__form {
+    display: flex;
+    flex-direction: column;
+    .mat-form-field:not(.mat-form-field-invalid) {
+      .mat-input-placeholder  {
+        color: $suse-text-gray;
+      }
+      .mat-form-field-underline {
+        background-color: $suse-text-gray;
+      }
+    }
+  }
+  &__submit.mat-raised-button {
+    &.mat-primary[disabled] {
+      color: $suse-button-gray;
+    }
+    margin-top: 24px;
   }
   &__headline {
-    color: $suse-primary-color;
+    color: $suse-primary;
     font-size: 52px;
     font-weight: 300;
     margin: 0;
@@ -69,5 +90,55 @@
     font-weight: 300;
     line-height: 1.5;
     margin: 24px 0;
+  }
+  &__form-outer {
+    $cubic: cubic-bezier(.215, .61, .355, 1);
+    $time: 250ms;
+    height: 200px;
+    max-width: 400px;
+    opacity: 1;
+    transition: height $time $cubic 100ms, opacity $time * 2 $cubic $time + 50ms;
+  }
+  &__form-title {
+    color: $suse-text;
+    font-size: 30px;
+    font-weight: 300;
+    margin-bottom: 24px;
+  }
+  &__loading {
+    display: none;
+  }
+  &__busy {
+    .suse-login__form {
+      display: none;
+    }
+    .suse-login__form-outer {
+      height: 0;
+      opacity: 0;
+    }
+    .suse-login__loading {
+      display: block;
+    }
+  }
+  &__message {
+    font-size: 18px;
+    font-weight: 300;
+    height: 20px;
+    padding-top: 20px;
+  }
+}
+
+@media(max-width: 768px) {
+  .suse-login {
+    &__intro {
+      display: none;
+    }
+    &__box {
+      margin: 0;
+    }
+    &__content {
+      max-width: 400px;
+      width: 80%;
+    }
   }
 }
