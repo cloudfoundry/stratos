@@ -193,16 +193,16 @@ export class CurrentUserPermissionsChecker {
       map(flags => flags[func](flag => flag)),
       distinctUntilChanged()
     );
-  } §
+  }
 
   public groupConfigs(configs: PermissionConfig[]): IConfigGroups {
-    return configs.reduce((split, config) => {
+    return configs.reduce((grouped, config) => {
       return {
-        ...config,
-        [config.type]: {
-          ...(config[config.type] || {}),
+        ...grouped,
+        [config.type]: [
+          ...(grouped[config.type] || []),
           config
-        }
+        ]
       };
     }, {});
   }

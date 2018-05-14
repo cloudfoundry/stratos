@@ -29,7 +29,12 @@ import {
   PermissionStrings,
   PermissionTypes,
 } from './current-user-permissions.config';
-import { CurrentUserPermissionsChecker } from './current-user-permissions.checker';
+import { CurrentUserPermissionsChecker, IConfigGroups, IConfigGroup } from './current-user-permissions.checker';
+
+interface ICheckCombiner {
+  checks: Observable<boolean>[];
+  combineType?: '&&';
+}
 
 @Injectable()
 export class CurrentUserPermissionsService {
@@ -66,11 +71,43 @@ export class CurrentUserPermissionsService {
   }
 
   private getComplexPermission(actionConfigs: PermissionConfig[], endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
-    const [cfCheckConfigs, featureFlagCheckConfigs, internalCheckConfigs] = this.checker.splitConfigs(actionConfigs);
-    const featureFlagChecks = this.checker.getFeatureFlagChecks(featureFlagCheckConfigs, endpointGuid);
-    const cfChecks = this.checker.getCfChecks(cfCheckConfigs, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    const internalChecks = this.checker.getInternalChecks(internalCheckConfigs);
-    return this.combineChecks([cfChecks, featureFlagChecks], endpointGuid);
+    const groupedChecks = this.checker.groupConfigs(actionConfigs);
+    const checks = this.getChecksFromConfigGroups(groupedChecks, endpointGuid, orgOrSpaceGuid, spaceGuid);
+    // const featureFlagChecks = this.checker.getFeatureFlagChecks(featureFlagCheckConfigs, endpointGuid);
+    // const cfChecks = this.checker.getCfChecks(cfCheckConfigs, endpointGuid, orgOrSpaceGuid, spaceGuid);
+    // const internalChecks = this.checker.getInternalChecks(internalCheckConfigs);
+    return this.combineChecks(checks, endpointGuid);
+  }
+
+  private getChecksFromConfigGroups(groups: IConfigGroups, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
+    return Object.keys(groups).map((permission: PermissionTypes) => {
+      return this.getCheckFromConfig(groups[permission], permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
+    });
+  }
+
+  private getCheckFromConfig(
+    configGroup: IConfigGroup,
+    permission: PermissionTypes,
+    endpointGuid?: string,
+    orgOrSpaceGuid?: string,
+    spaceGuid?: string
+  ): ICheckCombiner {
+    switch (permission) {
+      case PermissionTypes.ENDPOINT:
+        return {
+          checks: this.checker.getInternalChecks(configGroup),
+        };
+      case PermissionTypes.FEATURE_FLAG:
+        return {
+          checks: this.checker.getFeatureFlagChecks(configGroup, endpointGuid),
+          combineType: '&&'
+        };
+      case PermissionTypes.ORGANIZATION:
+      case PermissionTypes.SPACE:
+        return {
+          checks: this.checker.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
+        };
+    }
   }
 
   private getConfig(config: PermissionConfigType, _tries = 0): PermissionConfig[] | PermissionConfig {
@@ -105,12 +142,11 @@ export class CurrentUserPermissionsService {
   }
 
   private combineChecks(
-    [cfChecks, featureFlagChecks]: [Observable<boolean>[], Observable<boolean>[]],
+    checkCombiners: ICheckCombiner[],
     endpointGuid?: string
   ) {
-    const featureFlagChecksReduced = this.checker.reduceChecks(featureFlagChecks, '&&');
-    const cfChecksReduced = this.checker.reduceChecks(cfChecks);
-    const check$ = combineLatest(featureFlagChecksReduced, cfChecksReduced).pipe(
+    const reducedChecks = checkCombiners.map(combiner => this.checker.reduceChecks(combiner.checks, combiner.combineType));
+    const check$ = combineLatest(reducedChecks).pipe(
       map(([featureFlagEnabled, cfPermission]) => {
         if (!featureFlagEnabled) {
           return false;
