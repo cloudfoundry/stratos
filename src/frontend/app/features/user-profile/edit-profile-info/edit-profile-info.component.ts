@@ -5,6 +5,7 @@ import { ErrorStateMatcher, MatSnackBar, ShowOnDirtyErrorStateMatcher } from '@a
 import { Subscription } from 'rxjs/Rx';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
 import { UserProfileService } from '../user-profile.service';
+import { first } from 'rxjs/operators';
 
 
 @Component({
@@ -54,7 +55,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.userProfileService.fetchUserProfile();
-    this.userProfileService.userProfile$.subscribe(profile => {
+    this.userProfileService.userProfile$.pipe(first()).subscribe(profile => {
       this.profile = profile;
       this.emailAddress = this.userProfileService.getPrimaryEmailAddress(profile);
       this.editProfileForm.setValue({
@@ -97,9 +98,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   }
 
   confirmPasswordValidator(): ValidatorFn {
-    return (control: AbstractControl): {[key: string]: any} => {
+    return (control: AbstractControl): { [key: string]: any } => {
       const same = control.value === this.editProfileForm.value.newPassword;
-      return same ? null : {'passwordMatch' : {value: control.value}};
+      return same ? null : { 'passwordMatch': { value: control.value } };
     };
   }
 
