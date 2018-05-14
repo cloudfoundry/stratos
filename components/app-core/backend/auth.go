@@ -76,8 +76,8 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 }
 
 func (p *portalProxy) initSSOlogin(c echo.Context) error {
-	redirectUrl:=fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_url=%s/pp/v1/auth/sso_login_callback&state=somestatecode", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, p.GetConfig().SSOredirectURL)
-	c.Redirect(http.StatusTemporaryRedirect,redirectUrl)
+	authUrl :=fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/pp/v1/auth/sso_login_callback&state=stratos_portal_proxy", p.GetConfig().ConsoleConfig.UAAEndpoint, p.GetConfig().ConsoleConfig.ConsoleClient, p.GetConfig().SSOredirectURL)
+	c.Redirect(http.StatusTemporaryRedirect, authUrl)
 	return nil
 }
 
@@ -179,20 +179,19 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 
 		// Save the console UAA token as the cnsi UAA token if:
 		// Attempting to login to auto-registered cnsi endpoint
-		// AND the auto-registered endpoint has the same UAA login server as console
+		// AND the auto-registered endpoint has the same UAA endpoint as console
 		theCNSIrecord, _ := p.GetCNSIRecord(cnsiGUID)
 		if p.GetConfig().AutoRegisterCFUrl == theCNSIrecord.APIEndpoint.String() { // CNSI API endpoint is the auto-register endpoint
 			cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
-			newCNSI, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true)
+			cnsiInfo, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true)
 			if err != nil {
 				log.Fatal("Could not get the info for Cloud Foundry", err)
 				return nil, err
 			}
 
-			// Override the configuration to set the authorization endpoint
-			uaaUrl, err := url.Parse(newCNSI.AuthorizationEndpoint)
+			uaaUrl, err := url.Parse(cnsiInfo.AuthorizationEndpoint)
 			if err != nil {
-				return nil, fmt.Errorf("invalid authorization endpoint URL %s %s", newCNSI.AuthorizationEndpoint, err)
+				return nil, fmt.Errorf("invalid authorization endpoint URL %s %s", cnsiInfo.AuthorizationEndpoint, err)
 			}
 
 			if uaaUrl.String() == p.GetConfig().ConsoleConfig.UAAEndpoint.String() { // CNSI UAA server matches Console UAA server
@@ -359,6 +358,11 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 
 	if c.Request().Method()==http.MethodGet {
 		code := c.QueryParam("code")
+		state := c.QueryParam("state")
+
+		if len(code) == 0 || state != "stratos_portal_proxy" {
+			return uaaRes, u, errors.New("no code query parameter provided or invalid state query parameter")
+		}
 		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint)
 	} else {
 		username := c.FormValue("username")
@@ -397,9 +401,11 @@ func (p *portalProxy) logout(c echo.Context) error {
 func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string) (*UAAResponse, error) {
 	log.Debug("getUAATokenWithCreds")
 
+	redirectUrl:=fmt.Sprintf("%s/pp/v1/auth/sso_login_callback",p.GetConfig().SSOredirectURL)
 	body := url.Values{}
 	body.Set("grant_type", "authorization_code")
 	body.Set("code", code)
+	body.Set("redirect_uri", redirectUrl)
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
