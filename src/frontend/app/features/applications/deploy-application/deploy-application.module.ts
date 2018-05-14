@@ -8,6 +8,8 @@ import { DeployApplicationStep2Component } from './deploy-application-step2/depl
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { DeployApplicationComponent } from './deploy-application.component';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
+import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
+import { CommitListWrapperComponent } from './deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component';
 
 @NgModule({
   imports: [
@@ -21,6 +23,8 @@ import { GithubProjectExistsDirective } from './github-project-exists.directive'
     DeployApplicationStep2Component,
     GithubProjectExistsDirective,
     DeployApplicationStep3Component,
+    DeployApplicationStep21Component,
+    CommitListWrapperComponent,
   ],
   exports: [
     DeployApplicationComponent
