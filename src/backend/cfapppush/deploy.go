@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -43,8 +42,6 @@ import (
 
 	archiver "github.com/mholt/archiver"
 )
-
-type MessageType int
 
 // Success
 const (
@@ -83,70 +80,12 @@ const (
 	SOURCE_FILE_DATA
 	SOURCE_FILE_ACK
 	SOURCE_GITURL
+	SOURCE_WAIT_ACK
 )
 
 const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
-
-type ManifestResponse struct {
-	Manifest string
-}
-
-type SocketMessage struct {
-	Message   string      `json:"message"`
-	Timestamp int64       `json:"timestamp"`
-	Type      MessageType `json:"type"`
-}
-
-type SocketWriter struct {
-	clientWebSocket *websocket.Conn
-}
-
-// Allow connections from any Origin
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
-type StratosProject struct {
-	DeploySource interface{} `json:"deploySource"`
-}
-
-type DeploySource struct {
-	SourceType string `json:"type"`
-	Timestamp  int64  `json:"timestamp"`
-}
-
-// Structure used to provide metadata about the GitHub source
-type GitHubSourceInfo struct {
-	DeploySource
-	Project    string `json:"project"`
-	Branch     string `json:"branch"`
-	Url        string `json:"url"`
-	CommitHash string `json:"commit"`
-}
-
-// Structure used to provide metadata about the Git Url source
-type GitUrlSourceInfo struct {
-	DeploySource
-	Project    string `json:"project"`
-	Branch     string `json:"branch"`
-	Url        string `json:"url"`
-	CommitHash string `json:"commit"`
-}
-
-type CloneDetails struct {
-	Url    string
-	Branch string
-	Commit string
-}
-type FolderSourceInfo struct {
-	DeploySource
-	Files   int      `json:"files"`
-	Folders []string `json:"folders,omitempty"`
-}
 
 func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
@@ -250,7 +189,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	}
 
 	sendEvent(clientWebSocket, EVENT_PUSH_STARTED)
-
 	err = cfAppPush.pushCommand.Execute(cfAppPush.flagContext)
 	if err != nil {
 		log.Warnf("Failed to execute due to: %+v", err)
@@ -265,7 +203,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (string, string, error) {
 	// The msg data is JSON for the Folder info
-	info := FolderSourceInfo{}
+	info := FolderSourceInfo{
+		WaitAfterUpload: false,
+	}
 
 	if err := json.Unmarshal([]byte(msg.Message), &info); err != nil {
 		return "", tempDir, err
@@ -322,6 +262,11 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 		lastFilePath = path
 		transfers--
+
+		// Acknowledge last file transfer
+		if transfers == 0 {
+			sendEvent(clientWebSocket, SOURCE_FILE_ACK)
+		}
 	}
 
 	// Check to see if we received only 1 file and check if that was an archive file
@@ -355,6 +300,19 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 			// Archive done
 			tempDir = unpackPath
+		}
+	}
+
+	// The client (v2) can request only source upload and for deploy to wait until it sends a message
+	if info.WaitAfterUpload {
+		msg := SocketMessage{}
+		if err := clientWebSocket.ReadJSON(&msg); err != nil {
+			log.Errorf("Error reading JSON: %v+", err)
+			return "", tempDir, err
+		}
+
+		if msg.Type != SOURCE_WAIT_ACK {
+			return "", tempDir, errors.New("Expecting ACK message to begin deployment")
 		}
 	}
 
@@ -642,9 +600,9 @@ func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempD
 }
 
 // This assumes manifest lives in the root of the app
-func fetchManifest(repoPath string, sourceEnvVarMetadata string, clientWebSocket *websocket.Conn) (manifest.Applications, error) {
+func fetchManifest(repoPath string, sourceEnvVarMetadata string, clientWebSocket *websocket.Conn) (Applications, error) {
 
-	var manifest manifest.Applications
+	var manifest Applications
 	manifestPath := fmt.Sprintf("%s/manifest.yml", repoPath)
 	data, err := ioutil.ReadFile(manifestPath)
 	if err != nil {
@@ -663,10 +621,10 @@ func fetchManifest(repoPath string, sourceEnvVarMetadata string, clientWebSocket
 	// If we have metadata to indicate the source origin, add it to the manifest
 	if len(sourceEnvVarMetadata) > 0 {
 		for i, app := range manifest.Applications {
-			if len(app.Env) == 0 {
-				app.Env = make(map[string]interface{})
+			if len(app.EnvironmentVariables) == 0 {
+				app.EnvironmentVariables = make(map[string]interface{})
 			}
-			app.Env[stratosProjectKey] = sourceEnvVarMetadata
+			app.EnvironmentVariables[stratosProjectKey] = sourceEnvVarMetadata
 			manifest.Applications[i] = app
 		}
 
@@ -684,6 +642,12 @@ func fetchManifest(repoPath string, sourceEnvVarMetadata string, clientWebSocket
 
 func (sw *SocketWriter) Write(data []byte) (int, error) {
 
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("WebSocket write recovered from panic", r)
+		}
+	}()
+
 	message, _ := getMarshalledSocketMessage(string(data), DATA)
 
 	err := sw.clientWebSocket.WriteMessage(websocket.TextMessage, message)
@@ -693,7 +657,7 @@ func (sw *SocketWriter) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
-func sendManifest(manifest manifest.Applications, clientWebSocket *websocket.Conn) error {
+func sendManifest(manifest Applications, clientWebSocket *websocket.Conn) error {
 
 	manifestBytes, err := json.Marshal(manifest)
 	if err != nil {
