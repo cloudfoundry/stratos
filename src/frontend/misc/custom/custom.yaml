@@ -10,3 +10,4 @@ files:
 folders:
   - "app/custom"
   - "assets/custom"
+  - "sass/custom"
