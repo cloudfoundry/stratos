@@ -19,7 +19,9 @@ import {
   GET_CURRENT_USER_RELATIONS,
   GET_CURRENT_USER_RELATION
 } from '../actions/permissions.actions';
-import { createCfFeatureFlagFetchAction } from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import {
+  createCfFeatureFlagFetchAction
+} from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 
 function getRequestFromAction(action: GetUserRelations, httpClient: HttpClient) {
   return httpClient.get<{ [guid: string]: { resources: APIResource[] } }>(

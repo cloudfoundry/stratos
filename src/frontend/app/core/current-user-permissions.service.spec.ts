@@ -1,7 +1,13 @@
 import { TestBed, inject } from '@angular/core/testing';
 import { StoreModule, Store } from '@ngrx/store';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
-import { CurrentUserPermissions, PermissionConfig, PermissionTypes, PermissionStrings, ScopeStrings } from './current-user-permissions.config';
+import {
+  CurrentUserPermissions,
+  PermissionConfig,
+  PermissionTypes,
+  PermissionStrings,
+  ScopeStrings
+} from './current-user-permissions.config';
 import { tap, first } from 'rxjs/operators';
 import { appReducers } from '../store/reducers.module';
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
@@ -820,7 +826,7 @@ const initialState = {
     }
   }
 };
-fdescribe('CurrentUserPermissionsService', () => {
+describe('CurrentUserPermissionsService', () => {
   let service: CurrentUserPermissionsService;
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -963,10 +969,10 @@ fdescribe('CurrentUserPermissionsService', () => {
 
   it('should not allow if read only admin', done => {
     service.can(
-    CurrentUserPermissions.APPLICATION_CREATE,
-    'READ_ONLY_ADMIN',
-    'c6450a21-aa1a-4643-9437-035cc818ea72'
-  ).pipe(
+      CurrentUserPermissions.APPLICATION_CREATE,
+      'READ_ONLY_ADMIN',
+      'c6450a21-aa1a-4643-9437-035cc818ea72'
+    ).pipe(
       tap(can => {
         expect(can).toBe(false);
         done();
@@ -977,10 +983,10 @@ fdescribe('CurrentUserPermissionsService', () => {
 
   it('should not allow if read only user', done => {
     service.can(
-    CurrentUserPermissions.APPLICATION_CREATE,
-    'READ_ONLY_USER',
-    'c6450a21-aa1a-4643-9437-035cc818ea72'
-  ).pipe(
+      CurrentUserPermissions.APPLICATION_CREATE,
+      'READ_ONLY_USER',
+      'c6450a21-aa1a-4643-9437-035cc818ea72'
+    ).pipe(
       tap(can => {
         expect(can).toBe(false);
         done();
