@@ -71,21 +71,29 @@ function updateTagForRelease {
   #     <prefix> = git commit prefix - always 'g'
   #     <hash> = git commit hash for the current branch
   # Reference: See the examples section here -> https://git-scm.com/docs/git-describe
-  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
+  pushd ${STRATOS_PATH} > /dev/null 2>&1
   GIT_HASH=$(git rev-parse --short HEAD)
   echo "GIT_HASH: ${GIT_HASH}"
-  TAG="${TAG}-0-g${GIT_HASH}"
+  TAG="${TAG}-g${GIT_HASH}"
+  if [ "${ADD_OFFICIAL_TAG}" = "true" ]; then
+  TAG=${OFFICIAL_TAG}-${TAG}
+  fi
   echo "New TAG: ${TAG}"
   popd > /dev/null 2>&1
 }
 
 function cleanup {
+  # Cleanup the SDL/instance defs
+  echo
+  echo "-- Cleaning up older values.yaml"
+  rm -f values.yaml
+  # Cleanup prior to generating the UI container
   echo
   echo "-- Cleaning up ${STRATOS_PATH}"
   rm -rf ${STRATOS_PATH}/dist
   rm -rf ${STRATOS_PATH}/node_modules
+  rm -rf ${STRATOS_PATH}/bower_components
   echo
   echo "-- Cleaning up ${STRATOS_PATH}/deploy/containers/nginx/dist"
   rm -rf ${STRATOS_PATH}/deploy/containers/nginx/dist
-
 }
