@@ -23,8 +23,10 @@ stages:
 - Frontend Lint
 - Frontend Unit Tests
 - Backend
-- E2E tests
-jobs:
+- name: E2E tests
+  if: branch = v2-master
+
+  jobs:
   include:
   - stage: Frontend Lint
     script:
