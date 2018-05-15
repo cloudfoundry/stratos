@@ -11,6 +11,9 @@
       <button mat-icon-button name="delete" (click)="redirectToDeletePage()" matTooltip="Delete">
         <mat-icon>delete</mat-icon>
       </button>
+      <button mat-icon-button name="restart" *ngIf="application?.app.entity.state === 'STARTED'" (click)="restartApplication()" matTooltip="Restart">
+        <mat-icon>settings_backup_restore</mat-icon>
+       </button>
       <span>
         <button mat-icon-button name="stop" *ngIf="application?.app.entity.state === 'STARTED'" (click)="stopApplication()" matTooltip="Stop">
           <mat-icon>stop</mat-icon>

@@ -88,6 +88,8 @@ src/backend/app-core/load_plugins.go
 .v8flags*
 
 *.bak
+secrets.yaml
+build/dev_config.json
 
 # Customisations
 
@@ -99,3 +101,4 @@ src/frontend/assets/login-bg.jpg
 src/frontend/app/custom.module.ts
 src/frontend/app/custom
 src/frontend/assets/custom
+src/frontend/sass/custom
