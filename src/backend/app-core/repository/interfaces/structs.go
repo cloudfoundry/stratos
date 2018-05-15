@@ -196,6 +196,7 @@ type PortalConfig struct {
 	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl           string   `configName:"AUTO_REG_CF_URL"`
+	CookieDomain                string   `configName:"COOKIE_DOMAIN"`
 	CFAdminIdentifier           string
 	CloudFoundryInfo            *CFInfo
 	HTTPS                       bool

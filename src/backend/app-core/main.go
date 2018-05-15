@@ -294,6 +294,12 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		setSecureCookie = false
 	}
 
+	// Allow the cookie domain to be configured
+	domain := pc.CookieDomain
+	if domain == "-" {
+		domain = ""
+	}
+
 	// Store depends on the DB Type
 	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
@@ -302,6 +308,9 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
 		sessionStore.Options.Secure = setSecureCookie
+		if len(domain) > 0 {
+			sessionStore.Options.Domain = domain
+		}
 		return sessionStore, err
 	}
 	// Store depends on the DB Type
@@ -312,6 +321,9 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
 		sessionStore.Options.Secure = setSecureCookie
+		if len(domain) > 0 {
+			sessionStore.Options.Domain = domain
+		}
 		return sessionStore, err
 	}
 
@@ -321,6 +333,9 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc interfaces.PortalC
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
 	sessionStore.Options.Secure = setSecureCookie
+	if len(domain) > 0 {
+		sessionStore.Options.Domain = domain
+	}
 	return sessionStore, err
 }
 

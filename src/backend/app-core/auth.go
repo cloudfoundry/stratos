@@ -13,8 +13,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	uuid "github.com/satori/go.uuid"
 	"github.com/gorilla/sessions"
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -104,7 +104,7 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	sessionValues["user_id"] = u.UserGUID
 	sessionValues["exp"] = u.TokenExpiry
 
-	xsrfToken := uuid.NewV4().String()	
+	xsrfToken := uuid.NewV4().String()
 	sessionValues[XSRFTokenSessionName] = xsrfToken
 
 	// Ensure that login disregards cookies from the request
@@ -144,10 +144,12 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
+	// XSRF Token - needs to not be an HTTP-Only cookie, so that Angular can read it
 	session, _ := p.GetSession(c)
 	xsrfGUID := fmt.Sprintf("%s", xsrfToken)
 	w := c.Response().(*standard.Response).ResponseWriter
 	cookie := sessions.NewCookie(XSRFTokenCookie, xsrfGUID, session.Options)
+	cookie.HttpOnly = false
 	http.SetCookie(w, cookie)
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -405,7 +407,8 @@ func (p *portalProxy) logout(c echo.Context) error {
 	session, err := p.GetSession(c)
 	if err == nil {
 		cookie := sessions.NewCookie(XSRFTokenCookie, "", session.Options)
-		cookie.MaxAge = 0
+		cookie.HttpOnly = false
+		cookie.MaxAge = -1
 		cookie.Expires = time.Unix(0, 0)
 		w := c.Response().(*standard.Response).ResponseWriter
 		http.SetCookie(w, cookie)
