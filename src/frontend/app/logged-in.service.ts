@@ -45,7 +45,7 @@ export class LoggedInService {
     @Inject(DOCUMENT) private document: Document,
     private store: Store<AppState>,
     private dialog: MatDialog,
-    ngZone: NgZone
+    private ngZone: NgZone
   ) {
 
     const eventStreams = this._userActiveEvents.map((eventName) => {
@@ -71,17 +71,22 @@ export class LoggedInService {
           }
         }
       });
-
   }
 
+  // Run outside Angular zone for protractor tests to work
+  // See: https://github.com/angular/protractor/blob/master/docs/timeouts.md#waiting-for-angular
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
-    this._sessionChecker = interval(this._checkSessionInterval)
-      .pipe(
-      tap(() => {
-        this._checkSession();
-      })
-      ).subscribe();
+    this.ngZone.runOutsideAngular(() => {
+      this._sessionChecker = interval(this._checkSessionInterval)
+        .pipe(
+        tap(() => {
+          this.ngZone.run(() => {
+            this._checkSession();
+          });
+        })
+        ).subscribe();
+    });
   }
 
   private closeSessionCheckerPoll() {
