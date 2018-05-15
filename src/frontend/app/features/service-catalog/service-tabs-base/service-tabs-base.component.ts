@@ -16,24 +16,19 @@ import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-s
   templateUrl: './service-tabs-base.component.html',
   styleUrls: ['./service-tabs-base.component.scss'],
 })
-export class ServiceTabsBaseComponent implements OnDestroy {
+export class ServiceTabsBaseComponent {
   toolTipText$: Observable<string>;
   hasVisiblePlans$: Observable<boolean>;
   servicesSubscription: Subscription;
 
   tabLinks: ISubHeaderTabs[] = [
     {
-      link: 'plans',
-      label: 'Service Plans'
-    },
-    {
       link: 'instances',
       label: 'Instances'
-    },
+    }
   ];
 
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
-    this.servicesSubscription = this.servicesService.service$.subscribe();
     this.hasVisiblePlans$ = this.servicesService.getVisibleServicePlans().pipe(
       map(p => p.length > 0));
     this.toolTipText$ = this.hasVisiblePlans$.pipe(
@@ -61,10 +56,6 @@ export class ServiceTabsBaseComponent implements OnDestroy {
       publishReplay(1),
       refCount()
     );
-  }
-
-  ngOnDestroy(): void {
-    this.servicesSubscription.unsubscribe();
   }
 
 }
