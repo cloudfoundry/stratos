@@ -23,8 +23,9 @@ export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) => (
 export const selectCurrentUserCFGlobalRolesState = (state: ICfRolesState) => state.global;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
-export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state.scopes;
 export const selectCurrentUserCFGlobalHasScopes = (scope: string) => (scopes: string[]) => scopes.includes(scope);
+export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state.scopes;
+export const selectCurrentUserCFStratosScopesState = (state: IStratosRolesState) => state.scopes;
 
 export const selectCurrentUserCFSpaceRolesState = (spaceId: string) => (state: ISpacesRoleState) => state[spaceId];
 export const selectCurrentUserCFOrgRolesState = (orgId: string) => (state: IOrgsRoleState) => state[orgId];
@@ -44,6 +45,16 @@ export const getCurrentUserStratosRole = (role: string) => compose(
   getCurrentUserStratosRolesState
 );
 // ============================
+
+// Top level stratos endpoint scopes
+// ============================
+export const getCurrentUserStratosHasScope = (scope: string) => compose(
+  selectCurrentUserCFGlobalHasScopes(scope),
+  selectCurrentUserCFStratosScopesState,
+  getCurrentUserStratosRolesState
+);
+// ============================
+
 
 
 // Top level cf endpoint role objects

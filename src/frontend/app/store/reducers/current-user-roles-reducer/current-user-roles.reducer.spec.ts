@@ -50,12 +50,13 @@ function getState(
   };
 }
 
-fdescribe('currentUserReducer', () => {
+describe('currentUserReducer', () => {
   it('set defaults', () => {
     const state = currentUserRolesReducer(undefined, { type: 'FAKE_ACTION' });
     expect(state).toEqual({
       internal: {
-        isAdmin: false
+        isAdmin: false,
+        scopes: []
       },
       cf: {}
     });

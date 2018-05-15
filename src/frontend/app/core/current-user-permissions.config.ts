@@ -31,7 +31,8 @@ export enum ScopeStrings {
   CF_ADMIN_GLOBAL_AUDITOR_GROUP = 'cloud_controller.global_auditor',
   CF_WRITE_SCOPE = 'cloud_controller.write',
   CF_READ_SCOPE = 'cloud_controller.write',
-  STRATOS_CHANGE_PASSWORD = 'password.write'
+  STRATOS_CHANGE_PASSWORD = 'password.write',
+  SCIM_READ = 'scim.read'
 }
 
 export enum PermissionTypes {
@@ -48,8 +49,7 @@ export type PermissionValues = ScopeStrings | CFFeatureFlagTypes | PermissionStr
 export class PermissionConfig {
   constructor(
     public type: PermissionTypes,
-    public permission: PermissionValues = PermissionStrings._GLOBAL_,
-    public guid?: string
+    public permission: PermissionValues = PermissionStrings._GLOBAL_
   ) { }
 }
 export class PermissionConfigLink {

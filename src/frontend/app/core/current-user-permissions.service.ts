@@ -2,34 +2,18 @@ import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
-
-import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
-import {
-  createCFFeatureFlagPaginationKey,
-} from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
-import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { AppState } from '../store/app-state';
-import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-factory';
-import {
-  getCurrentUserCFEndpointRolesState,
-  getCurrentUserStratosRole,
-  getCurrentUserCFGlobalState,
-} from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
-import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
-import { APIResource } from '../store/types/api.types';
-import { IOrgRoleState, ISpaceRoleState } from '../store/types/current-user-roles.types';
-import { IFeatureFlag } from './cf-api.types';
+import { CurrentUserPermissionsChecker, IConfigGroup, IConfigGroups } from './current-user-permissions.checker';
 import {
   CurrentUserPermissions,
   PermissionConfig,
   PermissionConfigLink,
-  permissionConfigs,
   PermissionConfigType,
-  PermissionStrings,
   PermissionTypes,
+  permissionConfigs
 } from './current-user-permissions.config';
-import { CurrentUserPermissionsChecker, IConfigGroups, IConfigGroup } from './current-user-permissions.checker';
+
 
 interface ICheckCombiner {
   checks: Observable<boolean>[];
@@ -51,15 +35,21 @@ export class CurrentUserPermissionsService {
    * @param spaceGuid If this is provided then the orgOrSpaceGuid will be used for org related permission checks and this will be
    *  used for space related permission checks.
    */
-  public can(action: CurrentUserPermissions, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string): Observable<boolean> {
-    const actionConfig = this.getConfig(permissionConfigs[action]);
+  public can(
+    action: CurrentUserPermissions | PermissionConfigType,
+    endpointGuid?: string,
+    orgOrSpaceGuid?: string,
+    spaceGuid?: string
+  ): Observable<boolean> {
+    const actionConfig = this.getConfig(typeof action === 'string' ? permissionConfigs[action] : action);
     if (Array.isArray(actionConfig)) {
       return this.getComplexPermission(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
     } else if (actionConfig) {
       return this.getSimplePermission(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    } else {
-      return endpointGuid ? this.checker.getAdminCheck(endpointGuid) : Observable.of(false);
+    } else if (endpointGuid) {
+      return this.checker.getAdminCheck(endpointGuid);
     }
+    return Observable.of(false);
   }
 
   private getSimplePermission(actionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
@@ -73,9 +63,6 @@ export class CurrentUserPermissionsService {
   private getComplexPermission(actionConfigs: PermissionConfig[], endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
     const groupedChecks = this.checker.groupConfigs(actionConfigs);
     const checks = this.getChecksFromConfigGroups(groupedChecks, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    // const featureFlagChecks = this.checker.getFeatureFlagChecks(featureFlagCheckConfigs, endpointGuid);
-    // const cfChecks = this.checker.getCfChecks(cfCheckConfigs, endpointGuid, orgOrSpaceGuid, spaceGuid);
-    // const internalChecks = this.checker.getInternalChecks(internalCheckConfigs);
     return this.combineChecks(checks, endpointGuid);
   }
 
@@ -95,7 +82,15 @@ export class CurrentUserPermissionsService {
     switch (permission) {
       case PermissionTypes.ENDPOINT:
         return {
-          checks: this.checker.getInternalChecks(configGroup),
+          checks: this.checker.getInternalScopesChecks(configGroup),
+        };
+      case PermissionTypes.ENDPOINT_SCOPE:
+        return {
+          checks: this.checker.getEndpointScopesChecks(configGroup, endpointGuid),
+        };
+      case PermissionTypes.STRATOS_SCOPE:
+        return {
+          checks: this.checker.getInternalScopesChecks(configGroup),
         };
       case PermissionTypes.FEATURE_FLAG:
         return {
@@ -130,11 +125,18 @@ export class CurrentUserPermissionsService {
 
   private applyAdminCheck(check$: Observable<boolean>, endpointGuid?: string) {
     const adminCheck$ = this.checker.getAdminChecks(endpointGuid);
-    return adminCheck$.pipe(
+    const readOnlyCheck$ = this.checker.getReadOnlyChecks(endpointGuid);
+    return combineLatest(
+      adminCheck$,
+      readOnlyCheck$
+    ).pipe(
       distinctUntilChanged(),
-      switchMap(isAdmin => {
+      switchMap(([isAdmin, isReadOnly]) => {
         if (isAdmin) {
           return Observable.of(true);
+        }
+        if (isReadOnly) {
+          return Observable.of(false);
         }
         return check$;
       })
@@ -147,11 +149,8 @@ export class CurrentUserPermissionsService {
   ) {
     const reducedChecks = checkCombiners.map(combiner => this.checker.reduceChecks(combiner.checks, combiner.combineType));
     const check$ = combineLatest(reducedChecks).pipe(
-      map(([featureFlagEnabled, cfPermission]) => {
-        if (!featureFlagEnabled) {
-          return false;
-        }
-        return cfPermission;
+      map(checks => {
+        return checks.every(check => check);
       })
     );
     return this.applyAdminCheck(check$, endpointGuid);

@@ -2,10 +2,9 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
-
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
-  createCFFeatureFlagPaginationKey,
+  createCFFeatureFlagPaginationKey
 } from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { AppState } from '../store/app-state';
@@ -13,13 +12,16 @@ import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-fac
 import {
   getCurrentUserCFEndpointRolesState,
   getCurrentUserCFGlobalState,
+  getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
+  getCurrentUserCFEndpointHasScope
 } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { APIResource } from '../store/types/api.types';
 import { IOrgRoleState, ISpaceRoleState } from '../store/types/current-user-roles.types';
 import { IFeatureFlag } from './cf-api.types';
-import { PermissionConfig, PermissionStrings, PermissionTypes, PermissionValues } from './current-user-permissions.config';
-import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
+import { PermissionConfig, PermissionStrings, PermissionTypes, PermissionValues, ScopeStrings } from './current-user-permissions.config';
+
 
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
@@ -28,10 +30,22 @@ export interface IConfigGroups {
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
   constructor(private store: Store<AppState>) { }
-  public check(type: PermissionTypes, permission: PermissionStrings, endpointGuid?: string, orgOrSpaceGuid?: string, ) {
+  public check(type: PermissionTypes, permission: PermissionValues, endpointGuid?: string, orgOrSpaceGuid?: string, ) {
     if (type === PermissionTypes.STRATOS) {
       return this.store.select(getCurrentUserStratosRole(permission));
     }
+
+    if (type === PermissionTypes.STRATOS_SCOPE) {
+      return this.store.select(getCurrentUserStratosHasScope(permission));
+    }
+
+    if (type === PermissionTypes.ENDPOINT_SCOPE) {
+      if (!endpointGuid) {
+        return Observable.of(false);
+      }
+      return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission));
+    }
+
     if (type === PermissionTypes.ENDPOINT) {
       return this.store.select(getCurrentUserCFGlobalState(permission));
     }
@@ -39,7 +53,7 @@ export class CurrentUserPermissionsChecker {
       filter(state => !!state),
       map(state => state[type][orgOrSpaceGuid]),
       filter(state => !!state),
-      map(state => this.selectPermission(state, permission)),
+      map(state => this.selectPermission(state, permission as PermissionStrings)),
       distinctUntilChanged()
     );
   }
@@ -60,6 +74,10 @@ export class CurrentUserPermissionsChecker {
         return this.getCfCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
       case (PermissionTypes.STRATOS):
         return this.getInternalCheck(permissionConfig.permission as PermissionStrings);
+      case (PermissionTypes.STRATOS_SCOPE):
+        return this.getInternalScopesCheck(permissionConfig.permission as ScopeStrings);
+      case (PermissionTypes.ENDPOINT_SCOPE):
+        return this.getEndpointScopesCheck(permissionConfig.permission as ScopeStrings, endpointGuid);
     }
   }
 
@@ -75,6 +93,44 @@ export class CurrentUserPermissionsChecker {
   public getInternalCheck(permission: PermissionStrings) {
     return this.check(PermissionTypes.STRATOS, permission);
   }
+
+  public getInternalScopesChecks(
+    configs: PermissionConfig[]
+  ) {
+    return configs.map(config => {
+      const { permission } = config;
+      return this.getInternalScopesCheck(permission as ScopeStrings);
+    });
+  }
+
+  public getEndpointScopesCheck(permission: ScopeStrings, endpointGuid?: string) {
+    const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
+    return endpointGuids$.pipe(
+      switchMap(guids => {
+        return combineLatest(guids.map(guid => {
+          return this.check(PermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid);
+        })).pipe(
+          map(checks => checks.some(check => check)),
+          distinctUntilChanged()
+        );
+      })
+    );
+  }
+
+  public getEndpointScopesChecks(
+    configs: PermissionConfig[],
+    endpoint?: string
+  ) {
+    return configs.map(config => {
+      const { permission } = config;
+      return this.getEndpointScopesCheck(permission as ScopeStrings, endpoint);
+    });
+  }
+
+  public getInternalScopesCheck(permission: ScopeStrings) {
+    return this.check(PermissionTypes.STRATOS_SCOPE, permission);
+  }
+
 
   public getCfChecks(
     configs: PermissionConfig[],
@@ -165,9 +221,11 @@ export class CurrentUserPermissionsChecker {
     return this.getEndpointState(endpointGuid).pipe(
       map(
         cfPermissions => (
-          cfPermissions.global.isGlobalAuditor ||
-          cfPermissions.global.isReadOnlyAdmin ||
-          !cfPermissions.global.canWrite
+          cfPermissions && (
+            cfPermissions.global.isGlobalAuditor ||
+            cfPermissions.global.isReadOnlyAdmin ||
+            !cfPermissions.global.canWrite
+          )
         )
       ),
       distinctUntilChanged()
@@ -180,7 +238,7 @@ export class CurrentUserPermissionsChecker {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       map(guids => guids.map(guid => this.getReadOnlyCheck(guid))),
-      switchMap(checks => this.reduceChecks(checks, ))
+      switchMap(checks => this.reduceChecks(checks, '&&'))
     );
   }
 
@@ -209,9 +267,8 @@ export class CurrentUserPermissionsChecker {
 
   private checkAllOfType(endpointGuid: string, type: PermissionTypes, permission: PermissionStrings) {
     return this.getEndpointState(endpointGuid).pipe(
-      filter(state => !!state),
       map(state => {
-        if (!state[type]) {
+        if (!state || !state[type]) {
           return false;
         }
         return Object.keys(state[type]).some(guid => {
@@ -236,9 +293,6 @@ export class CurrentUserPermissionsChecker {
   }
 
   private getEndpointState(endpointGuid: string) {
-    return this.store.select(getCurrentUserCFEndpointRolesState(endpointGuid)).pipe(
-      filter(cfPermissions => !!cfPermissions)
-    );
+    return this.store.select(getCurrentUserCFEndpointRolesState(endpointGuid));
   }
-
 }
