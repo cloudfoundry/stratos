@@ -13,6 +13,12 @@ import { DeployApplicationStep2Component } from './deploy-application-step2/depl
 import { DeployApplicationStep3Component } from './deploy-application-step3/deploy-application-step3.component';
 import { HttpClientModule } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
+import { CommitListWrapperComponent } from './deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component';
+import {
+  DeployApplicationStepSourceUploadComponent
+} from './deploy-application-step-source-upload/deploy-application-step-source-upload.component';
+import { DeployApplicationFsComponent } from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
 
 describe('DeployApplicationComponent', () => {
   let component: DeployApplicationComponent;
@@ -21,29 +27,33 @@ describe('DeployApplicationComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-          declarations: [
-            DeployApplicationComponent,
-            DeployApplicationStep2Component,
-            DeployApplicationStep3Component,
-          ],
-        providers: [CfOrgSpaceDataService],
-        imports: [
-          SharedModule,
-          CoreModule,
-          RouterTestingModule,
-          CreateApplicationModule,
-          BrowserAnimationsModule,
-          StoreModule.forRoot(
-            appReducers,
-            {
-              initialState
-            }
-          ),
-          HttpClientModule,
-          HttpClientTestingModule,
-        ]
+      declarations: [
+        DeployApplicationComponent,
+        DeployApplicationStep2Component,
+        DeployApplicationStep21Component,
+        DeployApplicationStep3Component,
+        DeployApplicationStepSourceUploadComponent,
+        DeployApplicationFsComponent,
+        CommitListWrapperComponent
+      ],
+      providers: [CfOrgSpaceDataService],
+      imports: [
+        SharedModule,
+        CoreModule,
+        RouterTestingModule,
+        CreateApplicationModule,
+        BrowserAnimationsModule,
+        StoreModule.forRoot(
+          appReducers,
+          {
+            initialState
+          }
+        ),
+        HttpClientModule,
+        HttpClientTestingModule,
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {

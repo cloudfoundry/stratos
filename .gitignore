@@ -88,3 +88,5 @@ src/backend/app-core/load_plugins.go
 .v8flags*
 
 *.bak
+secrets.yaml
+build/dev_config.json
