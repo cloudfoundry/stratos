@@ -80,6 +80,7 @@ const (
 	SOURCE_FILE_DATA
 	SOURCE_FILE_ACK
 	SOURCE_GITURL
+	SOURCE_WAIT_ACK
 )
 
 const (
@@ -202,7 +203,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (string, string, error) {
 	// The msg data is JSON for the Folder info
-	info := FolderSourceInfo{}
+	info := FolderSourceInfo{
+		WaitAfterUpload: false,
+	}
 
 	if err := json.Unmarshal([]byte(msg.Message), &info); err != nil {
 		return "", tempDir, err
@@ -259,6 +262,11 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 		lastFilePath = path
 		transfers--
+
+		// Acknowledge last file transfer
+		if transfers == 0 {
+			sendEvent(clientWebSocket, SOURCE_FILE_ACK)
+		}
 	}
 
 	// Check to see if we received only 1 file and check if that was an archive file
@@ -292,6 +300,19 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 			// Archive done
 			tempDir = unpackPath
+		}
+	}
+
+	// The client (v2) can request only source upload and for deploy to wait until it sends a message
+	if info.WaitAfterUpload {
+		msg := SocketMessage{}
+		if err := clientWebSocket.ReadJSON(&msg); err != nil {
+			log.Errorf("Error reading JSON: %v+", err)
+			return "", tempDir, err
+		}
+
+		if msg.Type != SOURCE_WAIT_ACK {
+			return "", tempDir, errors.New("Expecting ACK message to begin deployment")
 		}
 	}
 
@@ -620,6 +641,12 @@ func fetchManifest(repoPath string, sourceEnvVarMetadata string, clientWebSocket
 }
 
 func (sw *SocketWriter) Write(data []byte) (int, error) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("WebSocket write recovered from panic", r)
+		}
+	}()
 
 	message, _ := getMarshalledSocketMessage(string(data), DATA)
 
