@@ -19,16 +19,12 @@ import { CardCell } from '../../../list.types';
     ServicesWallService
   ]
 })
-export class ServiceInstanceCardComponent extends CardCell<APIResource> implements OnInit {
+export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> implements OnInit {
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
 
-  @Input('row') row: APIResource<IServiceInstance>;
-
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
-
-
 
   constructor(private store: Store<AppState>, private servicesWallService: ServicesWallService) {
     super();

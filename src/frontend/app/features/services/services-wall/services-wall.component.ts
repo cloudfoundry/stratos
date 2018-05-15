@@ -12,7 +12,7 @@ import { AppState } from '../../../store/app-state';
 import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
-import { CfOrgSpaceDataService, InitCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { Subscription } from 'rxjs/Subscription';
 
 @Component({
@@ -27,7 +27,7 @@ import { Subscription } from 'rxjs/Subscription';
     CfOrgSpaceDataService
   ]
 })
-export class ServicesWallComponent implements OnInit, OnDestroy {
+export class ServicesWallComponent implements OnDestroy {
   initCfOrgSpaceService: Subscription;
   cfIds$: Observable<string[]>;
 
@@ -39,13 +39,10 @@ export class ServicesWallComponent implements OnInit, OnDestroy {
       map(endpoints => endpoints.map(endpoint => endpoint.guid))
     );
 
-    this.initCfOrgSpaceService = InitCfOrgSpaceService(this.store,
+    this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
       this.cfOrgSpaceService,
       serviceInstancesSchemaKey,
       'all').subscribe();
-  }
-
-  ngOnInit() {
   }
 
   ngOnDestroy(): void {

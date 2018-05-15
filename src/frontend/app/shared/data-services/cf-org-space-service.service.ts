@@ -39,7 +39,7 @@ export const enum CfOrgSpaceSelectMode {
 }
 
 
-export const InitCfOrgSpaceService = (store: Store<AppState>,
+export const initCfOrgSpaceService = (store: Store<AppState>,
   cfOrgSpaceService: CfOrgSpaceDataService,
   schemaKey: string,
   paginationKey: string): Observable<any> => {
@@ -119,7 +119,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.space.loading$
     ).pipe(
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
-    );
+      );
 
   }
 
@@ -164,7 +164,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         }
         return [];
       }
-    );
+      );
 
     this.org = {
       list$: orgList$,

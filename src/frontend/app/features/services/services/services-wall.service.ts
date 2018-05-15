@@ -22,11 +22,8 @@ export class ServicesWallService {
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-
     this.services$ = this.initServicesObservable();
-
   }
-
 
   initServicesObservable = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, 'all');
@@ -42,11 +39,4 @@ export class ServicesWallService {
       true
     ).entities$;
   }
-
-  // fetchServiceLabel = (serviceGuid) => this.services$.pipe(
-  //   map(s => s.filter())
-
-  // )
-
-
 }

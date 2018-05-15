@@ -2,30 +2,17 @@ import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
-import { ServicesService } from '../../../../../features/service-catalog/services.service';
-import { AppState } from '../../../../../store/app-state';
-import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
-import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
-import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
-import { createListFilterConfig } from '../../list.helper';
-import { IListMultiFilterConfig, ListViewTypes } from '../../list.component.types';
-import { APIResource } from '../../../../../store/types/api.types';
-import { PaginationEntityState } from '../../../../../store/types/pagination.types';
-import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ListView } from '../../../../../store/actions/list.actions';
+import { AppState } from '../../../../../store/app-state';
+import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
+import { ListViewTypes } from '../../list.component.types';
+import { createListFilterConfig } from '../../list.helper';
+import { cfOrgSpaceFilter } from '../app/cf-apps-data-source';
+import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
+import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
+import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
 
 
-const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
-  const cfGuid = paginationState.clientPagination.filter.items['cf'];
-  const orgGuid = paginationState.clientPagination.filter.items['org'];
-  const spaceGuid = paginationState.clientPagination.filter.items['space'];
-  return entities.filter(e => {
-    const validCF = !(cfGuid && cfGuid !== e.entity.cfGuid);
-    const validOrg = !(orgGuid && orgGuid !== e.entity.space.entity.organization_guid);
-    const validSpace = !(spaceGuid && spaceGuid !== e.entity.space_guid);
-    return validCF && validOrg && validSpace;
-  });
-};
 @Injectable()
 export class ServiceInstancesWallListConfigService
   extends CfServiceInstancesListConfigBase {
