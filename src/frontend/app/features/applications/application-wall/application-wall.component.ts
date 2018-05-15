@@ -14,7 +14,7 @@ import { CardAppComponent } from '../../../shared/components/list/list-types/app
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { CfOrgSpaceDataService, InitCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
 import { GetAppStatsAction } from '../../../store/actions/app-metadata.actions';
 import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
@@ -84,7 +84,7 @@ export class ApplicationWallComponent implements OnDestroy {
       }),
       tag('stat-obs')).subscribe();
 
-    this.initCfOrgSpaceService = InitCfOrgSpaceService(this.store,
+    this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
       this.cfOrgSpaceService,
       applicationSchemaKey,
       CfAppsDataSource.paginationKey).subscribe();

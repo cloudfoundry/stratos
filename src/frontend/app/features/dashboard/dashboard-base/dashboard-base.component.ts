@@ -118,17 +118,15 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.breakpointSub = this.breakpointObserver.observe([
-      Breakpoints.HandsetPortrait
-    ]).pipe(
+    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
       debounceTime(250)
-      ).subscribe(result => {
-        if (result.matches) {
-          this.enableMobileNav();
-        } else {
-          this.disableMobileNav();
-        }
-      });
+    ).subscribe(result => {
+      if (result.matches) {
+        this.enableMobileNav();
+      } else {
+        this.disableMobileNav();
+      }
+    });
 
     this.closeSub = this.sidenav.onClose.subscribe(() => {
       this.store.dispatch(new CloseSideNav());
