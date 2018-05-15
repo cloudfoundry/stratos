@@ -1,11 +1,16 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { DatePipe } from '@angular/common';
+import { inject, TestBed } from '@angular/core/testing';
 
+import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServiceInstancesWallListConfigService } from './service-instances-wall-list-config.service';
 
 describe('ServiceInstancesWallListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ServiceInstancesWallListConfigService]
+      providers: [ServiceInstancesWallListConfigService, DatePipe],
+      imports: [
+        BaseTestModules
+      ]
     });
   });
 

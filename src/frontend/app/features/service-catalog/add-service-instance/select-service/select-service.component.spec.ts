@@ -1,5 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServicesWallService } from '../../../services/services/services-wall.service';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { SelectServiceComponent } from './select-service.component';
 
 describe('SelectServiceComponent', () => {
@@ -8,9 +13,16 @@ describe('SelectServiceComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SelectServiceComponent ]
+      declarations: [SelectServiceComponent],
+      imports: [...BaseTestModules],
+      providers: [
+        PaginationMonitorFactory,
+        ServicesWallService,
+        EntityServiceFactory,
+        CreateServiceInstanceHelperService
+      ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
