@@ -56,8 +56,9 @@ type GitUrlSourceInfo struct {
 
 type FolderSourceInfo struct {
 	DeploySource
-	Files   int      `json:"files"`
-	Folders []string `json:"folders,omitempty"`
+	WaitAfterUpload bool     `json:"wait"`
+	Files           int      `json:"files"`
+	Folders         []string `json:"folders,omitempty"`
 }
 
 type MessageType int

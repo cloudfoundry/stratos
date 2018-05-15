@@ -10,6 +10,10 @@ import { DeployApplicationComponent } from './deploy-application.component';
 import { GithubProjectExistsDirective } from './github-project-exists.directive';
 import { DeployApplicationStep21Component } from './deploy-application-step2-1/deploy-application-step2-1.component';
 import { CommitListWrapperComponent } from './deploy-application-step2-1/commit-list-wrapper/commit-list-wrapper.component';
+import { DeployApplicationFsComponent } from './deploy-application-step2/deploy-application-fs/deploy-application-fs.component';
+import {
+  DeployApplicationStepSourceUploadComponent
+} from './deploy-application-step-source-upload/deploy-application-step-source-upload.component';
 
 @NgModule({
   imports: [
@@ -25,6 +29,8 @@ import { CommitListWrapperComponent } from './deploy-application-step2-1/commit-
     DeployApplicationStep3Component,
     DeployApplicationStep21Component,
     CommitListWrapperComponent,
+    DeployApplicationFsComponent,
+    DeployApplicationStepSourceUploadComponent,
   ],
   exports: [
     DeployApplicationComponent

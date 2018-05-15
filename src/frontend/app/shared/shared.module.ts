@@ -102,6 +102,7 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
+import { UploadProgressIndicatorComponent } from './components/upload-progress-indicator/upload-progress-indicator.component';
 
 @NgModule({
   imports: [
@@ -182,6 +183,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     IntroScreenComponent,
     CliInfoComponent,
     CliCommandComponent,
+    UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     UserProfileBannerComponent,
     AppActionMonitorComponent,
@@ -253,6 +255,7 @@ import { ValuesPipe } from './pipes/values.pipe';
     UserProfileBannerComponent,
     CliInfoComponent,
     CliCommandComponent,
+    UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     AppActionMonitorComponent,
     CliCommandComponent,
