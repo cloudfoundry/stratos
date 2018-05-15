@@ -20,5 +20,5 @@ run:
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
       mv dev-certs-output/dev-certs stratos/dev-certs
       cd stratos/deploy/docker-compose/
-      ./build.sh -l -t test
+      ./build.sh -l
 
