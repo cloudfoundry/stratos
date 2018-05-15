@@ -124,20 +124,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
         tags: new FormControl(''),
       });
     } else {
-      if (this.cSIHelperService.marketPlaceMode) {
-        this.spaceScopeSub = this.cSIHelperService.getSelectedServicePlanAccessibility()
-          .pipe(
-          map(o => o.spaceScoped),
-          tap(spaceScope => {
-            if (spaceScope) {
-              this.stepperForm.get('org').disable();
-              this.stepperForm.get('space').disable();
-            } else {
-              this.stepperForm.get('org').enable();
-              this.stepperForm.get('space').enable();
-            }
-          })).subscribe();
-      }
+      this.spaceScopeSub = this.cSIHelperService.getSelectedServicePlanAccessibility()
+        .pipe(
+        map(o => o.spaceScoped),
+        tap(spaceScope => {
+          if (spaceScope) {
+            this.stepperForm.get('org').disable();
+            this.stepperForm.get('space').disable();
+          } else {
+            this.stepperForm.get('org').enable();
+            this.stepperForm.get('space').enable();
+          }
+        })).subscribe();
     }
   }
 
@@ -159,6 +157,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     safeUnsubscribe(this.orgSubscription);
     safeUnsubscribe(this.serviceInstanceNameSub);
     safeUnsubscribe(this.spaceScopeSub);
+    safeUnsubscribe(this.constructorSubscription);
   }
 
   initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {

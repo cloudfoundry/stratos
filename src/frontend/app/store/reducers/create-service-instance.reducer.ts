@@ -44,29 +44,17 @@ const setSpaceScopedFlag = (state: CreateServiceInstanceState, action) => ({
 export function createServiceInstanceReducer(state: CreateServiceInstanceState = defaultState, action) {
   switch (action.type) {
     case SET_SERVICE_PLAN:
-      return {
-        ...state, servicePlanGuid: action.servicePlanGuid
-      };
+      return { ...state, servicePlanGuid: action.servicePlanGuid };
     case SET_ORG:
-      return {
-        ...state, orgGuid: action.orgGuid
-      };
+      return { ...state, orgGuid: action.orgGuid };
     case SET_SPACE:
-      return {
-        ...state, spaceGuid: action.spaceGuid
-      };
+      return { ...state, spaceGuid: action.spaceGuid };
     case SET_SERVICE_INSTANCE_SVC_GUID:
-      return {
-        ...state, serviceGuid: action.serviceGuid
-      };
+      return { ...state, serviceGuid: action.serviceGuid };
     case SET_SERVICE_INSTANCE_GUID:
-      return {
-        ...state, serviceInstanceGuid: action.guid
-      };
+      return { ...state, serviceInstanceGuid: action.guid };
     case SET_SERVICE_INSTANCE_APP:
-      return {
-        ...state, bindAppGuid: action.appGuid, bindAppParams: action.params
-      };
+      return { ...state, bindAppGuid: action.appGuid, bindAppParams: action.params };
     case SET_SERVICE_INSTANCE_SPACE_SCOPED:
       return setSpaceScopedFlag(state, action);
     case SET_CREATE_SERVICE_INSTANCE:
