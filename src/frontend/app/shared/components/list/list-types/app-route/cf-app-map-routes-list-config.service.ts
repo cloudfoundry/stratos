@@ -4,7 +4,6 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
-import { DeleteRoute, UnmapRoute } from '../../../../../store/actions/route.actions';
 import { GetSpaceRoutes } from '../../../../../store/actions/space.actions';
 import { AppState } from '../../../../../store/app-state';
 import {
@@ -106,7 +105,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
       this.store,
       this.appService,
       action,
-      createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid),
       this
     );
   }

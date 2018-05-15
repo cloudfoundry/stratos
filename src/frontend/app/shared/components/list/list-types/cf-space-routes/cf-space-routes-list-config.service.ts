@@ -137,7 +137,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         new UnmapRoute(
           route.metadata.guid,
           p,
-          this.dataSource.cfGuid
+          this.dataSource.cfGuid,
+          false// We don't want to just remove the entity, we want to clear entities of this type forcing all to refresh
         )
       )
     );

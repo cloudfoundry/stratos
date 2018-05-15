@@ -42,6 +42,7 @@ import { createEntityRelationKey } from '../../../store/helpers/entity-relations
 import { APIResource } from '../../../store/types/api.types';
 import { ApplicationService } from '../application.service';
 import { DataFunctionDefinition } from '../../../shared/components/list/data-sources-controllers/list-data-source';
+import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
 
 
 @Component({
@@ -214,7 +215,7 @@ export class ApplicationDeleteComponent<T> {
     const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
-    const routesAction = CfAppRoutesListConfigService.createAction(appGuid, cfGuid);
+    const routesAction = new GetAppRoutes(appGuid, cfGuid);
     const instancePaginationKey = instanceAction.paginationKey;
     const routesPaginationKey = routesAction.paginationKey;
 

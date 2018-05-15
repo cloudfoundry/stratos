@@ -159,14 +159,6 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
   };
   isLocal = true;
 
-  static createAction(appGuid: string, cfGuid: string) {
-    return new GetAppRoutes(
-      appGuid,
-      cfGuid,
-      createEntityRelationPaginationKey(applicationSchemaKey, appGuid),
-    );
-  }
-
   dispatchDeleteAction(route) {
     return this.store.dispatch(
       new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
@@ -203,8 +195,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      CfAppRoutesListConfigService.createAction(appService.appGuid, appService.cfGuid),
-      createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
+      new GetAppRoutes(appService.appGuid, appService.cfGuid),
       this
     );
   }
