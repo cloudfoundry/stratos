@@ -1,6 +1,5 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
-
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -29,7 +28,13 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.DEBUG,
     autoWatch: true,
-    browsers: process.env.CI_ENV ? ['ChromeHeadless'] : ['Chrome'],
+    browsers: process.env.CI_ENV ? ['StratosChromeHeadless'] : ['Chrome'],
+    customLaunchers: {
+      StratosChromeHeadless:{
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox']
+      }
+    },
     singleRun: process.env.CI_ENV ? true : false,
     files: [{
         pattern: './src/frontend/**/*.spec.ts',
