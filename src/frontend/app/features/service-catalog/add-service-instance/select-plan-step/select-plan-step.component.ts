@@ -4,7 +4,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, share, tap, switchMap, distinctUntilChanged } from 'rxjs/operators';
+import { filter, first, map, share, tap, switchMap, distinctUntilChanged, publishReplay, refCount } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
@@ -18,6 +18,7 @@ import { CreateServiceInstanceHelperService } from '../create-service-instance-h
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { serviceSchemaKey, entityFactory } from '../../../../store/helpers/entity-factory';
 import { ActivatedRoute } from '@angular/router';
+import { safeUnsubscribe } from '../../services-helper';
 
 interface ServicePlan {
   id: string;
@@ -34,7 +35,7 @@ interface ServicePlan {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectPlanStepComponent implements OnChanges, OnInit, AfterContentInit, OnDestroy {
+export class SelectPlanStepComponent implements OnDestroy {
   selectedService$: Observable<ServicePlan>;
 
 
@@ -61,9 +62,9 @@ export class SelectPlanStepComponent implements OnChanges, OnInit, AfterContentI
     this.servicePlans$ = this.cSIHelperService.getVisibleServicePlans().pipe(
       filter(o => !!o && o.length > 0),
       map(o => this.mapToServicePlan(o)),
-      share(),
+      publishReplay(1),
+      refCount(),
     );
-
 
     this.selectedService$ = this.servicePlans$.pipe(
       filter(o => !!this.stepperForm.controls.servicePlans.value),
@@ -74,13 +75,12 @@ export class SelectPlanStepComponent implements OnChanges, OnInit, AfterContentI
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
       tap(o => {
-        this.stepperForm.controls.servicePlans.setValue(o[0].id, { onlySelf: false });
+        this.stepperForm.controls.servicePlans.setValue(o[0].id);
         this.servicePlans = o;
         this.validate.next(this.stepperForm.valid);
 
       }),
     ).subscribe();
-
 
     const { serviceId, cfId } = activatedRoute.snapshot.params;
     if (!!serviceId && !!cfId) {
@@ -119,28 +119,10 @@ export class SelectPlanStepComponent implements OnChanges, OnInit, AfterContentI
     return Observable.of({ success: true });
   }
 
-  ngAfterContentInit(): void {
-    this.stepperForm.controls.servicePlans.updateValueAndValidity();
-  }
-
-  ngOnChanges(): void {
-
-  }
-
-  ngOnInit(): void {
-  }
-
   ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-    if (this.changeSubscription) {
-      this.changeSubscription.unsubscribe();
-    }
-
-    if (this.servicePlanVisibilitySub) {
-      this.servicePlanVisibilitySub.unsubscribe();
-    }
+    safeUnsubscribe(this.subscription);
+    safeUnsubscribe(this.changeSubscription);
+    safeUnsubscribe(this.servicePlanVisibilitySub);
   }
 
   getPlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<CardStatus> => {
