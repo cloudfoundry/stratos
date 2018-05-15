@@ -31,7 +31,7 @@ interface ServicePlan {
   templateUrl: './select-plan-step.component.html',
   styleUrls: ['./select-plan-step.component.scss'],
   providers: [
-    TitleCasePipe,
+    TitleCasePipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -83,7 +83,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     ).subscribe();
 
     const { serviceId, cfId } = activatedRoute.snapshot.params;
-    if (!!serviceId && !!cfId) {
+    if (this.cSIHelperService.marketPlaceMode) {
       this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId));
     }
   }

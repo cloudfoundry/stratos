@@ -41,7 +41,10 @@ import { EntityService } from '../../../core/entity-service';
 @Injectable()
 export class CreateServiceInstanceHelperService {
   serviceEntityService: EntityService<APIResource<IService>>;
+  // Is instance being created from the Marketplace
   public marketPlaceMode = false;
+
+  // Internal property, clients should use `isInitialised()`
   initialised$ = new BehaviorSubject(false);
   cfGuid$ = new BehaviorSubject(null);
   serviceGuid$ = new BehaviorSubject(null);
@@ -95,7 +98,6 @@ export class CreateServiceInstanceHelperService {
           map(o => o.entity),
           publishReplay(1),
           refCount(),
-          // first(),
           tap(
             p => this.serviceBroker$.next(p)
           ),
