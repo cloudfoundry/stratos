@@ -89,6 +89,9 @@ src/backend/app-core/load_plugins.go
 
 *.bak
 
+secrets.yaml
+build/dev_config.json
+
 # Customisations
 
 src/frontend/favicon.ico

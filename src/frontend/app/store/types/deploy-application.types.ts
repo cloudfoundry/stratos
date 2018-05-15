@@ -42,7 +42,8 @@ export enum SocketEventTypes {
   SOURCE_FILE = 30003,
   SOURCE_FILE_DATA = 30004,
   SOURCE_FILE_ACK = 30005,
-  SOURCE_GITURL = 30006
+  SOURCE_GITURL = 30006,
+  SOURCE_WAIT_ACK = 30007
 }
 
 export interface DeployApplicationSource {

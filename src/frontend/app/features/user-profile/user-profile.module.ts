@@ -4,6 +4,8 @@ import { ProfileInfoComponent } from './profile-info/profile-info.component';
 import { UserProfileRoutingModule } from './user-profile.routing';
 import { SharedModule } from '../../shared/shared.module';
 import { CoreModule } from '../../core/core.module';
+import { EditProfileInfoComponent } from './edit-profile-info/edit-profile-info.component';
+import { UserProfileService } from './user-profile.service';
 
 @NgModule({
   imports: [
@@ -12,6 +14,9 @@ import { CoreModule } from '../../core/core.module';
     SharedModule,
     UserProfileRoutingModule
   ],
-  declarations: [ProfileInfoComponent]
+  declarations: [ProfileInfoComponent, EditProfileInfoComponent],
+  providers: [
+    UserProfileService
+  ]
 })
 export class UserProfileModule { }
