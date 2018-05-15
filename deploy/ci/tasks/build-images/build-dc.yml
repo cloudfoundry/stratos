@@ -1,7 +1,7 @@
 ---
 platform: linux
 inputs:
-- name: stratos-ui
+- name: stratos
 - name: dev-certs-output
 image_resource:
   type: docker-image
@@ -18,7 +18,7 @@ run:
       source /docker-lib.sh
       start_docker
       docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}
-      mv dev-certs-output/dev-certs stratos-ui/dev-certs
-      cd stratos-ui/deploy/docker-compose/
+      mv dev-certs-output/dev-certs stratos/dev-certs
+      cd stratos/deploy/docker-compose/
       ./build.sh -l -t test
 
