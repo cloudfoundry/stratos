@@ -84,29 +84,10 @@ export class ApplicationWallComponent implements OnDestroy {
       }),
       tag('stat-obs')).subscribe();
 
-<<<<<<< HEAD
     this.initCfOrgSpaceService = InitCfOrgSpaceService(this.store,
       this.cfOrgSpaceService,
       applicationSchemaKey,
       CfAppsDataSource.paginationKey).subscribe();
-=======
-    this.initCfOrgSpaceService = this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey)).pipe(
-      filter((pag) => !!pag),
-      first(),
-      tap(pag => {
-        const { cf, org, space } = pag.clientPagination.filter.items;
-        if (cf) {
-          this.cfOrgSpaceService.cf.select.next(cf);
-        }
-        if (org) {
-          this.cfOrgSpaceService.org.select.next(org);
-        }
-        if (space) {
-          this.cfOrgSpaceService.space.select.next(space);
-        }
-      })
-    ).subscribe();
->>>>>>> v2-master
   }
 
   cardComponent = CardAppComponent;

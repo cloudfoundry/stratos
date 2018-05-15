@@ -45,3 +45,13 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
 };
 
 export const safeUnsubscribe = (s: Subscription) => { if (s) { s.unsubscribe(); } };
+
+export const getServiceJsonParams = (params: any): {} => {
+  let prms = params;
+  try {
+    prms = JSON.parse(params) || null;
+  } catch (e) {
+    prms = null;
+  }
+  return prms;
+};

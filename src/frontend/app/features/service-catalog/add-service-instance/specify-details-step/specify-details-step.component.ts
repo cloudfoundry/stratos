@@ -34,7 +34,7 @@ import { ServicesService } from '../../services.service';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
-import { safeUnsubscribe } from '../../services-helper';
+import { safeUnsubscribe, getServiceJsonParams } from '../../services-helper';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
 
 @Component({
@@ -43,8 +43,7 @@ import { CreateServiceBinding } from '../../../../store/actions/service-bindings
   styleUrls: ['./specify-details-step.component.scss'],
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterContentInit {
-  constructorSubscription: Subscription; // TODO unsubscriber()
-
+  constructorSubscription: Subscription;
   stepperForm: FormGroup;
   serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
@@ -277,13 +276,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       cfGuid = this.cSIHelperService.cfGuid;
     }
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
-
-    let params = this.stepperForm.controls.params.value;
-    try {
-      params = JSON.parse(params) || null;
-    } catch (e) {
-      params = null;
-    }
+    const params = getServiceJsonParams(this.stepperForm.controls.params.value);
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 
@@ -292,11 +285,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     this.store.dispatch(new CreateServiceInstance(
       this.cSIHelperService.cfGuid,
       newServiceInstanceGuid,
-      name,
-      servicePlanGuid,
-      spaceGuid,
-      params,
-      tagsStr
+      name, servicePlanGuid, spaceGuid, params, tagsStr
     ));
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
