@@ -47,14 +47,16 @@ export const InitCfOrgSpaceService = (store: Store<AppState>,
     filter((pag) => !!pag),
     first(),
     tap(pag => {
-      if (pag.clientPagination.filter.items.cf) {
-        cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+      const { cf, org, space } = pag.clientPagination.filter.items;
+
+      if (cf) {
+        cfOrgSpaceService.cf.select.next(cf);
       }
-      if (pag.clientPagination.filter.items.org) {
-        cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+      if (org) {
+        cfOrgSpaceService.org.select.next(org);
       }
-      if (pag.clientPagination.filter.items.space) {
-        cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+      if (space) {
+        cfOrgSpaceService.space.select.next(space);
       }
     })
   );
