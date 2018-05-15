@@ -49,13 +49,13 @@ export const initCfOrgSpaceService = (store: Store<AppState>,
     tap(pag => {
       const { cf, org, space } = pag.clientPagination.filter.items;
       if (cf) {
-        this.cfOrgSpaceService.cf.select.next(cf);
+        cfOrgSpaceService.cf.select.next(cf);
       }
       if (org) {
-        this.cfOrgSpaceService.org.select.next(org);
+        cfOrgSpaceService.org.select.next(org);
       }
       if (space) {
-        this.cfOrgSpaceService.space.select.next(space);
+        cfOrgSpaceService.space.select.next(space);
       }
     })
   );
@@ -119,7 +119,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.space.loading$
     ).pipe(
       map(([cfLoading, orgLoading, spaceLoading]) => cfLoading || orgLoading || spaceLoading)
-      );
+    );
 
   }
 
@@ -164,7 +164,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         }
         return [];
       }
-      );
+    );
 
     this.org = {
       list$: orgList$,
