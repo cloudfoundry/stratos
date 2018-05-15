@@ -2,14 +2,17 @@
 <form novalidate #sourceSelectionForm="ngForm" class="stepper-form">
   <div class="deploy-step2-form">
     <!-- This can be flipped when we add other deploy types -->
-    <mat-form-field *ngIf="false">
+    <mat-form-field *ngIf="sourceTypes.length > 1">
       <mat-select class="reset-margin" [disabled]="isRedeploy" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
         <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
           {{ sourceType.name }}
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <div *ngIf="(sourceType$ | async)?.id === 'git'">
+    <div *ngIf="(sourceType$ | async)?.id as sourceType">
+      <app-deploy-application-fs #fsChooser *ngIf="sourceType === 'fs'" required name="fsLocalSource" [(ngModel)]="fsSourceData">
+      </app-deploy-application-fs>
+      <div *ngIf="sourceType === 'git'">
       <div>
         <mat-radio-group [disabled]="isRedeploy" [(ngModel)]="sourceSubType" name="sourceSubType" (change)="setSourceSubType($event.value)" class="deploy-step2-form__radio" required>
           <mat-radio-button *ngFor="let type of sourceSubTypes" name="sourceSubType" [value]="type">
@@ -80,5 +83,7 @@
         </mat-form-field>
       </div>
     </div>
+  </div>
+    
   </div>
 </form>

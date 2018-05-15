@@ -109,6 +109,7 @@ function buildAndPublishImage {
   NAME=${1}
   DOCKER_FILE=${2}
   FOLDER=${3}
+  TARGET=${4:-none}
 
   if [ ! -d "${FOLDER}" ]; then
     echo "Project ${FOLDER} hasn't been checked out";
@@ -120,8 +121,13 @@ function buildAndPublishImage {
 
   pushd ${FOLDER} > /dev/null 2>&1
   pwd
-  docker build ${BUILD_ARGS} -t $NAME -f $DOCKER_FILE .
 
+  SET_TARGET=""
+  if [ "${TARGET}" != "none" ]; then
+    SET_TARGET="--target=${TARGET}"
+  fi
+
+  docker build ${BUILD_ARGS} ${SET_TARGET} -t $NAME -f $DOCKER_FILE .
   docker tag ${NAME} ${IMAGE_URL}
 
   if [ "${NO_PUSH}" = "false" ]; then
@@ -186,79 +192,36 @@ function pushGitTag {
   popd > /dev/null 2>&1
 }
 
+
 function buildProxy {
-  # Use the existing build container to compile the backend executable, and leave
-  # it on the local filesystem.
   echo
-  echo "-- Building the Stratos backend"
+  echo "-- Building the Stratos Backend"
 
-  echo
-  echo "-- Run the build container to build the Stratos backend"
-
-  pushd ${STRATOS_UI_PATH} > /dev/null 2>&1
-  pushd $(git rev-parse --show-toplevel) > /dev/null 2>&1
-
-  docker run -e "APP_VERSION=${TAG}" \
-             ${RUN_ARGS} \
-             -it \
-             --rm \
-             -e USER_NAME=$(id -nu) \
-             -e USER_ID=$(id -u)  \
-             -e GROUP_ID=$(id -g) \
-             --name stratos-jetstream-builder \
-             --volume $(pwd):/go/src/github.com/SUSE/stratos-ui \
-             ${DOCKER_REGISTRY}/${DOCKER_ORG}/stratos-jetstream-builder:opensuse
-  popd > /dev/null 2>&1
-  popd > /dev/null 2>&1
-
-  # Copy the previously compiled executable into the container and
-  # publish the container image for the Stratos backend
   echo
   echo "-- Build & publish the runtime container image for the Console Proxy"
-  buildAndPublishImage stratos-dc-proxy deploy/Dockerfile.bk.dev ${STRATOS_UI_PATH}
+  buildAndPublishImage stratos-proxy deploy/Dockerfile.bk ${STRATOS_UI_PATH} prod-build
 }
 
-
-function buildGoose {
+function buildPostflightJob {
   # Build the postflight container
   echo
   echo "-- Build & publish the runtime container image for the postflight job"
-  buildAndPublishImage stratos-dc-goose deploy/db/Dockerfile.goose.dev ${STRATOS_UI_PATH}
-}
-
-function buildUI {
-  # Prepare the nginx server
-  CURRENT_USER=$
-  echo
-  echo "-- Provision the UI"
-  docker run --rm \
-    ${RUN_ARGS} \
-    -v ${STRATOS_UI_PATH}:/usr/src/app \
-    -e CREATE_USER="true"  \
-    -e USER_NAME=$(id -nu) \
-    -e USER_ID=$(id -u)  \
-    -e GROUP_ID=$(id -g) \
-    -e STRATOS_BOWER="${STRATOS_BOWER}" \
-    -w /usr/src/app \
-    splatform/stratos-ui-build-base:opensuse \
-    /bin/bash ./deploy/provision.sh
-
-  # Copy the artifacts from the above to the nginx container
-  echo
-  echo "-- Copying the Console UI artifacts to the web server (nginx) container"
-  cp -R ${STRATOS_UI_PATH}/dist ${STRATOS_UI_PATH}/deploy/containers/nginx/dist
-
-  # Build and push an image based on the nginx container
-  echo
-  echo "-- Building/publishing the runtime container image for the Console web server"
-  buildAndPublishImage stratos-dc-console Dockerfile.dc ${STRATOS_UI_PATH}/deploy/containers/nginx
+  buildAndPublishImage stratos-postflight-job deploy/Dockerfile.bk ${STRATOS_UI_PATH}  postflight-job
 }
 
 function buildMariaDb {
   echo
   echo "-- Building/publishing MariaDB"
   # Download and retag image to save bandwidth
-  buildAndPublishImage stratos-dc-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
+  buildAndPublishImage stratos-mariadb Dockerfile.mariadb ${STRATOS_UI_PATH}/deploy/db
+}
+
+function buildUI {
+  # Build and push an image based on the nginx container
+  echo
+  echo "-- Building/publishing the runtime container image for the Console web server"
+  # Download and retag image to save bandwidth
+  buildAndPublishImage stratos-console deploy/Dockerfile.ui ${STRATOS_UI_PATH} prod-build
 }
 
 # MAIN ------------------------------------------------------
@@ -274,7 +237,7 @@ updateTagForRelease
 
 # Build all of the components that make up the Console
 buildProxy
-buildGoose
+buildPostflightJob
 buildUI
 buildMariaDb
 
