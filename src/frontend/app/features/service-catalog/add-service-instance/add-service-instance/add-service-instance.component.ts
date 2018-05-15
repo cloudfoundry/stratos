@@ -36,8 +36,8 @@ export class AddServiceInstanceComponent {
   ) {
     const { serviceId, cfId } = activatedRoute.snapshot.params;
     if (!!serviceId && !!cfId) {
-      const serviceGuid = this.cSIHelperService.serviceGuid;
-      this.serviceInstancesUrl = `/service-catalog/${this.cSIHelperService.cfGuid}/${serviceGuid}/instances`;
+      const serviceGuid = serviceId;
+      this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
       this.title$ = this.cSIHelperService.getServiceName().pipe(
         map(label => `Create Instance: ${label}`)
       );

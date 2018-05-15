@@ -58,7 +58,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
   spaceScopeSub: Subscription;
-
+  cfGuid: string;
+  serviceGuid: string;
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
 
@@ -104,14 +105,23 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       this.spaces$ = this.initSpacesObservable();
     }
 
-    this.constructorSubscription = cSIHelperService.initialised$.pipe(
-      filter(p => !!p),
+    this.constructorSubscription = cSIHelperService.isInitialised().pipe(
       tap(o => {
-        const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.cSIHelperService.serviceGuid);
-        this.allServiceInstances$ = this.initServiceInstances(paginationKey);
+        this.cSIHelperService.serviceGuid$.pipe(
+          first(),
+          tap(guid => {
+            const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, guid);
+            this.allServiceInstances$ = this.initServiceInstances(paginationKey);
+          }),
+        ).subscribe();
 
+        this.cSIHelperService.cfGuid$.pipe(
+          first(),
+          tap(guid => this.cfGuid = guid)
+        ).subscribe();
       })
     ).subscribe();
+
 
   }
 
@@ -142,7 +152,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
     store: this.store,
-    action: new GetServiceInstances(this.cSIHelperService.cfGuid, paginationKey),
+    action: new GetServiceInstances(this.cfGuid, paginationKey),
     paginationMonitor: this.paginationMonitorFactory.create(
       paginationKey,
       entityFactory(serviceInstancesSchemaKey)
@@ -273,7 +283,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       cfGuid = createServiceInstance.cfGuid;
     } else {
       spaceGuid = this.stepperForm.controls.space.value;
-      cfGuid = this.cSIHelperService.cfGuid;
+      cfGuid = this.cfGuid;
     }
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = getServiceJsonParams(this.stepperForm.controls.params.value);
@@ -283,7 +293,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
 
     this.store.dispatch(new CreateServiceInstance(
-      this.cSIHelperService.cfGuid,
+      this.cfGuid,
       newServiceInstanceGuid,
       name, servicePlanGuid, spaceGuid, params, tagsStr
     ));
@@ -292,11 +302,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   createBinding = (serviceInstanceGuid: string, appGuid: string, params: {}) => {
 
-    const guid = `${this.cSIHelperService.cfGuid}-${appGuid}-${serviceInstanceGuid}`;
+    const guid = `${this.cfGuid}-${appGuid}-${serviceInstanceGuid}`;
     params = params;
 
     this.store.dispatch(new CreateServiceBinding(
-      this.cSIHelperService.cfGuid,
+      this.cfGuid,
       guid,
       appGuid,
       serviceInstanceGuid,

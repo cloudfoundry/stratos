@@ -40,8 +40,6 @@ import { EntityService } from '../../../core/entity-service';
 
 @Injectable()
 export class CreateServiceInstanceHelperService {
-  serviceGuid: any;
-  cfGuid: any;
   serviceEntityService: EntityService<APIResource<IService>>;
   public marketPlaceMode = false;
   initialised$ = new BehaviorSubject(false);
@@ -61,9 +59,7 @@ export class CreateServiceInstanceHelperService {
     if (!!serviceId && !!cfId) {
       this.marketPlaceMode = true;
       this.cfGuid$.next(cfId);
-      this.cfGuid = cfId;
       this.serviceGuid$.next(serviceId);
-      this.serviceGuid = serviceId;
       this.initialised$.next(true);
       this.initBaseObservables(serviceId, cfId);
     }
@@ -131,8 +127,6 @@ export class CreateServiceInstanceHelperService {
     this.cfGuid$.next(cfGuid);
     this.serviceGuid$.next(serviceGuid);
     this.initialised$.next(true);
-    this.cfGuid = cfGuid;
-    this.serviceGuid = serviceGuid;
 
     this.initBaseObservables(serviceGuid, cfGuid);
   }
