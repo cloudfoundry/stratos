@@ -156,17 +156,10 @@ export class CreateServiceInstanceHelperService {
       filter(p => !!p)
     );
   }
-  getService(): Observable<APIResource<IService>> {
+  getService = (): Observable<APIResource<IService>> => this.service$.pipe(filter(p => !!p));
+  getServicePlanVisibilities = (): Observable<APIResource<IServicePlanVisibility>[]> =>
+    this.servicePlanVisibilities$.pipe(filter(p => !!p))
 
-    return this.service$.pipe(
-      filter(p => !!p),
-    );
-  }
-  getServicePlanVisibilities(): Observable<APIResource<IServicePlanVisibility>[]> {
-    return this.servicePlanVisibilities$.pipe(
-      filter(p => !!p)
-    );
-  }
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
     return this.getService().pipe(
       filter(p => !!p),
