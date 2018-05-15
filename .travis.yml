@@ -24,7 +24,7 @@ stages:
   - Frontend Unit Tests
   - Backend
   - name: E2E tests
-    if: branch = v2-master
+    if: type != pull_request
 jobs:
   include:
   - stage: Frontend Lint
