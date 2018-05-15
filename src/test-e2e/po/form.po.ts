@@ -25,7 +25,7 @@ export interface FormItem {
 }
 
 /**
- * Page Objeect for a form
+ * Page Object for a form
  */
 export class FormComponent extends Component {
 

@@ -1,7 +1,6 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by } from 'protractor';
+import { by, element } from 'protractor';
+import { ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
-import { MenuComponent } from './menu.po';
 
 export class StepperStep {
   index: number;
@@ -12,7 +11,7 @@ export class StepperStep {
 }
 
 /**
- * Page Objeect for stepper component
+ * Page Object for stepper component
  */
 export class StepperComponent extends Component {
 

@@ -1,10 +1,9 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
-import { Page } from './page.po';
+import { promise } from 'protractor';
 import { NoContentComponent } from './no-content.po';
+import { Page } from './page.po';
 
 /**
- * Base CF Page Objeect can be inherited by appropriate pages
+ * Base CF Page Object can be inherited by appropriate pages
  */
 export abstract class CFPage extends Page {
 

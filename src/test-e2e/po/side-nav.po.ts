@@ -10,7 +10,7 @@ export enum SideNavMenuItem {
 }
 
 /**
- * Page Objeect for side navigation
+ * Page Objeet for side navigation
  */
 export class SideNavigation extends Component {
 

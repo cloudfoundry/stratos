@@ -5,7 +5,7 @@ import { PageHeader } from './page-header.po';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 
 /**
- * Base Page Objeect can be inherited by appropriate pages
+ * Base Page Object can be inherited by appropriate pages
  */
 export abstract class Page {
 

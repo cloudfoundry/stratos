@@ -4,7 +4,7 @@ import { Component } from './component.po';
 
 
 /**
- * Page Objeect for app-no-content component
+ * Page Object for app-no-content component
  */
 export class NoContentComponent extends Component {
 

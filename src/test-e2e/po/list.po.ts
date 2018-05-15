@@ -1,9 +1,9 @@
-import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
+import { by, element, promise } from 'protractor';
+import { ElementArrayFinder, ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
 
 /**
- * Page Objeect for the List component
+ * Page Object for the List component
  */
 export class ListComponent extends Component {
 

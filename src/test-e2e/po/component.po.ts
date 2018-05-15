@@ -4,7 +4,7 @@ import { browser, element, by, promise } from 'protractor';
 const until = protractor.ExpectedConditions;
 
 /**
- * Page Objeect for generic base component
+ * Page Object for generic base component
  */
 export abstract class Component {
 

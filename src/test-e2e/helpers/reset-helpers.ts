@@ -11,36 +11,7 @@ const secrets = new SecretsHelpers();
  */
 export class ResetsHelpers {
 
-
   constructor() { }
-
-  /**
-   * @function devWorkflow
-   * @description Ensure the database is initialized for developer workflow.
-   * @param {boolean} firstTime - flag this as a first-time run
-   */
-  devWorkflow(firstTime) {
-    return new Promise((resolve, reject) => {
-      helpers.createReqAndSession(null, secrets.getConsoleNonAdminUsername(), secrets.getConsoleNonAdminPassword()).then((req) => {
-        const promises = [];
-        // promises.push(this.setUser(req, !firstTime));
-        promises.push(this.doResetAllEndpoints(req));
-
-        // if (firstTime) {
-        //   promises.push(this.removeUserServiceInstances(req));
-        // } else {
-        //   promises.push(this.resetUserServiceInstances(req));
-        // }
-
-        Promise.all(promises).then(
-          () => resolve()
-        ).catch((error) => {
-          console.log('Failed to set dev workflow');
-          reject(error);
-        });
-      });
-    });
-  }
 
   /**
    * Ensure the database is initialized for ITOps admin workflow with no clusters registered.

@@ -1,10 +1,10 @@
-import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
+import { browser, by, element, promise } from 'protractor';
+import { ElementArrayFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { MenuComponent } from './menu.po';
 
 /**
- * Page Objeect for page header
+ * Page Object for page header
  */
 export class PageHeader extends Component {
 

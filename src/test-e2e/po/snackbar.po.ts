@@ -3,7 +3,7 @@ import { browser, element, by, promise } from 'protractor';
 import { Component } from './component.po';
 
 /**
- * Page Objeect for snack bar component
+ * Page Object for snack bar component
  */
 export class SnackBarComponent extends Component {
 

@@ -14,7 +14,7 @@ export class MenuItem {
   disabled: boolean;
 }
 /**
- * Page Objeect for popup menu component
+ * Page Object for popup menu component
  */
 export class MenuComponent extends Component {
 
