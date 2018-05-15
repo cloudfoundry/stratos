@@ -89,6 +89,7 @@ export interface RowState {
   error?: boolean;
   message?: string;
   blocked?: boolean;
+  highlighted?: boolean;
   [customState: string]: any;
 }
 

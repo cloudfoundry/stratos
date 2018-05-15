@@ -40,7 +40,7 @@ const appRoutes: Routes = [
       { path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule' },
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },
-      { path: 'userProfile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
+      { path: 'user-profile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
     ]
   },
   {

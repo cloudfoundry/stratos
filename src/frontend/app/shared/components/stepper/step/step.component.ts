@@ -1,20 +1,21 @@
 import 'rxjs/add/observable/of';
 
-import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, TemplateRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
   onNext: StepOnNextFunction;
-  onEnter?: () => void;
+  onEnter?: (data?: any) => void;
 }
 
 export type StepOnNextFunction = () => Observable<{
   success: boolean,
   message?: string,
   // Should we redirect to the store previous state?
-  redirect?: boolean
+  redirect?: boolean,
+  data?: any,
 }>;
 
 @Component({
@@ -24,16 +25,30 @@ export type StepOnNextFunction = () => Observable<{
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-export class StepComponent implements OnInit {
+export class StepComponent {
 
-  public _onEnter: () => void;
+  public _onEnter: (data?: any) => void;
   active = false;
   complete = false;
   error = false;
   busy = false;
 
+  _hidden = false;
+
   @Input()
   title: string;
+
+  @Output() onHidden= new EventEmitter<boolean>();
+
+  @Input('hidden')
+  set hidden(hidden: boolean) {
+    this._hidden = hidden;
+    this.onHidden.emit(this._hidden);
+  }
+
+  get hidden() {
+    return this._hidden;
+  }
 
   @Input('valid')
   valid = true;
@@ -53,8 +68,8 @@ export class StepComponent implements OnInit {
   @Input('disablePrevious')
   disablePrevious = false;
 
-  @Input('blocked$')
-  blocked$: Observable<boolean>;
+  @Input('blocked')
+  blocked: boolean;
 
   @Input('destructiveStep')
   public destructiveStep = false;
@@ -63,24 +78,27 @@ export class StepComponent implements OnInit {
   content: TemplateRef<any>;
 
   @Input()
+  skip = false;
+
+  @Input()
   onNext: StepOnNextFunction = () => Observable.of({ success: true })
 
   @Input()
-  onEnter: () => void = () => { }
+  onEnter: (data: any) => void = () => { }
+
+  @Input()
+  onLeave: (isNext?: boolean) => void = () => { }
 
   constructor() {
-    this._onEnter = () => {
+    this._onEnter = (data?: any) => {
       if (this.destructiveStep) {
         this.busy = true;
         setTimeout(() => {
           this.busy = false;
         }, 1000);
       }
-      this.onEnter();
+      this.onEnter(data);
     };
-  }
-
-  ngOnInit() {
   }
 
 }

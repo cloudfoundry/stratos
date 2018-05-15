@@ -14,6 +14,19 @@ import { APIResource, EntityInfo } from '../store/types/api.types';
 import { AppStat, AppSummary } from '../store/types/app-metadata.types';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../shared/monitors/pagination-monitor.factory';
+import { ISpace } from '../core/cf-api.types';
+
+function createEntity<T>(entity: T): APIResource<T> {
+  return {
+    metadata: {
+      created_at: '',
+      guid: '',
+      updated_at: '',
+      url: ''
+    },
+    entity
+  };
+}
 
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
@@ -41,17 +54,14 @@ export class ApplicationServiceMock {
   isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
   isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
   waitForAppEntity$: Observable<EntityInfo> = Observable.of({
-    entity: {
-      metadata: {},
-      entity: {
-        space: {
-          metadata: {},
-          entity: {
-            domains: []
-          }
+    entity: createEntity({
+      space: {
+        metadata: {},
+        entity: {
+          domains: []
         }
-      },
-    }
+      }
+    })
   } as EntityInfo);
   appEnvVars = {
     entities$: Observable.of(new Array<APIResource<any>>())
@@ -61,6 +71,7 @@ export class ApplicationServiceMock {
     indicator: null,
     actions: {}
   });
+  appSpace$: Observable<APIResource<ISpace>> = Observable.of(createEntity<ISpace>({} as ISpace));
   applicationRunning$: Observable<boolean> = Observable.of(false);
 }
 

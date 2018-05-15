@@ -1,7 +1,7 @@
 import { SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map } from 'rxjs/operators';
+import { filter, first, map } from 'rxjs/operators';
 
 import { ListFilter, ListPagination, ListSort } from '../../../../store/actions/list.actions';
 import {
@@ -16,7 +16,6 @@ import { defaultClientPaginationPageSize } from '../../../../store/reducers/pagi
 import { PaginationClientFilter, PaginationEntityState } from '../../../../store/types/pagination.types';
 import { IListMultiFilterConfig } from '../list.component.types';
 import { IListDataSource } from './list-data-source-types';
-import { withLatestFrom } from 'rxjs/operators';
 
 export interface IListPaginationController<T> {
   pagination$: Observable<ListPagination>;
@@ -30,8 +29,15 @@ export interface IListPaginationController<T> {
   dataSource: IListDataSource<T>;
 }
 
+function onPaginationEntityState(
+  paginationEntityState$: Observable<PaginationEntityState>,
+  func: (paginationEntityState: PaginationEntityState) => void) {
+  paginationEntityState$.pipe(
+    first()
+  ).subscribe(func);
+}
+
 export class ListPaginationController<T> implements IListPaginationController<T> {
-  private paginationEntityState: PaginationEntityState;
   constructor(
     private store: Store<AppState>,
     public dataSource: IListDataSource<T>
@@ -53,67 +59,81 @@ export class ListPaginationController<T> implements IListPaginationController<T>
       this.store.dispatch(new SetClientPage(
         this.dataSource.entityKey, this.dataSource.paginationKey, page
       ));
-    } else if (this.paginationEntityState.currentPage !== page) {
-      this.store.dispatch(new SetPage(
-        this.dataSource.entityKey, this.dataSource.paginationKey, page
-      ));
+    } else {
+      onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+        if (paginationEntityState.currentPage !== page) {
+          this.store.dispatch(new SetPage(
+            this.dataSource.entityKey, this.dataSource.paginationKey, page
+          ));
+        }
+      });
     }
   }
   pageSize(pageSize: number) {
-    if (this.dataSource.isLocal) {
-      if (this.paginationEntityState.clientPagination.pageSize !== pageSize) {
-        this.store.dispatch(new SetClientPageSize(
-          this.dataSource.entityKey, this.dataSource.paginationKey, pageSize
-        ));
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      if (this.dataSource.isLocal) {
+        if (paginationEntityState.clientPagination.pageSize !== pageSize) {
+          this.store.dispatch(new SetClientPageSize(
+            this.dataSource.entityKey, this.dataSource.paginationKey, pageSize
+          ));
+        }
+      } else if (paginationEntityState.params['results-per-page'] !== pageSize) {
+        this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
+          ['results-per-page']: pageSize,
+        }, this.dataSource.isLocal));
       }
-    } else if (this.paginationEntityState.params['results-per-page'] !== pageSize) {
-      this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
-        ['results-per-page']: pageSize,
-      }, this.dataSource.isLocal));
-    }
+    });
   }
   sort = (listSort: ListSort) => {
-    if (
-      this.paginationEntityState.params['order-direction-field'] !== listSort.field ||
-      this.paginationEntityState.params['order-direction'] !== listSort.direction
-    ) {
-      this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
-        ['order-direction-field']: listSort.field,
-        ['order-direction']: listSort.direction
-      }, this.dataSource.isLocal));
-    }
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      if (
+        paginationEntityState.params['order-direction-field'] !== listSort.field ||
+        paginationEntityState.params['order-direction'] !== listSort.direction
+      ) {
+        this.store.dispatch(new AddParams(this.dataSource.entityKey, this.dataSource.paginationKey, {
+          ['order-direction-field']: listSort.field,
+          ['order-direction']: listSort.direction
+        }, this.dataSource.isLocal));
+      }
+    });
   }
   filterByString = filterString => {
-    if (this.dataSource.isLocal) {
-      if (this.paginationEntityState.clientPagination.filter.string !== filterString) {
-        const newFilter = this.cloneMultiFilter(this.paginationEntityState.clientPagination.filter);
-        newFilter.string = filterString;
-        this.store.dispatch(new SetClientFilter(
-          this.dataSource.entityKey,
-          this.dataSource.paginationKey,
-          newFilter
-        ));
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      if (this.dataSource.isLocal) {
+        if (paginationEntityState.clientPagination.filter.string !== filterString) {
+          const newFilter = this.cloneMultiFilter(paginationEntityState.clientPagination.filter);
+          newFilter.string = filterString;
+          this.store.dispatch(new SetClientFilter(
+            this.dataSource.entityKey,
+            this.dataSource.paginationKey,
+            newFilter
+          ));
+        }
+      } else if (this.dataSource.getFilterFromParams(paginationEntityState) !== filterString) {
+        this.dataSource.setFilterParam(filterString, paginationEntityState);
       }
-    } else if (this.dataSource.getFilterFromParams(this.paginationEntityState) !== filterString) {
-      this.dataSource.setFilterParam(filterString, this.paginationEntityState);
-    }
+    });
   }
   multiFilter = (filterConfig: IListMultiFilterConfig, filterValue: string) => {
-    if (this.dataSource.isLocal && this.paginationEntityState) {
-      // We don't want to dispatch  actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
-      // chained actions from firing.
-      const storeFilterParamValue = this.cleanFilterParam(this.paginationEntityState.clientPagination.filter.items[filterConfig.key]);
-      const newFilterParamValue = this.cleanFilterParam(filterValue);
-      if (storeFilterParamValue !== newFilterParamValue) {
-        const newFilter = this.cloneMultiFilter(this.paginationEntityState.clientPagination.filter);
-        newFilter.items[filterConfig.key] = filterValue;
-        this.store.dispatch(new SetClientFilter(
-          this.dataSource.entityKey,
-          this.dataSource.paginationKey,
-          newFilter
-        ));
+    onPaginationEntityState(this.dataSource.pagination$, (paginationEntityState) => {
+      if (this.dataSource.isLocal && paginationEntityState) {
+        // We don't want to dispatch  actions if it's a no op (values are not different, falsies are treated as the same). This avoids other
+        // chained actions from firing.
+        const storeFilterParamValue = this.cleanFilterParam(paginationEntityState.clientPagination.filter.items[filterConfig.key]);
+        const newFilterParamValue = this.cleanFilterParam(filterValue);
+        if (storeFilterParamValue !== newFilterParamValue) {
+          const newFilter = this.cloneMultiFilter(paginationEntityState.clientPagination.filter);
+          newFilter.items[filterConfig.key] = filterValue;
+          this.store.dispatch(new SetClientFilter(
+            this.dataSource.entityKey,
+            this.dataSource.paginationKey,
+            newFilter
+          ));
+        }
       }
-    }
+    });
+
+
   }
 
   private cloneMultiFilter(filter: PaginationClientFilter) {
@@ -126,8 +146,6 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     return dataSource.pagination$
       .filter(pag => !!pag)
       .map(pag => {
-        // This is going to break things as there isn't any guarantee that the pagination obs will emit.
-        this.paginationEntityState = pag;
         const pageSize = (dataSource.isLocal ? pag.clientPagination.pageSize : pag.params['results-per-page'])
           || defaultClientPaginationPageSize;
         const pageIndex = (dataSource.isLocal ? pag.clientPagination.currentPage : pag.currentPage) || 1;
@@ -157,7 +175,7 @@ export class ListPaginationController<T> implements IListPaginationController<T>
     return dataSource.pagination$.pipe(
       map(pag => ({
         string: dataSource.isLocal ? pag.clientPagination.filter.string : dataSource.getFilterFromParams(pag),
-        items: pag.clientPagination.filter.items
+        items: { ...pag.clientPagination.filter.items }
       }))
     ).tag('list-filter');
   }

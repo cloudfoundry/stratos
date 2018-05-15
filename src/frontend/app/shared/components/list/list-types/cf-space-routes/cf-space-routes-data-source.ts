@@ -9,6 +9,7 @@ import {
   entityFactory,
   routeSchemaKey,
   spaceSchemaKey,
+  domainSchemaKey,
 } from '../../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -29,10 +30,10 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
     spaceGuid: string,
     cfGuid: string
   ) {
-    // const paginationKey = getPaginationKey('cf-space-routes', cfGuid, spaceGuid);
     const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
     const action = new GetSpaceRoutes(spaceGuid, cfGuid, paginationKey, [
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
+      createEntityRelationKey(routeSchemaKey, domainSchemaKey),
     ]);
     const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
       store,

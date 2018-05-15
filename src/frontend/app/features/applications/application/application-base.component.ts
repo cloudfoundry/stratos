@@ -37,7 +37,6 @@ function entityServiceFactory(
   activatedRoute: ActivatedRoute
 ) {
   const { id, cfId } = activatedRoute.snapshot.params;
-  // const entityMonitor = new en
   return _entityServiceFactory.create(
     applicationSchemaKey,
     entityFactory(applicationSchemaKey),

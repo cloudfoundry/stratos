@@ -43,7 +43,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
-
     if (this.isRedeploy) {
       this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
     }

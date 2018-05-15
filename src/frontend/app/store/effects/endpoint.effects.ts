@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -166,10 +166,20 @@ export class EndpointsEffect {
         params,
         'create',
         [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
-        action.endpointType
+        action.endpointType,
+        null,
+        this.processRegisterError
       );
     });
 
+  private processRegisterError(e: HttpErrorResponse): string {
+    let message = 'There was a problem creating the endpoint. ' +
+    `Please ensure the endpoint address is correct and try again (${e.error.error})`;
+    if (e.status === 403) {
+      message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
+    }
+    return message;
+  }
   private getEndpointUpdateAction(guid, type, updatingKey) {
     return {
       entityKey: endpointStoreNames.type,
@@ -195,6 +205,7 @@ export class EndpointsEffect {
     actionStrings: [string, string] = [null, null],
     endpointType: EndpointType = 'cf',
     body?: string,
+    errorMessageHandler?: Function,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
@@ -221,7 +232,8 @@ export class EndpointsEffect {
         if (actionStrings[1]) {
           actions.push({ type: actionStrings[1], guid: apiAction.guid });
         }
-        actions.push(new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType));
+        const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
+        actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
         return actions;
       });
   }
