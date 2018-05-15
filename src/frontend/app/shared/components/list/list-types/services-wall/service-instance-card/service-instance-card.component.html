@@ -1,9 +1,7 @@
-<app-meta-card class="app-service-card">
+<app-meta-card class="app-service-card" [actionMenu]="cardMenu">
   <app-meta-card-title>
     <div class="app-service-card__title">
-      <div class="app-service-card__title__text">
-        <p>{{ row.entity.name }}</p>
-      </div>
+      <p>{{ row.entity.name }}</p>
     </div>
   </app-meta-card-title>
   <app-meta-card-item>

@@ -39,7 +39,7 @@ export const enum CfOrgSpaceSelectMode {
 }
 
 
-export const InitCfOrgSpaceService = (store: Store<AppState>,
+export const initCfOrgSpaceService = (store: Store<AppState>,
   cfOrgSpaceService: CfOrgSpaceDataService,
   schemaKey: string,
   paginationKey: string): Observable<any> => {
@@ -48,7 +48,6 @@ export const InitCfOrgSpaceService = (store: Store<AppState>,
     first(),
     tap(pag => {
       const { cf, org, space } = pag.clientPagination.filter.items;
-
       if (cf) {
         cfOrgSpaceService.cf.select.next(cf);
       }

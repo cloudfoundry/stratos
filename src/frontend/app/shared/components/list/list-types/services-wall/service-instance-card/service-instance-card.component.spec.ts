@@ -1,13 +1,14 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import {
   BaseTestModulesNoShared,
   MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { AppChipsComponent } from '../../../../chips/chips.component';
 import { ServiceInstanceCardComponent } from './service-instance-card.component';
+import { AppChipsComponent } from '../../../../chips/chips.component';
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
 
 describe('ServiceInstanceCardComponent', () => {
@@ -16,9 +17,18 @@ describe('ServiceInstanceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ServiceInstanceCardComponent, AppChipsComponent, MetadataCardTestComponents],
-      imports: [...BaseTestModulesNoShared],
-      providers: [EntityMonitorFactory, PaginationMonitorFactory, ServicesWallService]
+      declarations: [ServiceInstanceCardComponent,
+        ...MetadataCardTestComponents,
+        AppChipsComponent],
+      imports: [
+        BaseTestModulesNoShared,
+      ],
+      providers: [
+        ServicesWallService,
+        EntityServiceFactory,
+        EntityMonitorFactory,
+        PaginationMonitorFactory
+      ]
     })
       .compileComponents();
   }));
@@ -28,23 +38,50 @@ describe('ServiceInstanceCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        space_guid: '',
         service_plan_guid: '',
+        space_guid: '',
         dashboard_url: '',
         type: '',
+        tags: [],
         service_guid: '',
         service_plan_url: '',
+        service_bindings: [],
         service_bindings_url: '',
         service_keys_url: '',
-        credentials: '',
+        last_operation: {
+          type: '',
+          state: '',
+          description: '',
+          updated_at: '',
+          created_at: ''
+        },
+        service_plan: {
+          entity: {
+            name: '',
+            free: true,
+            description: '',
+            service_guid: '',
+            extra: '',
+            unique_id: '',
+            public: false,
+            bindable: 0,
+            active: false,
+            service_url: '',
+            service_instances_url: '',
+          },
+          metadata: {
+            created_at: '',
+            guid: '',
+            updated_at: '',
+            url: ''
+          }
+        },
         routes_url: '',
-        service_url: '',
-        tags: [],
-        service_bindings: []
+        service_url: ''
       },
       metadata: {
-        guid: '',
         created_at: '',
+        guid: '',
         updated_at: '',
         url: ''
       }

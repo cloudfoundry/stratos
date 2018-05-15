@@ -12,8 +12,13 @@ describe('ServicesWallComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ServicesWallComponent],
-      imports: [...BaseTestModules],
-      providers: [CloudFoundryService, CfOrgSpaceDataService]
+      imports: [
+        BaseTestModules
+      ],
+      providers: [
+        CloudFoundryService,
+        CfOrgSpaceDataService
+      ]
     })
       .compileComponents();
   }));
