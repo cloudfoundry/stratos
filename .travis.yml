@@ -20,13 +20,12 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-- Frontend Lint
-- Frontend Unit Tests
-- Backend
-- name: E2E tests
-  if: branch = v2-master
-
-  jobs:
+  - Frontend Lint
+  - Frontend Unit Tests
+  - Backend
+  - name: E2E tests
+    if: branch = v2-master
+jobs:
   include:
   - stage: Frontend Lint
     script:
