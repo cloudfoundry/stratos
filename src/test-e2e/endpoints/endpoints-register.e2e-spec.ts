@@ -1,15 +1,11 @@
-import { E2EHelpers, ConsoleUserType } from '../helpers/e2e-helpers';
-import { browser } from 'protractor';
-import { ResetsHelpers } from '../helpers/reset-helpers';
-import { EndpointsPage, EndpointMetadata, resetToLoggedIn } from './endpoints.po';
 import { ApplicationsPage } from '../applications/applications.po';
-import { SideNavMenuItem } from '../po/side-nav.po';
 import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
-import { ServicesPage } from '../services/services.po';
-import { SnackBarComponent } from '../po/snackbar.po';
+import { E2EHelpers } from '../helpers/e2e-helpers';
+import { ResetsHelpers } from '../helpers/reset-helpers';
 import { SecretsHelpers } from '../helpers/secrets-helpers';
-import { MenuComponent } from '../po/menu.po';
-import { FormComponent } from '../po/form.po';
+import { SideNavMenuItem } from '../po/side-nav.po';
+import { ServicesPage } from '../services/services.po';
+import { EndpointMetadata, EndpointsPage, resetToLoggedIn } from './endpoints.po';
 import { RegisterDialog } from './register-dialog.po';
 
 describe('Endpoints', () => {

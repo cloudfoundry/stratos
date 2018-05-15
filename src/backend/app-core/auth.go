@@ -53,7 +53,7 @@ const ClientRequestDateHeader = "X-Cap-Request-Date"
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
 // XSRFTokenHeader - XSRF Token Header name
-const XSRFTokenHeader = "X-Xsf-Token"
+const XSRFTokenHeader = "X-Xsrf-Token"
 
 // XSRFTokenCookie - XSRF Token Cookie name
 const XSRFTokenCookie = "XSRF-TOKEN"

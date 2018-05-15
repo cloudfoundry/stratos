@@ -112,7 +112,8 @@ export class E2EHelpers {
       username = username || this.secrets.getConsoleAdminUsername();
       password = password || this.secrets.getConsoleAdminPassword();
 
-      return this.createSession(req, username, password).then(() => {
+      return this.createSession(req, username, password).then((xsrf) => {
+        req.xsrfToken = xsrf;
         return req;
       });
     } else {
@@ -177,6 +178,12 @@ export class E2EHelpers {
         options.formData = formData;
       }
 
+      if (req.xsrfToken) {
+        options.headers = {
+          'X-Xsrf-Token': req.xsrfToken
+        };
+      }
+
       this.debugLogRequest('REQ: ' + options.method + ' ' + options.url);
       this.debugLogRequest(options);
 
@@ -206,6 +213,19 @@ export class E2EHelpers {
     });
   }
 
+  parseCookies(response) {
+    const list = {};
+    const setcookie = response.headers['set-cookie'] || [];
+    setcookie.forEach((cookiestr) => {
+      const nameValue = cookiestr.split(';')[0];
+      const index = nameValue.indexOf('=');
+      const name = nameValue.substr(0, index);
+      const value = nameValue.substr(index + 1);
+      list[name.toLowerCase()] = value;
+    });
+    return list;
+  }
+
   /**
    * @createSession
    * @description Create a session
@@ -223,7 +243,8 @@ export class E2EHelpers {
         .on('error', reject)
         .on('response', (response) => {
           if (response.statusCode === 200) {
-            resolve(true);
+            const cookies = this.parseCookies(response);
+            resolve(cookies['xsrf-token']);
           } else {
             console.log('Failed to create session. ' + JSON.stringify(response));
             reject('Failed to create session');
