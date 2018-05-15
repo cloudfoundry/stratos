@@ -30,17 +30,24 @@
   function Account(apiManager, $q) {
     var accountData = false;
 
+    var ssoLogin = false;
+
     return {
       getAccountData: getAccountData,
       login: login,
       logout: logout,
       verifySession: verifySession,
       isAdmin: isAdmin,
-      isLoggedIn: isLoggedIn
+      isLoggedIn: isLoggedIn,
+      isSSOLogin: isSSOLogin
     };
 
     function getAccountData() {
       return accountData;
+    }
+
+    function isSSOLogin() {
+      return ssoLogin;
     }
 
     /**
@@ -53,6 +60,11 @@
      * @public
      */
     function login(username, password) {
+
+      if (ssoLogin) {
+        return doSSOLogin();
+      }
+
       var accountApi = apiManager.retrieve('app.api.account');
       return accountApi.login(username, password)
         .then(function (response) {
@@ -65,6 +77,11 @@
           }
           onLoggedIn(response);
         });
+    }
+
+    function doSSOLogin() {
+      var accountApi = apiManager.retrieve('app.api.account');
+      return accountApi.ssoLogin();
     }
 
     /**
@@ -97,11 +114,11 @@
         function (response) {
           onLoggedIn(response);
         },
-        function () {
+        function (e) {
+          ssoLogin = accountApi.isSSOLogin(e);
           onLoggedOut();
         }
       );
-
       return p;
     }
 

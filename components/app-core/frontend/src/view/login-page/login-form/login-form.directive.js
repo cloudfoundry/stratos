@@ -33,7 +33,7 @@
    * @property {boolean} loggingIn - flag indicating app is still authenticating
    * @property {object} loginTimeout - the promise returned by $timeout for loggingIn
    */
-  function LoginFormController($scope, $timeout, appEventService) {
+  function LoginFormController($scope, $timeout, appEventService, modelManager) {
     var vm = this;
 
     vm.loggingIn = false;
