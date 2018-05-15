@@ -24,7 +24,7 @@ stages:
   - Frontend Unit Tests
   - Backend
   - name: E2E tests
-    if: type != pull_request OR branch =~ ^([\w-_])*e2e([\w-_])*$
+    if: type != pull_request OR branch =~ /^([\w-_])*e2e([\w-_])*
 jobs:
   include:
   - stage: Frontend Lint
