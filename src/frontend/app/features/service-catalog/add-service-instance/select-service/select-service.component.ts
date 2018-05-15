@@ -38,6 +38,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private servicesWallService: ServicesWallService,
     private entityServiceFactory: EntityServiceFactory,
+    private cSIHelperService: CreateServiceInstanceHelperService
   ) {
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
@@ -57,7 +58,8 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   onNext = () => {
 
     const serviceGuid = this.stepperForm.controls.service.value;
-    this.store.dispatch(new SetCreateServiceInstanceServiceGuid());
+    this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
+    this.cSIHelperService.manualInit(this.cfGuid, serviceGuid);
     return Observable.of({ success: true });
   }
 

@@ -148,8 +148,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
     if (step.valid) {
       return true;
-    } else if (step.optionalStep) {
-      return true;
     } else {
       return false;
     }

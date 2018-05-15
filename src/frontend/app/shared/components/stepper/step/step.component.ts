@@ -59,9 +59,6 @@ export class StepComponent implements OnInit {
   @Input('destructiveStep')
   public destructiveStep = false;
 
-  @Input('optionalStep')
-  optionalStep = false;
-
   @ViewChild(TemplateRef)
   content: TemplateRef<any>;
 

@@ -35,15 +35,21 @@ import { CreateServiceInstanceState } from '../../../store/types/create-service-
 import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { fetchVisiblePlans, getSvcAvailability } from '../services-helper';
 import { ServicePlanAccessibility } from '../services.service';
+import { EntityService } from '../../../core/entity-service';
 
 
 @Injectable()
 export class CreateServiceInstanceHelperService {
-  public cfGuid: any;
-  public serviceGuid: any;
-  public marketPlaceMode: boolean;
+  serviceGuid: any;
+  cfGuid: any;
+  serviceEntityService: EntityService<APIResource<IService>>;
+  public marketPlaceMode = false;
   initialised$ = new BehaviorSubject(false);
-
+  cfGuid$ = new BehaviorSubject(null);
+  serviceGuid$ = new BehaviorSubject(null);
+  service$ = new BehaviorSubject(null);
+  serviceBroker$ = new BehaviorSubject(null);
+  servicePlanVisibilities$ = new BehaviorSubject(null);
   constructor(
     private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
@@ -51,56 +57,89 @@ export class CreateServiceInstanceHelperService {
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
-    const { id, cfId } = activatedRoute.snapshot.params;
-    if (!!id && !!cfId) {
+    const { serviceId, cfId } = activatedRoute.snapshot.params;
+    if (!!serviceId && !!cfId) {
       this.marketPlaceMode = true;
-      this.serviceGuid = id;
+      this.cfGuid$.next(cfId);
       this.cfGuid = cfId;
+      this.serviceGuid$.next(serviceId);
+      this.serviceGuid = serviceId;
       this.initialised$.next(true);
-    } else {
-      this.store.select(selectCreateServiceInstance).pipe(
-        tap((p: CreateServiceInstanceState) => {
-          if (this.cfGuid !== p.cfGuid) {
-            this.cfGuid = p.cfGuid;
-          }
-          if (this.serviceGuid !== p.serviceGuid) {
-            this.serviceGuid = p.serviceGuid;
-          }
-          if (!!this.cfGuid && !!this.serviceGuid) {
-            this.initialised$.next(true);
-          }
-        }),
-
-      ).subscribe(); // TODO think about unscribe
+      this.initBaseObservables(serviceId, cfId);
     }
-
   }
 
 
-  isInitialised = () => this.initialised$.pipe(
-    filter(p => !!p)
-  )
-
-  getService(): Observable<APIResource<IService>> {
-
-    return this.isInitialised().pipe(
-      switchMap(p => {
+  initBaseObservables = (serviceId: string, cfGuid: string) => {
+    this.serviceEntityService = this.entityServiceFactory.create(
+      serviceSchemaKey,
+      entityFactory(serviceSchemaKey),
+      serviceId,
+      new GetService(serviceId, cfGuid),
+      true
+    );
+    this.serviceEntityService.waitForEntity$.pipe(
+      filter(o => !!o && !!o.entity),
+      map(o => o.entity),
+      publishReplay(1),
+      refCount(),
+      first(),
+      tap(svc => {
+        this.service$.next(svc);
+        const brokerId = svc.entity.service_broker_guid;
         const serviceEntityService = this.entityServiceFactory.create(
-          serviceSchemaKey,
-          entityFactory(serviceSchemaKey),
-          this.serviceGuid,
-          new GetService(this.serviceGuid, this.cfGuid),
+          serviceBrokerSchemaKey,
+          entityFactory(serviceBrokerSchemaKey),
+          svc.entity.service_broker_guid,
+          new GetServiceBroker(brokerId, svc.entity.cfGuid),
           true
         );
-        return serviceEntityService.waitForEntity$.pipe(
+        serviceEntityService.waitForEntity$.pipe(
           filter(o => !!o && !!o.entity),
           map(o => o.entity),
           publishReplay(1),
-          refCount()
-        );
+          refCount(),
+          // first(),
+          tap(
+            p => this.serviceBroker$.next(p)
+          ),
+        ).subscribe();
       })
-    );
+    ).subscribe();
+
+    const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, cfGuid);
+    return getPaginationObservables<APIResource<IServicePlanVisibility>>(
+      {
+        store: this.store,
+        action: new GetServicePlanVisibilities(cfGuid, paginationKey),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          paginationKey,
+          entityFactory(servicePlanVisibilitySchemaKey)
+        )
+      },
+      true
+    ).entities$.pipe(
+      first(),
+      tap(o => this.servicePlanVisibilities$.next(o))
+      ).subscribe();
   }
+
+  isMarketplace = () => this.marketPlaceMode;
+
+  manualInit = (cfGuid: string, serviceGuid: string) => {
+
+    this.cfGuid$.next(cfGuid);
+    this.serviceGuid$.next(serviceGuid);
+    this.initialised$.next(true);
+    this.cfGuid = cfGuid;
+    this.serviceGuid = serviceGuid;
+
+    this.initBaseObservables(serviceGuid, cfGuid);
+  }
+
+  isInitialised = (b: BehaviorSubject<any> = this.initialised$) => b.pipe(
+    filter(p => !!p)
+  )
 
   getVisibleServicePlans = () => {
     return this.getServicePlans().pipe(
@@ -113,62 +152,39 @@ export class CreateServiceInstanceHelperService {
 
   getServiceBroker(): Observable<APIResource<IServiceBroker>> {
 
-    return this.getService().pipe(
-      switchMap(svc => {
+    return this.serviceBroker$.pipe(
+      filter(p => !!p)
+    );
+  }
+  getService(): Observable<APIResource<IService>> {
 
-        const brokerId = svc.entity.service_broker_guid;
-        const serviceEntityService = this.entityServiceFactory.create(
-          serviceBrokerSchemaKey,
-          entityFactory(serviceBrokerSchemaKey),
-          svc.entity.service_broker_guid,
-          new GetServiceBroker(brokerId, this.cfGuid),
-          true
-        );
-        return serviceEntityService.waitForEntity$.pipe(
-          filter(o => !!o && !!o.entity),
-          map(o => o.entity),
-          publishReplay(1),
-          refCount()
-        );
-      })
+    return this.service$.pipe(
+      filter(p => !!p),
     );
   }
   getServicePlanVisibilities(): Observable<APIResource<IServicePlanVisibility>[]> {
-    return this.isInitialised().pipe(
-      switchMap(p => {
-        const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, this.cfGuid);
-        return getPaginationObservables<APIResource<IServicePlanVisibility>>(
-          {
-            store: this.store,
-            action: new GetServicePlanVisibilities(this.cfGuid, paginationKey),
-            paginationMonitor: this.paginationMonitorFactory.create(
-              paginationKey,
-              entityFactory(servicePlanVisibilitySchemaKey)
-            )
-          },
-          true
-        ).entities$;
-      })
+    return this.servicePlanVisibilities$.pipe(
+      filter(p => !!p)
     );
   }
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
-    return this.getService().pipe(map(o => o.entity.service_plans));
+    return this.getService().pipe(
+      filter(p => !!p),
+      map(o => o.entity.service_plans));
   }
 
 
   getServiceName = () => {
-    return this.isInitialised().pipe(
-      switchMap(p => {
-        return this.getService()
-          .pipe(
-          map(service => {
-            const extraInfo = JSON.parse(service.entity.extra);
-            if (extraInfo && extraInfo.displayName) {
-              return extraInfo.displayName;
-            } else {
-              return service.entity.label;
-            }
-          }));
+    return this.getService()
+      .pipe(
+      filter(p => !!p),
+      map(service => {
+        const extraInfo = JSON.parse(service.entity.extra);
+        if (extraInfo && extraInfo.displayName) {
+          return extraInfo.displayName;
+        } else {
+          return service.entity.label;
+        }
       }));
   }
 
@@ -180,6 +196,7 @@ export class CreateServiceInstanceHelperService {
       });
     }
     return this.getService().pipe(
+      filter(p => !!p),
       switchMap(o => this.getServiceBroker()),
       combineLatest(this.getServicePlanVisibilities()),
       filter(([p, q]) => !!p && !!q),
@@ -206,9 +223,10 @@ export class CreateServiceInstanceHelperService {
     return this.getSelectedServicePlan()
       .pipe(
       switchMap(servicePlan => this.getServicePlanAccessibility(servicePlan)),
-      switchMap(servicePlanAccessbility => {
+      combineLatest(this.isInitialised(this.cfGuid$)),
+      switchMap(([servicePlanAccessbility, cfGuid]) => {
         if (servicePlanAccessbility.isPublic) {
-          const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(this.cfGuid);
+          const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(cfGuid);
           return getPaginationObservables<APIResource<IOrganization>>({
             store: this.store,
             action: getAllOrgsAction,
@@ -220,7 +238,7 @@ export class CreateServiceInstanceHelperService {
             .entities$.pipe(share(), first());
         } else if (servicePlanAccessbility.spaceScoped) {
           // Service plan is not public, but is space-scoped
-          const action = new GetSpace(servicePlanAccessbility.spaceGuid, this.cfGuid,
+          const action = new GetSpace(servicePlanAccessbility.spaceGuid, cfGuid,
             [
               createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
             ]

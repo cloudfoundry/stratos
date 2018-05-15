@@ -5,7 +5,7 @@ import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, share, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, share, switchMap, tap, take } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
@@ -19,7 +19,7 @@ import {
 } from '../../../../store/actions/create-service-instance.actions';
 import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
+import { entityFactory, serviceInstancesSchemaKey, serviceBindingSchemaKey } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -33,6 +33,9 @@ import { APIResource } from '../../../../store/types/api.types';
 import { ServicesService } from '../../services.service';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { safeUnsubscribe } from '../../services-helper';
+import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -153,9 +156,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     first()
     )
   ngOnDestroy(): void {
-    this.orgSubscription.unsubscribe();
-    this.serviceInstanceNameSub.unsubscribe();
-    this.spaceScopeSub.unsubscribe();
+    safeUnsubscribe(this.orgSubscription);
+    safeUnsubscribe(this.serviceInstanceNameSub);
+    safeUnsubscribe(this.spaceScopeSub);
   }
 
   initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {
@@ -223,24 +226,45 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
 
   onNext = () => {
-    // TODO debug this place
     return this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p),
       switchMap(p => this.createServiceInstance(p)),
       filter(s => !s.creating),
-      map(s => {
-        if (s.error) {
+      combineLatest(this.store.select(selectCreateServiceInstance)),
+      first(),
+      switchMap(([request, state]) => {
+        if (request.error) {
           this.displaySnackBar();
-          return { success: false };
+          return Observable.of({ success: false });
         } else {
-          const serviceInstanceGuid = s.response.result[0];
+          const serviceInstanceGuid = request.response.result[0];
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
-          return { success: true };
+          if (!!state.bindAppGuid) {
+            return this.createBinding(serviceInstanceGuid, state.bindAppGuid, state.bindAppParams)
+              .pipe(
+              filter(s => {
+                return s && !s.creating;
+              }),
+              map(req => {
+                if (req.error) {
+                  this.displaySnackBar(true);
+                  return { success: false };
+                } else {
+                  return this.routeToServices();
+                }
+              }));
+          } else {
+            return Observable.of(this.routeToServices());
+          }
         }
-      })
+      }),
     );
   }
 
+  routeToServices = () => {
+    this.store.dispatch(new RouterNav({ path: ['/services'] }));
+    return { success: true };
+  }
   createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
     const name = this.stepperForm.controls.name.value;
@@ -275,13 +299,33 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       params,
       tagsStr
     ));
-    this.store.dispatch(new SetCreateServiceInstance(name, spaceGuid, tagsStr, params));
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
 
+  createBinding = (serviceInstanceGuid: string, appGuid: string, params: {}) => {
 
-  private displaySnackBar() {
-    this.snackBar.open('Failed to create service instance! Please re-check the details.', 'Dismiss');
+    const guid = `${this.cSIHelperService.cfGuid}-${appGuid}-${serviceInstanceGuid}`;
+    params = params;
+
+    this.store.dispatch(new CreateServiceBinding(
+      this.cSIHelperService.cfGuid,
+      guid,
+      appGuid,
+      serviceInstanceGuid,
+      params
+    ));
+
+    return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
+  }
+
+
+  private displaySnackBar(isBindingFailure = false) {
+
+    if (isBindingFailure) {
+      this.snackBar.open('Failed to bind app! Please re-check the details.', 'Dismiss');
+    } else {
+      this.snackBar.open('Failed to create service instance! Please re-check the details.', 'Dismiss');
+    }
   }
 
   addTag(event: MatChipInputEvent): void {

@@ -1,3 +1,5 @@
+import { Subscription } from 'rxjs/Subscription';
+
 import { IService, IServiceBroker, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
 import { APIResource } from '../../store/types/api.types';
 
@@ -41,3 +43,5 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
   }
   return svcAvailability;
 };
+
+export const safeUnsubscribe = (s: Subscription) => { if (s) { s.unsubscribe(); } };

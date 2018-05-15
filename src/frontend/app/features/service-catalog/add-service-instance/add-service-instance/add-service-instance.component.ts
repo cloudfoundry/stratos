@@ -22,7 +22,8 @@ import { CreateServiceInstanceHelperService } from '../create-service-instance-h
     TitleCasePipe
   ]
 })
-export class AddServiceInstanceComponent implements OnInit {
+export class AddServiceInstanceComponent {
+  marketPlaceMode: boolean;
   title$: Observable<string>;
   serviceInstancesUrl: string;
   servicesWallCreateInstance = false;
@@ -33,19 +34,17 @@ export class AddServiceInstanceComponent implements OnInit {
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService
   ) {
-
-
-    if (!cSIHelperService.marketPlaceMode) {
-      this.servicesWallCreateInstance = true;
-      this.title$ = Observable.of(`Create Service Instance`);
-    } else {
-      const serviceGuid = cSIHelperService.serviceGuid;
-      this.serviceInstancesUrl = `/service-catalog/${cSIHelperService.cfGuid}/${serviceGuid}/instances`;
+    const { serviceId, cfId } = activatedRoute.snapshot.params;
+    if (!!serviceId && !!cfId) {
+      const serviceGuid = this.cSIHelperService.serviceGuid;
+      this.serviceInstancesUrl = `/service-catalog/${this.cSIHelperService.cfGuid}/${serviceGuid}/instances`;
       this.title$ = this.cSIHelperService.getServiceName().pipe(
         map(label => `Create Instance: ${label}`)
       );
+    } else {
+      this.servicesWallCreateInstance = true;
+      this.title$ = Observable.of(`Create Service Instance`);
     }
-
   }
 
   onNext = () => {
@@ -55,9 +54,6 @@ export class AddServiceInstanceComponent implements OnInit {
       this.cfOrgSpaceService.space.select.getValue()
     ));
     return Observable.of({ success: true });
-  }
-
-  ngOnInit() {
   }
 
 }

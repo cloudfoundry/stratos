@@ -3,20 +3,20 @@
     {{ title$ | async }}
   </app-page-header>
   <app-steppers [cancel]="serviceInstancesUrl">
-    <app-step *ngIf="servicesWallCreateInstance" title="Cloud Foundry" [valid]="step1.validate | async" [onNext]="onNext" [blocked$]="cfOrgSpaceService.isLoading$">
-      <app-create-application-step1 #step1></app-create-application-step1>
+    <app-step *ngIf="servicesWallCreateInstance" title="Cloud Foundry" [valid]="selectCF.validate | async" [onNext]="onNext" [blocked$]="cfOrgSpaceService.isLoading$">
+      <app-create-application-step1 #selectCF></app-create-application-step1>
     </app-step>
-    <app-step title="Select Service" *ngIf="servicesWallCreateInstance" [valid]="step2.validate | async" [onNext]="step2.onNext">
-      <app-select-service #step2></app-select-service>
+    <app-step title="Select Service" *ngIf="servicesWallCreateInstance" [valid]="selectService.validate | async" [onNext]="selectService.onNext">
+      <app-select-service #selectService></app-select-service>
     </app-step>
-    <app-step title="Select Plan" [onNext]="step3.onNext" [valid]="step3.validate | async" [onEnter]="step3.onEnter" cancelButtonText="Cancel">
-      <app-select-plan-step #step3></app-select-plan-step>
+    <app-step title="Select Plan" [onNext]="selectPlan.onNext" [valid]="selectPlan.validate | async" [onEnter]="selectPlan.onEnter" cancelButtonText="Cancel">
+      <app-select-plan-step #selectPlan></app-select-plan-step>
     </app-step>
-    <app-step title="Bind App (Optional)" optionalStep="true" [onNext]="step5.submit" [valid]="step5.validate | async" cancelButtonText="Close" finishButtonText="Bind">
-      <app-bind-apps-step #step5></app-bind-apps-step>
+    <app-step title="Bind App (Optional)" [onNext]="bindApp.submit" [valid]="bindApp.validate | async" cancelButtonText="Close" finishButtonText="Bind">
+      <app-bind-apps-step #bindApp></app-bind-apps-step>
     </app-step>
-    <app-step title="Specify Details" [onNext]="step4.onNext" [valid]="step4.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
-      <app-specify-details-step #step4></app-specify-details-step>
+    <app-step title="Specify Details" [onNext]="specifyDetails.onNext" [valid]="specifyDetails.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
+      <app-specify-details-step #specifyDetails></app-specify-details-step>
     </app-step>
   </app-steppers>
 </div>

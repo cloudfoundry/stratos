@@ -2,6 +2,7 @@ import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, first, map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
@@ -29,12 +30,12 @@ import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-det
 })
 
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
-  validate: Observable<boolean>;
+  validateSubscription: Subscription;
+  validate = new BehaviorSubject(true);
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
   allAppsSubscription: Subscription;
   apps$: Observable<APIResource<IApp>[]>;
-  // selectedAppGuid: string;
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -44,6 +45,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       apps: new FormControl(''),
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
+
 
 
     this.allAppsSubscription = this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
@@ -71,10 +73,13 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.validate = this.stepperForm.statusChanges
+    this.validateSubscription = this.stepperForm.statusChanges
       .map(() => {
-        return this.stepperForm.valid;
-      });
+        if (this.stepperForm.pristine) {
+          this.validate.next(true);
+        }
+        this.validate.next(this.stepperForm.valid);
+      }).subscribe();
   }
 
   submit = () => {
@@ -82,36 +87,16 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     return Observable.of({ success: true });
   }
 
-  // createBinding = () => {
-
-  //   const appGuid = this.stepperForm.controls.apps.value;
-
-  //   const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
-  //   let params = this.stepperForm.controls.params.value;
-  //   try {
-  //     params = JSON.parse(params) || null;
-  //   } catch (e) {
-  //     params = null;
-  //   }
-
-  //   this.store.dispatch(new CreateServiceBinding(
-  //     this.servicesService.cfGuid,
-  //     guid,
-  //     appGuid,
-  //     this.serviceInstanceGuid,
-  //     params
-
-  //   ));
-
-  //   return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
-
-  // }
-  setApp = () => this.store.dispatch(new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value));
+  setApp = () => this.store.dispatch(
+    new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.stepperForm.controls.params.value)
+  )
 
   ngOnDestroy(): void {
     this.allAppsSubscription.unsubscribe();
+    this.validateSubscription.unsubscribe();
   }
   private displaySnackBar() {
     this.snackBar.open('Failed to create service binding! ', 'Dismiss');
   }
+
 }
