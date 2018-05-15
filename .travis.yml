@@ -24,7 +24,7 @@ stages:
   - Frontend Unit Tests
   - Backend
   - name: E2E tests
-    if: type != pull_request OR env(TRAVIS_PULL_REQUEST_BRANCH) =~ ^e2e-.*$
+    if: type != pull_request OR env(TRAVIS_PULL_REQUEST_BRANCH) = e2e-cf-endpoints
 jobs:
   include:
   - stage: Frontend Lint
