@@ -57,7 +57,10 @@
     }
 
     function ssoLogin() {
-      var returnUrl = encodeURI($window.location.href);
+      if (!window.location.origin) {
+          window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+      }
+      var returnUrl = encodeURI($window.location.origin);
       $window.open('/pp/v1/auth/sso_login?state=' + returnUrl, '_self');
       return {
         then: function () {},

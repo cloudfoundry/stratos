@@ -28,6 +28,8 @@
         return that.GetUser(userId).then (function (data) {
           user.user = data;
           return user;
+        }).catch(function () {
+          return user;
         });
       });
     },
