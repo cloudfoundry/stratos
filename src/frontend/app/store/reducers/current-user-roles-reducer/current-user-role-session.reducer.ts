@@ -19,7 +19,7 @@ export function roleInfoFromSessionReducer(
   const internalRoles = { ...state.internal };
   if (user) {
     internalRoles.scopes = user.scopes || [];
-    const isAdmin = internalRoles.scopes.includes(ScopeStrings.CF_ADMIN_GROUP);
+    const isAdmin = internalRoles.scopes.includes(ScopeStrings.STRATOS_ADMIN);
     internalRoles.isAdmin = isAdmin;
   }
   return {

@@ -32,6 +32,7 @@ export enum ScopeStrings {
   CF_WRITE_SCOPE = 'cloud_controller.write',
   CF_READ_SCOPE = 'cloud_controller.write',
   STRATOS_CHANGE_PASSWORD = 'password.write',
+  STRATOS_ADMIN = 'stratos.admin',
   SCIM_READ = 'scim.read'
 }
 
