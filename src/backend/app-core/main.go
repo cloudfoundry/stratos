@@ -97,7 +97,7 @@ func main() {
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
-	log.Infof("Console Version loaded: %s", portalConfig.ConsoleVersion)
+	log.Infof("Stratos Version: %s", portalConfig.ConsoleVersion)
 
 	// Initialize the HTTP client
 	initializeHTTPClients(portalConfig.HTTPClientTimeoutInSecs, portalConfig.HTTPConnectionTimeoutInSecs)
@@ -212,7 +212,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 			log.Info("Will add `setup` route and middleware")
 
 		} else {
-			log.Infof("Stratos is intialised with the following settings: %+v", consoleConfig)
+			showStratosConfig(consoleConfig)
 			portalProxy.Config.ConsoleConfig = consoleConfig
 		}
 
@@ -221,11 +221,20 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 		if err != nil {
 			log.Infof("Instance is initialised, but console_config table may contain junk data! %+v", err)
 		}
-		log.Infof("Stratos is intialised with the following settings: %+v", consoleConfig)
+		showStratosConfig(consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
 	}
 
 	return addSetupMiddleware, nil
+}
+
+func showStratosConfig(config *interfaces.ConsoleConfig) {
+	log.Infof("Stratos is intialised with the following setup:")
+	log.Infof("... UAA Endpoint        : %s", config.UAAEndpoint)
+	log.Infof("... Console Client      : %s", config.ConsoleClient)
+	log.Infof("... Skip SSL Validation : %t", config.SkipSSLValidation)
+	log.Infof("... Setup Complete      : %t", config.IsSetupComplete)
+	log.Infof("... Admin Scope         : %s", config.ConsoleAdminScope)
 }
 
 func getEncryptionKey(pc interfaces.PortalConfig) ([]byte, error) {
