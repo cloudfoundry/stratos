@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
-import { IListConfig, ListViewTypes } from '../../list.component.types';
+import { IListConfig, ListViewTypes, IGlobalListAction } from '../../list.component.types';
 import { CloudFoundryEndpointService } from '../../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { IOrganization } from '../../../../../core/cf-api.types';
@@ -19,12 +19,25 @@ import {
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
 import { DatePipe } from '@angular/common';
 import { DataFunctionDefinition } from '../../data-sources-controllers/list-data-source';
+import { RouterNav } from '../../../../../store/actions/router.actions';
 @Injectable()
 export class AppServiceBindingListConfigService extends BaseCfListConfig<APIResource> {
   dataSource: AppServiceBindingDataSource;
   cardComponent = AppServiceBindingCardComponent;
   viewType = ListViewTypes.BOTH;
   defaultView = 'cards' as ListView;
+
+  private listActionAdd: IGlobalListAction<APIResource> = {
+    action: () => {
+      this.store.dispatch(new RouterNav({ path: ['applications', this.appService.cfGuid, this.appService.appGuid, 'bind'] }));
+    },
+    icon: 'add',
+    label: 'Add',
+    description: 'Bind Service Instance',
+    visible: (row: APIResource) => true,
+    enabled: (row: APIResource) => true
+  };
+
   getColumns = () => {
     return [
       {
@@ -72,12 +85,13 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     ];
   }
 
+
   constructor(private store: Store<AppState>, private appService: ApplicationService, private datePipe: DatePipe) {
     super();
     this.dataSource = new AppServiceBindingDataSource(this.store, appService, this);
   }
 
-  getGlobalActions = () => [];
+  getGlobalActions = () => [this.listActionAdd];
   getMultiActions = () => [];
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];

@@ -9,7 +9,7 @@ import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-s
 import { SetCreateServiceInstanceCFDetails } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CreateServiceInstanceHelperService, Mode } from '../create-service-instance-helper.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -22,7 +22,6 @@ import { CreateServiceInstanceHelperService } from '../create-service-instance-h
   ]
 })
 export class AddServiceInstanceComponent {
-  marketPlaceMode: boolean;
   title$: Observable<string>;
   serviceInstancesUrl: string;
   servicesWallCreateInstance = false;
@@ -34,7 +33,11 @@ export class AddServiceInstanceComponent {
     private cfOrgSpaceService: CfOrgSpaceDataService
   ) {
     const { serviceId, cfId } = activatedRoute.snapshot.params;
-    if (cSIHelperService.marketPlaceMode) {
+    if (!!serviceId && !!cfId) {
+      // Marketplace Mode
+      cSIHelperService.initService(cfId, serviceId, Mode.MARKETPLACE);
+    }
+    if (cSIHelperService.isMarketplace()) {
       cSIHelperService.isInitialised().pipe(
         take(1),
         tap(o => {

@@ -59,7 +59,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
     const serviceGuid = this.stepperForm.controls.service.value;
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
-    this.cSIHelperService.manualInit(this.cfGuid, serviceGuid);
+    this.cSIHelperService.initService(this.cfGuid, serviceGuid);
     return Observable.of({ success: true });
   }
 
