@@ -2,12 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { ApplicationStateService } from './application-state.service';
 
 
-fdescribe('ApplicationStateService', () => {
+describe('ApplicationStateService', () => {
 
-  const $translate = { instant: (label) => label};
+  const $translate = { instant: (label) => label };
   let cfAppStateService;
 
-  beforeEach(async() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [ApplicationStateService]
     }).compileComponents();
@@ -35,7 +35,7 @@ fdescribe('ApplicationStateService', () => {
       let running = 0;
       if (instanceStates) {
         instanceStates.forEach(function (s) {
-          instances.push({state: s});
+          instances.push({ state: s });
           if (s === 'RUNNING') { running++; }
         });
       } else {

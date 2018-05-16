@@ -239,7 +239,6 @@ export class ApplicationStateService {
           } else {
             extState = pkgState + '(?,?,?)';
           }
-          console.log(extState);
           if (appStateMatch[extState]) {
             return appStateMatch[extState];
           }
