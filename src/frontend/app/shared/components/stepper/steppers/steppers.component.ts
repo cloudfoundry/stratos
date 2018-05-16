@@ -37,8 +37,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   @Input('cancel') cancel = null;
 
   steps: StepComponent[] = [];
+  allSteps: StepComponent[] = [];
+
+  hiddenSubs: Subscription[] = [];
 
   stepValidateSub: Subscription = null;
+
+  private enterData;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{
@@ -61,12 +66,27 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     );
   }
 
-  ngOnInit() {
+  ngOnInit() { }
+
+  ngOnDestroy() {
+    this.hiddenSubs.forEach(sub => sub.unsubscribe());
+    this.unsubscribeNext();
   }
 
   ngAfterContentInit() {
-    this.steps = this._steps.toArray();
+    this.allSteps = this._steps.toArray();
     this.setActive(0);
+
+    this.allSteps.forEach((step => {
+      this.hiddenSubs.push(step.onHidden.subscribe((hidden) => {
+        this.filterSteps();
+      }));
+    }));
+    this.filterSteps();
+  }
+
+  private filterSteps() {
+    this.steps = this.allSteps.filter((step => !step.hidden));
   }
 
   goNext() {
@@ -80,10 +100,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       }
       this.nextSub = obs$
         .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, ignoreSuccess: false }))
-        .switchMap(({ success, message, redirect, ignoreSuccess }) => {
+        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false }))
+        .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
           step.error = !success;
           step.busy = false;
+          this.enterData = data;
           if (success && !ignoreSuccess) {
             if (redirect) {
               // Must sub to this
@@ -124,10 +145,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       }
       _step.active = i === index ? true : false;
     });
-    this.steps[this.currentIndex].onLeave();
+    // Tell onLeave if this is a Next or Previous transition
+    this.steps[this.currentIndex].onLeave(index > this.currentIndex);
     index = this.steps[index].skip ? ++index : index;
     this.currentIndex = index;
-    this.steps[this.currentIndex]._onEnter();
+    this.steps[this.currentIndex]._onEnter(this.enterData);
+    this.enterData = undefined;
   }
 
   canGoto(index: number): boolean {
@@ -192,8 +215,4 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.nextSub.unsubscribe();
     }
   }
-  ngOnDestroy() {
-    this.unsubscribeNext();
-  }
-
 }

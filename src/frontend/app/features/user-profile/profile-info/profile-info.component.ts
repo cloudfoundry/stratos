@@ -10,6 +10,7 @@ import { UserProfileInfo } from '../../../store/types/user-profile.types';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { entityFactory, userProfileSchemaKey } from '../../../store/helpers/entity-factory';
 import { UserProfileEffect } from '../../../store/effects/user-profile.effects';
+import { UserProfileService } from '../user-profile.service';
 
 @Component({
   selector: 'app-profile-info',
@@ -22,34 +23,16 @@ export class ProfileInfoComponent implements OnInit {
 
   primaryEmailAddress$: Observable<string>;
 
-  constructor(private store: Store<AppState>, private entityMonitorFactory: EntityMonitorFactory) {
-
-    const entityMonitor = this.entityMonitorFactory.create<UserProfileInfo>(UserProfileEffect.guid,
-    userProfileSchemaKey, entityFactory(userProfileSchemaKey));
-
-    this.userProfile$ = entityMonitor.entity$.pipe(
-      filter(data => data && !!data.id)
-    );
+  constructor(private userProfileService: UserProfileService) {
+    this.userProfile$ = userProfileService.userProfile$;
 
     this.primaryEmailAddress$ = this.userProfile$.pipe(
-      map((profile: UserProfileInfo) => {
-        const primaryEmails = profile.emails.filter((email => email.primary));
-        const firstEmail = profile.emails.length ? profile.emails[0].value : 'No Email Address';
-        return primaryEmails.length ? primaryEmails[0].value : firstEmail;
-      })
+      map((profile: UserProfileInfo) => userProfileService.getPrimaryEmailAddress(profile))
     );
-
   }
 
   ngOnInit() {
-    // Once we have the user's guid, fetch their profile
-    this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
-      map((auth: AuthState) => auth.sessionData),
-      first()
-    ).subscribe(data => {
-      this.store.dispatch(new FetchUserProfileAction(data.user.guid));
-    });
+    this.userProfileService.fetchUserProfile();
   }
 
 }

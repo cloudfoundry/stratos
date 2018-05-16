@@ -67,6 +67,7 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -91,6 +92,9 @@ import { TileGridComponent } from './components/tile/tile-grid/tile-grid.compone
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
+import {
+  UploadProgressIndicatorComponent,
+} from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
@@ -104,8 +108,6 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { TableComponent } from './components/list/list-table/table.component';
-import { TableCellSelectOrgComponent } from './components/list/list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
 
 @NgModule({
   imports: [
@@ -188,6 +190,7 @@ import { TableCellSelectOrgComponent } from './components/list/list-types/cf-use
     CliCommandComponent,
     CfRoleCheckboxComponent,
     EnumerateComponent,
+    UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     UserProfileBannerComponent,
     AppActionMonitorComponent,
@@ -261,6 +264,7 @@ import { TableCellSelectOrgComponent } from './components/list/list-types/cf-use
     CliCommandComponent,
     CfRoleCheckboxComponent,
     EnumerateComponent,
+    UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     AppActionMonitorComponent,
     CliCommandComponent,
