@@ -20,7 +20,8 @@ export const selectCurrentUserStratosRoles = (role: string) => (state: IStratosR
 export const selectCurrentUserCFRolesState = (state: ICurrentUserRolesState) => state.cf;
 export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) => (state: IAllCfRolesState) => state[endpointGuid];
 
-export const selectCurrentUserCFGlobalRolesState = (state: ICfRolesState) => state.global;
+export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => state.global;
+export const selectCurrentUserCFGlobalRolesState = (role: string) => (state: IGlobalRolesState) => state[role] || false;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
 export const selectCurrentUserCFGlobalHasScopes = (scope: string) => (scopes: string[]) => scopes.includes(scope);
@@ -75,17 +76,26 @@ export const getCurrentUserCFEndpointRolesState = (endpointGuid: string) => comp
 
 // CF Global roles
 // ============================
-export const getCurrentUserCFGlobalState = (endpointGuid: string) => compose(
-  selectCurrentUserCFGlobalRolesState,
+export const getCurrentUserCFGlobalStates = (endpointGuid: string) => compose(
+  selectCurrentUserCFGlobalRolesStates,
   getCurrentUserCFEndpointRolesState(endpointGuid)
 );
 // ============================
+
+// CF Global role
+// ============================
+export const getCurrentUserCFGlobalState = (endpointGuid: string, role: string) => compose(
+  selectCurrentUserCFGlobalRolesState(role),
+  getCurrentUserCFGlobalStates(endpointGuid)
+);
+// ============================
+
 
 // Specific endpoint scopes
 // ============================
 export const getCurrentUserCFEndpointScopesState = (endpointGuid: string) => compose(
   selectCurrentUserCFGlobalScopesState,
-  getCurrentUserCFGlobalState(endpointGuid)
+  getCurrentUserCFGlobalStates(endpointGuid)
 );
 // ============================
 

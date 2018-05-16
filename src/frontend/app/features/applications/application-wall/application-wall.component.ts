@@ -66,11 +66,6 @@ export class ApplicationWallComponent implements OnDestroy {
   ) {
     const dataSource: ListDataSource<APIResource> = appListConfig.getDataSource();
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
-      tap(endpoints => endpoints.forEach(endpoint => {
-        if (endpoint.user) {
-          this.store.dispatch(new GetCFUser(endpoint.user.guid, endpoint.guid));
-        }
-      })),
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
     this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;

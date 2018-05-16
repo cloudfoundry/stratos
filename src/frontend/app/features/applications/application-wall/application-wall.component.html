@@ -1,5 +1,4 @@
 <app-page-header [endpointIds$]="cfIds$">
-  {{canCreateApplication$ | async}}
   <h1>Applications</h1>
   <div class="page-header-right">
     <ng-container *appUserPermission="canCreateApplication">

@@ -51,12 +51,22 @@ export class PermissionsEffects {
     ),
     switchMap(([action, endpoints]) => {
       const endpointsArray = Object.values(endpoints);
+      const noneAdminEndpoints = endpointsArray.filter(endpoint => !endpoint.user.admin);
       // Dispatch feature flags fetch actions
-      endpointsArray.forEach(endpoint => this.store.dispatch(createCfFeatureFlagFetchAction(endpoint.guid)));
-      return combineLatest(this.getRequests(endpointsArray)).pipe(
+      noneAdminEndpoints.forEach(endpoint => this.store.dispatch(createCfFeatureFlagFetchAction(endpoint.guid)));
+      const allActions = [
+        { type: 'all-complete' }
+      ];
+      if (!noneAdminEndpoints.length) {
+        return allActions;
+      }
+      return combineLatest(this.getRequests(noneAdminEndpoints)).pipe(
         mergeMap(actions => {
           actions.push({ type: 'all-complete' });
-          return actions;
+          return [
+            ...actions,
+            ...allActions
+          ];
         })
       );
     }));

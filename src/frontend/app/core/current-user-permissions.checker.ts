@@ -13,9 +13,10 @@ import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-fac
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
-  getCurrentUserCFGlobalState,
+  getCurrentUserCFGlobalStates,
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
+  getCurrentUserCFGlobalState,
 } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { APIResource } from '../store/types/api.types';
@@ -54,7 +55,7 @@ export class CurrentUserPermissionsChecker {
     }
 
     if (type === PermissionTypes.ENDPOINT) {
-      return this.store.select(getCurrentUserCFGlobalState(permission));
+      return this.store.select(getCurrentUserCFGlobalState(endpointGuid, permission));
     }
     return this.getEndpointState(endpointGuid).pipe(
       filter(state => !!state),
