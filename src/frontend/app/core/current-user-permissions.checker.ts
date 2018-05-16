@@ -2,25 +2,32 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
-  createCFFeatureFlagPaginationKey
+  createCFFeatureFlagPaginationKey,
 } from '../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { PaginationMonitor } from '../shared/monitors/pagination-monitor';
 import { AppState } from '../store/app-state';
 import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-factory';
 import {
+  getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
   getCurrentUserCFGlobalState,
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-  getCurrentUserCFEndpointHasScope
 } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { APIResource } from '../store/types/api.types';
 import { IOrgRoleState, ISpaceRoleState } from '../store/types/current-user-roles.types';
 import { IFeatureFlag } from './cf-api.types';
-import { PermissionConfig, PermissionStrings, PermissionTypes, PermissionValues, ScopeStrings } from './current-user-permissions.config';
+import {
+  PermissionConfig,
+  PermissionStrings,
+  PermissionTypes,
+  PermissionValues,
+  ScopeStrings,
+} from './current-user-permissions.config';
 
 
 export interface IConfigGroups {
@@ -130,7 +137,6 @@ export class CurrentUserPermissionsChecker {
   public getInternalScopesCheck(permission: ScopeStrings) {
     return this.check(PermissionTypes.STRATOS_SCOPE, permission);
   }
-
 
   public getCfChecks(
     configs: PermissionConfig[],
