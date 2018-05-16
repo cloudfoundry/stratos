@@ -12,7 +12,7 @@ class TestUserPermissionComponent {
 
 class MockTemplateRef { }
 
-fdescribe('UserPermissionDirective', () => {
+describe('UserPermissionDirective', () => {
   let component: TestUserPermissionComponent;
   let fixture: ComponentFixture<TestUserPermissionComponent>;
   beforeEach(() => {
