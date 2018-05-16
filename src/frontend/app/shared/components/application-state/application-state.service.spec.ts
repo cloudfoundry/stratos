@@ -1,8 +1,8 @@
-import { TestBed, inject } from '@angular/core/testing';
-
+import { TestBed } from '@angular/core/testing';
 import { ApplicationStateService } from './application-state.service';
 
-describe('ApplicationStateService', () => {
+
+fdescribe('ApplicationStateService', () => {
 
   const $translate = { instant: (label) => label};
   let cfAppStateService;
@@ -187,13 +187,13 @@ describe('ApplicationStateService', () => {
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('error');
       expect($translate.instant(res.label)).toBe('Deployed');
-      expect($translate.instant(res.subLabel)).toBe('Crashing');
+      expect($translate.instant(res.subLabel)).toBe('Crashed');
 
       testData = makeTestData('STARTED', 'STAGED', ['TIMEOUT', 'TIMEOUT', 'CRASHED', 'CRASHED']);
       res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('error');
       expect($translate.instant(res.label)).toBe('Deployed');
-      expect($translate.instant(res.subLabel)).toBe('Crashing');
+      expect($translate.instant(res.subLabel)).toBe('Crashed');
       expect(Object.keys(res.actions).length).toBe(3);
       expect(res.actions.restart).toBe(true);
       expect(res.actions.stop).toBe(true);
@@ -204,13 +204,13 @@ describe('ApplicationStateService', () => {
       let res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Deployed');
-      expect($translate.instant(res.subLabel)).toBe('Partially Online');
+      expect($translate.instant(res.subLabel)).toBe('Crashing');
 
       testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'RUNNING', 'CRASHED', 'CRASHED']);
       res = cfAppStateService.get(testData.summary, testData.instances);
       expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Deployed');
-      expect($translate.instant(res.subLabel)).toBe('Partially Online');
+      expect($translate.instant(res.subLabel)).toBe('Crashing');
       expect(Object.keys(res.actions).length).toBe(4);
       expect(res.actions.restart).toBe(true);
       expect(res.actions.stop).toBe(true);
@@ -238,7 +238,7 @@ describe('ApplicationStateService', () => {
     it('Borked, one crashed, one running, one stating', function () {
       const testData = makeTestData('STARTED', 'STAGED', ['RUNNING', 'CRASHED', 'STARTING']);
       const res = cfAppStateService.get(testData.summary, testData.instances);
-      expect(res.indicator).toBe('error');
+      expect(res.indicator).toBe('warning');
       expect($translate.instant(res.label)).toBe('Deployed');
       expect($translate.instant(res.subLabel)).toBe('Crashing');
     });

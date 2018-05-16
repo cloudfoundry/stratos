@@ -128,25 +128,31 @@ export class ApplicationStateService {
       },
       'STAGED(0,N,N)': {
         label: 'Deployed',
-        subLabel: 'Crashing',
+        subLabel: 'Crashed',
         indicator: CardStatus.ERROR,
         actions: 'stop,restart,cli'
       },
       'STAGED(0,N,N,N)': {
         label: 'Deployed',
-        subLabel: 'Crashing',
+        subLabel: 'Crashed',
         indicator: CardStatus.ERROR,
         actions: 'stop,restart,cli'
       },
       'CRASHING': {
         label: 'Deployed',
         subLabel: 'Crashing',
-        indicator: CardStatus.ERROR,
+        indicator: CardStatus.WARNING,
         actions: 'stop,restart,cli'
       },
       'STAGED(N,N,0)': {
         label: 'Deployed',
-        subLabel: 'Partially Online',
+        subLabel: 'Crashing',
+        indicator: CardStatus.WARNING,
+        actions: 'stop,restart,launch,cli'
+      },
+      'STAGED(N,N,N)': {
+        label: 'Deployed',
+        subLabel: 'Crashing',
         indicator: CardStatus.WARNING,
         actions: 'stop,restart,launch,cli'
       },
@@ -233,6 +239,7 @@ export class ApplicationStateService {
           } else {
             extState = pkgState + '(?,?,?)';
           }
+          console.log(extState);
           if (appStateMatch[extState]) {
             return appStateMatch[extState];
           }
