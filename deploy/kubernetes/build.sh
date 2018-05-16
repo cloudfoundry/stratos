@@ -10,6 +10,7 @@ OFFICIAL_TAG=cap
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 ADD_OFFICIAL_TAG="false"
 TAG_LATEST="false"
+NO_PUSH="false"
 while getopts ":ho:r:t:Tclb:O" opt; do
   case $opt in
     h)
@@ -78,9 +79,8 @@ function patchAndPushImage {
   TARGET=${4:-none}
 
   patchDockerfile ${DOCKER_FILE} ${FOLDER}
-  buildAndPublishImage ${1} ${2} ${3} ${4}
+  buildAndPublishImage ${NAME} ${DOCKER_FILE} ${FOLDER} ${TARGET}
   unPatchDockerfile ${DOCKER_FILE} ${FOLDER}
-  popd > /dev/null 2>&1
 }
 
 function pushGitTag {
@@ -163,8 +163,8 @@ cleanup
 updateTagForRelease
 
 # Build all of the components that make up the Console
-buildJetstream
-buildPostflightJob
+# buildJetstream
+# buildPostflightJob
 buildMariaDb
 buildUI
 
