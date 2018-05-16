@@ -30,6 +30,8 @@ export const privateDomainsSchemaKey = 'private_domains';
 export const spaceQuotaSchemaKey = 'space_quota_definition';
 export const metricSchemaKey = 'metrics';
 export const userProfileSchemaKey = 'userProfile';
+export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
+export const serviceBrokerSchemaKey = 'serviceBroker';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
 
@@ -90,7 +92,7 @@ entityCache[githubBranchesSchemaKey] = GithubBranchSchema;
 const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
 entityCache[githubRepoSchemaKey] = GithubRepoSchema;
 
-const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey);
+const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey, {}, { idAttribute: commit => commit.sha });
 entityCache[githubCommitSchemaKey] = GithubCommitSchema;
 
 const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);
@@ -234,6 +236,17 @@ const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   }
 }, { idAttribute: getAPIResourceGuid }, spaceWithOrgKey);
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
+
+const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {
+  entity: {
+    organization: OrganizationSchema,
+    service_plan: new EntitySchema(servicePlanSchemaKey, {}, { idAttribute: getAPIResourceGuid }),
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[servicePlanVisibilitySchemaKey] = ServicePlanVisibilitySchema;
+
+const ServiceBrokerSchema = new EntitySchema(serviceBrokerSchemaKey, {}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceBrokerSchemaKey] = ServiceBrokerSchema;
 
 const ApplicationEntitySchema = new EntitySchema(
   applicationSchemaKey,

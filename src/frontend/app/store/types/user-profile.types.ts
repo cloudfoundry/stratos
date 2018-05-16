@@ -9,17 +9,13 @@ export interface UserProfileInfo {
   };
   userName: string;
   meta: {
+    version: number;
     created: string;
     lastModified: string;
   };
   verified: boolean;
   active: boolean;
-  emails: [
-    {
-      primary: boolean;
-      value: string;
-    }
-  ];
+  emails: UserProfileInfoEmail[];
   groups?: [
     {
       display: string;
@@ -29,8 +25,15 @@ export interface UserProfileInfo {
   ];
   approvals?: any;
   passwordLastModified: string;
+  schemas: any;
+  zoneId: string;
+  origin: string;
 }
 
+export interface UserProfileInfoEmail {
+  primary: boolean;
+  value: string;
+}
 
 export const userProfileStoreNames: {
   section: TRequestTypeKeys,
@@ -39,3 +42,17 @@ export const userProfileStoreNames: {
     section: RequestSectionKeys.Other,
     type: 'userProfile'
   };
+
+export interface UserProfilePasswordUpdate {
+  oldPassword: string;
+  password: string;
+}
+
+export interface UserProfileInfoUpdates {
+  familyName?: string;
+  givenName?: string;
+  emailAddress?: string;
+  newPassword?: string;
+  confirmPassword?: string;
+  currentPassword?: string;
+}

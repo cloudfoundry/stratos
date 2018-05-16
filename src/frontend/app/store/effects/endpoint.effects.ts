@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
@@ -14,7 +14,6 @@ import {
   DISCONNECT_ENDPOINTS_FAILED,
   DISCONNECT_ENDPOINTS_SUCCESS,
   DisconnectEndpoint,
-  GetAllEndpoints,
   GetAllEndpointsSuccess,
   REGISTER_ENDPOINTS,
   REGISTER_ENDPOINTS_FAILED,
@@ -26,11 +25,11 @@ import {
   UnregisterEndpoint,
 } from '../actions/endpoint.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
-import { GET_SYSTEM_INFO_SUCCESS, GetSystemSuccess } from '../actions/system.actions';
+import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
 import { AppState } from '../app-state';
 import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
 import { NormalizedResponse } from '../types/api.types';
-import { endpointStoreNames, EndpointType } from '../types/endpoint.types';
+import { EndpointModel, endpointStoreNames, EndpointType } from '../types/endpoint.types';
 import {
   IRequestAction,
   StartRequestAction,
@@ -167,11 +166,20 @@ export class EndpointsEffect {
         params,
         'create',
         [REGISTER_ENDPOINTS_SUCCESS, REGISTER_ENDPOINTS_FAILED],
-        action.endpointType
+        action.endpointType,
+        null,
+        this.processRegisterError
       );
     });
 
-
+  private processRegisterError(e: HttpErrorResponse): string {
+    let message = 'There was a problem creating the endpoint. ' +
+    `Please ensure the endpoint address is correct and try again (${e.error.error})`;
+    if (e.status === 403) {
+      message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
+    }
+    return message;
+  }
   private getEndpointUpdateAction(guid, type, updatingKey) {
     return {
       entityKey: endpointStoreNames.type,
@@ -197,6 +205,7 @@ export class EndpointsEffect {
     actionStrings: [string, string] = [null, null],
     endpointType: EndpointType = 'cf',
     body?: string,
+    errorMessageHandler?: Function,
   ) {
     const headers = new HttpHeaders();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
@@ -204,20 +213,28 @@ export class EndpointsEffect {
     return this.http.post(url, body || {}, {
       headers,
       params
-    }).map(endpoint => {
+    }).mergeMap((endpoint: EndpointModel) => {
+      const actions = [];
       if (actionStrings[0]) {
-        this.store.dispatch({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType });
+        actions.push({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType, endpoint });
       }
       if (apiActionType === 'delete') {
-        this.store.dispatch(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
+        actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
       }
-      return new WrapperRequestActionSuccess(null, apiAction, apiActionType);
+      if (apiActionType === 'create') {
+        actions.push(new GetSystemInfo());
+      }
+      actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
+      return actions;
     })
       .catch(e => {
+        const actions = [];
         if (actionStrings[1]) {
-          this.store.dispatch({ type: actionStrings[1], guid: apiAction.guid });
+          actions.push({ type: actionStrings[1], guid: apiAction.guid });
         }
-        return [new WrapperRequestActionFailed('Could not connect', apiAction, apiActionType)];
+        const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
+        actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
+        return actions;
       });
   }
 }

@@ -1,7 +1,7 @@
 import { CdkRow } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
 
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 
@@ -22,6 +22,7 @@ export class TableRowComponent extends CdkRow implements OnInit {
   private inErrorState$: Observable<boolean>;
   private errorMessage$: Observable<string>;
   private isBlocked$: Observable<boolean>;
+  private isHighlighted$: Observable<boolean>;
 
   ngOnInit() {
     if (this.rowState) {
@@ -33,6 +34,9 @@ export class TableRowComponent extends CdkRow implements OnInit {
       );
       this.isBlocked$ = this.rowState.pipe(
         map(state => state.blocked)
+      );
+      this.isHighlighted$ = this.rowState.pipe(
+        map(state => state.highlighted)
       );
     }
   }

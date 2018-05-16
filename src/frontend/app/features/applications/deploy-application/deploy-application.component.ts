@@ -3,18 +3,18 @@ import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
-import { CfOrgSpaceDataService, CfOrgSpaceSelectMode } from '../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { DeleteDeployAppSection, StoreCFSettings } from '../../../store/actions/deploy-applications.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
-import { selectCfDetails } from '../../../store/selectors/deploy-application.selector';
-import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { selectApplicationSource, selectCfDetails } from '../../../store/selectors/deploy-application.selector';
+import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
+import { DeployApplicationSource } from '../../../store/types/deploy-application.types';
 
 @Component({
   selector: 'app-deploy-application',
@@ -24,16 +24,26 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 })
 export class DeployApplicationComponent implements OnInit, OnDestroy {
 
-  isRedeploy: boolean;
+  appGuid: string;
   initCfOrgSpaceService: Subscription[] = [];
   deployButtonText = 'Deploy';
+  skipConfig$: Observable<boolean> = Observable.of(false);
 
   constructor(
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private activatedRoute: ActivatedRoute
   ) {
-    this.isRedeploy = this.activatedRoute.snapshot.queryParams['redeploy'] === 'true';
+    this.appGuid = this.activatedRoute.snapshot.queryParams['appGuid'];
+
+    this.skipConfig$ = this.store.select<DeployApplicationSource>(selectApplicationSource).pipe(
+      map((appSource: DeployApplicationSource) => {
+        if (appSource && appSource.type && appSource.type) {
+          return appSource.type.id === 'git' && appSource.type.subType === 'giturl';
+        }
+        return false;
+      })
+    );
   }
 
   onNext = () => {
@@ -51,7 +61,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
 
-    if (this.isRedeploy) {
+    if (this.appGuid) {
       this.deployButtonText = 'Redeploy';
       this.initCfOrgSpaceService.push(this.store.select(selectCfDetails).pipe(
         filter(p => !!p),
@@ -72,14 +82,15 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       this.initCfOrgSpaceService.push(this.store.select(selectPaginationState(applicationSchemaKey, CfAppsDataSource.paginationKey)).pipe(
         filter((pag) => !!pag),
         tap(pag => {
-          if (pag.clientPagination.filter.items.cf) {
-            this.cfOrgSpaceService.cf.select.next(pag.clientPagination.filter.items.cf);
+          const { cf, org, space } = pag.clientPagination.filter.items;
+          if (cf) {
+            this.cfOrgSpaceService.cf.select.next(cf);
           }
-          if (pag.clientPagination.filter.items.org) {
-            this.cfOrgSpaceService.org.select.next(pag.clientPagination.filter.items.org);
+          if (org) {
+            this.cfOrgSpaceService.org.select.next(org);
           }
-          if (pag.clientPagination.filter.items.space) {
-            this.cfOrgSpaceService.space.select.next(pag.clientPagination.filter.items.space);
+          if (space) {
+            this.cfOrgSpaceService.space.select.next(space);
           }
         })
       ).subscribe());
@@ -89,7 +100,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   }
 
   getTitle = () => {
-    if (this.isRedeploy) {
+    if (this.appGuid) {
       return 'Redeploy';
     } else {
       return 'Deploy';
