@@ -52,12 +52,14 @@ var (
 )
 
 func cleanup(dbc *sql.DB, ss HttpSessionStore) {
+	// Print a newline - if you pressed CTRL+C, the alighment will be slightly out, so start a new line first
+	fmt.Println()
 	log.Info("Attempting to shut down gracefully...")
-	log.Info(`--- Closing databaseConnectionPool`)
+	log.Info(`... Closing databaseConnectionPool`)
 	dbc.Close()
-	log.Info(`--- Closing sessionStore`)
+	log.Info(`... Closing sessionStore`)
 	ss.Close()
-	log.Info(`--- Stopping sessionStore cleanup`)
+	log.Info(`.. Stopping sessionStore cleanup`)
 	ss.StopCleanup(ss.Cleanup(time.Minute * 5))
 	log.Info("Graceful shut down complete")
 }
@@ -126,10 +128,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	defer func() {
-		log.Info(`--- Closing databaseConnectionPool`)
+		log.Info(`... Closing database connection pool`)
 		databaseConnectionPool.Close()
 	}()
-	log.Info("Proxy database connection pool created.")
+	log.Info("Database connection pool created.")
 
 	// Initialize session store for Gorilla sessions
 	sessionStore, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, SessionExpiry)
@@ -138,21 +140,21 @@ func main() {
 	}
 
 	defer func() {
-		log.Info(`--- Closing sessionStore`)
+		log.Info(`... Closing session store`)
 		sessionStore.Close()
 	}()
 
 	// Ensure the cleanup tick starts now (this will delete expired sessions from the DB)
 	quitCleanup, doneCleanup := sessionStore.Cleanup(time.Minute * 3)
 	defer func() {
-		log.Info(`--- Setting up sessionStore cleanup`)
+		log.Info(`... Cleaning up session store`)
 		sessionStore.StopCleanup(quitCleanup, doneCleanup)
 	}()
-	log.Info("Proxy session store initialized.")
+	log.Info("Session store initialized.")
 
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore)
-	log.Info("Proxy initialization complete.")
+	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -177,13 +179,13 @@ func main() {
 		plugin.Init()
 	}
 
-	log.Info("Initialised general plugins.")
+	log.Info("Plugins initialized")
 
 	// Start the back-end
 	if err := start(portalProxy.Config, portalProxy, addSetupMiddleware, false); err != nil {
 		log.Fatalf("Unable to start: %v", err)
 	}
-	log.Info("Unable to start proxy!")
+	log.Info("Unable to start Stratos JetStream backend")
 
 }
 func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware, error) {
@@ -191,7 +193,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 	addSetupMiddleware := new(setupMiddleware)
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Unable to intialise console backend config due to: %+v", err)
+		log.Errorf("Unable to intialise Stratos backend config due to: %+v", err)
 		return addSetupMiddleware, err
 	}
 	isInitialised, err := consoleRepo.IsInitialised()
@@ -203,23 +205,23 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) (*setupMiddleware,
 
 		consoleConfig, err := portalProxy.initialiseConsoleConfig(consoleRepo)
 		if err != nil {
-			log.Warnf("Failed to initialise console config due to: %+v", err)
+			log.Warnf("Failed to initialise Stratos config due to: %+v", err)
 
 			addSetupMiddleware.addSetup = true
 			addSetupMiddleware.consoleRepo = consoleRepo
 			log.Info("Will add `setup` route and middleware")
 
 		} else {
-			log.Infof("Console is intialised with the following settings: %+v", consoleConfig)
+			log.Infof("Stratos is intialised with the following settings: %+v", consoleConfig)
 			portalProxy.Config.ConsoleConfig = consoleConfig
 		}
 
 	} else if err == nil && isInitialised {
 		consoleConfig, err := consoleRepo.GetConsoleConfig()
 		if err != nil {
-			log.Infof("Instance is initialised, but console_config table may consist junk data! %+v", err)
+			log.Infof("Instance is initialised, but console_config table may contain junk data! %+v", err)
 		}
-		log.Infof("Console is intialised with the following settings: %+v", consoleConfig)
+		log.Infof("Stratos is intialised with the following settings: %+v", consoleConfig)
 		portalProxy.Config.ConsoleConfig = consoleConfig
 	}
 
@@ -330,7 +332,7 @@ func loadPortalConfig(pc interfaces.PortalConfig) (interfaces.PortalConfig, erro
 	config.LoadConfigFile("./config.properties")
 
 	if err := config.Load(&pc); err != nil {
-		return pc, fmt.Errorf("Unable to load portal configuration. %v", err)
+		return pc, fmt.Errorf("Unable to load configuration. %v", err)
 	}
 
 	// Add custom properties
@@ -678,6 +680,6 @@ func stopEchoWhenUpgraded(e *standard.Server) {
 	for isConsoleUpgrading() {
 		time.Sleep(1 * time.Second)
 	}
-	log.Info("Console upgrade has completed! Shutting down Upgrade Echo instance")
+	log.Info("Stratos upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
 }

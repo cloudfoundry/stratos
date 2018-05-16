@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/SUSE/stratos-ui/repository/interfaces"
-	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 )
 
@@ -39,6 +38,5 @@ func (userInfo *UserInfo) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 func (userInfo *UserInfo) Init() error {
-	log.Info("User Info component loaded")
 	return nil
 }
