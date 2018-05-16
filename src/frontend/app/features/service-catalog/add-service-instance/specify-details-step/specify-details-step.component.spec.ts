@@ -4,6 +4,7 @@ import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoi
 import { ServicesService } from '../../services.service';
 import { ServicesServiceMock } from '../../services.service.mock';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -14,7 +15,7 @@ describe('SpecifyDetailsStepComponent', () => {
       declarations: [SpecifyDetailsStepComponent],
       imports: [BaseTestModules],
       providers: [
-        { provide: ServicesService, useClass: ServicesServiceMock },
+        CreateServiceInstanceHelperService
       ]
     })
       .compileComponents();

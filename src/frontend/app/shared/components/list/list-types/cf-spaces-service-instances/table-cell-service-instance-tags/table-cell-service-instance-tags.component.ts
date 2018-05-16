@@ -31,6 +31,14 @@ export class TableCellServiceInstanceTagsComponent<T> extends TableCellCustom<T>
           hideClearButton: true
         });
       });
+    } else if (this.row.entity && this.row.entity.tags) {
+      this.row.entity.tags.forEach(t => {
+        this.tags.push({
+          value: t,
+          key: this.row,
+          hideClearButton: true
+        });
+      });
     }
   }
 }

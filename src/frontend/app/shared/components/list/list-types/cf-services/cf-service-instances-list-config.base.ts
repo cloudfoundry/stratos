@@ -32,6 +32,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
   defaultView = 'table' as ListView;
   text = {
     title: null,
+    filter: null,
     noEntries: 'There are no service instances'
   };
 
@@ -98,12 +99,12 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     enabled: (row: APIResource) => row.entity.service_bindings.length === 1
   };
 
-  constructor(protected store: Store<AppState>, protected cfGuid: string, protected datePipe: DatePipe) {
+  constructor(protected store: Store<AppState>, protected datePipe: DatePipe) {
     super();
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    this.store.dispatch(new DeleteServiceInstance(this.cfGuid, serviceInstance.metadata.guid))
+    this.store.dispatch(new DeleteServiceInstance(serviceInstance.entity.cfGuid, serviceInstance.metadata.guid))
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
@@ -113,7 +114,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     **/
     if (serviceInstance.entity.service_bindings.length === 1) {
       this.store.dispatch(new DeleteServiceBinding(
-        this.cfGuid,
+        serviceInstance.entity.cfGuid,
         serviceInstance.entity.service_bindings[0].metadata.guid));
     } else {
       this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));

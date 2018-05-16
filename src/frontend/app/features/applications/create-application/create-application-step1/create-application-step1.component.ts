@@ -30,6 +30,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   validate: Observable<boolean>;
 
+  @Input('stepperText')
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
   onNext = () => {

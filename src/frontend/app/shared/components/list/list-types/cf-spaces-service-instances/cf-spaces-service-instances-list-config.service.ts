@@ -16,7 +16,7 @@ export class CfSpacesServiceInstancesListConfigService extends CfServiceInstance
 
 
   constructor(store: Store<AppState>, cfSpaceService: CloudFoundrySpaceService, datePipe: DatePipe) {
-    super(store, cfSpaceService.cfGuid, datePipe);
+    super(store, datePipe);
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
   }
 

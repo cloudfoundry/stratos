@@ -12,7 +12,7 @@ export class ServiceInstancesListConfigService
   extends CfServiceInstancesListConfigBase {
 
   constructor(store: Store<AppState>, servicesService: ServicesService, datePipe: DatePipe) {
-    super(store, servicesService.cfGuid, datePipe);
+    super(store, datePipe);
     // Remove 'Service' column
     this.serviceInstanceColumns.splice(1, 1);
     this.getColumns = () => this.serviceInstanceColumns;
