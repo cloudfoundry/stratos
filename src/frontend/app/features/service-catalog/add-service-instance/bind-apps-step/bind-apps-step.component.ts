@@ -51,41 +51,38 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
 
-    this.allAppsSubscription = this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
+    this.allAppsSubscription = this.fetchApps().subscribe();
+
+  }
+
+  private fetchApps() {
+    return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
       filter(p => !!p),
       combineLatest(this.store.select(selectCreateServiceInstanceCfGuid)),
       filter(p => !!p),
       tap(([spaceGuid, cfGuid]) => {
         const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
-        this.apps$ = getPaginationObservables<APIResource<IApp>>({
-          store: this.store,
-          action: new GetAllAppsInSpace(cfGuid, spaceGuid, paginationKey),
-          paginationMonitor: this.paginationMonitorFactory.create(
-            paginationKey,
-            entityFactory(applicationSchemaKey)
-          )
-        }, true).entities$
-          .pipe(
-          map(apps => {
-            if (this.boundAppId) {
-              return apps.filter(a => a.metadata.guid === this.boundAppId);
-            }
-            return apps;
-          }),
-          map(apps => apps.sort(appDataSort)),
-          first(),
-          map(apps => apps.slice(0, 50)),
-          tap(apps => {
-            if (this.boundAppId) {
-              this.stepperForm.controls.apps.setValue(this.boundAppId);
-              this.stepperForm.controls.apps.disable();
-              this.guideText = 'Specify binding params (optional)';
-            }
-          })
-          );
-      })
-    ).subscribe();
+        this.apps$ = this.getApps(cfGuid, spaceGuid, paginationKey).pipe(map(apps => {
+          if (this.boundAppId) {
+            return apps.filter(a => a.metadata.guid === this.boundAppId);
+          }
+          return apps;
+        }), map(apps => apps.sort(appDataSort)), first(), map(apps => apps.slice(0, 50)), tap(apps => {
+          if (this.boundAppId) {
+            this.stepperForm.controls.apps.setValue(this.boundAppId);
+            this.stepperForm.controls.apps.disable();
+            this.guideText = 'Specify binding params (optional)';
+          }
+        }));
+      }));
+  }
 
+  private getApps(cfGuid: string, spaceGuid: string, paginationKey: string) {
+    return getPaginationObservables<APIResource<IApp>>({
+      store: this.store,
+      action: new GetAllAppsInSpace(cfGuid, spaceGuid, paginationKey),
+      paginationMonitor: this.paginationMonitorFactory.create(paginationKey, entityFactory(applicationSchemaKey))
+    }, true).entities$;
   }
 
   ngAfterContentInit() {

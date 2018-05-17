@@ -46,64 +46,29 @@ export class AddServiceInstanceComponent {
     private entityServiceFactory: EntityServiceFactory
   ) {
 
-    const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
-    const cfId = getIdFromRoute(activatedRoute, 'cfId');
-    const id = getIdFromRoute(activatedRoute, 'id');
-    if (!!serviceId && !!cfId) {
-      cSIHelperService.initService(cfId, serviceId, Mode.MARKETPLACE);
-    }
+    const { serviceId, cfId, id } = this.getIdsFromRoute();
 
+    // Check if wizard has been initiated from the Services Marketplace
+    this.checkAndConfigureServiceForMarketplaceMode(serviceId, cfId);
 
-    this.displaySelectCfStep = this.setupSelectCFStep();
+    // Check if the CF Select step needs to be displayed
+    this.displaySelectCfStep = this.setupSelectCFStep(serviceId, cfId, id);
+
+    // Check if the select service step needs to be displayed
     this.displaySelectServiceStep = this.setupSelectServiceStep();
 
-    if (cSIHelperService.isMarketplace()) {
-      cSIHelperService.isInitialised().pipe(
-        take(1),
-        tap(o => {
-          const serviceGuid = serviceId;
-          this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
-          this.title$ = this.cSIHelperService.getServiceName().pipe(
-            map(label => `Create Instance: ${label}`)
-          );
-        })
-      ).subscribe();
-    } else if (!!cfId && !!id) {
-      // App services mode
-      this.appId = id;
-      const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
-        applicationSchemaKey,
-        entityFactory(applicationSchemaKey),
-        id,
-        new GetApplication(id, cfId, [createEntityRelationKey(applicationSchemaKey, spaceSchemaKey)]),
-        true
-      );
-      entityService.waitForEntity$.pipe(
-        filter(p => !!p),
-        tap(app => {
-          const spaceEntity = app.entity.entity.space as APIResource<ISpace>;
-          this.store.dispatch(new SetCreateServiceInstanceCFDetails(
-            cfId,
-            spaceEntity.entity.organization_guid,
-            app.entity.entity.space_guid
-          ));
-          this.title$ = Observable.of(`Create Or Bind Service Instance to '${app.entity.entity.name}'`);
-
-        }),
-
-        take(1),
-      ).subscribe();
+    if (!!cfId && !!id) {
+      // Setup wizard for App services mode
+      this.setupForAppServiceMode(id, cfId);
     } else {
+      // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.title$ = Observable.of(`Create Service Instance`);
     }
   }
 
-  setupSelectCFStep = () => {
+  setupSelectCFStep = (serviceId: string, cfId: string, id: string) => {
     // Show Select CF Step only when in the Services Wall mode
-    const serviceId = getIdFromRoute(this.activatedRoute, 'serviceId');
-    const cfId = getIdFromRoute(this.activatedRoute, 'cfId');
-    const id = getIdFromRoute(this.activatedRoute, 'id');
     if (!serviceId && !cfId && !id) {
       return true;
     } else {
@@ -130,4 +95,42 @@ export class AddServiceInstanceComponent {
     return Observable.of({ success: true });
   }
 
+  private getIdsFromRoute() {
+    const serviceId = getIdFromRoute(this.activatedRoute, 'serviceId');
+    const cfId = getIdFromRoute(this.activatedRoute, 'cfId');
+    const id = getIdFromRoute(this.activatedRoute, 'id');
+    return { serviceId, cfId, id };
+  }
+
+  private setupForAppServiceMode(id: string, cfId: string) {
+    this.appId = id;
+    const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
+      applicationSchemaKey,
+      entityFactory(applicationSchemaKey),
+      id,
+      new GetApplication(id, cfId, [createEntityRelationKey(applicationSchemaKey, spaceSchemaKey)]),
+      true);
+    entityService.waitForEntity$.pipe(filter(p => !!p), tap(app => {
+      const spaceEntity = app.entity.entity.space as APIResource<ISpace>;
+      this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid));
+      this.title$ = Observable.of(`Create Or Bind Service Instance to '${app.entity.entity.name}'`);
+    }), take(1)).subscribe();
+  }
+
+  private checkAndConfigureServiceForMarketplaceMode(serviceId: string, cfId: string) {
+    if (!!serviceId && !!cfId) {
+      this.cSIHelperService.initService(cfId, serviceId, Mode.MARKETPLACE);
+
+      this.cSIHelperService.isInitialised().pipe(
+        take(1),
+        tap(o => {
+          const serviceGuid = serviceId;
+          this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
+          this.title$ = this.cSIHelperService.getServiceName().pipe(
+            map(label => `Create Instance: ${label}`)
+          );
+        })
+      ).subscribe();
+    }
+  }
 }
