@@ -26,7 +26,7 @@ export function createGetAllAppAction(paginationKey): GetAllApplications {
   ]);
 }
 
-const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
+export const cfOrgSpaceFilter = (entities: APIResource[], paginationState: PaginationEntityState) => {
   // Filter by cf/org/space
   const cfGuid = paginationState.clientPagination.filter.items['cf'];
   const orgGuid = paginationState.clientPagination.filter.items['org'];

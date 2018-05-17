@@ -9,6 +9,7 @@ export interface MetaCardMenuItem {
   icon?: string;
   label: string;
   action: Function;
+  disabled?: Observable<boolean>;
 }
 @Component({
   selector: 'app-meta-card',
@@ -32,7 +33,16 @@ export class MetaCardComponent {
   @Input('clickAction')
   clickAction: Function = null;
 
-  constructor() { }
+  constructor() {
+    if (this.actionMenu) {
+      this.actionMenu = this.actionMenu.map(element => {
+        if (!element.disabled) {
+          element.disabled = Observable.of(false);
+        }
+        return element;
+      });
+    }
+  }
 
   cancelPropagation = (event) => {
     event.cancelBubble = true;
