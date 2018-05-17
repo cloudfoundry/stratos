@@ -4,12 +4,13 @@ import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
-import { DeleteServiceBinding, DeleteServiceInstance } from '../../../../../../store/actions/service-instances.actions';
+import { DeleteServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { DeleteServiceBinding } from '../../../../../../store/actions/service-bindings.actions';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -60,7 +61,9 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     if (this.row.entity.service_bindings.length === 1) {
       this.store.dispatch(new DeleteServiceBinding(
         this.cfGuid,
-        this.row.entity.service_bindings[0].metadata.guid));
+        this.row.entity.service_bindings[0].metadata.guid,
+        this.row.metadata.guid
+      ));
     }
   }
 

@@ -6,7 +6,8 @@ import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { RouterNav } from '../../../../../store/actions/router.actions';
-import { DeleteServiceBinding, DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
+import { DeleteServiceBinding } from '../../../../../store/actions/service-bindings.actions';
+import { DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { ITableColumn } from '../../list-table/table.types';
@@ -115,7 +116,8 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     if (serviceInstance.entity.service_bindings.length === 1) {
       this.store.dispatch(new DeleteServiceBinding(
         serviceInstance.entity.cfGuid,
-        serviceInstance.entity.service_bindings[0].metadata.guid));
+        serviceInstance.entity.service_bindings[0].metadata.guid,
+        serviceInstance.metadata.guid));
     } else {
       this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));
     }

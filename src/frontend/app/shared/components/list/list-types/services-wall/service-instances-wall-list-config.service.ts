@@ -12,10 +12,15 @@ import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-inst
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
 
-
+/**
+ * Service instance list shown for `services` nav component
+ *
+ * @export
+ * @class ServiceInstancesWallListConfigService
+ * @extends {CfServiceInstancesListConfigBase}
+ */
 @Injectable()
-export class ServiceInstancesWallListConfigService
-  extends CfServiceInstancesListConfigBase {
+export class ServiceInstancesWallListConfigService extends CfServiceInstancesListConfigBase {
 
   text = {
     title: null,
@@ -32,7 +37,6 @@ export class ServiceInstancesWallListConfigService
     private cfOrgSpaceService: CfOrgSpaceDataService
   ) {
     super(store, datePipe);
-    this.getColumns = () => this.serviceInstanceColumns;
     const multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
       createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
@@ -43,8 +47,12 @@ export class ServiceInstancesWallListConfigService
     this.dataSource = new ServiceInstancesWallDataSource(store, transformEntities, this);
     this.getMultiFiltersConfigs = () => multiFilterConfigs;
 
+    this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
+      breadcrumbs: 'service-wall'
+    };
   }
 
+  getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;
 
 }
