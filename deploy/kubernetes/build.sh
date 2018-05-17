@@ -163,8 +163,8 @@ cleanup
 updateTagForRelease
 
 # Build all of the components that make up the Console
-# buildJetstream
-# buildPostflightJob
+buildJetstream
+buildPostflightJob
 buildMariaDb
 buildUI
 
