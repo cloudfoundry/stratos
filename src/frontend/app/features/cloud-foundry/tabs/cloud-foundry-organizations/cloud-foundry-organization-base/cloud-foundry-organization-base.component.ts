@@ -4,6 +4,7 @@ import { first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
@@ -52,7 +53,7 @@ export class CloudFoundryOrganizationBaseComponent {
   public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
   public permsSpaceCreate = CurrentUserPermissions.SPACE_CREATE;
 
-  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService) {
+  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService, public currentUserPermissionsService: CurrentUserPermissionsService) {
     this.isFetching$ = cfOrgService.org$.pipe(
       map(org => org.entityRequestInfo.fetching)
     );
@@ -74,6 +75,9 @@ export class CloudFoundryOrganizationBaseComponent {
       ])),
       first()
     );
+
+    console.log('setting up')
+    this.currentUserPermissionsService.can(CurrentUserPermissions.SPACE_VIEW, this.cfEndpointService.cfGuid, this.cfOrgService.orgGuid).subscribe(a => console.log(a));
   }
 
 }
