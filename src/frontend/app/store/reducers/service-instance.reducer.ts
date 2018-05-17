@@ -1,12 +1,8 @@
-import { AppState, IRequestEntityTypeState } from '../app-state';
-import { Action } from '@ngrx/store';
-import { APIResource } from '../types/api.types';
-import { RouteEvents, UnmapRoute } from '../actions/route.actions';
-import { APISuccessOrFailedAction } from '../types/request.types';
-import { IRoute } from '../../core/cf-api.types';
-import { IServiceInstance, IServiceBinding } from '../../core/cf-api-svc.types';
+import { IServiceInstance } from '../../core/cf-api-svc.types';
 import { DELETE_SERVICE_BINDING_ACTION_SUCCESS, DeleteServiceBinding } from '../actions/service-bindings.actions';
-import { DELETE_SERVICE_BINDING, DeleteServiceInstanceBinding } from '../actions/service-instances.actions';
+import { IRequestEntityTypeState } from '../app-state';
+import { APIResource } from '../types/api.types';
+import { APISuccessOrFailedAction } from '../types/request.types';
 
 export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResource<IServiceInstance>>, action: APISuccessOrFailedAction) {
   switch (action.type) {

@@ -4,8 +4,8 @@ import { BaseTestModulesNoShared } from '../../../../../../test-framework/cloud-
 import { TableCellServiceInstanceAppsAttachedComponent } from './table-cell-service-instance-apps-attached.component';
 
 describe('TableCellServiceInstanceAppsAttachedComponent', () => {
-  let component: TableCellServiceInstanceAppsAttachedComponent<any>;
-  let fixture: ComponentFixture<TableCellServiceInstanceAppsAttachedComponent<any>>;
+  let component: TableCellServiceInstanceAppsAttachedComponent;
+  let fixture: ComponentFixture<TableCellServiceInstanceAppsAttachedComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
