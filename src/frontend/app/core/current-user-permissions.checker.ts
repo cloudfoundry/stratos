@@ -276,7 +276,7 @@ export class CurrentUserPermissionsChecker {
   }
 
   private getGroupType(config: PermissionConfig) {
-    if (config.type === PermissionTypes.ORGANIZATION || PermissionTypes.SPACE) {
+    if (config.type === PermissionTypes.ORGANIZATION || config.type === PermissionTypes.SPACE) {
       return CHECKER_GROUPS.CF_GROUP;
     }
     return config.type;
