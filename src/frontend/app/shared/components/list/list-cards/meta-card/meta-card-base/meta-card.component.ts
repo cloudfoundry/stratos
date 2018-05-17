@@ -39,7 +39,6 @@ export class MetaCardComponent {
       return menuItem;
     });
     this.showMenu$ = combineLatest(actionMenu.map(menuItem => menuItem.can)).pipe(
-      tap(console.log),
       map(cans => cans.some(can => can))
     );
   }
