@@ -1,19 +1,13 @@
-import { E2EHelpers } from '../helpers/e2e-helpers';
-import { AppPage } from '../app.po';
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from './login.po';
-import { browser } from 'protractor';
-import { DashboardPage } from '../dashboard/dashboard.po';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
-
 
 describe('Login', () => {
-  const helpers = new E2EHelpers();
   const loginPage = new LoginPage();
-  const dashboardPage = new DashboardPage();
-  const secrets = new SecretsHelpers();
 
   beforeAll(() => {
-    helpers.setupApp();
+    e2e.setup(ConsoleUserType.admin)
+    .doNotLogin();
   });
 
   beforeEach(() => {
@@ -36,7 +30,7 @@ describe('Login', () => {
   });
 
   it('- should reject bad password', () => {
-    loginPage.enterLogin(secrets.getConsoleAdminUsername(), 'badpassword');
+    loginPage.enterLogin(e2e.secrets.getConsoleAdminUsername(), 'badpassword');
     expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
     loginPage.loginButton().click();
@@ -45,15 +39,11 @@ describe('Login', () => {
   });
 
   it('- should accept correct details', () => {
-    loginPage.enterLogin(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
+    loginPage.enterLogin(e2e.secrets.getConsoleAdminUsername(), e2e.secrets.getConsoleAdminPassword());
     expect(loginPage.loginButton().isEnabled()).toBeTruthy();
 
     loginPage.loginButton().click();
-
     loginPage.waitForApplicationPage();
-
     expect(loginPage.isLoginPage()).toBeFalsy();
-
-
   });
 });
