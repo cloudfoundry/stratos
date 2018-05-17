@@ -78,8 +78,7 @@ describe('Endpoints', () => {
     describe('As User -', () => {
 
       beforeAll(() => {
-        e2e.setup(ConsoleUserType.admin)
-        .loginAs(ConsoleUserType.user)
+        e2e.setup(ConsoleUserType.user)
         .clearAllEndpoints()
         .registerDefaultCloudFoundry();
       });

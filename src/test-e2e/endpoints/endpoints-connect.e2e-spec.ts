@@ -19,8 +19,7 @@ describe('Endpoints', () => {
   describe('Connect/Disconnect endpoints -', () => {
 
     beforeAll(() => {
-      e2e.setup(ConsoleUserType.admin)
-      .loginAs(ConsoleUserType.user)
+      e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry();
     });

@@ -79,8 +79,7 @@ describe('Endpoints', () => {
 
       describe('No registered endpoints -', () => {
         beforeAll(() => {
-          e2e.setup(ConsoleUserType.admin)
-            .loginAs(ConsoleUserType.user)
+          e2e.setup(ConsoleUserType.user)
             .clearAllEndpoints();
         });
 
@@ -94,8 +93,7 @@ describe('Endpoints', () => {
 
         beforeAll(() => {
           beforeAll(() => {
-            e2e.setup(ConsoleUserType.admin)
-              .loginAs(ConsoleUserType.user)
+            e2e.setup(ConsoleUserType.user)
               .clearAllEndpoints()
               .registerDefaultCloudFoundry();
           });
