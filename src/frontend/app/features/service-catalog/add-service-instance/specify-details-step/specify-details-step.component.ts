@@ -131,6 +131,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
     this.subscriptions.push(cSIHelperService.isInitialised().pipe(
       tap(o => {
+
         this.cSIHelperService.serviceGuid$.pipe(
           first(),
           tap(guid => {

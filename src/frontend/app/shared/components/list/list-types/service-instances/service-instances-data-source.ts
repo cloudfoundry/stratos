@@ -24,7 +24,7 @@ export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
       isLocal: true,
       transformEntities: [
         (entities: APIResource[], paginationState: PaginationEntityState) => {
-          return entities.filter(e => e.entity.service_plan.entity.service_guid === serviceGuid);
+          return entities.filter(e => e.entity.service_guid === serviceGuid);
         }
       ],
       listConfig

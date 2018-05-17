@@ -217,7 +217,7 @@ export class CreateServiceInstanceHelperService {
     return this.getSelectedServicePlan()
       .pipe(
       switchMap(servicePlan => this.getServicePlanAccessibility(servicePlan)),
-      combineLatest(this.isInitialised(this.cfGuid$)),
+      combineLatest(this.cfGuid$),
       switchMap(([servicePlanAccessbility, cfGuid]) => {
         if (servicePlanAccessbility.isPublic) {
           const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(cfGuid);
@@ -290,7 +290,7 @@ export class CreateServiceInstanceHelperService {
           .entities$.pipe(
           share(),
           first(),
-          map(serviceInstances => serviceInstances.filter(s => (s.entity.service_plan.entity.service_guid === p.serviceGuid))),
+          map(serviceInstances => serviceInstances.filter(s => (s.entity.service_guid === p.serviceGuid))),
         );
 
       })

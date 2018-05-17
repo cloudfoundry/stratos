@@ -39,6 +39,7 @@ export interface IServiceInstance {
   last_operation?: ILastOperation;
   tags?: string[];
   space_url?: string;
+  service_guid: string;
   service_plan_url: string;
   service_plan?: APIResource<IServicePlan>;
   service_bindings_url: string;
