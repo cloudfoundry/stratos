@@ -129,25 +129,20 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       this.spaces$ = this.initSpacesObservable();
     }
 
-    this.serviceInstances$ = cSIHelperService.getServiceInstancesForService();
     this.subscriptions.push(cSIHelperService.isInitialised().pipe(
       tap(o => {
         this.cSIHelperService.serviceGuid$.pipe(
           first(),
           tap(guid => {
-            const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, guid);
-            this.allServiceInstances$ = this.initServiceInstances(paginationKey);
+            // This needs to be from a plan
+            this.serviceInstances$ = cSIHelperService.getServiceInstancesForService();
+            this.allServiceInstances$ = cSIHelperService.getServiceInstancesForService();
           }),
         ).subscribe();
 
-        this.cSIHelperService.cfGuid$.pipe(
-          first(),
-          tap(guid => this.cfGuid = guid)
-        ).subscribe();
+        this.cSIHelperService.cfGuid$.pipe(first(), tap(guid => this.cfGuid = guid)).subscribe();
       })
     ).subscribe());
-
-
   }
 
   resetForms = (mode: FormMode) => {
@@ -186,18 +181,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
-  initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
-    store: this.store,
-    action: new GetServiceInstances(this.cfGuid, paginationKey),
-    paginationMonitor: this.paginationMonitorFactory.create(
-      paginationKey,
-      entityFactory(serviceInstancesSchemaKey)
-    )
-  }, true)
-    .entities$.pipe(
-    share(),
-    first()
-    )
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
@@ -260,7 +243,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   updateServiceInstanceNames = () => {
     this.subscriptions.push(this.createNewInstanceForm.controls.space.statusChanges.pipe(
-      combineLatest(this.allServiceInstances$),
+      combineLatest(this.serviceInstances$),
       map(([c, services]) => {
         return services.filter(s => s.entity.space_guid === this.createNewInstanceForm.controls.space.value);
       }),
@@ -332,6 +315,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     }
     return { success: true };
   }
+
   createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
     const name = this.createNewInstanceForm.controls.name.value;
@@ -377,7 +361,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
 
   private displaySnackBar(isBindingFailure = false) {
-
     if (isBindingFailure) {
       this.snackBar.open('Failed to bind app! Please re-check the details.', 'Dismiss');
     } else {
@@ -406,6 +389,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
 
   checkName = (value: string = null) =>
-    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1 : true
+    this.allServiceInstanceNames ?
+      this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1 : true
 
 }
