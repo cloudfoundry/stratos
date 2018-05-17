@@ -29,14 +29,15 @@ import {
   PermissionValues,
   ScopeStrings,
 } from './current-user-permissions.config';
-
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
+}
+export enum CHECKER_GROUPS {
+  CF_GROUP = '__CF_TYPE__'
 }
 
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
-  private readonly CF_GROUP_TYPE = '__CF_TYPE__';
   constructor(private store: Store<AppState>) { }
   public check(type: PermissionTypes, permission: PermissionValues, endpointGuid?: string, orgOrSpaceGuid?: string, ) {
     if (type === PermissionTypes.STRATOS) {
@@ -276,7 +277,7 @@ export class CurrentUserPermissionsChecker {
 
   private getGroupType(config: PermissionConfig) {
     if (config.type === PermissionTypes.ORGANIZATION || PermissionTypes.SPACE) {
-      return this.CF_GROUP_TYPE;
+      return CHECKER_GROUPS.CF_GROUP;
     }
     return config.type;
   }
