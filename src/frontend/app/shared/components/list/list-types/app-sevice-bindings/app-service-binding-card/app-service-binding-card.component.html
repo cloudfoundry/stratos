@@ -1,7 +1,7 @@
 <app-meta-card class="app-service-card">
   <app-meta-card-title>
     <div class="app-service-card__title">
-      <p>{{ (serviceInstance$ | async)?.entity.entity.name}}</p>
+      {{ (serviceInstance$ | async)?.entity.entity.name}}
       <app-service-icon [service]="service$ | async"></app-service-icon>
     </div>
   </app-meta-card-title>
