@@ -12,7 +12,7 @@ import { IListConfig } from '../../list.component.types';
 
 export class ServiceInstancesDataSource extends ListDataSource<APIResource> {
   constructor(cfGuid: string, serviceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {
-    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, serviceGuid);
+    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
     const action = new GetServiceInstances(cfGuid, paginationKey);
 
     super({

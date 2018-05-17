@@ -15,7 +15,9 @@ import { APIResource } from '../../../../store/types/api.types';
 import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { ServicesService } from '../../services.service';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CreateServiceInstanceHelperService, Mode } from '../create-service-instance-helper.service';
+import { ActivatedRoute } from '@angular/router';
+import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 
 @Component({
   selector: 'app-select-service',
@@ -38,7 +40,8 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private servicesWallService: ServicesWallService,
     private entityServiceFactory: EntityServiceFactory,
-    private cSIHelperService: CreateServiceInstanceHelperService
+    private cSIHelperService: CreateServiceInstanceHelperService,
+    private activatedRoute: ActivatedRoute
   ) {
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
@@ -59,7 +62,9 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
     const serviceGuid = this.stepperForm.controls.service.value;
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
-    this.cSIHelperService.initService(this.cfGuid, serviceGuid);
+
+    const appId = getIdFromRoute(this.activatedRoute, 'id');
+    this.cSIHelperService.initService(this.cfGuid, serviceGuid, appId ? Mode.APPSERVICE : Mode.DEFAULT);
     return Observable.of({ success: true });
   }
 
