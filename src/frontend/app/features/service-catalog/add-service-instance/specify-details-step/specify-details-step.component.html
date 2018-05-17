@@ -1,18 +1,29 @@
 <div class="specify-details">
-  <form class="stepper-form" [formGroup]="stepperForm">
-    <mat-form-field *ngIf="cSIHelperService.marketPlaceMode">
+
+  <div *ngIf="showModeSelection">
+    <b>Create a new service instance or bind an existing one.</b>
+    <div>
+      <mat-radio-group [(ngModel)]="formMode" class="">
+        <mat-radio-button *ngFor="let mode of formModes" [value]="mode" class="">
+          {{ mode.label }}
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+  </div>
+  <form class="stepper-form" *ngIf="(showModeSelection && formMode?.key === 'create-service-instance') || !showModeSelection" [formGroup]="createNewInstanceForm">
+    <mat-form-field *ngIf="cSIHelperService.isMarketplace()">
       <mat-select class="form-control" placeholder="Organization" required formControlName="org" (change)="setOrg($event.value)">
         <mat-option *ngFor="let organization of orgs$ | async" [value]="organization.metadata.guid">{{ organization.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-form-field *ngIf="cSIHelperService.marketPlaceMode">
+    <mat-form-field *ngIf="cSIHelperService.isMarketplace()">
       <mat-select class="form-control" placeholder="Space" required formControlName="space">
-        <mat-option [disabled]="!stepperForm.controls.org.value" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
+        <mat-option [disabled]="!createNewInstanceForm.controls.org.value" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
     <mat-form-field>
       <input matInput class="form-control" formControlName="name" placeholder="Name" required>
-      <mat-error *ngIf="stepperForm.controls.name?.hasError('nameTaken')">
+      <mat-error *ngIf="createNewInstanceForm.controls.name?.hasError('nameTaken')">
         A service instance with this name already exists. Please enter a different one.
       </mat-error>
     </mat-form-field>
@@ -27,7 +38,25 @@
     </mat-form-field>
     <mat-form-field>
       <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
-      <mat-error *ngIf="stepperForm.controls.params?.hasError('notValidJson')">
+      <mat-error *ngIf="createNewInstanceForm.controls.params?.hasError('notValidJson')">
+        Not valid JSON. Please specify a valid JSON Object
+      </mat-error>
+    </mat-form-field>
+  </form>
+  <form class="stepper-form" *ngIf="showModeSelection && formMode?.key === 'bind-service-insstance'" [formGroup]="createNewInstanceForm">
+    <mat-form-field *ngIf="cSIHelperService.isMarketplace()">
+      <mat-select class="form-control" placeholder="Organization" required formControlName="org" (change)="setOrg($event.value)">
+        <mat-option *ngFor="let organization of orgs$ | async" [value]="organization.metadata.guid">{{ organization.entity.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field *ngIf="cSIHelperService.isMarketplace()">
+      <mat-select class="form-control" placeholder="Space" required formControlName="space">
+        <mat-option [disabled]="!createNewInstanceForm.controls.org.value" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field>
+      <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
+      <mat-error *ngIf="createNewInstanceForm.controls.params?.hasError('notValidJson')">
         Not valid JSON. Please specify a valid JSON Object
       </mat-error>
     </mat-form-field>

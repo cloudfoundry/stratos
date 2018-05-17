@@ -37,14 +37,35 @@ import { RouterNav } from '../../../../store/actions/router.actions';
 import { safeUnsubscribe, getServiceJsonParams } from '../../services-helper';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
 
+const enum FormMode {
+  CreateServiceInstance = 'create-service-insstance',
+  BindServiceInstance = 'bind-service-insstance',
+}
 @Component({
   selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterContentInit {
+
+  formModes = [
+    {
+      label: 'Create Service Instance',
+      key: FormMode.CreateServiceInstance
+    },
+    {
+      label: 'Bind Service Instance',
+      key: FormMode.BindServiceInstance
+    }
+  ];
+  @Input('showModeSelection')
+  showModeSelection = false;
+
+  formMode: FormMode;
+
+  selectExistingInstanceForm: FormGroup;
   constructorSubscription: Subscription;
-  stepperForm: FormGroup;
+  createNewInstanceForm: FormGroup;
   serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: Observable<boolean>;
@@ -92,7 +113,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     private snackBar: MatSnackBar,
   ) {
 
-    this.stepperForm = new FormGroup({
+    this.createNewInstanceForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
       org: new FormControl('', Validators.required),
       space: new FormControl('', Validators.required),
@@ -100,7 +121,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       tags: new FormControl(''),
     });
 
-    if (cSIHelperService.marketPlaceMode) {
+    this.selectExistingInstanceForm = new FormGroup({
+      services: new FormControl('', [Validators.required, this.nameTakenValidator()]),
+    });
+
+    if (cSIHelperService.isMarketplace()) {
       this.orgs$ = this.initOrgsObservable();
       this.spaces$ = this.initSpacesObservable();
     }
@@ -126,8 +151,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
 
   ngOnInit(): void {
-    if (!this.cSIHelperService.marketPlaceMode) {
-      this.stepperForm = new FormGroup({
+    if (!this.cSIHelperService.isMarketplace()) {
+      this.createNewInstanceForm = new FormGroup({
         name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
         params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
         tags: new FormControl(''),
@@ -138,11 +163,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
         map(o => o.spaceScoped),
         tap(spaceScope => {
           if (spaceScope) {
-            this.stepperForm.get('org').disable();
-            this.stepperForm.get('space').disable();
+            this.createNewInstanceForm.get('org').disable();
+            this.createNewInstanceForm.get('space').disable();
           } else {
-            this.stepperForm.get('org').enable();
-            this.stepperForm.get('space').enable();
+            this.createNewInstanceForm.get('org').enable();
+            this.createNewInstanceForm.get('space').enable();
           }
         })).subscribe();
     }
@@ -175,19 +200,19 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
 
   ngAfterContentInit() {
-    this.validate = this.stepperForm.statusChanges
+    this.validate = this.createNewInstanceForm.statusChanges
       .map(() => {
-        return this.stepperForm.valid;
+        return this.createNewInstanceForm.valid;
       });
 
-    if (this.cSIHelperService.marketPlaceMode) {
+    if (this.cSIHelperService.isMarketplace()) {
       this.orgSubscription = this.orgs$.pipe(
         filter(p => !!p && p.length > 0),
         tap(o => {
           const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
           if (orgWithSpaces.length > 0) {
             const selectedOrgId = orgWithSpaces[0].metadata.guid;
-            this.stepperForm.controls.org.setValue(selectedOrgId);
+            this.createNewInstanceForm.controls.org.setValue(selectedOrgId);
             this.store.dispatch(new SetCreateServiceInstanceOrg(selectedOrgId));
           }
         })
@@ -215,17 +240,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     tap((spaces) => {
       if (spaces.length > 0) {
         const selectedSpaceId = spaces[0].metadata.guid;
-        this.stepperForm.controls.space.setValue(selectedSpaceId);
+        this.createNewInstanceForm.controls.space.setValue(selectedSpaceId);
         this.store.dispatch(new SetCreateServiceInstanceSpace(selectedSpaceId));
       }
     })
   )
 
   updateServiceInstanceNames = () => {
-    this.serviceInstanceNameSub = this.stepperForm.controls.space.statusChanges.pipe(
+    this.serviceInstanceNameSub = this.createNewInstanceForm.controls.space.statusChanges.pipe(
       combineLatest(this.allServiceInstances$),
       map(([c, services]) => {
-        return services.filter(s => s.entity.space_guid === this.stepperForm.controls.space.value);
+        return services.filter(s => s.entity.space_guid === this.createNewInstanceForm.controls.space.value);
       }),
       tap(o => {
         this.allServiceInstanceNames = o.map(s => s.entity.name);
@@ -275,18 +300,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
   createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
-    const name = this.stepperForm.controls.name.value;
+    const name = this.createNewInstanceForm.controls.name.value;
     let spaceGuid = '';
     let cfGuid = '';
-    if (!this.cSIHelperService.marketPlaceMode) {
+    if (!this.cSIHelperService.isMarketplace()) {
       spaceGuid = createServiceInstance.spaceGuid;
       cfGuid = createServiceInstance.cfGuid;
     } else {
-      spaceGuid = this.stepperForm.controls.space.value;
+      spaceGuid = this.createNewInstanceForm.controls.space.value;
       cfGuid = this.cfGuid;
     }
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
-    const params = getServiceJsonParams(this.stepperForm.controls.params.value);
+    const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 
@@ -348,6 +373,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
 
   checkName = (value: string = null) =>
-    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.stepperForm.controls.name.value) === -1 : true
+    this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1 : true
 
 }

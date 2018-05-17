@@ -83,7 +83,7 @@ export class SelectPlanStepComponent implements OnDestroy {
     ).subscribe();
 
     const { serviceId, cfId } = activatedRoute.snapshot.params;
-    if (this.cSIHelperService.marketPlaceMode) {
+    if (this.cSIHelperService.isMarketplace()) {
       this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId));
     }
   }

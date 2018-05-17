@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, Input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -30,12 +30,17 @@ import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-det
 })
 
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
+
+  @Input('boundAppId')
+  boundAppId: string;
+
   validateSubscription: Subscription;
   validate = new BehaviorSubject(true);
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
   allAppsSubscription: Subscription;
   apps$: Observable<APIResource<IApp>[]>;
+  guideText = 'Specify the application to bind (Optional)';
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -45,8 +50,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       apps: new FormControl(''),
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
-
-
 
     this.allAppsSubscription = this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
       filter(p => !!p),
@@ -63,9 +66,22 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
           )
         }, true).entities$
           .pipe(
+          map(apps => {
+            if (this.boundAppId) {
+              return apps.filter(a => a.metadata.guid === this.boundAppId);
+            }
+            return apps;
+          }),
           map(apps => apps.sort(appDataSort)),
           first(),
-          map(apps => apps.slice(0, 50))
+          map(apps => apps.slice(0, 50)),
+          tap(apps => {
+            if (this.boundAppId) {
+              this.stepperForm.controls.apps.setValue(this.boundAppId);
+              this.stepperForm.controls.apps.disable();
+              this.guideText = 'Specify binding params (optional)';
+            }
+          })
           );
       })
     ).subscribe();
