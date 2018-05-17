@@ -76,8 +76,6 @@ export class CloudFoundryOrganizationBaseComponent {
       first()
     );
 
-    console.log('setting up')
-    this.currentUserPermissionsService.can(CurrentUserPermissions.SPACE_VIEW, this.cfEndpointService.cfGuid, this.cfOrgService.orgGuid).subscribe(a => console.log(a));
   }
 
 }
