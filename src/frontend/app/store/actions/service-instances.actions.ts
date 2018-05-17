@@ -122,8 +122,6 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
     this.options.params.set('async', 'false');
     this.options.params.set('recursive', 'true');
     this.options.headers = new Headers();
-    const endpointPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(endpointPassthroughHeader, 'true');
   }
   actions = getActions('Service Instances', 'Delete Service Instance');
   entity = [entityFactory(serviceInstancesSchemaKey)];
