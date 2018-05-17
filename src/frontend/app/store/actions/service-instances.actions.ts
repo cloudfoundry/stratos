@@ -1,15 +1,15 @@
-import { RequestOptions, URLSearchParams, Headers } from '@angular/http';
+import { Headers, RequestOptions, URLSearchParams } from '@angular/http';
 
 import {
+  applicationSchemaKey,
   entityFactory,
+  organizationSchemaKey,
   serviceBindingSchemaKey,
   serviceInstancesSchemaKey,
-  servicePlanSchemaKey,
-  spaceSchemaKey,
-  serviceSchemaKey,
-  applicationSchemaKey,
-  organizationSchemaKey,
   serviceInstancesWithSpaceSchemaKey,
+  servicePlanSchemaKey,
+  serviceSchemaKey,
+  spaceSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -19,6 +19,8 @@ import {
 import { PaginationAction } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
+
+export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
 
 export class GetServicesInstancesInSpace
   extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -120,13 +122,12 @@ export class DeleteServiceInstance extends CFStartAction implements ICFAction {
     this.options.params.set('async', 'false');
     this.options.params.set('recursive', 'true');
     this.options.headers = new Headers();
-    const endpointPassthroughHeader = 'x-cap-passthrough';
-    this.options.headers.set(endpointPassthroughHeader, 'true');
   }
   actions = getActions('Service Instances', 'Delete Service Instance');
   entity = [entityFactory(serviceInstancesSchemaKey)];
   entityKey = serviceInstancesSchemaKey;
   options: RequestOptions;
+  removeEntityOnDelete = true;
 }
 export class CreateServiceInstance extends CFStartAction implements ICFAction {
   constructor(
@@ -157,20 +158,3 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
 }
 
 
-export class DeleteServiceBinding extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public guid: string) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `service_bindings/${guid}`;
-    this.options.method = 'delete';
-    this.options.params = new URLSearchParams();
-    this.options.params.set('async', 'false');
-
-  }
-  actions = getActions('Service Instances', 'Delete Service binding');
-  entity = [entityFactory(serviceInstancesSchemaKey)];
-  entityKey = serviceInstancesSchemaKey;
-  options: RequestOptions;
-  removeEntityOnDelete = true;
-
-}

@@ -74,7 +74,7 @@ export class CardComponent<T> implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.row;
+    const row: SimpleChange = changes.item;
     if (
       row &&
       this.cardComponent &&

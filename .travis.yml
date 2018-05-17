@@ -20,10 +20,11 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-- Frontend Lint
-- Frontend Unit Tests
-- Backend
-- E2E tests
+  - Frontend Lint
+  - Frontend Unit Tests
+  - Backend
+  - name: E2E tests
+    if: type != pull_request
 jobs:
   include:
   - stage: Frontend Lint
