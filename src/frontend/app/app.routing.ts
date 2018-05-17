@@ -36,6 +36,7 @@ const appRoutes: Routes = [
         }]
       },
       { path: 'service-catalog', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
+      { path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule' },
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },
       { path: 'user-profile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
