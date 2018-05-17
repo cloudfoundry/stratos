@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';
@@ -22,8 +23,8 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     icon: 'delete',
     label: 'Delete',
     description: '',
-    visible: (row: ListAppEnvVar) => true,
-    enabled: (row: ListAppEnvVar) => true,
+    visible: () => true,
+    enabled: () => Observable.of(true)
   };
 
   private listActionDelete: IListAction<ListAppEnvVar> = {

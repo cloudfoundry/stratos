@@ -26,6 +26,7 @@ import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
@@ -52,8 +53,8 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    visible: () => true,
+    enabled: () => Observable.of(true),
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -77,8 +78,8 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    visible: () => true,
+    enabled: () => Observable.of(true)
   };
 
   private listActionDelete: IListAction<APIResource> = {
@@ -123,8 +124,8 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     icon: 'add',
     label: 'Add',
     description: 'Add new route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    visible: () => true,
+    enabled: () => Observable.of(true)
   };
 
   columns: Array<ITableColumn<APIResource>> = [
