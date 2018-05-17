@@ -137,7 +137,7 @@ export class CfRolesService {
         // For each user, loop through the new roles and compare with any existing. If there's a diff, add it to a changes collection to be
         // returned
         pickedUsers.forEach(user => {
-          this.createRolesUserDiff(existingRoles, newRoles, changes, user, orgGuid);
+          changes.push(...this.createRolesUserDiff(existingRoles, newRoles, changes, user, orgGuid));
         });
         this.store.dispatch(new UsersRolesSetChanges(changes));
         return changes;
@@ -151,21 +151,24 @@ export class CfRolesService {
     changes: CfRoleChange[],
     user: CfUser,
     orgGuid: string
-  ) {
+  ): CfRoleChange[] {
     const existingUserRoles = existingRoles[user.guid] || {};
+    const newChanges = [];
 
     // Compare org roles
     const existingOrgRoles = existingUserRoles[orgGuid] || createDefaultOrgRoles(orgGuid);
-    changes.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, add: false, role: null },
+    newChanges.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, add: false, role: null },
       existingOrgRoles.permissions, newRoles.permissions));
 
     // Compare space roles
     Object.keys(newRoles.spaces).forEach(spaceGuid => {
       const newSpace = newRoles.spaces[spaceGuid];
       const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, spaceGuid);
-      changes.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, spaceGuid, add: false, role: null },
+      newChanges.push(...this.comparePermissions({ userGuid: user.guid, orgGuid, spaceGuid, add: false, role: null },
         oldSpace.permissions, newSpace.permissions));
     });
+
+    return newChanges;
   }
 
   fetchOrg(cfGuid: string, orgGuid: string): Observable<APIResource<IOrganization>> {
