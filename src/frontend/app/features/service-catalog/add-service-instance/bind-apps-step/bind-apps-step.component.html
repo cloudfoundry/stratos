@@ -3,7 +3,7 @@
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
       <mat-select class="form-control" placeholder="App" formControlName="apps">
-        <mat-option>None</mat-option>
+        <mat-option></mat-option>
         <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>
