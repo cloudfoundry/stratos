@@ -5,6 +5,8 @@ export enum CurrentUserPermissions {
   SPACE_DELETE = 'delete.space',
   SPACE_EDIT = 'edit.space',
   ORGANIZATION_CREATE = 'create.org',
+  ORGANIZATION_DELETE = 'delete.org',
+  ORGANIZATION_EDIT = 'edit.org',
   ENDPOINT_REGISTER = 'register.endpoint',
   PASSWORD_CHANGE = 'change-password'
 }
@@ -76,6 +78,8 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_AUDITOR),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
   ],
+  [CurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
+  [CurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CurrentUserPermissions.ORGANIZATION_DELETE),
   [CurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN),
   [CurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(PermissionTypes.STRATOS_SCOPE, ScopeStrings.STRATOS_CHANGE_PASSWORD),
 };
