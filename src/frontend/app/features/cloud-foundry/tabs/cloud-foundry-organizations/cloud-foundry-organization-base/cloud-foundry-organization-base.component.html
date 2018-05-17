@@ -1,10 +1,11 @@
 <app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks">
   <h1> {{ name$ | async }}</h1>
   <div class="page-header-right">
-    <button mat-icon-button name="edit-org" *appUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org">
+    <button mat-icon-button name="edit-org" *appUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org" matTooltip="Edit Organization">
         <mat-icon>mode_edit</mat-icon>
       </button>
-    <button mat-icon-button name="add-space" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space">
+    <button mat-icon-button name="add-space" *appUserPermission="permsSpaceCreate;endpointGuid:cfEndpointService.cfGuid;organizationGuid:cfOrgService.orgGuid" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space"
+      matTooltip="Create Space">
         <mat-icon>add_box</mat-icon>
       </button>
     <button mat-icon-button name="user-management" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/manage-users">

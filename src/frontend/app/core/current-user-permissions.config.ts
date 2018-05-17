@@ -2,11 +2,13 @@ import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 
 export enum CurrentUserPermissions {
   APPLICATION_CREATE = 'create.application',
+  SPACE_CREATE = 'create.space',
   SPACE_DELETE = 'delete.space',
   SPACE_EDIT = 'edit.space',
   ORGANIZATION_CREATE = 'create.org',
   ORGANIZATION_DELETE = 'delete.org',
   ORGANIZATION_EDIT = 'edit.org',
+  ORGANIZATION_SUSPEND = 'suspend.org',
   ENDPOINT_REGISTER = 'register.endpoint',
   PASSWORD_CHANGE = 'change-password'
 }
@@ -63,6 +65,7 @@ export class PermissionConfigLink {
 
 export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.APPLICATION_CREATE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SPACE_CREATE]: new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
   [CurrentUserPermissions.SPACE_DELETE]: new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
   [CurrentUserPermissions.SPACE_EDIT]: [
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
@@ -80,6 +83,7 @@ export const permissionConfigs: IPermissionConfigs = {
   ],
   [CurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CurrentUserPermissions.ORGANIZATION_DELETE),
+  [CurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN),
   [CurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(PermissionTypes.STRATOS_SCOPE, ScopeStrings.STRATOS_CHANGE_PASSWORD),
 };

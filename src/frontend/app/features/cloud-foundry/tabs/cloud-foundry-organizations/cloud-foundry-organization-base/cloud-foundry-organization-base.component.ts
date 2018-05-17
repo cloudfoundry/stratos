@@ -50,6 +50,7 @@ export class CloudFoundryOrganizationBaseComponent {
   public isDevEnvironment = !environment.production;
 
   public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
+  public permsSpaceCreate = CurrentUserPermissions.SPACE_CREATE;
 
   constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService) {
     this.isFetching$ = cfOrgService.org$.pipe(
