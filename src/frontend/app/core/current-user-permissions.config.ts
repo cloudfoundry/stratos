@@ -1,7 +1,9 @@
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 
 export enum CurrentUserPermissions {
+  APPLICATION_VIEW = 'view.application',
   APPLICATION_CREATE = 'create.application',
+  SPACE_VIEW = 'view.space',
   SPACE_CREATE = 'create.space',
   SPACE_DELETE = 'delete.space',
   SPACE_EDIT = 'edit.space',
@@ -64,7 +66,25 @@ export class PermissionConfigLink {
 }
 
 export const permissionConfigs: IPermissionConfigs = {
+  [CurrentUserPermissions.APPLICATION_VIEW]: [
+    // See #2186
+    new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_READ_ONLY_ADMIN_GROUP),
+    new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP),
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_AUDITOR),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
+  ],
   [CurrentUserPermissions.APPLICATION_CREATE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SPACE_VIEW]: [
+    // See #2186
+    new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_READ_ONLY_ADMIN_GROUP),
+    new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GLOBAL_AUDITOR_GROUP),
+    new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_MANAGER),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_AUDITOR),
+    new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
+  ],
   [CurrentUserPermissions.SPACE_CREATE]: new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
   [CurrentUserPermissions.SPACE_DELETE]: new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
   [CurrentUserPermissions.SPACE_EDIT]: [
