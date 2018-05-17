@@ -35,19 +35,9 @@ export class AddServiceInstanceComponent {
   ) {
     const { serviceId, cfId } = activatedRoute.snapshot.params;
     if (cSIHelperService.marketPlaceMode) {
-      cSIHelperService.isInitialised().pipe(
-        take(1),
-        tap(o => {
-          const serviceGuid = serviceId;
-          this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
-          this.title$ = this.cSIHelperService.getServiceName().pipe(
-            map(label => `Create Instance: ${label}`)
-          );
-        })
-      ).subscribe();
+      this.initialiseForMarketplaceMode(serviceId, cfId);
     } else {
-      this.servicesWallCreateInstance = true;
-      this.title$ = Observable.of(`Create Service Instance`);
+      this.initialiseForDefaultMode();
     }
   }
 
@@ -60,4 +50,17 @@ export class AddServiceInstanceComponent {
     return Observable.of({ success: true });
   }
 
+
+  private initialiseForDefaultMode() {
+    this.servicesWallCreateInstance = true;
+    this.title$ = Observable.of(`Create Service Instance`);
+  }
+
+  private initialiseForMarketplaceMode(serviceId: string, cfId: string) {
+    this.cSIHelperService.isInitialised().pipe(take(1), tap(o => {
+      const serviceGuid = serviceId;
+      this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
+      this.title$ = this.cSIHelperService.getServiceName().pipe(map(label => `Create Instance: ${label}`));
+    })).subscribe();
+  }
 }
