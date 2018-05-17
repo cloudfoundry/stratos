@@ -1,41 +1,36 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, OnDestroy, Input, OnInit } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, share, switchMap, tap, take } from 'rxjs/operators';
+import { combineLatest, filter, first, map, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
-  SetCreateServiceInstance,
   SetCreateServiceInstanceOrg,
   SetCreateServiceInstanceSpace,
   SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
-import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
+import { CreateServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, serviceInstancesSchemaKey, serviceBindingSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
+import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import {
-  selectCreateServiceInstanceOrgGuid,
-  selectCreateServiceInstanceServicePlan,
   selectCreateServiceInstance,
+  selectCreateServiceInstanceOrgGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { ServicesService } from '../../services.service';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { CreateServiceInstanceHelperService, Mode } from '../create-service-instance-helper.service';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { safeUnsubscribe, getServiceJsonParams } from '../../services-helper';
-import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
+import { getServiceJsonParams } from '../../services-helper';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -112,21 +107,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     private snackBar: MatSnackBar,
   ) {
 
-    this.createNewInstanceForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-      org: new FormControl('', Validators.required),
-      space: new FormControl('', Validators.required),
-      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
-      tags: new FormControl(''),
-    });
-
-    this.selectExistingInstanceForm = new FormGroup({
-      serviceInstances: new FormControl('', [Validators.required]),
-    });
+    this.setupForms();
 
     if (cSIHelperService.isMarketplace()) {
-      this.orgs$ = this.initOrgsObservable();
-      this.spaces$ = this.initSpacesObservable();
+      this.InitOrgAndSpaceObs();
     }
 
     this.subscriptions.push(cSIHelperService.isInitialised().pipe(
@@ -157,30 +141,60 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     }
   }
 
+  private InitOrgAndSpaceObs() {
+    this.orgs$ = this.initOrgsObservable();
+    this.spaces$ = this.initSpacesObservable();
+  }
+
+  private setupForms() {
+    this.createNewInstanceForm = new FormGroup({
+      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
+      org: new FormControl('', Validators.required),
+      space: new FormControl('', Validators.required),
+      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
+      tags: new FormControl(''),
+    });
+    this.selectExistingInstanceForm = new FormGroup({
+      serviceInstances: new FormControl('', [Validators.required]),
+    });
+  }
+
   ngOnInit(): void {
     if (!this.cSIHelperService.isMarketplace()) {
-      this.createNewInstanceForm = new FormGroup({
-        name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-        params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
-        tags: new FormControl(''),
-      });
+      this.RemoveOrgAndSpaceFields();
     } else {
       this.subscriptions.push(this.cSIHelperService.getSelectedServicePlanAccessibility()
         .pipe(
-        map(o => o.spaceScoped),
-        tap(spaceScope => {
-          if (spaceScope) {
-            this.createNewInstanceForm.get('org').disable();
-            this.createNewInstanceForm.get('space').disable();
-          } else {
-            this.createNewInstanceForm.get('org').enable();
-            this.createNewInstanceForm.get('space').enable();
-          }
-        })).subscribe());
+          map(o => o.spaceScoped),
+          tap(spaceScope => {
+            if (spaceScope) {
+              this.disableOrgAndSpaceFields();
+            } else {
+              this.enableOrgAndSpaceFields();
+            }
+          })).subscribe());
     }
   }
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
+
+  private enableOrgAndSpaceFields() {
+    this.createNewInstanceForm.get('org').enable();
+    this.createNewInstanceForm.get('space').enable();
+  }
+
+  private disableOrgAndSpaceFields() {
+    this.createNewInstanceForm.get('org').disable();
+    this.createNewInstanceForm.get('space').disable();
+  }
+
+  private RemoveOrgAndSpaceFields() {
+    this.createNewInstanceForm = new FormGroup({
+      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
+      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
+      tags: new FormControl(''),
+    });
+  }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
@@ -193,13 +207,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   ngAfterContentInit() {
 
-    this.subscriptions.push(this.createNewInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.createNewInstanceForm.valid))
-    ).subscribe());
-
-    this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
-      map(() => this.validate.next(this.selectExistingInstanceForm.valid))
-    ).subscribe());
+    this.setupValidate();
 
     if (this.cSIHelperService.isMarketplace()) {
       this.subscriptions.push(this.orgs$.pipe(
@@ -276,30 +284,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       first(),
       switchMap(([request, state]) => {
         if (request.error) {
-          this.displaySnackBar();
-          return Observable.of({ success: false });
+          return this.handleException();
         } else {
-          let serviceInstanceGuid = '';
-          if (this.bindExistingInstance) {
-            serviceInstanceGuid = this.selectExistingInstanceForm.controls.serviceInstances.value;
-          } else {
-            serviceInstanceGuid = request.response.result[0];
-          }
+          const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           if (!!state.bindAppGuid) {
             return this.createBinding(serviceInstanceGuid, state.bindAppGuid, state.bindAppParams)
               .pipe(
-              filter(s => {
-                return s && !s.creating;
-              }),
-              map(req => {
-                if (req.error) {
-                  this.displaySnackBar(true);
-                  return { success: false };
-                } else {
-                  return this.routeToServices(state.cfGuid, state.bindAppGuid);
-                }
-              }));
+                filter(s => {
+                  return s && !s.creating;
+                }),
+                map(req => req.error ? this.handleException(true) : this.routeToServices(state.cfGuid, state.bindAppGuid))
+              );
           } else {
             return Observable.of(this.routeToServices());
           }
@@ -315,6 +311,29 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       this.store.dispatch(new RouterNav({ path: ['/services'] }));
     }
     return { success: true };
+  }
+
+  private setServiceInstanceGuid(request: { creating: boolean; error: boolean; response: { result: any[]; }; }) {
+    let serviceInstanceGuid = '';
+    if (this.bindExistingInstance) {
+      serviceInstanceGuid = this.selectExistingInstanceForm.controls.serviceInstances.value;
+    }
+    else {
+      serviceInstanceGuid = request.response.result[0];
+    }
+    return serviceInstanceGuid;
+  }
+
+  private handleException(bindingFailed: boolean = false) {
+    this.displaySnackBar(bindingFailed);
+    return Observable.of({ success: false });
+  }
+
+  private setupValidate() {
+    this.subscriptions.push(this.createNewInstanceForm.statusChanges.pipe(
+      map(() => this.validate.next(this.createNewInstanceForm.valid))).subscribe());
+    this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
+      map(() => this.validate.next(this.selectExistingInstanceForm.valid))).subscribe());
   }
 
   createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
