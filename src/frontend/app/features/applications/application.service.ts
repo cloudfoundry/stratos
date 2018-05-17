@@ -187,7 +187,8 @@ export class ApplicationService {
         map(space => space.entity.organization_guid),
         switchMap(orgGuid => {
           return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
-        })
+        }),
+        filter(org => !!org)
       ));
 
     this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.publishReplay(1).refCount();
