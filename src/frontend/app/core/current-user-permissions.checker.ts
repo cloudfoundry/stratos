@@ -30,13 +30,13 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 
-
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
 }
 
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
+  private readonly CF_GROUP_TYPE = '__CF_TYPE__';
   constructor(private store: Store<AppState>) { }
   public check(type: PermissionTypes, permission: PermissionValues, endpointGuid?: string, orgOrSpaceGuid?: string, ) {
     if (type === PermissionTypes.STRATOS) {
@@ -263,14 +263,22 @@ export class CurrentUserPermissionsChecker {
 
   public groupConfigs(configs: PermissionConfig[]): IConfigGroups {
     return configs.reduce((grouped, config) => {
+      const type = this.getGroupType(config);
       return {
         ...grouped,
-        [config.type]: [
-          ...(grouped[config.type] || []),
+        [type]: [
+          ...(grouped[type] || []),
           config
         ]
       };
     }, {});
+  }
+
+  private getGroupType(config: PermissionConfig) {
+    if (config.type === PermissionTypes.ORGANIZATION || PermissionTypes.SPACE) {
+      return this.CF_GROUP_TYPE;
+    }
+    return config.type;
   }
 
   private checkAllOfType(endpointGuid: string, type: PermissionTypes, permission: PermissionStrings) {
