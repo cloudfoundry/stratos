@@ -18,7 +18,7 @@
     "start": "ng serve --preserve-symlinks --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "start-prod": "ng serve --prod --preserve-symlinks --aot=false --sourcemaps=true --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "test": "ng test --preserve-symlinks --code-coverage --sourcemaps=false -sr",
-    "test-debug": "ng test --preserve-symlinks --sourcemaps=false",
+    "test-debug": "ng test --preserve-symlinks --sourcemaps=true",
     "codecov": "codecov -f coverage/*.json",
     "lint": "ng lint --type-check --format stylish",
     "sass-lint": "sass-lint -v",

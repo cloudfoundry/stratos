@@ -7,17 +7,26 @@ import { AppState } from '../../../../../store/app-state';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstancesDataSource } from './service-instances-data-source';
 
+/**
+ * Service instance list shown for `service / service instances` component
+ *
+ * @export
+ * @class ServiceInstancesListConfigService
+ * @extends {CfServiceInstancesListConfigBase}
+ */
 @Injectable()
-export class ServiceInstancesListConfigService
-  extends CfServiceInstancesListConfigBase {
+export class ServiceInstancesListConfigService extends CfServiceInstancesListConfigBase {
 
   constructor(store: Store<AppState>, servicesService: ServicesService, datePipe: DatePipe) {
-    super(store, servicesService.cfGuid, datePipe);
+    super(store, datePipe);
     // Remove 'Service' column
     this.serviceInstanceColumns.splice(1, 1);
-    this.getColumns = () => this.serviceInstanceColumns;
     this.dataSource = new ServiceInstancesDataSource(servicesService.cfGuid, servicesService.serviceGuid, store, this);
+    this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
+      breadcrumbs: 'marketplace-services'
+    };
   }
 
+  getColumns = () => this.serviceInstanceColumns;
   getDataSource = () => this.dataSource;
 }
