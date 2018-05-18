@@ -1,0 +1,39 @@
+@import '../../../../../sass/mixins';
+
+:host {
+  width: 100%;
+}
+
+.deploy-options {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+
+  @include breakpoint(tablet) {
+    flex-direction: row;
+  }
+
+  &__col {
+    //max-width: 480px;
+    width: 100%;
+    flex: 1;
+
+    &:first-child {
+      margin-right: 12px;
+    }
+    &:not(:first-child) {
+      margin-left: 12px;
+    }
+  }
+  &__buttons {
+    text-align: right;
+  }
+  &__toggler {
+    margin: 12px 0;
+  }
+  &__error {
+    font-weight: 600;
+    padding: 8px;
+  }
+}
+
