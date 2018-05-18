@@ -241,7 +241,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
         })
       ).subscribe());
     }
-    this.updateServiceInstanceNames();
   }
 
   initSpacesObservable = () => this.store.select(selectCreateServiceInstanceOrgGuid).pipe(
@@ -268,16 +267,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       }
     })
   )
-
-  updateServiceInstanceNames = () => {
-
-    // Update allServiceInstanceNames when user changes space in marketplaceMode
-else {
-      // In all other modes watch the store for the spaceGuid
-
-    }
-
-  }
 
   onNext = () => {
     return this.store.select(selectCreateServiceInstance).pipe(
