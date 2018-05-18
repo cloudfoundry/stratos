@@ -1,8 +1,33 @@
-import { HTTP_INTERCEPTORS, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse, HttpXsrfTokenExtractor } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest,
+  HttpResponse,
+  HttpXsrfTokenExtractor,
+} from '@angular/common/http';
 import { Inject, Injectable, NgModule, PLATFORM_ID } from '@angular/core';
+
 import { Observable } from 'rxjs/Observable';
 
 const STRATOS_XSRF_HEADER_NAME = 'X-XSRF-Token';
+
+@Injectable()
+export class HttpXsrfHeaderExtractor implements HttpXsrfTokenExtractor {
+
+  // XSRF Token
+  public static stratosXSRFToken = '';
+
+  constructor(@Inject(PLATFORM_ID) private platform: string) { }
+
+  getToken(): string | null {
+    if (this.platform === 'server') {
+      return null;
+    }
+    return HttpXsrfHeaderExtractor.stratosXSRFToken;
+  }
+}
 
 // Interceptor to look for the xsrf token in responses
 // Only works for calls using the new HttpClient in @angular/common/http
@@ -19,22 +44,6 @@ export class HttpXsrfHeaderInterceptor implements HttpInterceptor {
         }
       }
     });
-  }
-}
-
-@Injectable()
-export class HttpXsrfHeaderExtractor implements HttpXsrfTokenExtractor {
-
-  // XSRF Token
-  public static stratosXSRFToken = '';
-
-  constructor(@Inject(PLATFORM_ID) private platform: string) { }
-
-  getToken(): string | null {
-    if (this.platform === 'server') {
-      return null;
-    }
-    return HttpXsrfHeaderExtractor.stratosXSRFToken;
   }
 }
 
