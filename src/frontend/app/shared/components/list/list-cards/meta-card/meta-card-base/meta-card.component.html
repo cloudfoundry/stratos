@@ -9,8 +9,7 @@
       </button>
       <mat-menu class="meta-card__header__popup" #menu="matMenu">
         <ng-container *ngFor="let menuItem of _actionMenu">
-          <button class="meta-card__header__popup__btn" [disabled]="_menuItem.disabled | async" mat-menu-item *ngIf="menuItem.can | async"
-            (click)="menuItem.action()">
+          <button class="meta-card__header__popup__btn" [disabled]="menuItem.disabled | async" mat-menu-item *ngIf="menuItem.can | async" (click)="menuItem.action()">
             <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>
             <span>{{menuItem.label}}</span>
           </button>
