@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -13,8 +14,6 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gorilla/sessions"
-	uuid "github.com/satori/go.uuid"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
@@ -104,9 +103,6 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 	sessionValues["user_id"] = u.UserGUID
 	sessionValues["exp"] = u.TokenExpiry
 
-	xsrfToken := uuid.NewV4().String()
-	sessionValues[XSRFTokenSessionName] = xsrfToken
-
 	// Ensure that login disregards cookies from the request
 	req := c.Request().(*standard.Request).Request
 	req.Header.Set("Cookie", "")
@@ -144,13 +140,8 @@ func (p *portalProxy) loginToUAA(c echo.Context) error {
 		return err
 	}
 
-	// XSRF Token - needs to not be an HTTP-Only cookie, so that Angular can read it
-	session, _ := p.GetSession(c)
-	xsrfGUID := fmt.Sprintf("%s", xsrfToken)
-	w := c.Response().(*standard.Response).ResponseWriter
-	cookie := sessions.NewCookie(XSRFTokenCookie, xsrfGUID, session.Options)
-	cookie.HttpOnly = false
-	http.SetCookie(w, cookie)
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
 
 	c.Response().Header().Set("Content-Type", "application/json")
 	c.Response().Write(jsonString)
@@ -403,21 +394,10 @@ func (p *portalProxy) logout(c echo.Context) error {
 
 	p.removeEmptyCookie(c)
 
-	// Remove XSRF Cookie
-	session, err := p.GetSession(c)
-	if err == nil {
-		cookie := sessions.NewCookie(XSRFTokenCookie, "", session.Options)
-		cookie.HttpOnly = false
-		cookie.MaxAge = -1
-		cookie.Expires = time.Unix(0, 0)
-		w := c.Response().(*standard.Response).ResponseWriter
-		http.SetCookie(w, cookie)
-	}
-
 	// Remove the XSRF Token from the session
 	p.unsetSessionValue(c, XSRFTokenSessionName)
 
-	err = p.clearSession(c)
+	err := p.clearSession(c)
 	if err != nil {
 		log.Errorf("Unable to clear session: %v", err)
 	}
@@ -655,12 +635,51 @@ func (p *portalProxy) verifySession(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
+	// Add XSRF Token
+	p.ensureXSRFToken(c)
+
 	err = c.JSON(http.StatusOK, info)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// Create a token for XSRF if needed, store it in the session and add the response header for the front-end to pick up
+func (p *portalProxy) ensureXSRFToken(c echo.Context) {
+	token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
+	if err != nil || len(token) == 0 {
+		// Need a new token
+		tokenBytes, err := generateRandomBytes(32)
+		if err == nil {
+			token = base64.StdEncoding.EncodeToString(tokenBytes)
+		} else {
+			token = ""
+		}
+		sessionValues := make(map[string]interface{})
+		sessionValues[XSRFTokenSessionName] = token
+		p.setSessionValues(c, sessionValues)
+	}
+
+	if len(token) > 0 {
+		c.Response().Header().Set(XSRFTokenHeader, token)
+	}
+}
+
+// See: https://github.com/gorilla/csrf/blob/a8abe8abf66db8f4a9750d76ba95b4021a354757/helpers.go
+// generateRandomBytes returns securely generated random bytes.
+// It will return an error if the system's secure random number generator fails to function correctly.
+func generateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	// err == nil only if len(b) == n
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+
 }
 
 func (p *portalProxy) handleSessionExpiryHeader(c echo.Context) error {

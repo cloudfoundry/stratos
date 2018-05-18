@@ -1,32 +1,16 @@
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Headers, Http, RequestOptionsArgs, URLSearchParams } from '@angular/http';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-
 import { BrowserStandardEncoder } from '../../helper';
 import { GET_ENDPOINTS_SUCCESS, GetAllEndpointsSuccess } from '../actions/endpoint.actions';
 import { GetSystemInfo } from '../actions/system.actions';
 import { SessionData } from '../types/auth.types';
-import {
-  InvalidSession,
-  LOGIN,
-  Login,
-  LoginFailed,
-  LoginSuccess,
-  LOGOUT,
-  Logout,
-  LogoutFailed,
-  LogoutSuccess,
-  RESET_AUTH,
-  ResetAuth,
-  SESSION_INVALID,
-  VerifiedSession,
-  VERIFY_SESSION,
-  VerifySession,
-} from './../actions/auth.actions';
+import { InvalidSession, LOGIN, LOGOUT, Login, LoginFailed, LoginSuccess, Logout, LogoutFailed, LogoutSuccess, RESET_AUTH, ResetAuth, SESSION_INVALID, VERIFY_SESSION, VerifiedSession, VerifySession } from './../actions/auth.actions';
 import { AppState } from './../app-state';
+
 
 const SETUP_HEADER = 'stratos-setup-required';
 const UPGRADE_HEADER = 'retry-after';
@@ -35,7 +19,7 @@ const UPGRADE_HEADER = 'retry-after';
 export class AuthEffect {
 
   constructor(
-    private http: Http,
+    private http: HttpClient,
     private actions$: Actions,
     private store: Store<AppState>,
     private router: Router,
@@ -44,36 +28,37 @@ export class AuthEffect {
 
   @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN)
     .switchMap(({ username, password }) => {
-      const config = {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'x-cap-request-date': Math.floor(Date.now() / 1000)
+      const encoder = new BrowserStandardEncoder();
+      const headers = new HttpHeaders();
+      const params = new HttpParams({
+        encoder: new BrowserStandardEncoder(),
+        fromObject: {
+          username: username,
+          password: password
         }
-      };
-      const headers = new Headers();
-      const params = new URLSearchParams('', new BrowserStandardEncoder());
+      });
 
-      params.set('username', username);
-      params.set('password', password);
-
-      headers.append('Content-Type', 'application/x-www-form-urlencoded');
+      headers.set('Content-Type', 'application/x-www-form-urlencoded');
+      headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
       return this.http.post('/pp/v1/auth/login/uaa', params, {
-        headers
+        headers: headers,
       })
         .map(data => new VerifySession())
         .catch((err, caught) => [new LoginFailed(err)]);
     });
 
   @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION)
-    .switchMap((action) => {
-      const options: RequestOptionsArgs = {
-        headers: new Headers({ 'x-cap-request-date': Math.floor(Date.now() / 1000) }),
-        withCredentials: true
-      };
-      return this.http.get('/pp/v1/auth/session/verify', options)
-        .mergeMap(data => {
-          const sessionData: SessionData = data.json();
-          sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
+    .switchMap(action => {
+      const headers = new HttpHeaders();
+      headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
+      return this.http.get<SessionData>('/pp/v1/auth/session/verify', {
+        headers: headers,
+        observe: 'response',
+        withCredentials: true,
+      })
+        .mergeMap(response => {
+          const sessionData = response.body;
+          sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
           return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
         })
         .catch((err, caught) => {

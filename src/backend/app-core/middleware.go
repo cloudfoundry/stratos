@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"net/http"
 	"os"
@@ -60,12 +61,12 @@ func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return h(c)
 		}
 		errMsg := "Failed to get stored XSRF token from user session"
-		token, err := p.GetSessionValue(c, XSRFTokenSessionName)
+		token, err := p.GetSessionStringValue(c, XSRFTokenSessionName)
 		if err == nil {
 			// Check the token against the header
-			if (c.Request().Header().Contains(XSRFTokenHeader)) {
+			if c.Request().Header().Contains(XSRFTokenHeader) {
 				requestToken := c.Request().Header().Get(XSRFTokenHeader)
-				if (requestToken == token) {
+				if compareTokens(requestToken, token) {
 					return h(c)
 				}
 				errMsg = "Supplied XSRF Token does not match"
@@ -79,6 +80,13 @@ func (p *portalProxy) xsrfMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			"XSRF Token error: %s", errMsg,
 		)
 	}
+}
+
+func compareTokens(a, b string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	return subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
 }
 
 func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
