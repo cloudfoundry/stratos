@@ -120,7 +120,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     detachServiceBinding(
       this.confirmDialog,
       this.store, serviceBindingGuid,
-      serviceInstance.entity.service_guid,
+      serviceInstance.metadata.guid,
       serviceInstance.entity.cfGuid
     );
   }

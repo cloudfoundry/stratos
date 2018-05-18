@@ -130,7 +130,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
       this.confirmDialog,
       this.store,
       this.row.metadata.guid,
-      this.row.entity.service_instance.entity.service_guid,
+      this.row.entity.service_instance_guid,
       this.appService.cfGuid
     );
   }
