@@ -1,5 +1,5 @@
 import { TitleCasePipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -10,7 +10,7 @@ import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { GetApplication } from '../../../../store/actions/application.actions';
-import { SetCreateServiceInstanceCFDetails } from '../../../../store/actions/create-service-instance.actions';
+import { SetCreateServiceInstanceCFDetails, ResetCreateServiceInstanceState } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceWithOrgKey, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { APIResource } from '../../../../store/types/api.types';
@@ -29,7 +29,8 @@ import { createEntityRelationKey } from '../../../../store/helpers/entity-relati
     TitleCasePipe
   ]
 })
-export class AddServiceInstanceComponent {
+export class AddServiceInstanceComponent implements OnDestroy {
+
   displaySelectServiceStep: boolean;
   displaySelectCfStep: boolean;
   title$: Observable<string>;
@@ -133,5 +134,8 @@ export class AddServiceInstanceComponent {
         })
       ).subscribe();
     }
+  }
+  ngOnDestroy(): void {
+    this.store.dispatch(new ResetCreateServiceInstanceState());
   }
 }
