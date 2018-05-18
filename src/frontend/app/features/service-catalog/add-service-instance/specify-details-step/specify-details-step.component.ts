@@ -58,8 +58,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
   spaceScopeSub: Subscription;
-  cfGuid: string;
-  serviceGuid: string;
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
 
@@ -107,22 +105,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
     this.constructorSubscription = cSIHelperService.isInitialised().pipe(
       tap(o => {
-        this.cSIHelperService.serviceGuid$.pipe(
-          first(),
-          tap(guid => {
-            const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, guid);
-            this.allServiceInstances$ = this.initServiceInstances(paginationKey);
-          }),
-        ).subscribe();
-
-        this.cSIHelperService.cfGuid$.pipe(
-          first(),
-          tap(guid => this.cfGuid = guid)
-        ).subscribe();
+        this.allServiceInstances$ = Observable.combineLatest(this.cSIHelperService.serviceGuid$, this.cSIHelperService.cfGuid$).pipe(
+          switchMap(([serviceGuid, cfGuid]) => {
+            const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
+            return this.initServiceInstances(cfGuid, paginationKey);
+          })
+        );
       })
     ).subscribe();
-
-
   }
 
   ngOnInit(): void {
@@ -133,8 +123,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
         tags: new FormControl(''),
       });
     } else {
-      this.spaceScopeSub = this.cSIHelperService.getSelectedServicePlanAccessibility()
-        .pipe(
+      this.spaceScopeSub = this.cSIHelperService.getSelectedServicePlanAccessibility().pipe(
         map(o => o.spaceScoped),
         tap(spaceScope => {
           if (spaceScope) {
@@ -150,17 +139,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
-  initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
+  initServiceInstances = (cfGuid: string, paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
     store: this.store,
-    action: new GetServiceInstances(this.cfGuid, paginationKey),
+    action: new GetServiceInstances(cfGuid, paginationKey),
     paginationMonitor: this.paginationMonitorFactory.create(
       paginationKey,
       entityFactory(serviceInstancesSchemaKey)
     )
   }, true)
     .entities$.pipe(
-    share(),
-    first()
+      share(),
+      first()
     )
   ngOnDestroy(): void {
     safeUnsubscribe(this.orgSubscription);
@@ -248,8 +237,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
           const serviceInstanceGuid = request.response.result[0];
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           if (!!state.bindAppGuid) {
-            return this.createBinding(serviceInstanceGuid, state.bindAppGuid, state.bindAppParams)
-              .pipe(
+            return this.createBinding(serviceInstanceGuid, state.cfGuid, state.bindAppGuid, state.bindAppParams).pipe(
               filter(s => {
                 return s && !s.creating;
               }),
@@ -280,11 +268,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     let cfGuid = '';
     if (!this.cSIHelperService.marketPlaceMode) {
       spaceGuid = createServiceInstance.spaceGuid;
-      cfGuid = createServiceInstance.cfGuid;
     } else {
       spaceGuid = this.stepperForm.controls.space.value;
-      cfGuid = this.cfGuid;
     }
+    cfGuid = createServiceInstance.cfGuid;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = getServiceJsonParams(this.stepperForm.controls.params.value);
     let tagsStr = null;
@@ -293,20 +280,20 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
 
     this.store.dispatch(new CreateServiceInstance(
-      this.cfGuid,
+      cfGuid,
       newServiceInstanceGuid,
       name, servicePlanGuid, spaceGuid, params, tagsStr
     ));
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
 
-  createBinding = (serviceInstanceGuid: string, appGuid: string, params: {}) => {
+  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 
-    const guid = `${this.cfGuid}-${appGuid}-${serviceInstanceGuid}`;
+    const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
     params = params;
 
     this.store.dispatch(new CreateServiceBinding(
-      this.cfGuid,
+      cfGuid,
       guid,
       appGuid,
       serviceInstanceGuid,
