@@ -26,6 +26,7 @@ import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceOrgGuid,
+  selectCreateServiceInstanceServicePlan,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
@@ -70,8 +71,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   tagsAddOnBlur = true;
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
-  cfGuid: string;
-  serviceGuid: string;
+  spaceScopeSub: Subscription;
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
   bindExistingInstance = false;
@@ -116,16 +116,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     this.subscriptions.push(cSIHelperService.isInitialised().pipe(
       tap(o => {
 
-        this.cSIHelperService.serviceGuid$.pipe(
-          first(),
-          tap(guid => {
-            // This needs to be from a plan
-            this.serviceInstances$ = cSIHelperService.getServiceInstancesForService();
-            this.allServiceInstances$ = cSIHelperService.getServiceInstancesForService();
-          }),
-        ).subscribe();
-
-        this.cSIHelperService.cfGuid$.pipe(first(), tap(guid => this.cfGuid = guid)).subscribe();
+        this.allServiceInstances$ = Observable.combineLatest(this.cSIHelperService.serviceGuid$, this.cSIHelperService.cfGuid$).pipe(
+          switchMap(([serviceGuid, cfGuid]) => cSIHelperService.getServiceInstancesForService())
+        );
+        this.serviceInstances$ = this.store.select(selectCreateServiceInstanceServicePlan).pipe(
+          filter(p => !!p),
+          switchMap(guid => cSIHelperService.getServiceInstancesForService(guid))
+        );
       })
     ).subscribe());
   }
@@ -289,7 +286,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
           const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           if (!!state.bindAppGuid) {
-            return this.createBinding(serviceInstanceGuid, state.bindAppGuid, state.bindAppParams)
+            return this.createBinding(serviceInstanceGuid, state.cfGuid, state.bindAppGuid, state.bindAppParams)
               .pipe(
                 filter(s => {
                   return s && !s.creating;
@@ -341,13 +338,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     const name = this.createNewInstanceForm.controls.name.value;
     let spaceGuid = '';
     let cfGuid = '';
-    if (!this.cSIHelperService.isMarketplace()) {
-      spaceGuid = createServiceInstance.spaceGuid;
-      cfGuid = createServiceInstance.cfGuid;
-    } else {
+    if (this.cSIHelperService.isMarketplace()) {
       spaceGuid = this.createNewInstanceForm.controls.space.value;
-      cfGuid = this.cfGuid;
+    } else {
+      spaceGuid = createServiceInstance.spaceGuid;
     }
+
+    cfGuid = createServiceInstance.cfGuid;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);
     let tagsStr = null;
@@ -356,20 +353,20 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
 
     this.store.dispatch(new CreateServiceInstance(
-      this.cfGuid,
+      cfGuid,
       newServiceInstanceGuid,
       name, servicePlanGuid, spaceGuid, params, tagsStr
     ));
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
 
-  createBinding = (serviceInstanceGuid: string, appGuid: string, params: {}) => {
+  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 
-    const guid = `${this.cfGuid}-${appGuid}-${serviceInstanceGuid}`;
+    const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
     params = params;
 
     this.store.dispatch(new CreateServiceBinding(
-      this.cfGuid,
+      cfGuid,
       guid,
       appGuid,
       serviceInstanceGuid,

@@ -116,7 +116,7 @@ export class CreateServiceInstanceHelperService {
     ).entities$.pipe(
       first(),
       tap(o => this.servicePlanVisibilities$.next(o))
-      ).subscribe();
+    ).subscribe();
   }
 
   isMarketplace = () => this.mode === Mode.MARKETPLACE;
@@ -171,15 +171,15 @@ export class CreateServiceInstanceHelperService {
   getServiceName = () => {
     return this.getService()
       .pipe(
-      filter(p => !!p),
-      map(service => {
-        const extraInfo = JSON.parse(service.entity.extra);
-        if (extraInfo && extraInfo.displayName) {
-          return extraInfo.displayName;
-        } else {
-          return service.entity.label;
-        }
-      }));
+        filter(p => !!p),
+        map(service => {
+          const extraInfo = JSON.parse(service.entity.extra);
+          if (extraInfo && extraInfo.displayName) {
+            return extraInfo.displayName;
+          } else {
+            return service.entity.label;
+          }
+        }));
   }
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
@@ -201,9 +201,9 @@ export class CreateServiceInstanceHelperService {
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
     return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.getServicePlans())
       .pipe(
-      filter(([p, q]) => !!p && !!q),
-      map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
-      map(p => p[0]), filter(p => !!p)
+        filter(([p, q]) => !!p && !!q),
+        map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
+        map(p => p[0]), filter(p => !!p)
       );
   }
 
@@ -216,53 +216,53 @@ export class CreateServiceInstanceHelperService {
   getOrgsForSelectedServicePlan = (): Observable<APIResource<IOrganization>[]> => {
     return this.getSelectedServicePlan()
       .pipe(
-      switchMap(servicePlan => this.getServicePlanAccessibility(servicePlan)),
-      combineLatest(this.cfGuid$),
-      switchMap(([servicePlanAccessbility, cfGuid]) => {
-        if (servicePlanAccessbility.isPublic) {
-          const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(cfGuid);
-          return getPaginationObservables<APIResource<IOrganization>>({
-            store: this.store,
-            action: getAllOrgsAction,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              getAllOrgsAction.paginationKey,
-              entityFactory(organizationSchemaKey)
-            )
-          }, true)
-            .entities$.pipe(share(), first());
-        } else if (servicePlanAccessbility.spaceScoped) {
-          // Service plan is not public, but is space-scoped
-          const action = new GetSpace(servicePlanAccessbility.spaceGuid, cfGuid,
-            [
-              createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
-            ]
-          );
-          action.entity = [entityFactory(spaceWithOrgKey)];
-          return this.entityServiceFactory.create<APIResource<ISpace>>(
-            spaceSchemaKey,
-            entityFactory(spaceWithOrgKey),
-            servicePlanAccessbility.spaceGuid,
-            action,
-            true
-          ).waitForEntity$
-            .pipe(
-            // Block until the org is either fetched or associated with existing entity
-            filter(p => !!pathGet('entity.entity.organization.entity', p)),
-            map((p) => {
-              const orgEntity = { ...p.entity.entity.organization.entity, spaces: [p.entity] };
-              return [{ ...p.entity.entity.organization, entity: orgEntity }];
-            }),
-          );
-        } else if (servicePlanAccessbility.hasVisibilities) {
-          // Service plan is not public, fetch visibilities
-          return this.getServicePlanVisibilitiesForPlan(servicePlanAccessbility.guid)
-            .pipe(
-            map(s => s.map(o => o.entity.organization)),
-          );
+        switchMap(servicePlan => this.getServicePlanAccessibility(servicePlan)),
+        combineLatest(this.cfGuid$),
+        switchMap(([servicePlanAccessbility, cfGuid]) => {
+          if (servicePlanAccessbility.isPublic) {
+            const getAllOrgsAction = CloudFoundryEndpointService.createGetAllOrganizationsLimitedSchema(cfGuid);
+            return getPaginationObservables<APIResource<IOrganization>>({
+              store: this.store,
+              action: getAllOrgsAction,
+              paginationMonitor: this.paginationMonitorFactory.create(
+                getAllOrgsAction.paginationKey,
+                entityFactory(organizationSchemaKey)
+              )
+            }, true)
+              .entities$.pipe(share(), first());
+          } else if (servicePlanAccessbility.spaceScoped) {
+            // Service plan is not public, but is space-scoped
+            const action = new GetSpace(servicePlanAccessbility.spaceGuid, cfGuid,
+              [
+                createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+              ]
+            );
+            action.entity = [entityFactory(spaceWithOrgKey)];
+            return this.entityServiceFactory.create<APIResource<ISpace>>(
+              spaceSchemaKey,
+              entityFactory(spaceWithOrgKey),
+              servicePlanAccessbility.spaceGuid,
+              action,
+              true
+            ).waitForEntity$
+              .pipe(
+                // Block until the org is either fetched or associated with existing entity
+                filter(p => !!pathGet('entity.entity.organization.entity', p)),
+                map((p) => {
+                  const orgEntity = { ...p.entity.entity.organization.entity, spaces: [p.entity] };
+                  return [{ ...p.entity.entity.organization, entity: orgEntity }];
+                }),
+            );
+          } else if (servicePlanAccessbility.hasVisibilities) {
+            // Service plan is not public, fetch visibilities
+            return this.getServicePlanVisibilitiesForPlan(servicePlanAccessbility.guid)
+              .pipe(
+                map(s => s.map(o => o.entity.organization)),
+            );
+          }
         }
-      }
-      ),
-      share(), first()
+        ),
+        share(), first()
       );
   }
 
@@ -274,7 +274,7 @@ export class CreateServiceInstanceHelperService {
     );
   }
 
-  getServiceInstancesForService = () => {
+  getServiceInstancesForService = (servicePlanGuid: string = null) => {
     return this.isInitialised().pipe(
       switchMap(p => {
         const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, p.cfGuid);
@@ -288,14 +288,16 @@ export class CreateServiceInstanceHelperService {
           )
         }, true)
           .entities$.pipe(
-          share(),
-          first(),
-          map(serviceInstances => serviceInstances.filter(s => (s.entity.service_guid === p.serviceGuid))),
-        );
+            share(),
+            first(),
+            map(serviceInstances => serviceInstances.filter(s => (s.entity.service_guid === p.serviceGuid))),
+            // Filter out services that belong to other service plans if required
+            map(serviceInstances => servicePlanGuid ?
+              serviceInstances.filter(s => (s.entity.service_plan_guid === servicePlanGuid)) : serviceInstances)
+          );
 
       })
     );
-
   }
 
 }
