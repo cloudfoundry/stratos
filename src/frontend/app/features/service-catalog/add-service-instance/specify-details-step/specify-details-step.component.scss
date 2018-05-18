@@ -15,3 +15,11 @@
     }
   }
 }
+
+.specify-details {
+  &__radio-group {
+    &__radio {
+      padding-right: 10px;
+    }
+  }
+}

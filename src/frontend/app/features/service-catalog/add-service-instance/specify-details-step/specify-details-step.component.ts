@@ -27,6 +27,7 @@ import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceOrgGuid,
   selectCreateServiceInstanceServicePlan,
+  selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
@@ -75,7 +76,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
   bindExistingInstance = false;
-
   subscriptions: Subscription[] = [];
 
   static isValidJsonValidatorFn = (): ValidatorFn => {
@@ -114,11 +114,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     }
 
     this.subscriptions.push(cSIHelperService.isInitialised().pipe(
-      tap(o => {
+      tap(t => {
 
         this.allServiceInstances$ = Observable.combineLatest(this.cSIHelperService.serviceGuid$, this.cSIHelperService.cfGuid$).pipe(
           switchMap(([serviceGuid, cfGuid]) => cSIHelperService.getServiceInstancesForService())
         );
+
+        this.subscriptions.push(this.setupFormValidatorData());
+
         this.serviceInstances$ = this.store.select(selectCreateServiceInstanceServicePlan).pipe(
           filter(p => !!p),
           switchMap(guid => cSIHelperService.getServiceInstancesForService(guid))
@@ -133,9 +136,28 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     this.selectExistingInstanceForm.reset();
     if (mode === FormMode.CreateServiceInstance) {
       this.tags = [];
+      this.bindExistingInstance = false;
     } else if (mode === FormMode.BindServiceInstance) {
       this.bindExistingInstance = true;
     }
+  }
+
+  private setupFormValidatorData(): Subscription {
+    return this.allServiceInstances$.pipe(switchMap(instances => {
+      if (this.cSIHelperService.isMarketplace()) {
+        return this.createNewInstanceForm.controls.space.statusChanges.pipe(map(c => {
+          return instances.filter(s => s.entity.space_guid === this.createNewInstanceForm.controls.space.value);
+        }), tap(o => {
+          this.allServiceInstanceNames = o.map(s => s.entity.name);
+        }));
+      } else {
+        return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
+          filter(p => !!p),
+          map(spaceGuid => instances.filter(s => s.entity.space_guid === spaceGuid)), tap(o => {
+            this.allServiceInstanceNames = o.map(s => s.entity.name);
+          }));
+      }
+    })).subscribe();
   }
 
   private InitOrgAndSpaceObs() {
@@ -218,8 +240,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
           }
         })
       ).subscribe());
-      this.updateServiceInstanceNames();
     }
+    this.updateServiceInstanceNames();
   }
 
   initSpacesObservable = () => this.store.select(selectCreateServiceInstanceOrgGuid).pipe(
@@ -248,15 +270,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   )
 
   updateServiceInstanceNames = () => {
-    this.subscriptions.push(this.createNewInstanceForm.controls.space.statusChanges.pipe(
-      combineLatest(this.serviceInstances$),
-      map(([c, services]) => {
-        return services.filter(s => s.entity.space_guid === this.createNewInstanceForm.controls.space.value);
-      }),
-      tap(o => {
-        this.allServiceInstanceNames = o.map(s => s.entity.name);
-      })
-    ).subscribe());
+
+    // Update allServiceInstanceNames when user changes space in marketplaceMode
+else {
+      // In all other modes watch the store for the spaceGuid
+
+    }
+
   }
 
   onNext = () => {
@@ -273,7 +293,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
             }
           });
         } else {
-          this.createServiceInstance(p);
+          return this.createServiceInstance(p);
         }
       }),
       filter(s => !s.creating),
@@ -314,8 +334,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     let serviceInstanceGuid = '';
     if (this.bindExistingInstance) {
       serviceInstanceGuid = this.selectExistingInstanceForm.controls.serviceInstances.value;
-    }
-    else {
+    } else {
       serviceInstanceGuid = request.response.result[0];
     }
     return serviceInstanceGuid;

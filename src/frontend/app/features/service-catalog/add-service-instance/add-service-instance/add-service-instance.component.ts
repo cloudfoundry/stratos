@@ -104,6 +104,7 @@ export class AddServiceInstanceComponent {
 
   private setupForAppServiceMode(id: string, cfId: string) {
     this.appId = id;
+    this.bindAppStepperText = 'Binding Params (Optional)';
     const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
       applicationSchemaKey,
       entityFactory(applicationSchemaKey),
