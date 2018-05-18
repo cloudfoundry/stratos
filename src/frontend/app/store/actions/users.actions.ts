@@ -34,6 +34,9 @@ const defaultUserRelations = [
   createEntityRelationKey(cfUserSchemaKey, 'managed_spaces'),
   createEntityRelationKey(cfUserSchemaKey, 'audited_spaces')
 ];
+export const GET_CF_USER = '[Users] Get cf user ';
+export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
+export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 
 export class GetAllUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
@@ -57,6 +60,22 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction, Entit
     'order-direction-field': 'username',
   };
   flattenPagination = true;
+}
+
+export class GetCFUser extends CFStartAction implements IRequestAction {
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `users/${guid}/summary`;
+    this.options.method = 'get';
+  }
+  actions = [GET_CF_USER, GET_CF_USER_SUCCESS, GET_CF_USER_FAILED];
+  entity = entityFactory(cfUserSchemaKey);
+  entityKey = cfUserSchemaKey;
+  options: RequestOptions;
 }
 
 export class ChangeUserPermission extends CFStartAction implements IRequestAction {
@@ -146,3 +165,5 @@ export class GetUser extends CFStartAction {
   entityKey = cfUserSchemaKey;
   options: RequestOptions;
 }
+
+

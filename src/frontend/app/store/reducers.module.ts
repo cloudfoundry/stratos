@@ -11,6 +11,7 @@ import { requestDataReducer, requestReducer } from './reducers/api-request-reduc
 import { authReducer } from './reducers/auth.reducer';
 import { createAppReducer } from './reducers/create-application.reducer';
 import { createServiceInstanceReducer } from './reducers/create-service-instance.reducer';
+import { currentUserRolesReducer } from './reducers/current-user-roles-reducer/current-user-roles.reducer';
 import { dashboardReducer } from './reducers/dashboard-reducer';
 import { deployAppReducer } from './reducers/deploy-app.reducer';
 import { endpointsReducer } from './reducers/endpoints.reducer';
@@ -42,7 +43,8 @@ export const appReducers = {
   lists: listReducer,
   routing: routingReducer,
   manageUsersRoles: UsersRolesReducer,
-  internalEvents: internalEventReducer
+  internalEvents: internalEventReducer,
+  currentUserRoles: currentUserRolesReducer
 } as ActionReducerMap<{}>;
 
 let metaReducers = [];
