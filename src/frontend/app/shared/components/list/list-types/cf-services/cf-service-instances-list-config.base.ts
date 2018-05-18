@@ -24,6 +24,8 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { detachServiceBinding } from '../app-sevice-bindings/service-binding.helper';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
@@ -100,7 +102,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     enabled: (row: APIResource) => row.entity.service_bindings.length === 1
   };
 
-  constructor(protected store: Store<AppState>, protected datePipe: DatePipe) {
+  constructor(protected store: Store<AppState>, protected datePipe: DatePipe, private confirmDialog: ConfirmationDialogService) {
     super();
   }
 
@@ -109,18 +111,18 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
+
     /**
      * If only one binding exists, carry out the action otherwise
      * take user to a form to select which app binding they want to remove
     **/
-    if (serviceInstance.entity.service_bindings.length === 1) {
-      this.store.dispatch(new DeleteServiceBinding(
-        serviceInstance.entity.cfGuid,
-        serviceInstance.entity.service_bindings[0].metadata.guid,
-        serviceInstance.metadata.guid));
-    } else {
-      this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));
-    }
+    const serviceBindingGuid = serviceInstance.entity.service_bindings[0].metadata.guid;
+    detachServiceBinding(
+      this.confirmDialog,
+      this.store, serviceBindingGuid,
+      serviceInstance.entity.service_guid,
+      serviceInstance.entity.cfGuid
+    );
   }
 
   getGlobalActions = () => [];

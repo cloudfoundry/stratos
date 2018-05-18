@@ -11,6 +11,8 @@ import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { DeleteServiceBinding } from '../../../../../../store/actions/service-bindings.actions';
+import { detachServiceBinding } from '../../app-sevice-bindings/service-binding.helper';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 @Component({
   selector: 'app-service-instance-card',
@@ -27,7 +29,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
 
-  constructor(private store: Store<AppState>, private servicesWallService: ServicesWallService) {
+  constructor(
+    private store: Store<AppState>,
+    private servicesWallService: ServicesWallService,
+    private confirmDialog: ConfirmationDialogService
+  ) {
     super();
 
     this.cardMenu = [
@@ -57,14 +63,8 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
 
   detach = () => {
-    // Only deletes the first binding, if more than one exist this should take user to the appropriate view
-    if (this.row.entity.service_bindings.length === 1) {
-      this.store.dispatch(new DeleteServiceBinding(
-        this.cfGuid,
-        this.row.entity.service_bindings[0].metadata.guid,
-        this.row.metadata.guid
-      ));
-    }
+    const serviceBindingGuid = this.row.entity.service_bindings[0].metadata.guid;
+    detachServiceBinding(this.confirmDialog, this.store, serviceBindingGuid, this.row.metadata.guid, this.row.entity.cfGuid);
   }
 
 
