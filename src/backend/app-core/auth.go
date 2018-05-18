@@ -679,9 +679,10 @@ func (p *portalProxy) getUAAUser(userGUID string) (*interfaces.ConnectedUser, er
 
 	// add the uaa entry to the output
 	uaaEntry := &interfaces.ConnectedUser{
-		GUID:  userGUID,
-		Name:  userTokenInfo.UserName,
-		Admin: uaaAdmin,
+		GUID:   userGUID,
+		Name:   userTokenInfo.UserName,
+		Admin:  uaaAdmin,
+		Scopes: userTokenInfo.Scope,
 	}
 
 	return uaaEntry, nil
@@ -722,8 +723,9 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 
 		// add the uaa entry to the output
 		cnsiUser = &interfaces.ConnectedUser{
-			GUID: userTokenInfo.UserGUID,
-			Name: userTokenInfo.UserName,
+			GUID:   userTokenInfo.UserGUID,
+			Name:   userTokenInfo.UserName,
+			Scopes: userTokenInfo.Scope,
 		}
 		scope = userTokenInfo.Scope
 	}

@@ -1,8 +1,8 @@
 <app-page-header [tabs]="tabLinks">
   <h1>{{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
-    <button mat-icon-button name="add-org" *ngIf="(this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
-      <mat-icon>add</mat-icon>
+    <button mat-icon-button name="add-org" *ngIf="(this.cfEndpointService.connected$ | async) && (canAddOrg$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
+      <mat-icon>add_box</mat-icon>
     </button>
     <button mat-icon-button name="user-management" *ngIf="isDevEnvironment && (this.cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/manage-users">
       <mat-icon>people</mat-icon>

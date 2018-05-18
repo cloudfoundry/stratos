@@ -77,7 +77,6 @@ describe('CfOrgCardComponent', () => {
   });
 
   it('should create', () => {
-
     expect(component).toBeTruthy();
   });
 });

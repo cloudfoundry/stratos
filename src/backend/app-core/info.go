@@ -81,7 +81,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*interfaces.Info, error) {
 		s.Endpoints[cnsiType][cnsi.GUID] = endpoint
 	}
 
-	// Allow plugin to modyf the info data
+	// Allow plugin to modify the info data
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
 		if err == nil {
