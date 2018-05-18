@@ -81,7 +81,8 @@ export class AppActionMonitorComponent<T> implements OnInit {
     this.dataSource = {
       connect: () => this.data$,
       disconnect: () => { },
-      trackBy: this.getId ? (index, item) => this.getId(item) : this.trackBy
+      trackBy: this.getId ? (index, item) => this.getId(item) : this.trackBy,
+      isTableLoading$: Observable.of(false)
     } as ITableListDataSource<T>;
   }
 

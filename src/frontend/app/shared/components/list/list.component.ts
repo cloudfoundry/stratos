@@ -406,7 +406,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         })
       );
 
-    const canShowLoading$ = this.dataSource.pagination$.pipe(
+    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
+      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
+      withLatestFrom(this.dataSource.pagination$),
+      map(([loading, page]) => page),
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),

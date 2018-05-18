@@ -1,4 +1,7 @@
-<div>
+<div class="app-table">
+  <div class="app-table__loading" *ngIf="dataSource.isTableLoading$">
+    <mat-progress-bar color="primary" *ngIf="dataSource.isTableLoading$ | async" [mode]="'query'"></mat-progress-bar>
+  </div>
   <mat-card class="app-table__card">
     <mat-card-content class="app-table__content">
       <mat-table class="app-table__inner" #table [hidden]="hideTable" [dataSource]="dataSource" [trackBy]="dataSource.trackBy" matSort>

@@ -122,8 +122,14 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       map(org => [org]),
       share()
     );
+
+    const isTableLoading$ = orgConnect$.pipe(
+      map(orgs => !orgs),
+      startWith(true)
+    );
     // Data source that will power the orgs table
     this.orgDataSource = {
+      isTableLoading$,
       connect: () => orgConnect$,
       disconnect: () => { },
       trackBy: (index, row) => getRowMetadata(row)
