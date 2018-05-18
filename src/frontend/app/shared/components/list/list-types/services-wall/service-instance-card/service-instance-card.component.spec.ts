@@ -10,6 +10,7 @@ import { AppChipsComponent } from '../../../../chips/chips.component';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
+import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 describe('ServiceInstanceCardComponent', () => {
   let component: ServiceInstanceCardComponent;
@@ -27,7 +28,8 @@ describe('ServiceInstanceCardComponent', () => {
         ServicesWallService,
         EntityServiceFactory,
         EntityMonitorFactory,
-        PaginationMonitorFactory
+        PaginationMonitorFactory,
+        ConfirmationDialogService
       ]
     })
       .compileComponents();
