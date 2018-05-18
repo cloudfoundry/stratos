@@ -99,17 +99,6 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
 
     this.subscriptions.push(fetchData$.subscribe());
 
-    console.log(this.cfEndpointService.cfGuid);
-    console.log(this.orgGuid);
-    console.log(this.spaceGuid);
-
-    this.currentUserPermissionsService.can(
-      CurrentUserPermissions.SPACE_EDIT,
-      this.cfEndpointService.cfGuid,
-      this.orgGuid,
-      this.spaceGuid
-    ).subscribe(a => console.log('SPACE_EDIT: ', a));
-
   }
 
   setCounts = () => {

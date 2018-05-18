@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
@@ -13,10 +13,9 @@ import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-fac
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
-  getCurrentUserCFGlobalStates,
+  getCurrentUserCFGlobalState,
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-  getCurrentUserCFGlobalState,
 } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { APIResource } from '../store/types/api.types';
@@ -29,6 +28,7 @@ import {
   PermissionValues,
   ScopeStrings,
 } from './current-user-permissions.config';
+
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
 }
@@ -64,7 +64,6 @@ export class CurrentUserPermissionsChecker {
       filter(state => !!state),
       map(state => this.selectPermission(state, permission as PermissionStrings)),
       distinctUntilChanged(),
-      tap(a => console.log(`${permission}, ${orgOrSpaceGuid}`, a))
     );
   }
   /**
