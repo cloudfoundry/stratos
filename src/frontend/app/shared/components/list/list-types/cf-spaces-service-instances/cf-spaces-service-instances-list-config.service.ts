@@ -23,7 +23,11 @@ import { ConfirmationDialogService } from '../../../confirmation-dialog.service'
 export class CfSpacesServiceInstancesListConfigService extends CfServiceInstancesListConfigBase
   implements IListConfig<APIResource<IServiceInstance>>  {
 
-  constructor(store: Store<AppState>, cfSpaceService: CloudFoundrySpaceService, datePipe: DatePipe, confirmDialog: ConfirmationDialogService) {
+  constructor(
+    store: Store<AppState>,
+    cfSpaceService: CloudFoundrySpaceService,
+    datePipe: DatePipe,
+    confirmDialog: ConfirmationDialogService) {
     super(store, datePipe, confirmDialog);
     this.dataSource = new CfSpacesServiceInstancesDataSource(cfSpaceService.cfGuid, cfSpaceService.spaceGuid, this.store, this);
     this.serviceInstanceColumns.find(column => column.columnId === 'attachedApps').cellConfig = {
