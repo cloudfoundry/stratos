@@ -11,6 +11,8 @@ import { SpecifyDetailsStepComponent } from './add-service-instance/specify-deta
 import { BindAppsStepComponent } from './add-service-instance/bind-apps-step/bind-apps-step.component';
 import { AddServiceInstanceComponent } from './add-service-instance/add-service-instance/add-service-instance.component';
 import { SelectPlanStepComponent } from './add-service-instance/select-plan-step/select-plan-step.component';
+import { CreateApplicationModule } from '../applications/create-application/create-application.module';
+import { SelectServiceComponent } from './add-service-instance/select-service/select-service.component';
 
 @NgModule({
   imports: [
@@ -18,6 +20,7 @@ import { SelectPlanStepComponent } from './add-service-instance/select-plan-step
     SharedModule,
     ServiceCatalogRoutingModule,
     CoreModule,
+    CreateApplicationModule
   ],
   declarations: [
     ServiceCatalogPageComponent,
@@ -27,6 +30,10 @@ import { SelectPlanStepComponent } from './add-service-instance/select-plan-step
     BindAppsStepComponent,
     AddServiceInstanceComponent,
     SelectPlanStepComponent,
+    SelectServiceComponent,
+  ],
+  exports: [
+    AddServiceInstanceComponent
   ]
 })
 export class ServiceCatalogModule { }

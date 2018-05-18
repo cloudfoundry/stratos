@@ -116,6 +116,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
+  skipToNext() {
+    this.unsubscribeNext();
+    if (this.currentIndex < this.steps.length) {
+      this.setActive(this.currentIndex + 1);
+    }
+  }
+
   redirect() {
     return combineLatest(
       this.cancel$,
@@ -124,7 +131,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       map(([path, params]) => {
         this.store.dispatch(new RouterNav({ path: path, query: params }));
       })
-    );
+      );
   }
 
   setActive(index: number) {

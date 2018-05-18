@@ -1,35 +1,55 @@
 <div class="specify-details">
-  <form class="stepper-form" [formGroup]="stepperForm">
-    <mat-form-field>
-      <mat-select class="form-control" placeholder="Organization" required formControlName="org" (change)="setOrg($event.value)">
-        <mat-option *ngFor="let organization of orgs$ | async" [value]="organization.metadata.guid">{{ organization.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-select class="form-control" placeholder="Space" required formControlName="space">
-        <mat-option [disabled]="!stepperForm.controls.org.value" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field>
-      <input matInput class="form-control" formControlName="name" placeholder="Name" required>
-      <mat-error *ngIf="stepperForm.controls.name?.hasError('nameTaken')">
-        A service instance with this name already exists. Please enter a different one.
-      </mat-error>
-    </mat-form-field>
-    <mat-form-field class="stepper-form__tags">
-      <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
-        <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">
-          {{tag.label}}
-          <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
-        </mat-chip>
-        <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
-      </mat-chip-list>
-    </mat-form-field>
-    <mat-form-field>
-      <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
-      <mat-error *ngIf="stepperForm.controls.params?.hasError('notValidJson')">
-        Not valid JSON. Please specify a valid JSON Object
-      </mat-error>
-    </mat-form-field>
-  </form>
+
+  <div *ngIf="showModeSelection">
+    <b>Create a new service instance or bind an existing one.</b>
+    <div>
+      <mat-radio-group [(ngModel)]="formMode" class="specify-details__radio-group">
+        <mat-radio-button *ngFor="let mode of formModes" [value]="mode.key" class="specify-details__radio-group__radio" (click)="resetForms(mode.key)">
+          {{ mode.label }}
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
+  </div>
 </div>
+<form class="stepper-form" *ngIf="(showModeSelection && formMode === 'create-service-instance') || !showModeSelection" [formGroup]="createNewInstanceForm">
+  <mat-form-field *ngIf="cSIHelperService.isMarketplace()">
+    <mat-select class="form-control" placeholder="Organization" required formControlName="org" (change)="setOrg($event.value)">
+      <mat-option *ngFor="let organization of orgs$ | async" [value]="organization.metadata.guid">{{ organization.entity.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field *ngIf="cSIHelperService.isMarketplace()">
+    <mat-select class="form-control" placeholder="Space" required formControlName="space">
+      <mat-option [disabled]="!createNewInstanceForm.controls.org.value" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field>
+    <input matInput class="form-control" formControlName="name" placeholder="Name" required>
+    <mat-error *ngIf="createNewInstanceForm.controls.name?.hasError('nameTaken')">
+      A service instance with this name already exists. Please enter a different one.
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field class="stepper-form__tags">
+    <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
+      <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">
+        {{tag.label}}
+        <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
+      </mat-chip>
+      <input placeholder="Tags" [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="tagsAddOnBlur" (matChipInputTokenEnd)="addTag($event)" />
+    </mat-chip-list>
+  </mat-form-field>
+  <mat-form-field>
+    <textarea matInput placeholder="JSON parameters" formControlName="params"></textarea>
+    <mat-error *ngIf="createNewInstanceForm.controls.params?.hasError('notValidJson')">
+      Not valid JSON. Please specify a valid JSON Object
+    </mat-error>
+  </mat-form-field>
+</form>
+
+<form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'" [formGroup]="selectExistingInstanceForm">
+  <mat-form-field>
+    <mat-select class="form-control" placeholder="Service Instance" required formControlName="serviceInstances">
+      <mat-option *ngFor="let serviceInstance of serviceInstances$ | async" [value]="serviceInstance.metadata.guid">{{ serviceInstance.entity.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+<!-- </div> -->

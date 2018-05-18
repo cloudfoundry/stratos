@@ -7,6 +7,9 @@ import { BindAppsStepComponent } from '../bind-apps-step/bind-apps-step.componen
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
+import { CreateApplicationModule } from '../../../applications/create-application/create-application.module';
+import { ServiceCatalogModule } from '../../service-catalog.module';
+import { SelectServiceComponent } from '../select-service/select-service.component';
 
 describe('AddServiceInstanceComponent', () => {
   let component: AddServiceInstanceComponent;
@@ -18,9 +21,10 @@ describe('AddServiceInstanceComponent', () => {
         AddServiceInstanceComponent,
         SelectPlanStepComponent,
         SpecifyDetailsStepComponent,
-        BindAppsStepComponent
+        BindAppsStepComponent,
+        SelectServiceComponent
       ],
-      imports: [BaseTestModules],
+      imports: [BaseTestModules, CreateApplicationModule],
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },
       ]

@@ -1,28 +1,32 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
-import { SelectPlanStepComponent } from './select-plan-step.component';
+import { SelectServiceComponent } from './select-service.component';
 
-describe('SelectPlanStepComponent', () => {
-  let component: SelectPlanStepComponent;
-  let fixture: ComponentFixture<SelectPlanStepComponent>;
+describe('SelectServiceComponent', () => {
+  let component: SelectServiceComponent;
+  let fixture: ComponentFixture<SelectServiceComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [SelectPlanStepComponent],
-      imports: [BaseTestModules],
+      declarations: [SelectServiceComponent],
+      imports: [...BaseTestModules],
       providers: [
+        PaginationMonitorFactory,
+        ServicesWallService,
         EntityServiceFactory,
-        CreateServiceInstanceHelperService,
+        CreateServiceInstanceHelperService
       ]
     })
       .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SelectPlanStepComponent);
+    fixture = TestBed.createComponent(SelectServiceComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

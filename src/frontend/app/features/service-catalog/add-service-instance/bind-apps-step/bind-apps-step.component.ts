@@ -1,31 +1,26 @@
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, Input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
-import { RouterNav } from '../../../../store/actions/router.actions';
-import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  serviceBindingSchemaKey,
-  spaceSchemaKey,
-} from '../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
-import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
+import {
+  selectCreateServiceInstanceCfGuid,
+  selectCreateServiceInstanceSpaceGuid,
+} from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { appDataSort } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
-import { ServicesService } from '../../services.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 
 @Component({
@@ -35,15 +30,19 @@ import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-det
 })
 
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
-  validate: Observable<boolean>;
+
+  @Input('boundAppId')
+  boundAppId: string;
+
+  validateSubscription: Subscription;
+  validate = new BehaviorSubject(true);
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
   allAppsSubscription: Subscription;
   apps$: Observable<APIResource<IApp>[]>;
-  // selectedAppGuid: string;
+  guideText = 'Specify the application to bind (Optional)';
   constructor(
     private store: Store<AppState>,
-    private servicesService: ServicesService,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar
   ) {
@@ -52,91 +51,65 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
 
+    this.allAppsSubscription = this.fetchApps().subscribe();
 
-    this.allAppsSubscription = this.store.select(selectCreateServiceInstance).pipe(
-      filter(selectCreateServiceInstance => !!selectCreateServiceInstance.spaceGuid),
-      tap(createServiceInstanceState => {
-        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstanceState.spaceGuid);
-        this.apps$ = getPaginationObservables<APIResource<IApp>>({
-          store: this.store,
-          action: new GetAllAppsInSpace(this.servicesService.cfGuid, createServiceInstanceState.spaceGuid, paginationKey),
-          paginationMonitor: this.paginationMonitorFactory.create(
-            paginationKey,
-            entityFactory(applicationSchemaKey)
-          )
-        }, true).entities$
-          .pipe(
-          map(apps => apps.sort(appDataSort)),
-          first(),
-          map(apps => apps.slice(0, 50))
-          );
+  }
 
-        this.serviceInstanceGuid = createServiceInstanceState.serviceInstanceGuid;
+  private fetchApps() {
+    return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
+      filter(p => !!p),
+      combineLatest(this.store.select(selectCreateServiceInstanceCfGuid)),
+      filter(p => !!p),
+      tap(([spaceGuid, cfGuid]) => {
+        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid);
+        this.apps$ = this.getApps(cfGuid, spaceGuid, paginationKey).pipe(map(apps => {
+          if (this.boundAppId) {
+            return apps.filter(a => a.metadata.guid === this.boundAppId);
+          }
+          return apps;
+        }), map(apps => apps.sort(appDataSort)), first(), map(apps => apps.slice(0, 50)), tap(apps => {
+          if (this.boundAppId) {
+            this.stepperForm.controls.apps.setValue(this.boundAppId);
+            this.stepperForm.controls.apps.disable();
+            this.guideText = 'Specify binding params (optional)';
+          }
+        }));
+      }));
+  }
 
-      })
-    ).subscribe();
-
+  private getApps(cfGuid: string, spaceGuid: string, paginationKey: string) {
+    return getPaginationObservables<APIResource<IApp>>({
+      store: this.store,
+      action: new GetAllAppsInSpace(cfGuid, spaceGuid, paginationKey),
+      paginationMonitor: this.paginationMonitorFactory.create(paginationKey, entityFactory(applicationSchemaKey))
+    }, true).entities$;
   }
 
   ngAfterContentInit() {
-    this.validate = this.stepperForm.statusChanges
+    this.validateSubscription = this.stepperForm.statusChanges
       .map(() => {
-        return this.stepperForm.valid;
-      });
+        if (this.stepperForm.pristine) {
+          this.validate.next(true);
+        }
+        this.validate.next(this.stepperForm.valid);
+      }).subscribe();
   }
 
   submit = () => {
-    return this.createBinding().pipe(
-      filter(s => !s.creating),
-      map(s => {
-        if (s.error) {
-          this.displaySnackBar();
-          return { success: false };
-        } else {
-
-          this.store.dispatch(new RouterNav({
-            path: ['service-catalog',
-              this.servicesService.cfGuid,
-              this.servicesService.serviceGuid,
-              'instances']
-          }
-          ));
-          return { success: true };
-        }
-      })
-    );
+    this.setApp();
+    return Observable.of({ success: true });
   }
 
-  createBinding = () => {
-
-    const appGuid = this.stepperForm.controls.apps.value;
-
-    const guid = `${this.servicesService.cfGuid}-${appGuid}-${this.serviceInstanceGuid}`;
-    let params = this.stepperForm.controls.params.value;
-    try {
-      params = JSON.parse(params) || null;
-    } catch (e) {
-      params = null;
-    }
-
-    this.store.dispatch(new CreateServiceBinding(
-      this.servicesService.cfGuid,
-      guid,
-      appGuid,
-      this.serviceInstanceGuid,
-      params
-
-    ));
-
-    return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
-
-  }
-  setApp = (guid) => this.store.dispatch(new SetCreateServiceInstanceApp(guid));
+  setApp = () => this.store.dispatch(
+    new SetCreateServiceInstanceApp(this.stepperForm.controls.apps.value, this.stepperForm.controls.params.value)
+  )
 
   ngOnDestroy(): void {
     this.allAppsSubscription.unsubscribe();
+    this.validateSubscription.unsubscribe();
   }
   private displaySnackBar() {
     this.snackBar.open('Failed to create service binding! ', 'Dismiss');
   }
+
 }

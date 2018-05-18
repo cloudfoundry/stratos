@@ -5,7 +5,7 @@
         <mat-icon>mode_edit</mat-icon>
       </button>
     <button mat-icon-button name="add-space" *ngIf="(cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/add-space">
-        <mat-icon>add_box</mat-icon>
+        <mat-icon>add</mat-icon>
       </button>
     <button mat-icon-button name="user-management" *ngIf="isDevEnvironment && (cfEndpointService.connected$ | async)" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/manage-users">
         <mat-icon>people</mat-icon>
