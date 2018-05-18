@@ -50,7 +50,6 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       tap((p: CreateServiceInstanceState) => this.cfGuid = p.cfGuid),
       switchMap(p => this.servicesWallService.getServicesInCf(p.cfGuid)),
       filter(p => !!p),
-      first(),
       share()
     );
   }
