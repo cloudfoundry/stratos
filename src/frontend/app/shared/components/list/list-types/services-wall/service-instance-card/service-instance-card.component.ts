@@ -11,7 +11,7 @@ import { AppChip } from '../../../../chips/chips.component';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
 import { DeleteServiceBinding } from '../../../../../../store/actions/service-bindings.actions';
-import { detachServiceBinding } from '../../app-sevice-bindings/service-binding.helper';
+import { detachServiceBinding, deleteServiceInstance } from '../../app-sevice-bindings/service-binding.helper';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
 
 @Component({
@@ -68,6 +68,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   }
 
 
-  delete = () => this.store.dispatch(new DeleteServiceInstance(this.cfGuid, this.row.metadata.guid));
+  delete = () => deleteServiceInstance(this.confirmDialog, this.store, this.row.metadata.guid, this.row.entity.cfGuid);
 
 }

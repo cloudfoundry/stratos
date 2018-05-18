@@ -25,7 +25,7 @@ import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { detachServiceBinding } from '../app-sevice-bindings/service-binding.helper';
+import { detachServiceBinding, deleteServiceInstance } from '../app-sevice-bindings/service-binding.helper';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
@@ -107,7 +107,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    this.store.dispatch(new DeleteServiceInstance(serviceInstance.entity.cfGuid, serviceInstance.metadata.guid))
+    deleteServiceInstance(this.confirmDialog, this.store, serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
