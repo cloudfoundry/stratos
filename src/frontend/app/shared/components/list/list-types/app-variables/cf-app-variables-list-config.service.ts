@@ -23,8 +23,8 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     icon: 'delete',
     label: 'Delete',
     description: '',
-    visible: () => true,
-    enabled: () => Observable.of(true)
+    visible$: Observable.of(true),
+    enabled$: Observable.of(true)
   };
 
   private listActionDelete: IListAction<ListAppEnvVar> = {
@@ -33,8 +33,8 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     },
     label: 'Delete',
     description: '',
-    visible: (row: ListAppEnvVar) => true,
-    enabled: (row: ListAppEnvVar) => true,
+    createVisible: () => Observable.of(true),
+    createEnabled: () => Observable.of(true)
   };
 
   columns: Array<ITableColumn<ListAppEnvVar>> = [

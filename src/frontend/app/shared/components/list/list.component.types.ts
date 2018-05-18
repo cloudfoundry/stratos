@@ -123,8 +123,8 @@ export interface IBaseListAction<T> {
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
-  visible: (row: T) => Observable<boolean>;
-  enabled: (row: T) => Observable<boolean>;
+  createVisible: (row: T) => Observable<boolean>;
+  createEnabled: (row: T) => Observable<boolean>;
 }
 
 export interface IMultiListAction<T> extends IBaseListAction<T> {
@@ -134,12 +134,12 @@ export interface IMultiListAction<T> extends IBaseListAction<T> {
    * @memberof IMultiListAction
    */
   action: (items: T[]) => boolean;
-  visible: (rows: T[]) => Observable<boolean>;
-  enabled: (rows: T[]) => Observable<boolean>;
+  visible$: Observable<boolean>;
+  enabled$: Observable<boolean>;
 }
 
 export interface IGlobalListAction<T> extends IBaseListAction<T> {
   action: () => void;
-  visible: Observable<boolean>;
-  enabled: Observable<boolean>;
+  visible$: Observable<boolean>;
+  enabled$: Observable<boolean>;
 }

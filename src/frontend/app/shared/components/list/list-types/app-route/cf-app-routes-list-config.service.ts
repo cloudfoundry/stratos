@@ -53,8 +53,8 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: () => true,
-    enabled: () => Observable.of(true),
+    visible$: Observable.of(true),
+    enabled$: Observable.of(true)
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -78,24 +78,24 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: () => true,
-    enabled: () => Observable.of(true)
+    visible$: Observable.of(true),
+    enabled$: Observable.of(true)
   };
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    createVisible: (row: APIResource) => Observable.of(true),
+    createEnabled: (row: APIResource) => Observable.of(true)
   };
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    createVisible: (row: APIResource) => Observable.of(true),
+    createEnabled: (row: APIResource) => Observable.of(true)
   };
 
   private listActionAdd: IGlobalListAction<APIResource> = {
@@ -124,8 +124,8 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     icon: 'add',
     label: 'Add',
     description: 'Add new route',
-    visible: () => true,
-    enabled: () => Observable.of(true)
+    visible$: Observable.of(true),
+    enabled$: Observable.of(true)
   };
 
   columns: Array<ITableColumn<APIResource>> = [

@@ -12,6 +12,7 @@ import {
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import {
@@ -141,8 +142,9 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   private paginationWidgetToStore: Subscription;
   private filterWidgetToStore: Subscription;
 
-  globalActions: IListAction<T>[];
+  globalActions: IGlobalListAction<T>[];
   multiActions: IMultiListAction<T>[];
+  haveMultiActions = new BehaviorSubject(false);
   singleActions: IListAction<T>[];
   columns: ITableColumn<T>[];
   dataSource: IListDataSource<T>;
@@ -293,7 +295,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.paginatorSettings.pageSize = pagination.pageSize;
     });
 
-
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
@@ -330,7 +331,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       })
     ).subscribe();
 
-
     this.isFiltering$ = this.paginationController.filter$.pipe(
       map((filter: ListFilter) => {
         const isFilteringByString = filter.string ? !!filter.string.length : false;
@@ -362,10 +362,20 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       })
     );
 
+    // Multi actions can be a list of actions that aren't visible. For those case, in effect, we don't have multi actions
+    const visibles$ = (this.multiActions || []).map(multiAction => multiAction.visible$);
+    const haveMultiActions = combineLatest(visibles$).pipe(
+      map(visibles => visibles.some(visible => visible)),
+      tap(allowSelection => {
+        this.haveMultiActions.next(allowSelection && this.config.allowSelection);
+      })
+    );
+
     this.uberSub = Observable.combineLatest(
       paginationStoreToWidget,
       filterStoreToWidget,
-      sortStoreToWidget
+      sortStoreToWidget,
+      haveMultiActions
     ).subscribe();
 
     this.pageState$ = combineLatest(

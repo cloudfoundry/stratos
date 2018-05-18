@@ -45,8 +45,8 @@
         </div>
         <!-- Multi actions (those applied to selection) -->
         <div *ngIf="(dataSource.isSelecting$ | async)">
-          <ng-container *ngFor="let action of multiActions">
-            <button mat-icon-button *ngIf="action.visible()" (click)="executeActionMultiple(action)" [disabled]="!action.enabled() | async" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
+          <ng-container *ngFor="let action of (multiActions$ | async)">
+            <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
               <mat-icon>{{action.icon}}</mat-icon>
             </button>
           </ng-container>
@@ -54,7 +54,7 @@
         <!-- Global actions (those not applied to specific rows) -->
         <div *ngIf="!(isAddingOrSelecting$ | async) && globalActions?.length > 0">
           <ng-container *ngFor="let action of globalActions">
-            <button mat-icon-button *ngIf="action.visible(row)" (click)="executeActionGlobal(action)" [disabled]="!action.enabled(row)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
+            <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionGlobal(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="2000">
               <mat-icon>{{action.icon}}</mat-icon>
             </button>
           </ng-container>
@@ -99,7 +99,7 @@
   <div class="list-component__body">
     <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
       <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-      <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (config.getMultiActions() || []).length > 0" [paginationController]="paginationController"
+      <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="(haveMultiActions | async) && (config.getMultiActions() || []).length > 0" [paginationController]="paginationController"
         [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
       </app-table>
     </div>

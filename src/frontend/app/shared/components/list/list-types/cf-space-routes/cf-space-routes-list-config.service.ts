@@ -47,8 +47,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: () => this.canEditApp$,
-    enabled: () => Observable.of(true)
+    visible$: Observable.of(true), // See ctor
+    enabled$: Observable.of(true)
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -72,24 +72,24 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: () => this.canEditApp$,
-    enabled: () => Observable.of(true)
+    visible$: Observable.of(true), // See ctor
+    enabled$: Observable.of(true)
   };
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: APIResource) => this.canEditApp$,
-    enabled: (row: APIResource) => true
+    createVisible: (row: APIResource) => this.canEditApp$,
+    createEnabled: () => Observable.of(true)
   };
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => row.entity.apps && row.entity.apps.length
+    createVisible: (row: APIResource) => this.canEditApp$,
+    createEnabled: (row: APIResource) => Observable.of(row.entity.apps && row.entity.apps.length)
   };
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -175,7 +175,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
       this.cfSpaceService.cfGuid,
       this.cfSpaceService.spaceGuid
     );
-    this.multiListActionDelete.visible = this.canEditApp$;
+    this.multiListActionDelete.visible$ = this.canEditApp$;
+    this.multiListActionUnmap.visible$ = this.canEditApp$;
   }
 
   private deleteSingleRoute(item: APIResource) {

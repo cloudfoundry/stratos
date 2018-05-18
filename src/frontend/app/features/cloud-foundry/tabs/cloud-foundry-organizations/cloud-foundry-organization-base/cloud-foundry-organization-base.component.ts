@@ -53,7 +53,7 @@ export class CloudFoundryOrganizationBaseComponent {
   public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
   public permsSpaceCreate = CurrentUserPermissions.SPACE_CREATE;
 
-  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService, public currentUserPermissionsService: CurrentUserPermissionsService) {
+  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService) {
     this.isFetching$ = cfOrgService.org$.pipe(
       map(org => org.entityRequestInfo.fetching)
     );

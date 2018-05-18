@@ -8,6 +8,7 @@ import { AppState } from '../../../../../store/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -19,13 +20,28 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
   @Input('rowState')
   rowState: Observable<RowState>;
 
-  private busy$: Observable<boolean>;
+  private _row: T;
+  @Input('row')
+  get row() { return this._row; }
+  set row(row: T) {
+    this._row = row;
+    if (row) {
+      this.initialise(row);
+    }
+  }
 
-  constructor(
-    private store: Store<AppState>,
-    public listConfig: ListConfig<T>
-  ) {
+  private busy$: Observable<boolean>;
+  private show$: Observable<boolean>;
+
+  actions: IListAction<T>[];
+  obs: {
+    visible: { [action: string]: Observable<boolean> },
+    enabled: { [action: string]: Observable<boolean> }
+  };
+
+  constructor(private store: Store<AppState>, public listConfig: ListConfig<T>) {
     super();
+    this.actions = listConfig.getSingleActions();
   }
 
   ngOnInit() {
@@ -34,16 +50,21 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     );
   }
 
-  execute(listActionConfig: IListAction<T>, row: T) {
-    listActionConfig.action(row);
-  }
-
-  isEnabled(action: IListAction<T>, row: T) {
-    const enabled = action.enabled(row);
-    if (enabled instanceof Observable ) {
-      return enabled;
-    } else {
-      return Observable.of(enabled);
+  initialise(row) {
+    if (this.obs) {
+      return;
     }
+    this.obs = {
+      visible: {},
+      enabled: {}
+    };
+    this.actions.forEach(action => {
+      this.obs.visible[action.label] = action.createVisible(row);
+      this.obs.enabled[action.label] = action.createEnabled(row);
+    });
+
+    this.show$ = combineLatest(Object.values(this.obs.visible)).pipe(
+      map(visibles => visibles.some(visible => visible))
+    );
   }
 }
