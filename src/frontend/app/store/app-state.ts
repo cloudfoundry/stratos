@@ -4,6 +4,7 @@ import { DashboardState } from './reducers/dashboard-reducer';
 import { ListsState } from './reducers/list.reducer';
 import { CreateNewApplicationState } from './types/create-application.types';
 import { CreateServiceInstanceState } from './types/create-service-instance.types';
+import { ICurrentUserRolesState } from './types/current-user-roles.types';
 import { DeployApplicationState } from './types/deploy-application.types';
 import { EndpointState } from './types/endpoint.types';
 import { IRequestDataState, IRequestState } from './types/entity.types';
@@ -33,4 +34,5 @@ export interface AppState {
   lists: ListsState;
   routing: RoutingHistory;
   internalEvents: InternalEventsState;
+  currentUserRoles: ICurrentUserRolesState;
 }
