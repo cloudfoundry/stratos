@@ -1,8 +1,8 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
-import { SideNavigation } from './side-nav.po';
-import { PageHeader } from './page-header.po';
+import { browser, promise } from 'protractor';
 import { E2EHelpers } from '../helpers/e2e-helpers';
+import { BreadcrumbsComponent } from './breadcrumbs.po';
+import { PageHeader } from './page-header.po';
+import { SideNavigation } from './side-nav.po';
 
 /**
  * Base Page Object can be inherited by appropriate pages
@@ -14,6 +14,9 @@ export abstract class Page {
 
   // Top header bar (if present)
   public header = new PageHeader();
+
+  // Breadcrumbs (if present)
+  public breadcrumbs = new BreadcrumbsComponent();
 
   // Helpers
   public helpers = new E2EHelpers();

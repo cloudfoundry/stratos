@@ -50,6 +50,25 @@ export class ResetsHelpers {
     });
   }
 
+  resetAndConnectEndpoints = (username, password, registerMultipleCf, endpointName?: string, connectAsAdmin = true) => {
+    return new Promise((resolve, reject) => {
+      helpers.createReqAndSession(null, username, password).then((req) => {
+        this.doResetAllEndpoints(req, registerMultipleCf, endpointName).then(() => {
+          this.connectAllExistingEndpoints(req, connectAsAdmin).then(() => {
+            resolve();
+          }, (error) => {
+            reject(error);
+          });
+        }, function (error) {
+          console.log('Failed to reset all endpoints: ', error);
+          reject(error);
+        }).catch(reject);
+      }, function (error) {
+        reject(error);
+      });
+    });
+  }
+
   /**
    * Get all of the registered Endpoints and comnnect all of them for which credentials
    * have been configured
@@ -79,6 +98,29 @@ export class ResetsHelpers {
       });
   }
 
+  // Connect with session
+  connectAllExistingEndpoints(session, isAdmin = true) {
+    return helpers.sendRequest(session, {method: 'GET', url: 'pp/v1/cnsis'})
+    .then(response => {
+      const cnsis = JSON.parse(response);
+      const promises = [];
+      cnsis.forEach((cnsi) => {
+        const list = secrets.getEndpoints()[cnsi.cnsi_type] as E2EEndpointConfig[];
+        if (!list) {
+          fail('Unknown endpoint');
+        }
+        const found = list.find((ep) => {
+          return ep.url.endsWith(cnsi.api_endpoint.Host);
+        });
+        if (found) {
+          const user = isAdmin ? found.creds.admin : found.creds.nonAdmin || found.creds.admin;
+          promises.push(this.connectEndpoint(session, cnsi.guid, user.username, user.password));
+        }
+      });
+      return Promise.all(promises);
+    });
+  }
+  
   /**
    * Reset endpoints to original state
    */

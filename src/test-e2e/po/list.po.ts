@@ -9,9 +9,12 @@ export class ListComponent extends Component {
 
   public table: ListTableComponent;
 
+  public cards: ListCardComponent;
+
   constructor(locator: ElementFinder = element(by.tagName('app-list'))) {
     super(locator);
     this.table = new ListTableComponent(locator);
+    this.cards = new ListCardComponent(locator);
    }
 
    isTableView(): promise.Promise<boolean> {
@@ -41,4 +44,17 @@ export class ListTableComponent extends Component {
     return this.getRows().get(row).all(by.css('.app-table__cell')).get(column);
   }
 
+}
+
+
+// Page Object for the List Card View
+export class ListCardComponent extends Component {
+
+  constructor(locator: ElementFinder) {
+    super(locator);
+   }
+
+  getCards(): ElementArrayFinder {
+    return this.locator.all(by.tagName('app-card'));
+  }
 }
