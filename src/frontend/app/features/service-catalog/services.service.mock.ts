@@ -16,7 +16,7 @@ export class ServicesServiceMock {
         bindable: true,
         unique_id: '826fcda4-80e1-11e7-aead-9372473ff564-service-app-autoscaler',
         // tslint:disable-next-line:max-line-length
-        extra: '{"displayName":"app-autoscaler","imageUrl":"","longDescription":"","providerDisplayName":"","documentationUrl":"","supportUrl":""}',
+        extra: '{"displayName":"app-autoscaler","imageUrl":"test","longDescription":"","providerDisplayName":"","documentationUrl":"","supportUrl":""}',
         tags: [
           'simple',
           'shared'
