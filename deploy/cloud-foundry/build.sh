@@ -24,6 +24,7 @@ find . -name glide.lock -exec sed -i 's/^testImports:$/testImports: []/g' {} \;
 cd ${TOP_LEVEL}
 
 npm install
+npm run customize
 
 # Fetch Glide dependencies
 npm run cf-get-backend-deps
