@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, Input } from '@angular/core';
 
+import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
+import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
 
 interface BoundApp {
@@ -12,26 +13,16 @@ interface BoundApp {
   templateUrl: './table-cell-service-instance-apps-attached.component.html',
   styleUrls: ['./table-cell-service-instance-apps-attached.component.scss']
 })
-export class TableCellServiceInstanceAppsAttachedComponent<T> extends TableCellCustom<T> implements OnInit {
-
+export class TableCellServiceInstanceAppsAttachedComponent extends TableCellCustom<APIResource<IServiceInstance>> {
   boundApps: BoundApp[];
-  @Input('row') row;
 
-  constructor(private activatedRoute: ActivatedRoute) {
-    super();
+  @Input('row')
+  set row(row: any) {
+    const cfGuid = this.boundApps = row ? row.entity.service_bindings.map(binding => {
+      return {
+        appName: binding.entity.app.entity.name,
+        url: `/applications/${binding.entity.cfGuid}/${binding.entity.app.metadata.guid}`,
+      };
+    }) : [];
   }
-
-  ngOnInit() {
-    const parentRoute = this.activatedRoute.pathFromRoot.filter(route => !!route.snapshot.params['cfId'])[0];
-    const cfGuid = parentRoute && parentRoute.snapshot.params['cfId'];
-    this.boundApps = this.row.entity.service_bindings
-      .map(a => {
-        return {
-          appName: a.entity.app.entity.name,
-          url: `/applications/${cfGuid}/${a.entity.app.metadata.guid}`,
-          params: { breadcrumbs: 'space-services' }
-        };
-      });
-  }
-
 }
