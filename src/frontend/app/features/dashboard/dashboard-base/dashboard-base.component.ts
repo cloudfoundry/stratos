@@ -63,9 +63,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/applications'
     },
     {
+      text: 'Marketplace',
+      matIcon: 'store',
+      link: '/service-catalog'
+    },
+    {
       text: 'Services',
       matIcon: 'library_books',
-      link: '/service-catalog'
+      link: '/services'
     },
     {
       text: 'Cloud Foundry',
@@ -113,9 +118,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.breakpointSub = this.breakpointObserver.observe([
-      Breakpoints.HandsetPortrait
-    ]).pipe(
+    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
       debounceTime(250)
     ).subscribe(result => {
       if (result.matches) {

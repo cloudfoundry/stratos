@@ -26,6 +26,7 @@ import { CfServiceCardComponent } from '../../list-types/cf-services/cf-service-
 import { CfSpaceCardComponent } from '../../list-types/cf-spaces/cf-space-card/cf-space-card.component';
 import { CfStacksCardComponent } from '../../list-types/cf-stacks/cf-stacks-card/cf-stacks-card.component';
 import { TableCellCustom } from '../../list.types';
+import { ServiceInstanceCardComponent } from '../../list-types/services-wall/service-instance-card/service-instance-card.component';
 
 export const listCards = [
   CardAppComponent,
@@ -36,7 +37,8 @@ export const listCards = [
   CfSecurityGroupsCardComponent,
   CfStacksCardComponent,
   CfServiceCardComponent,
-  AppServiceBindingCardComponent
+  AppServiceBindingCardComponent,
+  ServiceInstanceCardComponent
 ];
 
 @Component({
@@ -72,7 +74,7 @@ export class CardComponent<T> implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const row: SimpleChange = changes.row;
+    const row: SimpleChange = changes.item;
     if (
       row &&
       this.cardComponent &&
