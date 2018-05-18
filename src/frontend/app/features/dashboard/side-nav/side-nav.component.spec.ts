@@ -1,12 +1,10 @@
-import { appReducers } from '../../../store/reducers.module';
-import { actionHistoryReducer } from '../../../store/reducers/action-history-reducer';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-
+import { Customizations } from '../../../core/customizations.types';
 import { MDAppModule } from '../../../core/md.module';
+import { createBasicStoreModule } from '../../../test-framework/store-test-helper';
 import { SideNavComponent } from './side-nav.component';
-import { getInitialTestStoreState, createBasicStoreModule } from '../../../test-framework/store-test-helper';
-import { StoreModule } from '@ngrx/store';
+
 
 describe('SideNavComponent', () => {
   let component: SideNavComponent;
@@ -19,6 +17,9 @@ describe('SideNavComponent', () => {
         RouterTestingModule,
         MDAppModule,
         createBasicStoreModule()
+      ],
+      providers: [
+        { provide: Customizations, useValue: {} }
       ]
     })
       .compileComponents();
