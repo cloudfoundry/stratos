@@ -18,6 +18,10 @@ export const REMOVE_PERMISSION = '[Users] Remove Permission';
 export const REMOVE_PERMISSION_SUCCESS = '[Users]  Remove Permission success';
 export const REMOVE_PERMISSION_FAILED = '[Users]  Remove Permission failed';
 
+export const GET_CF_USER = '[Users] Get cf user ';
+export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
+export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
+
 export class GetAllUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
@@ -50,6 +54,22 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction, Entit
   flattenPagination = true;
 }
 
+export class GetCFUser extends CFStartAction implements IRequestAction {
+  constructor(
+    public guid: string,
+    public endpointGuid: string,
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `users/${guid}/summary`;
+    this.options.method = 'get';
+  }
+  actions = [GET_CF_USER, GET_CF_USER_SUCCESS, GET_CF_USER_FAILED];
+  entity = entityFactory(cfUserSchemaKey);
+  entityKey = cfUserSchemaKey;
+  options: RequestOptions;
+}
+
 export class RemoveUserPermission<T> extends CFStartAction implements IRequestAction {
   constructor(
     public guid: string,
@@ -73,3 +93,5 @@ export class RemoveUserPermission<T> extends CFStartAction implements IRequestAc
   }
 
 }
+
+

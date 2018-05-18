@@ -20,6 +20,7 @@ import { TruncatePipe } from './truncate.pipe';
 import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
+import { CurrentUserPermissionsService } from './current-user-permissions.service';
 
 
 @NgModule({
@@ -51,7 +52,8 @@ import { WindowRef } from './window-ref/window-ref.service';
     EndpointsService,
     UserService,
     EntityServiceFactory,
-    { provide: Customizations, useValue: {} }
+    { provide: Customizations, useValue: {} },
+    CurrentUserPermissionsService
   ],
   declarations: [
     LogOutDialogComponent,

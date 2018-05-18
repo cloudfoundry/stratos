@@ -3,13 +3,17 @@
   </app-card-status>
   <mat-card-header class="meta-card__header" *ngIf="title">
     <ng-container *ngTemplateOutlet="title.content"></ng-container>
-    <div *ngIf="actionMenu" appClickStopPropagation>
-      <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu"><mat-icon>more_vert</mat-icon></button>
+    <div *ngIf="_actionMenu && (showMenu$ | async)" appClickStopPropagation>
+      <button mat-icon-button class="meta-card__header__button" color="basic" [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
       <mat-menu class="meta-card__header__popup" #menu="matMenu">
-        <button class="meta-card__header__popup__btn" *ngFor="let menuItem of actionMenu" mat-menu-item (click)="menuItem.action()">
+        <ng-container *ngFor="let menuItem of _actionMenu">
+          <button class="meta-card__header__popup__btn" [disabled]="menuItem.disabled | async" mat-menu-item *ngIf="menuItem.can | async" (click)="menuItem.action()">
             <mat-icon *ngIf="menuItem.icon">{{menuItem.icon}}</mat-icon>
             <span>{{menuItem.label}}</span>
           </button>
+        </ng-container>
       </mat-menu>
     </div>
     <app-application-state-icon *ngIf="status$" [status]="status$ | async"></app-application-state-icon>
@@ -17,7 +21,7 @@
   <mat-card-content>
     <div *ngFor="let metaItem of metaItems">
       <span *ngIf="metaItem?.content">
-        <ng-container  *ngTemplateOutlet="metaItem.content"></ng-container>
+        <ng-container *ngTemplateOutlet="metaItem.content"></ng-container>
       </span>
     </div>
   </mat-card-content>
