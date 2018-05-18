@@ -11,6 +11,7 @@ import { cfOrgSpaceFilter } from '../app/cf-apps-data-source';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 
 /**
  * Service instance list shown for `services` nav component
@@ -34,9 +35,10 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
 
   constructor(store: Store<AppState>,
     datePipe: DatePipe,
-    private cfOrgSpaceService: CfOrgSpaceDataService
+    private cfOrgSpaceService: CfOrgSpaceDataService,
+    confirmDialog: ConfirmationDialogService
   ) {
-    super(store, datePipe);
+    super(store, datePipe, confirmDialog);
     const multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
       createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
