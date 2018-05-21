@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-
 import { AuthGuardService } from './auth-guard.service';
 import { ButtonBlurOnClickDirective } from './button-blur-on-click.directive';
 import { BytesToHumanSize, MegaBytesToHumanSize } from './byte-formatters.pipe';
 import { ClickStopPropagationDirective } from './click-stop-propagation';
+import { Customizations } from './customizations.types';
 import { DotContentComponent } from './dot-content/dot-content.component';
 import { EndpointsService } from './endpoints.service';
 import { EntityServiceFactory } from './entity-service-factory.service';
@@ -21,6 +21,7 @@ import { UserService } from './user.service';
 import { UtilsService } from './utils.service';
 import { WindowRef } from './window-ref/window-ref.service';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
+
 
 @NgModule({
   imports: [
@@ -51,6 +52,7 @@ import { CurrentUserPermissionsService } from './current-user-permissions.servic
     EndpointsService,
     UserService,
     EntityServiceFactory,
+    { provide: Customizations, useValue: {} },
     CurrentUserPermissionsService
   ],
   declarations: [

@@ -2,7 +2,7 @@
   <h1>{{ (cfEndpointService.endpoint$ | async)?.entity.name }}</h1>
   <div class="page-header-right">
     <button mat-icon-button name="add-org" *ngIf="(cfEndpointService.connected$ | async) && (canAddOrg$ | async)" routerLink="/cloud-foundry/{{this.cfEndpointService.cfGuid}}/add-org">
-      <mat-icon>add_box</mat-icon>
+      <mat-icon>add</mat-icon>
     </button>
     <button mat-icon-button name="user-management" *ngIf="cfEndpointService.connected$ | async" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/users/manage" matTooltip="Manage Users">
       <mat-icon>people</mat-icon>

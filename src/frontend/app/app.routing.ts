@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
@@ -35,7 +34,7 @@ const appRoutes: Routes = [
           loadChildren: 'app/features/metrics/metrics.module#MetricsModule',
         }]
       },
-      { path: 'service-catalog', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
+      { path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
       { path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule' },
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },

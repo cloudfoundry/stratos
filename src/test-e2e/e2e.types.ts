@@ -1,12 +1,11 @@
+export interface E2ECred {
+  username: string;
+  password: string;
+}
+
 export interface E2ECreds {
-  admin: {
-    username: string;
-    password: string;
-  };
-  nonAdmin?: {
-    username: string;
-    password: string;
-  };
+  admin: E2ECred;
+  nonAdmin?: E2ECred;
 }
 
 export interface E2EEndpointConfig {
