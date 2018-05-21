@@ -281,7 +281,7 @@ export class CurrentUserPermissionsChecker {
     return config.type;
   }
 
-  private checkAllOfType(endpointGuid: string, type: PermissionTypes, permission: PermissionStrings) {
+  private checkAllOfType(endpointGuid: string, type: PermissionTypes, permission: PermissionStrings, orgGuid?: string) {
     return this.getEndpointState(endpointGuid).pipe(
       map(state => {
         if (!state || !state[type]) {

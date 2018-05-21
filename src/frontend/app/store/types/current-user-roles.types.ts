@@ -42,6 +42,7 @@ export interface IOrgRoleState {
   isAuditor: boolean;
   isBillingManager: boolean;
   isUser: boolean;
+  spaceGuids: string[];
 }
 export interface IOrgsRoleState {
   [orgId: string]: IOrgRoleState;
