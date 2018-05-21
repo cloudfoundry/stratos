@@ -2,13 +2,11 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
-import {
-  BaseTestModulesNoShared,
-  MetadataCardTestComponents,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { AppChipsComponent } from '../../../../chips/chips.component';
 import { ServiceInstanceCardComponent } from './service-instance-card.component';
 
 describe('ServiceInstanceCardComponent', () => {
@@ -17,17 +15,16 @@ describe('ServiceInstanceCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ServiceInstanceCardComponent,
-        ...MetadataCardTestComponents,
-        AppChipsComponent],
       imports: [
-        BaseTestModulesNoShared,
+        BaseTestModules,
+        createBasicStoreModule(),
       ],
       providers: [
         ServicesWallService,
         EntityServiceFactory,
         EntityMonitorFactory,
         PaginationMonitorFactory,
+        ServiceActionHelperService,
       ]
     })
       .compileComponents();
