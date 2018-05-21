@@ -5,11 +5,9 @@ import { Store } from '@ngrx/store';
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { DeleteServiceBinding } from '../../../../../store/actions/service-bindings.actions';
-import { DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import {
@@ -24,8 +22,6 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>

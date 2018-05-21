@@ -1,16 +1,15 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
 import {
   BaseTestModulesNoShared,
   MetadataCardTestComponents,
 } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServiceInstanceCardComponent } from './service-instance-card.component';
-import { AppChipsComponent } from '../../../../chips/chips.component';
-import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
-import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
+import { AppChipsComponent } from '../../../../chips/chips.component';
+import { ServiceInstanceCardComponent } from './service-instance-card.component';
 
 describe('ServiceInstanceCardComponent', () => {
   let component: ServiceInstanceCardComponent;
@@ -29,7 +28,6 @@ describe('ServiceInstanceCardComponent', () => {
         EntityServiceFactory,
         EntityMonitorFactory,
         PaginationMonitorFactory,
-        ConfirmationDialogService
       ]
     })
       .compileComponents();
