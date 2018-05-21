@@ -17,8 +17,8 @@ export class ServiceActionHelperService {
   ) { }
 
   detachServiceBinding = (
-    serviceInstanceGuid: string,
     serviceBindingGuid: string,
+    serviceInstanceGuid: string,
     endpointGuid: string
   ) => {
     const confirmation = new ConfirmationDialogConfig(
