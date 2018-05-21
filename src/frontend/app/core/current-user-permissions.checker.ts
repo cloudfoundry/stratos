@@ -38,7 +38,7 @@ export enum CHECKER_GROUPS {
 
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
-  static readonly ALL_SPACES_KEYS = 'PERMISSIONS__ALL_SPACES_PLEASE';
+  static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
   constructor(private store: Store<AppState>) { }
   public check(
     type: PermissionTypes,
@@ -174,7 +174,7 @@ export class CurrentUserPermissionsChecker {
 
   public getCfCheck(config: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string): Observable<boolean> {
     const { type, permission } = config;
-    const checkAllSpaces = spaceGuid === CurrentUserPermissionsChecker.ALL_SPACES_KEYS;
+    const checkAllSpaces = spaceGuid === CurrentUserPermissionsChecker.ALL_SPACES;
     const actualGuid = type === PermissionTypes.SPACE && spaceGuid && !checkAllSpaces ? spaceGuid : orgOrSpaceGuid;
     const cfPermissions = permission as PermissionStrings;
     if (type === PermissionTypes.ENDPOINT || (endpointGuid && actualGuid)) {
