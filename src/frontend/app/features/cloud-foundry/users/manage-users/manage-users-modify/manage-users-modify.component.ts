@@ -113,18 +113,23 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    const orgConnect$ = this.store.select(selectUsersRolesOrgGuid).pipe(
+    const orgEntity$ = this.store.select(selectUsersRolesOrgGuid).pipe(
       startWith(''),
       distinctUntilChanged(),
       filter(orgGuid => !!orgGuid),
       tap(orgGuid => this.updateOrg(orgGuid)),
       switchMap(orgGuid => this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, orgGuid)),
-      map(org => [org]),
       share()
     );
 
-    const isTableLoading$ = orgConnect$.pipe(
-      map(orgs => !orgs),
+    const orgConnect$ = orgEntity$.pipe(
+      filter(entityInfo => !!entityInfo.entity),
+      map(entityInfo => [entityInfo.entity]),
+      share()
+    );
+
+    const isTableLoading$ = orgEntity$.pipe(
+      map(orgEntity => orgEntity.entityRequestInfo.fetching),
       startWith(true)
     );
     // Data source that will power the orgs table

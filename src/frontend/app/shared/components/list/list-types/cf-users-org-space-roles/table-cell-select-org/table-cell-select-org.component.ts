@@ -35,7 +35,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
 
   ngOnInit() {
     if (this.activeRouteCfOrgSpace.orgGuid) {
-      this.singleOrg$ = this.cfRolesService.fetchOrg(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid);
+      this.singleOrg$ = this.cfRolesService.fetchOrgEntity(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid);
     } else {
       this.singleOrg$ = Observable.of(null);
       this.organizations$ = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid);

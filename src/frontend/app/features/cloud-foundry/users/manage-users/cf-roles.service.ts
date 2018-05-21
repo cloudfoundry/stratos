@@ -32,7 +32,7 @@ import {
   selectUsersRolesPicked,
   selectUsersRolesRoles,
 } from '../../../../store/selectors/users-roles.selector';
-import { APIResource } from '../../../../store/types/api.types';
+import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 
@@ -171,7 +171,7 @@ export class CfRolesService {
     return newChanges;
   }
 
-  fetchOrg(cfGuid: string, orgGuid: string): Observable<APIResource<IOrganization>> {
+  fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
     return this.entityServiceFactory.create<APIResource<IOrganization>>(
       organizationSchemaKey,
       entityFactory(organizationSchemaKey),
@@ -180,7 +180,11 @@ export class CfRolesService {
         createEntityRelationKey(organizationSchemaKey, spaceSchemaKey)
       ], true),
       true
-    ).waitForEntity$.pipe(
+    ).waitForEntity$;
+  }
+
+  fetchOrgEntity(cfGuid: string, orgGuid: string): Observable<APIResource<IOrganization>> {
+    return this.fetchOrg(cfGuid, orgGuid).pipe(
       filter(entityInfo => !!entityInfo.entity),
       map(entityInfo => entityInfo.entity),
     );

@@ -115,7 +115,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   ngAfterContentInit() {
     this.cfAndOrgGuid$.pipe(
-      mergeMap(({ cfGuid, orgGuid }) => this.cfRolesService.fetchOrg(cfGuid, orgGuid)),
+      mergeMap(({ cfGuid, orgGuid }) => this.cfRolesService.fetchOrgEntity(cfGuid, orgGuid)),
     ).subscribe(org => this.orgName$.next(org.entity.name));
   }
 
@@ -184,7 +184,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       mergeMap(([changed, { cfGuid, orgGuid }]) => {
         return Observable.combineLatest(
           this.cfUserService.getUsers(cfGuid),
-          this.cfRolesService.fetchOrg(cfGuid, orgGuid)
+          this.cfRolesService.fetchOrgEntity(cfGuid, orgGuid)
         );
       }),
       withLatestFrom(
