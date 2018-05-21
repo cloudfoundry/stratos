@@ -1,4 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, first, map, withLatestFrom } from 'rxjs/operators';
@@ -33,16 +34,23 @@ export class UsersRolesComponent implements OnDestroy {
   constructor(
     private store: Store<AppState>,
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    private cfUserService: CfUserService
+    private cfUserService: CfUserService,
+    private route: ActivatedRoute
   ) {
 
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
 
-    this.initialUsers$ = this.store.select(selectUsersRolesPicked).pipe(
-      first(),
-    );
+    const userQParam = this.route.snapshot.queryParams.user;
+    if (userQParam) {
+      this.initialUsers$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
+        map(user => [user.entity])
+      );
+    } else {
+      this.initialUsers$ = this.store.select(selectUsersRolesPicked);
+    }
 
     this.singleUser$ = this.initialUsers$.pipe(
+      first(),
       filter(users => users && users.length > 0),
       map(users => users.length === 1 ? users[0] : {} as CfUser),
     );

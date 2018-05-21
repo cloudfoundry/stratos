@@ -57,7 +57,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   manageUserAction = {
     action: (user: APIResource<CfUser>) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
-      this.router.navigate([this.createManagerUsersUrl()]);
+      this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.entity.guid } });
     },
     label: 'Manage',
     description: ``,
@@ -68,7 +68,11 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
   manageMultiUserAction = {
     action: (users: APIResource<CfUser>[]) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, users.map(user => user.entity)));
-      this.router.navigate([this.createManagerUsersUrl()]);
+      if (users.length === 1) {
+        this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: users[0].entity.guid } });
+      } else {
+        this.router.navigate([this.createManagerUsersUrl()]);
+      }
       return false;
     },
     icon: 'people',
