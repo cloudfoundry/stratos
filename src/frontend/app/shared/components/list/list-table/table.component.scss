@@ -1,4 +1,8 @@
 $row-height: 62px;
+.mat-column-select {
+  overflow: initial;
+}
+
 .app-table {
   &__card {
     padding: 0;
