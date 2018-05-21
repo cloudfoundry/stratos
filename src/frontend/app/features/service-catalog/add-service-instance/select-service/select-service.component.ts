@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, share, switchMap, tap } from 'rxjs/operators';
+import { filter, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IService } from '../../../../core/cf-api-svc.types';
@@ -42,6 +42,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private cSIHelperService: CreateServiceInstanceHelperService,
     private activatedRoute: ActivatedRoute
   ) {
+
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
     });
@@ -49,8 +50,6 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       filter(p => !!p && !!p.cfGuid),
       tap((p: CreateServiceInstanceState) => this.cfGuid = p.cfGuid),
       switchMap(p => this.servicesWallService.getServicesInCf(p.cfGuid)),
-      filter(p => !!p),
-      share()
     );
   }
 
@@ -67,7 +66,9 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       tap(services => {
         const guid = services[0].metadata.guid;
         this.stepperForm.controls.service.setValue(guid);
-        this.validate.next(true);
+        setTimeout(() => {
+          this.validate.next(true);
+        });
       })
     ).subscribe();
   }
