@@ -14,6 +14,7 @@ export enum CurrentUserPermissions {
   ORGANIZATION_DELETE = 'delete.org',
   ORGANIZATION_EDIT = 'edit.org',
   ORGANIZATION_SUSPEND = 'suspend.org',
+  FIREHOSE_VIEW = 'view-firehose',
   ENDPOINT_REGISTER = 'register.endpoint',
   PASSWORD_CHANGE = 'change-password'
 }
@@ -113,6 +114,8 @@ export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CurrentUserPermissions.ORGANIZATION_DELETE),
   [CurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
+  // TODO: RC also allow read only admin
+  [CurrentUserPermissions.FIREHOSE_VIEW]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN),
   [CurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(PermissionTypes.STRATOS_SCOPE, ScopeStrings.STRATOS_CHANGE_PASSWORD),
 };
