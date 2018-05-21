@@ -25,7 +25,7 @@ import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
-import { detachServiceBinding, deleteServiceInstance } from '../app-sevice-bindings/service-binding.helper';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
@@ -102,12 +102,16 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     enabled: (row: APIResource) => row.entity.service_bindings.length === 1
   };
 
-  constructor(protected store: Store<AppState>, protected datePipe: DatePipe, private confirmDialog: ConfirmationDialogService) {
+  constructor(
+    protected store: Store<AppState>,
+    protected datePipe: DatePipe,
+    private serviceActionHelperService: ServiceActionHelperService
+  ) {
     super();
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    deleteServiceInstance(this.confirmDialog, this.store, serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
+    this.serviceActionHelperService.deleteServiceInstance(serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
@@ -117,9 +121,8 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
      * take user to a form to select which app binding they want to remove
     **/
     const serviceBindingGuid = serviceInstance.entity.service_bindings[0].metadata.guid;
-    detachServiceBinding(
-      this.confirmDialog,
-      this.store, serviceBindingGuid,
+    this.serviceActionHelperService.detachServiceBinding(
+      serviceBindingGuid,
       serviceInstance.metadata.guid,
       serviceInstance.entity.cfGuid
     );

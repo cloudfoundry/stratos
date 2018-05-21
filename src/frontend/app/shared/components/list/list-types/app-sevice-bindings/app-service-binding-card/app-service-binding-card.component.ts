@@ -20,7 +20,7 @@ import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.compo
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
 import { DatePipe } from '@angular/common';
-import { detachServiceBinding } from '../service-binding.helper';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 
 @Component({
   selector: 'app-app-service-binding-card',
@@ -42,6 +42,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     private appService: ApplicationService,
     private dialog: MatDialog,
     private confirmDialog: ConfirmationDialogService,
+    private serviceActionHelperService: ServiceActionHelperService,
     private datePipe: DatePipe
   ) {
     super();
@@ -126,9 +127,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   detach = () => {
-    detachServiceBinding(
-      this.confirmDialog,
-      this.store,
+    this.serviceActionHelperService.detachServiceBinding(
       this.row.metadata.guid,
       this.row.entity.service_instance_guid,
       this.appService.cfGuid
