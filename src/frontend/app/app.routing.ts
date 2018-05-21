@@ -34,7 +34,7 @@ const appRoutes: Routes = [
           loadChildren: 'app/features/metrics/metrics.module#MetricsModule',
         }]
       },
-      { path: 'service-catalog', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
+      { path: 'marketplace', loadChildren: 'app/features/service-catalog/service-catalog.module#ServiceCatalogModule' },
       { path: 'services', loadChildren: 'app/features/services/services.module#ServicesModule' },
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },

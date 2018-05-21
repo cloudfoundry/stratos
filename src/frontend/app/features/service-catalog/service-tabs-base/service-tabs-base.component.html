@@ -1,0 +1,13 @@
+<app-page-header [tabs]="tabLinks">
+  <div class="app-page-header">
+    {{ getServiceLabel() | async }}
+    <div class="page-header-right">
+      <button mat-icon-button name="add-service-instance" [routerLink]="addServiceInstanceLink()" [disabled]="!(hasVisiblePlans$ | async)">
+        <mat-icon [matTooltip]="toolTipText$ | async">add</mat-icon>
+      </button>
+    </div>
+  </div>
+</app-page-header>
+<app-loading-page [text]="'Retrieving Service details'" class="router-component">
+  <router-outlet></router-outlet>
+</app-loading-page>
