@@ -73,8 +73,8 @@ export class PermissionsEffects {
 
   getRequests(endpoints: EndpointModel[]) {
     return [].concat(...endpoints.map(endpoint => {
-      return Object.values(UserRelationTypes).map(type => {
-        return getRequestFromAction(new GetUserRelations(endpoint.user.guid, type as UserRelationTypes, endpoint.guid), this.httpClient);
+      return Object.values(UserRelationTypes).map((type: UserRelationTypes) => {
+        return getRequestFromAction(new GetUserRelations(endpoint.user.guid, type, endpoint.guid), this.httpClient);
       });
     }));
   }
