@@ -1,10 +1,12 @@
+import { promise } from 'protractor';
+import { e2e } from '../e2e';
 import { E2EEndpointConfig } from '../e2e.types';
-import { E2EHelpers } from './e2e-helpers';
-import { SecretsHelpers } from './secrets-helpers';
+import { ConsoleUserType } from './e2e-helpers';
+import { RequestHelpers } from './request-helpers';
 
+const reqHelpers = new RequestHelpers();
 
-const helpers = new E2EHelpers();
-const secrets = new SecretsHelpers();
+// This class is used internalyl and should not need to be used directly by tests
 
 /**
  * Helpers to reset the back-end to a given state
@@ -14,144 +16,109 @@ export class ResetsHelpers {
   constructor() { }
 
   /**
-   * Ensure the database is initialized for ITOps admin workflow with no clusters registered.
+   * Get all of the registered Endpoints and comnnect all of them for which credentials
+   * have been configured
    */
-  removeAllEndpoints = (username?, password?) => {
-    return new Promise((resolve, reject) => {
-      helpers.createReqAndSession(null, username, password).then((req) => {
-        this.doRemoveAllEndpoints(req).then(function () {
-          resolve();
-        }, function (error) {
-          console.log('Failed to remove all endpoints: ', error);
-          reject(error);
-        }).catch(reject);
-      }, function (error) {
-        reject(error);
-      });
-    });
-  }
-
-  /**
-   * Ensure the database is initialized for ITOps admin workflow with the clusters provided as params.
-   * registerMultipleCf - register multiple CF instance
-   */
-  resetAllEndpoints = (username, password, registerMultipleCf, endpointName?: string) => {
-    return new Promise((resolve, reject) => {
-      helpers.createReqAndSession(null, username, password).then((req) => {
-        this.doResetAllEndpoints(req, registerMultipleCf, endpointName).then(() => {
-          resolve();
-        }, function (error) {
-          console.log('Failed to reset all endpoints: ', error);
-          reject(error);
-        }).catch(reject);
-      }, function (error) {
-        reject(error);
-      });
-    });
-  }
-
-  resetAndConnectEndpoints = (username, password, registerMultipleCf, endpointName?: string, connectAsAdmin = true) => {
-    return new Promise((resolve, reject) => {
-      helpers.createReqAndSession(null, username, password).then((req) => {
-        this.doResetAllEndpoints(req, registerMultipleCf, endpointName).then(() => {
-          this.connectAllExistingEndpoints(req, connectAsAdmin).then(() => {
-            resolve();
-          }, (error) => {
-            reject(error);
+  connectAllEndpoints(req, userType: ConsoleUserType = ConsoleUserType.admin) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' })
+      .then(response => {
+        const cnsis = JSON.parse(response);
+        const p = promise.fulfilled({});
+        cnsis.forEach((cnsi) => {
+          const list = e2e.secrets.getEndpoints()[cnsi.cnsi_type] as E2EEndpointConfig[];
+          if (!list) {
+            fail('Unknown endpoint type');
+          }
+          const found = list.find((ep) => {
+            return ep.url.endsWith(cnsi.api_endpoint.Host);
           });
-        }, function (error) {
-          console.log('Failed to reset all endpoints: ', error);
-          reject(error);
-        }).catch(reject);
-      }, function (error) {
-        reject(error);
+          if (found) {
+            const user = userType === ConsoleUserType.admin ? found.creds.admin : found.creds.nonAdmin || found.creds.admin;
+            p.then(() => this.doConnectEndpoint(req, cnsi.guid, user.username, user.password));
+          }
+        });
+        return p;
       });
-    });
   }
 
   /**
    * Get all of the registered Endpoints and comnnect all of them for which credentials
    * have been configured
    */
-  connectAllEndpoints(username, password, isAdmin) {
-    let req;
-    return helpers.createReqAndSession(null, username, password)
-      .then(function (createdReq) { req = createdReq; })
-      .then(() => helpers.sendRequest(req, {method: 'GET', url: 'pp/v1/cnsis'}))
+  connectEndpoint(req, endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' })
       .then(response => {
         const cnsis = JSON.parse(response);
         const promises = [];
         cnsis.forEach((cnsi) => {
-          const list = secrets.getEndpoints()[cnsi.cnsi_type] as E2EEndpointConfig[];
+          const list = e2e.secrets.getEndpoints()[cnsi.cnsi_type] as E2EEndpointConfig[];
           if (!list) {
-            fail('Unknown endpoint');
+            fail('Unknown endpoint type');
           }
-          const found = list.find((ep) => {
-            return ep.url.endsWith(cnsi.api_endpoint.Host);
-          });
+          const found = list.find((ep) => ep.name === endpointName);
           if (found) {
-            const user = isAdmin ? found.creds.admin : found.creds.nonAdmin || found.creds.admin;
-            promises.push(this.connectEndpoint(req, cnsi.guid, user.username, user.password));
+            const user = userType === ConsoleUserType.admin ? found.creds.admin : found.creds.nonAdmin || found.creds.admin;
+            promises.push(this.doConnectEndpoint(req, cnsi.guid, user.username, user.password));
           }
         });
-        return Promise.all(promises);
+        return promise.all(promises);
       });
   }
 
-  // Connect with session
-  connectAllExistingEndpoints(session, isAdmin = true) {
-    return helpers.sendRequest(session, {method: 'GET', url: 'pp/v1/cnsis'})
-    .then(response => {
-      const cnsis = JSON.parse(response);
-      const promises = [];
-      cnsis.forEach((cnsi) => {
-        const list = secrets.getEndpoints()[cnsi.cnsi_type] as E2EEndpointConfig[];
-        if (!list) {
-          fail('Unknown endpoint');
-        }
-        const found = list.find((ep) => {
-          return ep.url.endsWith(cnsi.api_endpoint.Host);
-        });
-        if (found) {
-          const user = isAdmin ? found.creds.admin : found.creds.nonAdmin || found.creds.admin;
-          promises.push(this.connectEndpoint(session, cnsi.guid, user.username, user.password));
-        }
+  /**
+   *
+   * Ensure we have multiple Cloud Foundries registered
+   *
+   * Register a duplicate if necessary to ensure that we have multiple
+   */
+  registerMultipleCloudFoundries(req) {
+
+    const p = promise.fulfilled({});
+    const endpoints = e2e.secrets.getEndpoints();
+    Object.keys(endpoints).forEach((endpointType) => {
+      const endpointsOfType = endpoints[endpointType] as E2EEndpointConfig[];
+      // Only do this if we only have one endpoint
+      if (endpointsOfType.length === 1) {
+        fail('You must configure multiple Cloud Foundry endpoints in secrets.yaml');
+      }
+      endpointsOfType.forEach((ep) => {
+         p.then(() => reqHelpers.sendRequest(
+          req, { method: 'POST', url: 'pp/v1/register/' + endpointType }, null, this.makeRegisterFormData(ep)
+        ));
       });
-      return Promise.all(promises);
+    });
+    return p;
+  }
+
+  registerDefaultCloudFoundry(req) {
+    const endpoint = e2e.secrets.getDefaultCFEndpoint();
+    return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/register/cf' }, null, this.makeRegisterFormData(endpoint));
+  }
+
+  /**
+   * @function doRemoveAllEndpoints
+   * @description Remove all registered endpoints
+   */
+  removeAllEndpoints(req) {
+    return reqHelpers.sendRequest(req, { method: 'GET', url: 'pp/v1/cnsis' }).then((data) => {
+      if (!data || !data.length) {
+        return;
+      }
+      data = data.trim();
+      data = JSON.parse(data);
+      const p = promise.fulfilled({});
+      data.forEach((c) => {
+        p.then(() => reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/unregister' }, null, { cnsi_guid: c.guid }));
+      });
+      return p;
     });
   }
-  
-  /**
-   * Reset endpoints to original state
-   */
-  private doResetAllEndpoints(req, registerMultipleCf = false, endpointName?: string) {
-    return new Promise((resolve, reject) => {
-      this.doRemoveAllEndpoints(req).then(() => {
-        const promises = [];
-        const endpoints = secrets.getEndpoints();
-        Object.keys(endpoints).forEach((endpointType) => {
-          let endpointsOfType = endpoints[endpointType] as E2EEndpointConfig[];
-          if (registerMultipleCf) {
-            // Only do this if we only have one endpoint
-            if (endpointsOfType.length === 1) {
-              // duplicates the current definition and changes the name
-              const newEndpoint = { ...endpointsOfType[0], name: endpointsOfType[0].name +  'Copy' };
-              endpointsOfType.push(newEndpoint);
-            }
-          } else {
-            // Only want one
-            endpointsOfType = [ endpointsOfType[0] ];
-          }
-          endpointsOfType.forEach((ep) => {
-            if (!endpointName || ep.name === endpointName) {
-              promises.push(
-                helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/register/' + endpointType}, null, this.makeRegisterFormData(ep))
-              );
-            }
-          });
-        });
-        Promise.all(promises).then(() => resolve(), (error) => reject(error));
-      }, reject).catch(reject);
+
+  private doConnectEndpoint(req, cnsiGuid, username, password) {
+    return reqHelpers.sendRequest(req, { method: 'POST', url: 'pp/v1/auth/login/cnsi' }, null, {
+      cnsi_guid: cnsiGuid,
+      username: username,
+      password: password
     });
   }
 
@@ -161,34 +128,5 @@ export class ResetsHelpers {
       cnsi_name: ep.name,
       skip_ssl_validation: ep.skipSSLValidation ? 'true' : 'false'
     };
-  }
-
-  /**
-   * @function doRemoveAllEndpoints
-   * @description Remove all registered endpoints
-   */
-  private doRemoveAllEndpoints(req) {
-    return new Promise(function (resolve, reject) {
-      helpers.sendRequest(req, {method: 'GET', url: 'pp/v1/cnsis'}).then((data) => {
-        data = data.trim();
-        data = JSON.parse(data);
-        if (!data || !data.length) {
-          resolve();
-          return;
-        }
-        const promises = data.map((c) => {
-          return helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/unregister'}, null, {cnsi_guid: c.guid});
-        });
-        Promise.all(promises).then(resolve, reject);
-      }, reject);
-    });
-  }
-
-  private connectEndpoint(req, cnsiGuid, username, password) {
-    return helpers.sendRequest(req, {method: 'POST', url: 'pp/v1/auth/login/cnsi'}, null, {
-      cnsi_guid: cnsiGuid,
-      username: username,
-      password: password
-    });
   }
 }
