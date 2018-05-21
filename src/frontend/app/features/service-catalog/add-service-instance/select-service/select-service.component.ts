@@ -37,7 +37,6 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private servicesWallService: ServicesWallService,
     private entityServiceFactory: EntityServiceFactory,
     private cSIHelperService: CreateServiceInstanceHelperService,
     private activatedRoute: ActivatedRoute
@@ -48,8 +47,12 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     });
     this.services$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p && !!p.cfGuid),
-      tap((p: CreateServiceInstanceState) => this.cfGuid = p.cfGuid),
-      switchMap(p => this.servicesWallService.getServicesInCf(p.cfGuid)),
+      tap((p: CreateServiceInstanceState) => {
+        this.cfGuid = p.cfGuid;
+      }),
+      switchMap(p => {
+        return this.cSIHelperService.getServicesForSpace(p.spaceGuid, p.cfGuid);
+      })
     );
   }
 

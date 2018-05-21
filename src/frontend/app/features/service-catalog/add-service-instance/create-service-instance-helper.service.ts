@@ -13,7 +13,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { GetServiceBroker } from '../../../store/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
 import { GetService } from '../../../store/actions/service.actions';
-import { GetSpace } from '../../../store/actions/space.actions';
+import { GetSpace, GetAllServicesForSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   entityFactory,
@@ -24,6 +24,7 @@ import {
   spaceSchemaKey,
   spaceWithOrgKey,
   serviceInstancesSchemaKey,
+  serviceInstancesWithSpaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -82,23 +83,8 @@ export class CreateServiceInstanceHelperService {
       first(),
       tap(svc => {
         this.service$.next(svc);
-        const brokerId = svc.entity.service_broker_guid;
-        const serviceEntityService = this.entityServiceFactory.create(
-          serviceBrokerSchemaKey,
-          entityFactory(serviceBrokerSchemaKey),
-          svc.entity.service_broker_guid,
-          new GetServiceBroker(brokerId, svc.entity.cfGuid),
-          true
-        );
-        serviceEntityService.waitForEntity$.pipe(
-          filter(o => !!o && !!o.entity),
-          map(o => o.entity),
-          publishReplay(1),
-          refCount(),
-          tap(
-            p => this.serviceBroker$.next(p)
-          ),
-        ).subscribe();
+        const brokerEntity$ = this.getBrokerEntityById(svc.entity.service_broker_guid, svc.entity.cfGuid);
+        brokerEntity$.subscribe();
       })
     ).subscribe();
 
@@ -150,6 +136,14 @@ export class CreateServiceInstanceHelperService {
       combineLatest(this.getServicePlanVisibilities(), this.getServiceBroker(), this.getService()),
       map(([svcPlans, svcPlanVis, svcBrokers, svc]) => fetchVisiblePlans(svcPlans, svcPlanVis, svcBrokers, svc)),
     );
+  }
+
+  private getBrokerEntityById(brokerGuid: string, cfGuid: string) {
+    const serviceEntityService = this.entityServiceFactory.create(
+      serviceBrokerSchemaKey, entityFactory(serviceBrokerSchemaKey), brokerGuid, new GetServiceBroker(brokerGuid, cfGuid), true);
+    const brokerEntity$ = serviceEntityService.waitForEntity$.pipe(
+      filter(o => !!o && !!o.entity), map(o => o.entity), publishReplay(1), refCount(), tap(p => this.serviceBroker$.next(p)));
+    return brokerEntity$;
   }
 
   getServiceBroker(): Observable<APIResource<IServiceBroker>> {
@@ -274,7 +268,7 @@ export class CreateServiceInstanceHelperService {
     );
   }
 
-  getServiceInstancesForService = (servicePlanGuid: string = null) => {
+  getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null) => {
     return this.isInitialised().pipe(
       switchMap(p => {
         const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, p.cfGuid);
@@ -291,12 +285,35 @@ export class CreateServiceInstanceHelperService {
             share(),
             first(),
             map(serviceInstances => serviceInstances.filter(s => (s.entity.service_guid === p.serviceGuid))),
-            // Filter out services that belong to other service plans if required
+            // Conditionally filter out services that belong to other service plans if required
             map(serviceInstances => servicePlanGuid ?
-              serviceInstances.filter(s => (s.entity.service_plan_guid === servicePlanGuid)) : serviceInstances)
+              serviceInstances.filter(s => (s.entity.service_plan_guid === servicePlanGuid)) : serviceInstances),
+            // Conditionally filter out services that have bindings in other spaces
+            map(serviceInstances => spaceGuid ?
+              serviceInstances.filter(s => s.entity.space_guid === spaceGuid) : serviceInstances
+            )
           );
 
       })
+    );
+  }
+
+  getServicesForSpace = (spaceGuid: string, cfGuid: string) => {
+    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, spaceGuid);
+    return getPaginationObservables<APIResource<IService>>(
+      {
+        store: this.store,
+        action: new GetAllServicesForSpace(paginationKey, cfGuid, spaceGuid),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          paginationKey,
+          entityFactory(serviceSchemaKey)
+        )
+      },
+      true
+    ).entities$.pipe(
+      filter(p => !!p),
+      publishReplay(1),
+      refCount()
     );
   }
 

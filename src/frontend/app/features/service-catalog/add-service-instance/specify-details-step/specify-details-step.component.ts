@@ -122,9 +122,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
         this.subscriptions.push(this.setupFormValidatorData());
 
-        this.serviceInstances$ = this.store.select(selectCreateServiceInstanceServicePlan).pipe(
+        this.serviceInstances$ = this.store.select(selectCreateServiceInstance).pipe(
           filter(p => !!p),
-          switchMap(guid => cSIHelperService.getServiceInstancesForService(guid))
+          switchMap(createServiceInstanceState => cSIHelperService.getServiceInstancesForService(
+            createServiceInstanceState.servicePlanGuid,
+            createServiceInstanceState.spaceGuid
+          ))
         );
       })
     ).subscribe());

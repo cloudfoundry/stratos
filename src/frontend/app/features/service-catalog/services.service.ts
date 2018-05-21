@@ -126,11 +126,11 @@ export class ServicesService {
 
   getServiceBrokerById = (guid: string): Observable<APIResource<IServiceBroker>> => this.serviceBrokers$
     .pipe(
-    filter(p => !!p),
-    map(brokers => brokers.filter(b => b.metadata.guid === guid)),
-    filter(s => s && s.length === 1),
-    map(s => s[0]),
-    first()
+      filter(p => !!p),
+      map(brokers => brokers.filter(b => b.metadata.guid === guid)),
+      filter(s => s && s.length === 1),
+      map(s => s[0]),
+      first()
     )
 
   getVisibleServicePlans = () => {
@@ -144,24 +144,24 @@ export class ServicesService {
   }
 
   fetchVisiblePlans =
-  (svcPlans: APIResource<IServicePlan>[],
-    svcPlanVis: APIResource<IServicePlanVisibility>[],
-    svcBrokers: APIResource<IServiceBroker>[],
-    svc: APIResource<IService>): APIResource<IServicePlan>[] => {
-    const visiblePlans: APIResource<IServicePlan>[] = [];
-    svcPlans.forEach(p => {
-      if (p.entity.public) {
-        visiblePlans.push(p);
-      } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
-        // plan is visibilities
-        visiblePlans.push(p);
-      } else if (svcBrokers.filter(s => s.metadata.guid === svc.entity.service_broker_guid)[0].entity.space_guid) {
-        // Plan is space-scoped
-        visiblePlans.push(p);
-      }
-    });
-    return visiblePlans;
-  }
+    (svcPlans: APIResource<IServicePlan>[],
+      svcPlanVis: APIResource<IServicePlanVisibility>[],
+      svcBrokers: APIResource<IServiceBroker>[],
+      svc: APIResource<IService>): APIResource<IServicePlan>[] => {
+      const visiblePlans: APIResource<IServicePlan>[] = [];
+      svcPlans.forEach(p => {
+        if (p.entity.public) {
+          visiblePlans.push(p);
+        } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
+          // plan is visibilities
+          visiblePlans.push(p);
+        } else if (svcBrokers.filter(s => s.metadata.guid === svc.entity.service_broker_guid)[0].entity.space_guid) {
+          // Plan is space-scoped
+          visiblePlans.push(p);
+        }
+      });
+      return visiblePlans;
+    }
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
@@ -183,12 +183,12 @@ export class ServicesService {
   getServiceName = () => {
     return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
-      map(([extraInfo, service]) => {
-        if (extraInfo && extraInfo.displayName) {
-          return extraInfo.displayName;
-        } else {
-          return service.entity.label;
-        }
-      }));
+        map(([extraInfo, service]) => {
+          if (extraInfo && extraInfo.displayName) {
+            return extraInfo.displayName;
+          } else {
+            return service.entity.label;
+          }
+        }));
   }
 }
