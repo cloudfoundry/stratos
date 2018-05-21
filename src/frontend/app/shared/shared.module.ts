@@ -106,6 +106,7 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
+import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 
 @NgModule({
   imports: [
@@ -280,7 +281,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     EntityMonitorFactory,
     PaginationMonitorFactory,
     CloudFoundryService,
-    InternalEventMonitorFactory
+    InternalEventMonitorFactory,
+    ServiceActionHelperService
   ]
 })
 export class SharedModule { }
