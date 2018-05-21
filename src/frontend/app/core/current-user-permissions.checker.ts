@@ -107,7 +107,7 @@ export class CurrentUserPermissionsChecker {
     return orgState.spaceGuids.map(spaceGuid => {
       const space = endpointSpaces[spaceGuid];
       return space ? space[permission] || false : false;
-    });
+    }).some(check => check);
   }
 
   public getInternalChecks(
