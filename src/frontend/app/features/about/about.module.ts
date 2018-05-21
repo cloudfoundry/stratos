@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
+import { CustomModule } from '../../custom.module';
 import { SharedModule } from '../../shared/shared.module';
 import { AboutPageComponent } from './about-page/about-page.component';
 import { AboutRoutingModule } from './about.routing';
@@ -10,7 +11,8 @@ import { AboutRoutingModule } from './about.routing';
   imports: [
     CoreModule,
     SharedModule,
-    AboutRoutingModule
+    AboutRoutingModule,
+    CustomModule
   ],
   declarations: [
     AboutPageComponent
