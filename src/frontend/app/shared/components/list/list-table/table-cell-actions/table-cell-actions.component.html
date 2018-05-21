@@ -1,4 +1,4 @@
-<button *ngIf="(show$ | async); else noActions" [disabled]="busy$ | async" mat-icon-button [matMenuTriggerFor]="menu">
+<button *ngIf="(show$ | async)" [disabled]="busy$ | async" mat-icon-button [matMenuTriggerFor]="menu">
   <mat-icon>more_vert</mat-icon>
 </button>
 <mat-menu #menu="matMenu" [xPosition]="'before'" [yPosition]="'below'">
@@ -9,4 +9,3 @@
     </button>
   </ng-container>
 </mat-menu>
-<ng-template #noActions>-</ng-template>

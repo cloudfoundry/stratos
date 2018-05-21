@@ -23,7 +23,7 @@ const tableColumnSelect = {
 
 const tableColumnAction = {
   columnId: 'actions',
-  headerCell: () => 'Actions',
+  headerCell: () => '',
   cellComponent: TableCellActionsComponent,
   class: 'app-table__cell--table-column-action',
   cellFlex: '1'
