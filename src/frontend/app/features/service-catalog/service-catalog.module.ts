@@ -13,8 +13,8 @@ import { ServiceBaseComponent } from './service-base/service-base.component';
 import { ServiceCatalogPageComponent } from './service-catalog-page/service-catalog-page.component';
 import { ServiceCatalogRoutingModule } from './service-catalog.routing';
 import { ServiceInstancesComponent } from './service-instances/service-instances.component';
-import { ServicePlansComponent } from './service-plans/service-plans.component';
 import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
+import { ServicePlansComponent } from './service-plans/service-plans.component';
 
 @NgModule({
   imports: [
@@ -33,10 +33,11 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     AddServiceInstanceComponent,
     SelectPlanStepComponent,
     SelectServiceComponent,
+    ServicePlansComponent,
+    ServiceTabsBaseComponent
   ],
   exports: [
     AddServiceInstanceComponent,
-    ServicePlansComponent,
     ServiceTabsBaseComponent,
   ]
 })

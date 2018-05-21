@@ -49,7 +49,8 @@ export class SelectPlanStepComponent implements OnDestroy {
   servicePlans$: Observable<ServicePlan[]>;
   initialising$ = new BehaviorSubject(true);
 
-  constructor(private store: Store<AppState>,
+  constructor(
+    private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cSIHelperService: CreateServiceInstanceHelperService,
     private activatedRoute: ActivatedRoute

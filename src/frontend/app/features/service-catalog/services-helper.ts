@@ -10,7 +10,7 @@ export const fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
     svcPlanVis: APIResource<IServicePlanVisibility>[],
     svcBroker: APIResource<IServiceBroker>,
-    svc: APIResource<IService>): APIResource<IServicePlan>[] => {
+  ): APIResource<IServicePlan>[] => {
     const visiblePlans: APIResource<IServicePlan>[] = [];
     svcPlans.forEach(p => {
       if (p.entity.public) {

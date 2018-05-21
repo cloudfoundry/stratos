@@ -13,7 +13,7 @@ import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-mo
 import { GetServiceBroker } from '../../../store/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
 import { GetService } from '../../../store/actions/service.actions';
-import { GetSpace, GetAllServicesForSpace } from '../../../store/actions/space.actions';
+import { GetSpace, GetAllServicesForSpace, GetServiceInstancesForSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   entityFactory,
@@ -38,7 +38,9 @@ import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-
 import { fetchVisiblePlans, getSvcAvailability } from '../services-helper';
 import { ServicePlanAccessibility } from '../services.service';
 import { EntityService } from '../../../core/entity-service';
-import { GetServiceInstances } from '../../../store/actions/service-instances.actions';
+import { GetServiceInstances, DELETE_SERVICE_BINDING } from '../../../store/actions/service-instances.actions';
+import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';
+import { QParam } from '../../../store/types/pagination.types';
 
 
 export enum Mode {
@@ -134,7 +136,7 @@ export class CreateServiceInstanceHelperService {
       filter(p => !!p && p.length > 0),
       map(o => o.filter(s => s.entity.bindable)),
       combineLatest(this.getServicePlanVisibilities(), this.getServiceBroker(), this.getService()),
-      map(([svcPlans, svcPlanVis, svcBrokers, svc]) => fetchVisiblePlans(svcPlans, svcPlanVis, svcBrokers, svc)),
+      map(([svcPlans, svcPlanVis, svcBrokers, svc]) => fetchVisiblePlans(svcPlans, svcPlanVis, svcBrokers)),
     );
   }
 
@@ -159,7 +161,8 @@ export class CreateServiceInstanceHelperService {
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
     return this.getService().pipe(
       filter(p => !!p),
-      map(o => o.entity.service_plans));
+      map(o => o.entity.service_plans)
+    );
   }
 
   getServiceName = () => {
@@ -268,14 +271,25 @@ export class CreateServiceInstanceHelperService {
     );
   }
 
-  getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null) => {
+  getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null, cfGuid: string = null) => {
+
+    let action, paginationKey;
+    if (spaceGuid) {
+      paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, `${spaceGuid}-${servicePlanGuid}`);
+      const q = [new QParam('service_plan_guid', servicePlanGuid, '=')];
+      action = new GetServiceInstancesForSpace(spaceGuid, cfGuid, paginationKey, q);
+    } else if (servicePlanGuid) {
+      paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, servicePlanGuid);
+      action = new GetServicePlanServiceInstances(servicePlanGuid, cfGuid, paginationKey);
+    } else {
+      paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
+      action = new GetServiceInstances(cfGuid, paginationKey);
+    }
     return this.isInitialised().pipe(
       switchMap(p => {
-        const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, p.cfGuid);
-        const getAllServiceInstances = new GetServiceInstances(p.cfGuid, paginationKey);
         return getPaginationObservables<APIResource<IServiceInstance>>({
           store: this.store,
-          action: getAllServiceInstances,
+          action: action,
           paginationMonitor: this.paginationMonitorFactory.create(
             paginationKey,
             entityFactory(serviceInstancesSchemaKey)
@@ -284,15 +298,7 @@ export class CreateServiceInstanceHelperService {
           .entities$.pipe(
             share(),
             first(),
-            map(serviceInstances => serviceInstances.filter(s => (s.entity.service_guid === p.serviceGuid))),
-            // Conditionally filter out services that belong to other service plans if required
-            map(serviceInstances => servicePlanGuid ?
-              serviceInstances.filter(s => (s.entity.service_plan_guid === servicePlanGuid)) : serviceInstances),
-            // Conditionally filter out services that have bindings in other spaces
-            map(serviceInstances => spaceGuid ?
-              serviceInstances.filter(s => s.entity.space_guid === spaceGuid) : serviceInstances
-            )
-          );
+        );
 
       })
     );

@@ -5,7 +5,7 @@ import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, switchMap, tap, take } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
@@ -117,16 +117,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       tap(t => {
 
         this.allServiceInstances$ = Observable.combineLatest(this.cSIHelperService.serviceGuid$, this.cSIHelperService.cfGuid$).pipe(
-          switchMap(([serviceGuid, cfGuid]) => cSIHelperService.getServiceInstancesForService())
+          take(1),
+          switchMap(([serviceGuid, cfGuid]) => cSIHelperService.getServiceInstancesForService(null, null, cfGuid))
         );
 
         this.subscriptions.push(this.setupFormValidatorData());
 
         this.serviceInstances$ = this.store.select(selectCreateServiceInstance).pipe(
-          filter(p => !!p),
+          filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
           switchMap(createServiceInstanceState => cSIHelperService.getServiceInstancesForService(
             createServiceInstanceState.servicePlanGuid,
-            createServiceInstanceState.spaceGuid
+            createServiceInstanceState.spaceGuid,
+            createServiceInstanceState.cfGuid
           ))
         );
       })

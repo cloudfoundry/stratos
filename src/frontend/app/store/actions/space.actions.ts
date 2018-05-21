@@ -11,9 +11,12 @@ import {
   organizationSchemaKey,
   serviceSchemaKey,
   servicePlanSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesWithSpaceSchemaKey,
 } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
-import { PaginatedAction, PaginationAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationAction, QParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { RouteEvents } from './route.actions';
@@ -253,4 +256,44 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginationA
     'order-direction': 'desc',
     'order-direction-field': 'label',
   };
+}
+
+
+export class GetServiceInstancesForSpace
+  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  constructor(
+    public spaceGuid: string,
+    public endpointGuid: string,
+    public paginationKey: string,
+    public q: QParam[] = null,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
+      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${spaceGuid}/service_instances`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+    if (q) {
+      this.initialParams['q'] = q;
+    }
+  }
+  actions = getActions('Space', 'Get all');
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'creation',
+  };
+  flattenPagination = true;
 }
