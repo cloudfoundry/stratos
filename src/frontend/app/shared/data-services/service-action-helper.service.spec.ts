@@ -5,7 +5,7 @@ import { BaseTestModules } from '../../test-framework/cloud-foundry-endpoint-ser
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
 
-fdescribe('ServiceActionHelperService', () => {
+describe('ServiceActionHelperService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [ServiceActionHelperService, ConfirmationDialogService],
