@@ -58,7 +58,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   @Input('showModeSelection')
   showModeSelection = false;
 
-  formMode: FormMode = FormMode.CreateServiceInstance;
+  formMode: FormMode;
 
   selectExistingInstanceForm: FormGroup;
   createNewInstanceForm: FormGroup;
@@ -179,6 +179,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     this.selectExistingInstanceForm = new FormGroup({
       serviceInstances: new FormControl('', [Validators.required]),
     });
+    this.formMode = FormMode.CreateServiceInstance;
   }
 
   ngOnInit(): void {
