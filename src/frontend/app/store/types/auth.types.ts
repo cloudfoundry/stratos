@@ -1,3 +1,4 @@
+import { ScopeStrings } from "../../core/current-user-permissions.config";
 
 export interface SessionDataEndpoint {
   guid: string;
@@ -7,7 +8,7 @@ export interface SessionDataEndpoint {
     admin: boolean,
     guid: string,
     name: string,
-    scopes: string[];
+    scopes: ScopeStrings[];
   };
   type: string;
 }
@@ -15,7 +16,7 @@ export interface SessionUser {
   admin: boolean;
   guid: string;
   name: string;
-  scopes: string[];
+  scopes: ScopeStrings[];
 }
 export interface SessionEndpoints {
   [type: string]: {

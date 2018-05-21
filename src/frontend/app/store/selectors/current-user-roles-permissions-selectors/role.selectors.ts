@@ -11,20 +11,21 @@ import {
   IStratosRolesState,
   IGlobalRolesState,
 } from '../../types/current-user-roles.types';
+import { PermissionValues, ScopeStrings } from '../../../core/current-user-permissions.config';
 
 export const selectCurrentUserRolesState = (state: AppState) => state.currentUserRoles;
 
 export const selectCurrentUserStratosRolesState = (state: ICurrentUserRolesState) => state.internal;
-export const selectCurrentUserStratosRoles = (role: string) => (state: IStratosRolesState) => state[role] || false;
+export const selectCurrentUserStratosRoles = (role: PermissionValues) => (state: IStratosRolesState) => state[role] || false;
 
 export const selectCurrentUserCFRolesState = (state: ICurrentUserRolesState) => state.cf;
 export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) => (state: IAllCfRolesState) => state[endpointGuid];
 
 export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => state.global;
-export const selectCurrentUserCFGlobalRolesState = (role: string) => (state: IGlobalRolesState) => state[role] || false;
+export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => state[role] || false;
 export const selectCurrentUserCFOrgsRolesState = (state: ICfRolesState) => state.organizations;
 export const selectCurrentUserCFSpacesRolesState = (state: ICfRolesState) => state.spaces;
-export const selectCurrentUserCFGlobalHasScopes = (scope: string) => (scopes: string[]) => scopes.includes(scope);
+export const selectCurrentUserCFGlobalHasScopes = (scope: ScopeStrings) => (scopes: ScopeStrings[]) => scopes.includes(scope);
 export const selectCurrentUserCFGlobalScopesState = (state: IGlobalRolesState) => state.scopes;
 export const selectCurrentUserCFStratosScopesState = (state: IStratosRolesState) => state.scopes;
 
@@ -41,7 +42,7 @@ export const getCurrentUserStratosRolesState = compose(
 
 // Top level stratos endpoint role objects
 // ============================
-export const getCurrentUserStratosRole = (role: string) => compose(
+export const getCurrentUserStratosRole = (role: PermissionValues) => compose(
   selectCurrentUserStratosRoles(role),
   getCurrentUserStratosRolesState
 );
@@ -49,7 +50,7 @@ export const getCurrentUserStratosRole = (role: string) => compose(
 
 // Top level stratos endpoint scopes
 // ============================
-export const getCurrentUserStratosHasScope = (scope: string) => compose(
+export const getCurrentUserStratosHasScope = (scope: ScopeStrings) => compose(
   selectCurrentUserCFGlobalHasScopes(scope),
   selectCurrentUserCFStratosScopesState,
   getCurrentUserStratosRolesState
@@ -84,7 +85,7 @@ export const getCurrentUserCFGlobalStates = (endpointGuid: string) => compose(
 
 // CF Global role
 // ============================
-export const getCurrentUserCFGlobalState = (endpointGuid: string, role: string) => compose(
+export const getCurrentUserCFGlobalState = (endpointGuid: string, role: PermissionValues) => compose(
   selectCurrentUserCFGlobalRolesState(role),
   getCurrentUserCFGlobalStates(endpointGuid)
 );
@@ -101,7 +102,7 @@ export const getCurrentUserCFEndpointScopesState = (endpointGuid: string) => com
 
 // Has endpoint scopes
 // ============================
-export const getCurrentUserCFEndpointHasScope = (endpointGuid: string, scope: string) => compose(
+export const getCurrentUserCFEndpointHasScope = (endpointGuid: string, scope: ScopeStrings) => compose(
   selectCurrentUserCFGlobalHasScopes(scope),
   getCurrentUserCFEndpointScopesState(endpointGuid)
 );

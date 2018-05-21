@@ -1,5 +1,6 @@
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
+import { PermissionValues, ScopeStrings } from '../../core/current-user-permissions.config';
 
 export function getDefaultEndpointRoles(): ICfRolesState {
   return {
@@ -59,7 +60,7 @@ export interface IAllCfRolesState {
 
 export interface IStratosRolesState {
   isAdmin: boolean;
-  scopes: string[];
+  scopes: ScopeStrings[];
 }
 
 export interface ICurrentUserRolesState {
