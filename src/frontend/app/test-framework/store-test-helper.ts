@@ -21646,10 +21646,10 @@ const testInitialStoreState: AppState = {
   routing: {
     previousState: {
       id: 4,
-      url: '/service-catalog',
-      urlAfterRedirects: '/service-catalog',
+      url: '/marketplace',
+      urlAfterRedirects: '/marketplace',
       state: {
-        url: '/service-catalog',
+        url: '/marketplace',
         params: {},
         queryParams: {}
       }
