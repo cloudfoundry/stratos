@@ -23,6 +23,7 @@ import { EndpointModel } from '../../../store/types/endpoint.types';
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 
 @Component({
   selector: 'app-cli-info-cloud-foundry',
@@ -36,6 +37,9 @@ import { CfUserService } from '../../../shared/data-services/cf-user.service';
   ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
+
+  permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
+  permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
 
   cfEndpointEntityService: any;
   public previousUrl: string;
@@ -55,7 +59,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   constructor(
     private store: Store<AppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfEndpointService: CloudFoundryEndpointService,
     @Optional() private cfOrgService: CloudFoundryOrganizationService,
     @Optional() private cfSpaceService: CloudFoundrySpaceService
