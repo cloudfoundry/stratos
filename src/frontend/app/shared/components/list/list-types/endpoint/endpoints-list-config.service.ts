@@ -89,9 +89,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       });
     },
     label: 'Unregister',
-    description: 'Remove the endpoint',
-    createVisible: (row: EndpointModel) => Observable.of(true),
-    createEnabled: (row: EndpointModel) => Observable.of(true),
+    description: 'Remove the endpoint'
   };
 
   private listActionDisconnect: IListAction<EndpointModel> = {

@@ -22,9 +22,7 @@ export class CfAppVariablesListConfigService implements IListConfig<ListAppEnvVa
     },
     icon: 'delete',
     label: 'Delete',
-    description: '',
-    visible$: Observable.of(true),
-    enabled$: Observable.of(true)
+    description: ''
   };
 
   private listActionDelete: IListAction<ListAppEnvVar> = {

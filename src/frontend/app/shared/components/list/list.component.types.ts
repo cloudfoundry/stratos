@@ -123,23 +123,24 @@ export interface IBaseListAction<T> {
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
-  createVisible: (row: T) => Observable<boolean>;
-  createEnabled: (row: T) => Observable<boolean>;
+  createVisible?: (row: T) => Observable<boolean>;
+  createEnabled?: (row: T) => Observable<boolean>;
 }
 
-export interface IMultiListAction<T> extends IBaseListAction<T> {
+export interface IOptionalAction<T> extends IBaseListAction<T> {
+  visible$?: Observable<boolean>;
+  enabled$?: Observable<boolean>;
+}
+
+export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
    *
    * @memberof IMultiListAction
    */
   action: (items: T[]) => boolean;
-  visible$: Observable<boolean>;
-  enabled$: Observable<boolean>;
 }
 
-export interface IGlobalListAction<T> extends IBaseListAction<T> {
+export interface IGlobalListAction<T> extends IOptionalAction<T> {
   action: () => void;
-  visible$: Observable<boolean>;
-  enabled$: Observable<boolean>;
 }

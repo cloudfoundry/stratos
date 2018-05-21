@@ -59,8 +59,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
       enabled: {}
     };
     this.actions.forEach(action => {
-      this.obs.visible[action.label] = action.createVisible(row);
-      this.obs.enabled[action.label] = action.createEnabled(row);
+      this.obs.visible[action.label] = action.createVisible ? action.createVisible(row) : Observable.of(true);
+      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(row) : Observable.of(true);
     });
 
     this.show$ = combineLatest(Object.values(this.obs.visible)).pipe(
