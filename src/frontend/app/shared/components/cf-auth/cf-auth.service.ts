@@ -20,8 +20,6 @@ import { endpointEntitiesSelector } from '../../../store/selectors/endpoint.sele
 
 @Injectable()
 export class CfAuthService {
-
-
   endpoints$: Observable<IRequestEntityTypeState<EndpointModel>>;
   sessionData$: Observable<SessionData>;
   // WIP: RC Initialise previously released promise when all init requests finished. For the time being use this, then make selector
