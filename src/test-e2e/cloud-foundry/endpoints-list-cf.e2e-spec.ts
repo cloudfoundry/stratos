@@ -1,20 +1,20 @@
 
 import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
-import { EndpointsPage, resetToLoggedIn } from '../endpoints/endpoints.po';
-import { ResetsHelpers } from '../helpers/reset-helpers';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
+import { e2e } from '../e2e';
+import { EndpointsPage } from '../endpoints/endpoints.po';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem, SideNavigation } from '../po/side-nav.po';
 
 describe('CF Endpoints Dashboard', () => {
-  const secrets = new SecretsHelpers();
-  const resets = new ResetsHelpers();
   const endpointsPage = new EndpointsPage();
   const cloudFoundry = new CloudFoundryPage();
   const nav = new SideNavigation();
+  const cfEndpoint = e2e.secrets.getDefaultCFEndpoint();
 
   describe('No endpoints', () => {
     beforeAll(() => {
-      resetToLoggedIn(resets.resetAllEndpoints, false);
+      e2e.setup(ConsoleUserType.admin)
+      .clearAllEndpoints();
     });
 
     beforeEach(() => {
@@ -31,10 +31,12 @@ describe('CF Endpoints Dashboard', () => {
   });
 
   describe('Single endpoint', () => {
-    const cfEndpoint = secrets.getDefaultCFEndpoint();
     beforeAll(() => {
       // Only register and connect a single Cloud Foundry endpoint
-      resetToLoggedIn(resets.resetAndConnectEndpoints.bind(resets, null, null, false, cfEndpoint.name), true);
+      e2e.setup(ConsoleUserType.admin)
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry()
+      .connectAllEndpoints();
     });
 
     beforeEach(() => {
@@ -52,9 +54,11 @@ describe('CF Endpoints Dashboard', () => {
   });
 
   describe('Multiple endpoints', () => {
-    const cfEndpoint = secrets.getDefaultCFEndpoint();
     beforeAll(() => {
-      resetToLoggedIn(resets.resetAndConnectEndpoints.bind(resets, null, null, true), true);
+      e2e.setup(ConsoleUserType.admin)
+      .clearAllEndpoints()
+      .registerMultipleCloudFoundries()
+      .connectAllEndpoints();
     });
 
     beforeEach(() => {

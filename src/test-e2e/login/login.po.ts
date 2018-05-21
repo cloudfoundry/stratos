@@ -1,6 +1,5 @@
-import { userInfo } from 'os';
+import { browser, by, element, promise, protractor } from 'protractor';
 import { E2EHelpers } from '../helpers/e2e-helpers';
-import { element, by, browser, promise, protractor } from 'protractor';
 
 const LOGIN_FAIL_MSG = 'Username and password combination incorrect. Please try again.';
 const until = protractor.ExpectedConditions;
@@ -41,7 +40,21 @@ export class LoginPage {
     this.navigateTo();
     this.enterLogin(username, password);
     this.loginButton().click();
-    // this.waitForApplicationPage();
+
+    browser.wait(() => {
+      return browser.getCurrentUrl().then(function (url) {
+        return !url.endsWith('/login');
+      });
+    }, 10000, 'timed out waiting for login');
+
+    // Wait for the page to be ready
+    return browser.getCurrentUrl().then((url: string) => {
+      if (url.endsWith('/noendpoints')) {
+        return this.waitForNoEndpoints();
+      } else {
+        return this.waitForApplicationPage();
+      }
+    });
   }
 
   waitForLoggedIn() {
