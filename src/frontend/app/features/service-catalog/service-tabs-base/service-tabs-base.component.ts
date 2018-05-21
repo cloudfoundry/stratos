@@ -34,9 +34,9 @@ export class ServiceTabsBaseComponent {
     this.toolTipText$ = this.hasVisiblePlans$.pipe(
       map(hasPlans => {
         if (hasPlans) {
-          return 'Create a New Service Instance';
+          return 'Create service instance';
         } else {
-          return 'No public or visible plans exist for this service.';
+          return 'Cannot create service instance (no public or visible plans exist for service)';
         }
       }));
 
