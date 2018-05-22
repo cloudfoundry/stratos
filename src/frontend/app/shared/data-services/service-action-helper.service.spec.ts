@@ -1,9 +1,8 @@
-import { TestBed, inject } from '@angular/core/testing';
+import { inject, TestBed } from '@angular/core/testing';
 
-import { ServiceActionHelperService } from './service-action-helper.service';
 import { BaseTestModules } from '../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../components/confirmation-dialog.service';
+import { ServiceActionHelperService } from './service-action-helper.service';
 
 describe('ServiceActionHelperService', () => {
   beforeEach(() => {

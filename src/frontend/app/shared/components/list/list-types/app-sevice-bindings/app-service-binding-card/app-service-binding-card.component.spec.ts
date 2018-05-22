@@ -22,7 +22,7 @@ describe('AppServiceBindingCardComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
-      createBasicStoreModule(),
+        createBasicStoreModule(),
       ],
       providers: [
         EntityMonitorFactory,

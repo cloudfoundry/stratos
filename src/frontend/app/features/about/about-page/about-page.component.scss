@@ -21,4 +21,13 @@
     margin-bottom: 24px;
     z-index: 1;
   }
+  &__eula {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    div {
+      flex: 1;
+      font-weight: 500;
+    }
+  }
 }
