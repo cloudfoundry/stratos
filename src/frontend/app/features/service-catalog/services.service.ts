@@ -42,6 +42,7 @@ export interface ServicePlanAccessibility {
 @Injectable()
 export class ServicesService {
   serviceBrokers$: Observable<APIResource<IServiceBroker>[]>;
+  serviceBroker$: Observable<APIResource<IServiceBroker>>;
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   serviceExtraInfo$: Observable<IServiceExtra>;
@@ -86,6 +87,13 @@ export class ServicesService {
     );
 
     this.serviceBrokers$ = this.getServiceBrokers();
+
+    this.serviceBroker$ = this.serviceBrokers$.pipe(
+      filter(p => !!p && p.length > 0),
+      combineLatest(this.service$),
+      map(([brokers, service]) => brokers.filter(broker => broker.metadata.guid === service.entity.service_broker_guid)),
+      map(o => o[0])
+    );
   }
 
   getServicePlanVisibilities = () => {

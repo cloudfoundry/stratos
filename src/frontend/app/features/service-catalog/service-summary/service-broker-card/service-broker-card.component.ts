@@ -1,4 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { ServicesService } from '../../services.service';
+import { Store } from '@ngrx/store';
+import { AppState } from '../../../../store/app-state';
+import { Observable } from 'rxjs/Observable';
+import { APIResource } from '../../../../store/types/api.types';
+import { IServiceBroker } from '../../../../core/cf-api-svc.types';
+import { filter, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-service-broker-card',
@@ -7,9 +14,16 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ServiceBrokerCardComponent implements OnInit {
 
-  constructor() { }
+  serviceBroker$: Observable<APIResource<IServiceBroker>>;
+  constructor(
+    private servicesService: ServicesService,
+    private store: Store<AppState>
+  ) {
+
+    this.serviceBroker$ = this.servicesService.serviceBroker$;
+
+  }
 
   ngOnInit() {
   }
-
 }
