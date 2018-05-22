@@ -15,6 +15,9 @@ export class AuthGuardService implements CanActivate {
   queryParamMap() {
     const map = {};
     const query = window.location.search.substring(1);
+    if (query.length === 0) {
+      return map;
+    }
     const vars = query.split('&');
     for (let i = 0; i < vars.length; i++) {
       const pair = vars[i].split('=');

@@ -83,7 +83,7 @@ export class LoginPageComponent implements OnInit, OnDestroy {
       this.subscription.unsubscribe(); // Ensure to unsub otherwise GoToState gets caught in loop
     }
     if (this.redirect) {
-      this.store.dispatch(new RouterNav({ path: [this.redirect.path], query: this.redirect.queryParams }));
+      this.store.dispatch(new RouterNav({ path: [this.redirect.path], query: this.redirect.queryParams || {} }));
     } else {
       this.store.dispatch(new RouterNav({ path: ['/'] }, null));
     }
