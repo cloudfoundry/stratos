@@ -38,7 +38,6 @@ import { getRowMetadata } from '../../../cf.helpers';
 import { CfRolesService } from '../cf-roles.service';
 import { SpaceRolesListWrapperComponent } from './space-roles-list-wrapper/space-roles-list-wrapper.component';
 
-
 interface Org { metadata: { guid: string }; }
 
 @Component({

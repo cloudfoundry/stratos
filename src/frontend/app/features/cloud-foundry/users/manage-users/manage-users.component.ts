@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map } from 'rxjs/operators';
+import { combineLatest, filter, first, map, tap, startWith } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -52,7 +52,7 @@ export class UsersRolesComponent implements OnDestroy {
     this.singleUser$ = this.initialUsers$.pipe(
       first(),
       filter(users => users && users.length > 0),
-      map(users => users.length === 1 ? users[0] : {} as CfUser),
+      map(users => users.length === 1 ? users[0] : null),
     );
 
     // Ensure that when we arrive here directly the store is set up with all it needs
