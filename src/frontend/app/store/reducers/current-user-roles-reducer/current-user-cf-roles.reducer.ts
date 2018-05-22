@@ -1,10 +1,11 @@
-import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
-import { getDefaultEndpointRoles, ICfRolesState, IOrgsRoleState, IOrgRoleState } from '../../types/current-user-roles.types';
-import { currentUserSpaceRolesReducer } from './current-user-roles-spaces.reducer';
-import { currentUserOrgRolesReducer } from './current-user-roles-orgs.reducer';
-import { isOrgRelation, isSpaceRelation } from './current-user-reducer.helpers';
-import { APIResource } from '../../types/api.types';
 import { ISpace } from '../../../core/cf-api.types';
+import { GetCurrentUserRelationsComplete } from '../../actions/permissions.actions';
+import { APIResource } from '../../types/api.types';
+import { getDefaultEndpointRoles, ICfRolesState, IOrgsRoleState } from '../../types/current-user-roles.types';
+import { isOrgRelation, isSpaceRelation } from './current-user-reducer.helpers';
+import { createOrgRoleStateState } from './current-user-roles-org.reducer';
+import { currentUserOrgRolesReducer } from './current-user-roles-orgs.reducer';
+import { currentUserSpaceRolesReducer } from './current-user-roles-spaces.reducer';
 
 export function currentUserCFRolesReducer(
   state: ICfRolesState = getDefaultEndpointRoles(),
@@ -27,13 +28,14 @@ export function currentUserCFRolesReducer(
 function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResource<ISpace>[]): IOrgsRoleState {
   return spaces.reduce((newOrganizations: IOrgsRoleState, space) => {
     const orgGuid = space.entity.organization_guid;
-    const spaceGuids = newOrganizations[orgGuid].spaceGuids || [];
+    const org = newOrganizations[orgGuid] || createOrgRoleStateState();
+    const spaceGuids = org.spaceGuids || [];
     return spaceGuids.includes(space.metadata.guid) ? newOrganizations : {
       ...newOrganizations,
       [orgGuid]: {
-        ...(newOrganizations[orgGuid] || {} as IOrgRoleState),
+        ...org,
         spaceGuids: [
-          ...(newOrganizations[orgGuid].spaceGuids || []),
+          ...spaceGuids,
           space.metadata.guid
         ]
       }
