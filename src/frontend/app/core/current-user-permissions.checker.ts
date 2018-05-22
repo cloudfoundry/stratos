@@ -326,8 +326,8 @@ export class CurrentUserPermissionsChecker {
     return !endpointGuid ? this.getAllEndpointGuids() : Observable.of([endpointGuid]);
   }
 
-  private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: PermissionStrings) {
-    return state[permission] || false;
+  private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: PermissionStrings): boolean {
+    return state ? state[permission] || false : false;
   }
 
   private getEndpointState(endpointGuid: string) {
