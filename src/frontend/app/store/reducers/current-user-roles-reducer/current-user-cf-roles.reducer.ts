@@ -25,7 +25,8 @@ export function currentUserCFRolesReducer(state: ICfRolesState = getDefaultEndpo
 function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResource<ISpace>[]) {
   return spaces.reduce((newOrganizations, space) => {
     const orgGuid = space.entity.organization_guid;
-    return {
+    const spaceGuids = newOrganizations[orgGuid].spaceGuids || [];
+    return spaceGuids.includes(space.metadata.guid) ? newOrganizations : {
       ...newOrganizations,
       [orgGuid]: {
         ...(newOrganizations[orgGuid] || {}),

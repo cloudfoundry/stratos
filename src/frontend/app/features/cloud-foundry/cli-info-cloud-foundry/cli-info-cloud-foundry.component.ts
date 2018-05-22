@@ -24,6 +24,7 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsChecker } from '../../../core/current-user-permissions.checker';
 
 @Component({
   selector: 'app-cli-info-cloud-foundry',
@@ -40,6 +41,8 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
   permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
+
+  spaceGuid: string;
 
   cfEndpointEntityService: any;
   public previousUrl: string;
@@ -65,6 +68,9 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     @Optional() private cfSpaceService: CloudFoundrySpaceService
   ) {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
+    this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CurrentUserPermissionsChecker.ALL_SPACES;
+    // console.log('orgGuid: ', activeRouteCfOrgSpace.orgGuid);
+    // console.log('spaceGuid: ', this.spaceGuid);
   }
 
   ngOnInit() {

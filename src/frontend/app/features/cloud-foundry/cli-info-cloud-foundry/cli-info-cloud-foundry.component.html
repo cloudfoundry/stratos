@@ -33,7 +33,7 @@
   </app-cli-command>
 
   <!-- TODO: RC Can I do this action in a particular org or any space within that org -->
-  <app-cli-command *appUserPermission="permsSpaceEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:activeRouteCfOrgSpace.orgGuid;spaceGuid:activeRouteCfOrgSpace.spaceGuid" name="Rename" msg="To rename a space:" syntax="cf rename-space {{context.spaceName || '[space name]'}} [name]">
+  <app-cli-command *appUserPermission="permsSpaceEdit;endpointGuid:activeRouteCfOrgSpace.cfGuid;organizationGuid:activeRouteCfOrgSpace.orgGuid;spaceGuid:spaceGuid" name="Rename" msg="To rename a space:" syntax="cf rename-space {{context.spaceName || '[space name]'}} [name]">
   </app-cli-command>
 
   <app-cli-command name="Information" msg="To fetch space information:" syntax="cf space {{context.spaceName || '[space name]'}}">
