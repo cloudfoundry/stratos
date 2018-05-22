@@ -8,9 +8,7 @@
         <mat-card-content>
           <div class="github-tab__deployment">
             <app-metadata-item label="Repository">
-              <a href="{{(gitHubRepo$ | async)?.html_url}}" target="_blank">
-                {{stratosProject.deploySource.project }}
-              </a>
+              <a href="{{(gitHubRepo$ | async)?.html_url}}" target="_blank">{{stratosProject.deploySource.project }}</a>
             </app-metadata-item>
             <app-metadata-item label="Branch">
               <a href="{{(gitHubRepo$ | async)?.html_url}}/tree/{{ stratosProject.deploySource.branch}}" target="_blank">
@@ -20,30 +18,21 @@
             <div class="github-tab__deployment__commit">
               <div>
                 <app-metadata-item label="Commit">
-                  <a href="{{(commit$ | async)?.html_url}}" target="_blank">
-                          {{ stratosProject.deploySource.commit}}
-                      </a>
+                  <a href="{{(commit$ | async)?.html_url}}" target="_blank">{{ stratosProject.deploySource.commit | limitTo: 8}}</a>
                 </app-metadata-item>
               </div>
               <div class="github-tab__deployment__commit-warning" *ngIf="!(isHead$ | async) && (initialised$ | async)">
                 <div>
                   <mat-icon color="warn">warning</mat-icon>
                 </div>
-                <div class="github-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}} branch has been updated since this app was pushed. Redeploy to update</div>
+                <div class="github-tab__deployment__commit-warning__msg">The {{ stratosProject.deploySource.branch}} branch has been updated since this app was deployed. Redeploy to update</div>
               </div>
             </div>
-            <app-metadata-item label="Deployed at:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
-          </div>
-          <div class="github-tab__deployment__deploy">
-            <div class="github-tab__deployment__deploy__button">
-              <button mat-button color="primary" (click)="deployApp(stratosProject)">Redeploy App</button>
-            </div>
+            <app-metadata-item label="Deployed:">{{ stratosProject.deploySource.timestamp * 1000 | date:'medium' }}</app-metadata-item>
           </div>
         </mat-card-content>
       </mat-card>
     </app-tile>
-  </app-tile-group>
-  <app-tile-group>
     <app-tile>
       <mat-card>
         <mat-card-header>
@@ -61,8 +50,8 @@
               </app-metadata-item>
               <app-metadata-item label="Owner">{{ githubRepo.owner.login }}</app-metadata-item>
               <app-metadata-item label="Description">{{ githubRepo.description }}</app-metadata-item>
-              <app-metadata-item label="Created at:">{{ githubRepo.created_at | date:'medium' }}</app-metadata-item>
-              <app-metadata-item label="Last Pushed at:">{{ githubRepo.pushed_at | date:'medium' }}</app-metadata-item>
+              <app-metadata-item label="Created:">{{ githubRepo.created_at | date:'medium' }}</app-metadata-item>
+              <app-metadata-item label="Last Pushed:">{{ githubRepo.pushed_at | date:'medium' }}</app-metadata-item>
             </div>
           </div>
         </mat-card-content>
@@ -83,9 +72,8 @@
               <app-metadata-item label="SHA">
                 <a href={{commitInfo.html_url}} target="_blank">{{ commitInfo.sha | limitTo: 8}}</a>
               </app-metadata-item>
-              <app-metadata-item label="Message">{{ commitInfo.commit.message }}</app-metadata-item>
-              <app-metadata-item label="Author">{{ commitInfo.commit.author.name }}
-                <{{ commitInfo.commit.author.email }}>
+              <app-metadata-item label="Author">
+                <app-github-commit-author [commit]="commitInfo" [showAvatar]="false"></app-github-commit-author>
               </app-metadata-item>
               <app-metadata-item label="Date:">{{ commitInfo.commit.author.date | date:'medium' }}</app-metadata-item>
             </div>
@@ -94,4 +82,5 @@
       </mat-card>
     </app-tile>
   </app-tile-group>
+  <app-list></app-list>
 </app-tile-grid>

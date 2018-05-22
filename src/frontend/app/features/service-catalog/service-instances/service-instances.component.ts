@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { ServicesService } from '../services.service';
-import { tap, filter } from 'rxjs/operators';
-import { ListConfig } from '../../../shared/components/list/list.component.types';
+import { Component } from '@angular/core';
+
 import {
-  ServiceInstancesListConfigService
+  ServiceInstancesListConfigService,
 } from '../../../shared/components/list/list-types/service-instances/service-instances-list-config.service';
-import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers';
+import { ListConfig } from '../../../shared/components/list/list.component.types';
 
 @Component({
   selector: 'app-service-instances',
@@ -18,5 +16,4 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../cloud-foundry/cf.helpers
     }
   ]
 })
-export class ServiceInstancesComponent {
-}
+export class ServiceInstancesComponent { }

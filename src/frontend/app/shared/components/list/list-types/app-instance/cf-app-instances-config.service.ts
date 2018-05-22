@@ -13,6 +13,7 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -122,22 +123,22 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'Terminate',
     description: ``, // Description depends on console user permission
-    visible: row => true,
-    enabled: row => true,
+    createVisible: (row) => Observable.of(true),
+    createEnabled: (row) => Observable.of(true)
   };
 
   private listActionSsh: IListAction<any> = {
     action: (item) => {
-        const index = item.index;
-        const sshRoute = (
-          `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
-        );
-        this.router.navigate([sshRoute]);
-      },
+      const index = item.index;
+      const sshRoute = (
+        `/applications/${this.appService.cfGuid}/${this.appService.appGuid}/ssh/${index}`
+      );
+      this.router.navigate([sshRoute]);
+    },
     label: 'SSH',
     description: ``, // Description depends on console user permission
-    visible: row => true,
-    enabled: row =>
+    createVisible: (row) => Observable.of(true),
+    createEnabled: row =>
       this.appService.app$.pipe(
         map(app => {
           return row.value &&
@@ -145,7 +146,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
             app.entity.entity.enable_ssh;
         })
       )
-    };
+  };
 
   private singleActions = [
     this.listActionTerminate,

@@ -89,26 +89,6 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
   options: RequestOptions;
 }
 
-export class DeleteAppServiceBinding extends CFStartAction
-  implements ICFAction {
-  constructor(
-    public appGuid: string,
-    public guid: string,
-    public endpointGuid: string
-  ) {
-    super();
-    this.options = new RequestOptions();
-    this.options.url = `apps/${appGuid}/service_bindings/${guid}`;
-    this.options.method = 'delete';
-    this.options.headers = new Headers();
-  }
-  actions = getActions('Application Service Bindings', 'Delete Binding');
-  entity = [entityFactory(serviceBindingSchemaKey)];
-  entityKey = serviceBindingSchemaKey;
-  removeEntityOnDelete = true;
-  options: RequestOptions;
-}
-
 export class AssociateRouteWithAppApplication extends CFStartAction
   implements ICFAction {
   constructor(

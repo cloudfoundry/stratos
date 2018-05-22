@@ -34,6 +34,7 @@ export const servicePlanVisibilitySchemaKey = 'servicePlanVisibility';
 export const serviceBrokerSchemaKey = 'serviceBroker';
 
 export const spaceWithOrgKey = 'spaceWithOrg';
+export const serviceInstancesWithSpaceSchemaKey = 'serviceInstancesWithSpace';
 
 const entityCache: {
   [key: string]: EntitySchema
@@ -92,7 +93,7 @@ entityCache[githubBranchesSchemaKey] = GithubBranchSchema;
 const GithubRepoSchema = new EntitySchema(githubRepoSchemaKey);
 entityCache[githubRepoSchemaKey] = GithubRepoSchema;
 
-const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey);
+const GithubCommitSchema = new EntitySchema(githubCommitSchemaKey, {}, { idAttribute: commit => commit.sha });
 entityCache[githubCommitSchemaKey] = GithubCommitSchema;
 
 const CFInfoSchema = new EntitySchema(cfInfoSchemaKey);
@@ -236,6 +237,16 @@ const SpaceWithOrgsEntitySchema = new EntitySchema(spaceSchemaKey, {
   }
 }, { idAttribute: getAPIResourceGuid }, spaceWithOrgKey);
 entityCache[spaceWithOrgKey] = SpaceWithOrgsEntitySchema;
+
+
+const ServiceInstancesWithSpaceSchema = new EntitySchema(serviceInstancesSchemaKey, {
+  entity: {
+    service_plan: ServicePlanSchema,
+    service_bindings: [ServiceBindingsSchema],
+    space: SpaceSchema
+  }
+}, { idAttribute: getAPIResourceGuid });
+entityCache[serviceInstancesWithSpaceSchemaKey] = ServiceInstancesWithSpaceSchema;
 
 const ServicePlanVisibilitySchema = new EntitySchema(servicePlanVisibilitySchemaKey, {
   entity: {

@@ -6,13 +6,13 @@ import { AppState } from '../../store/app-state';
 import { internalEventStateSelector } from '../../store/selectors/internal-events.selectors';
 import { InternalEventSubjectState } from '../../store/types/internal-events.types';
 import { InternalEventMonitor } from './internal-event.monitor';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 @Injectable()
 export class InternalEventMonitorFactory {
 
   private events$: Observable<InternalEventSubjectState>;
 
-  constructor(private store: Store<AppState>) {
+  constructor(private store: Store<AppState>, private ngZone: NgZone) {
 
     this.events$ = store.select(internalEventStateSelector).pipe(
       distinctUntilChanged(),
@@ -22,7 +22,7 @@ export class InternalEventMonitorFactory {
   }
 
   getMonitor(eventType: string, subjectIds?: string[] | Observable<string[]>) {
-    return new InternalEventMonitor(this.events$, eventType, subjectIds);
+    return new InternalEventMonitor(this.events$, eventType, subjectIds, this.ngZone);
   }
 
 }

@@ -26,6 +26,7 @@ import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
@@ -51,9 +52,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'delete',
     label: 'Delete',
-    description: 'Unmap and delete routes',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Unmap and delete routes'
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -76,25 +75,19 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'block',
     label: 'Unmap',
-    description: 'Unmap routes',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Unmap routes'
   };
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
     label: 'Delete',
-    description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Unmap and delete route'
   };
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
-    description: '',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: ''
   };
 
   private listActionAdd: IGlobalListAction<APIResource> = {
@@ -122,9 +115,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'add',
     label: 'Add',
-    description: 'Add new route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Add new route'
   };
 
   columns: Array<ITableColumn<APIResource>> = [

@@ -68,7 +68,7 @@
         admin: secrets.console.admin,
         user: secrets.console.user
       },
-      skipSSlValidation: true,
+      skipSSLValidation: true,
       caCert: '',
       appWithLogStream: 'node-env',
       endpoint: {

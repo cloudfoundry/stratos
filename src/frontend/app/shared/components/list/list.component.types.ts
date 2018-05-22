@@ -43,6 +43,11 @@ export interface IListConfig<T> {
    */
   getMultiFiltersConfigs: () => IListMultiFilterConfig[];
   /**
+   * Fetch an observable that will emit once the underlying config components have been created. For instance if the data source requires
+   * something from the store which requires an async call
+   */
+  getInitialised?: () => Observable<boolean>;
+  /**
    * A collection of numbers used to define how many entries per page should be shown. If missing a default will be used per table view type
    */
   pageSizeOptions?: number[];
@@ -107,21 +112,27 @@ export class ListConfig<T> implements IListConfig<T> {
   getColumns = (): ITableColumn<T>[] => null;
   getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
+  getInitialised = () => Observable.of(true);
 }
 
 export interface IBaseListAction<T> {
   icon?: string;
   label: string;
   description: string;
-  visible: (row: T) => boolean;
-  enabled: (row: T) => boolean | Observable<T>;
 }
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
+  createVisible?: (row: T) => Observable<boolean>;
+  createEnabled?: (row: T) => Observable<boolean>;
 }
 
-export interface IMultiListAction<T> extends IBaseListAction<T> {
+export interface IOptionalAction<T> extends IBaseListAction<T> {
+  visible$?: Observable<boolean>;
+  enabled$?: Observable<boolean>;
+}
+
+export interface IMultiListAction<T> extends IOptionalAction<T> {
   /**
    * Return true if the selection should be cleared
    *
@@ -130,6 +141,6 @@ export interface IMultiListAction<T> extends IBaseListAction<T> {
   action: (items: T[]) => boolean;
 }
 
-export interface IGlobalListAction<T> extends IBaseListAction<T> {
+export interface IGlobalListAction<T> extends IOptionalAction<T> {
   action: () => void;
 }

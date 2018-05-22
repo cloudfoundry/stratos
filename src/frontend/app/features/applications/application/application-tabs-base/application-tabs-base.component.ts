@@ -1,8 +1,9 @@
-import { Component, OnDestroy, OnInit, HostBinding } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { first, map, tap, withLatestFrom } from 'rxjs/operators';
+import { combineLatest } from 'rxjs/observable/combineLatest';
+import { delay, filter, first, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -11,8 +12,7 @@ import { ConfirmationDialogConfig } from '../../../../shared/components/confirma
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../shared/components/page-subheader/page-subheader.types';
-import { GetAppStatsAction, GetAppSummaryAction, AppMetadataTypes } from '../../../../store/actions/app-metadata.actions';
-import { DeleteApplication } from '../../../../store/actions/application.actions';
+import { AppMetadataTypes, GetAppStatsAction, GetAppSummaryAction } from '../../../../store/actions/app-metadata.actions';
 import { ResetPagination } from '../../../../store/actions/pagination.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
@@ -34,7 +34,11 @@ const appStartConfirmation = new ConfirmationDialogConfig(
   'Are you sure you want to start this Application?',
   'Start'
 );
-
+const appRestartConfirmation = new ConfirmationDialogConfig(
+  'Restart Application',
+  'Are you sure you want to restart this Application?',
+  'Restart'
+);
 // App delete will have a richer delete experience
 const appDeleteConfirmation = new ConfirmationDialogConfig(
   'Delete Application',
@@ -152,6 +156,18 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
         ]
       },
       {
+        key: 'marketplace-services',
+        breadcrumbs: [
+          { value: 'Marketplace', routerLink: `/service-catalog` }
+        ]
+      },
+      {
+        key: 'service-wall',
+        breadcrumbs: [
+          { value: 'Services', routerLink: `/services` }
+        ]
+      },
+      {
         key: 'space-summary',
         breadcrumbs: [
           ...baseSpaceBreadcrumbs,
@@ -179,8 +195,11 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       first(),
       tap(appData => {
         this.confirmDialog.open(confirmConfig, () => {
+          // Once the state changes always make a request to app stats via [AppMetadataTypes.STATS] below
           this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity);
-          this.pollEntityService(updateKey, requiredAppState).delay(1).subscribe(() => { }, () => { }, onSuccess);
+          this.pollEntityService(updateKey, requiredAppState).pipe(
+            first(),
+          ).subscribe(onSuccess);
         });
       })
     ).subscribe();
@@ -194,19 +213,43 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     });
   }
 
-  pollEntityService(state, stateString) {
+  pollEntityService(state, stateString): Observable<any> {
     return this.entityService
-      .poll(1000, state)
-      .takeWhile(({ resource, updatingSection }) => {
-        return resource.entity.state !== stateString;
-      });
+      .poll(1000, state).pipe(
+        delay(1),
+        filter(({ resource, updatingSection }) => {
+          return resource.entity.state === stateString;
+        }),
+    );
   }
 
   startApplication() {
-    this.startStopApp(appStartConfirmation, 'starting', 'STARTED', () => {
-      // On app reaching the 'STARTED' state immediately go fetch the app stats instead of waiting for the normal poll to kick in
-      const { cfGuid, appGuid } = this.applicationService;
-      this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+    this.startStopApp(appStartConfirmation, 'starting', 'STARTED', () => { });
+  }
+
+  private dispatchAppStats = () => {
+    const { cfGuid, appGuid } = this.applicationService;
+    this.store.dispatch(new GetAppStatsAction(appGuid, cfGuid));
+  }
+
+  restartApplication() {
+    this.confirmDialog.open(appRestartConfirmation, () => {
+
+      this.applicationService.application$.pipe(
+        first(),
+        mergeMap(appData => {
+          this.applicationService.updateApplication({ state: 'STOPPED' }, [], appData.app.entity);
+          return combineLatest(
+            Observable.of(appData),
+            this.pollEntityService('stopping', 'STOPPED').first()
+          );
+        }),
+        mergeMap(([appData, updateData]) => {
+          this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
+          return this.pollEntityService('starting', 'STARTED').first();
+        }),
+      ).subscribe(null, this.dispatchAppStats, this.dispatchAppStats);
+
     });
   }
 
