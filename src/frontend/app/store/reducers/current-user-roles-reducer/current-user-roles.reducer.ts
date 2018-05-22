@@ -14,7 +14,7 @@ const defaultState = {
   cf: {}
 };
 
-export function currentUserRolesReducer(state: ICurrentUserRolesState = defaultState, action: Action) {
+export function currentUserRolesReducer(state: ICurrentUserRolesState = defaultState, action: Action): ICurrentUserRolesState {
   switch (action.type) {
     case GET_CURRENT_USER_RELATION_SUCCESS:
       return {

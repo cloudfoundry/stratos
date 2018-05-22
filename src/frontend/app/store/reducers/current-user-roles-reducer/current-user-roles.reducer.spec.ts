@@ -69,6 +69,7 @@ describe('currentUserReducer', () => {
       isAuditor: false,
       isBillingManager: false,
       isUser: false,
+      spaceGuids: []
     }));
   });
   it('should add org auditor role to org', () => {
@@ -79,6 +80,7 @@ describe('currentUserReducer', () => {
       isAuditor: true,
       isBillingManager: false,
       isUser: false,
+      spaceGuids: []
     }));
   });
   it('should add org billing manager role to org', () => {
@@ -89,6 +91,7 @@ describe('currentUserReducer', () => {
       isAuditor: false,
       isBillingManager: true,
       isUser: false,
+      spaceGuids: []
     }));
   });
   it('should add org user role to org', () => {
@@ -99,6 +102,7 @@ describe('currentUserReducer', () => {
       isAuditor: false,
       isBillingManager: false,
       isUser: true,
+      spaceGuids: []
     }));
   });
 
@@ -113,7 +117,8 @@ describe('currentUserReducer', () => {
         isAuditor: false,
         isBillingManager: false,
         isUser: true,
-      }
+        spaceGuids: []
+      },
     },
     {
       guid: generalGuid,
@@ -122,6 +127,7 @@ describe('currentUserReducer', () => {
         isAuditor: true,
         isBillingManager: false,
         isUser: false,
+        spaceGuids: []
       }
     }]);
     expect(cfPermissions).toEqual(toEqual);
@@ -180,6 +186,7 @@ describe('currentUserReducer', () => {
         isAuditor: false,
         isBillingManager: false,
         isUser: true,
+        spaceGuids: []
       }
     },
     {
@@ -189,6 +196,7 @@ describe('currentUserReducer', () => {
         isAuditor: true,
         isBillingManager: false,
         isUser: false,
+        spaceGuids: []
       }
     }]);
     spaceState.organizations = orgState.organizations;

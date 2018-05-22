@@ -1,4 +1,4 @@
-import { ScopeStrings } from "../../core/current-user-permissions.config";
+import { ScopeStrings } from '../../core/current-user-permissions.config';
 
 export interface SessionDataEndpoint {
   guid: string;
