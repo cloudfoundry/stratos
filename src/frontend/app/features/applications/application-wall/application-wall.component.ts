@@ -6,7 +6,6 @@ import { map } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
 import { CfAppConfigService } from '../../../shared/components/list/list-types/app/cf-app-config.service';
 import { CfAppsDataSource } from '../../../shared/components/list/list-types/app/cf-apps-data-source';
@@ -15,7 +14,6 @@ import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/da
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
-import { APIResource } from '../../../store/types/api.types';
 
 @Component({
   selector: 'app-application-wall',
@@ -49,9 +47,7 @@ export class ApplicationWallComponent implements OnDestroy {
   constructor(
     public cloudFoundryService: CloudFoundryService,
     private store: Store<AppState>,
-    private appListConfig: ListConfig<APIResource>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
-    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.cfIds$ = cloudFoundryService.cFEndpoints$.pipe(
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
