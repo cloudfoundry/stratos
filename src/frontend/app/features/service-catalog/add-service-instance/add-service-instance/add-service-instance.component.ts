@@ -3,12 +3,17 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, take, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { SetCreateServiceInstanceCFDetails } from '../../../../store/actions/create-service-instance.actions';
+import {
+  SetCreateServiceInstanceCFDetails,
+  SetCreateServiceInstanceServiceGuid,
+} from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
+import { isMarketplaceMode } from '../../services-helper';
+import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 @Component({
@@ -17,25 +22,30 @@ import { CreateServiceInstanceHelperService } from '../create-service-instance-h
   styleUrls: ['./add-service-instance.component.scss'],
   providers: [
     servicesServiceFactoryProvider,
-    CreateServiceInstanceHelperService,
+    CreateServiceInstanceHelperServiceFactory,
     TitleCasePipe
   ]
 })
 export class AddServiceInstanceComponent {
+  cSIHelperService: CreateServiceInstanceHelperService;
   marketPlaceMode: boolean;
   title$: Observable<string>;
   serviceInstancesUrl: string;
   servicesWallCreateInstance = false;
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   constructor(
-    private cSIHelperService: CreateServiceInstanceHelperService,
+    private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService
   ) {
-    const { serviceId, cfId } = activatedRoute.snapshot.params;
-    if (cSIHelperService.marketPlaceMode) {
+    if (isMarketplaceMode(activatedRoute)) {
+      const { cfId, serviceId } = activatedRoute.snapshot.params;
+      this.cSIHelperService = cSIHelperServiceFactory.create(cfId, serviceId);
+      this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId));
+      this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
       this.initialiseForMarketplaceMode(serviceId, cfId);
+      this.marketPlaceMode = true;
     } else {
       this.initialiseForDefaultMode();
     }
@@ -57,10 +67,8 @@ export class AddServiceInstanceComponent {
   }
 
   private initialiseForMarketplaceMode(serviceId: string, cfId: string) {
-    this.cSIHelperService.isInitialised().pipe(take(1), tap(o => {
-      const serviceGuid = serviceId;
-      this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
-      this.title$ = this.cSIHelperService.getServiceName().pipe(map(label => `Create Instance: ${label}`));
-    })).subscribe();
+    const serviceGuid = serviceId;
+    this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
+    this.title$ = this.cSIHelperService.getServiceName().pipe(map(label => `Create Instance: ${label}`));
   }
 }

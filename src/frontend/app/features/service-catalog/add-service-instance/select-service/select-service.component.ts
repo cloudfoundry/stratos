@@ -10,12 +10,11 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
-import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
+import { selectCreateServiceInstance, selectCreateServiceInstanceCfGuid } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { ServicesService } from '../../services.service';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 @Component({
   selector: 'app-select-service',
@@ -38,16 +37,15 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private servicesWallService: ServicesWallService,
     private entityServiceFactory: EntityServiceFactory,
-    private cSIHelperService: CreateServiceInstanceHelperService
   ) {
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
     });
 
-    this.services$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.cfGuid),
-      tap((p: CreateServiceInstanceState) => this.cfGuid = p.cfGuid),
-      switchMap(p => servicesWallService.getServicesInCf(p.cfGuid)),
+    this.services$ = this.store.select(selectCreateServiceInstanceCfGuid).pipe(
+      filter(p => !!p),
+      tap(cfGuid => this.cfGuid = cfGuid),
+      switchMap(cfGuid => servicesWallService.getServicesInCf(cfGuid)),
       filter(p => !!p),
       first(),
       share()
@@ -59,7 +57,6 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
     const serviceGuid = this.stepperForm.controls.service.value;
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
-    this.cSIHelperService.manualInit(this.cfGuid, serviceGuid);
     return Observable.of({ success: true });
   }
 
