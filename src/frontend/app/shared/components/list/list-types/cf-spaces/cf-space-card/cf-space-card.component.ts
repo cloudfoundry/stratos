@@ -1,10 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { ISpace } from '../../../../../../core/cf-api.types';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getSpaceRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -20,6 +21,7 @@ import { EndpointUser } from '../../../../../../store/types/endpoint.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 
 @Component({
   selector: 'app-cf-space-card',
@@ -50,23 +52,35 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
     private cfOrgService: CloudFoundryOrganizationService,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     super();
-
-    this.cardMenu = [
-      {
-        label: 'Edit',
-        action: this.edit
-      },
-      {
-        label: 'Delete',
-        action: this.delete
-      }
-    ];
   }
 
   ngOnInit() {
     this.spaceGuid = this.row.metadata.guid;
+    this.orgGuid = this.cfOrgService.orgGuid;
+    this.cardMenu = [
+      {
+        label: 'Edit',
+        action: this.edit,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SPACE_EDIT,
+          this.cfEndpointService.cfGuid,
+          this.orgGuid,
+          this.spaceGuid
+        )
+      },
+      {
+        label: 'Delete',
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SPACE_DELETE,
+          this.cfEndpointService.cfGuid,
+          this.orgGuid
+        )
+      }
+    ];
 
     const userRole$ = this.cfEndpointService.currentUser$.pipe(
       switchMap(u => this.cfUserService.getUserRoleInSpace(
@@ -84,7 +98,6 @@ export class CfSpaceCardComponent extends CardCell<APIResource<ISpace>> implemen
     );
 
     this.subscriptions.push(fetchData$.subscribe());
-    this.orgGuid = this.cfOrgService.orgGuid;
 
   }
 

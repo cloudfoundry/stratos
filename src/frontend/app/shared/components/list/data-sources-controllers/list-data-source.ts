@@ -163,6 +163,12 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
     this.externalDestroy = config.destroy || (() => { });
     this.addItem = this.getEmptyType();
     this.entityKey = this.sourceScheme.key;
+    if (!this.isLocal && this.config.listConfig) {
+      // This is a non-local data source so the results-per-page should match the initial page size. This will avoid making two calls
+      // (one for the page size in the action and another when the initial page size is set)
+      this.action.initialParams = this.action.initialParams || {};
+      this.action.initialParams['results-per-page'] = this.config.listConfig.pageSizeOptions[0];
+    }
   }
 
   private getRefreshFunction(config: IListDataSourceConfig<A, T>) {
@@ -179,10 +185,7 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
    */
   getRowState(row: T) {
     return this.rowsState.pipe(
-      map(state => ({
-        ...getDefaultRowState(),
-        ...(state[this.getRowUniqueId(row)] || {})
-      })),
+      map(state => ({ ...getDefaultRowState(), ...(state[this.getRowUniqueId(row)] || {}) })),
       distinctUntilChanged(),
       publishReplay(1), refCount()
     );

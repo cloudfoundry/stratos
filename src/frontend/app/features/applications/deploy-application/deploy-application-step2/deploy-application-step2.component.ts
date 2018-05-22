@@ -23,6 +23,7 @@ import { entityFactory, githubBranchesSchemaKey, githubCommitSchemaKey } from '.
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
   selectDeployBranchName,
+  selectNewProjectCommit,
   selectPEProjectName,
   selectProjectExists,
   selectSourceSubType,
@@ -45,9 +46,12 @@ export class DeployApplicationStep2Component
 
   branchesSubscription: Subscription;
   commitInfo: GithubCommit;
-  sourceTypes: SourceType[] = [{ name: 'Git', id: 'git' }];
+  sourceTypes: SourceType[] = [
+    { name: 'Git', id: 'git' },
+    { name: 'File or folder', id: 'fs' },
+  ];
   sourceType$: Observable<SourceType>;
-  GIT_SOURCE_TYPE = 0;
+  GIT_SOURCE_TYPE = 1;
   GITHUB_SUB_SOURCE_TYPE = 0;
   sourceSubTypes: SourceType[] = [
     { id: 'github', name: 'Public Github' },
@@ -65,8 +69,13 @@ export class DeployApplicationStep2Component
   repository: string;
   stepperText = 'Please specify the source';
 
+  // Local FS data when file or folder upload
+  // @Input('fsSourceData') fsSourceData;
+
   @ViewChild('sourceSelectionForm') sourceSelectionForm: NgForm;
   subscriptions: Array<Subscription> = [];
+
+  @ViewChild('fsChooser') fsChooser;
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -92,7 +101,7 @@ export class DeployApplicationStep2Component
         branch: this.repositoryBranch
       })
     );
-    return Observable.of({ success: true });
+    return Observable.of({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   }
 
   ngOnInit() {
@@ -106,24 +115,24 @@ export class DeployApplicationStep2Component
     const fetchBranches = this.store
       .select(selectProjectExists)
       .pipe(
-      filter(state => state && !state.checking && state.exists),
-      tap(p => {
-        if (this.branchesSubscription) {
-          this.branchesSubscription.unsubscribe();
-        }
-        const action = new FetchBranchesForProject(p.name);
-        this.branchesSubscription = getPaginationObservables<APIResource>(
-          {
-            store: this.store,
-            action,
-            paginationMonitor: this.paginationMonitorFactory.create(
-              action.paginationKey,
-              entityFactory(githubBranchesSchemaKey)
-            )
-          },
-          true
-        ).entities$.subscribe();
-      })
+        filter(state => state && !state.checking && state.exists),
+        tap(p => {
+          if (this.branchesSubscription) {
+            this.branchesSubscription.unsubscribe();
+          }
+          const action = new FetchBranchesForProject(p.name);
+          this.branchesSubscription = getPaginationObservables<APIResource>(
+            {
+              store: this.store,
+              action,
+              paginationMonitor: this.paginationMonitorFactory.create(
+                action.paginationKey,
+                entityFactory(githubBranchesSchemaKey)
+              )
+            },
+            true
+          ).entities$.subscribe();
+        })
       )
       .subscribe();
 
@@ -146,6 +155,7 @@ export class DeployApplicationStep2Component
     );
 
     const deployBranchName$ = this.store.select(selectDeployBranchName);
+    const deployCommit$ = this.store.select(selectNewProjectCommit);
 
     const paginationMonitor = this.paginationMonitorFactory.create<APIResource<GitBranch>>(
       action.paginationKey,
@@ -167,35 +177,36 @@ export class DeployApplicationStep2Component
     const updateBranchAndCommit = Observable.combineLatest(
       this.repositoryBranches$,
       deployBranchName$,
-      this.projectInfo$
+      this.projectInfo$,
+      deployCommit$
     ).pipe(
-      tap(([branches, name, projectInfo]) => {
+      tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
         if (branch) {
           this.store.dispatch(new SetBranch(branch));
 
+          const commitSha = commit || branch.commit.sha;
+          const entityKey = projectInfo.full_name + '-' + commitSha;
           const commitEntityService = this.entityServiceFactory.create<EntityInfo>(
             githubCommitSchemaKey,
             entityFactory(githubCommitSchemaKey),
-            branch.commit.sha,
-            new FetchCommit(branch.commit.sha, projectInfo.full_name),
-            false
+            entityKey,
+            new FetchCommit(commitSha, projectInfo.full_name),
           );
 
           if (this.commitSubscription) {
             this.commitSubscription.unsubscribe();
           }
-          this.commitSubscription = commitEntityService.waitForEntity$
-            .pipe(
+          this.commitSubscription = commitEntityService.waitForEntity$.pipe(
             map(p => p.entity.entity),
             tap(p => {
               this.commitInfo = p;
             })
-            )
+          )
             .subscribe();
         }
       })
-      );
+    );
 
     this.subscriptions.push(updateBranchAndCommit.subscribe());
 

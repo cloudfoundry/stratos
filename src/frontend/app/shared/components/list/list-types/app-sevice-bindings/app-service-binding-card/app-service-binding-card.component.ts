@@ -7,7 +7,6 @@ import { first, map, switchMap, tap, withLatestFrom, filter } from 'rxjs/operato
 import { IService, IServiceBinding, IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { DeleteAppServiceBinding } from '../../../../../../store/actions/application-service-routes.actions';
 import { GetServiceInstance } from '../../../../../../store/actions/service-instances.actions';
 import { GetService } from '../../../../../../store/actions/service.actions';
 import { AppState } from '../../../../../../store/app-state';
@@ -21,6 +20,7 @@ import { EnvVarViewComponent } from '../../../../env-var-view/env-var-view.compo
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell, IListRowCell, IListRowCellData } from '../../../list.types';
 import { DatePipe } from '@angular/common';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 
 @Component({
   selector: 'app-app-service-binding-card',
@@ -42,6 +42,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     private appService: ApplicationService,
     private dialog: MatDialog,
     private confirmDialog: ConfirmationDialogService,
+    private serviceActionHelperService: ServiceActionHelperService,
     private datePipe: DatePipe
   ) {
     super();
@@ -126,14 +127,10 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
   }
 
   detach = () => {
-    const confirmation = new ConfirmationDialogConfig(
-      'Detach Service Instance',
-      'Are you sure you want to detach the application from the service?',
-      'Detach',
-      true
-    );
-    this.confirmDialog.open(confirmation, () =>
-      this.store.dispatch(new DeleteAppServiceBinding(this.appService.appGuid, this.row.metadata.guid, this.appService.cfGuid))
+    this.serviceActionHelperService.detachServiceBinding(
+      this.row.metadata.guid,
+      this.row.entity.service_instance_guid,
+      this.appService.cfGuid
     );
   }
 }

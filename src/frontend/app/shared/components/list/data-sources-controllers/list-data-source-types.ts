@@ -32,11 +32,6 @@ export class ListActionConfig<T> {
   visible: (row: T) => boolean;
   enabled: (row: T) => boolean;
 }
-export class ListActions<T> {
-  globalActions = new Array<ListActionConfig<T>>();
-  multiActions = new Array<ListActionConfig<T>>();
-  singleActions = new Array<ListActionConfig<T>>();
-}
 
 export interface ITableListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
@@ -89,6 +84,7 @@ export interface RowState {
   error?: boolean;
   message?: string;
   blocked?: boolean;
+  highlighted?: boolean;
   [customState: string]: any;
 }
 

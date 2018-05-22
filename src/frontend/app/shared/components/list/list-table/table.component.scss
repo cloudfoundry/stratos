@@ -42,6 +42,14 @@ $row-height: 62px;
         justify-content: flex-end;
       }
     }
+    &--table-column-clip {
+      app-table-cell {
+        display: inline-block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
   }
   &__row {
     min-height: $row-height;
