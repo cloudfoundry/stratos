@@ -1,0 +1,14 @@
+# Customization manifest
+
+files:
+  custom.scss: "sass/custom.scss"
+  custom.module.ts_: "app/custom.module.ts"
+  favicon.ico: "favicon.ico"
+  login-bg.jpg: "assets/login-bg.jpg"
+  logo.png: "assets/logo.png"
+  eula.html: "assets/eula.html" 
+
+folders:
+  - "app/custom"
+  - "assets/custom"
+  - "sass/custom"

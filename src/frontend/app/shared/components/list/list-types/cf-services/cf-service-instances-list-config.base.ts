@@ -5,11 +5,9 @@ import { Store } from '@ngrx/store';
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { DeleteServiceBinding } from '../../../../../store/actions/service-bindings.actions';
-import { DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import {
@@ -24,6 +22,7 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
@@ -88,39 +87,42 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     action: (item: APIResource) => this.deleteServiceInstance(item),
     label: 'Delete',
     description: 'Delete Service Instance',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    createVisible: (row) => Observable.of(true),
+    createEnabled: (row) => Observable.of(true)
   };
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
     label: 'Detach',
     description: 'Detach Service Instance',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => row.entity.service_bindings.length === 1
+    createVisible: (row: APIResource) => Observable.of(true),
+    createEnabled: (row: APIResource) => Observable.of(row.entity.service_bindings.length === 1)
   };
 
-  constructor(protected store: Store<AppState>, protected datePipe: DatePipe) {
+  constructor(
+    protected store: Store<AppState>,
+    protected datePipe: DatePipe,
+    private serviceActionHelperService: ServiceActionHelperService
+  ) {
     super();
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    this.store.dispatch(new DeleteServiceInstance(serviceInstance.entity.cfGuid, serviceInstance.metadata.guid))
+    this.serviceActionHelperService.deleteServiceInstance(serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
+
     /**
      * If only one binding exists, carry out the action otherwise
      * take user to a form to select which app binding they want to remove
     **/
-    if (serviceInstance.entity.service_bindings.length === 1) {
-      this.store.dispatch(new DeleteServiceBinding(
-        serviceInstance.entity.cfGuid,
-        serviceInstance.entity.service_bindings[0].metadata.guid,
-        serviceInstance.metadata.guid));
-    } else {
-      this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));
-    }
+    const serviceBindingGuid = serviceInstance.entity.service_bindings[0].metadata.guid;
+    this.serviceActionHelperService.detachServiceBinding(
+      serviceBindingGuid,
+      serviceInstance.metadata.guid,
+      serviceInstance.entity.cfGuid
+    );
   }
 
   getGlobalActions = () => [];

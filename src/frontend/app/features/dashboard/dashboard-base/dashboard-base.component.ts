@@ -15,6 +15,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -65,7 +66,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     {
       text: 'Marketplace',
       matIcon: 'store',
-      link: '/service-catalog'
+      link: '/marketplace'
     },
     {
       text: 'Services',
@@ -85,8 +86,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   ];
 
   sideNaveMode = 'side';
-
+  dispatchRelations() {
+    this.store.dispatch(new GetCurrentUsersRelations());
+  }
   ngOnInit() {
+    this.dispatchRelations();
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.routeChangeSubscription = this.router.events.pipe(

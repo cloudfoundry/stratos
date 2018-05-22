@@ -13,6 +13,8 @@ import { AddServiceInstanceComponent } from './add-service-instance/add-service-
 import { SelectPlanStepComponent } from './add-service-instance/select-plan-step/select-plan-step.component';
 import { CreateApplicationModule } from '../applications/create-application/create-application.module';
 import { SelectServiceComponent } from './add-service-instance/select-service/select-service.component';
+import { ServicePlansComponent } from './service-plans/service-plans.component';
+import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
 
 @NgModule({
   imports: [
@@ -31,9 +33,12 @@ import { SelectServiceComponent } from './add-service-instance/select-service/se
     AddServiceInstanceComponent,
     SelectPlanStepComponent,
     SelectServiceComponent,
+    ServicePlansComponent,
+    ServiceTabsBaseComponent
   ],
   exports: [
-    AddServiceInstanceComponent
+    AddServiceInstanceComponent,
+    ServiceTabsBaseComponent,
   ]
 })
 export class ServiceCatalogModule { }
