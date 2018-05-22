@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { AppState } from '../store/app-state';
-import { CurrentUserPermissionsChecker, IConfigGroup, IConfigGroups } from './current-user-permissions.checker';
+import { CurrentUserPermissionsChecker, IConfigGroup, IConfigGroups, CHECKER_GROUPS } from './current-user-permissions.checker';
 import {
   CurrentUserPermissions,
   PermissionConfig,
@@ -74,7 +74,7 @@ export class CurrentUserPermissionsService {
 
   private getCheckFromConfig(
     configGroup: IConfigGroup,
-    permission: PermissionTypes,
+    permission: PermissionTypes | CHECKER_GROUPS,
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
@@ -97,8 +97,7 @@ export class CurrentUserPermissionsService {
           checks: this.checker.getFeatureFlagChecks(configGroup, endpointGuid),
           combineType: '&&'
         };
-      case PermissionTypes.ORGANIZATION:
-      case PermissionTypes.SPACE:
+      case CHECKER_GROUPS.CF_GROUP:
         return {
           checks: this.checker.getCfChecks(configGroup, endpointGuid, orgOrSpaceGuid, spaceGuid)
         };

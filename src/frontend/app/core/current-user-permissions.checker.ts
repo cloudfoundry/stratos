@@ -13,10 +13,9 @@ import { entityFactory, featureFlagSchemaKey } from '../store/helpers/entity-fac
 import {
   getCurrentUserCFEndpointHasScope,
   getCurrentUserCFEndpointRolesState,
-  getCurrentUserCFGlobalStates,
+  getCurrentUserCFGlobalState,
   getCurrentUserStratosHasScope,
   getCurrentUserStratosRole,
-  getCurrentUserCFGlobalState,
 } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { APIResource } from '../store/types/api.types';
@@ -30,9 +29,11 @@ import {
   ScopeStrings,
 } from './current-user-permissions.config';
 
-
 export interface IConfigGroups {
   [permissionType: string]: IConfigGroup;
+}
+export enum CHECKER_GROUPS {
+  CF_GROUP = '__CF_TYPE__'
 }
 
 export type IConfigGroup = PermissionConfig[];
@@ -62,7 +63,7 @@ export class CurrentUserPermissionsChecker {
       map(state => state[type][orgOrSpaceGuid]),
       filter(state => !!state),
       map(state => this.selectPermission(state, permission as PermissionStrings)),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     );
   }
   /**
@@ -262,14 +263,22 @@ export class CurrentUserPermissionsChecker {
 
   public groupConfigs(configs: PermissionConfig[]): IConfigGroups {
     return configs.reduce((grouped, config) => {
+      const type = this.getGroupType(config);
       return {
         ...grouped,
-        [config.type]: [
-          ...(grouped[config.type] || []),
+        [type]: [
+          ...(grouped[type] || []),
           config
         ]
       };
     }, {});
+  }
+
+  private getGroupType(config: PermissionConfig) {
+    if (config.type === PermissionTypes.ORGANIZATION || config.type === PermissionTypes.SPACE) {
+      return CHECKER_GROUPS.CF_GROUP;
+    }
+    return config.type;
   }
 
   private checkAllOfType(endpointGuid: string, type: PermissionTypes, permission: PermissionStrings) {
