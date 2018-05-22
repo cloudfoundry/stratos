@@ -43,10 +43,11 @@ export class UsersRolesComponent implements OnDestroy {
     const userQParam = this.route.snapshot.queryParams.user;
     if (userQParam) {
       this.initialUsers$ = this.cfUserService.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
-        map(user => [user.entity])
+        map(user => [user.entity]),
+        first()
       );
     } else {
-      this.initialUsers$ = this.store.select(selectUsersRolesPicked);
+      this.initialUsers$ = this.store.select(selectUsersRolesPicked).pipe(first());
     }
 
     this.singleUser$ = this.initialUsers$.pipe(
