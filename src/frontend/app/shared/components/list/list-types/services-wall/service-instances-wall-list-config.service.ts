@@ -5,6 +5,7 @@ import { Store } from '@ngrx/store';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ListViewTypes } from '../../list.component.types';
 import { createListFilterConfig } from '../../list.helper';
 import { cfOrgSpaceFilter } from '../app/cf-apps-data-source';
@@ -34,9 +35,10 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
 
   constructor(store: Store<AppState>,
     datePipe: DatePipe,
-    private cfOrgSpaceService: CfOrgSpaceDataService
+    private cfOrgSpaceService: CfOrgSpaceDataService,
+    serviceActionHelperService: ServiceActionHelperService
   ) {
-    super(store, datePipe);
+    super(store, datePipe, serviceActionHelperService);
     const multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
       createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),
