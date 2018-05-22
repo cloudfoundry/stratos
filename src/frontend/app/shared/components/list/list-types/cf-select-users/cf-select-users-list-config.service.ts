@@ -6,7 +6,7 @@ import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
 import { CfUser } from '../../../../../store/types/user.types';
 import { ITableColumn } from '../../list-table/table.types';
-import { IListConfig, ListViewTypes } from '../../list.component.types';
+import { IListConfig, ListViewTypes, IMultiListAction } from '../../list.component.types';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
 
 @Injectable()
@@ -41,12 +41,10 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
 
   getColumns = () => this.columns;
   getGlobalActions = () => [];
-  getMultiActions = () => [{
+  getMultiActions = (): IMultiListAction<APIResource<CfUser>>[] => [{
     label: 'delete me',
     description: '',
-    action: (items: APIResource<CfUser>[]) => false,
-    visible: () => true,
-    enabled: () => true,
+    action: (items: APIResource<CfUser>[]) => false
   }]
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];

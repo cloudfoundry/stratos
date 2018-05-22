@@ -9,10 +9,11 @@ import { AppState } from './../../../../../store/app-state';
 import { APIResource } from './../../../../../store/types/api.types';
 import { CfUserService } from './../../../../data-services/cf-user.service';
 import { ITableColumn } from './../../list-table/table.types';
-import { ListConfig, ListViewTypes } from './../../list.component.types';
+import { ListConfig, ListViewTypes, IMultiListAction, IBaseListAction, IListAction } from './../../list.component.types';
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
+import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
@@ -54,18 +55,16 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     noEntries: 'There are no users'
   };
 
-  manageUserAction = {
+  manageUserAction: IListAction<APIResource<CfUser>> = {
     action: (user: APIResource<CfUser>) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, [user.entity]));
       this.router.navigate([this.createManagerUsersUrl()], { queryParams: { user: user.entity.guid } });
     },
     label: 'Manage',
     description: ``,
-    visible: row => true,
-    enabled: row => true
   };
 
-  manageMultiUserAction = {
+  manageMultiUserAction: IMultiListAction<APIResource<CfUser>> = {
     action: (users: APIResource<CfUser>[]) => {
       this.store.dispatch(new UsersRolesSetUsers(this.cfUserService.activeRouteCfOrgSpace.cfGuid, users.map(user => user.entity)));
       if (users.length === 1) {
@@ -78,8 +77,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     icon: 'people',
     label: 'Manage',
     description: ``,
-    visible: row => true,
-    enabled: row => true
+    visible$: Observable.of(true)
   };
 
   createManagerUsersUrl(user: APIResource<CfUser> = null): string {

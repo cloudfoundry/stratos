@@ -80,6 +80,9 @@ export interface IListConfig<T> {
    */
   cardComponent?: any;
   hideRefresh?: boolean;
+  /**
+   * Allow selection regardless of number or visibility of multi actions
+   */
   allowSelection?: boolean;
 }
 

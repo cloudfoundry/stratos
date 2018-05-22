@@ -371,7 +371,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     const haveMultiActions = combineLatest(visibles$).pipe(
       map(visibles => visibles.some(visible => visible)),
       tap(allowSelection => {
-        this.haveMultiActions.next(allowSelection && this.config.allowSelection);
+        this.haveMultiActions.next(allowSelection);
       })
     );
 
