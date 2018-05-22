@@ -5,6 +5,8 @@ import { map, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -43,17 +45,20 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private cfEndpointService: CloudFoundryEndpointService,
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     super();
 
     this.cardMenu = [
       {
         label: 'Edit',
-        action: this.edit
+        action: this.edit,
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
       },
       {
         label: 'Delete',
-        action: this.delete
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
       }
     ];
   }

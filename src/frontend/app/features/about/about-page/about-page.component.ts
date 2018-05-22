@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { AuthState } from '../../../store/reducers/auth.reducer';
+import { Component, Inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { Observable } from 'rxjs/Observable';
 import { filter, map } from 'rxjs/operators';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
+import { AppState } from '../../../store/app-state';
+import { AuthState } from '../../../store/reducers/auth.reducer';
 import { SessionData } from '../../../store/types/auth.types';
 
 @Component({
@@ -16,7 +17,7 @@ export class AboutPageComponent implements OnInit {
   sessionData$: Observable<SessionData>;
   versionNumber$: Observable<string>;
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppState>, @Inject(Customizations) public customizations: CustomizationsMetadata) { }
 
   ngOnInit() {
     this.sessionData$ = this.store.select(s => s.auth).pipe(

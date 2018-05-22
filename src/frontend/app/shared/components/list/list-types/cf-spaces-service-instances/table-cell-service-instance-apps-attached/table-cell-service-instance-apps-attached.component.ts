@@ -18,7 +18,7 @@ export class TableCellServiceInstanceAppsAttachedComponent extends TableCellCust
 
   @Input('row')
   set row(row: any) {
-    const cfGuid = this.boundApps = row ? row.entity.service_bindings.map(binding => {
+    this.boundApps = row ? row.entity.service_bindings.map(binding => {
       return {
         appName: binding.entity.app.entity.name,
         url: `/applications/${binding.entity.cfGuid}/${binding.entity.app.metadata.guid}`,
