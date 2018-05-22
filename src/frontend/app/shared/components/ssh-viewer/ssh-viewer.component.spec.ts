@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SshViewerComponent } from './ssh-viewer.component';
 import { CoreModule } from '../../../core/core.module';
+import { SshViewerComponent } from './ssh-viewer.component';
 
 describe('SshViewerComponent', () => {
   let component: SshViewerComponent;

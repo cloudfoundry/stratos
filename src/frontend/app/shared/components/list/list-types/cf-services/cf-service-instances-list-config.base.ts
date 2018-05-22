@@ -5,11 +5,9 @@ import { Store } from '@ngrx/store';
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ListView } from '../../../../../store/actions/list.actions';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { DeleteServiceBinding } from '../../../../../store/actions/service-bindings.actions';
-import { DeleteServiceInstance } from '../../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../../store/app-state';
 import { APIResource } from '../../../../../store/types/api.types';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import {
@@ -124,27 +122,28 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
   constructor(
     protected store: Store<AppState>,
     protected datePipe: DatePipe,
-    protected currentUserPermissionsService: CurrentUserPermissionsService) {
+    protected currentUserPermissionsService: CurrentUserPermissionsService,
+    private serviceActionHelperService: ServiceActionHelperService
+  ) {
     super();
   }
 
   deleteServiceInstance = (serviceInstance: APIResource<IServiceInstance>) =>
-    this.store.dispatch(new DeleteServiceInstance(serviceInstance.entity.cfGuid, serviceInstance.metadata.guid))
+    this.serviceActionHelperService.deleteServiceInstance(serviceInstance.metadata.guid, serviceInstance.entity.cfGuid)
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
+
     /**
      * If only one binding exists, carry out the action otherwise
      * take user to a form to select which app binding they want to remove
     **/
-    if (serviceInstance.entity.service_bindings.length === 1) {
-      this.store.dispatch(new DeleteServiceBinding(
-        serviceInstance.entity.cfGuid,
-        serviceInstance.entity.service_bindings[0].metadata.guid,
-        serviceInstance.metadata.guid));
-    } else {
-      this.store.dispatch(new RouterNav({ path: ['services', serviceInstance.entity.service_guid, 'detach-service-binding'] }));
-    }
+    const serviceBindingGuid = serviceInstance.entity.service_bindings[0].metadata.guid;
+    this.serviceActionHelperService.detachServiceBinding(
+      serviceBindingGuid,
+      serviceInstance.metadata.guid,
+      serviceInstance.entity.cfGuid
+    );
   }
 
   getGlobalActions = () => [];

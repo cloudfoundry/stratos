@@ -47,6 +47,7 @@ import {
   IMultiListAction,
   ListConfig,
   ListViewTypes,
+  IOptionalAction,
 } from './list.component.types';
 
 
@@ -205,8 +206,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private initialise() {
-    this.globalActions = this.config.getGlobalActions();
-    this.multiActions = this.config.getMultiActions();
+    this.globalActions = this.setupActionsDefaultObservables(
+      this.config.getGlobalActions()
+    );
+    this.multiActions = this.setupActionsDefaultObservables(
+      this.config.getMultiActions()
+    );
     this.singleActions = this.config.getSingleActions();
     this.columns = this.config.getColumns();
     this.dataSource = this.config.getDataSource();
@@ -504,5 +509,20 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         takeWhile(isLoading => isLoading)
       ).subscribe();
     }
+  }
+
+  private setupActionsDefaultObservables<Y extends IOptionalAction<T>>(actions: Y[]) {
+    if (Array.isArray(actions)) {
+      return actions.map(action => {
+        if (!action.visible$) {
+          action.visible$ = Observable.of(true);
+        }
+        if (!action.enabled$) {
+          action.enabled$ = Observable.of(true);
+        }
+        return action;
+      });
+    }
+    return actions;
   }
 }

@@ -47,8 +47,6 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible$: Observable.of(true), // See ctor
-    enabled$: Observable.of(true)
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -72,8 +70,6 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible$: Observable.of(true), // See ctor
-    enabled$: Observable.of(true)
   };
 
   private listActionDelete: IListAction<APIResource> = {
