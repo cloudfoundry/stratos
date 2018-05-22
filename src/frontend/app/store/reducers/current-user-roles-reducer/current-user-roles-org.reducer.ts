@@ -6,6 +6,7 @@ const defaultState = {
   isAuditor: false,
   isBillingManager: false,
   isUser: false,
+  spaceGuids: []
 };
 
 export function currentUserOrgRoleReducer(state: IOrgRoleState = defaultState, relationType: UserRelationTypes, userHasRelation: boolean) {
