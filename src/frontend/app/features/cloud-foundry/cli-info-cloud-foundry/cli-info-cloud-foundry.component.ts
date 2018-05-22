@@ -1,26 +1,30 @@
-import { Component, OnInit, Optional } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { first, map } from 'rxjs/operators';
-
-import { IOrganization, ISpace } from '../../../core/cf-api.types';
-import { CurrentUserPermissionsChecker } from '../../../core/current-user-permissions.checker';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
-import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
-import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { RouterNav } from '../../../store/actions/router.actions';
+import { Component, OnInit, ViewEncapsulation, Optional } from '@angular/core';
 import { AppState } from '../../../store/app-state';
+import { Store } from '@ngrx/store';
+import { getPreviousRoutingState, RoutingEvent } from '../../../store/types/routing.type';
+import { first, map, filter } from 'rxjs/operators';
+import { RouterNav } from '../../../store/actions/router.actions';
+import { ActivatedRoute } from '@angular/router';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { APIResource, EntityInfo } from '../../../store/types/api.types';
-import { EndpointModel } from '../../../store/types/endpoint.types';
-import { getPreviousRoutingState } from '../../../store/types/routing.type';
+import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
+import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
+import { combineLatest } from 'rxjs/observable/combineLatest';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
+import { Observable } from 'rxjs/Observable';
+import { IApp, IOrganization, ISpace } from '../../../core/cf-api.types';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../services/cloud-foundry-organization.service';
+import { EndpointModel } from '../../../store/types/endpoint.types';
 import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.service';
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsChecker } from '../../../core/current-user-permissions.checker';
 
 @Component({
   selector: 'app-cli-info-cloud-foundry',
