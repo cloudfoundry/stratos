@@ -20,12 +20,6 @@ describe('AppServiceBindingCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      // declarations: [
-      //   AppServiceBindingCardComponent,
-      //   MetadataCardTestComponents,
-      //   ServiceIconComponent,
-      //   AppChipsComponent,
-      // ],
       imports: [
         ...BaseTestModules,
         createBasicStoreModule(),
