@@ -2,7 +2,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, withLatestFrom } from 'rxjs/operators';
+import { combineLatest, filter, first, map } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { CfUserService } from '../../../../shared/data-services/cf-user.service';
@@ -57,10 +57,10 @@ export class UsersRolesComponent implements OnDestroy {
 
     // Ensure that when we arrive here directly the store is set up with all it needs
     this.store.select(selectUsersRoles).pipe(
-      withLatestFrom(this.initialUsers$),
+      combineLatest(this.initialUsers$),
       first()
     ).subscribe(([usersRoles, users]) => {
-      if (!usersRoles.cfGuid) {
+      if (!usersRoles.cfGuid || !users) {
         this.store.dispatch(new UsersRolesSetUsers(activeRouteCfOrgSpace.cfGuid, users));
       }
     });
