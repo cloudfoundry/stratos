@@ -65,8 +65,10 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     @Optional() private cfSpaceService: CloudFoundrySpaceService
   ) {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
-    this.orgGuid = activeRouteCfOrgSpace.orgGuid || CurrentUserPermissionsChecker.ALL_ORGS;
-    this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CurrentUserPermissionsChecker.ALL_SPACES;
+    if (activeRouteCfOrgSpace.orgGuid) {
+      this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+      this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CurrentUserPermissionsChecker.ALL_SPACES;
+    }
   }
 
   ngOnInit() {
