@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store/store';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap, tap } from 'rxjs/operators';
 
 import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
@@ -274,4 +274,41 @@ export class ServicesService {
           }
         }));
   }
+
+  getServiceDescription = () => {
+    return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
+      .pipe(
+        map(([extraInfo, service]) => {
+          if (extraInfo && extraInfo.longDescription) {
+            return extraInfo.longDescription;
+          } else {
+            return service.entity.description;
+          }
+        }));
+  }
+
+
+  getDocumentationUrl = () => this.serviceExtraInfo$.pipe(
+    map(p => p.documentationUrl)
+  )
+
+  getSupportUrl = () => this.serviceExtraInfo$.pipe(
+    map(p => p.supportUrl)
+  )
+
+  hasSupportUrl = () => this.getSupportUrl().pipe(
+    map(p => !!p)
+  )
+
+  getServiceTags = () => this.service$.pipe(
+    first(),
+    tap(o => console.log('firing!!')),
+    map(service =>
+      service.entity.tags.map(t => ({
+        value: t,
+        hideClearButton: true
+      }))
+    )
+  )
+
 }

@@ -1,0 +1,25 @@
+<div class="summary">
+  <app-tile-grid fit="true">
+    <app-tile-group>
+      <app-tile>
+        <app-service-summary-card></app-service-summary-card>
+      </app-tile>
+      <app-tile>
+        <app-service-broker-card></app-service-broker-card>
+      </app-tile>
+    </app-tile-group>
+    <app-tile-group>
+      <app-tile>
+        <!-- <app-card-number-metric [link]="appLink" icon="apps" label="Instances" labelSingular="Instance" value="{{ (cfEndpointService.allApps$ | async)?.length }}"></app-card-number-metric> -->
+      </app-tile>
+      <app-tile>
+        <!-- <app-card-number-metric link="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations" icon="domain" label="Plans" labelSingular="Plan" value="{{ (cfEndpointService.orgs$ | async)?.length }}"></app-card-number-metric> -->
+      </app-tile>
+    </app-tile-group>
+    <app-tile-group>
+      <app-tile>
+        <app-service-recent-instances-card></app-service-recent-instances-card>
+      </app-tile>
+    </app-tile-group>
+  </app-tile-grid>
+</div>

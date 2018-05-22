@@ -7,6 +7,7 @@ import { ServiceInstancesComponent } from './service-instances/service-instances
 import { AddServiceInstanceComponent } from './add-service-instance/add-service-instance/add-service-instance.component';
 import { ServicePlansComponent } from './service-plans/service-plans.component';
 import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
+import { ServiceSummaryComponent } from './service-summary/service-summary.component';
 const serviceCatalog: Routes = [
   {
     path: '',
@@ -29,8 +30,12 @@ const serviceCatalog: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'instances',
+            redirectTo: 'summary',
             pathMatch: 'full'
+          },
+          {
+            path: 'summary',
+            component: ServiceSummaryComponent
           },
           {
             path: 'plans',

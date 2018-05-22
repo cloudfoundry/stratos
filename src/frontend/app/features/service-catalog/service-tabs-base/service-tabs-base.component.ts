@@ -23,6 +23,10 @@ export class ServiceTabsBaseComponent {
 
   tabLinks: ISubHeaderTabs[] = [
     {
+      link: 'summary',
+      label: 'Summary'
+    },
+    {
       link: 'instances',
       label: 'Instances'
     }

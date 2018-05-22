@@ -265,7 +265,8 @@ import { ServiceActionHelperService } from './data-services/service-action-helpe
     AppActionMonitorComponent,
     CliCommandComponent,
     AppActionMonitorIconComponent,
-    UserPermissionDirective
+    UserPermissionDirective,
+    BooleanIndicatorComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
