@@ -1,10 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServicesService } from '../../services.service';
-import { ServicesServiceMock } from '../../services.service.mock';
+import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -15,7 +13,7 @@ describe('SpecifyDetailsStepComponent', () => {
       declarations: [SpecifyDetailsStepComponent],
       imports: [BaseTestModules],
       providers: [
-        CreateServiceInstanceHelperService
+        CreateServiceInstanceHelperServiceFactory
       ]
     })
       .compileComponents();
