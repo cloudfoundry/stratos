@@ -9,13 +9,13 @@
     <app-step title="Select Service" *ngIf="servicesWallCreateInstance" [valid]="selectService.validate | async" [onNext]="selectService.onNext">
       <app-select-service #selectService></app-select-service>
     </app-step>
-    <app-step title="Select Plan" [onNext]="selectPlan.onNext" [valid]="selectPlan.validate | async" [onEnter]="selectPlan.onEnter" cancelButtonText="Cancel">
+    <app-step title="Select Plan" [onNext]="selectPlan.onNext" [onEnter]="selectPlan.onEnter" [valid]="selectPlan.validate | async" cancelButtonText="Cancel">
       <app-select-plan-step #selectPlan></app-select-plan-step>
     </app-step>
     <app-step title="Bind App (Optional)" [onNext]="bindApp.submit" [valid]="bindApp.validate | async" cancelButtonText="Close" finishButtonText="Bind">
       <app-bind-apps-step #bindApp></app-bind-apps-step>
     </app-step>
-    <app-step title="Specify Details" [onNext]="specifyDetails.onNext" [valid]="specifyDetails.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
+    <app-step title="Specify Details" [onNext]="specifyDetails.onNext" [onEnter]="specifyDetails.onEnter" [valid]="specifyDetails.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
       <app-specify-details-step #specifyDetails></app-specify-details-step>
     </app-step>
   </app-steppers>

@@ -35,6 +35,7 @@ import { CreateServiceInstanceState } from '../../../../store/types/create-servi
 import { getServiceJsonParams, isMarketplaceMode, safeUnsubscribe } from '../../services-helper';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -43,8 +44,7 @@ import { CreateServiceInstanceHelperService } from '../create-service-instance-h
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterContentInit {
   marketPlaceMode: boolean;
-  cSIHelperService$: Observable<CreateServiceInstanceHelperService>;
-  constructorSubscription: Subscription;
+  cSIHelperService: CreateServiceInstanceHelperService;
   stepperForm: FormGroup;
   serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
@@ -90,6 +90,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar,
+    private csiGuidsService: CsiGuidsService
   ) {
 
     this.stepperForm = new FormGroup({
@@ -99,21 +100,19 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
     });
+  }
 
-    this.cSIHelperService$ = Observable.combineLatest(
-      this.store.select(selectCreateServiceInstanceCfGuid),
-      this.store.select(selectCreateServiceInstanceServiceGuid)).pipe(
-        filter(([c, s]) => !!s && !!c),
-        map(([cfGuid, serviceGuid]) => cSIHelperServiceFactory.create(cfGuid, serviceGuid))
-      );
+  onEnter = () => {
 
-    this.marketPlaceMode = isMarketplaceMode(activatedRoute);
+    this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
+
+    this.marketPlaceMode = isMarketplaceMode(this.activatedRoute);
     if (this.marketPlaceMode) {
-      this.orgs$ = this.cSIHelperService$.pipe(switchMap(s => s.getOrgsForSelectedServicePlan()));
-      this.spaces$ = this.cSIHelperService$.pipe(switchMap(s => this.initSpacesObservable()));
+      this.orgs$ = this.cSIHelperService.getOrgsForSelectedServicePlan();
+      this.spaces$ = this.initSpacesObservable();
 
     }
-    this.allServiceInstances$ = this.cSIHelperService$.pipe(switchMap(s => this.initServiceInstances(s.cfGuid, s.serviceGuid)));
+    this.allServiceInstances$ = this.initServiceInstances(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
 
   }
 
@@ -125,7 +124,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
         tags: new FormControl(''),
       });
     } else {
-      this.spaceScopeSub = this.cSIHelperService$.pipe(switchMap(s => s.getSelectedServicePlanAccessibility().pipe(
+      this.spaceScopeSub = this.cSIHelperService.getSelectedServicePlanAccessibility().pipe(
         map(o => o.spaceScoped),
         tap(spaceScope => {
           if (spaceScope) {
@@ -135,7 +134,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
             this.stepperForm.get('org').enable();
             this.stepperForm.get('space').enable();
           }
-        })))).subscribe();
+        })).subscribe();
     }
   }
 
@@ -157,7 +156,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     safeUnsubscribe(this.orgSubscription);
     safeUnsubscribe(this.serviceInstanceNameSub);
     safeUnsubscribe(this.spaceScopeSub);
-    safeUnsubscribe(this.constructorSubscription);
   }
 
   ngAfterContentInit() {
@@ -191,7 +189,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     }),
     filter(p => !!p),
     map(org => org.entity.spaces),
-    combineLatest(this.cSIHelperService$.pipe(switchMap(s => s.getSelectedServicePlanAccessibility()))),
+    combineLatest(this.cSIHelperService.getSelectedServicePlanAccessibility()),
     map(([spaces, servicePlanAccessibility]) => {
       if (servicePlanAccessibility.spaceScoped) {
         return spaces.filter(s => s.metadata.guid === servicePlanAccessibility.spaceGuid);

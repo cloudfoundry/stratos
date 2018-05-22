@@ -15,6 +15,7 @@ import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
 import { isMarketplaceMode } from '../../services-helper';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -23,7 +24,8 @@ import { CreateServiceInstanceHelperService } from '../create-service-instance-h
   providers: [
     servicesServiceFactoryProvider,
     CreateServiceInstanceHelperServiceFactory,
-    TitleCasePipe
+    TitleCasePipe,
+    CsiGuidsService
   ]
 })
 export class AddServiceInstanceComponent {
@@ -37,10 +39,13 @@ export class AddServiceInstanceComponent {
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,
-    private cfOrgSpaceService: CfOrgSpaceDataService
+    private cfOrgSpaceService: CfOrgSpaceDataService,
+    private csiGuidsService: CsiGuidsService
   ) {
     if (isMarketplaceMode(activatedRoute)) {
       const { cfId, serviceId } = activatedRoute.snapshot.params;
+      this.csiGuidsService.cfGuid = cfId;
+      this.csiGuidsService.serviceGuid = serviceId;
       this.cSIHelperService = cSIHelperServiceFactory.create(cfId, serviceId);
       this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId));
       this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));

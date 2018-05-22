@@ -1,5 +1,8 @@
-<b>Specify the application to bind (Optional)</b>
-<div class="bind-apps">
+<div *ngIf="(apps$ | async)?.length === 0">
+  There are no apps available in the selected Space and Organization
+</div>
+<div class="bind-apps" *ngIf="(apps$ | async)?.length > 0">
+  <b>Specify the application to bind (Optional)</b>
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
       <mat-select class="form-control" placeholder="App" formControlName="apps">

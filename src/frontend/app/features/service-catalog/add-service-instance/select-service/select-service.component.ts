@@ -13,6 +13,7 @@ import { AppState } from '../../../../store/app-state';
 import { selectCreateServiceInstanceCfGuid } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesWallService } from '../../../services/services/services-wall.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
   selector: 'app-select-service',
@@ -29,12 +30,12 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   stepperForm: FormGroup;
   validate: Observable<boolean>;
 
-
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private servicesWallService: ServicesWallService,
     private entityServiceFactory: EntityServiceFactory,
+    private csiGuidService: CsiGuidsService
   ) {
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
@@ -52,6 +53,8 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   onNext = () => {
     const serviceGuid = this.stepperForm.controls.service.value;
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
+    this.csiGuidService.serviceGuid = serviceGuid;
+    this.csiGuidService.cfGuid = this.cfGuid;
     return Observable.of({ success: true });
   }
 

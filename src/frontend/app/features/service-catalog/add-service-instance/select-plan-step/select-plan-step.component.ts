@@ -22,6 +22,7 @@ import { safeUnsubscribe } from '../../services-helper';
 import { ServicePlanAccessibility } from '../../services.service';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 interface ServicePlan {
   id: string;
@@ -39,7 +40,7 @@ interface ServicePlan {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnDestroy {
-  cSIHelperService$: Observable<CreateServiceInstanceHelperService>;
+  cSIHelperService: CreateServiceInstanceHelperService;
   selectedService$: Observable<ServicePlan>;
 
 
@@ -51,47 +52,17 @@ export class SelectPlanStepComponent implements OnDestroy {
   subscription: Subscription;
   stepperForm: FormGroup;
   servicePlans$: Observable<ServicePlan[]>;
-  initialising$ = new BehaviorSubject(true);
 
   constructor(private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory,
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private csiGuidsService: CsiGuidsService
   ) {
 
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
     });
-
-    this.cSIHelperService$ = Observable.combineLatest(
-      this.store.select(selectCreateServiceInstanceCfGuid),
-      this.store.select(selectCreateServiceInstanceServiceGuid)).pipe(
-        filter(([c, s]) => !!s && !!c),
-        map(([cfGuid, serviceGuid]) => cSIHelperServiceFactory.create(cfGuid, serviceGuid))
-      );
-    this.servicePlans$ = this.cSIHelperService$.pipe(
-      switchMap(s => s.getVisibleServicePlans().pipe(
-        filter(o => !!o && o.length > 0),
-        map(o => this.mapToServicePlan(o)),
-        publishReplay(1),
-        refCount(),
-      )));
-
-    this.selectedService$ = this.servicePlans$.pipe(
-      filter(o => !!this.stepperForm.controls.servicePlans.value),
-      map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
-      filter(p => !!p),
-    );
-
-    this.subscription = this.servicePlans$.pipe(
-      filter(p => !!p && p.length > 0),
-      tap(o => {
-        this.stepperForm.controls.servicePlans.setValue(o[0].id);
-        this.servicePlans = o;
-        setTimeout(() => this.validate.next(this.stepperForm.valid));
-
-      }),
-    ).subscribe();
 
   }
 
@@ -114,10 +85,30 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   onEnter = () => {
-    this.changeSubscription = this.stepperForm.statusChanges.pipe(
-      map(() => {
-        this.validate.next(this.stepperForm.valid);
-      })).subscribe();
+    this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
+
+    this.servicePlans$ = this.cSIHelperService.getVisibleServicePlans().pipe(
+      filter(o => !!o && o.length > 0),
+      map(o => this.mapToServicePlan(o)),
+      publishReplay(1),
+      refCount(),
+    );
+
+    this.selectedService$ = this.servicePlans$.pipe(
+      filter(o => !!this.stepperForm.controls.servicePlans.value),
+      map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
+      filter(p => !!p),
+    );
+
+    this.subscription = this.servicePlans$.pipe(
+      filter(p => !!p && p.length > 0),
+      tap(o => {
+        this.stepperForm.controls.servicePlans.setValue(o[0].id);
+        this.servicePlans = o;
+        setTimeout(() => this.validate.next(this.stepperForm.valid));
+
+      }),
+    ).subscribe();
 
   }
 
@@ -133,7 +124,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   getPlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<CardStatus> => {
-    return this.cSIHelperService$.pipe(switchMap(s => s.getServicePlanAccessibility(servicePlan).pipe(
+    return this.cSIHelperService.getServicePlanAccessibility(servicePlan).pipe(
       map((servicePlanAccessibility: ServicePlanAccessibility) => {
         if (servicePlanAccessibility.isPublic) {
           return CardStatus.OK;
@@ -144,7 +135,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         }
       }),
       first()
-    )));
+    );
   }
 
   getAccessibilityMessage = (servicePlan: APIResource<IServicePlan>): Observable<string> => {

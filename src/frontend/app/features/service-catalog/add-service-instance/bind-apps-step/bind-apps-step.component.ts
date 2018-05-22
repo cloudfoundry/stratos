@@ -46,8 +46,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
 
-
-
     this.allAppsSubscription = this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
       filter(p => !!p),
       combineLatest(this.store.select(selectCreateServiceInstanceCfGuid)),
