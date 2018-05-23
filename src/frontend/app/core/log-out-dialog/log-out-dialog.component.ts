@@ -28,15 +28,15 @@ export class LogOutDialogComponent implements OnInit, OnDestroy {
     this.countdownTotal = this.countDown = this.data.expiryDate - Date.now();
     this._autoLogout = interval(updateInterval)
       .pipe(
-      tap(() => {
-        if (this.countDown <= 0) {
-          this._autoLogout.unsubscribe();
-          this.store.dispatch(new Logout());
-        } else {
-          this.countDown -= updateInterval;
-          this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
-        }
-      })
+        tap(() => {
+          if (this.countDown <= 0) {
+            this._autoLogout.unsubscribe();
+            this.store.dispatch(new Logout());
+          } else {
+            this.countDown -= updateInterval;
+            this.percentage = ((this.countdownTotal - this.countDown) / this.countdownTotal) * 100;
+          }
+        })
       ).subscribe();
   }
 

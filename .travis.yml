@@ -8,6 +8,7 @@ services:
 addons:
   chrome: stable
 install:
+- npm install npm@5.6.0 -g
 - npm install
 filter_secrets: false
 branches:
@@ -24,7 +25,7 @@ stages:
   - Frontend Unit Tests
   - Backend
   - name: E2E tests
-    if: type != pull_request
+    if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
 jobs:
   include:
   - stage: Frontend Lint

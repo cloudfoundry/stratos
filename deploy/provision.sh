@@ -3,6 +3,7 @@
 WORK_DIR=$(pwd)
 
 npm install
+npm run customize
 export PATH=$PATH:$WORK_DIR/node_modules/.bin
 
 npm run build

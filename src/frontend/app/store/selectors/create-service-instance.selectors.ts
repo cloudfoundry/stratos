@@ -28,9 +28,7 @@ export const selectCreateServiceInstanceCfGuid = compose(
   getCfGuid,
   selectCreateServiceInstance
 );
-
-export const selectCreateServiceGuid = compose(
+export const selectCreateServiceInstanceServiceGuid = compose(
   getServiceGuid,
   selectCreateServiceInstance
 );
-

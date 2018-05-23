@@ -12,6 +12,7 @@ import { GetApplication } from '../../../../store/actions/application.actions';
 import {
   ResetCreateServiceInstanceState,
   SetCreateServiceInstanceCFDetails,
+  SetCreateServiceInstanceServiceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
@@ -19,7 +20,10 @@ import { createEntityRelationKey } from '../../../../store/helpers/entity-relati
 import { APIResource } from '../../../../store/types/api.types';
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
-import { CreateServiceInstanceHelperService, Mode } from '../create-service-instance-helper.service';
+import { isMarketplaceMode } from '../../services-helper';
+import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -27,12 +31,15 @@ import { CreateServiceInstanceHelperService, Mode } from '../create-service-inst
   styleUrls: ['./add-service-instance.component.scss'],
   providers: [
     servicesServiceFactoryProvider,
-    CreateServiceInstanceHelperService,
-    TitleCasePipe
+    CreateServiceInstanceHelperServiceFactory,
+    TitleCasePipe,
+    CsiGuidsService
   ]
 })
 export class AddServiceInstanceComponent implements OnDestroy {
 
+  marketPlaceMode: boolean;
+  cSIHelperService: CreateServiceInstanceHelperService;
   displaySelectServiceStep: boolean;
   displaySelectCfStep: boolean;
   title$: Observable<string>;
@@ -42,17 +49,18 @@ export class AddServiceInstanceComponent implements OnDestroy {
   bindAppStepperText = 'Bind App (Optional)';
   appId: string;
   constructor(
-    private cSIHelperService: CreateServiceInstanceHelperService,
+    private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
+    private csiGuidsService: CsiGuidsService,
     private entityServiceFactory: EntityServiceFactory
   ) {
 
     const { serviceId, cfId, id } = this.getIdsFromRoute();
 
     // Check if wizard has been initiated from the Services Marketplace
-    this.checkAndConfigureServiceForMarketplaceMode(serviceId, cfId);
+    this.checkAndConfigureServiceForMarketplaceMode();
 
     // Check if the CF Select step needs to be displayed
     this.displaySelectCfStep = this.setupSelectCFStep(serviceId, cfId, id);
@@ -63,12 +71,14 @@ export class AddServiceInstanceComponent implements OnDestroy {
     if (!!cfId && !!id) {
       // Setup wizard for App services mode
       this.setupForAppServiceMode(id, cfId);
-    } else {
+    }
+    if (!cfId && !id && !serviceId) {
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.title$ = Observable.of(`Create Service Instance`);
     }
   }
+
 
   setupSelectCFStep = (serviceId: string, cfId: string, id: string) => {
     // Show Select CF Step only when in the Services Wall mode
@@ -121,23 +131,26 @@ export class AddServiceInstanceComponent implements OnDestroy {
     }), take(1)).subscribe();
   }
 
-  private checkAndConfigureServiceForMarketplaceMode(serviceId: string, cfId: string) {
-    if (!!serviceId && !!cfId) {
-      this.cSIHelperService.initService(cfId, serviceId, Mode.MARKETPLACE);
-
-      this.cSIHelperService.isInitialised().pipe(
-        take(1),
-        tap(o => {
-          const serviceGuid = serviceId;
-          this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
-          this.title$ = this.cSIHelperService.getServiceName().pipe(
-            map(label => `Create Instance: ${label}`)
-          );
-        })
-      ).subscribe();
+  private checkAndConfigureServiceForMarketplaceMode() {
+    if (isMarketplaceMode(this.activatedRoute)) {
+      const { cfId, serviceId } = this.activatedRoute.snapshot.params;
+      this.csiGuidsService.cfGuid = cfId;
+      this.csiGuidsService.serviceGuid = serviceId;
+      this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceId);
+      this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId));
+      this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
+      this.initialiseForMarketplaceMode(serviceId, cfId);
+      this.marketPlaceMode = true;
     }
   }
+
   ngOnDestroy(): void {
     this.store.dispatch(new ResetCreateServiceInstanceState());
+  }
+
+  private initialiseForMarketplaceMode(serviceId: string, cfId: string) {
+    const serviceGuid = serviceId;
+    this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
+    this.title$ = this.cSIHelperService.getServiceName().pipe(map(label => `Create Instance: ${label}`));
   }
 }

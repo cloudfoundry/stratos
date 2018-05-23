@@ -14,19 +14,14 @@ import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
 import { ITableColumn } from '../../list-table/table.types';
-import {
-  defaultPaginationPageSizeOptionsTable,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
-import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
-import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
+import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+import { Observable } from 'rxjs/Observable';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -94,9 +89,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       });
     },
     label: 'Unregister',
-    description: 'Remove the endpoint',
-    visible: row => true,
-    enabled: row => true,
+    description: 'Remove the endpoint'
   };
 
   private listActionDisconnect: IListAction<EndpointModel> = {
@@ -109,8 +102,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    visible: row => row.connectionStatus === 'connected',
-    enabled: row => true,
+    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'connected'),
+    createEnabled: (row: EndpointModel) => Observable.of(true),
   };
 
   private listActionConnect: IListAction<EndpointModel> = {
@@ -126,8 +119,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Connect',
     description: '',
-    visible: row => row.connectionStatus === 'disconnected',
-    enabled: row => true,
+    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'disconnected'),
+    createEnabled: (row: EndpointModel) => Observable.of(true),
   };
 
   private singleActions = [

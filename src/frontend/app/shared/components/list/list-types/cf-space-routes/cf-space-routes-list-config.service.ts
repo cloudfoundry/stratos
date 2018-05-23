@@ -18,10 +18,14 @@ import {
   TableCellRouteAppsAttachedComponent,
 } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { DatePipe } from '@angular/common';
+import { Observable } from 'rxjs/Observable';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 
 @Injectable()
 export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> {
-  dataSource: CfSpaceRoutesDataSource;
+  private dataSource: CfSpaceRoutesDataSource;
+  private canEditApp$: Observable<boolean>;
 
   private multiListActionDelete: IMultiListAction<APIResource> = {
     action: (items: APIResource[]) => {
@@ -43,8 +47,6 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'delete',
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -68,24 +70,22 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     icon: 'block',
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
   };
 
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteSingleRoute(item),
     label: 'Delete',
     description: 'Unmap and delete route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    createVisible: (row: APIResource) => this.canEditApp$,
+    createEnabled: () => Observable.of(true)
   };
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
     description: 'Unmap route',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => row.entity.apps && row.entity.apps.length
+    createVisible: (row: APIResource) => this.canEditApp$,
+    createEnabled: (row: APIResource) => Observable.of(row.entity.apps && row.entity.apps.length)
   };
 
   columns: Array<ITableColumn<APIResource>> = [
@@ -157,14 +157,22 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     private store: Store<AppState>,
     private confirmDialog: ConfirmationDialogService,
     private cfSpaceService: CloudFoundrySpaceService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    public currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.dataSource = new CfSpaceRoutesDataSource(
       this.store,
       this,
       this.cfSpaceService.spaceGuid,
-      this.cfSpaceService.cfGuid
+      this.cfSpaceService.cfGuid,
     );
+    this.canEditApp$ = this.currentUserPermissionsService.can(
+      CurrentUserPermissions.APPLICATION_EDIT,
+      this.cfSpaceService.cfGuid,
+      this.cfSpaceService.spaceGuid
+    );
+    this.multiListActionDelete.visible$ = this.canEditApp$;
+    this.multiListActionUnmap.visible$ = this.canEditApp$;
   }
 
   private deleteSingleRoute(item: APIResource) {

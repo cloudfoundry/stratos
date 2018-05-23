@@ -8,7 +8,7 @@ export class FocusDirective implements OnInit, OnDestroy {
   sub: Subscription;
   @Input('appFocus') appFocus: EventEmitter<boolean>;
 
-  constructor( @Inject(ElementRef) private element: ElementRef, private renderer: Renderer) {
+  constructor(@Inject(ElementRef) private element: ElementRef, private renderer: Renderer) {
   }
 
   ngOnInit() {

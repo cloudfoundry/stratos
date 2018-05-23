@@ -5,12 +5,14 @@ import { APIResource } from '../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../store/types/create-service-instance.types';
 import { Observable } from 'rxjs/Observable';
 import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
+import { ActivatedRoute } from '@angular/router';
+import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 
 export const fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
     svcPlanVis: APIResource<IServicePlanVisibility>[],
     svcBroker: APIResource<IServiceBroker>,
-    svc: APIResource<IService>): APIResource<IServicePlan>[] => {
+  ): APIResource<IServicePlan>[] => {
     const visiblePlans: APIResource<IServicePlan>[] = [];
     svcPlans.forEach(p => {
       if (p.entity.public) {
@@ -59,4 +61,19 @@ export const getServiceJsonParams = (params: any): {} => {
   return prms;
 };
 
+
+export const isMarketplaceMode = (activatedRoute: ActivatedRoute) => {
+  const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
+  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  return !!serviceId && !!cfId;
+};
+
+export const isAppServicesMode = (activatedRoute: ActivatedRoute) => {
+  const id = getIdFromRoute(activatedRoute, 'id');
+  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  return !!id && !!cfId;
+};
+export const isServicesWallMode = (activatedRoute: ActivatedRoute) => {
+  return !isAppServicesMode(activatedRoute) && !isMarketplaceMode(activatedRoute);
+};
 

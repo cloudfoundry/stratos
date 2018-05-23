@@ -4,6 +4,7 @@ import { BindAppsStepComponent } from './bind-apps-step.component';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { ServicesService } from '../../services.service';
 import { ServicesServiceMock } from '../../services.service.mock';
+import { CsiGuidsService } from '../csi-guids.service';
 
 describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
@@ -15,6 +16,7 @@ describe('BindAppsStepComponent', () => {
       imports: [BaseTestModules],
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },
+        CsiGuidsService
       ]
 
 

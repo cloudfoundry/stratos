@@ -5,6 +5,8 @@ import { ServiceBaseComponent } from './service-base/service-base.component';
 import { ServiceCatalogPageComponent } from './service-catalog-page/service-catalog-page.component';
 import { ServiceInstancesComponent } from './service-instances/service-instances.component';
 import { AddServiceInstanceComponent } from './add-service-instance/add-service-instance/add-service-instance.component';
+import { ServicePlansComponent } from './service-plans/service-plans.component';
+import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
 const serviceCatalog: Routes = [
   {
     path: '',
@@ -17,18 +19,32 @@ const serviceCatalog: Routes = [
   {
     path: ':cfId/:serviceId',
     component: ServiceBaseComponent,
-
     children: [
       {
         path: '',
-        redirectTo: 'instances',
-        pathMatch: 'full'
-      },
-      {
-        path: 'instances',
-        component: ServiceInstancesComponent
-      }]
+        component: ServiceTabsBaseComponent,
+        data: {
+          uiFullView: true
+        },
+        children: [
+          {
+            path: '',
+            redirectTo: 'instances',
+            pathMatch: 'full'
+          },
+          {
+            path: 'plans',
+            component: ServicePlansComponent
+          },
+          {
+            path: 'instances',
+            component: ServiceInstancesComponent
+          },
+        ]
+      }
+    ]
   }
+
 ];
 
 @NgModule({

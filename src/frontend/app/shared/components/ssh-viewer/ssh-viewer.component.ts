@@ -104,20 +104,20 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.xterm.reset();
     this.msgSubscription = this.sshStream
       .subscribe(
-      (data: string) => {
-        for (const c of data.split(' ')) {
-          this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+        (data: string) => {
+          for (const c of data.split(' ')) {
+            this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+          }
+        },
+        (err) => {
+          this.disconnect();
+        },
+        () => {
+          this.disconnect();
+          if (!this.isDestroying) {
+            this.changeDetector.detectChanges();
+          }
         }
-      },
-      (err) => {
-        this.disconnect();
-      },
-      () => {
-        this.disconnect();
-        if (!this.isDestroying) {
-          this.changeDetector.detectChanges();
-        }
-      }
       );
   }
 

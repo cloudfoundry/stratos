@@ -5,13 +5,13 @@ import { Store } from '@ngrx/store';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
 import { CfOrgSpaceDataService } from '../../../../data-services/cf-org-space-service.service';
+import { ServiceActionHelperService } from '../../../../data-services/service-action-helper.service';
 import { ListViewTypes } from '../../list.component.types';
 import { createListFilterConfig } from '../../list.helper';
 import { cfOrgSpaceFilter } from '../app/cf-apps-data-source';
 import { CfServiceInstancesListConfigBase } from '../cf-services/cf-service-instances-list-config.base';
 import { ServiceInstanceCardComponent } from './service-instance-card/service-instance-card.component';
 import { ServiceInstancesWallDataSource } from './service-instances-wall-data-source';
-import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 
 /**
  * Service instance list shown for `services` nav component
@@ -36,9 +36,9 @@ export class ServiceInstancesWallListConfigService extends CfServiceInstancesLis
   constructor(store: Store<AppState>,
     datePipe: DatePipe,
     private cfOrgSpaceService: CfOrgSpaceDataService,
-    confirmDialog: ConfirmationDialogService
+    serviceActionHelperService: ServiceActionHelperService
   ) {
-    super(store, datePipe, confirmDialog);
+    super(store, datePipe, serviceActionHelperService);
     const multiFilterConfigs = [
       createListFilterConfig('cf', 'Cloud Foundry', this.cfOrgSpaceService.cf),
       createListFilterConfig('org', 'Organization', this.cfOrgSpaceService.org),

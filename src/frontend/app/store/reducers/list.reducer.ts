@@ -56,8 +56,8 @@ export const getListStateObservables = (
   store: Store<AppState>,
   key: string
 ): {
-  view: Observable<ListView>;
-} => {
+    view: Observable<ListView>;
+  } => {
   return {
     view: store.select<ListView>(selectListStateProperty(key, 'view'))
   };
