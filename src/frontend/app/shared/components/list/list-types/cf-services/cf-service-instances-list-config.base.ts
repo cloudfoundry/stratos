@@ -23,6 +23,7 @@ import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
@@ -86,17 +87,14 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
   private listActionDelete: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceInstance(item),
     label: 'Delete',
-    description: 'Delete Service Instance',
-    createVisible: (row) => Observable.of(true),
-    createEnabled: (row) => Observable.of(true)
+    description: 'Delete Service Instance'
   };
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
     label: 'Detach',
     description: 'Detach Service Instance',
-    createVisible: (row: APIResource) => Observable.of(true),
-    createEnabled: (row: APIResource) => Observable.of(row.entity.service_bindings.length === 1)
+    createEnabled: (row$: Observable<APIResource>) => row$.pipe(map(row => row.entity.service_bindings.length === 1))
   };
 
   constructor(

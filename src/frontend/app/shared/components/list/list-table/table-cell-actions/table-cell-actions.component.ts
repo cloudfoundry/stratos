@@ -9,6 +9,7 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -39,6 +40,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     enabled: { [action: string]: Observable<boolean> }
   };
 
+  private subjects: BehaviorSubject<T>[] = [];
+
   constructor(private store: Store<AppState>, public listConfig: ListConfig<T>) {
     super();
     this.actions = listConfig.getSingleActions();
@@ -52,19 +55,29 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
 
   initialise(row) {
     if (this.obs) {
-      return;
+      return this.updateActionButtons(row);
     }
     this.obs = {
       visible: {},
       enabled: {}
     };
     this.actions.forEach(action => {
-      this.obs.visible[action.label] = action.createVisible ? action.createVisible(row) : Observable.of(true);
-      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(row) : Observable.of(true);
+      const subject = new BehaviorSubject(row);
+      this.subjects.push(subject);
+      this.obs.visible[action.label] = action.createVisible ? action.createVisible(subject) : Observable.of(true);
+      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(subject) : Observable.of(true);
     });
 
     this.show$ = combineLatest(Object.values(this.obs.visible)).pipe(
       map(visibles => visibles.some(visible => visible))
     );
+  }
+
+  private updateActionButtons(row: T) {
+    if (this.subjects.length > 0) {
+      this.subjects.forEach(subject => {
+        subject.next(row);
+      });
+    }
   }
 }

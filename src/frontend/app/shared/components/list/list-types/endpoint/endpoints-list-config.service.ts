@@ -22,6 +22,7 @@ import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { Observable } from 'rxjs/Observable';
+import { map } from 'rxjs/operators';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -102,8 +103,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'connected'),
-    createEnabled: (row: EndpointModel) => Observable.of(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'connected'))
   };
 
   private listActionConnect: IListAction<EndpointModel> = {
@@ -119,8 +119,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Connect',
     description: '',
-    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'disconnected'),
-    createEnabled: (row: EndpointModel) => Observable.of(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
   };
 
   private singleActions = [

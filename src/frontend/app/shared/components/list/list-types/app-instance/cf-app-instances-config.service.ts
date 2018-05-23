@@ -14,6 +14,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
 import { Observable } from 'rxjs/Observable';
+import { switchMap } from 'rxjs/operators';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -123,8 +124,6 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'Terminate',
     description: ``, // Description depends on console user permission
-    createVisible: (row) => Observable.of(true),
-    createEnabled: (row) => Observable.of(true)
   };
 
   private listActionSsh: IListAction<any> = {
@@ -137,15 +136,16 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'SSH',
     description: ``, // Description depends on console user permission
-    createVisible: (row) => Observable.of(true),
-    createEnabled: row =>
-      this.appService.app$.pipe(
-        map(app => {
-          return row.value &&
-            row.value.state === 'RUNNING' &&
-            app.entity.entity.enable_ssh;
-        })
-      )
+    createEnabled: row$ =>
+      row$.pipe(switchMap(row => {
+        return this.appService.app$.pipe(
+          map(app => {
+            return row.value &&
+              row.value.state === 'RUNNING' &&
+              app.entity.entity.enable_ssh;
+          })
+        );
+      }))
   };
 
   private singleActions = [
