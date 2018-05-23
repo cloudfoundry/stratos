@@ -2,6 +2,43 @@ import { Observable } from 'rxjs/Observable';
 
 export class ServicesServiceMock {
   servicePlanVisibilities$ = Observable.of([]);
+  service$ = Observable.of(
+    {
+      entity: {
+        label: 'app-autoscaler',
+        provider: null,
+        url: null,
+        description: 'Shared service for app-autoscaler',
+        long_description: null,
+        version: null,
+        info_url: null,
+        active: true,
+        bindable: true,
+        unique_id: '826fcda4-80e1-11e7-aead-9372473ff564-service-app-autoscaler',
+        // tslint:disable-next-line:max-line-length
+        extra: '{"displayName":"app-autoscaler","imageUrl":"test","longDescription":"","providerDisplayName":"","documentationUrl":"","supportUrl":""}',
+        tags: [
+          'simple',
+          'shared'
+        ],
+        requires: [],
+        documentation_url: null,
+        service_broker_guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+        plan_updateable: false,
+        service_plans_url: '/v2/services/f88cdd0e-82e1-429c-be8b-7ab43644c3f4/service_plans',
+        service_plans: [
+          '333d56fa-f0ee-4327-bd0e-b79e8060f551'
+        ],
+        guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+        cfGuid: '7d5e510b-8396-4db0-a91c-6abdc390c9d1'
+      },
+      metadata: {
+        guid: 'f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+        url: '/v2/services/f88cdd0e-82e1-429c-be8b-7ab43644c3f4',
+        created_at: '2017-11-27T17:07:02Z',
+        updated_at: '2017-11-27T17:07:02Z'
+      }
+    });
   servicePlans$ = Observable.of([{
     entity: {
       name: 'shared',
@@ -35,4 +72,5 @@ export class ServicesServiceMock {
   getServicePlanAccessibility = () => Observable.of({
     isPublic: true
   })
+
 }

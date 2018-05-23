@@ -2,6 +2,29 @@
 
 Weekly status updates are published here.
 
+## 18 May 2018
+
+The team have been working on the following issues and PRs this week:
+
+- User permissions [#2147](https://github.com/cloudfoundry-incubator/stratos/pull/2147) - adding in the framework to control UI elements based on the user's permissions
+
+- Apply user permissions to CF pages [#2198](https://github.com/cloudfoundry-incubator/stratos/pull/2198) - appropriately show the CF actions a user can perform based on their permissions
+
+- Service instances view [#2074](https://github.com/cloudfoundry-incubator/stratos/issues/2074) - adding a view to show service instances
+
+- Services Wall: Create Services instance [#2163](https://github.com/cloudfoundry-incubator/stratos/pull/2163) - adding support for creating service instances from the service marketplace view
+
+- App Services tab: Allow user to bind a service instance [#2188](https://github.com/cloudfoundry-incubator/stratos/pull/2188)
+
+- E2E Tests and E2E Test setup improvements [#2183](https://github.com/cloudfoundry-incubator/stratos/pull/2183)
+
+- Add support for Angular XSRF protection [#2153](https://github.com/cloudfoundry-incubator/stratos/pull/2153) - adding support for the Angular XSRF protection mechanism
+
+- Remove deprecated API & Add confirmation dialogs when detaching/removing service bindings [#2193](https://github.com/cloudfoundry-incubator/stratos/pull/2193)
+
+
+
+
 ## 11 May 2018
 
 The work to get V2 to the same level of functionality as V1 is going well and we're nearing completion - the team have been working on the following issues and PRs this week:

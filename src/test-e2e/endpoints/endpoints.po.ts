@@ -1,9 +1,9 @@
-import { protractor, ElementFinder } from 'protractor/built';
-import { E2EHelpers, ConsoleUserType } from '../helpers/e2e-helpers';
-import { browser, element, by, ElementArrayFinder } from 'protractor';
-import { Page } from '../po/page.po';
-import { ListComponent, ListTableComponent } from '../po/list.po';
+import { browser, by, element } from 'protractor';
+import { ElementFinder } from 'protractor/built';
 import { E2EEndpointConfig } from '../e2e.types';
+import { ConsoleUserType, E2EHelpers } from '../helpers/e2e-helpers';
+import { ListComponent, ListTableComponent } from '../po/list.po';
+import { Page } from '../po/page.po';
 import { SnackBarComponent } from '../po/snackbar.po';
 
 export function resetToLoggedIn(stateSetter, isAdmin) {
@@ -80,10 +80,10 @@ export class EndpointsTable extends ListTableComponent {
     // Get all of the columns
     return row.all(by.tagName('app-table-cell')).map(col => col.getText()).then(data => {
       return {
-        name: data[1],
-        connected: data[2] === 'cloud_done',
-        type: data[3],
-        url: data[4]
+        name: data[0],
+        connected: data[1] === 'cloud_done',
+        type: data[2],
+        url: data[3]
       } as EndpointMetadata;
     });
   }

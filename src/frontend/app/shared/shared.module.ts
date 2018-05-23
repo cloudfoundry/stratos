@@ -89,6 +89,9 @@ import { TileGridComponent } from './components/tile/tile-grid/tile-grid.compone
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
+import {
+  UploadProgressIndicatorComponent,
+} from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
@@ -102,7 +105,8 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { UploadProgressIndicatorComponent } from './components/upload-progress-indicator/upload-progress-indicator.component';
+import { UserPermissionDirective } from './user-permission.directive';
+import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 
 @NgModule({
   imports: [
@@ -189,7 +193,8 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserProfileBannerComponent,
-    TableCellRequestMonitorIconComponent
+    TableCellRequestMonitorIconComponent,
+    UserPermissionDirective
   ],
   exports: [
     FormsModule,
@@ -259,7 +264,8 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     GithubCommitAuthorComponent,
     AppActionMonitorComponent,
     CliCommandComponent,
-    AppActionMonitorIconComponent
+    AppActionMonitorIconComponent,
+    UserPermissionDirective
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -275,7 +281,8 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     EntityMonitorFactory,
     PaginationMonitorFactory,
     CloudFoundryService,
-    InternalEventMonitorFactory
+    InternalEventMonitorFactory,
+    ServiceActionHelperService
   ]
 })
 export class SharedModule { }

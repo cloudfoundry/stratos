@@ -1,22 +1,16 @@
-import { E2EHelpers, ConsoleUserType } from '../helpers/e2e-helpers';
-import { browser } from 'protractor';
-import { ResetsHelpers } from '../helpers/reset-helpers';
-import { EndpointsPage, EndpointMetadata, resetToLoggedIn } from './endpoints.po';
 import { ApplicationsPage } from '../applications/applications.po';
-import { SideNavMenuItem } from '../po/side-nav.po';
 import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
-import { ServicesPage } from '../services/services.po';
-import { SnackBarComponent } from '../po/snackbar.po';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
-import { MenuComponent } from '../po/menu.po';
-import { ConnectDialogComponent } from './connect-dialog.po';
-import { FormComponent, FormItemMap } from '../po/form.po';
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { LoginPage } from '../login/login.po';
+import { FormItemMap } from '../po/form.po';
+import { MenuComponent } from '../po/menu.po';
+import { SnackBarComponent } from '../po/snackbar.po';
+import { ServicesPage } from '../services/services.po';
+import { ConnectDialogComponent } from './connect-dialog.po';
+import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
-  const helpers = new E2EHelpers();
-  const secrets = new SecretsHelpers();
-  const resets = new ResetsHelpers();
   const endpointsPage = new EndpointsPage();
   const applications = new ApplicationsPage();
   const services = new ServicesPage();
@@ -25,16 +19,20 @@ describe('Endpoints', () => {
   describe('Connect/Disconnect endpoints -', () => {
 
     beforeAll(() => {
-      resetToLoggedIn(resets.resetAllEndpoints, false);
+      e2e.setup(ConsoleUserType.user)
+      .clearAllEndpoints()
+      .registerDefaultCloudFoundry();
     });
 
     describe('endpoint `Connect` -', () => {
-
-      const toConnect = secrets.getDefaultCFEndpoint();
+      const toConnect = e2e.secrets.getDefaultCFEndpoint();
       const connectDialog = new ConnectDialogComponent();
 
       it('should open the credentials form', () => {
         expect(endpointsPage.isActivePage()).toBeTruthy();
+
+        // Close the snack bar telling us that there are no connected endpoints
+        connectDialog.snackBar.close();
 
         // Get the row in the table for this endpoint
         endpointsPage.table.getRowForEndpoint(toConnect.name).then(row => {
@@ -48,7 +46,6 @@ describe('Endpoints', () => {
             // Connect dialog should be shown
             expect(connectDialog.isPresent()).toBeTruthy();
             expect(connectDialog.isDisplayed()).toBeTruthy();
-
           });
         });
       });
@@ -81,6 +78,7 @@ describe('Endpoints', () => {
         // Wait for snackbar
         connectDialog.snackBar.waitUntilShown();
         endpointsPage.table.getEndpointDataForEndpoint(toConnect.name).then((ep: EndpointMetadata) => {
+          expect(ep).toBeDefined();
           expect(ep.connected).toBeTruthy();
         });
 
@@ -103,7 +101,7 @@ describe('Endpoints', () => {
         endpointsPage.header.logout();
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
-        loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
+        loginPage.login(e2e.secrets.getConsoleAdminUsername(), e2e.secrets.getConsoleAdminPassword());
         loginPage.waitForApplicationPage();
         expect(endpointsPage.isActivePage()).toBeTruthy();
       });
@@ -112,7 +110,7 @@ describe('Endpoints', () => {
         endpointsPage.header.logout();
         const loginPage = new LoginPage();
         loginPage.waitForLogin();
-        loginPage.login(secrets.getConsoleNonAdminUsername(), secrets.getConsoleNonAdminPassword());
+        loginPage.login(e2e.secrets.getConsoleNonAdminUsername(), e2e.secrets.getConsoleNonAdminPassword());
         // loginPage.login(secrets.getConsoleAdminUsername(), secrets.getConsoleAdminPassword());
         loginPage.waitForApplicationPage();
         const appPage = new ApplicationsPage();
@@ -123,7 +121,7 @@ describe('Endpoints', () => {
 
     describe('endpoint `Disconnect` -', () => {
 
-      const toDisconnect = secrets.getDefaultCFEndpoint();
+      const toDisconnect = e2e.secrets.getDefaultCFEndpoint();
 
       it('should update row in table when disconnected', () => {
         endpointsPage.navigateTo();

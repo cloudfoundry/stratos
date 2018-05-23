@@ -31,9 +31,6 @@ export interface VariableTabAllEnvVarType {
 })
 export class VariablesTabComponent implements OnInit {
 
-
-
-
   constructor(
     private store: Store<AppState>,
     private appService: ApplicationService,
