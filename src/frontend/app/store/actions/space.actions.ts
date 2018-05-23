@@ -282,7 +282,6 @@ export class GetServiceInstancesForSpace
     this.options.method = 'get';
     this.options.params = new URLSearchParams();
     if (q) {
-      console.log('Adding once!')
       this.initialParams['q'] = q;
     }
   }
