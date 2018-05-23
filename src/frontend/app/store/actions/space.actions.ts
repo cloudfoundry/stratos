@@ -29,9 +29,9 @@ export const CREATE_SPACE = '[Space] Create';
 export const CREATE_SPACE_SUCCESS = '[Space] Create Success';
 export const CREATE_SPACE_FAILED = '[Space] Create Failed';
 
-export const DELETE_SPACE = '[Space] Create';
-export const DELETE_SPACE_SUCCESS = '[Space] Create Success';
-export const DELETE_SPACE_FAILED = '[Space] Create Failed';
+export const DELETE_SPACE = '[Space] Delete';
+export const DELETE_SPACE_SUCCESS = '[Space] Delete Success';
+export const DELETE_SPACE_FAILED = '[Space] Delete Failed';
 
 export class GetSpace extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(

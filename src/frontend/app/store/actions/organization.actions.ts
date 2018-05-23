@@ -25,6 +25,10 @@ export const GET_ORGANIZATION_SPACES = '[Space] Get all org spaces';
 export const GET_ORGANIZATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
 export const GET_ORGANIZATION_SPACES_FAILED = '[Space] Get all org spaces failed';
 
+export const DELETE_ORGANIZATION = '[Organization] Delete organization';
+export const DELETE_ORGANIZATION_SUCCESS = '[Organization] Delete organization success';
+export const DELETE_ORGANIZATION_FAILED = '[Organization] Delete organization failed';
+
 export class GetOrganization extends CFStartAction implements ICFAction, EntityInlineParentAction {
   constructor(public guid: string,
     public endpointGuid: string,
@@ -114,7 +118,7 @@ export class DeleteOrganization extends CFStartAction implements ICFAction {
     this.options.params.append('recursive', 'true');
     this.options.params.append('async', 'false');
   }
-  actions = getActions('Organizations', 'Delete Org');
+  actions = [DELETE_ORGANIZATION, DELETE_ORGANIZATION_SUCCESS, DELETE_ORGANIZATION_FAILED];
   entity = [entityFactory(organizationSchemaKey)];
   entityKey = organizationSchemaKey;
   options: RequestOptions;
