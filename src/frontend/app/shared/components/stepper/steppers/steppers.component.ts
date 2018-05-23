@@ -137,7 +137,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   setActive(index: number) {
     if (!this.canGoto(index)) {
       if (index === 0) {
-        this.allSteps[index]._onEnter(this.enterData);
+        if (this.allSteps && this.allSteps.length > 0) {
+          this.allSteps[index]._onEnter(this.enterData);
+        }
       }
       return;
     }
