@@ -1,3 +1,14 @@
-<p>
-  service-recent-instances-card works!
-</p>
+<mat-card class="recent-apps-card">
+  <mat-card-header class="recent-apps-card__header">
+    <mat-card-title>Recently updated service instances</mat-card-title>
+    <app-stateful-icon *ngIf="!(serviceInstances$ | async)" [state]="'busy'"></app-stateful-icon>
+  </mat-card-header>
+  <mat-card-content class="recent-apps-card__content" *ngIf="apps$ | async as apps">
+    <div *ngIf="apps.length === 0">
+      There are no applications.
+    </div>
+    <div *ngIf="apps.length > 0" class="recent-apps-card__scroller">
+      <app-compact-app-card *ngFor="let app of apps" [app]="app"></app-compact-app-card>
+    </div>
+  </mat-card-content>
+</mat-card>

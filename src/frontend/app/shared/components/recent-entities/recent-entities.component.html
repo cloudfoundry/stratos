@@ -1,0 +1,14 @@
+<mat-card class="recent-entities-card">
+  <mat-card-header class="recent-entities-card__header">
+    <mat-card-title>Recnetly updated {{ entityName }}</mat-card-title>
+    <app-stateful-icon *ngIf="!(entityList | async)" [state]="'busy'"></app-stateful-icon>
+  </mat-card-header>
+  <mat-card-content class="recent-entities-card__content" *ngIf="entityList | async as entities">
+    <div *ngIf="entities.length === 0">
+      There are no {{ entityName}}.
+    </div>
+    <div *ngIf="entities.length > 0" class="recent-entities-card__scroller">
+      <app-compact-app-card *ngFor="let entity of entities" [app]="entity"></app-compact-app-card>
+    </div>
+  </mat-card-content>
+</mat-card>

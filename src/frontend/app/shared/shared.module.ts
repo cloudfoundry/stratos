@@ -107,6 +107,7 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
 import { ServiceActionHelperService } from './data-services/service-action-helper.service';
+import { RecentEntitiesComponent } from './components/recent-entities/recent-entities.component';
 
 @NgModule({
   imports: [
@@ -194,7 +195,8 @@ import { ServiceActionHelperService } from './data-services/service-action-helpe
     AppActionMonitorIconComponent,
     UserProfileBannerComponent,
     TableCellRequestMonitorIconComponent,
-    UserPermissionDirective
+    UserPermissionDirective,
+    RecentEntitiesComponent
   ],
   exports: [
     FormsModule,
