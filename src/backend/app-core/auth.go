@@ -212,6 +212,11 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string) (*interface
 				Admin:       isAdmin,
 			}
 
+			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
+			if ok {
+				resp.User = cnsiUser
+			}
+
 			return resp, nil
 		}
 	}
@@ -694,7 +699,7 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*interfaces
 }
 
 func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*interfaces.ConnectedUser, *interfaces.TokenRecord, bool) {
-	log.Debug("GetCNSIUser")
+	log.Debug("GetCNSIUserAndToken")
 
 	// get the uaa token record
 	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
@@ -703,6 +708,13 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 		log.Error(msg)
 		return nil, nil, false
 	}
+
+	cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, &cfTokenRecord)
+	return cnsiUser, &cfTokenRecord, ok
+}
+
+func (p *portalProxy) GetCNSIUserFromToken(cnsiGUID string, cfTokenRecord *interfaces.TokenRecord) (*interfaces.ConnectedUser, bool) {
+	log.Debug("GetCNSIUserFromToken")
 
 	var cnsiUser *interfaces.ConnectedUser
 	var scope = []string{}
@@ -718,7 +730,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 		if err != nil {
 			msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
 			log.Errorf(msg, err)
-			return nil, nil, false
+			return nil, false
 		}
 
 		// add the uaa entry to the output
@@ -735,7 +747,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 	if err != nil {
 		msg := "Unable to load CNSI record: %s"
 		log.Errorf(msg, err)
-		return nil, nil, false
+		return nil, false
 	}
 	// TODO should be an extension point
 	if cnsiRecord.CNSIType == "cf" {
@@ -743,7 +755,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 		cnsiUser.Admin = cnsiAdmin
 	}
 
-	return cnsiUser, &cfTokenRecord, true
+	return cnsiUser, true
 }
 
 // Refresh the UAA Token for the user
