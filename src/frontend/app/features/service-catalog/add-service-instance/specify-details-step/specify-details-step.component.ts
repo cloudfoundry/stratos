@@ -1,11 +1,12 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, Input, OnDestroy, OnInit, Component } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, switchMap, tap, take } from 'rxjs/operators';
+import { combineLatest, filter, first, map, switchMap, tap, take, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
@@ -26,13 +27,14 @@ import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
   selectCreateServiceInstanceOrgGuid,
-  selectCreateServiceInstanceServicePlan,
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { getServiceJsonParams } from '../../services-helper';
+import { getServiceJsonParams, isMarketplaceMode } from '../../services-helper';
+import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -63,6 +65,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   selectExistingInstanceForm: FormGroup;
   createNewInstanceForm: FormGroup;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  marketPlaceMode: boolean;
+  cSIHelperService: CreateServiceInstanceHelperService;
+  stepperForm: FormGroup;
+  serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
   allServiceInstanceNames: string[];
@@ -102,37 +108,40 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   constructor(
     private store: Store<AppState>,
-    private cSIHelperService: CreateServiceInstanceHelperService,
+    private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
+    private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar,
+    private csiGuidsService: CsiGuidsService
   ) {
-
     this.setupForms();
+  }
 
-    if (cSIHelperService.isMarketplace()) {
-      this.InitOrgAndSpaceObs();
+  onEnter = () => {
+
+    this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
+
+    this.marketPlaceMode = isMarketplaceMode(this.activatedRoute);
+    if (this.marketPlaceMode) {
+      this.orgs$ = this.cSIHelperService.getOrgsForSelectedServicePlan();
+      this.spaces$ = this.initSpacesObservable();
     }
+    this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
+    this.subscriptions.push(this.setupFormValidatorData());
 
-    this.subscriptions.push(cSIHelperService.isInitialised().pipe(
-      tap(t => {
-
-        this.allServiceInstances$ = Observable.combineLatest(this.cSIHelperService.serviceGuid$, this.cSIHelperService.cfGuid$).pipe(
-          take(1),
-          switchMap(([serviceGuid, cfGuid]) => cSIHelperService.getServiceInstancesForService(null, null, cfGuid))
-        );
-
-        this.subscriptions.push(this.setupFormValidatorData());
-
-        this.serviceInstances$ = this.store.select(selectCreateServiceInstance).pipe(
-          filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
-          switchMap(createServiceInstanceState => cSIHelperService.getServiceInstancesForService(
-            createServiceInstanceState.servicePlanGuid,
-            createServiceInstanceState.spaceGuid,
-            createServiceInstanceState.cfGuid
-          ))
-        );
-      })
-    ).subscribe());
+    this.serviceInstances$ = this.store.select(selectCreateServiceInstance).pipe(
+      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
+      distinctUntilChanged((x, y) => {
+        console.log(`REturning: ${!(x.cfGuid === y.cfGuid && x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid)}`);
+        return !(x.cfGuid === y.cfGuid && x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid);
+      }),
+      tap(o => console.log(`Executing3... ${JSON.stringify(o)}`)),
+      switchMap(guids => this.cSIHelperService.getServiceInstancesForService(
+        guids.servicePlanGuid,
+        guids.spaceGuid,
+        guids.cfGuid
+      ))
+    ).pipe(tap(o => console.log(o)));
   }
 
   resetForms = (mode: FormMode) => {
@@ -149,7 +158,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   private setupFormValidatorData(): Subscription {
     return this.allServiceInstances$.pipe(switchMap(instances => {
-      if (this.cSIHelperService.isMarketplace()) {
+      if (isMarketplaceMode(this.activatedRoute)) {
         return this.createNewInstanceForm.controls.space.statusChanges.pipe(map(c => {
           return instances.filter(s => s.entity.space_guid === this.createNewInstanceForm.controls.space.value);
         }), tap(o => {
@@ -185,7 +194,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
 
   ngOnInit(): void {
-    if (!this.cSIHelperService.isMarketplace()) {
+    if (!isMarketplaceMode(this.activatedRoute)) {
       this.RemoveOrgAndSpaceFields();
     } else {
       this.subscriptions.push(this.cSIHelperService.getSelectedServicePlanAccessibility()
@@ -229,12 +238,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     return this.cSIHelperService.getOrgsForSelectedServicePlan();
   }
 
-
   ngAfterContentInit() {
 
     this.setupValidate();
 
-    if (this.cSIHelperService.isMarketplace()) {
+    if (this.marketPlaceMode) {
       this.subscriptions.push(this.orgs$.pipe(
         filter(p => !!p && p.length > 0),
         tap(o => {
@@ -352,10 +360,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     const name = this.createNewInstanceForm.controls.name.value;
     let spaceGuid = '';
     let cfGuid = '';
-    if (this.cSIHelperService.isMarketplace()) {
-      spaceGuid = this.createNewInstanceForm.controls.space.value;
-    } else {
+    if (!this.marketPlaceMode) {
       spaceGuid = createServiceInstance.spaceGuid;
+    } else {
+      spaceGuid = this.createNewInstanceForm.controls.space.value;
     }
 
     cfGuid = createServiceInstance.cfGuid;

@@ -27,7 +27,6 @@ import {
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import {
-  selectCreateServiceGuid,
   selectCreateServiceInstanceCfGuid,
   selectCreateServiceInstanceServicePlan,
 } from '../../store/selectors/create-service-instance.selectors';

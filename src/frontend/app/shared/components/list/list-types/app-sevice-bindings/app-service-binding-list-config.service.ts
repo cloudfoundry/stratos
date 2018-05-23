@@ -33,9 +33,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
     },
     icon: 'add',
     label: 'Add',
-    description: 'Bind Service Instance',
-    visible: (row: APIResource) => true,
-    enabled: (row: APIResource) => true
+    description: 'Bind Service Instance'
   };
 
   getColumns = () => {

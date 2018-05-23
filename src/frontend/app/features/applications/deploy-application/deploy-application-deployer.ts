@@ -112,7 +112,7 @@ export class DeployApplicationDeployer {
     }
 
     const readyFilter = this.fsFileInfo ? () => true :
-    (appDetail) => !!appDetail.applicationSource && !!appDetail.applicationSource.projectName;
+      (appDetail) => !!appDetail.applicationSource && !!appDetail.applicationSource.projectName;
     this.isOpen = true;
     this.connectSub = this.store.select(selectDeployAppState).pipe(
       filter(appDetail => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
@@ -154,7 +154,7 @@ export class DeployApplicationDeployer {
             filter((log) => log.type === SocketEventTypes.DATA),
             map((log) => log.message)
           );
-          this.msgSub = this.messages.subscribe();
+        this.msgSub = this.messages.subscribe();
       })
     ).subscribe();
   }
@@ -261,7 +261,7 @@ export class DeployApplicationDeployer {
         break;
       case SocketEventTypes.SOURCE_REQUIRED:
         this.inputStream.next(this.sendProjectInfo(this.applicationSource));
-      break;
+        break;
       case SocketEventTypes.EVENT_CLONED:
       case SocketEventTypes.EVENT_FETCHED_MANIFEST:
       case SocketEventTypes.MANIFEST:
@@ -278,7 +278,7 @@ export class DeployApplicationDeployer {
     // Update for the previous file transfer
     if (this.currentFileTransfer) {
       this.fileTransferStatus.bytesSent += this.currentFileTransfer.size;
-      this.fileTransferStatus.filesSent ++;
+      this.fileTransferStatus.filesSent++;
       this.fileTransferStatus$.next(this.fileTransferStatus);
     }
 

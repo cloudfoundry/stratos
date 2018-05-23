@@ -12,12 +12,10 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
-import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
+import { selectCreateServiceInstanceCfGuid } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 import { ServicesWallService } from '../../../services/services/services-wall.service';
-import { CreateServiceInstanceHelperService, Mode } from '../create-service-instance-helper.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
   selector: 'app-select-service',
@@ -32,35 +30,33 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   serviceSubscription: Subscription;
   services$: Observable<APIResource<IService>[]>;
   stepperForm: FormGroup;
-  validate = new BehaviorSubject(false);
+  validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityServiceFactory: EntityServiceFactory,
-    private cSIHelperService: CreateServiceInstanceHelperService,
-    private activatedRoute: ActivatedRoute
+    private csiGuidService: CsiGuidsService,
+    private servicesWallService: ServicesWallService
   ) {
 
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
     });
-    this.services$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.cfGuid),
-      tap((p: CreateServiceInstanceState) => {
-        this.cfGuid = p.cfGuid;
-      }),
-      switchMap(p => {
-        return this.cSIHelperService.getServicesForSpace(p.spaceGuid, p.cfGuid);
-      })
+
+    this.services$ = this.store.select(selectCreateServiceInstanceCfGuid).pipe(
+      filter(p => !!p),
+      tap(cfGuid => this.cfGuid = cfGuid),
+      switchMap(cfGuid => servicesWallService.getServicesInCf(cfGuid)),
+      filter(p => !!p),
     );
   }
 
   onNext = () => {
     const serviceGuid = this.stepperForm.controls.service.value;
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
-    const appId = getIdFromRoute(this.activatedRoute, 'id');
-    this.cSIHelperService.initService(this.cfGuid, serviceGuid, appId ? Mode.APPSERVICE : Mode.DEFAULT);
+    this.csiGuidService.serviceGuid = serviceGuid;
+    this.csiGuidService.cfGuid = this.cfGuid;
     return Observable.of({ success: true });
   }
 

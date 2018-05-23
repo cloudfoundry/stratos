@@ -131,11 +131,16 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       map(([path, params]) => {
         this.store.dispatch(new RouterNav({ path: path, query: params }));
       })
-      );
+    );
   }
 
   setActive(index: number) {
     if (!this.canGoto(index)) {
+      if (index === 0) {
+        if (this.allSteps && this.allSteps.length > 0) {
+          this.allSteps[index]._onEnter(this.enterData);
+        }
+      }
       return;
     }
     // We do allow next beyond the last step to

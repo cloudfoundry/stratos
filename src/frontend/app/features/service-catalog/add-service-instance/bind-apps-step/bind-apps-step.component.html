@@ -1,5 +1,8 @@
-<b>{{guideText}}</b>
-<div class="bind-apps">
+<div *ngIf="!haveApps">
+  There are no apps available in the selected Space and Organization
+</div>
+<div class="bind-apps" *ngIf="haveApps">
+  <b>{{guideText}}</b>
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
       <mat-select class="form-control" placeholder="App" formControlName="apps">
