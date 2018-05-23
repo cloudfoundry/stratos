@@ -6,6 +6,7 @@ export interface INewlyConnectedEndpointInfo {
   admin: boolean;
   api_endpoint: IApiEndpointInfo;
   token_expiry: number;
+  user: EndpointUser;
 }
 
 export const endpointStoreNames: {
