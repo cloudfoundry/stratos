@@ -6,6 +6,7 @@ import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoi
 import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { SelectServiceComponent } from './select-service.component';
+import { CsiGuidsService } from '../csi-guids.service';
 
 describe('SelectServiceComponent', () => {
   let component: SelectServiceComponent;
@@ -19,7 +20,8 @@ describe('SelectServiceComponent', () => {
         PaginationMonitorFactory,
         ServicesWallService,
         EntityServiceFactory,
-        CreateServiceInstanceHelperService
+        CreateServiceInstanceHelperService,
+        CsiGuidsService
       ]
     })
       .compileComponents();
