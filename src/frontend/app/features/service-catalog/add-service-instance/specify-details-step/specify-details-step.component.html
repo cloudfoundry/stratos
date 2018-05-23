@@ -1,4 +1,4 @@
-<div class="specify-details">
+<div class="specify-details" *ngIf="initialised">
   <div *ngIf="showModeSelection">
     <b>Create a new service instance or bind an existing one.</b>
     <div>
@@ -42,11 +42,12 @@
       </mat-error>
     </mat-form-field>
   </form>
+  <form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'" [formGroup]="selectExistingInstanceForm">
+    <mat-form-field>
+      <mat-select class="form-control" placeholder="Service Instance" required formControlName="serviceInstances">
+        <mat-option *ngFor="let sI of serviceInstances$ | async" [value]="sI.metadata.guid">{{ sI.entity.name }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </form>
 </div>
-<form class="stepper-form" *ngIf="showModeSelection && formMode === 'bind-service-instance'" [formGroup]="selectExistingInstanceForm">
-  <mat-form-field>
-    <mat-select class="form-control" placeholder="Service Instance" required formControlName="serviceInstances">
-      <mat-option *ngFor="let serviceInstance of serviceInstances$ | async" [value]="serviceInstance.metadata.guid">{{ serviceInstance.entity.name }}</mat-option>
-    </mat-select>
-  </mat-form-field>
-</form>

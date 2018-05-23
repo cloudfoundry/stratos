@@ -6,8 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, switchMap, tap, take, distinctUntilChanged } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { combineLatest, filter, first, map, switchMap, tap, take, distinctUntilChanged, publishReplay, refCount, share } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
@@ -35,6 +34,7 @@ import { getServiceJsonParams, isMarketplaceMode } from '../../services-helper';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
+import { Subscription } from 'rxjs/Subscription';
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -47,6 +47,7 @@ const enum FormMode {
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterContentInit {
 
+  selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
     {
       label: 'Create Service Instance',
@@ -83,6 +84,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   orgs$: Observable<APIResource<IOrganization>[]>;
   bindExistingInstance = false;
   subscriptions: Subscription[] = [];
+  initialised = false;
 
   static isValidJsonValidatorFn = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
@@ -115,12 +117,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     private csiGuidsService: CsiGuidsService
   ) {
     this.setupForms();
+
+    this.selectCreateInstance$ = this.store.select(selectCreateServiceInstance).pipe(
+      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
+      share(),
+    );
+
   }
 
   onEnter = () => {
 
     this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
-
     this.marketPlaceMode = isMarketplaceMode(this.activatedRoute);
     if (this.marketPlaceMode) {
       this.orgs$ = this.cSIHelperService.getOrgsForSelectedServicePlan();
@@ -128,20 +135,20 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     }
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     this.subscriptions.push(this.setupFormValidatorData());
-
-    this.serviceInstances$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
+    this.serviceInstances$ = this.selectCreateInstance$.pipe(
       distinctUntilChanged((x, y) => {
-        console.log(`REturning: ${!(x.cfGuid === y.cfGuid && x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid)}`);
         return !(x.cfGuid === y.cfGuid && x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid);
       }),
-      tap(o => console.log(`Executing3... ${JSON.stringify(o)}`)),
       switchMap(guids => this.cSIHelperService.getServiceInstancesForService(
         guids.servicePlanGuid,
         guids.spaceGuid,
         guids.cfGuid
-      ))
-    ).pipe(tap(o => console.log(o)));
+      )),
+      publishReplay(1),
+      refCount(),
+    );
+    this.initialised = true;
+
   }
 
   resetForms = (mode: FormMode) => {

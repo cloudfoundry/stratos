@@ -100,7 +100,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
 
     this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p),
+      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
       switchMap(createServiceInstance => {
         const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstance.spaceGuid);
         return getPaginationObservables<APIResource<IApp>>({
