@@ -35,12 +35,17 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
         routes = routes.map(route => {
           let newRoute = route;
           if (!route.entity.isTCPRoute || !route.entity.mappedAppsCount) {
+            const apps = route.entity.apps;
+            const foundApp = !!apps && (apps.findIndex(a => a.metadata.guid === appService.appGuid) >= 0);
+            const mappedAppsCount = foundApp ? Number.MAX_SAFE_INTEGER : getMappedApps(route).length;
+            const mappedAppsCountLabel = foundApp ? `Already attached` : mappedAppsCount;
             newRoute = {
               ...route,
               entity: {
                 ...route.entity,
                 isTCPRoute: isTCPRoute(route),
-                mappedAppsCount: getMappedApps(route).length
+                mappedAppsCount,
+                mappedAppsCountLabel
               }
             };
           }

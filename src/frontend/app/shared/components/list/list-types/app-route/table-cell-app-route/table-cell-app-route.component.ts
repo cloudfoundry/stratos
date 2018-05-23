@@ -9,22 +9,4 @@ import { TableCellCustom } from '../../../list.types';
   templateUrl: './table-cell-app-route.component.html',
   styleUrls: ['./table-cell-app-route.component.scss']
 })
-export class TableCellAppRouteComponent<T> extends TableCellCustom<T>
-  implements OnInit {
-  @Input('row') row;
-
-  mappedAppsCount: any;
-  constructor(private appService: ApplicationService) {
-    super();
-  }
-
-  ngOnInit(): void {
-    const apps = this.row.entity.apps;
-    this.mappedAppsCount = this.row.entity.mappedAppsCount;
-    const foundApp =
-      apps && apps.find(a => a.metadata.guid === this.appService.appGuid);
-    if (foundApp && foundApp.length !== 0) {
-      this.mappedAppsCount = `Already attached`;
-    }
-  }
-}
+export class TableCellAppRouteComponent<T> extends TableCellCustom<T> { }
