@@ -1,6 +1,13 @@
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
 
+export interface INewlyConnectedEndpointInfo {
+  account: string;
+  admin: boolean;
+  api_endpoint: IApiEndpointInfo;
+  token_expiry: number;
+}
+
 export const endpointStoreNames: {
   section: TRequestTypeKeys,
   type: string
@@ -8,19 +15,21 @@ export const endpointStoreNames: {
     section: RequestSectionKeys.Other,
     type: endpointSchemaKey
   };
+
+export interface IApiEndpointInfo {
+  ForceQuery: boolean;
+  Fragment: string;
+  Host: string;
+  Opaque: string;
+  Path: string;
+  RawPath: string;
+  RawQuery: string;
+  Scheme: string;
+  User: object;
+}
 export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
 export interface EndpointModel {
-  api_endpoint?: {
-    ForceQuery: boolean,
-    Fragment: string,
-    Host: string,
-    Opaque: string,
-    Path: string,
-    RawPath: string,
-    RawQuery: string,
-    Scheme: string,
-    User: object
-  };
+  api_endpoint?: IApiEndpointInfo;
   authorization_endpoint?: string;
   cnsi_type?: EndpointType;
   doppler_logging_endpoint?: string;

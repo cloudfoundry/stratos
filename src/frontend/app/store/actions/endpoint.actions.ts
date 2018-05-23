@@ -2,7 +2,7 @@ import { Action } from '@ngrx/store';
 
 import { endpointSchemaKey } from '../helpers/entity-factory';
 import { PaginatedAction } from '../types/pagination.types';
-import { EndpointType } from '../types/endpoint.types';
+import { EndpointType, EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
 
 export const GET_ENDPOINTS = '[Endpoints] Get all';
 export const GET_ENDPOINTS_START = '[Endpoints] Get all start';
@@ -25,6 +25,15 @@ export const REGISTER_ENDPOINTS_FAILED = '[Endpoints] Register failed';
 export const UNREGISTER_ENDPOINTS = '[Endpoints] Unregister';
 export const UNREGISTER_ENDPOINTS_SUCCESS = '[Endpoints] Unregister succeed';
 export const UNREGISTER_ENDPOINTS_FAILED = '[Endpoints] Unregister failed';
+
+export class EndpointActionComplete implements Action {
+  constructor(
+    public type: string,
+    public guid: string,
+    public endpointType: EndpointType,
+    public endpoint: EndpointModel | INewlyConnectedEndpointInfo
+  ) { }
+}
 
 export class EndpointAction implements Action {
   type: string;
