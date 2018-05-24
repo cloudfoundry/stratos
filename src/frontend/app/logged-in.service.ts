@@ -1,5 +1,5 @@
 import { HostListener, Inject, Injectable, NgZone } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
+import { DOCUMENT } from '@angular/common';
 import { Subscription } from 'rxjs/Rx';
 import { Store } from '@ngrx/store';
 import { AppState } from './store/app-state';
@@ -80,11 +80,11 @@ export class LoggedInService {
     this.ngZone.runOutsideAngular(() => {
       this._sessionChecker = interval(this._checkSessionInterval)
         .pipe(
-        tap(() => {
-          this.ngZone.run(() => {
-            this._checkSession();
-          });
-        })
+          tap(() => {
+            this.ngZone.run(() => {
+              this._checkSession();
+            });
+          })
         ).subscribe();
     });
   }
