@@ -9,7 +9,7 @@ import { RowState } from '../../data-sources-controllers/list-data-source-types'
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
 import { combineLatest } from 'rxjs/observable/combineLatest';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Component({
   selector: 'app-table-cell-actions',
