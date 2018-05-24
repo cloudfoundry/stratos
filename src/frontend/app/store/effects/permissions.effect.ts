@@ -84,7 +84,7 @@ export class PermissionsEffects {
   @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS).pipe(
     switchMap(action => {
       const endpoint = action.endpoint as INewlyConnectedEndpointInfo;
-      if (endpoint.user.admin) {
+      if (endpoint.user.admin || action.endpointType !== 'cf') {
         return [];
       }
       return combineLatest(this.getRequests([{
