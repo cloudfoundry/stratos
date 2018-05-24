@@ -108,6 +108,13 @@ import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
 import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 import { RecentEntitiesComponent } from './components/recent-entities/recent-entities.component';
+import { CardServiceRecentInstancesComponent } from './components/cards/card-service-recent-instances/card-service-recent-instances.component';
+import { ServiceBrokerCardComponent } from './components/cards/service-broker-card/service-broker-card.component';
+import {
+  ServiceRecentInstancesCardComponent,
+} from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
+import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
+import { CompactServiceInstanceCardComponent } from './components/cards/compact-service-instance-card/compact-service-instance-card.component';
 
 @NgModule({
   imports: [
@@ -196,7 +203,12 @@ import { RecentEntitiesComponent } from './components/recent-entities/recent-ent
     UserProfileBannerComponent,
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
-    RecentEntitiesComponent
+    RecentEntitiesComponent,
+    CardServiceRecentInstancesComponent,
+    ServiceSummaryCardComponent,
+    ServiceBrokerCardComponent,
+    ServiceRecentInstancesCardComponent,
+    CompactServiceInstanceCardComponent,
   ],
   exports: [
     FormsModule,
@@ -268,7 +280,11 @@ import { RecentEntitiesComponent } from './components/recent-entities/recent-ent
     CliCommandComponent,
     AppActionMonitorIconComponent,
     UserPermissionDirective,
-    BooleanIndicatorComponent
+    BooleanIndicatorComponent,
+    ServiceSummaryCardComponent,
+    ServiceBrokerCardComponent,
+    ServiceRecentInstancesCardComponent,
+    CompactServiceInstanceCardComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

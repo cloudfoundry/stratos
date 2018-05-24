@@ -12,11 +12,6 @@ import { ServiceCatalogPageComponent } from './service-catalog-page/service-cata
 import { ServiceCatalogRoutingModule } from './service-catalog.routing';
 import { ServiceInstancesComponent } from './service-instances/service-instances.component';
 import { ServicePlansComponent } from './service-plans/service-plans.component';
-import { ServiceBrokerCardComponent } from './service-summary/service-broker-card/service-broker-card.component';
-import {
-  ServiceRecentInstancesCardComponent,
-} from './service-summary/service-recent-instances-card/service-recent-instances-card.component';
-import { ServiceSummaryCardComponent } from './service-summary/service-summary-card/service-summary-card.component';
 import { ServiceSummaryComponent } from './service-summary/service-summary.component';
 import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
 
@@ -38,9 +33,7 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     ServicePlansComponent,
     ServiceTabsBaseComponent,
     ServiceSummaryComponent,
-    ServiceSummaryCardComponent,
-    ServiceBrokerCardComponent,
-    ServiceRecentInstancesCardComponent,
+
   ]
 })
 export class ServiceCatalogModule { }

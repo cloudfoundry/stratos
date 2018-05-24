@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { ServicesService } from '../../services.service';
 import { Observable } from 'rxjs/Observable';
 import { APIResource } from '../../../../store/types/api.types';
 import { IService } from '../../../../core/cf-api-svc.types';
 import { AppChip } from '../../../../shared/components/chips/chips.component';
 import { ServiceTag } from '../../../../shared/components/list/list-types/cf-services/cf-service-card/cf-service-card.component';
 import { map, tap } from 'rxjs/operators';
+import { ServicesService } from '../../../../features/service-catalog/services.service';
 
 @Component({
   selector: 'app-service-summary-card',

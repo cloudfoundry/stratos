@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store/store';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap, tap } from 'rxjs/operators';
 
-import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
+import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility, IServiceInstance } from '../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -23,6 +23,7 @@ import {
   serviceSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
+  serviceInstancesSchemaKey,
 } from '../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -30,6 +31,7 @@ import { selectCreateServiceInstanceServicePlan } from '../../store/selectors/cr
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { GetServiceInstance, GetServiceInstances } from '../../store/actions/service-instances.actions';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -41,6 +43,8 @@ export interface ServicePlanAccessibility {
 
 @Injectable()
 export class ServicesService {
+  allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   serviceBrokers$: Observable<APIResource<IServiceBroker>[]>;
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -94,9 +98,14 @@ export class ServicesService {
       map(([brokers, service]) => brokers.filter(broker => broker.metadata.guid === service.entity.service_broker_guid)),
       map(o => o[0])
     );
+
+    this.allServiceInstances$ = this.getServiceInstances();
+    this.serviceInstances$ = this.allServiceInstances$.pipe(
+      map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))
+    );
   }
 
-  getServicePlanVisibilities = () => {
+  private getServicePlanVisibilities = () => {
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, this.cfGuid);
     return getPaginationObservables<APIResource<IServicePlanVisibility>>(
       {
@@ -110,8 +119,22 @@ export class ServicesService {
       true
     ).entities$;
   }
+  private getServiceInstances = () => {
+    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.cfGuid);
+    return getPaginationObservables<APIResource<IServiceInstance>>(
+      {
+        store: this.store,
+        action: new GetServiceInstances(this.cfGuid, paginationKey),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          paginationKey,
+          entityFactory(serviceInstancesSchemaKey)
+        )
+      },
+      true
+    ).entities$;
+  }
 
-  getServiceBrokers = () => {
+  private getServiceBrokers = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceBrokerSchemaKey, this.cfGuid);
     return getPaginationObservables<APIResource<IServiceBroker>>(
       {
