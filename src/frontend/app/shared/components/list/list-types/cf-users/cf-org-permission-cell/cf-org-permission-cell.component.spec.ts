@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TableCellCfUserPermissionComponent } from './cf-user-permission-cell.component';
+import { CfOrgPermissionCellComponent } from './cf-org-permission-cell.component';
 import {
   BaseTestModules,
   generateTestCfEndpointServiceProvider
@@ -9,8 +9,8 @@ import { SharedModule } from '../../../../../shared.module';
 import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
 
 describe('CfUserPermissionCellComponent', () => {
-  let component: TableCellCfUserPermissionComponent;
-  let fixture: ComponentFixture<TableCellCfUserPermissionComponent>;
+  let component: CfOrgPermissionCellComponent;
+  let fixture: ComponentFixture<CfOrgPermissionCellComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -26,7 +26,7 @@ describe('CfUserPermissionCellComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableCellCfUserPermissionComponent);
+    fixture = TestBed.createComponent(CfOrgPermissionCellComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

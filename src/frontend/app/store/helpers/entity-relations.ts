@@ -289,7 +289,7 @@ function handleRelation(config: HandleRelationsConfig): ValidateEntityResult[] {
         action: new UpdateCfAction({
           ...config.action,
           updatingKey: `AssociatedChildAt:${new Date()}`
-        }, '')
+        }, false, '')
       };
       results = [].concat(results, connectEntityWithParent, notifyParentListenersOfChange);
     }

@@ -189,7 +189,6 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     public config: ListConfig<T>
   ) { }
 
-
   ngOnInit() {
     if (this.config.getInitialised) {
       this.initialised$ = this.config.getInitialised().pipe(
@@ -202,8 +201,8 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       this.initialise();
       this.initialised$ = Observable.of(true);
     }
-
   }
+
 
   private initialise() {
     this.globalActions = this.setupActionsDefaultObservables(
@@ -372,7 +371,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     const haveMultiActions = combineLatest(visibles$).pipe(
       map(visibles => visibles.some(visible => visible)),
       tap(allowSelection => {
-        this.haveMultiActions.next(allowSelection && this.config.allowSelection);
+        this.haveMultiActions.next(allowSelection);
       })
     );
 
@@ -422,7 +421,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         })
       );
 
-    const canShowLoading$ = this.dataSource.pagination$.pipe(
+    const canShowLoading$ = this.dataSource.isLoadingPage$.pipe(
+      distinctUntilChanged((previousVal, newVal) => !previousVal && newVal),
+      withLatestFrom(this.dataSource.pagination$),
+      map(([loading, page]) => page),
       map(pag => pag.currentPage),
       pairwise(),
       map(([oldPage, newPage]) => oldPage !== newPage),
@@ -459,8 +461,12 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     if (this.filterWidgetToStore) {
       this.filterWidgetToStore.unsubscribe();
     }
-    this.uberSub.unsubscribe();
-    this.dataSource.destroy();
+    if (this.uberSub) {
+      this.uberSub.unsubscribe();
+    }
+    if (this.dataSource) {
+      this.dataSource.destroy();
+    }
   }
 
   private getDefaultListView(config: IListConfig<T>) {
