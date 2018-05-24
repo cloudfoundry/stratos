@@ -36,6 +36,14 @@ import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-u
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
+import {
+  CompactServiceInstanceCardComponent,
+} from './components/cards/compact-service-instance-card/compact-service-instance-card.component';
+import { ServiceBrokerCardComponent } from './components/cards/service-broker-card/service-broker-card.component';
+import {
+  ServiceRecentInstancesCardComponent,
+} from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
+import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
@@ -78,6 +86,7 @@ import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
+import { RecentEntitiesComponent } from './components/recent-entities/recent-entities.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
@@ -97,6 +106,7 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
+import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
@@ -106,15 +116,6 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
-import { ServiceActionHelperService } from './data-services/service-action-helper.service';
-import { RecentEntitiesComponent } from './components/recent-entities/recent-entities.component';
-import { CardServiceRecentInstancesComponent } from './components/cards/card-service-recent-instances/card-service-recent-instances.component';
-import { ServiceBrokerCardComponent } from './components/cards/service-broker-card/service-broker-card.component';
-import {
-  ServiceRecentInstancesCardComponent,
-} from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
-import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
-import { CompactServiceInstanceCardComponent } from './components/cards/compact-service-instance-card/compact-service-instance-card.component';
 
 @NgModule({
   imports: [
@@ -204,7 +205,6 @@ import { CompactServiceInstanceCardComponent } from './components/cards/compact-
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
     RecentEntitiesComponent,
-    CardServiceRecentInstancesComponent,
     ServiceSummaryCardComponent,
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
