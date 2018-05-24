@@ -3,7 +3,6 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { CurrentUserPermissions } from '../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
-import { distinctUntilChanged, startWith } from 'rxjs/operators';
 
 @Directive({
   selector: '[appUserPermission]'
@@ -36,10 +35,6 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
       this.appUserPermissionEndpointGuid,
       this.getOrgOrSpaceGuid(),
       this.getSpaceGuid()
-    ).pipe(
-      // Ensure we don't create multiple instances if true is emitted multiple times
-      distinctUntilChanged(),
-      startWith(false)
     ).subscribe(
       can => {
         if (can) {
