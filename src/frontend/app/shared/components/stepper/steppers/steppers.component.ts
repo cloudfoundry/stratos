@@ -36,10 +36,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
   @Input('cancel') cancel = null;
+  @Input('nextButtonProgress') nextButtonProgress = true;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
-  nextStepProgress = false;
+  showNextButtonProgress = false;
 
   hiddenSubs: Subscription[] = [];
 
@@ -101,12 +102,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
-      this.nextStepProgress = true;
+      this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false }))
         .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
-          this.nextStepProgress = false;
+          this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
           this.enterData = data;
