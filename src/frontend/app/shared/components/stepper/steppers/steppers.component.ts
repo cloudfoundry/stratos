@@ -19,6 +19,7 @@ import { AppState } from '../../../../store/app-state';
 import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
+import { LoggerService } from '../../../../core/logger.service';
 
 
 @Component({
@@ -56,6 +57,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     private steppersService: SteppersService,
     private store: Store<AppState>,
     private snackBar: MatSnackBar,
+    private logger: LoggerService,
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
@@ -105,7 +107,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$
         .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false }))
+        .catch(err => {
+          this.logger.warn('Stepper failed: ', err);
+          return Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false });
+        })
         .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
           this.showNextButtonProgress = false;
           step.error = !success;
