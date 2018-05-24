@@ -1,7 +1,7 @@
 <app-meta-card class="service-card" [clickAction]="goToServiceInstances">
   <app-meta-card-title>
     <div class="service-card__title">
-      <div class="service-card__title__link">{{ servicesService.getServiceName() }}</div>
+      <div class="service-card__title__link">{{ getDisplayName() }}</div>
       <app-service-icon [service]="row"></app-service-icon>
     </div>
   </app-meta-card-title>

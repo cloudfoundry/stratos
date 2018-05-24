@@ -6,6 +6,7 @@ import { MetadataCardTestComponents, BaseTestModulesNoShared } from '../../../..
 import { BooleanIndicatorComponent } from '../../boolean-indicator/boolean-indicator.component';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
+import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 
 describe('ServiceBrokerCardComponent', () => {
   let component: ServiceBrokerCardComponent;
@@ -23,6 +24,7 @@ describe('ServiceBrokerCardComponent', () => {
       ],
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },
+        EntityMonitorFactory
       ]
     })
       .compileComponents();

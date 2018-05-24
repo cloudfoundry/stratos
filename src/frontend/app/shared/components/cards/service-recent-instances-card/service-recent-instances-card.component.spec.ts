@@ -6,6 +6,7 @@ import { StatefulIconComponent } from '../../stateful-icon/stateful-icon.compone
 import { CompactServiceInstanceCardComponent } from '../compact-service-instance-card/compact-service-instance-card.component';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
 import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
+import { AppChipsComponent } from '../../chips/chips.component';
 
 describe('ServiceRecentInstancesCardComponent', () => {
   let component: ServiceRecentInstancesCardComponent;
@@ -18,6 +19,7 @@ describe('ServiceRecentInstancesCardComponent', () => {
         MetadataCardTestComponents,
         StatefulIconComponent,
         CompactServiceInstanceCardComponent,
+        AppChipsComponent
 
       ],
       imports: [BaseTestModulesNoShared],
