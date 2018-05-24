@@ -8,6 +8,7 @@ import {
   QueryList,
   ViewEncapsulation,
 } from '@angular/core';
+import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { first, map } from 'rxjs/operators';
@@ -38,6 +39,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
+  nextStepProgress = false;
 
   hiddenSubs: Subscription[] = [];
 
@@ -51,7 +53,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }>;
   constructor(
     private steppersService: SteppersService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private snackBar: MatSnackBar,
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
@@ -98,10 +101,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
+      this.nextStepProgress = true;
       this.nextSub = obs$
         .first()
         .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false }))
         .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
+          this.nextStepProgress = false;
           step.error = !success;
           step.busy = false;
           this.enterData = data;
@@ -112,6 +117,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             } else {
               this.setActive(this.currentIndex + 1);
             }
+          } else if (!success && message) {
+            this.snackBar.open(message, 'Dismiss');
           }
           return [];
         }).subscribe();
