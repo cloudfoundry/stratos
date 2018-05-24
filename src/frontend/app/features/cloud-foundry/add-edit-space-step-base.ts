@@ -18,20 +18,20 @@ import { ValidatorFn, AbstractControl } from '@angular/forms';
 import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
 import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 
 export class AddEditSpaceStepBase {
-  submitSubscription: Subscription;
   fetchSpacesSubscription: Subscription;
   orgGuid: string;
   cfGuid: string;
   allSpacesInOrg: string[];
-  allSpacesInSpace$: Observable<string[]>;
+  allSpacesInOrg$: Observable<string[]>;
   validate: (spaceName: string) => boolean;
   constructor(
     protected store: Store<AppState>,
     protected activatedRoute: ActivatedRoute,
     protected paginationMonitorFactory: PaginationMonitorFactory,
-    protected snackBar: MatSnackBar,
+    // protected snackBar: MatSnackBar,// TODO: RC search and remove not needed
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
@@ -40,7 +40,7 @@ export class AddEditSpaceStepBase {
 
     const action = new GetAllOrganizationSpaces(paginationKey, this.orgGuid, this.cfGuid);
 
-    this.allSpacesInSpace$ = getPaginationObservables<APIResource>(
+    this.allSpacesInOrg$ = getPaginationObservables<APIResource>(
       {
         store: this.store,
         action,
@@ -55,21 +55,13 @@ export class AddEditSpaceStepBase {
       map(o => o.map(org => org.entity.name)),
       tap((o) => this.allSpacesInOrg = o)
     );
-    this.fetchSpacesSubscription = this.allSpacesInSpace$.subscribe();
+    this.fetchSpacesSubscription = this.allSpacesInOrg$.subscribe();
 
   }
 
   destroy(): void {
     this.fetchSpacesSubscription.unsubscribe();
-    if (this.submitSubscription) {
-      this.submitSubscription.unsubscribe();
-    }
   }
-
-  displaySnackBar = (message: string) => this.snackBar.open(
-    message,
-    'Dismiss'
-  )
 
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): { [key: string]: any } => {
@@ -78,16 +70,12 @@ export class AddEditSpaceStepBase {
     };
   }
 
-  protected map(path: string[], errorMessage: string): (source: Observable<RequestInfoState>) => Observable<void> {
-    return map(o => {
-      if (o.error) {
-        this.displaySnackBar(errorMessage);
-      } else {
-        this.store.dispatch(new RouterNav({
-          path: path
-        }));
-      }
-    });
+  protected map(errorMessage: string):
+    (source: Observable<{ error: boolean, message: string }>) => Observable<StepOnNextResult> {
+    return map(o => ({
+      success: !o.error,
+      redirect: !o.error,
+      message: o.error ? errorMessage + o.message : ''
+    }));
   }
-
 }
