@@ -38,6 +38,12 @@ import {
 import { TableCellAppNameComponent } from '../../list-types/app/table-cell-app-name/table-cell-app-name.component';
 import { TableCellAppStatusComponent } from '../../list-types/app/table-cell-app-status/table-cell-app-status.component';
 import {
+  TableCellConfirmOrgSpaceComponent,
+} from '../../list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
+import {
+  TableCellConfirmRoleAddRemComponent,
+} from '../../list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import {
   TableCellFeatureFlagStateComponent,
 } from '../../list-types/cf-feature-flags/table-cell-feature-flag-state/table-cell-feature-flag-state.component';
 import {
@@ -56,11 +62,17 @@ import {
   TableCellServicePlanComponent,
 } from '../../list-types/cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import {
+  TableCellRoleOrgSpaceComponent,
+} from '../../list-types/cf-users-org-space-roles/table-cell-org-space-role/table-cell-org-space-role.component';
+import {
+  TableCellSelectOrgComponent,
+} from '../../list-types/cf-users-org-space-roles/table-cell-select-org/table-cell-select-org.component';
+import {
+  CfOrgPermissionCellComponent,
+} from '../../list-types/cf-users/cf-org-permission-cell/cf-org-permission-cell.component';
+import {
   CfSpacePermissionCellComponent,
 } from '../../list-types/cf-users/cf-space-permission-cell/cf-space-permission-cell.component';
-import {
-  TableCellCfUserPermissionComponent,
-} from '../../list-types/cf-users/cf-user-permission-cell/cf-user-permission-cell.component';
 import {
   TableCellEndpointNameComponent,
 } from '../../list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
@@ -81,6 +93,8 @@ import {
 import { TableCellSelectComponent } from '../table-cell-select/table-cell-select.component';
 import { TableHeaderSelectComponent } from '../table-header-select/table-header-select.component';
 import { ICellDefinition } from '../table.types';
+
+
 /* tslint:enable:max-line-length */
 export const listTableCells = [
   TableCellDefaultComponent,
@@ -108,9 +122,14 @@ export const listTableCells = [
   TableCellServicePlanComponent,
   TableCellServiceNameComponent,
   TableCellRouteAppsAttachedComponent,
-  TableCellCfUserPermissionComponent,
+  CfOrgPermissionCellComponent,
   CfSpacePermissionCellComponent,
   TableCellFeatureFlagStateComponent,
+  TableCellConfirmOrgSpaceComponent,
+  TableCellRequestMonitorIconComponent,
+  TableCellConfirmRoleAddRemComponent,
+  TableCellRoleOrgSpaceComponent,
+  TableCellSelectOrgComponent,
   TableCellCommitAuthorComponent,
   TableCellRequestMonitorIconComponent
 ];
