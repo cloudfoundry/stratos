@@ -24,6 +24,6 @@
   <!-- TODO add link! -->
   <app-meta-card-item *ngIf="(serviceBroker$ | async)?.entity.space_guid">
     <app-meta-card-key>Space</app-meta-card-key>
-    <app-meta-card-value>{{(serviceBroker$ | async)?.entity.space_guid }} </app-meta-card-value>
+    <app-meta-card-value><a [routerLink]="spaceLink$ | async">{{(serviceBroker$ | async)?.entity.space_guid }}</a> </app-meta-card-value>
   </app-meta-card-item>
 </app-meta-card>

@@ -36,7 +36,6 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
     });
   }
 
-  // TODO update
   getDisplayName() {
     if (this.extraInfo && this.extraInfo.displayName) {
       return this.extraInfo.displayName;
