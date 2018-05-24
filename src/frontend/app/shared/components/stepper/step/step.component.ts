@@ -1,7 +1,6 @@
 import 'rxjs/add/observable/of';
 
-import { Component, Input, OnInit, TemplateRef, ViewChild, Output, EventEmitter } from '@angular/core';
-import { ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
 export interface IStepperStep {
@@ -10,15 +9,17 @@ export interface IStepperStep {
   onEnter?: (data?: any) => void;
 }
 
-export type StepOnNextFunction = () => Observable<{
-  success: boolean,
-  message?: string,
+export interface StepOnNextResult {
+  success: boolean;
+  message?: string;
   // Should we redirect to the store previous state?
-  redirect?: boolean,
+  redirect?: boolean;
   // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
-  ignoreSuccess?: boolean,
-  data?: any,
-}>;
+  ignoreSuccess?: boolean;
+  data?: any;
+}
+
+export type StepOnNextFunction = () => Observable<StepOnNextResult>;
 
 @Component({
   selector: 'app-step',
