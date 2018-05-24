@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -8,9 +8,9 @@ import { filter, map, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { CreateOrganization } from '../../../../store/actions/organization.actions';
-import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -75,35 +75,21 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   validate = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
 
-  submit = () => {
+  submit: StepOnNextFunction = () => {
     const orgName = this.addOrg.value['orgName'];
     this.store.dispatch(new CreateOrganization(orgName, this.cfGuid));
 
-    this.submitSubscription = this.store.select(selectRequestInfo(organizationSchemaKey, orgName)).pipe(
-      filter(o => !!o && !o.creating),
-      map(o => {
-        if (o.error) {
-          this.displaySnackBar();
-        } else {
-          this.store.dispatch(
-            new RouterNav({
-              path: ['/cloud-foundry', this.cfGuid, 'organizations']
-            })
-          );
-        }
-      })
-    ).subscribe();
-    return Observable.of({ success: true });
+    return this.store.select(selectRequestInfo(organizationSchemaKey, orgName)).pipe(
+      filter(requestInfo => !!requestInfo && !requestInfo.creating),
+      map(requestInfo => ({
+        success: !requestInfo.error,
+        redirect: !requestInfo.error,
+        message: requestInfo.error ? `Failed to create organization: ${requestInfo.message}` : ''
+      }))
+    );
   }
 
-  displaySnackBar = () => this.snackBar.open(
-    'Failed to create organization! Please select a different name and try again!',
-    'Dismiss'
-  )
   ngOnDestroy() {
     this.orgSubscription.unsubscribe();
-    if (this.submitSubscription) {
-      this.submitSubscription.unsubscribe();
-    }
   }
 }

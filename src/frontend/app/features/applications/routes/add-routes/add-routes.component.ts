@@ -224,10 +224,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid,
             createEntityRelationKey(applicationSchemaKey, domainSchemaKey)
           ));
-          this.store.dispatch(new RouterNav({
-            path: ['applications', this.cfGuid, this.appGuid, 'routes']
-          }));
-          return { success: true };
+          return { success: true, redirect: true };
         }
       })
     );
