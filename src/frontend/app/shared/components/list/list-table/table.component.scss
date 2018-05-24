@@ -1,4 +1,8 @@
 $row-height: 62px;
+.table-column-select {
+  overflow: initial;
+}
+
 .app-table {
   &__loading {
     margin-top: 5px;

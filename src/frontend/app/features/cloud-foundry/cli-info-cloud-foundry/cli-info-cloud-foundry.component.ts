@@ -6,6 +6,8 @@ import { combineLatest } from 'rxjs/observable/combineLatest';
 import { first, map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../core/cf-api.types';
+import { CurrentUserPermissionsChecker } from '../../../core/current-user-permissions.checker';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { RouterNav } from '../../../store/actions/router.actions';
@@ -33,6 +35,12 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
 
+  permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
+  permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
+
+  orgGuid: string;
+  spaceGuid: string;
+
   cfEndpointEntityService: any;
   public previousUrl: string;
   public previousQueryParams: {
@@ -51,12 +59,16 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   constructor(
     private store: Store<AppState>,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private cfEndpointService: CloudFoundryEndpointService,
     @Optional() private cfOrgService: CloudFoundryOrganizationService,
     @Optional() private cfSpaceService: CloudFoundrySpaceService
   ) {
     this.breadcrumbs$ = new BehaviorSubject<IHeaderBreadcrumb[]>([]);
+    if (activeRouteCfOrgSpace.orgGuid) {
+      this.orgGuid = activeRouteCfOrgSpace.orgGuid;
+      this.spaceGuid = activeRouteCfOrgSpace.spaceGuid || CurrentUserPermissionsChecker.ALL_SPACES;
+    }
   }
 
   ngOnInit() {
