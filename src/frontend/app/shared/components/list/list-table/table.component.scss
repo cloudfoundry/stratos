@@ -1,5 +1,17 @@
 $row-height: 62px;
+.table-column-select {
+  overflow: initial;
+}
+
 .app-table {
+  &__loading {
+    margin-top: 5px;
+    position: relative;
+    mat-progress-bar {
+      position: absolute;
+      top: -5px;
+    }
+  }
   &__card {
     padding: 0;
   }

@@ -1,4 +1,6 @@
 import { InvalidSession, LOGIN } from '../actions/auth.actions';
+import { RouterActions, RouterNav } from '../actions/router.actions';
+import { SessionData } from '../types/auth.types';
 import {
   LOGIN_FAILED,
   LOGIN_SUCCESS,
@@ -9,8 +11,7 @@ import {
   SESSION_VERIFIED,
   VERIFY_SESSION,
 } from './../actions/auth.actions';
-import { SessionData } from '../types/auth.types';
-import { RouterNav, RouterActions } from '../actions/router.actions';
+import { RouterRedirect } from './routing.reducer';
 
 export interface AuthUser {
   guid: string;
@@ -26,7 +27,7 @@ export interface AuthState {
   errorResponse: any;
   sessionData: SessionData;
   verifying: boolean;
-  redirectPath?: string;
+  redirect?: RouterRedirect;
 }
 
 const defaultState: AuthState = {
@@ -37,10 +38,9 @@ const defaultState: AuthState = {
   errorResponse: '',
   sessionData: null,
   verifying: false,
-  redirectPath: null,
 };
 
-export function authReducer(state: AuthState = defaultState, action) {
+export function authReducer(state: AuthState = defaultState, action): AuthState {
   switch (action.type) {
     case LOGIN:
       return { ...state, loggingIn: true, loggedIn: false, error: false };
@@ -56,7 +56,7 @@ export function authReducer(state: AuthState = defaultState, action) {
       return {
         ...state,
         error: false,
-        errorMessage: '',
+        errorResponse: '',
         sessionData: {
           ...action.sessionData,
           valid: true,
@@ -68,14 +68,15 @@ export function authReducer(state: AuthState = defaultState, action) {
     case SESSION_INVALID:
       const sessionInvalid: InvalidSession = action;
       return {
-        ...state, sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress },
+        ...state,
+        sessionData: { valid: false, uaaError: action.uaaError, upgradeInProgress: action.upgradeInProgress, sessionExpiresOn: null },
         verifying: false
       };
     case RouterActions.GO:
       const goToState: RouterNav = action;
       return {
         ...state,
-        redirectPath: goToState.redirectPath !== undefined ? goToState.redirectPath : state.redirectPath
+        redirect: goToState.redirect || state.redirect
       };
     case RESET_AUTH:
       return defaultState;

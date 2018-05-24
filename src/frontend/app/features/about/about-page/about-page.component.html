@@ -6,6 +6,12 @@
     <div class="about-page__title">Stratos provides an easy-to-use web-based UI that allows developers and administrators to manage their applications and Cloud Foundry deployments</div>
   </div>
 </mat-card>
+
+<mat-card *ngIf="customizations.hasEula" class="about-page__card about-page__eula">
+  <div>Use of this software is subject to the End-User License Agreement</div>
+  <button [routerLink]="['eula']" mat-button mat-raised-button color="primary">View EULA</button>
+</mat-card>
+
 <mat-card *ngIf="(sessionData$ | async) as session">
   <app-metadata-item icon="web_asset" label="Stratos Version">{{ session.version.proxy_version }}</app-metadata-item>
   <app-metadata-item icon="storage" label="Database Version">{{ session.version.database_version }}</app-metadata-item>

@@ -1,4 +1,3 @@
-import { ISpacesRoleState, IOrgRoleState } from '../../types/current-user-roles.types';
 import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
 
 export interface IKeyedByIDObject<T> {

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ManageUsersComponent } from './manage-users.component';
+import { EnumerateComponent } from './enumerate.component';
 
-describe('ManageUsersComponent', () => {
-  let component: ManageUsersComponent;
-  let fixture: ComponentFixture<ManageUsersComponent>;
+describe('EnumerateComponent', () => {
+  let component: EnumerateComponent;
+  let fixture: ComponentFixture<EnumerateComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ManageUsersComponent ]
+      declarations: [ EnumerateComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ManageUsersComponent);
+    fixture = TestBed.createComponent(EnumerateComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
