@@ -12,6 +12,7 @@ import { ApplicationStateIconPipe } from '../../../application-state/application
 import { ApplicationStateComponent } from '../../../application-state/application-state.component';
 import { ApplicationStateService } from '../../../application-state/application-state.service';
 import { BooleanIndicatorComponent } from '../../../boolean-indicator/boolean-indicator.component';
+import { CfRoleCheckboxComponent } from '../../../cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from '../../../chips/chips.component';
 import { GithubCommitAuthorComponent } from '../../../github-commit-author/github-commit-author.component';
 import { RunningInstancesComponent } from '../../../running-instances/running-instances.component';
@@ -39,6 +40,7 @@ describe('TableCellComponent', () => {
         RunningInstancesComponent,
         AppChipsComponent,
         BooleanIndicatorComponent,
+        CfRoleCheckboxComponent,
         GithubCommitAuthorComponent
       ],
       imports: [

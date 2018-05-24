@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output } from '@angular/core';
 import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.service';
-import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/types';
+import { rootUpdatingKey, RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { schema } from 'normalizr';
 import { EntityMonitor } from '../../monitors/entity-monitor';
 import { Observable } from 'rxjs/Observable';
@@ -94,18 +94,22 @@ export class AppActionMonitorIconComponent implements OnInit {
     );
   }
 
+  private fetchUpdatingState = (requestState: RequestInfoState): ActionState =>
+    (requestState.updating[this.updateKey] || { busy: false, error: false, message: '' })
   private getUpdatingState(entityMonitor: EntityMonitor): Observable<IApplicationMonitorComponentState> {
+
+
     const completed$ = this.getHasCompletedObservable(
       entityMonitor.entityRequest$.pipe(
-        map(requestState => requestState.updating[this.updateKey].busy),
+        map(requestState => this.fetchUpdatingState(requestState).busy),
       )
     );
     return entityMonitor.entityRequest$.pipe(
       pairwise(),
       withLatestFrom(completed$),
       map(([[oldRequestState, requestState], completed]) => {
-        const oldUpdatingState = requestState.updating[this.updateKey];
-        const updatingState = requestState.updating[this.updateKey];
+        const oldUpdatingState = this.fetchUpdatingState(requestState);
+        const updatingState = this.fetchUpdatingState(requestState);
         return {
           busy: updatingState.busy,
           error: updatingState.error,

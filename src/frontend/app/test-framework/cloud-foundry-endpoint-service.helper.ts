@@ -74,12 +74,12 @@ export function generateTestCfUserServiceProvider(guid = testSCFGuid) {
     provide: CfUserService,
     useFactory: (
       store: Store<AppState>,
-      paginationMonitorFactory: PaginationMonitorFactory
+      paginationMonitorFactory: PaginationMonitorFactory,
+      entityServiceFactory: EntityServiceFactory
     ) => {
-      const cfUserService = new CfUserService(store, paginationMonitorFactory, { cfGuid: guid, orgGuid: guid, spaceGuid: guid });
-      return cfUserService;
+      return new CfUserService(store, paginationMonitorFactory, { cfGuid: guid, orgGuid: guid, spaceGuid: guid }, entityServiceFactory);
     },
-    deps: [Store, PaginationMonitorFactory]
+    deps: [Store, PaginationMonitorFactory, EntityServiceFactory]
   };
 }
 

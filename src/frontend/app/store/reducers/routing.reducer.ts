@@ -1,6 +1,12 @@
 import { RoutingHistory, defaultRoutingState } from '../types/routing.type';
 import { RouterNavigationAction, ROUTER_NAVIGATION } from '@ngrx/router-store';
 
+export interface RouterRedirect {
+  path: string;
+  queryParams?: {
+    [key: string]: string
+  };
+}
 
 export function routingReducer(state: RoutingHistory = defaultRoutingState, action: RouterNavigationAction) {
   switch (action.type) {
