@@ -52,7 +52,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'delete',
     label: 'Delete',
-    description: 'Unmap and delete route'
+    description: 'Unmap and delete routes'
   };
 
   private multiListActionUnmap: IMultiListAction<APIResource> = {
@@ -75,7 +75,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     },
     icon: 'block',
     label: 'Unmap',
-    description: 'Unmap route'
+    description: 'Unmap routes'
   };
 
   private listActionDelete: IListAction<APIResource> = {
@@ -87,7 +87,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
-    description: 'Unmap route'
+    description: ''
   };
 
   private listActionAdd: IGlobalListAction<APIResource> = {
@@ -150,14 +150,6 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
   };
   isLocal = true;
 
-  static createAction(appGuid: string, cfGuid: string) {
-    return new GetAppRoutes(
-      appGuid,
-      cfGuid,
-      createEntityRelationPaginationKey(applicationSchemaKey, appGuid),
-    );
-  }
-
   dispatchDeleteAction(route) {
     return this.store.dispatch(
       new DeleteRoute(route.metadata.guid, this.routesDataSource.cfGuid)
@@ -194,8 +186,7 @@ export class CfAppRoutesListConfigService extends ListConfig<APIResource> {
     this.routesDataSource = new CfAppRoutesDataSource(
       this.store,
       this.appService,
-      CfAppRoutesListConfigService.createAction(appService.appGuid, appService.cfGuid),
-      createEntityRelationPaginationKey(applicationSchemaKey, appService.appGuid),
+      new GetAppRoutes(appService.appGuid, appService.cfGuid),
       this
     );
   }
