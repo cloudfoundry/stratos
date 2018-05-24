@@ -86,7 +86,6 @@ import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.
 import { NestedTabsComponent } from './components/nested-tabs/nested-tabs.component';
 import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
 import { PageHeaderModule } from './components/page-header/page-header.module';
-import { RecentEntitiesComponent } from './components/recent-entities/recent-entities.component';
 import { RingChartComponent } from './components/ring-chart/ring-chart.component';
 import { RunningInstancesComponent } from './components/running-instances/running-instances.component';
 import { ServiceIconComponent } from './components/service-icon/service-icon.component';
@@ -204,7 +203,6 @@ import { UserPermissionDirective } from './user-permission.directive';
     UserProfileBannerComponent,
     TableCellRequestMonitorIconComponent,
     UserPermissionDirective,
-    RecentEntitiesComponent,
     ServiceSummaryCardComponent,
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,

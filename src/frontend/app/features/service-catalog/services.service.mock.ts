@@ -64,6 +64,7 @@ export class ServicesServiceMock {
     }
   }]);
 
+  serviceInstances$ = Observable.of([]);
   getVisibleServicePlans = () => this.servicePlans$;
   getOrgsForSelectedServicePlan = () => Observable.of([]);
   getSelectedServicePlanAccessibility = () => Observable.of({
@@ -72,5 +73,10 @@ export class ServicesServiceMock {
   getServicePlanAccessibility = () => Observable.of({
     isPublic: true
   })
+
+  getDocumentationUrl = () => '';
+  getSupportUrl = () => '';
+  getServiceName = () => '';
+  getServiceDescription = () => '';
 
 }
