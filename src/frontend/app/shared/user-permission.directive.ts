@@ -9,16 +9,16 @@ import { Subscription } from 'rxjs/Subscription';
 export class UserPermissionDirective implements OnDestroy, OnInit {
 
   @Input('appUserPermission')
-  private appUserPermission: CurrentUserPermissions;
+  public appUserPermission: CurrentUserPermissions;
 
-  @Input('endpointGuid')
-  private endpointGuid: string;
+  @Input('appUserPermissionEndpointGuid')
+  public appUserPermissionEndpointGuid: string;
 
-  @Input('organizationGuid')
-  private organizationGuid: string;
+  @Input('appUserPermissionOrganizationGuid')
+  private appUserPermissionOrganizationGuid: string;
 
-  @Input('spaceGuid')
-  private spaceGuid: string;
+  @Input('appUserPermissionSpaceGuid')
+  private appUserPermissionSpaceGuid: string;
 
   private canSub: Subscription;
 
@@ -31,7 +31,7 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
   public ngOnInit() {
     this.canSub = this.currentUserPermissionsService.can(
       this.appUserPermission,
-      this.endpointGuid,
+      this.appUserPermissionEndpointGuid,
       this.getOrgOrSpaceGuid(),
       this.getSpaceGuid()
     ).subscribe(
@@ -52,15 +52,15 @@ export class UserPermissionDirective implements OnDestroy, OnInit {
   }
 
   private getOrgOrSpaceGuid() {
-    if (this.spaceGuid && !this.organizationGuid) {
-      return this.spaceGuid;
+    if (this.appUserPermissionSpaceGuid && !this.appUserPermissionOrganizationGuid) {
+      return this.appUserPermissionSpaceGuid;
     }
-    return this.organizationGuid;
+    return this.appUserPermissionOrganizationGuid;
   }
 
   private getSpaceGuid() {
-    if (this.organizationGuid) {
-      return this.spaceGuid;
+    if (this.appUserPermissionOrganizationGuid) {
+      return this.appUserPermissionSpaceGuid;
     }
     return null;
   }

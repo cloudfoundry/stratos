@@ -45,6 +45,7 @@ import {
 } from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
 import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
+import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from './components/cli-info/cli-info.component';
@@ -56,6 +57,7 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EnumerateComponent } from './components/enumerate/enumerate.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
@@ -73,6 +75,7 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -195,6 +198,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     IntroScreenComponent,
     CliInfoComponent,
     CliCommandComponent,
+    CfRoleCheckboxComponent,
+    EnumerateComponent,
     UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     UserProfileBannerComponent,
@@ -272,6 +277,8 @@ import { UserPermissionDirective } from './user-permission.directive';
     UserProfileBannerComponent,
     CliInfoComponent,
     CliCommandComponent,
+    CfRoleCheckboxComponent,
+    EnumerateComponent,
     UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     AppActionMonitorComponent,
@@ -282,7 +289,9 @@ import { UserPermissionDirective } from './user-permission.directive';
     ServiceSummaryCardComponent,
     ServiceBrokerCardComponent,
     ServiceRecentInstancesCardComponent,
-    CompactServiceInstanceCardComponent
+    CompactServiceInstanceCardComponent,
+    TableComponent,
+    UserPermissionDirective
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,

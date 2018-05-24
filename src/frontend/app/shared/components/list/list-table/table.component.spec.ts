@@ -63,7 +63,8 @@ describe('TableComponent', () => {
     component.dataSource = {
       trackBy: () => '1',
       connect: () => Observable.empty(),
-      disconnect: () => null
+      disconnect: () => null,
+      isTableLoading$: Observable.of(false)
     };
     fixture.detectChanges();
   });

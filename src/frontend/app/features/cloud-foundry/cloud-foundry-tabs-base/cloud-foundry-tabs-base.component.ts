@@ -3,10 +3,10 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 
 import { environment } from '../../../../environments/environment';
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { AppState } from './../../../store/app-state';
-import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
-import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 
 @Component({
   selector: 'app-cloud-foundry-tabs-base',

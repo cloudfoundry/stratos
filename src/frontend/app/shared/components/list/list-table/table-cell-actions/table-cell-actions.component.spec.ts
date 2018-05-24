@@ -1,13 +1,12 @@
-import { DatePipe } from '@angular/common';
-import { APIResource } from '../../../../../store/types/api.types';
-import { CoreModule } from '../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { TableCellActionsComponent } from './table-cell-actions.component';
-import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
-import { ListActions, IListDataSource } from '../../data-sources-controllers/list-data-source-types';
-import { ListConfig } from '../../list.component.types';
 import { Observable } from 'rxjs/Observable';
+
+import { CoreModule } from '../../../../../core/core.module';
+import { APIResource } from '../../../../../store/types/api.types';
+import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
+import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import { ListConfig } from '../../list.component.types';
+import { TableCellActionsComponent } from './table-cell-actions.component';
 
 describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;

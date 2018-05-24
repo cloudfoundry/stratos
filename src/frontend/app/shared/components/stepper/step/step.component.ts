@@ -15,6 +15,8 @@ export type StepOnNextFunction = () => Observable<{
   message?: string,
   // Should we redirect to the store previous state?
   redirect?: boolean,
+  // Ignore the result of a successful `onNext` call. Handy when sometimes you want to avoid navigation/step change
+  ignoreSuccess?: boolean,
   data?: any,
 }>;
 
@@ -38,7 +40,7 @@ export class StepComponent {
   @Input()
   title: string;
 
-  @Output() onHidden= new EventEmitter<boolean>();
+  @Output() onHidden = new EventEmitter<boolean>();
 
   @Input('hidden')
   set hidden(hidden: boolean) {

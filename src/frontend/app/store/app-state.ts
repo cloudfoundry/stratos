@@ -12,6 +12,7 @@ import { InternalEventsState } from './types/internal-events.types';
 import { PaginationState } from './types/pagination.types';
 import { RoutingHistory } from './types/routing.type';
 import { UAASetupState } from './types/uaa-setup.types';
+import { UsersRolesState } from './types/users-roles.types';
 
 export interface IRequestTypeState {
   [entityKey: string]: IRequestEntityTypeState<any>;
@@ -33,6 +34,7 @@ export interface AppState {
   createServiceInstance: CreateServiceInstanceState;
   lists: ListsState;
   routing: RoutingHistory;
+  manageUsersRoles: UsersRolesState;
   internalEvents: InternalEventsState;
   currentUserRoles: ICurrentUserRolesState;
 }
