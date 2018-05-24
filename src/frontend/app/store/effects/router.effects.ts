@@ -1,9 +1,8 @@
-import { RouterNav, RouterActions } from '../actions/router.actions';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Actions, Effect } from '@ngrx/effects';
+
+import { RouterActions, RouterNav } from '../actions/router.actions';
 
 
 @Injectable()

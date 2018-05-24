@@ -14,6 +14,9 @@ export enum CurrentUserPermissions {
   ORGANIZATION_DELETE = 'delete.org',
   ORGANIZATION_EDIT = 'edit.org',
   ORGANIZATION_SUSPEND = 'suspend.org',
+  SERVICE_INSTANCE_DELETE = 'delete.service-instance',
+  SERVICE_BINDING_EDIT = 'edit.service-binding',
+  FIREHOSE_VIEW = 'view-firehose',
   ENDPOINT_REGISTER = 'register.endpoint',
   PASSWORD_CHANGE = 'change-password'
 }
@@ -99,7 +102,6 @@ export const permissionConfigs: IPermissionConfigs = {
     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
     new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER)
   ],
-  // [CurrentUserPermissions.ROUTE_BINDING_CREATE]: new PermissionConfigLink(CurrentUserPermissions.ROUTE_CREATE),
   [CurrentUserPermissions.ORGANIZATION_CREATE]: [
     new PermissionConfig(PermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.user_org_creation),
     new PermissionConfig(PermissionTypes.ORGANIZATION, PermissionStrings.ORG_MANAGER),
@@ -113,6 +115,11 @@ export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.ORGANIZATION_DELETE]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CurrentUserPermissions.ORGANIZATION_DELETE),
   [CurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
+  [CurrentUserPermissions.SERVICE_INSTANCE_DELETE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SERVICE_BINDING_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.FIREHOSE_VIEW]: [
+    new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_READ_ONLY_ADMIN_GROUP)
+  ],
   [CurrentUserPermissions.ENDPOINT_REGISTER]: new PermissionConfig(PermissionTypes.STRATOS, PermissionStrings.STRATOS_ADMIN),
   [CurrentUserPermissions.PASSWORD_CHANGE]: new PermissionConfig(PermissionTypes.STRATOS_SCOPE, ScopeStrings.STRATOS_CHANGE_PASSWORD),
 };

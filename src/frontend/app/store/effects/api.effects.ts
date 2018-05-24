@@ -209,7 +209,8 @@ export class APIEffect {
           error: false,
           errorCode: '200',
           guid: action.endpointGuid,
-          url: action.options.url
+          url: action.options.url,
+          errorResponse: null
         }];
       }
       return null;

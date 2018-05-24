@@ -8,7 +8,7 @@
     <button mat-icon-button name="delete" *appUserPermission="permsSpaceDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;" (click)="deleteSpace()" matTooltip="Delete Space">
         <mat-icon>delete</mat-icon>
       </button>
-    <button mat-icon-button name="user-management" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/manage-users">
+    <button mat-icon-button name="user-management" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users/manage" matTooltip="Manage Users">
         <mat-icon>people</mat-icon>
       </button>
     <button mat-icon-button name="cli" routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/cli" matTooltip="CLI Info">

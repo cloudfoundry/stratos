@@ -1,14 +1,26 @@
 import { UserRelationTypes } from '../../actions/permissions.actions';
 import { IOrgRoleState } from '../../types/current-user-roles.types';
 
-const defaultState = {
+const defaultOrgRoleStateState = {
   isManager: false,
   isAuditor: false,
   isBillingManager: false,
   isUser: false,
+  spaceGuids: []
 };
 
-export function currentUserOrgRoleReducer(state: IOrgRoleState = defaultState, relationType: UserRelationTypes, userHasRelation: boolean) {
+export const createOrgRoleStateState = () => ({
+  ...defaultOrgRoleStateState,
+  spaceGuids: [
+    ...defaultOrgRoleStateState.spaceGuids
+  ]
+});
+
+export function currentUserOrgRoleReducer(
+  state: IOrgRoleState = createOrgRoleStateState(),
+  relationType: UserRelationTypes,
+  userHasRelation: boolean
+) {
   switch (relationType) {
     case UserRelationTypes.AUDITED_ORGANIZATIONS:
       return {
