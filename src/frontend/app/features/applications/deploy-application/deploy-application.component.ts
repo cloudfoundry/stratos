@@ -15,6 +15,7 @@ import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectApplicationSource, selectCfDetails } from '../../../store/selectors/deploy-application.selector';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 import { DeployApplicationSource } from '../../../store/types/deploy-application.types';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application',
@@ -46,7 +47,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     );
   }
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(new StoreCFSettings({
       cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
       org: this.cfOrgSpaceService.org.select.getValue(),

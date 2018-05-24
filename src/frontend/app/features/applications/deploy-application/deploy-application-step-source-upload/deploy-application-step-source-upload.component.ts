@@ -7,6 +7,7 @@ import { Store } from '@ngrx/store';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { HttpClient } from '@angular/common/http';
 import { map, filter } from 'rxjs/operators';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application-step-source-upload',
@@ -35,7 +36,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
     if (!isNext) {
       this.deployer.close();
     }
-   }
+  }
 
   onEnter = (data: FileScannerInfo) => {
     // Previous step is expected to pass us the file info for the files to be uploaded
@@ -46,7 +47,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   }
 
   // Make the deployer available to the next step
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     return Observable.of({ success: true, data: this.deployer });
   }
 

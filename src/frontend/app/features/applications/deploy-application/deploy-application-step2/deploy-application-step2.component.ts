@@ -33,6 +33,7 @@ import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { SourceType } from '../../../../store/types/deploy-application.types';
 import { GitBranch, GithubCommit, GithubRepo } from '../../../../store/types/github.types';
 import { PaginatedAction } from '../../../../store/types/pagination.types';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 @Component({
   selector: 'app-deploy-application-step2',
@@ -94,7 +95,7 @@ export class DeployApplicationStep2Component
     private paginationMonitorFactory: PaginationMonitorFactory
   ) { }
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(
       new SaveAppDetails({
         projectName: this.repository,
