@@ -120,6 +120,11 @@
       return;
     }
 
+    // Check if we have a customization folder
+    if (!fs.existsSync(customBaseFolder)) {
+      return;
+    }
+
     // Symlink any custom plugins
     var plugins = fs.readdirSync(customBaseFolder);
     plugins.forEach(file => {
