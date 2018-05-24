@@ -46,7 +46,7 @@
   },
   "footer": {
     "title": "[[@:product.name]] [[@:product.version]]",
-    "copyright": "&copy; 2017 [[@:company.name]] - modified to support IBM login",
+    "copyright": "&copy; 2017 [[@:company.name]] - modified to support OAuth login",
     "logo": "@:company.logo",
     "company.logo": "@:company.logo",
     "product.logo": "@:product.logo",
