@@ -1,5 +1,7 @@
+import { NavigationExtras } from '@angular/router';
 import { Action } from '@ngrx/store';
-import { Router, NavigationExtras } from '@angular/router';
+
+import { RouterRedirect } from '../reducers/routing.reducer';
 import { LoggerAction, LogLevel } from './log.actions';
 
 export const RouterActions = {
@@ -16,7 +18,7 @@ export class RouterNav implements Action, LoggerAction {
       [key: string]: any
     };
     extras?: NavigationExtras;
-  }, public redirectPath?: string) {
+  }, public redirect?: RouterRedirect) {
     const path = payload.path as string[];
     const pathString = payload.path as string;
     this.message = path.join ? path.join('/') : pathString;

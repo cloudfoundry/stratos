@@ -72,10 +72,17 @@ export interface IListConfig<T> {
    */
   tableFixedRowHeight?: boolean;
   /**
+   * Set the align-self of each cell in the row
+   */
+  tableRowAlignSelf?: string;
+  /**
    * The card component used in card view
    */
   cardComponent?: any;
   hideRefresh?: boolean;
+  /**
+   * Allow selection regardless of number or visibility of multi actions
+   */
   allowSelection?: boolean;
 }
 
@@ -102,7 +109,6 @@ export class ListConfig<T> implements IListConfig<T> {
   viewType = ListViewTypes.BOTH;
   text = null;
   enableTextFilter = false;
-  tableFixedRowHeight = false;
   cardComponent = null;
   defaultView = 'table' as ListView;
   allowSelection = false;
