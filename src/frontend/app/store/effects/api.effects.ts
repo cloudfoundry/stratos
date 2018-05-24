@@ -129,8 +129,9 @@ export class APIEffect {
           if (error.error) {
             const fakedAction = { ...actionClone, endpointGuid: error.guid };
             this.store.dispatch(new APISuccessOrFailedAction(fakedAction.actions[2], fakedAction));
+            const errorMessage = error.errorResponse ? error.errorResponse.description || error.errorCode : error.errorCode;
             this.store.dispatch(new WrapperRequestActionFailed(
-              error.errorCode,
+              errorMessage,
               { ...actionClone, endpointGuid: error.guid },
               requestType
             ));
