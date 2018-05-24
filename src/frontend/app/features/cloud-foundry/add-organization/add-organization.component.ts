@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { Component } from '@angular/core';
+
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
+import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 
 @Component({
   selector: 'app-add-organization',
@@ -11,8 +11,7 @@ import { ActiveRouteCfOrgSpace } from '../cf-page.types';
     getActiveRouteCfOrgSpaceProvider
   ]
 })
-export class AddOrganizationComponent implements OnInit {
-
+export class AddOrganizationComponent {
   cfUrl: string;
   constructor(
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
@@ -20,8 +19,4 @@ export class AddOrganizationComponent implements OnInit {
     const cfId = activeRouteCfOrgSpace.cfGuid;
     this.cfUrl = `/cloud-foundry/${cfId}/organizations`;
   }
-
-  ngOnInit() {
-  }
-
 }

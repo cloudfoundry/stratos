@@ -33,12 +33,17 @@ export class ListActionConfig<T> {
   enabled: (row: T) => boolean;
 }
 
-export interface ITableListDataSource<T> extends DataSource<T> {
+interface ICoreListDataSource<T> extends DataSource<T> {
   rowsState?: Observable<RowsState>;
   getRowState?(row: T): Observable<RowsState>;
   trackBy(index: number, item: T);
 }
-export interface IListDataSource<T> extends ITableListDataSource<T> {
+
+export interface ITableListDataSource<T> extends ICoreListDataSource<T> {
+  isTableLoading$: Observable<boolean>;
+}
+
+export interface IListDataSource<T> extends ICoreListDataSource<T> {
   pagination$: Observable<PaginationEntityState>;
   isLocal?: boolean;
   localDataFunctions?: ((

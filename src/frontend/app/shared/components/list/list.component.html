@@ -22,7 +22,7 @@
       </div>
       <div class="list-component__header__right">
         <!-- Filter by text input -->
-        <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
+        <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async)">
           <mat-form-field floatPlaceholder="never">
             <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
           </mat-form-field>
@@ -45,7 +45,7 @@
         </div>
         <!-- Multi actions (those applied to selection) -->
         <div *ngIf="(dataSource.isSelecting$ | async)">
-          <ng-container *ngFor="let action of (multiActions$ | async)">
+          <ng-container *ngFor="let action of multiActions">
             <button mat-icon-button *ngIf="action.visible$ | async" (click)="executeActionMultiple(action)" [disabled]="!(action.enabled$ | async)" matTooltip="{{action.description}}" matTooltipShowDelay="1000">
               <mat-icon>{{action.icon}}</mat-icon>
             </button>
@@ -99,7 +99,7 @@
   <div class="list-component__body">
     <div class="list-component__body-inner" [hidden]="!(hasRows$ | async)" [@list]="(pageState$ | async)">
       <app-cards *ngIf="(view$ | async) === 'cards'" #cards [dataSource]="dataSource" [component]="config.cardComponent" [hidden]="!(hasRows$ | async)"></app-cards>
-      <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="(haveMultiActions | async) && (config.getMultiActions() || []).length > 0" [paginationController]="paginationController"
+      <app-table *ngIf="(view$ | async) === 'table'" #table [dataSource]="dataSource" [addActions]="(config.getSingleActions() || []).length > 0" [addSelect]="config.allowSelection || (haveMultiActions | async)" [paginationController]="paginationController"
         [columns]="columns" [fixedRowHeight]="config.tableFixedRowHeight" [hidden]="!(hasRows$ | async)">
       </app-table>
     </div>

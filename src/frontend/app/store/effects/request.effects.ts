@@ -188,7 +188,7 @@ export class RequestEffect {
       if (busy) {
         newAction.updatingKey = rootUpdatingKey;
       }
-      this.store.dispatch(new UpdateCfAction(newAction, error));
+      this.store.dispatch(new UpdateCfAction(newAction, busy, error));
     }
   }
 
