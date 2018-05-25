@@ -1,5 +1,5 @@
-import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 
 export const endpointStoreNames: {
   section: TRequestTypeKeys,
@@ -54,7 +54,8 @@ export interface EndpointState {
 }
 
 // If we support more endpoint types in future, this type should be extended
-export type EndpointType = 'cf' | 'metrics';
+// We defined the build-in endpoints and allow for custom ones via any string
+export type EndpointType = 'cf' | 'metrics' | string;
 
 export interface StateUpdateAction {
   type: string;

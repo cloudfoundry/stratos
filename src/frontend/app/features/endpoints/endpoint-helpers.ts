@@ -1,3 +1,6 @@
+import { Validators } from '@angular/forms';
+
+import { EndpointTypeExtension } from '../../core/extension/extension-manager-service';
 import { urlValidationExpression } from '../../core/utils.service';
 import { EndpointModel, EndpointType } from './../../store/types/endpoint.types';
 
@@ -6,7 +9,6 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
-
 export interface EndpointTypeHelper {
   value: EndpointType;
   label: string;
@@ -25,11 +27,44 @@ const endpointTypes: EndpointTypeHelper[] = [
   },
 ];
 
+const endpointAuthTypes = [
+  {
+    name: 'Username and Password',
+    value: 'creds',
+    form: {
+      username: ['', Validators.required],
+      password: ['', Validators.required],
+    },
+    types: new Array<EndpointType>('cf', 'metrics')
+  },
+];
+
 const endpointTypesMap = {};
 
-endpointTypes.forEach(ept => {
-  endpointTypesMap[ept.value] = ept;
-});
+export function initEndpointTypes(epTypes: EndpointTypeExtension[]) {
+  console.log('Init endpoint types');
+
+  epTypes.forEach(type => {
+    endpointTypes.push({
+      value: type.type,
+      label: type.label
+    });
+
+    // Map in the authentication providers
+    type.authTypes.forEach(authType => {
+      const endpointAuthType = endpointAuthTypes.find(a => a.value === authType);
+      if (endpointAuthType) {
+        endpointAuthType.types.push(type.type);
+      }
+    });
+  });
+
+  // TODO: Sort alphabetically
+
+  endpointTypes.forEach(ept => {
+    endpointTypesMap[ept.value] = ept;
+  });
+}
 
 // Get the name to display for a given Endpoint type
 export function getNameForEndpointType(type: string): string {
@@ -38,4 +73,8 @@ export function getNameForEndpointType(type: string): string {
 
 export function getEndpointTypes() {
   return endpointTypes;
+}
+
+export function getEndpointAuthTypes() {
+  return endpointAuthTypes;
 }

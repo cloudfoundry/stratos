@@ -1,0 +1,11 @@
+<app-page-header>
+    <h1>{{ (kubeEndpointService.endpoint$ | async)?.entity.name }}</h1>
+    <div class="page-header-right">
+    </div>
+  </app-page-header>
+  <app-page-subheader [tabs]="tabLinks">
+  </app-page-subheader>
+  <app-loading-page [isLoading]="isFetching$" [text]="'Retrieving Kubernetes details'">
+    <router-outlet></router-outlet>
+  </app-loading-page>
+  

@@ -2,12 +2,12 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
+
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../environments/environment';
+import { ExtensionManager } from '../../../core/extension/extension-manager-service';
+import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 import { AppState } from '../../../store/app-state';
 import { MetricsService } from '../../metrics/services/metrics-service';
 import { EventWatcherService } from './../../../core/event-watcher/event-watcher.service';
@@ -15,7 +15,10 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
-import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
+
+import { Subscription } from 'rxjs/Subscription';
+import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
+import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -33,10 +36,16 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private metricsService: MetricsService,
+    private ext: ExtensionManager,
   ) {
     if (this.breakpointObserver.isMatched(Breakpoints.Handset)) {
       this.enableMobileNav();
     }
+    this.sideNavTabs = [
+      ... this.defaultSideNavTabs,
+      ...ext.getSideNav()
+    ];
+    console.log(this.sideNavTabs);
   }
 
   private openCloseSub: Subscription;
@@ -50,7 +59,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
 
   @ViewChild('sidenav') public sidenav: MatDrawer;
 
-  sideNavTabs: SideNavItem[] = [
+  sideNavTabs: SideNavItem[];
+
+  defaultSideNavTabs: SideNavItem[] = [
     {
       text: 'Dashboard',
       matIcon: 'assessment',

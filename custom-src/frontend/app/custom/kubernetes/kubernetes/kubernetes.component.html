@@ -1,0 +1,12 @@
+<app-page-header>
+    <h1>Kubernetes</h1>
+</app-page-header>
+
+<div *ngIf="!(hasOneKube$ | async)">
+
+  Multiple Kubernetes registered
+</div>
+<!--
+<app-list *ngIf="!(hasOneCf$ | async)">
+</app-list>
+-->

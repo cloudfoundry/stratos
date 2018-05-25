@@ -1,10 +1,8 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
+
 import { Store } from '@ngrx/store';
-import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
@@ -15,6 +13,11 @@ import { SystemEffects } from '../../../store/effects/system.effects';
 import { ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { selectEntity, selectRequestInfo, selectUpdateInfo } from '../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames, EndpointType } from '../../../store/types/endpoint.types';
+import { getEndpointAuthTypes } from '../endpoint-helpers';
+
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Rx';
+import { delay, filter, map, pairwise, startWith, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-connect-endpoint-dialog',
@@ -39,18 +42,6 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private bodyContent = '';
 
-  private authTypes = [
-    {
-      name: 'Username and Password',
-      value: 'creds',
-      form: {
-        username: ['', Validators.required],
-        password: ['', Validators.required],
-      },
-      types: new Array<EndpointType>('cf', 'metrics')
-    },
-  ];
-
   private hasAttemptedConnect: boolean;
   private authTypesForEndpoint = [];
 
@@ -71,7 +62,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     }
   ) {
     // Populate the valid auth types for the endpoint that we want to connect to
-    this.authTypes.forEach(authType => {
+    getEndpointAuthTypes().forEach(authType => {
       if (authType.types.find(t => t === this.data.type)) {
         this.authTypesForEndpoint.push(authType);
       }

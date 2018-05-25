@@ -2,10 +2,13 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Params, RouterStateSnapshot } from '@angular/router';
+
 import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router-store';
+
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
+import { ExtensionManager } from './core/extension/extension-manager-service';
 import { CustomModule } from './custom.module';
 import { AboutModule } from './features/about/about.module';
 import { ApplicationsModule } from './features/applications/applications.module';
@@ -72,8 +75,9 @@ export class CustomRouterStateSerializer
   ],
   providers: [
     LoggedInService,
+    ExtensionManager,
     { provide: RouterStateSerializer, useClass: CustomRouterStateSerializer } // Create action for router navigation
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

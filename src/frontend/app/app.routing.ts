@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+
 import { AuthGuardService } from './core/auth-guard.service';
 import { CoreModule } from './core/core.module';
 import { EndpointsService } from './core/endpoints.service';
@@ -39,6 +40,8 @@ const appRoutes: Routes = [
       { path: 'cloud-foundry', loadChildren: 'app/features/cloud-foundry/cloud-foundry.module#CloudFoundryModule' },
       { path: 'about', loadChildren: 'app/features/about/about.module#AboutModule' },
       { path: 'user-profile', loadChildren: 'app/features/user-profile/user-profile.module#UserProfileModule' },
+      //{ path: 'caasp', loadChildren: 'app/custom/caasp/caasp.module#CaaspModule' },
+      // { path: 'kubernetes', loadChildren: 'app/custom/kubernetes/kubernetes.module#KubernetesModule' },
     ]
   },
   {
@@ -53,7 +56,7 @@ const appRoutes: Routes = [
     CommonModule,
     CoreModule,
     SharedModule,
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes),
   ]
 })
 export class RouteModule { }
