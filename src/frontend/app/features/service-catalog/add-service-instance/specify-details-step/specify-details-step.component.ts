@@ -17,6 +17,7 @@ import {
   share,
   switchMap,
   tap,
+  take,
 } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
@@ -46,6 +47,7 @@ import { getServiceJsonParams, isMarketplaceMode } from '../../services-helper';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
+import { CsiModeService } from '../csi-mode.service';
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -77,9 +79,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   selectExistingInstanceForm: FormGroup;
   createNewInstanceForm: FormGroup;
   serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  marketPlaceMode: boolean;
   cSIHelperService: CreateServiceInstanceHelperService;
-  stepperForm: FormGroup;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
   allServiceInstanceNames: string[];
@@ -124,7 +124,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar,
-    private csiGuidsService: CsiGuidsService
+    private csiGuidsService: CsiGuidsService,
+    private modeService: CsiModeService
   ) {
     this.setupForms();
 
@@ -133,7 +134,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       share(),
     );
 
-    this.stepperForm = new FormGroup({
+    this.createNewInstanceForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
@@ -157,6 +158,20 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       refCount(),
     );
     this.initialised = true;
+
+    if (this.modeService.isEditServiceInstanceMode) {
+      this.store.select(selectCreateServiceInstance).pipe(
+        take(1),
+        tap(state => {
+          this.createNewInstanceForm.controls.name.setValue(state.name);
+          this.createNewInstanceForm.controls.params.setValue(state.parameters);
+          if (state.tags) {
+            this.tags = [].concat(state.tags.map(t => ({ label: t })));
+          }
+          console.log(this.tags);
+        })
+      ).subscribe();
+    }
 
   }
 
@@ -281,7 +296,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   routeToServices = (cfGuid: string = null, appGuid: string = null) => {
-    if (this.cSIHelperService.isAppServices()) {
+    if (this.modeService.isAppServicesMode()) {
       this.store.dispatch(new RouterNav({ path: ['/applications', cfGuid, appGuid, 'services'] }));
     } else {
       this.store.dispatch(new RouterNav({ path: ['/services'] }));
@@ -313,7 +328,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
-    const name = this.stepperForm.controls.name.value;
+    const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);

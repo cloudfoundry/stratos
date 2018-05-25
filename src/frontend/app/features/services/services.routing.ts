@@ -12,6 +12,10 @@ const services: Routes = [
   {
     path: 'new',
     component: AddServiceInstanceComponent
+  },
+  {
+    path: ':cfId/:serviceInstanceId/edit',
+    component: AddServiceInstanceComponent
   }
 ];
 

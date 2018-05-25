@@ -19,6 +19,7 @@ import {
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { CsiGuidsService } from '../csi-guids.service';
+import { CsiModeService } from '../csi-mode.service';
 
 @Component({
   selector: 'app-select-service',
@@ -40,7 +41,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityServiceFactory: EntityServiceFactory,
     private csiGuidService: CsiGuidsService,
-    private servicesWallService: ServicesWallService
+    private servicesWallService: ServicesWallService,
   ) {
 
     this.stepperForm = new FormGroup({

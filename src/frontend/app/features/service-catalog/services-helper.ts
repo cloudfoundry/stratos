@@ -78,6 +78,13 @@ export const isAppServicesMode = (activatedRoute: ActivatedRoute) => {
   return !!id && !!cfId;
 };
 export const isServicesWallMode = (activatedRoute: ActivatedRoute) => {
-  return !isAppServicesMode(activatedRoute) && !isMarketplaceMode(activatedRoute);
+  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  return !cfId;
+};
+
+export const isEditServiceInstanceMode = (activatedRoute: ActivatedRoute) => {
+  const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
+  const cfId = getIdFromRoute(activatedRoute, 'cfId');
+  return !!cfId && !!serviceInstanceId;
 };
 

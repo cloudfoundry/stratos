@@ -23,6 +23,7 @@ import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
 import { Observable } from 'rxjs/Observable';
+import { RouterNav } from '../../../../../store/actions/router.actions';
 
 @Injectable()
 export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<IServiceInstance>>
@@ -99,6 +100,15 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     createEnabled: (row: APIResource) => Observable.of(row.entity.service_bindings.length === 1)
   };
 
+  private listActionEdit: IListAction<APIResource> = {
+    action: (item: APIResource<IServiceInstance>) =>
+      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid),
+    label: 'Edit',
+    description: 'Edit Service Instance',
+    // createVisible: (row: APIResource) => Observable.of(true),
+    // createEnabled: (row: APIResource) => Observable.of(true)
+  };
+
   constructor(
     protected store: Store<AppState>,
     protected datePipe: DatePipe,
@@ -127,7 +137,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
   getGlobalActions = () => [];
   getMultiActions = () => [];
-  getSingleActions = () => [this.listActionDetach, this.listActionDelete];
+  getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
 
 }

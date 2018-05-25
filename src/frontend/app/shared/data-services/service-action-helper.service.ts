@@ -6,6 +6,7 @@ import { ConfirmationDialogService } from '../components/confirmation-dialog.ser
 import { ConfirmationDialogConfig } from '../components/confirmation-dialog.config';
 import { DeleteServiceBinding } from '../../store/actions/service-bindings.actions';
 import { DeleteServiceInstance } from '../../store/actions/service-instances.actions';
+import { RouterNav } from '../../store/actions/router.actions';
 
 @Injectable()
 export class ServiceActionHelperService {
@@ -48,4 +49,7 @@ export class ServiceActionHelperService {
     );
   }
 
+
+  editServiceBinding = (guid: string, endpointGuid: string) =>
+    this.store.dispatch(new RouterNav({ path: ['/services', endpointGuid, guid, 'edit'] }))
 }
