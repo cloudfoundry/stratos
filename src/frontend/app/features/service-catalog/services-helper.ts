@@ -12,6 +12,7 @@ export const fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
     svcPlanVis: APIResource<IServicePlanVisibility>[],
     svcBroker: APIResource<IServiceBroker>,
+    spaceGuid: string = null
   ): APIResource<IServicePlan>[] => {
     const visiblePlans: APIResource<IServicePlan>[] = [];
     svcPlans.forEach(p => {
@@ -21,8 +22,11 @@ export const fetchVisiblePlans =
         // plan is visibilities
         visiblePlans.push(p);
       } else if (svcBroker.entity.space_guid) {
-        // Plan is space-scoped
-        visiblePlans.push(p);
+
+        if (!spaceGuid || (svcBroker.entity.space_guid !== spaceGuid)) {
+          // Plan is space-scoped
+          visiblePlans.push(p);
+        }
       }
     });
     return visiblePlans;
