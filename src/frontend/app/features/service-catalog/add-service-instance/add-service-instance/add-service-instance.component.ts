@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators';
+import { map, tap, take, filter } from 'rxjs/operators';
 
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import {
@@ -29,8 +29,8 @@ import { CsiGuidsService } from '../csi-guids.service';
   ]
 })
 export class AddServiceInstanceComponent {
-  cSIHelperService: CreateServiceInstanceHelperService;
   marketPlaceMode: boolean;
+  cSIHelperService: CreateServiceInstanceHelperService;
   title$: Observable<string>;
   serviceInstancesUrl: string;
   servicesWallCreateInstance = false;
@@ -51,6 +51,13 @@ export class AddServiceInstanceComponent {
       this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
       this.initialiseForMarketplaceMode(serviceId, cfId);
       this.marketPlaceMode = true;
+      cfOrgSpaceService.cf.list$.pipe(
+        filter(p => !!p),
+        map(endpoints => endpoints.filter(e => e.guid === cfId)),
+        map(e => e[0]),
+        tap(e => cfOrgSpaceService.cf.select.next(e.guid)),
+        take(1)
+      ).subscribe();
     } else {
       this.initialiseForDefaultMode();
     }

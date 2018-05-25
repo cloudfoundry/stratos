@@ -12,6 +12,7 @@ import { entityFactory, serviceSchemaKey } from '../../../store/helpers/entity-f
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../../store/types/api.types';
+import { GetServicesForSpace } from '../../../store/actions/space.actions';
 
 @Injectable()
 export class ServicesWallService {
@@ -45,4 +46,18 @@ export class ServicesWallService {
     map(services => services.filter(s => s.entity.cfGuid === cfGuid))
   )
 
+  getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
+    const paginationKey = createEntityRelationPaginationKey(serviceSchemaKey, `${cfGuid}-${spaceGuid}`);
+    return getPaginationObservables<APIResource<IService>>(
+      {
+        store: this.store,
+        action: new GetServicesForSpace(spaceGuid, cfGuid, paginationKey),
+        paginationMonitor: this.paginationMonitorFactory.create(
+          paginationKey,
+          entityFactory(serviceSchemaKey)
+        )
+      },
+      true
+    ).entities$;
+  }
 }

@@ -2,7 +2,7 @@ import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, share, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, share, switchMap, tap, combineLatest } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IService } from '../../../../core/cf-api-svc.types';
@@ -10,7 +10,7 @@ import { EntityServiceFactory } from '../../../../core/entity-service-factory.se
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
-import { selectCreateServiceInstanceCfGuid } from '../../../../store/selectors/create-service-instance.selectors';
+import { selectCreateServiceInstanceCfGuid, selectCreateServiceInstanceSpaceGuid } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { CsiGuidsService } from '../csi-guids.service';
@@ -43,8 +43,9 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
 
     this.services$ = this.store.select(selectCreateServiceInstanceCfGuid).pipe(
       filter(p => !!p),
-      tap(cfGuid => this.cfGuid = cfGuid),
-      switchMap(cfGuid => servicesWallService.getServicesInCf(cfGuid)),
+      combineLatest(this.store.select(selectCreateServiceInstanceSpaceGuid)),
+      tap(([cfGuid, spaceGuid]) => this.cfGuid = cfGuid),
+      switchMap(([cfGuid, spaceGuid]) => servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
       filter(p => !!p),
     );
 

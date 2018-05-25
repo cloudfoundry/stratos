@@ -15,6 +15,7 @@ import { CreateApplicationModule } from '../applications/create-application/crea
 import { SelectServiceComponent } from './add-service-instance/select-service/select-service.component';
 import { ServicePlansComponent } from './service-plans/service-plans.component';
 import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
+import { NoServicePlansComponent } from './add-service-instance/no-service-plans/no-service-plans.component';
 
 @NgModule({
   imports: [
@@ -34,11 +35,16 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     SelectPlanStepComponent,
     SelectServiceComponent,
     ServicePlansComponent,
-    ServiceTabsBaseComponent
+    NoServicePlansComponent,
+    ServiceTabsBaseComponent,
   ],
   exports: [
     AddServiceInstanceComponent,
+    // NoServicePlansComponent,
     ServiceTabsBaseComponent,
+  ],
+  entryComponents: [
+    NoServicePlansComponent
   ]
 })
 export class ServiceCatalogModule { }
