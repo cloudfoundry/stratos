@@ -221,9 +221,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         if (requestInfo.error) {
           return { success: false, message: `Failed to associate route with app: ${requestInfo.message}` };
         } else {
-          this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid,
-            createEntityRelationKey(applicationSchemaKey, domainSchemaKey)
-          ));
+          this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
           return { success: true, redirect: true };
         }
       })
