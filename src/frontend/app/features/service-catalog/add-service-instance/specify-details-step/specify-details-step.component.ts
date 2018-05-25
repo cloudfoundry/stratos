@@ -30,6 +30,7 @@ import {
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesService } from '../../services.service';
+import { getServiceInstancesInCf } from '../../services-helper';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -103,31 +104,24 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.spaceScopeSub = this.servicesService.getSelectedServicePlanAccessibility()
       .pipe(
-      map(o => o.spaceScoped),
-      tap(spaceScope => {
-        if (spaceScope) {
-          this.stepperForm.get('org').disable();
-          this.stepperForm.get('space').disable();
-        } else {
-          this.stepperForm.get('org').enable();
-          this.stepperForm.get('space').enable();
-        }
-      })).subscribe();
+        map(o => o.spaceScoped),
+        tap(spaceScope => {
+          if (spaceScope) {
+            this.stepperForm.get('org').disable();
+            this.stepperForm.get('space').disable();
+          } else {
+            this.stepperForm.get('org').enable();
+            this.stepperForm.get('space').enable();
+          }
+        })).subscribe();
   }
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
-  initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
-    store: this.store,
-    action: new GetServiceInstances(this.servicesService.cfGuid, paginationKey),
-    paginationMonitor: this.paginationMonitorFactory.create(
-      paginationKey,
-      entityFactory(serviceInstancesSchemaKey)
-    )
-  }, true)
-    .entities$.pipe(
-    share(),
-    first()
+  initServiceInstances = (paginationKey: string) =>
+    getServiceInstancesInCf(this.servicesService.cfGuid, this.store, this.paginationMonitorFactory).pipe(
+      share(),
+      first()
     )
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();

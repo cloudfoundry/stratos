@@ -39,6 +39,7 @@ import { selectCreateServiceInstanceServicePlan } from '../../store/selectors/cr
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { getServiceInstancesInCf } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -104,18 +105,7 @@ export class ServicesService {
     ).entities$;
   }
   private getServiceInstances = () => {
-    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.cfGuid);
-    return getPaginationObservables<APIResource<IServiceInstance>>(
-      {
-        store: this.store,
-        action: new GetServiceInstances(this.cfGuid, paginationKey),
-        paginationMonitor: this.paginationMonitorFactory.create(
-          paginationKey,
-          entityFactory(serviceInstancesSchemaKey)
-        )
-      },
-      true
-    ).entities$;
+    return getServiceInstancesInCf(this.cfGuid, this.store, this.paginationMonitorFactory);
   }
 
   private getServiceBrokers = () => {
@@ -304,20 +294,23 @@ export class ServicesService {
 
 
   getDocumentationUrl = () => this.serviceExtraInfo$.pipe(
-    map(p => p.documentationUrl)
+    map(p => p ? p.documentationUrl : null)
   )
 
   getSupportUrl = () => this.serviceExtraInfo$.pipe(
-    map(p => p.supportUrl)
+    map(p => p ? p.supportUrl : null)
   )
 
   hasSupportUrl = () => this.getSupportUrl().pipe(
     map(p => !!p)
   )
 
+  hasDocumentationUrl = () => this.getDocumentationUrl().pipe(
+    map(p => !!p)
+  )
+
   getServiceTags = () => this.service$.pipe(
     first(),
-    tap(o => console.log('firing!!')),
     map(service =>
       service.entity.tags.map(t => ({
         value: t,
@@ -325,7 +318,6 @@ export class ServicesService {
       }))
     )
   )
-
 
   private initBaseObservables() {
     this.servicePlanVisibilities$ = this.getServicePlanVisibilities();

@@ -1,8 +1,12 @@
 <app-meta-card class="service-broker">
   <app-meta-card-title>
-    <div class="service-broker__title__link">{{ (serviceBroker$ | async)?.entity.name }}</div>
+    <div class="service-broker__title__link">Service Broker</div>
   </app-meta-card-title>
   <app-meta-card-item>
+    <app-meta-card-item>
+      <app-meta-card-key>Name</app-meta-card-key>
+      <app-meta-card-value>{{ (serviceBroker$ | async)?.entity.name }} </app-meta-card-value>
+    </app-meta-card-item>
     <app-meta-card-key>Broker Link</app-meta-card-key>
     <app-meta-card-value>
       <a [href]="(serviceBroker$ | async)?.entity.broker_url" target="_blank" appClickStopPropagation>

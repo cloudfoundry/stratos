@@ -17,7 +17,7 @@ import { GetSpace } from '../../../../store/actions/space.actions';
   templateUrl: './service-broker-card.component.html',
   styleUrls: ['./service-broker-card.component.scss']
 })
-export class ServiceBrokerCardComponent implements OnInit {
+export class ServiceBrokerCardComponent {
 
   spaceLink$: Observable<string[]>;
   serviceBroker$: Observable<APIResource<IServiceBroker>>;
@@ -26,15 +26,10 @@ export class ServiceBrokerCardComponent implements OnInit {
     private store: Store<AppState>,
     private entityServiceFactory: EntityServiceFactory
   ) {
-
     this.serviceBroker$ = this.servicesService.serviceBroker$;
-
-
     this.spaceLink$ = this.serviceBroker$.pipe(
       switchMap(broker => {
-
         const spaceGuid = broker.entity.space_guid;
-
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,
           entityFactory(spaceWithOrgKey),
           spaceGuid,
@@ -54,10 +49,5 @@ export class ServiceBrokerCardComponent implements OnInit {
         ];
       })
     );
-
-
-  }
-
-  ngOnInit() {
   }
 }

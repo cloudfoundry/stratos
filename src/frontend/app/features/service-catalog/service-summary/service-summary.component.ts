@@ -14,7 +14,7 @@ import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
   templateUrl: './service-summary.component.html',
   styleUrls: ['./service-summary.component.scss']
 })
-export class ServiceSummaryComponent implements OnInit {
+export class ServiceSummaryComponent {
 
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   instances$: Observable<APIResource<IServiceInstance>[]>;
@@ -25,17 +25,12 @@ export class ServiceSummaryComponent implements OnInit {
 
     this.instances$ = servicesService.serviceInstances$;
     this.servicePlans$ = servicesService.servicePlans$;
-
-    this.serviceInstancesLink = () => {
-      this.store.dispatch(new RouterNav({
-        path: ['marketplace', this.servicesService.cfGuid, this.servicesService.serviceGuid, 'instances']
-      }));
-    };
   }
 
   serviceInstancesLink = () => {
-
+    this.store.dispatch(new RouterNav({
+      path: ['marketplace', this.servicesService.cfGuid, this.servicesService.serviceGuid, 'instances']
+    }));
   }
-  ngOnInit() { }
 
 }
