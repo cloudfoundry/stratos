@@ -56,7 +56,7 @@ const enum FormMode {
   templateUrl: './specify-details-step.component.html',
   styleUrls: ['./specify-details-step.component.scss'],
 })
-export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterContentInit {
+export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
 
   selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
@@ -80,7 +80,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   marketPlaceMode: boolean;
   cSIHelperService: CreateServiceInstanceHelperService;
   stepperForm: FormGroup;
-  serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
   allServiceInstanceNames: string[];
@@ -134,16 +133,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
       share(),
     );
 
+    this.stepperForm = new FormGroup({
+      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
+      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
+      tags: new FormControl(''),
+    });
   }
 
   onEnter = () => {
-
     this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
-    this.marketPlaceMode = isMarketplaceMode(this.activatedRoute);
-    if (this.marketPlaceMode) {
-      this.orgs$ = this.cSIHelperService.getOrgsForSelectedServicePlan();
-      this.spaces$ = this.initSpacesObservable();
-    }
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     this.subscriptions.push(this.setupFormValidatorData());
     this.serviceInstances$ = this.selectCreateInstance$.pipe(
@@ -176,19 +174,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   private setupFormValidatorData(): Subscription {
     return this.allServiceInstances$.pipe(switchMap(instances => {
-      if (isMarketplaceMode(this.activatedRoute)) {
-        return this.createNewInstanceForm.controls.space.statusChanges.pipe(map(c => {
-          return instances.filter(s => s.entity.space_guid === this.createNewInstanceForm.controls.space.value);
-        }), tap(o => {
+      return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
+        filter(p => !!p),
+        map(spaceGuid => instances.filter(s => s.entity.space_guid === spaceGuid)), tap(o => {
           this.allServiceInstanceNames = o.map(s => s.entity.name);
         }));
-      } else {
-        return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
-          filter(p => !!p),
-          map(spaceGuid => instances.filter(s => s.entity.space_guid === spaceGuid)), tap(o => {
-            this.allServiceInstanceNames = o.map(s => s.entity.name);
-          }));
-      }
     })).subscribe();
   }
 
@@ -200,8 +190,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   private setupForms() {
     this.createNewInstanceForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-      org: new FormControl('', Validators.required),
-      space: new FormControl('', Validators.required),
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
     });
@@ -211,42 +199,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
     this.formMode = FormMode.CreateServiceInstance;
   }
 
-  ngOnInit(): void {
-    if (!isMarketplaceMode(this.activatedRoute)) {
-      this.RemoveOrgAndSpaceFields();
-    } else {
-      this.subscriptions.push(this.cSIHelperService.getSelectedServicePlanAccessibility()
-        .pipe(
-          map(o => o.spaceScoped),
-          tap(spaceScope => {
-            if (spaceScope) {
-              this.disableOrgAndSpaceFields();
-            } else {
-              this.enableOrgAndSpaceFields();
-            }
-          })).subscribe());
-    }
-  }
-
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
-
-  private enableOrgAndSpaceFields() {
-    this.createNewInstanceForm.get('org').enable();
-    this.createNewInstanceForm.get('space').enable();
-  }
-
-  private disableOrgAndSpaceFields() {
-    this.createNewInstanceForm.get('org').disable();
-    this.createNewInstanceForm.get('space').disable();
-  }
-
-  private RemoveOrgAndSpaceFields() {
-    this.createNewInstanceForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
-      tags: new FormControl(''),
-    });
-  }
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
@@ -257,22 +210,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
   }
 
   ngAfterContentInit() {
-
     this.setupValidate();
-
-    if (this.marketPlaceMode) {
-      this.subscriptions.push(this.orgs$.pipe(
-        filter(p => !!p && p.length > 0),
-        tap(o => {
-          const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
-          if (orgWithSpaces.length > 0) {
-            const selectedOrgId = orgWithSpaces[0].metadata.guid;
-            this.createNewInstanceForm.controls.org.setValue(selectedOrgId);
-            this.store.dispatch(new SetCreateServiceInstanceOrg(selectedOrgId));
-          }
-        })
-      ).subscribe());
-    }
   }
 
   initSpacesObservable = () => this.store.select(selectCreateServiceInstanceOrgGuid).pipe(
@@ -375,16 +313,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, OnInit, AfterCont
 
   createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
-    const name = this.createNewInstanceForm.controls.name.value;
-    let spaceGuid = '';
-    let cfGuid = '';
-    if (!this.marketPlaceMode) {
-      spaceGuid = createServiceInstance.spaceGuid;
-    } else {
-      spaceGuid = this.createNewInstanceForm.controls.space.value;
-    }
-
-    cfGuid = createServiceInstance.cfGuid;
+    const name = this.stepperForm.controls.name.value;
+    const { spaceGuid, cfGuid } = createServiceInstance;
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);
     let tagsStr = null;

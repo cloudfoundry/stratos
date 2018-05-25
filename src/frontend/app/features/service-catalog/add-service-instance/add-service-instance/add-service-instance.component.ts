@@ -3,7 +3,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, filter, tap, take } from 'rxjs/operators';
+import { map, tap, take, filter } from 'rxjs/operators';
 
 import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -81,11 +81,11 @@ export class AddServiceInstanceComponent implements OnDestroy {
 
 
   setupSelectCFStep = (serviceId: string, cfId: string, id: string) => {
-    // Show Select CF Step only when in the Services Wall mode
-    if (!serviceId && !cfId && !id) {
-      return true;
-    } else {
+    // Dont show Select CF Step in App Services Mode
+    if (!!cfId && !!id) {
       return false;
+    } else {
+      return true;
     }
   }
   setupSelectServiceStep = () => {
@@ -141,6 +141,13 @@ export class AddServiceInstanceComponent implements OnDestroy {
       this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
       this.initialiseForMarketplaceMode(serviceId, cfId);
       this.marketPlaceMode = true;
+      this.cfOrgSpaceService.cf.list$.pipe(
+        filter(p => !!p),
+        map(endpoints => endpoints.filter(e => e.guid === cfId)),
+        map(e => e[0]),
+        tap(e => this.cfOrgSpaceService.cf.select.next(e.guid)),
+        take(1)
+      ).subscribe();
     }
   }
 
