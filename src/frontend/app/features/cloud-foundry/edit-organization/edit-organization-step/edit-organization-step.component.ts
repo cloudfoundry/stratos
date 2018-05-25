@@ -1,15 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { filter, map, take, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { UpdateOrganization } from '../../../../store/actions/organization.actions';
-import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { entityFactory, organizationSchemaKey } from '../../../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
@@ -34,7 +33,6 @@ const enum OrgStatus {
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
 
-  submitSubscription: Subscription;
   fetchOrgsSub: Subscription;
   allOrgsInEndpoint: any;
   allOrgsInEndpoint$: Observable<any>;
@@ -50,7 +48,6 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private snackBar: MatSnackBar,
     private cfOrgService: CloudFoundryOrganizationService
   ) {
     this.orgGuid = cfOrgService.orgGuid;
@@ -110,39 +107,25 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  submit = () => {
+  submit: StepOnNextFunction = () => {
     this.store.dispatch(new UpdateOrganization(this.orgGuid, this.cfGuid, {
       name: this.orgName,
       status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
     }));
 
     // Update action
-    this.submitSubscription = this.store.select(selectRequestInfo(organizationSchemaKey, this.orgGuid)).pipe(
+    return this.store.select(selectRequestInfo(organizationSchemaKey, this.orgGuid)).pipe(
       filter(o => !!o && !o.updating[UpdateOrganization.UpdateExistingOrg].busy),
-      map(o => {
-        if (o.error) {
-          this.displaySnackBar();
-        } else {
-          this.store.dispatch(
-            new RouterNav({
-              path: ['/cloud-foundry', this.cfGuid, 'organizations']
-            })
-          );
-        }
-      })
-    ).subscribe();
-    return Observable.of({ success: true });
+      map(o => o.updating[UpdateOrganization.UpdateExistingOrg]),
+      map(o => ({
+        success: !o.error,
+        redirect: !o.error,
+        message: !o.error ? '' : `Failed to update organization: ${o.message}`
+      }))
+    );
   }
-
-  displaySnackBar = () => this.snackBar.open(
-    'Failed to update organization! Please try again or contact your organization manager!',
-    'Dismiss'
-  )
 
   ngOnDestroy(): void {
     this.fetchOrgsSub.unsubscribe();
-    if (this.submitSubscription) {
-      this.submitSubscription.unsubscribe();
-    }
   }
 }
