@@ -9,7 +9,7 @@
   <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
     <mat-dialog-content class="connection-dialog__content">
       <mat-form-field *ngIf="authTypesForEndpoint.length > 1">
-        <mat-select (change)="authChanged($event)" id="authType" name="authType" formControlName="authType" placeholder="Auth Type">
+        <mat-select (selectionChange)="authChanged($event)" id="authType" name="authType" formControlName="authType" placeholder="Auth Type">
           <mat-option *ngFor="let auth of authTypesForEndpoint" [value]="auth">{{ auth.name }}</mat-option>
         </mat-select>
       </mat-form-field>

@@ -9,7 +9,7 @@
         <!-- Multi filters, such as filter app wall by cf/org/space -->
         <div class="list-component__header__left--multi-filters" [hidden]="(!(hasRows$ | async) && !filter) || (isAddingOrSelecting$ | async)">
           <mat-form-field *ngFor="let multiFilterConfig of multiFilterConfigs" [floatLabel]="'never'">
-            <mat-select matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async) || !(multiFilterConfig.list$ | async).length" (change)="multiFilterConfig.select.next($event.value)">
+            <mat-select matInput [(value)]="multiFilters[multiFilterConfig.key]" [disabled]="(dataSource.isLoadingPage$ | async) || (multiFilterConfig.loading$ | async) || !(multiFilterConfig.list$ | async) || !(multiFilterConfig.list$ | async).length" (selectionChange)="multiFilterConfig.select.next($event.value)">
               <mat-option>All</mat-option>
               <mat-option *ngFor="let selectItem of multiFilterConfig.list$ | async" [value]="selectItem.value">
                 {{selectItem.label}}
@@ -23,14 +23,14 @@
       <div class="list-component__header__right">
         <!-- Filter by text input -->
         <div class="filter" [hidden]="!config.enableTextFilter || (!(hasRows$ | async) && !filter) || (dataSource.isAdding$ | async)">
-          <mat-form-field floatPlaceholder="never">
+          <mat-form-field floatLabel="never">
             <input matInput [ngModel]="filterString" #filter="ngModel" [disabled]="(dataSource.isLoadingPage$ | async)" name="filter" placeholder="{{config.text?.filter || 'Filter'}}">
           </mat-form-field>
         </div>
         <!-- Sort Button & Drop down -->
         <div class="sort" [hidden]="(view$ | async) === 'table' || sortColumns.length < 1 || (isAddingOrSelecting$ | async) || (!(dataSource.isLoadingPage$ | async) && !(hasRowsOrIsFiltering$ | async))">
           <mat-form-field>
-            <mat-select matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (change)="updateListSort($event.value, headerSort.direction)">
+            <mat-select matInput [(ngModel)]="headerSort.value" shouldPlaceholderFloat="false" [disabled]="(disableActions$ | async)" (selectionChange)="updateListSort($event.value, headerSort.direction)">
               <mat-option *ngFor="let column of sortColumns" [value]="column.columnId">
                 {{column.headerCell()}}
               </mat-option>

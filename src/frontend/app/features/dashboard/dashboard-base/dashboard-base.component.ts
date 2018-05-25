@@ -132,7 +132,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       }
     });
 
-    this.closeSub = this.sidenav.onClose.subscribe(() => {
+    this.closeSub = this.sidenav.openedChange.pipe(filter(isOpen => !isOpen)).subscribe(() => {
       this.store.dispatch(new CloseSideNav());
     });
 
