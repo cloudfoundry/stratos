@@ -15,7 +15,7 @@ import { TitleCasePipe } from '@angular/common';
     TitleCasePipe
   ]
 })
-export class AddServiceInstanceComponent implements OnInit {
+export class AddServiceInstanceComponent {
   title$: Observable<string>;
   serviceInstancesUrl: string;
 
@@ -28,8 +28,4 @@ export class AddServiceInstanceComponent implements OnInit {
       map(label => `Create Instance: ${label}`)
     );
   }
-
-  ngOnInit() {
-  }
-
 }

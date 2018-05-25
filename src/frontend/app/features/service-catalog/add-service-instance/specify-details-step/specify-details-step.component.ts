@@ -3,7 +3,6 @@ import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, first, map, share, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
@@ -82,7 +81,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private store: Store<AppState>,
     private servicesService: ServicesService,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private snackBar: MatSnackBar,
   ) {
 
     this.stepperForm = new FormGroup({
@@ -103,16 +101,16 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     this.spaceScopeSub = this.servicesService.getSelectedServicePlanAccessibility()
       .pipe(
-      map(o => o.spaceScoped),
-      tap(spaceScope => {
-        if (spaceScope) {
-          this.stepperForm.get('org').disable();
-          this.stepperForm.get('space').disable();
-        } else {
-          this.stepperForm.get('org').enable();
-          this.stepperForm.get('space').enable();
-        }
-      })).subscribe();
+        map(o => o.spaceScoped),
+        tap(spaceScope => {
+          if (spaceScope) {
+            this.stepperForm.get('org').disable();
+            this.stepperForm.get('space').disable();
+          } else {
+            this.stepperForm.get('org').enable();
+            this.stepperForm.get('space').enable();
+          }
+        })).subscribe();
   }
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
@@ -126,9 +124,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     )
   }, true)
     .entities$.pipe(
-    share(),
-    first()
+      share(),
+      first()
     )
+
   ngOnDestroy(): void {
     this.orgSubscription.unsubscribe();
     this.serviceInstanceNameSub.unsubscribe();
@@ -205,14 +204,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       filter(s => !s.creating),
       map(s => {
         if (s.error) {
-          this.displaySnackBar();
-          return { success: false };
-        } else {
-
-          const serviceInstanceGuid = s.response.result[0];
-          this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
-          return { success: true };
+          return { success: false, message: `Failed to create service instance: ${s.message}` };
         }
+        const serviceInstanceGuid = s.response.result[0];
+        this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
+        return { success: true };
       })
     );
   }
@@ -245,11 +241,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
 
-
-  private displaySnackBar() {
-    this.snackBar.open('Failed to create service instance! Please re-check the details.', 'Dismiss');
-  }
-
   addTag(event: MatChipInputEvent): void {
     const input = event.input;
     const value = event.value;
@@ -269,7 +260,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       this.tags.splice(index, 1);
     }
   }
-
 
   checkName = (value: string = null) =>
     this.allServiceInstanceNames ? this.allServiceInstanceNames.indexOf(value || this.stepperForm.controls.name.value) === -1 : true
