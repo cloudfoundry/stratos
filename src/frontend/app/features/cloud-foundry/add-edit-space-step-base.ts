@@ -1,24 +1,19 @@
-import { Store } from '@ngrx/store';
-import { Injectable } from '@angular/core';
-import { AppState } from '../../store/app-state';
+import { AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs/Observable';
+import { filter, map, tap } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
+
+import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { MatSnackBar } from '@angular/material';
+import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
+import { getPaginationKey } from '../../store/actions/pagination.actions';
+import { AppState } from '../../store/app-state';
+import { entityFactory, spaceSchemaKey } from '../../store/helpers/entity-factory';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { getPaginationKey } from '../../store/actions/pagination.actions';
-import { filter, map, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
-import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
-import { RouterNav } from '../../store/actions/router.actions';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
-import { getIdFromRoute } from './cf.helpers';
-import { ValidatorFn, AbstractControl } from '@angular/forms';
-import { entityFactory, spaceSchemaKey, organizationSchemaKey } from '../../store/helpers/entity-factory';
-import { GetAllOrganizationSpaces } from '../../store/actions/organization.actions';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
-import { StepOnNextResult } from '../../shared/components/stepper/step/step.component';
 
 export class AddEditSpaceStepBase {
   fetchSpacesSubscription: Subscription;
@@ -31,7 +26,6 @@ export class AddEditSpaceStepBase {
     protected store: Store<AppState>,
     protected activatedRoute: ActivatedRoute,
     protected paginationMonitorFactory: PaginationMonitorFactory,
-    // protected snackBar: MatSnackBar,// TODO: RC search and remove not needed
     protected activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
   ) {
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;

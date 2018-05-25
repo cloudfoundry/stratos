@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -43,7 +42,6 @@ import { ApplicationService } from '../../application.service';
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
-  // submitted: boolean;
   model: Route;
   domains: APIResource<Domain>[] = [];
   addTCPRoute: FormGroup;
@@ -68,7 +66,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private applicationService: ApplicationService,
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
     private entityServiceFactory: EntityServiceFactory
   ) {
     this.appGuid = applicationService.appGuid;

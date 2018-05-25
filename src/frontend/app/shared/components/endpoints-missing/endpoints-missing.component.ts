@@ -1,19 +1,17 @@
-import { concat } from 'rxjs/observable/concat';
-import { Observable, Subscription } from 'rxjs/Rx';
-import { Component, OnInit, Input, OnDestroy, Output, AfterViewInit } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
+import { delay, map, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs/Rx';
+
 import { UserService } from '../../../core/user.service';
-import { EndpointsService } from '../../../core/endpoints.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
-import { map, tap, delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-endpoints-missing',
   templateUrl: './endpoints-missing.component.html',
   styleUrls: ['./endpoints-missing.component.scss']
 })
-export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestroy {
+export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
 
   noContent$: Observable<{ firstLine: string; secondLine: { text: string; }; }>;
   @Input('showSnackForNoneConnected') showSnackForNoneConnected = false;
@@ -45,10 +43,6 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
   private _snackBar: MatSnackBarRef<SimpleSnackBar>;
 
   constructor(private userService: UserService, private snackBar: MatSnackBar, public cloudFoundryService: CloudFoundryService) { }
-
-  ngOnInit() {
-
-  }
 
   ngAfterViewInit() {
     this.noContent$ = Observable.combineLatest(

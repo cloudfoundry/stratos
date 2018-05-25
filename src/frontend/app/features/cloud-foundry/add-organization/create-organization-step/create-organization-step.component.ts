@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
@@ -39,7 +38,6 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     private store: Store<AppState>,
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private snackBar: MatSnackBar
   ) {
     this.cfGuid = activatedRoute.snapshot.params.cfId;
   }
