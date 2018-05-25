@@ -8,7 +8,7 @@ import {
   QueryList,
   ViewEncapsulation,
 } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs/observable/combineLatest';
 import { first, map } from 'rxjs/operators';
@@ -48,6 +48,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   stepValidateSub: Subscription = null;
 
   private enterData;
+  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{
@@ -96,6 +97,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   goNext() {
+    // Close previous error snackbar if there was omne
+    if (this.snackBarRef) {
+      this.snackBar.dismiss();
+    }
+
     this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
@@ -124,7 +130,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               this.setActive(this.currentIndex + 1);
             }
           } else if (!success && message) {
-            this.snackBar.open(message, 'Dismiss');
+            this.snackBarRef = this.snackBar.open(message, 'Dismiss');
           }
           return [];
         }).subscribe();
