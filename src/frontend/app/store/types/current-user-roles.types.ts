@@ -1,6 +1,4 @@
-import { ActionState } from '../reducers/api-request-reducer/types';
-import { APIResource } from './api.types';
-import { PermissionValues, ScopeStrings } from '../../core/current-user-permissions.config';
+import { ScopeStrings } from '../../core/current-user-permissions.config';
 
 export function getDefaultEndpointRoles(): ICfRolesState {
   return {

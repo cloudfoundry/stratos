@@ -78,6 +78,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnDestroy() {
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
+    if (this.snackBarRef) {
+      this.snackBar.dismiss();
+    }
   }
 
   ngAfterContentInit() {
@@ -97,7 +100,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   goNext() {
-    // Close previous error snackbar if there was omne
+    // Close previous error snackbar if there was one
     if (this.snackBarRef) {
       this.snackBar.dismiss();
     }
