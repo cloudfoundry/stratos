@@ -10,7 +10,7 @@
     </app-tile-group>
     <app-tile-group>
       <app-tile>
-        <app-card-number-metric icon="library_books" label="Instances" labelSingular="Instance" value="{{ (instances$ | async)?.length }}"></app-card-number-metric>
+        <app-card-number-metric [link]="serviceInstancesLink" icon="library_books" label="Instances" labelSingular="Instance" value="{{ (instances$ | async)?.length }}"></app-card-number-metric>
       </app-tile>
       <app-tile>
         <app-card-number-metric icon="domain" label="Service Plans" labelSingular="Service Plan" value="{{ ( servicePlans$ | async)?.length }}"></app-card-number-metric>
