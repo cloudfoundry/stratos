@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store/store';
-import { Observable } from 'rxjs/Observable';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
 import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';

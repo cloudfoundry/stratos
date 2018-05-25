@@ -3,9 +3,8 @@ import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angu
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  Subscription } from 'rxjs';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';

@@ -1,11 +1,8 @@
 import { DataSource } from '@angular/cdk/table';
 import { Store } from '@ngrx/store';
 import { schema } from 'normalizr';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { OperatorFunction } from 'rxjs/interfaces';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, OperatorFunction, Observable, Subscription, ReplaySubject } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, publishReplay, refCount } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { SetResultCount } from '../../../../store/actions/pagination.actions';
 import { AppState } from '../../../../store/app-state';
@@ -16,7 +13,7 @@ import { IListDataSourceConfig } from './list-data-source-config';
 import { getDefaultRowState, getRowUniqueId, IListDataSource, RowsState } from './list-data-source-types';
 import { getDataFunctionList } from './local-filtering-sorting';
 import { LocalListController } from './local-list-controller';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { tag } from 'rxjs-spy/operators';
 
 export class DataFunctionDefinition {
   type: 'sort' | 'filter';
@@ -275,8 +272,9 @@ export abstract class ListDataSource<T, A = T> extends DataSource<T> implements 
   }
 
   connect(): Observable<T[]> {
-    return this.page$
-      .tag('actual-page-obs');
+    return this.page$.pipe(
+      tag('actual-page-obs')
+    );
   }
 
   public getFilterFromParams(pag: PaginationEntityState) {

@@ -18,7 +18,7 @@ import {
   TableCellRouteAppsAttachedComponent,
 } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { DatePipe } from '@angular/common';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 

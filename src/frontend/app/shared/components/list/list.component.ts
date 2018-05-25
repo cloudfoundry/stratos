@@ -12,9 +12,7 @@ import {
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BehaviorSubject ,  Observable ,  combineLatest ,  Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -28,7 +26,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';

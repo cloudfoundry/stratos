@@ -2,7 +2,7 @@ import { OnInit, Component } from '@angular/core';
 import * as moment from 'moment';
 import { QueueingSubject } from 'queueing-subject/lib';
 import websocketConnect from 'rxjs-websockets';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { catchError, filter, map, share } from 'rxjs/operators';
 
 import { environment } from '../../../../../environments/environment';

@@ -1,5 +1,5 @@
 import { Input } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
 import { APIResource } from '../../../../../store/types/api.types';

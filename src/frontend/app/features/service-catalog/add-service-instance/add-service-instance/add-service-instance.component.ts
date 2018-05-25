@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
 import { ServicesService } from '../../services.service';
 import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { TitleCasePipe } from '@angular/common';
 
 @Component({

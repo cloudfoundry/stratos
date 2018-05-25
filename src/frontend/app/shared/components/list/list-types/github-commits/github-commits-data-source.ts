@@ -11,7 +11,7 @@ import { IListConfig } from '../../list.component.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
 import { APIResource } from '../../../../../store/types/api.types';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {
   store: Store<AppState>;

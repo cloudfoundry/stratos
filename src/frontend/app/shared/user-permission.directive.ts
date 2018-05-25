@@ -1,7 +1,7 @@
 import { Directive, Input, TemplateRef, ViewContainerRef, OnDestroy, OnInit } from '@angular/core';
 import { CurrentUserPermissionsService } from '../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../core/current-user-permissions.config';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 @Directive({
   selector: '[appUserPermission]'

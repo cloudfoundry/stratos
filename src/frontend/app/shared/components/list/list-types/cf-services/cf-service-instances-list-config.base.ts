@@ -22,7 +22,7 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 

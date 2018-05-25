@@ -65,7 +65,7 @@ export class CreateApplicationStep3Component implements OnInit {
           throw new Error(app.error ? 'Could not create application' : 'Could not create route');
         }
         // Did we create a route?
-        const createdRoute = route !== 'NO_ROUTE';
+        const createdRoute = route !== null;
         if (createdRoute) {
           // Then assign it to the application
           this.store.dispatch(new AssociateRouteWithAppApplication(
@@ -100,7 +100,7 @@ export class CreateApplicationStep3Component implements OnInit {
     return this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid));
   }
 
-  createRoute(): Observable<RequestInfoState> | Observable<string> {
+  createRoute(): Observable<RequestInfoState> {
     const { cloudFoundryDetails, name } = this.newAppData;
 
     const { cloudFoundry, org, space } = cloudFoundryDetails;
@@ -119,7 +119,7 @@ export class CreateApplicationStep3Component implements OnInit {
         }
       ));
     }
-    return shouldCreate ? this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)) : Observable.of('NO_ROUTE');
+    return shouldCreate ? this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)) : Observable.of(null);
   }
 
   ngOnInit() {

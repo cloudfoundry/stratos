@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { APIResource } from '../../../../../store/types/api.types';

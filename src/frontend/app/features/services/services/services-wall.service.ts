@@ -10,7 +10,7 @@ import { getPaginationObservables } from '../../../store/reducers/pagination-red
 import { APIResource } from '../../../store/types/api.types';
 import { IService } from '../../../core/cf-api-svc.types';
 import { GetAllServices } from '../../../store/actions/service.actions';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Injectable()

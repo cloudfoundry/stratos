@@ -21,7 +21,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {

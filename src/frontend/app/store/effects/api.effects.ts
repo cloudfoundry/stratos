@@ -1,13 +1,12 @@
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/mergeMap';
+
+
 
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, URLSearchParams } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { normalize, Schema } from 'normalizr';
-import { Observable } from 'rxjs/Observable';
-import { forkJoin } from 'rxjs/observable/forkJoin';
+import { Observable ,  forkJoin } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';

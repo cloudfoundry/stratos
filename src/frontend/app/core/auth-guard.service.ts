@@ -1,9 +1,9 @@
-import 'rxjs/add/operator/skipWhile';
+
 
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, CanActivate, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
 import { RouterNav } from '../store/actions/router.actions';
 import { AppState } from '../store/app-state';

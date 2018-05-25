@@ -2,11 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { interval } from 'rxjs/observable/interval';
+import { BehaviorSubject ,  Observable ,  interval ,  Subscription } from 'rxjs';
 import { catchError, filter, map, switchMap, takeWhile } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import {
   CfAppsDataSource,

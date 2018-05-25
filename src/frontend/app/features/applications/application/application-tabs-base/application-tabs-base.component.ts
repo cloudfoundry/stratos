@@ -1,10 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Observable, Subscription,  combineLatest } from 'rxjs';
 import { delay, filter, first, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
 
 import { IApp, IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { EntityService } from '../../../../core/entity-service';

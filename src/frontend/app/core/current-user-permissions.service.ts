@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Observable, combineLatest } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { AppState } from '../store/app-state';
 import { CurrentUserPermissionsChecker, IConfigGroup, IConfigGroups, CHECKER_GROUPS } from './current-user-permissions.checker';

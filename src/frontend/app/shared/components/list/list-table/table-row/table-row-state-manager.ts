@@ -1,6 +1,5 @@
-import { Subject } from 'rxjs/Subject';
+import { Subject ,  ReplaySubject } from 'rxjs';
 import { RowState, RowsState } from '../../data-sources-controllers/list-data-source-types';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { debounceTime } from 'rxjs/operators';
 /**
  * A manager that helps manage list table row state.

@@ -2,10 +2,8 @@ import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { filter, map, take, tap } from 'rxjs/operators';
-import { withLatestFrom } from 'rxjs/operators/withLatestFrom';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable ,  Subscription } from 'rxjs';
+import { filter, map, take, tap ,  withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';

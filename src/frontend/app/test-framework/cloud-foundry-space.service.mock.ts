@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { APIResource, EntityInfo } from '../store/types/api.types';
 import { ISpace } from '../core/cf-api.types';
 import { GetAllSpaceUsers } from '../store/actions/space.actions';

@@ -1,7 +1,7 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy, HostBinding } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { tag } from 'rxjs-spy/operators/tag';
+import { tag } from 'rxjs-spy/operators';
 import { debounceTime, distinctUntilChanged, filter, first, tap, withLatestFrom, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
@@ -22,7 +22,7 @@ import { selectPaginationState } from '../../../store/selectors/pagination.selec
 import { APIResource } from '../../../store/types/api.types';
 import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { GetCFUser } from '../../../store/actions/users.actions';
 import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';

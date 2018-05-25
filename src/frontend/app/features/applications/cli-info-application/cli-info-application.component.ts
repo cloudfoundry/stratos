@@ -10,12 +10,10 @@ import { EntityServiceFactory } from '../../../core/entity-service-factory.servi
 import { APIResource } from '../../../store/types/api.types';
 import { endpointSchemaKey, entityFactory } from '../../../store/helpers/entity-factory';
 import { GetAllEndpoints } from '../../../store/actions/endpoint.actions';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest ,  Observable ,  BehaviorSubject } from 'rxjs';
 import { getFullEndpointApiUrl } from '../../endpoints/endpoint-helpers';
-import { Observable } from 'rxjs/Observable';
 import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { CFAppCLIInfoContext } from '../../../shared/components/cli-info/cli-info.component';
 
 @Component({

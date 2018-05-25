@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 
 import { ApplicationMonitorService } from '../../../../features/applications/application-monitor.service';

@@ -1,4 +1,4 @@
-import { concat } from 'rxjs/observable/concat';
+import { concat } from 'rxjs';
 import { Observable, Subscription } from 'rxjs/Rx';
 import { Component, OnInit, Input, OnDestroy, Output, AfterViewInit } from '@angular/core';
 import { Store } from '@ngrx/store';

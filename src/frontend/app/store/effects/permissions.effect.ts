@@ -4,10 +4,9 @@ import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 
 import { AppState, IRequestEntityTypeState } from '../app-state';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest ,  Observable } from 'rxjs';
 import { catchError, map, switchMap, withLatestFrom, tap, mergeMap } from 'rxjs/operators';
 import { APIResource } from '../types/api.types';
-import { Observable } from 'rxjs/Observable';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { EndpointModel } from '../types/endpoint.types';
 import { Action } from '@ngrx/store';

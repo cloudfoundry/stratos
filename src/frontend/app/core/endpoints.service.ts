@@ -3,7 +3,6 @@ import {
   endpointStatusSelector,
   endpointsEntityRequestDataSelector
 } from '../store/selectors/endpoint.selectors';
-import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import { EndpointState, EndpointModel, endpointStoreNames } from '../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
@@ -13,6 +12,7 @@ import { UserService } from './user.service';
 import { AuthState } from '../store/reducers/auth.reducer';
 import { RouterNav } from '../store/actions/router.actions';
 import { map, first, filter } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 
 @Injectable()

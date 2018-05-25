@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  combineLatest } from 'rxjs';
 import { AppState } from '../../store/app-state';
 import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 import { userProfileSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
@@ -13,7 +13,6 @@ import { AuthState } from '../../store/reducers/auth.reducer';
 import { filter, map, first } from 'rxjs/operators';
 import { selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { UpdateExistingApplication } from '../../store/actions/application.actions';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 
 @Injectable()

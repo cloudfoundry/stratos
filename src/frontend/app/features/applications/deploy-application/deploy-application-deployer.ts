@@ -2,10 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { QueueingSubject } from 'queueing-subject/lib';
 import websocketConnect from 'rxjs-websockets';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store, compose } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
-import { interval } from 'rxjs/observable/interval';
+import { interval } from 'rxjs';
 import { filter, map, publishReplay, refCount, share, tap, withLatestFrom } from 'rxjs/operators';
 import { Observable } from 'rxjs/Rx';
 

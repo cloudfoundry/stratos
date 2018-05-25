@@ -1,6 +1,6 @@
 import { SessionData } from '../../../store/types/auth.types';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { EndpointModel, EndpointState, endpointStoreNames } from '../../../store/types/endpoint.types';
 import { Store } from '@ngrx/store';
 import { AppState, IRequestEntityTypeState } from '../../../store/app-state';

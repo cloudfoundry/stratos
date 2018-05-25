@@ -1,6 +1,5 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Observable, combineLatest, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
@@ -57,7 +56,7 @@ export class CurrentUserPermissionsChecker {
 
     if (type === PermissionTypes.ENDPOINT_SCOPE) {
       if (!endpointGuid) {
-        return Observable.of(false);
+        return of(false);
       }
       return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission as ScopeStrings));
     }

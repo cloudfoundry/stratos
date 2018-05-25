@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableRowComponent } from './table-row.component';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { CdkTableModule } from '@angular/cdk/table';

@@ -1,8 +1,6 @@
 import { Component, OnInit, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BehaviorSubject ,  Observable ,  combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../core/cf-api.types';

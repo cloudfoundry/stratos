@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { ApplicationService } from '../../../../../features/applications/application.service';
 import { AppVariablesDelete } from '../../../../../store/actions/app-variables.actions';

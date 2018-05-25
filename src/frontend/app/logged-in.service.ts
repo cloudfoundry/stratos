@@ -1,17 +1,14 @@
 import { HostListener, Inject, Injectable, NgZone } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { Subscription } from 'rxjs/Rx';
 import { Store } from '@ngrx/store';
 import { AppState } from './store/app-state';
 import { AuthState } from './store/reducers/auth.reducer';
 import { VerifySession } from './store/actions/auth.actions';
 import { MatDialog } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
-import { Observable } from 'rxjs/Observable';
+import { Observable, interval, Subscription, fromEvent, merge } from 'rxjs';
 import { SessionData } from './store/types/auth.types';
-import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
-import { interval } from 'rxjs/observable/interval';
-import { timeInterval } from 'rxjs/operator/timeInterval';
+
 import { tap } from 'rxjs/operators';
 
 @Injectable()
@@ -49,7 +46,7 @@ export class LoggedInService {
   ) {
 
     const eventStreams = this._userActiveEvents.map((eventName) => {
-      return Observable.fromEvent(document, eventName);
+      return fromEvent(document, eventName);
     });
 
     this.store.select(s => s.auth)
@@ -60,7 +57,7 @@ export class LoggedInService {
             this.openSessionCheckerPoll();
           }
           if (!this._userInteractionChecker) {
-            this._userInteractionChecker = Observable.merge(...eventStreams).subscribe(() => {
+            this._userInteractionChecker = merge(...eventStreams).subscribe(() => {
               this._lastUserInteraction = Date.now();
             });
           }

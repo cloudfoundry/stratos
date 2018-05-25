@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Observable ,  combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../../environments/environment';

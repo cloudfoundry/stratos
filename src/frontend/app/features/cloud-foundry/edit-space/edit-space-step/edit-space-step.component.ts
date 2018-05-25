@@ -3,9 +3,8 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { UpdateSpace } from '../../../../store/actions/space.actions';

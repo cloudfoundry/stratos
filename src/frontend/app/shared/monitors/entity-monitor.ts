@@ -1,7 +1,7 @@
 import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { tag } from 'rxjs-spy/operators/tag';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { combineLatest } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,

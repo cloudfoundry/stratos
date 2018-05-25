@@ -1,11 +1,10 @@
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  combineLatest } from 'rxjs';
 
 import { CardStatus } from '../../../../application-state/application-state.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 import { IPermissionConfigs } from '../../../../../../core/current-user-permissions.config';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { map, tap } from 'rxjs/operators';
 
 export interface MetaCardMenuItem {

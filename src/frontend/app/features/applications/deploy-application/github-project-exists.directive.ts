@@ -2,7 +2,7 @@ import { Directive, forwardRef } from '@angular/core';
 import { NG_ASYNC_VALIDATORS, Validator, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { CheckProjectExists } from '../../../store/actions/deploy-applications.actions';
 import { selectDeployAppState } from '../../../store/selectors/deploy-application.selector';
 

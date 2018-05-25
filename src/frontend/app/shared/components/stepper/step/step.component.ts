@@ -1,8 +1,8 @@
-import 'rxjs/add/observable/of';
+
 
 import { Component, Input, OnInit, TemplateRef, ViewChild, Output, EventEmitter } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export interface IStepperStep {
   validate: Observable<boolean>;

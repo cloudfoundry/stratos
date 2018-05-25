@@ -1,6 +1,6 @@
 import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export class AppMonitorState {
 

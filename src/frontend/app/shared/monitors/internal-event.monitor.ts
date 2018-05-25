@@ -1,10 +1,9 @@
 import * as moment from 'moment';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Observable, combineLatest } from 'rxjs';
 import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
 import { distinctUntilChanged, filter, map, tap, startWith, share } from 'rxjs/operators';
 
-import { InternalEventSeverity, InternalEventSubjectState } from '../../store/types/internal-events.types';
+import { InternalEventSeverity, InternalEventSubjectState, InternalEventsState } from '../../store/types/internal-events.types';
 
 import { NgZone } from '@angular/core';
 
@@ -36,7 +35,7 @@ export class InternalEventMonitor {
   public events$: Observable<InternalEventSubjectState>;
 
   constructor(
-    events$: Observable<InternalEventSubjectState>,
+    events$: Observable<InternalEventsState>,
     eventType: string,
     subjectIds: string[] | Observable<string[]> = Observable.of(null),
     private ngZone: NgZone,

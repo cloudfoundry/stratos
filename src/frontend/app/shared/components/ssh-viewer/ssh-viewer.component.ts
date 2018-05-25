@@ -4,9 +4,8 @@ import {
 } from '@angular/core';
 
 import { Observable } from 'rxjs/Rx';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription ,  Subject } from 'rxjs';
 import { QueueingSubject } from 'queueing-subject';
-import { Subject } from 'rxjs/Subject';
 
 // Import Xterm
 import * as Terminal from 'xterm/dist/xterm.js';
