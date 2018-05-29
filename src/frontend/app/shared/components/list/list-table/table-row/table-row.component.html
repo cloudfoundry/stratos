@@ -1,4 +1,4 @@
-<div class="table-row-wrapper" [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__errored': inErrorState$ | async,'table-row-wrapper__highlighted': isHighlighted$ | async }">
+<mat-row class="table-row-wrapper" [ngClass]="{'table-row-wrapper__blocked': isBlocked$ | async, 'table-row-wrapper__errored': inErrorState$ | async,'table-row-wrapper__highlighted': isHighlighted$ | async }">
   <div role="row" class="table-row">
     <div class="mat-row table-row__inner">
       <ng-container cdkCellOutlet></ng-container>
@@ -9,4 +9,4 @@
     <div class="table-row__error-message" [innerHTML]="errorMessage$ | async">
     </div>
   </div>
-</div>
+</mat-row>
