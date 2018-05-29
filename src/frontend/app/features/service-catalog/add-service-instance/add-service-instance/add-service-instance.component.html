@@ -16,7 +16,7 @@
       <app-bind-apps-step #bindApp [boundAppId]="appId"></app-bind-apps-step>
     </app-step>
     <app-step title="Specify Details" [onNext]="specifyDetails.onNext" [onEnter]="specifyDetails.onEnter" [valid]="specifyDetails.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
-      <app-specify-details-step #specifyDetails showModeSelection="!!appId"></app-specify-details-step>
+      <app-specify-details-step #specifyDetails [showModeSelection]="!!appId"></app-specify-details-step>
     </app-step>
   </app-steppers>
 </div>

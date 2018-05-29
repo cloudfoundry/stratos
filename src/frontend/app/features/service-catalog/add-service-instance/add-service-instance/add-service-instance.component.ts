@@ -38,6 +38,7 @@ import { GetApplication } from '../../../../store/actions/application.actions';
 })
 export class AddServiceInstanceComponent implements OnDestroy {
 
+  cancelUrl: string;
   marketPlaceMode: boolean;
   cSIHelperService: CreateServiceInstanceHelperService;
   displaySelectServiceStep: boolean;
@@ -75,6 +76,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
     if (!cfId && !id && !serviceId) {
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
+      this.serviceInstancesUrl = `/services`;
       this.title$ = Observable.of(`Create Service Instance`);
     }
   }
@@ -117,6 +119,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
 
   private setupForAppServiceMode(id: string, cfId: string) {
     this.appId = id;
+    this.serviceInstancesUrl = `/applications/${cfId}/${id}/services`;
     this.bindAppStepperText = 'Binding Params (Optional)';
     const entityService = this.entityServiceFactory.create<APIResource<IApp>>(
       applicationSchemaKey,
@@ -157,7 +160,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
 
   private initialiseForMarketplaceMode(serviceId: string, cfId: string) {
     const serviceGuid = serviceId;
-    this.serviceInstancesUrl = `/service-catalog/${cfId}/${serviceGuid}/instances`;
+    this.serviceInstancesUrl = `/marketplace/${cfId}/${serviceGuid}/instances`;
     this.title$ = this.cSIHelperService.getServiceName().pipe(map(label => `Create Instance: ${label}`));
   }
 }
