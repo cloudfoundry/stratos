@@ -15,6 +15,7 @@ import {
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
   SetCreateServiceInstance,
+  SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
@@ -159,6 +160,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
         this.csiGuidsService.serviceGuid = serviceGuid;
         this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceGuid);
         this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
+        this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
         this.store.dispatch(new SetCreateServiceInstance(
           serviceInstanceEntity.name,
           serviceInstanceEntity.space_guid,

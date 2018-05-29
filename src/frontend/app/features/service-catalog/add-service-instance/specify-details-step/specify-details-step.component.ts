@@ -31,7 +31,7 @@ import {
 } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
-import { CreateServiceInstance } from '../../../../store/actions/service-instances.actions';
+import { CreateServiceInstance, UpdateServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
 import { serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
@@ -60,6 +60,8 @@ const enum FormMode {
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
 
+  serviceInstanceName: string;
+  serviceInstanceGuid: string;
   selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
     {
@@ -159,16 +161,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
     this.initialised = true;
 
-    if (this.modeService.isEditServiceInstanceMode) {
+    if (this.modeService.isEditServiceInstanceMode()) {
       this.store.select(selectCreateServiceInstance).pipe(
         take(1),
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
           this.createNewInstanceForm.controls.params.setValue(state.parameters);
+          this.serviceInstanceGuid = state.serviceInstanceGuid;
+          this.serviceInstanceName = state.name;
           if (state.tags) {
             this.tags = [].concat(state.tags.map(t => ({ label: t })));
           }
-          console.log(this.tags);
+          console.log(`State: ${JSON.stringify(state)}`);
         })
       ).subscribe();
     }
@@ -188,13 +192,23 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   private setupFormValidatorData(): Subscription {
-    return this.allServiceInstances$.pipe(switchMap(instances => {
-      return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
-        filter(p => !!p),
-        map(spaceGuid => instances.filter(s => s.entity.space_guid === spaceGuid)), tap(o => {
-          this.allServiceInstanceNames = o.map(s => s.entity.name);
-        }));
-    })).subscribe();
+    return this.allServiceInstances$.pipe(
+      combineLatest(this.store.select(selectCreateServiceInstance)),
+      switchMap(([instances, state]) => {
+        return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
+          filter(p => !!p),
+          map(spaceGuid => instances.filter(s => {
+            let filterSelf = false;
+            if (this.modeService.isEditServiceInstanceMode()) {
+              filterSelf = s.entity.name === state.name;
+            }
+            return (s.entity.space_guid === spaceGuid) && !filterSelf;
+
+          }
+          )), tap(o => {
+            this.allServiceInstanceNames = o.map(s => s.entity.name);
+          }));
+      })).subscribe();
   }
 
   private InitOrgAndSpaceObs() {
@@ -267,7 +281,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
             }
           });
         } else {
-          return this.createServiceInstance(p);
+          return this.createServiceInstance(p, this.modeService.isEditServiceInstanceMode());
         }
       }),
       filter(s => !s.creating),
@@ -276,7 +290,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       switchMap(([request, state]) => {
         if (request.error) {
           return this.handleException();
-        } else {
+        } else if (!this.modeService.isEditServiceInstanceMode()) {
           const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
           if (!!state.bindAppGuid) {
@@ -287,10 +301,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                 }),
                 map(req => req.error ? this.handleException(true) : this.routeToServices(state.cfGuid, state.bindAppGuid))
               );
-          } else {
-            return Observable.of(this.routeToServices());
           }
         }
+        return Observable.of(this.routeToServices());
       }),
     );
   }
@@ -326,7 +339,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       map(() => this.validate.next(this.selectExistingInstanceForm.valid))).subscribe());
   }
 
-  createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
+  createServiceInstance(createServiceInstance: CreateServiceInstanceState, isUpdate: boolean): Observable<RequestInfoState> {
 
     const name = this.createNewInstanceForm.controls.name.value;
     const { spaceGuid, cfGuid } = createServiceInstance;
@@ -335,13 +348,22 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 
-    const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
+    let newServiceInstanceGuid;
 
-    this.store.dispatch(new CreateServiceInstance(
-      cfGuid,
-      newServiceInstanceGuid,
-      name, servicePlanGuid, spaceGuid, params, tagsStr
-    ));
+    if (!this.modeService.isEditServiceInstanceMode()) {
+
+      newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
+    } else {
+      newServiceInstanceGuid = this.serviceInstanceGuid;
+    }
+
+    let action;
+    if (this.modeService.isEditServiceInstanceMode()) {
+      action = new UpdateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+    } else {
+      action = new CreateServiceInstance(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr);
+    }
+    this.store.dispatch(action);
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
 
@@ -390,8 +412,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
   }
 
-  checkName = (value: string = null) =>
-    this.allServiceInstanceNames ?
-      this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1 : true
+  checkName = (value: string = null) => {
+    if (this.allServiceInstanceNames) {
+
+      const specifiedName = value || this.createNewInstanceForm.controls.name.value;
+      if (this.modeService.isEditServiceInstanceMode() && specifiedName === this.serviceInstanceName) {
+        return true;
+      }
+      return this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1;
+    }
+  }
 
 }

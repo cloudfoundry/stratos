@@ -21,6 +21,7 @@ import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
 export const DELETE_SERVICE_BINDING = '[Service Instances] Delete service binding';
+export const UPDATE_SERVICE_INSTANCE_SUCCESS = getActions('Service Instances', 'Update Service Instance')[1];
 
 export class GetServicesInstancesInSpace
   extends CFStartAction implements PaginationAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -157,4 +158,20 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
+export class UpdateServiceInstance extends CreateServiceInstance {
+  constructor(
+    public endpointGuid: string,
+    public guid: string,
+    public name: string,
+    public servicePlanGuid: string,
+    public spaceGuid: string,
+    public params: Object,
+    public tags: string[],
+  ) {
+    super(endpointGuid, guid, name, servicePlanGuid, spaceGuid, params, tags);
+    this.options.method = 'put';
+    this.options.url = `${this.options.url}/${this.guid}`;
 
+    this.actions = getActions('Service Instances', 'Update Service Instance');
+  }
+}
