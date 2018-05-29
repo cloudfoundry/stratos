@@ -34,8 +34,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
-  @Input('cancel')
-  cancel = null;
+  @Input('cancel') cancel = null;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
@@ -57,11 +56,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {
-        return previousState ? previousState.url.split('?')[0] : this.cancel;
+        // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
+        // cancel state is
+        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : this.cancel;
       })
     );
     this.cancelQueryParams$ = previousRoute$.pipe(
-      map(previousState => previousState ? previousState.state.queryParams : {})
+      map(previousState => previousState && previousState.url !== '/login' ? previousState.state.queryParams : {})
     );
   }
 
@@ -99,13 +100,14 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       }
       this.nextSub = obs$
         .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {} }))
-        .switchMap(({ success, data, message, redirect }) => {
+        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false }))
+        .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
           step.error = !success;
           step.busy = false;
           this.enterData = data;
-          if (success) {
+          if (success && !ignoreSuccess) {
             if (redirect) {
+              // Must sub to this
               return this.redirect();
             } else {
               this.setActive(this.currentIndex + 1);

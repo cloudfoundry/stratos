@@ -110,7 +110,7 @@ export class AuthEffect {
 
   @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH)
     .do(() => {
-      // Ensure that we clear any path fro mthe location (otherwise would be stored via auth gate as redirectPath for log in)
+      // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       window.location.assign(window.location.origin);
     });
 

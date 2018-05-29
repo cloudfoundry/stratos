@@ -18,11 +18,11 @@ describe('TableCellRequestMonitorIconComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TableCellRequestMonitorIconComponent);
     component = fixture.componentInstance;
-    component.config = {
+    component.config = () => ({
       entityKey: '',
       schema: null,
       monitorState: AppMonitorComponentTypes.DELETE
-    };
+    });
     component.row = {
       metadata: {
         guid: '1'

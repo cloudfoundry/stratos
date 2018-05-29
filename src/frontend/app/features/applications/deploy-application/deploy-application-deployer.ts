@@ -1,25 +1,14 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatSnackBar } from '@angular/material';
+import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
 import { QueueingSubject } from 'queueing-subject/lib';
 import websocketConnect from 'rxjs-websockets';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { interval } from 'rxjs/observable/interval';
-import { catchError, filter, map, mergeMap, share, switchMap, takeWhile, tap, first } from 'rxjs/operators';
+import { catchError, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../environments/environment';
-import {
-  CfAppsDataSource,
-  createGetAllAppAction,
-} from '../../../shared/components/list/list-types/app/cf-apps-data-source';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
-import { GetAppEnvVarsAction } from '../../../store/actions/app-metadata.actions';
-import { DeleteDeployAppSection } from '../../../store/actions/deploy-applications.actions';
-import { RouterNav } from '../../../store/actions/router.actions';
 import { AppState } from '../../../store/app-state';
 import { organizationSchemaKey, spaceSchemaKey } from '../../../store/helpers/entity-factory';
 import { selectEntity } from '../../../store/selectors/api.selectors';

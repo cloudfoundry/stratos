@@ -1,21 +1,16 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ApplicationService } from '../application.service';
-import { EntityService } from '../../../core/entity-service';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { selectNewAppState } from '../../../store/effects/create-app-effects';
-
-// import { UpdateApplication } from '../../../store/actions/application.actions';
-import { Observable, Subscription } from 'rxjs/Rx';
-import { Router } from '@angular/router';
-import { AppNameUniqueDirective, AppNameUniqueChecking } from '../app-name-unique.directive/app-name-unique.directive';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { SetNewAppName, SetCFDetails } from '../../../store/actions/create-applications-page.actions';
+import { Store } from '@ngrx/store';
+import { Observable, Subscription } from 'rxjs/Rx';
+
+import { EntityService } from '../../../core/entity-service';
+import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
+import { AppState } from '../../../store/app-state';
+import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
+import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-edit-application',
