@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, publishReplay, refCount, switchMap, tap, combineLatest } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, combineLatest, take } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
@@ -44,7 +44,7 @@ interface ServicePlan {
 })
 export class SelectPlanStepComponent implements OnDestroy {
   cSIHelperService: CreateServiceInstanceHelperService;
-  selectedService$: Observable<ServicePlan>;
+  selectedService$: BehaviorSubject<ServicePlan> = new BehaviorSubject(null);
   @ViewChild('noplans', { read: ViewContainerRef })
   noPlansDiv: ViewContainerRef;
 
@@ -116,22 +116,29 @@ export class SelectPlanStepComponent implements OnDestroy {
       refCount(),
     );
 
-    this.selectedService$ = this.servicePlans$.pipe(
-      filter(o => !!this.stepperForm.controls.servicePlans.value),
-      map(o => o.filter(p => p.id === this.stepperForm.controls.servicePlans.value)[0]),
-      filter(p => !!p),
-    );
-
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
       tap(o => {
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
+        this.selectedService$.next(o[0]);
         this.servicePlans = o;
         setTimeout(() => this.validate.next(this.stepperForm.valid));
 
       }),
     ).subscribe();
 
+    this.watchForChanges();
+
+  }
+
+  watchForChanges = () => {
+    this.stepperForm.statusChanges.pipe(
+      combineLatest(this.servicePlans$),
+      tap(([valid, servicePlans]) => {
+        const servicePlan = this.servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0];
+        this.selectedService$.next(servicePlan);
+      }),
+    ).subscribe();
   }
 
   onNext = () => {
