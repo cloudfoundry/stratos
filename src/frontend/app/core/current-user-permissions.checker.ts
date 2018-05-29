@@ -19,7 +19,7 @@ import {
 } from '../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 import { endpointsRegisteredEntitiesSelector } from '../store/selectors/endpoint.selectors';
 import { APIResource } from '../store/types/api.types';
-import { IOrgRoleState, ISpaceRoleState } from '../store/types/current-user-roles.types';
+import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/current-user-roles.types';
 import { IFeatureFlag } from './cf-api.types';
 import {
   PermissionConfig,
@@ -38,21 +38,28 @@ export enum CHECKER_GROUPS {
 
 export type IConfigGroup = PermissionConfig[];
 export class CurrentUserPermissionsChecker {
+  static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
   constructor(private store: Store<AppState>) { }
-  public check(type: PermissionTypes, permission: PermissionValues, endpointGuid?: string, orgOrSpaceGuid?: string, ) {
+  public check(
+    type: PermissionTypes,
+    permission: PermissionValues,
+    endpointGuid?: string,
+    orgOrSpaceGuid?: string,
+    allSpacesWithinOrg = false
+  ) {
     if (type === PermissionTypes.STRATOS) {
       return this.store.select(getCurrentUserStratosRole(permission));
     }
 
     if (type === PermissionTypes.STRATOS_SCOPE) {
-      return this.store.select(getCurrentUserStratosHasScope(permission));
+      return this.store.select(getCurrentUserStratosHasScope(permission as ScopeStrings));
     }
 
     if (type === PermissionTypes.ENDPOINT_SCOPE) {
       if (!endpointGuid) {
         return Observable.of(false);
       }
-      return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission));
+      return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission as ScopeStrings));
     }
 
     if (type === PermissionTypes.ENDPOINT) {
@@ -60,9 +67,16 @@ export class CurrentUserPermissionsChecker {
     }
     return this.getEndpointState(endpointGuid).pipe(
       filter(state => !!state),
-      map(state => state[type][orgOrSpaceGuid]),
-      filter(state => !!state),
-      map(state => this.selectPermission(state, permission as PermissionStrings)),
+      map(state => {
+        const permissionString = permission as PermissionStrings;
+        if (allSpacesWithinOrg) {
+          const orgOrSpaceState = state[PermissionTypes.ORGANIZATION][orgOrSpaceGuid];
+          const spaceState = state[PermissionTypes.SPACE];
+          return this.checkAllSpacesInOrg(orgOrSpaceState, spaceState, permissionString);
+        }
+        const orgOrSpaceState = state[type][orgOrSpaceGuid];
+        return this.selectPermission(orgOrSpaceState, permissionString);
+      }),
       distinctUntilChanged(),
     );
   }
@@ -88,6 +102,13 @@ export class CurrentUserPermissionsChecker {
       case (PermissionTypes.ENDPOINT_SCOPE):
         return this.getEndpointScopesCheck(permissionConfig.permission as ScopeStrings, endpointGuid);
     }
+  }
+
+  private checkAllSpacesInOrg(orgState: IOrgRoleState, endpointSpaces: ISpacesRoleState, permission: PermissionStrings) {
+    return orgState.spaceGuids.map(spaceGuid => {
+      const space = endpointSpaces[spaceGuid];
+      return space ? space[permission] || false : false;
+    }).some(check => check);
   }
 
   public getInternalChecks(
@@ -154,10 +175,11 @@ export class CurrentUserPermissionsChecker {
 
   public getCfCheck(config: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string): Observable<boolean> {
     const { type, permission } = config;
-    const actualGuid = type === PermissionTypes.SPACE && spaceGuid ? spaceGuid : orgOrSpaceGuid;
+    const checkAllSpaces = spaceGuid === CurrentUserPermissionsChecker.ALL_SPACES;
+    const actualGuid = type === PermissionTypes.SPACE && spaceGuid && !checkAllSpaces ? spaceGuid : orgOrSpaceGuid;
     const cfPermissions = permission as PermissionStrings;
     if (type === PermissionTypes.ENDPOINT || (endpointGuid && actualGuid)) {
-      return this.check(type, cfPermissions, endpointGuid, actualGuid);
+      return this.check(type, cfPermissions, endpointGuid, actualGuid, checkAllSpaces);
     } else if (!actualGuid) {
       const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
       return endpointGuids$.pipe(
@@ -281,7 +303,7 @@ export class CurrentUserPermissionsChecker {
     return config.type;
   }
 
-  private checkAllOfType(endpointGuid: string, type: PermissionTypes, permission: PermissionStrings) {
+  private checkAllOfType(endpointGuid: string, type: PermissionTypes, permission: PermissionStrings, orgGuid?: string) {
     return this.getEndpointState(endpointGuid).pipe(
       map(state => {
         if (!state || !state[type]) {
@@ -304,8 +326,8 @@ export class CurrentUserPermissionsChecker {
     return !endpointGuid ? this.getAllEndpointGuids() : Observable.of([endpointGuid]);
   }
 
-  private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: PermissionStrings) {
-    return state[permission] || false;
+  private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: PermissionStrings): boolean {
+    return state ? state[permission] || false : false;
   }
 
   private getEndpointState(endpointGuid: string) {

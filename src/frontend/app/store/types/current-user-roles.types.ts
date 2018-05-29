@@ -1,5 +1,6 @@
 import { ActionState } from '../reducers/api-request-reducer/types';
 import { APIResource } from './api.types';
+import { PermissionValues, ScopeStrings } from '../../core/current-user-permissions.config';
 
 export function getDefaultEndpointRoles(): ICfRolesState {
   return {
@@ -42,6 +43,7 @@ export interface IOrgRoleState {
   isAuditor: boolean;
   isBillingManager: boolean;
   isUser: boolean;
+  spaceGuids: string[];
 }
 export interface IOrgsRoleState {
   [orgId: string]: IOrgRoleState;
@@ -58,7 +60,7 @@ export interface IAllCfRolesState {
 
 export interface IStratosRolesState {
   isAdmin: boolean;
-  scopes: string[];
+  scopes: ScopeStrings[];
 }
 
 export interface ICurrentUserRolesState {

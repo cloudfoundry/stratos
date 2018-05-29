@@ -4,6 +4,7 @@ import { StoreModule } from '@ngrx/store';
 import { AppState } from '../store/app-state';
 import { appReducers } from '../store/reducers.module';
 import { getDefaultEndpointRoles } from '../store/types/current-user-roles.types';
+import { createUserRoleInOrg } from '../store/types/user.types';
 
 export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
@@ -21667,6 +21668,22 @@ const testInitialStoreState: AppState = {
         queryParams: {}
       }
     }
+  },
+  manageUsersRoles: {
+    users: [],
+    cfGuid: '',
+    newRoles: {
+      name: '',
+      orgGuid: '',
+      spaces: {},
+      permissions: createUserRoleInOrg(
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      )
+    },
+    changedRoles: []
   },
   internalEvents: {
     types: {}

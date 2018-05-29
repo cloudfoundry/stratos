@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { CfUserService } from '../../../shared/data-services/cf-user.service';
-import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
+import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.service';
 
 function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
   return {
@@ -20,8 +20,4 @@ function getCfIdFromUrl(activatedRoute: ActivatedRoute) {
     CloudFoundryEndpointService,
   ]
 })
-export class CloudFoundryBaseComponent implements OnInit {
-  constructor() { }
-
-  ngOnInit() { }
-}
+export class CloudFoundryBaseComponent { }
