@@ -12,7 +12,7 @@
     <app-step title="Select Plan" [onNext]="selectPlan.onNext" [onEnter]="selectPlan.onEnter" [valid]="selectPlan.validate | async" cancelButtonText="Cancel">
       <app-select-plan-step #selectPlan></app-select-plan-step>
     </app-step>
-    <app-step [title]="bindAppStepperText" [onNext]="bindApp.submit " [valid]="bindApp.validate | async" cancelButtonText="Close" finishButtonText="Bind">
+    <app-step [title]="bindAppStepperText" [onNext]="bindApp.submit" [skip]="skipApps$ | async" [valid]="bindApp.validate | async" cancelButtonText="Close" finishButtonText="Bind">
       <app-bind-apps-step #bindApp [boundAppId]="appId"></app-bind-apps-step>
     </app-step>
     <app-step title="Specify Details" [onNext]="specifyDetails.onNext" [onEnter]="specifyDetails.onEnter" [valid]="specifyDetails.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
