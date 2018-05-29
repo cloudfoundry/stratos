@@ -34,7 +34,6 @@ export class CsiModeService {
   constructor(
     private activatedRoute: ActivatedRoute
   ) {
-    console.log('Running constructor');
     const serviceId = getIdFromRoute(activatedRoute, 'serviceId');
     const serviceInstanceId = getIdFromRoute(activatedRoute, 'serviceInstanceId');
     const cfId = getIdFromRoute(activatedRoute, 'cfId');

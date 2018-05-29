@@ -71,7 +71,6 @@ export class AddServiceInstanceComponent implements OnDestroy {
   ) {
 
 
-    console.log(modeService.viewDetail);
     // Check if wizard has been initiated from the Services Marketplace
     if (this.modeService.isMarketplaceMode()) {
       this.configureForMarketplaceMode();
@@ -148,7 +147,6 @@ export class AddServiceInstanceComponent implements OnDestroy {
   private configureForEditServiceInstanceMode() {
     const { cfId, serviceInstanceId } = this.activatedRoute.snapshot.params;
 
-    console.log(`serviceInstanceId: ${serviceInstanceId}, cfId: ${cfId}`);
     const entityService = this.getServiceInstanceEntityService(serviceInstanceId, cfId);
     entityService.waitForEntity$.pipe(
       filter(p => !!p),

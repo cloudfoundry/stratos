@@ -35,6 +35,10 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
     this.cardMenu = [
       {
+        label: 'Edit',
+        action: this.edit,
+      },
+      {
         label: 'Detach',
         action: this.detach,
         disabled: this.hasMultipleBindings
@@ -66,5 +70,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
 
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(this.row.metadata.guid, this.row.entity.cfGuid);
+
+  edit = () => this.serviceActionHelperService.editServiceBinding(this.row.metadata.guid, this.row.entity.cfGuid);
 
 }

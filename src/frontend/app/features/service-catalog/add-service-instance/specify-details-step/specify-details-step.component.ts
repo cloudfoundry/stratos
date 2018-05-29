@@ -169,10 +169,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           this.createNewInstanceForm.controls.params.setValue(state.parameters);
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
+          this.createNewInstanceForm.updateValueAndValidity();
           if (state.tags) {
             this.tags = [].concat(state.tags.map(t => ({ label: t })));
           }
-          console.log(`State: ${JSON.stringify(state)}`);
         })
       ).subscribe();
     }
@@ -414,13 +414,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   checkName = (value: string = null) => {
     if (this.allServiceInstanceNames) {
-
       const specifiedName = value || this.createNewInstanceForm.controls.name.value;
       if (this.modeService.isEditServiceInstanceMode() && specifiedName === this.serviceInstanceName) {
         return true;
       }
       return this.allServiceInstanceNames.indexOf(value || this.createNewInstanceForm.controls.name.value) === -1;
     }
+    return true;
   }
 
 }
