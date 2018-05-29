@@ -48,6 +48,10 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
+            "sslCert": "dev-ssl/server.crt",
+            "proxyConfig": "proxy.conf.js",
+            "ssl": true,
+            "sslKey": "dev-ssl/server.key",
             "browserTarget": "stratos:build"
           },
           "configurations": {
