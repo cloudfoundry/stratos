@@ -2,6 +2,21 @@
 
 Weekly status updates are published here.
 
+## 25 May 2018
+
+The team have been working on the following issues and PRs this week:
+
+- Upgrade to Angular 6 [#2227](https://github.com/cloudfoundry-incubator/stratos/pull/2227)
+
+- Handle async request progress/success/failure in modals [#2223](https://github.com/cloudfoundry-incubator/stratos/pull/2223) - Improving busy state and error feedback in modals - e.g. when creating an application, creating a space etc
+
+- Service Summary tab [#2219](https://github.com/cloudfoundry-incubator/stratos/pull/2219) - add a summary tab to the view for a service, to show summary metadata
+
+- Add support for back-end custom plugins [#2217](https://github.com/cloudfoundry-incubator/stratos/pull/2217)
+
+- Apply user permissions to CF pages (2) [#2212](https://github.com/cloudfoundry-incubator/stratos/pull/2212) - Completion of work to wire in user permissions into the Cloud Foundry view
+
+
 ## 18 May 2018
 
 The team have been working on the following issues and PRs this week:

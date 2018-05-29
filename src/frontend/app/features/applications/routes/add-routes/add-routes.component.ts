@@ -230,9 +230,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
           if (p.error) {
             this.snackBar.open('Failed to associate route with the app!', 'Dismiss');
           } else {
-            this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid,
-              createEntityRelationKey(applicationSchemaKey, domainSchemaKey)
-            ));
+            this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
             this.store.dispatch(new RouterNav({
               path: ['applications', this.cfGuid, this.appGuid, 'routes']
             }));
