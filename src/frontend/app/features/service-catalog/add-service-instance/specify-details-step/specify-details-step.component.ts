@@ -65,11 +65,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
     {
-      label: 'Create Service Instance',
+      label: 'Create and Bind to a new Service Instance',
       key: FormMode.CreateServiceInstance
     },
     {
-      label: 'Bind Service Instance',
+      label: 'Bind to an Existing Service Instance',
       key: FormMode.BindServiceInstance
     }
   ];
@@ -135,12 +135,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
       share(),
     );
-
-    this.createNewInstanceForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-      params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
-      tags: new FormControl(''),
-    });
   }
 
   onEnter = () => {
