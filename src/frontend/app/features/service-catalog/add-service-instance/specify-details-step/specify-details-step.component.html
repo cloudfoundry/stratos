@@ -1,16 +1,6 @@
 <div class="specify-details">
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
-      <mat-select class="form-control" placeholder="Organization" required formControlName="org" (change)="setOrg($event.value)">
-        <mat-option *ngFor="let organization of orgs$ | async" [value]="organization.metadata.guid">{{ organization.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field>
-      <mat-select class="form-control" placeholder="Space" required formControlName="space">
-        <mat-option [disabled]="!stepperForm.controls.org.value" *ngFor="let space of spaces$ | async" [value]="space.metadata.guid">{{ space.entity.name }}</mat-option>
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field>
       <input matInput class="form-control" formControlName="name" placeholder="Name" required>
       <mat-error *ngIf="stepperForm.controls.name?.hasError('nameTaken')">
         A service instance with this name already exists. Please enter a different one.

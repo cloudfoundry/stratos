@@ -9,9 +9,14 @@ import {
   spaceWithOrgKey,
   cfUserSchemaKey,
   organizationSchemaKey,
+  serviceSchemaKey,
+  servicePlanSchemaKey,
+  serviceInstancesSchemaKey,
+  serviceBindingSchemaKey,
+  serviceInstancesWithSpaceSchemaKey,
 } from '../helpers/entity-factory';
 import { EntityInlineChildAction, EntityInlineParentAction, createEntityRelationKey } from '../helpers/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
+import { PaginatedAction, PaginationAction, QParam } from '../types/pagination.types';
 import { CFStartAction, ICFAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { RouteEvents } from './route.actions';
@@ -220,6 +225,66 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
     'results-per-page': 100,
     'order-direction': 'desc',
     'order-direction-field': 'username',
+  };
+  flattenPagination = true;
+}
+
+
+export class GetAllServicesForSpace extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  constructor(
+    public paginationKey: string,
+    public endpointGuid: string = null,
+    public spaceGuid: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${spaceGuid}/services`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Space', 'Get all Services');
+  entity = entityFactory(serviceSchemaKey);
+  entityKey = serviceSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'label',
+  };
+}
+
+
+export class GetServicesForSpace
+  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  constructor(
+    public spaceGuid: string,
+    public endpointGuid: string,
+    public paginationKey: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceSchemaKey, servicePlanSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${spaceGuid}/services`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Space', 'Get all Services');
+  entity = [entityFactory(serviceSchemaKey)];
+  entityKey = serviceSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'creation',
   };
   flattenPagination = true;
 }

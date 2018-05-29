@@ -1,24 +1,28 @@
+import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
 import { Subscription } from 'rxjs/Subscription';
 
-import { IService, IServiceBroker, IServicePlan, IServicePlanVisibility, IServiceInstance } from '../../core/cf-api-svc.types';
-import { APIResource } from '../../store/types/api.types';
-import { CreateServiceInstanceState } from '../../store/types/create-service-instance.types';
-import { Observable } from 'rxjs/Observable';
-import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
-import { ActivatedRoute } from '@angular/router';
-import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
+import {
+  IService,
+  IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+} from '../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
-import { serviceInstancesSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
-import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { GetServiceInstances } from '../../store/actions/service-instances.actions';
+import { AppState } from '../../store/app-state';
+import { entityFactory, serviceInstancesSchemaKey } from '../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../store/types/api.types';
+import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 
 export const fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
     svcPlanVis: APIResource<IServicePlanVisibility>[],
     svcBroker: APIResource<IServiceBroker>,
+    svc: APIResource<IService>,
     spaceGuid: string = null
   ): APIResource<IServicePlan>[] => {
     const visiblePlans: APIResource<IServicePlan>[] = [];

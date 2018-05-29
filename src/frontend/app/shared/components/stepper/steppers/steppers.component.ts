@@ -118,6 +118,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
+  skipToNext() {
+    this.unsubscribeNext();
+    if (this.currentIndex < this.steps.length) {
+      this.setActive(this.currentIndex + 1);
+    }
+  }
+
   redirect() {
     return combineLatest(
       this.cancel$,
@@ -131,6 +138,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   setActive(index: number) {
     if (!this.canGoto(index)) {
+      if (index === 0) {
+        if (this.allSteps && this.allSteps.length > 0) {
+          this.allSteps[index]._onEnter(this.enterData);
+        }
+      }
       return;
     }
     // We do allow next beyond the last step to
