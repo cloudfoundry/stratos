@@ -134,7 +134,7 @@ export class SelectPlanStepComponent implements OnDestroy {
   watchForChanges = () => {
     this.stepperForm.statusChanges.pipe(
       combineLatest(this.servicePlans$),
-      filter(p => !!p && p.length > 0),
+      filter(([p, q]) => !!q && q.length > 0),
       tap(([valid, servicePlans]) => {
         const servicePlan = this.servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0];
         this.selectedService$.next(servicePlan);

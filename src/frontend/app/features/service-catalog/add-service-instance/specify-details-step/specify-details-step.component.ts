@@ -61,11 +61,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
     {
-      label: 'Create Service Instance',
+      label: 'Create and Bind to a new Service Instance',
       key: FormMode.CreateServiceInstance
     },
     {
-      label: 'Bind Service Instance',
+      label: 'Bind to an Existing Service Instance',
       key: FormMode.BindServiceInstance
     }
   ];
