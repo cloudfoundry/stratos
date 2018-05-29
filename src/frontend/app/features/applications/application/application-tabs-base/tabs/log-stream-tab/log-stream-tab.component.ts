@@ -2,9 +2,8 @@ import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
-import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs/Rx';
 
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
@@ -52,7 +51,7 @@ export class LogStreamTabComponent implements OnInit {
         this.applicationService.cfGuid
         }/apps/${this.applicationService.appGuid}/stream`;
 
-      const { messages, connectionStatus } = websocketConnect(streamUrl, new QueueingSubject<string>());
+      const { messages, connectionStatus } = websocketConnect(streamUrl, new Subject<string>());
       messages.catch(e => {
         this.logService.error(
           'Error while connecting to socket: ' + JSON.stringify(e)

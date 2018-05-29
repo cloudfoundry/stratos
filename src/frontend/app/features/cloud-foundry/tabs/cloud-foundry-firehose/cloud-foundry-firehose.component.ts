@@ -1,15 +1,14 @@
 import { OnInit, Component } from '@angular/core';
 import * as moment from 'moment';
-import { QueueingSubject } from 'queueing-subject/lib';
 import websocketConnect from 'rxjs-websockets';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { catchError, filter, map, share } from 'rxjs/operators';
 
 import { environment } from '../../../../../environments/environment';
 import { LogViewerComponent } from '../../../../shared/components/log-viewer/log-viewer.component';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { FireHoseItem, HTTP_METHODS } from './cloud-foundry-firehose.types';
-import { CloudFoundryFirehoseFormatter} from './cloud-foundry-firehose-formatter';
+import { CloudFoundryFirehoseFormatter } from './cloud-foundry-firehose-formatter';
 import { LoggerService } from '../../../../core/logger.service';
 import { UtilsService } from '../../../../core/utils.service';
 
@@ -31,7 +30,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
     private cfEndpointService: CloudFoundryEndpointService,
     private logService: LoggerService,
     private utilsService: UtilsService
-  ) {}
+  ) { }
 
   ngOnInit() {
     const host = window.location.host;
@@ -47,7 +46,7 @@ export class CloudFoundryFirehoseComponent implements OnInit {
   private setupFirehoseStream(streamUrl: string) {
     const { messages, connectionStatus } = websocketConnect(
       streamUrl,
-      new QueueingSubject<string>()
+      new Subject<string>()
     );
 
     this.messages = messages;

@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
-import { QueueingSubject } from 'queueing-subject/lib';
 import websocketConnect from 'rxjs-websockets';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, Subject } from 'rxjs';
 import { catchError, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
@@ -120,7 +119,7 @@ export class DeployApplicationDeployer {
           `?org=${org.entity.name}&space=${space.entity.name}`
         );
 
-        this.inputStream = new QueueingSubject<string>();
+        this.inputStream = new Subject<string>();
         this.messages = websocketConnect(streamUrl, this.inputStream)
           .messages.pipe(
             catchError(e => {

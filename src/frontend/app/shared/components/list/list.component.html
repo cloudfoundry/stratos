@@ -1,7 +1,7 @@
 <div class="list-component" *ngIf="initialised$ | async" [ngClass]="{'list-component__table': (view$ | async) === 'table', 'list-component__cards': (view$ | async) === 'cards' }">
-  <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async) && (showProgressBar$ | async)" [mode]="'query'"></mat-progress-bar>
+  <mat-progress-bar color="primary" *ngIf="!(hasControls$ | async) && (showProgressBar$ | async)" mode="indeterminate"></mat-progress-bar>
   <div class="list-component__header" [hidden]="!(hasControls$ | async) && ((noRowsNotFiltering$ | async) && noEntries)">
-    <mat-progress-bar color="primary" *ngIf="showProgressBar$ | async" [mode]="'query'"></mat-progress-bar>
+    <mat-progress-bar color="primary" *ngIf="showProgressBar$ | async" mode="indeterminate"></mat-progress-bar>
     <mat-card [ngClass]="{'list-component__header--selected': (dataSource.isSelecting$ | async), 'mat-header-row': (view$ | async) === 'table'}" class="list-component__header-card">
       <div class="list-component__header__left">
         <div class="list-component__header__left--text" *ngIf="!(isAddingOrSelecting$ | async) && config.text?.title">{{ config.text?.title }}</div>

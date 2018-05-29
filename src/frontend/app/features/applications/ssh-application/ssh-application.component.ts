@@ -1,9 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
@@ -24,7 +23,7 @@ export class SshApplicationComponent implements OnInit {
 
   public connectionStatus: Observable<number>;
 
-  public sshInput: QueueingSubject<string>;
+  public sshInput: Subject<string>;
 
   public errorMessage: string;
 
@@ -80,7 +79,7 @@ export class SshApplicationComponent implements OnInit {
       const streamUrl = (
         `${protocol}://${host}/pp/v1/${cfGuid}/apps/${appGuid}/ssh/${this.instanceId}`
       );
-      this.sshInput = new QueueingSubject<string>();
+      this.sshInput = new Subject<string>();
       const connection = websocketConnect(
         streamUrl,
         this.sshInput

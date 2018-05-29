@@ -1,7 +1,7 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy, HostBinding } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { tag } from 'rxjs-spy/operators';
+import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, distinctUntilChanged, filter, first, tap, withLatestFrom, map } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Rx';
 
