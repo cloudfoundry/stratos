@@ -118,13 +118,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  skipToNext() {
-    this.unsubscribeNext();
-    if (this.currentIndex < this.steps.length) {
-      this.setActive(this.currentIndex + 1);
-    }
-  }
-
   redirect() {
     return combineLatest(
       this.cancel$,
@@ -140,26 +133,35 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (!this.canGoto(index)) {
       if (index === 0) {
         if (this.allSteps && this.allSteps.length > 0) {
+          this.allSteps[index].active = true;
           this.allSteps[index]._onEnter(this.enterData);
         }
       }
       return;
     }
-    // We do allow next beyond the last step to
-    // allow the last step to finish up
-    // This shouldn't effect the state of the stepper though.
-    index = Math.min(index, this.steps.length - 1);
-    this.steps.forEach((_step, i) => {
-      if (i < index) {
-        _step.complete = true;
-      } else {
-        _step.complete = false;
-      }
-      _step.active = i === index ? true : false;
-    });
+    const isNextDirection = index > this.currentIndex;
     // Tell onLeave if this is a Next or Previous transition
-    this.steps[this.currentIndex].onLeave(index > this.currentIndex);
-    index = this.steps[index].skip ? ++index : index;
+    this.steps[this.currentIndex].onLeave(isNextDirection);
+
+    // Ensure the step Determine the next step (taking into account 'skipped' state)
+    index = Math.min(index, this.steps.length - 1);
+    const nonSkipSteps = this.steps.filter(step => !step.skip);
+    while (true) {
+      const newIndex = nonSkipSteps.findIndex(step => step === this.steps[index]);
+      if (newIndex !== -1) {
+        break;
+      }
+      index = isNextDirection ? ++index : --index;
+      if (index < 0 || this.steps.length <= index) {
+        return;
+      }
+    }
+
+    // Valid next step so set state of stepper to match up
+    this.steps.forEach((_step, i) => {
+      _step.complete = i < index;
+      _step.active = i === index;
+    });
     this.currentIndex = index;
     this.steps[this.currentIndex]._onEnter(this.enterData);
     this.enterData = undefined;
