@@ -438,6 +438,7 @@ func initializeHTTPClients(timeout int64, connectionTimeout int64) {
 		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: false},
 		MaxIdleConnsPerHost: 6, // (default is 2)
+		DisableCompression: true,
 	}
 	httpClient.Transport = tr
 	httpClient.Timeout = time.Duration(timeout) * time.Second
@@ -448,6 +449,7 @@ func initializeHTTPClients(timeout int64, connectionTimeout int64) {
 		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 		MaxIdleConnsPerHost: 6, // (default is 2)
+		DisableCompression: true,
 	}
 
 	httpClientSkipSSL.Transport = trSkipSSL
