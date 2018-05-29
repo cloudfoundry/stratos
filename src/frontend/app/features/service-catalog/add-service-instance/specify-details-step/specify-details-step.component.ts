@@ -1,9 +1,9 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
+import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import { combineLatest, filter, first, map, share, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
@@ -12,24 +12,30 @@ import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import {
-  SetCreateServiceInstance,
   SetCreateServiceInstanceOrg,
   SetCreateServiceInstanceSpace,
   SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
+import { RouterNav } from '../../../../store/actions/router.actions';
+import { CreateServiceBinding } from '../../../../store/actions/service-bindings.actions';
 import { CreateServiceInstance, GetServiceInstances } from '../../../../store/actions/service-instances.actions';
 import { AppState } from '../../../../store/app-state';
-import { entityFactory, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
+import { entityFactory, serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import {
+  selectCreateServiceInstance,
+  selectCreateServiceInstanceCfGuid,
   selectCreateServiceInstanceOrgGuid,
-  selectCreateServiceInstanceServicePlan,
+  selectCreateServiceInstanceServiceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { ServicesService } from '../../services.service';
+import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
+import { getServiceJsonParams, isMarketplaceMode, safeUnsubscribe } from '../../services-helper';
+import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
+import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
+import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -37,13 +43,10 @@ import { ServicesService } from '../../services.service';
   styleUrls: ['./specify-details-step.component.scss'],
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
-
+  cSIHelperService: CreateServiceInstanceHelperService;
   stepperForm: FormGroup;
-  serviceInstanceNameSub: Subscription;
   allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
   validate: Observable<boolean>;
-  orgSubscription: Subscription;
-  spaceSubscription: Subscription;
   allServiceInstanceNames: string[];
   tagsVisible = true;
   tagsSelectable = true;
@@ -52,7 +55,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   separatorKeysCodes = [ENTER, COMMA, SPACE];
   tags = [];
   spaceScopeSub: Subscription;
-
   spaces$: Observable<APIResource<ISpace>[]>;
   orgs$: Observable<APIResource<IOrganization>[]>;
 
@@ -80,85 +82,48 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   constructor(
     private store: Store<AppState>,
-    private servicesService: ServicesService,
+    private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
+    private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private snackBar: MatSnackBar,
+    private csiGuidsService: CsiGuidsService
   ) {
 
     this.stepperForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
-      org: new FormControl('', Validators.required),
-      space: new FormControl('', Validators.required),
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
       tags: new FormControl(''),
     });
+  }
 
-    this.orgs$ = this.initOrgsObservable();
-
-    const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, this.servicesService.serviceGuid);
-
-    this.allServiceInstances$ = this.initServiceInstances(paginationKey);
-
-    this.spaces$ = this.initSpacesObservable();
-
-    this.spaceScopeSub = this.servicesService.getSelectedServicePlanAccessibility()
-      .pipe(
-      map(o => o.spaceScoped),
-      tap(spaceScope => {
-        if (spaceScope) {
-          this.stepperForm.get('org').disable();
-          this.stepperForm.get('space').disable();
-        } else {
-          this.stepperForm.get('org').enable();
-          this.stepperForm.get('space').enable();
-        }
-      })).subscribe();
+  onEnter = () => {
+    this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
+    this.allServiceInstances$ = this.initServiceInstances(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
   }
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
 
-  initServiceInstances = (paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
+  initServiceInstances = (cfGuid: string, paginationKey: string) => getPaginationObservables<APIResource<IServiceInstance>>({
     store: this.store,
-    action: new GetServiceInstances(this.servicesService.cfGuid, paginationKey),
+    action: new GetServiceInstances(cfGuid, paginationKey),
     paginationMonitor: this.paginationMonitorFactory.create(
       paginationKey,
       entityFactory(serviceInstancesSchemaKey)
     )
   }, true)
     .entities$.pipe(
-    share(),
-    first()
+      share(),
+      first()
     )
   ngOnDestroy(): void {
-    this.orgSubscription.unsubscribe();
-    this.serviceInstanceNameSub.unsubscribe();
-    this.spaceScopeSub.unsubscribe();
+    safeUnsubscribe(this.spaceScopeSub);
   }
-
-  initOrgsObservable = (): Observable<APIResource<IOrganization>[]> => {
-    return this.servicesService.getOrgsForSelectedServicePlan();
-  }
-
 
   ngAfterContentInit() {
     this.validate = this.stepperForm.statusChanges
       .map(() => {
         return this.stepperForm.valid;
       });
-
-    this.orgSubscription = this.orgs$.pipe(
-      filter(p => !!p && p.length > 0),
-      tap(o => {
-        const orgWithSpaces = o.filter(org => org.entity.spaces.length > 0);
-        if (orgWithSpaces.length > 0) {
-          const selectedOrgId = orgWithSpaces[0].metadata.guid;
-          this.stepperForm.controls.org.setValue(selectedOrgId);
-          this.store.dispatch(new SetCreateServiceInstanceOrg(selectedOrgId));
-        }
-      })
-    ).subscribe();
-
-    this.updateServiceInstanceNames();
   }
 
   initSpacesObservable = () => this.store.select(selectCreateServiceInstanceOrgGuid).pipe(
@@ -170,7 +135,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }),
     filter(p => !!p),
     map(org => org.entity.spaces),
-    combineLatest(this.servicesService.getSelectedServicePlanAccessibility()),
+    combineLatest(this.cSIHelperService.getSelectedServicePlanAccessibility()),
     map(([spaces, servicePlanAccessibility]) => {
       if (servicePlanAccessibility.spaceScoped) {
         return spaces.filter(s => s.metadata.guid === servicePlanAccessibility.spaceGuid);
@@ -186,68 +151,88 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     })
   )
 
-  updateServiceInstanceNames = () => {
-    this.serviceInstanceNameSub = this.stepperForm.controls.space.statusChanges.pipe(
-      combineLatest(this.allServiceInstances$),
-      map(([c, services]) => {
-        return services.filter(s => s.entity.space_guid === this.stepperForm.controls.space.value);
-      }),
-      tap(o => {
-        this.allServiceInstanceNames = o.map(s => s.entity.name);
-      })
-    ).subscribe();
-  }
-
   onNext = () => {
-    return this.store.select(selectCreateServiceInstanceServicePlan).pipe(
+    return this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p),
       switchMap(p => this.createServiceInstance(p)),
       filter(s => !s.creating),
-      map(s => {
-        if (s.error) {
+      combineLatest(this.store.select(selectCreateServiceInstance)),
+      first(),
+      switchMap(([request, state]) => {
+        if (request.error) {
           this.displaySnackBar();
-          return { success: false };
+          return Observable.of({ success: false });
         } else {
-
-          const serviceInstanceGuid = s.response.result[0];
+          const serviceInstanceGuid = request.response.result[0];
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
-          return { success: true };
+          if (!!state.bindAppGuid) {
+            return this.createBinding(serviceInstanceGuid, state.cfGuid, state.bindAppGuid, state.bindAppParams).pipe(
+              filter(s => {
+                return s && !s.creating;
+              }),
+              map(req => {
+                if (req.error) {
+                  this.displaySnackBar(true);
+                  return { success: false };
+                } else {
+                  return this.routeToServices();
+                }
+              }));
+          } else {
+            return Observable.of(this.routeToServices());
+          }
         }
-      })
+      }),
     );
   }
 
-  createServiceInstance(servicePlanGuid: string): Observable<RequestInfoState> {
+  routeToServices = () => {
+    this.store.dispatch(new RouterNav({ path: ['/services'] }));
+    return { success: true };
+  }
+  createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
 
     const name = this.stepperForm.controls.name.value;
-    const spaceGuid = this.stepperForm.controls.space.value;
-    let params = this.stepperForm.controls.params.value;
-    try {
-      params = JSON.parse(params) || null;
-    } catch (e) {
-      params = null;
-    }
+    const { spaceGuid, cfGuid } = createServiceInstance;
+    const servicePlanGuid = createServiceInstance.servicePlanGuid;
+    const params = getServiceJsonParams(this.stepperForm.controls.params.value);
     let tagsStr = null;
     tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
 
     const newServiceInstanceGuid = name + spaceGuid + servicePlanGuid;
 
     this.store.dispatch(new CreateServiceInstance(
-      this.servicesService.cfGuid,
+      cfGuid,
       newServiceInstanceGuid,
-      name,
-      servicePlanGuid,
-      spaceGuid,
-      params,
-      tagsStr
+      name, servicePlanGuid, spaceGuid, params, tagsStr
     ));
-    this.store.dispatch(new SetCreateServiceInstance(name, spaceGuid, tagsStr, params));
     return this.store.select(selectRequestInfo(serviceInstancesSchemaKey, newServiceInstanceGuid));
   }
 
+  createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 
-  private displaySnackBar() {
-    this.snackBar.open('Failed to create service instance! Please re-check the details.', 'Dismiss');
+    const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
+    params = params;
+
+    this.store.dispatch(new CreateServiceBinding(
+      cfGuid,
+      guid,
+      appGuid,
+      serviceInstanceGuid,
+      params
+    ));
+
+    return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
+  }
+
+
+  private displaySnackBar(isBindingFailure = false) {
+
+    if (isBindingFailure) {
+      this.snackBar.open('Failed to bind app! Please re-check the details.', 'Dismiss');
+    } else {
+      this.snackBar.open('Failed to create service instance! Please re-check the details.', 'Dismiss');
+    }
   }
 
   addTag(event: MatChipInputEvent): void {

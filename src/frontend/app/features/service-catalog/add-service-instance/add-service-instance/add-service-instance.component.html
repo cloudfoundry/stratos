@@ -3,14 +3,20 @@
     {{ title$ | async }}
   </app-page-header>
   <app-steppers [cancel]="serviceInstancesUrl">
-    <app-step title="Select Plan" [onNext]="step1.onNext" [valid]="step1.validate | async" [onEnter]="step1.onEnter" cancelButtonText="Cancel">
-      <app-select-plan-step #step1></app-select-plan-step>
+    <app-step title="Cloud Foundry" [valid]="selectCF.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
+      <app-create-application-step1 [isServiceInstanceMode]="marketPlaceMode" #selectCF></app-create-application-step1>
     </app-step>
-    <app-step title="Specify Details" [onNext]="step2.onNext" [valid]="step2.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
-      <app-specify-details-step #step2></app-specify-details-step>
+    <app-step title="Select Service" *ngIf="servicesWallCreateInstance" [valid]="selectService.validate | async" [onNext]="selectService.onNext">
+      <app-select-service #selectService></app-select-service>
     </app-step>
-    <app-step title="Bind App" [onNext]="step3.submit" [valid]="step3.validate | async" cancelButtonText="Close" finishButtonText="Bind">
-      <app-bind-apps-step #step3></app-bind-apps-step>
+    <app-step title="Select Plan" [onNext]="selectPlan.onNext" [onEnter]="selectPlan.onEnter" [valid]="selectPlan.validate | async" cancelButtonText="Cancel">
+      <app-select-plan-step #selectPlan></app-select-plan-step>
+    </app-step>
+    <app-step title="Bind App (Optional)" [onNext]="bindApp.submit" [valid]="bindApp.validate | async" cancelButtonText="Close" finishButtonText="Bind">
+      <app-bind-apps-step #bindApp></app-bind-apps-step>
+    </app-step>
+    <app-step title="Specify Details" [onNext]="specifyDetails.onNext" [onEnter]="specifyDetails.onEnter" [valid]="specifyDetails.validate | async" cancelButtonText="Cancel" nextButtonText="Create">
+      <app-specify-details-step #specifyDetails></app-specify-details-step>
     </app-step>
   </app-steppers>
 </div>
