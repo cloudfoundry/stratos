@@ -93,15 +93,8 @@ export class ServicesService {
       publishReplay(1),
       refCount()
     );
-    this.serviceExtraInfo$ = this.service$.pipe(
-      map(o => JSON.parse(o.entity.extra))
-    );
 
-    this.servicePlans$ = this.service$.pipe(
-      map(o => o.entity.service_plans)
-    );
-    this.servicePlanVisibilities$ = this.getServicePlanVisibilities();
-    this.serviceBrokers$ = this.getServiceBrokers();
+    this.initBaseObservables();
   }
 
 
