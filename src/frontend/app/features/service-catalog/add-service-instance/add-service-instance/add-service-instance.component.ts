@@ -3,7 +3,7 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, tap, take, filter } from 'rxjs/operators';
+import { map, tap, take, filter, switchMap } from 'rxjs/operators';
 
 import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -15,7 +15,7 @@ import {
 } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
-import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../../store/types/api.types';
 import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
 import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
@@ -24,6 +24,10 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { GetApplication } from '../../../../store/actions/application.actions';
+import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
+import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -38,6 +42,7 @@ import { GetApplication } from '../../../../store/actions/application.actions';
 })
 export class AddServiceInstanceComponent implements OnDestroy {
 
+  skipApps$: Observable<boolean>;
   cancelUrl: string;
   marketPlaceMode: boolean;
   cSIHelperService: CreateServiceInstanceHelperService;
@@ -55,7 +60,8 @@ export class AddServiceInstanceComponent implements OnDestroy {
     private store: Store<AppState>,
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private csiGuidsService: CsiGuidsService,
-    private entityServiceFactory: EntityServiceFactory
+    private entityServiceFactory: EntityServiceFactory,
+    private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
     const { serviceId, cfId, id } = this.getIdsFromRoute();
@@ -79,6 +85,22 @@ export class AddServiceInstanceComponent implements OnDestroy {
       this.serviceInstancesUrl = `/services`;
       this.title$ = Observable.of(`Create Service Instance`);
     }
+
+    this.skipApps$ = this.store.select(selectCreateServiceInstance).pipe(
+      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
+      switchMap(createServiceInstance => {
+        const paginationKey = createEntityRelationPaginationKey(spaceSchemaKey, createServiceInstance.spaceGuid);
+        return getPaginationObservables<APIResource<IApp>>({
+          store: this.store,
+          action: new GetAllAppsInSpace(createServiceInstance.cfGuid, createServiceInstance.spaceGuid, paginationKey),
+          paginationMonitor: this.paginationMonitorFactory.create(
+            paginationKey,
+            entityFactory(applicationSchemaKey)
+          )
+        }, true).entities$;
+      }),
+      map(apps => apps.length === 0)
+    );
   }
 
 
