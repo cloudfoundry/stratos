@@ -1,7 +1,8 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
 import { withLatestFrom, map, filter, distinctUntilChanged } from 'rxjs/operators';
 
 import { endpointSchemaKey } from '../../../../store/helpers/entity-factory';
@@ -56,7 +57,7 @@ export class PageHeaderEventsComponent implements OnInit {
 
   ngOnInit() {
     if (!this.endpointIds$ && this.activatedRoute.snapshot.params && this.activatedRoute.snapshot.params.cfId) {
-      this.endpointIds$ = Observable.of([this.activatedRoute.snapshot.params.cfId]);
+      this.endpointIds$ = observableOf([this.activatedRoute.snapshot.params.cfId]);
     }
     if (this.endpointIds$) {
       const cfEndpointEventMonitor = this.internalEventMonitorFactory.getMonitor(endpointSchemaKey, this.endpointIds$);

@@ -1,9 +1,10 @@
+
+import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
 import { filter, map, take, tap } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -88,7 +89,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
         'Failed to update space! Please try again or contact your space manager!'
       )
     ).subscribe();
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   ngOnDestroy(): void {

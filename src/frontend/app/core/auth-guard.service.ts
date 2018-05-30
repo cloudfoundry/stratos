@@ -1,4 +1,6 @@
 
+import { first, map } from 'rxjs/operators';
+
 
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, CanActivate, Router } from '@angular/router';
@@ -33,8 +35,8 @@ export class AuthGuardService implements CanActivate {
   ) { }
 
   canActivate(): Observable<boolean> {
-    return this.store.select('auth')
-      .map((state: AuthState) => {
+    return this.store.select('auth').pipe(
+      map((state: AuthState) => {
         if (!state.sessionData || !state.sessionData.valid) {
           this.store.dispatch(new RouterNav({
             path: ['/login']
@@ -45,7 +47,7 @@ export class AuthGuardService implements CanActivate {
           return false;
         }
         return true;
-      }).first();
+      }), first(), );
   }
 
 }

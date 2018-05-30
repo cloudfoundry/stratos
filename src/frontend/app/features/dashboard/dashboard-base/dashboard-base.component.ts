@@ -1,9 +1,10 @@
+
+import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatDrawer } from '@angular/material';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
 import { debounceTime, filter, withLatestFrom } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
@@ -55,7 +56,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       matIcon: 'assessment',
       link: '/dashboard',
       // Experimental - only show in development
-      hidden: Observable.of(environment.production),
+      hidden: observableOf(environment.production),
     },
     {
       text: 'Applications',

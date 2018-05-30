@@ -1,3 +1,5 @@
+
+import {mergeMap, tap, switchMap, catchError, map} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Headers, Http, RequestOptionsArgs, URLSearchParams } from '@angular/http';
 import { MatDialog } from '@angular/material';
@@ -42,8 +44,8 @@ export class AuthEffect {
     public dialog: MatDialog
   ) { }
 
-  @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN)
-    .switchMap(({ username, password }) => {
+  @Effect() loginRequest$ = this.actions$.ofType<Login>(LOGIN).pipe(
+    switchMap(({ username, password }) => {
       const config = {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -59,24 +61,24 @@ export class AuthEffect {
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
       return this.http.post('/pp/v1/auth/login/uaa', params, {
         headers
-      })
-        .map(data => new VerifySession())
-        .catch((err, caught) => [new LoginFailed(err)]);
-    });
+      }).pipe(
+        map(data => new VerifySession()),
+        catchError((err, caught) => [new LoginFailed(err)]),);
+    }));
 
-  @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION)
-    .switchMap((action) => {
+  @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION).pipe(
+    switchMap((action) => {
       const options: RequestOptionsArgs = {
         headers: new Headers({ 'x-cap-request-date': Math.floor(Date.now() / 1000) }),
         withCredentials: true
       };
-      return this.http.get('/pp/v1/auth/session/verify', options)
-        .mergeMap(data => {
+      return this.http.get('/pp/v1/auth/session/verify', options).pipe(
+        mergeMap(data => {
           const sessionData: SessionData = data.json();
           sessionData.sessionExpiresOn = parseInt(data.headers.get('x-cap-session-expires-on'), 10) * 1000;
           return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
-        })
-        .catch((err, caught) => {
+        }),
+        catchError((err, caught) => {
           let setupMode = false;
           let isUpgrading = false;
           if (err.status === 503) {
@@ -85,33 +87,33 @@ export class AuthEffect {
           }
 
           return action.login ? [new InvalidSession(setupMode, isUpgrading)] : [new ResetAuth()];
-        });
-    });
+        }),);
+    }));
 
-  @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS)
-    .mergeMap(action => {
+  @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS).pipe(
+    mergeMap(action => {
       if (action.login) {
         return [new LoginSuccess()];
       }
       return [];
-    });
+    }));
 
-  @Effect() invalidSessionAuth$ = this.actions$.ofType<VerifySession>(SESSION_INVALID)
-    .map(() => {
+  @Effect() invalidSessionAuth$ = this.actions$.ofType<VerifySession>(SESSION_INVALID).pipe(
+    map(() => {
       return new LoginFailed('Invalid session');
-    });
+    }));
 
-  @Effect() logoutRequest$ = this.actions$.ofType<Logout>(LOGOUT)
-    .switchMap(() => {
-      return this.http.post('/pp/v1/auth/logout', {})
-        .mergeMap(data => [new LogoutSuccess(), new ResetAuth()])
-        .catch((err, caught) => [new LogoutFailed(err)]);
-    });
+  @Effect() logoutRequest$ = this.actions$.ofType<Logout>(LOGOUT).pipe(
+    switchMap(() => {
+      return this.http.post('/pp/v1/auth/logout', {}).pipe(
+        mergeMap(data => [new LogoutSuccess(), new ResetAuth()]),
+        catchError((err, caught) => [new LogoutFailed(err)]),);
+    }));
 
-  @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH)
-    .do(() => {
+  @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH).pipe(
+    tap(() => {
       // Ensure that we clear any path from the location (otherwise would be stored via auth gate as redirectPath for log in)
       window.location.assign(window.location.origin);
-    });
+    }));
 
 }

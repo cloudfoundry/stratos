@@ -1,10 +1,11 @@
+
+import {filter, pairwise,  map, withLatestFrom } from 'rxjs/operators';
 /* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
 import { Observable } from 'rxjs';
-import { map, withLatestFrom } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -91,12 +92,12 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
 
     const update$ = this.store.select(
       this.getUpdateSelector(action.guid())
-    ).filter(update => !!update);
+    ).pipe(filter(update => !!update));
 
-    return update$.pairwise()
-      .filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy))
-      .map(([oldVal, newVal]) => newVal)
-      .map(result => {
+    return update$.pipe(pairwise(),
+      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+      map(([oldVal, newVal]) => newVal),
+      map(result => {
         if (!result.error) {
           this.store.dispatch(new RouterNav({ path: ['endpoints'] }));
         } else {
@@ -106,7 +107,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
         return {
           success: !result.error
         };
-      });
+      }),);
   }
 
   private getUpdateSelector(guid) {
@@ -118,10 +119,10 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
   }
 
   ngAfterContentInit() {
-    this.validate = this.form.statusChanges
-      .map(() => {
+    this.validate = this.form.statusChanges.pipe(
+      map(() => {
         return this.form.valid;
-      });
+      }));
   }
 
   setUrlValidation(endpointValue: string) {

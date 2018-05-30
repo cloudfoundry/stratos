@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest, of } from 'rxjs';
+import { Observable, combineLatest, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
@@ -56,7 +56,7 @@ export class CurrentUserPermissionsChecker {
 
     if (type === PermissionTypes.ENDPOINT_SCOPE) {
       if (!endpointGuid) {
-        return of(false);
+        return observableOf(false);
       }
       return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission as ScopeStrings));
     }
@@ -192,7 +192,7 @@ export class CurrentUserPermissionsChecker {
         })
       );
     }
-    return Observable.of(false);
+    return observableOf(false);
   }
 
   public getFeatureFlagChecks(configs: PermissionConfig[], endpointGuid?: string): Observable<boolean>[] {
@@ -274,7 +274,7 @@ export class CurrentUserPermissionsChecker {
   public reduceChecks(checks: Observable<boolean>[], type: '||' | '&&' = '||') {
     const func = type === '||' ? 'some' : 'every';
     if (!checks || !checks.length) {
-      return Observable.of(true);
+      return observableOf(true);
     }
     return combineLatest(checks).pipe(
       map(flags => flags[func](flag => flag)),
@@ -322,7 +322,7 @@ export class CurrentUserPermissionsChecker {
   }
 
   private getEndpointGuidObservable(endpointGuid: string) {
-    return !endpointGuid ? this.getAllEndpointGuids() : Observable.of([endpointGuid]);
+    return !endpointGuid ? this.getAllEndpointGuids() : observableOf([endpointGuid]);
   }
 
   private selectPermission(state: IOrgRoleState | ISpaceRoleState, permission: PermissionStrings): boolean {

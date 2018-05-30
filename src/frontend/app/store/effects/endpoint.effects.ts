@@ -1,8 +1,9 @@
+
+import {catchError,  mergeMap } from 'rxjs/operators';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { mergeMap } from 'rxjs/operators';
 
 import { BrowserStandardEncoder } from '../../helper';
 import {
@@ -83,8 +84,8 @@ export class EndpointsEffect {
       ];
     }));
 
-  @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() connectEndpoint$ = this.actions$.ofType<ConnectEndpoint>(CONNECT_ENDPOINTS).pipe(
+    mergeMap(action => {
       const actionType = 'update';
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.connectingKey);
       const params: HttpParams = new HttpParams({
@@ -106,10 +107,10 @@ export class EndpointsEffect {
         action.endpointType,
         action.body,
       );
-    });
+    }));
 
-  @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() disconnect$ = this.actions$.ofType<DisconnectEndpoint>(DISCONNECT_ENDPOINTS).pipe(
+    mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid, action.type, EndpointsEffect.disconnectingKey);
       const params: HttpParams = new HttpParams({
@@ -126,10 +127,10 @@ export class EndpointsEffect {
         [DISCONNECT_ENDPOINTS_SUCCESS, DISCONNECT_ENDPOINTS_FAILED],
         action.endpointType
       );
-    });
+    }));
 
-  @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() unregister$ = this.actions$.ofType<UnregisterEndpoint>(UNREGISTER_ENDPOINTS).pipe(
+    mergeMap(action => {
 
       const apiAction = this.getEndpointDeleteAction(action.guid, action.type);
       const params: HttpParams = new HttpParams({
@@ -146,10 +147,10 @@ export class EndpointsEffect {
         [UNREGISTER_ENDPOINTS_SUCCESS, UNREGISTER_ENDPOINTS_FAILED],
         action.endpointType
       );
-    });
+    }));
 
-  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS)
-    .flatMap(action => {
+  @Effect() register$ = this.actions$.ofType<RegisterEndpoint>(REGISTER_ENDPOINTS).pipe(
+    mergeMap(action => {
 
       const apiAction = this.getEndpointUpdateAction(action.guid(), action.type, EndpointsEffect.registeringKey);
       const params: HttpParams = new HttpParams({
@@ -170,7 +171,7 @@ export class EndpointsEffect {
         null,
         this.processRegisterError
       );
-    });
+    }));
 
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
@@ -213,7 +214,7 @@ export class EndpointsEffect {
     return this.http.post(url, body || {}, {
       headers,
       params
-    }).mergeMap((endpoint: EndpointModel) => {
+    }).pipe(mergeMap((endpoint: EndpointModel) => {
       const actions = [];
       if (actionStrings[0]) {
         actions.push({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType, endpoint });
@@ -226,8 +227,8 @@ export class EndpointsEffect {
       }
       actions.push(new WrapperRequestActionSuccess(null, apiAction, apiActionType));
       return actions;
-    })
-      .catch(e => {
+    }),
+      catchError(e => {
         const actions = [];
         if (actionStrings[1]) {
           actions.push({ type: actionStrings[1], guid: apiAction.guid });
@@ -235,6 +236,6 @@ export class EndpointsEffect {
         const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
         actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
         return actions;
-      });
+      }),);
   }
 }

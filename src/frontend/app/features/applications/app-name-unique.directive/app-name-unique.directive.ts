@@ -1,3 +1,7 @@
+
+import {throwError as observableThrowError, timer as observableTimer, of as observableOf,  Observable } from 'rxjs';
+
+import {take, combineLatest, switchMap, map, catchError} from 'rxjs/operators';
 import { Directive, forwardRef, Input, OnInit } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
 import { Headers, Http, Request, RequestOptions, URLSearchParams } from '@angular/http';
@@ -6,7 +10,6 @@ import { Store } from '@ngrx/store';
 import { environment } from '../../../../environments/environment';
 import { AppState } from '../../../store/app-state';
 import { selectNewAppState } from '../../../store/effects/create-app-effects';
-import { Observable } from 'rxjs';
 
 /* tslint:disable:no-use-before-declare  */
 const APP_UNIQUE_NAME_PROVIDER = {
@@ -60,30 +63,30 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
   public validate(control: AbstractControl): Observable<{ appNameTaken: boolean } | null> {
     if (!control.dirty) {
-      return Observable.of(null);
+      return observableOf(null);
     }
     this.appApplicationNameUnique.set(true);
-    return Observable.timer(500).take(1)
-      .combineLatest(this.store.select(selectNewAppState).take(1))
-      .switchMap(newAppState => {
+    return observableTimer(500).pipe(take(1),
+      combineLatest(this.store.select(selectNewAppState).pipe(take(1))),
+      switchMap(newAppState => {
         const cfGuid = newAppState[1].cloudFoundryDetails.cloudFoundry;
         const spaceGuid = newAppState[1].cloudFoundryDetails.space;
         const currentName = newAppState[1].name;
         return this.appNameTaken(cfGuid, spaceGuid, currentName, control.value);
-      })
-      .map(appNameTaken => {
+      }),
+      map(appNameTaken => {
         this.appApplicationNameUnique.set(false, appNameTaken);
         return appNameTaken ? { appNameTaken } : null;
-      })
-      .catch(err => {
+      }),
+      catchError(err => {
         this.appApplicationNameUnique.set(false);
-        return Observable.throw(err);
-      });
+        return observableThrowError(err);
+      }),);
   }
 
   private appNameTaken(cfGuid, spaceGuid, currentName, name): Observable<any> {
     if (name.length === 0) {
-      return Observable.of(undefined);
+      return observableOf(undefined);
     }
     const options = new RequestOptions();
     options.url = `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/apps`;
@@ -94,8 +97,8 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     options.headers = new Headers();
     options.headers.set('x-cap-cnsi-list', cfGuid);
     options.headers.set('x-cap-passthrough', 'true');
-    return this.http.request(new Request(options))
-      .map(response => {
+    return this.http.request(new Request(options)).pipe(
+      map(response => {
         let resData;
         try {
           resData = response.json();
@@ -103,6 +106,6 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
           resData = {};
         }
         return resData.total_results > 0;
-      });
+      }));
   }
 }

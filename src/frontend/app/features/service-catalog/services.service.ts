@@ -1,7 +1,8 @@
+
+import {combineLatest as observableCombineLatest, of as observableOf,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
 import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
@@ -166,7 +167,7 @@ export class ServicesService {
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
-      return Observable.of({
+      return observableOf({
         isPublic: true,
         guid: servicePlan.metadata.guid
       });
@@ -196,7 +197,7 @@ export class ServicesService {
   }
 
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
-    return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
+    return observableCombineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.servicePlans$)
       .pipe(
         filter(([p, q]) => !!p && !!q),
         map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),
@@ -264,7 +265,7 @@ export class ServicesService {
   }
 
   getServiceName = () => {
-    return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
+    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
         map(([extraInfo, service]) => {
           if (extraInfo && extraInfo.displayName) {

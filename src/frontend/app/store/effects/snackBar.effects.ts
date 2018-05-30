@@ -1,3 +1,5 @@
+
+import {map} from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
@@ -11,10 +13,10 @@ export class SnackBarEffects {
     private actions$: Actions,
     public snackBar: MatSnackBar
   ) { }
-  @Effect({ dispatch: false }) getInfo$ = this.actions$.ofType<ShowSnackBar>(SHOW_SNACK_BAR)
-    .map(action => {
+  @Effect({ dispatch: false }) getInfo$ = this.actions$.ofType<ShowSnackBar>(SHOW_SNACK_BAR).pipe(
+    map(action => {
       const snackBarRef = this.snackBar.open(action.message, null, {
         duration: 5000
       });
-    });
+    }));
 }

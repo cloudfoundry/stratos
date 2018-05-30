@@ -1,10 +1,11 @@
+
+import {of as observableOf,  BehaviorSubject ,  Observable ,  Subscription } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject ,  Observable ,  Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
 import { ISpace } from '../../../../core/cf-api.types';
@@ -184,7 +185,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         if (route.error) {
           this.submitted = false;
           this.displaySnackBar();
-          return Observable.of(null);
+          return observableOf(null);
         } else {
           this.store.dispatch(new AssociateRouteWithAppApplication(
             this.appGuid,
@@ -206,7 +207,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       );
 
     this.subscriptions.push(associateRoute$.subscribe());
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   private displaySnackBar() {
@@ -240,7 +241,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
 
       this.subscriptions.push(appServiceSub$.subscribe());
     });
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   private associateRoute(route: any) {

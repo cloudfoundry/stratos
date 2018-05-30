@@ -1,8 +1,32 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { filter, map, share, switchMap, tap } from 'rxjs/operators';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  BehaviorSubject,
+  Observable,
+  Subscription,
+  combineLatest as observableCombineLatest,
+  fromEvent as observableFromEvent,
+  interval as observableInterval,
+  never as observableNever
+} from 'rxjs';
+import {
+  buffer,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  sampleTime,
+  scan,
+  share,
+  startWith,
+  switchMap,
+  tap,
+  throttle,
+  timeInterval
+} from 'rxjs/operators';
 import { AnsiColors } from './ansi-colors';
+
+
 
 @Component({
   selector: 'app-log-viewer',
@@ -48,52 +72,53 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
     const stoppableLogStream$ = this.stopped$.pipe(
       switchMap(
-        stopped => (stopped ? Observable.never() : this.logStream)
+        stopped => (stopped ? observableNever() : this.logStream)
       ),
       share()
     );
 
     // Locked indicates auto-scroll - scroll position is "locked" to the bottom
     // If the user scrolls off the bottom then disable auto-scroll
-    this.isLocked$ = Observable.fromEvent<MouseEvent>(
+    this.isLocked$ = observableFromEvent<MouseEvent>(
       containerElement,
       'scroll'
-    )
-      .scan(() => {
+    ).pipe(
+      map(() => {
         return containerElement.scrollTop + containerElement.clientHeight >= contentElement.clientHeight;
-      })
-      .startWith(true);
+      }),
+      startWith(true)
+    );
 
     // When we resize the window, we need to re-enable auto-scroll - if the height changes
     // we will determine that the user scrolled off the bottom, when in fact this is due to the resize event
-    this.resizeSub = Observable.fromEvent(window, 'resize')
-      .combineLatest(this.isLocked$)
+    this.resizeSub = observableFromEvent(window, 'resize').pipe(
+      combineLatest(this.isLocked$))
       .subscribe(([event, locked]) => {
         if (locked) {
           this.scrollToBottom();
         }
       });
 
-    this.isHighThroughput$ = stoppableLogStream$
-      .timeInterval()
-      .sampleTime(500)
-      .map(x => {
+    this.isHighThroughput$ = stoppableLogStream$.pipe(
+      timeInterval(),
+      sampleTime(500),
+      map(x => {
         const high = x.interval < this.highThroughputTimeMS;
         return high;
-      })
-      .distinctUntilChanged()
-      .startWith(false);
+      }),
+      distinctUntilChanged(),
+      startWith(false), );
 
-    const buffer$ = Observable.interval()
-      .combineLatest(this.isHighThroughput$)
-      .throttle(([t, high]) => {
-        return Observable.interval(
+    const buffer$ = observableInterval().pipe(
+      combineLatest(this.isHighThroughput$),
+      throttle(([t, high]) => {
+        return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
         );
-      });
+      }), );
 
-    const addedLogs$ = stoppableLogStream$
-      .buffer(buffer$)
+    const addedLogs$ = stoppableLogStream$.pipe(
+      buffer(buffer$))
       .pipe(
         filter(log => !!log.length),
         // Apply filter to messages if applicable
@@ -121,12 +146,12 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         })
       );
 
-    this.listeningSub = Observable.combineLatest(this.isLocked$, addedLogs$)
-      .do(([isLocked, logs]) => {
+    this.listeningSub = observableCombineLatest(this.isLocked$, addedLogs$).pipe(
+      tap(([isLocked, logs]) => {
         if (isLocked) {
           containerElement.scrollTop = contentElement.clientHeight;
         }
-      })
+      }))
       .subscribe();
 
     if (this.status) {

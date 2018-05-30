@@ -1,6 +1,7 @@
+
+import {of as observableOf,  Observable, combineLatest } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { AppState } from '../store/app-state';
 import { CurrentUserPermissionsChecker, IConfigGroup, IConfigGroups, CHECKER_GROUPS } from './current-user-permissions.checker';
@@ -48,7 +49,7 @@ export class CurrentUserPermissionsService {
     } else if (endpointGuid) {
       return this.checker.getAdminCheck(endpointGuid);
     }
-    return Observable.of(false);
+    return observableOf(false);
   }
 
   private getSimplePermission(actionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
@@ -131,10 +132,10 @@ export class CurrentUserPermissionsService {
       distinctUntilChanged(),
       switchMap(([isAdmin, isReadOnly]) => {
         if (isAdmin) {
-          return Observable.of(true);
+          return observableOf(true);
         }
         if (isReadOnly) {
-          return Observable.of(false);
+          return observableOf(false);
         }
         return check$;
       })

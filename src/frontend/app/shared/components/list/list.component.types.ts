@@ -1,4 +1,5 @@
-import { BehaviorSubject ,  Observable } from 'rxjs';
+
+import {of as observableOf,  BehaviorSubject ,  Observable } from 'rxjs';
 
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
@@ -117,7 +118,7 @@ export class ListConfig<T> implements IListConfig<T> {
   getColumns = (): ITableColumn<T>[] => null;
   getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
-  getInitialised = () => Observable.of(true);
+  getInitialised = () => observableOf(true);
 }
 
 export interface IBaseListAction<T> {

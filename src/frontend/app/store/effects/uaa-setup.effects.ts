@@ -1,3 +1,5 @@
+
+import {map, switchMap, catchError} from 'rxjs/operators';
 import {
   SETUP_UAA,
   SETUP_UAA_SCOPE,
@@ -23,8 +25,8 @@ export class UAASetupEffect {
 
   baseUrl = '/pp/v1/setup';
 
-  @Effect() uaaSetupRequest$ = this.actions$.ofType<SetupUAA>(SETUP_UAA)
-    .switchMap(({ setupData }) => {
+  @Effect() uaaSetupRequest$ = this.actions$.ofType<SetupUAA>(SETUP_UAA).pipe(
+    switchMap(({ setupData }) => {
 
       const headers = new Headers();
       const params = new URLSearchParams();
@@ -42,13 +44,13 @@ export class UAASetupEffect {
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
       return this.http.post(this.baseUrl, params, {
         headers
-      })
-        .map(data => new SetupUAASuccess(data.json()))
-        .catch((err, caught) => [new SetupUAAFailed(err)]);
-    });
+      }).pipe(
+        map(data => new SetupUAASuccess(data.json())),
+        catchError((err, caught) => [new SetupUAAFailed(err)]),);
+    }));
 
-  @Effect() uassSetScope = this.actions$.ofType<SetUAAScope>(SETUP_UAA_SCOPE)
-    .switchMap(({ scope }) => {
+  @Effect() uassSetScope = this.actions$.ofType<SetUAAScope>(SETUP_UAA_SCOPE).pipe(
+    switchMap(({ scope }) => {
       const headers = new Headers();
       const params = new URLSearchParams();
 
@@ -56,9 +58,9 @@ export class UAASetupEffect {
       headers.append('Content-Type', 'application/x-www-form-urlencoded');
       return this.http.post(`${this.baseUrl}/update`, params, {
         headers
-      })
-        .map(data => new SetupUAASuccess({}))
-        .catch((err, caught) => [new SetupUAAFailed(err)]);
-    });
+      }).pipe(
+        map(data => new SetupUAASuccess({})),
+        catchError((err, caught) => [new SetupUAAFailed(err)]),);
+    }));
 
 }

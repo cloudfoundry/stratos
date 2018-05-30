@@ -1,10 +1,11 @@
+
+import {never as observableNever,  Observable, Subject ,  Subscription } from 'rxjs';
+
+import {catchError,  first, map } from 'rxjs/operators';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import websocketConnect from 'rxjs-websockets';
-import { Observable, Subject } from 'rxjs';
-import { first, map } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
 
 import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
@@ -71,8 +72,8 @@ export class SshApplicationComponent implements OnInit {
     );
 
     if (!cfGuid || !appGuid || !this.instanceId) {
-      this.messages = Observable.never();
-      this.connectionStatus = Observable.never();
+      this.messages = observableNever();
+      this.connectionStatus = observableNever();
     } else {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -85,13 +86,13 @@ export class SshApplicationComponent implements OnInit {
         this.sshInput
       );
 
-      this.messages = connection.messages
-        .catch(e => {
+      this.messages = connection.messages.pipe(
+        catchError(e => {
           if (e.type === 'error') {
             this.errorMessage = 'Error connecting to web socket';
           }
           return [];
-        });
+        }));
 
       this.connectionStatus = connection.connectionStatus;
 

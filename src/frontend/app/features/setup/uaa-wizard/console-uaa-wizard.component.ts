@@ -1,3 +1,5 @@
+
+import {take, delay, filter, skipWhile, map} from 'rxjs/operators';
 import { AfterContentInit, Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -38,37 +40,37 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       username: this.uaaForm.get('adminUsername').value,
       console_client_secret: this.uaaForm.get('clientSecret').value,
     }));
-    return this.store.select('uaaSetup')
-      .skipWhile((state: UAASetupState) => {
+    return this.store.select('uaaSetup').pipe(
+      skipWhile((state: UAASetupState) => {
         return state.settingUp;
-      })
-      .map((state: UAASetupState) => {
+      }),
+      map((state: UAASetupState) => {
         this.uaaScopes = state.payload.scope;
         this.selectedScope = 'stratos.admin';
         return {
           success: !state.error,
           message: state.message
         };
-      });
+      }),);
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetUAAScope(this.selectedScope));
     this.applyingSetup$.next(true);
-    return this.store.select(s => [s.uaaSetup, s.auth])
-      .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+    return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
+      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         return !(uaa.settingUp || auth.verifying);
-      })
-      .delay(3000)
-      .take(10)
-      .filter(([uaa, auth]: [UAASetupState, AuthState]) => {
+      }),
+      delay(3000),
+      take(10),
+      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
         const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
         if (!validUAASessionData) {
           this.store.dispatch(new VerifySession());
         }
         return validUAASessionData;
-      })
-      .map((state: [UAASetupState, AuthState]) => {
+      }),
+      map((state: [UAASetupState, AuthState]) => {
         if (!state[0].error) {
           // Do a hard reload of the app
           const loc = window.location;
@@ -81,7 +83,7 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
           success: !state[0].error,
           message: state[0].message
         };
-      });
+      }),);
   }
   ngOnInit() {
     this.uaaForm = new FormGroup({

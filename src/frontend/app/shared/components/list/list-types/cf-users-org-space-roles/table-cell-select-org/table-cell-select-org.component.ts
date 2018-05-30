@@ -1,6 +1,7 @@
+
+import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
 
 import { IOrganization } from '../../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
@@ -36,7 +37,7 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     if (this.activeRouteCfOrgSpace.orgGuid) {
       this.singleOrg$ = this.cfRolesService.fetchOrgEntity(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid);
     } else {
-      this.singleOrg$ = Observable.of(null);
+      this.singleOrg$ = observableOf(null);
       this.organizations$ = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid);
     }
     this.orgGuidChangedSub = this.store.select(selectUsersRolesOrgGuid).subscribe(orgGuid => this.selectedOrgGuid = orgGuid);

@@ -3,8 +3,7 @@ import {
   EventEmitter, HostListener
 } from '@angular/core';
 
-import { Observable } from 'rxjs';
-import { Subscription, Subject } from 'rxjs';
+import { Observable ,  Subscription, Subject } from 'rxjs';
 
 // Import Xterm
 import * as Terminal from 'xterm/dist/xterm.js';

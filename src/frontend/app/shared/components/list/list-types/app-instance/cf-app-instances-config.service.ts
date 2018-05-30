@@ -1,3 +1,5 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -13,7 +15,6 @@ import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { CfAppInstancesDataSource, ListAppInstance } from './cf-app-instances-data-source';
 import { TableCellUsageComponent } from './table-cell-usage/table-cell-usage.component';
-import { Observable } from 'rxjs';
 
 @Injectable()
 export class CfAppInstancesConfigService implements IListConfig<ListAppInstance> {
@@ -123,8 +124,8 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'Terminate',
     description: ``, // Description depends on console user permission
-    createVisible: (row) => Observable.of(true),
-    createEnabled: (row) => Observable.of(true)
+    createVisible: (row) => observableOf(true),
+    createEnabled: (row) => observableOf(true)
   };
 
   private listActionSsh: IListAction<any> = {
@@ -137,7 +138,7 @@ export class CfAppInstancesConfigService implements IListConfig<ListAppInstance>
     },
     label: 'SSH',
     description: ``, // Description depends on console user permission
-    createVisible: (row) => Observable.of(true),
+    createVisible: (row) => observableOf(true),
     createEnabled: row =>
       this.appService.app$.pipe(
         map(app => {

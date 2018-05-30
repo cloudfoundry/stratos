@@ -1,8 +1,9 @@
+
+import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
 import { map, take, tap } from 'rxjs/operators';
 
 import { EntityService } from '../../../../../../core/entity-service';
@@ -115,7 +116,7 @@ export class GithubTabComponent implements OnInit, OnDestroy {
               stProject.deploySource.commit.trim()
             );
           }),
-          tap(p => (this.initialised$ = Observable.of(true)))
+          tap(p => (this.initialised$ = observableOf(true)))
         );
       })
     );

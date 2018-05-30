@@ -1,6 +1,7 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -83,7 +84,7 @@ export class CfRolesService {
    */
   populateRoles(cfGuid: string, selectedUsers: CfUser[]): Observable<CfUserRolesSelected> {
     if (!cfGuid || !selectedUsers || selectedUsers.length === 0) {
-      return Observable.of({});
+      return observableOf({});
     }
 
     const userGuids = selectedUsers.map(user => user.guid);

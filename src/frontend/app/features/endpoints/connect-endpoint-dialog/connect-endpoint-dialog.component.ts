@@ -1,10 +1,10 @@
+
+import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
-import { Observable } from 'rxjs';
-import { Subscription } from 'rxjs';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';
 import { ShowSnackBar } from '../../../store/actions/snackBar.actions';
@@ -96,8 +96,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   setupSubscriptions() {
-    this.fetchSub = this.update$
-      .pairwise()
+    this.fetchSub = this.update$.pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
           // Has finished fetching
@@ -105,9 +105,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
         }
       });
 
-    this.connectingSub = this.endpointConnected$
-      .filter(connected => connected)
-      .delay(this.connectDelay)
+    this.connectingSub = this.endpointConnected$.pipe(
+      filter(connected => connected),
+      delay(this.connectDelay),)
       .subscribe(() => {
         this.store.dispatch(new ShowSnackBar(`Connected ${this.data.name}`));
         this.dialogRef.close();
@@ -117,19 +117,19 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   setupObservables() {
     this.update$ = this.store.select(
       this.getUpdateSelector()
-    ).filter(update => !!update);
+    ).pipe(filter(update => !!update));
 
     this.fetchingInfo$ = this.store.select(
       this.getRequestSelector()
-    )
-      .filter(request => !!request)
-      .map(request => request.fetching);
+    ).pipe(
+      filter(request => !!request),
+      map(request => request.fetching),);
 
     this.endpointConnected$ = this.store.select(
       this.getEntitySelector()
-    )
-      .map(request => !!(request && request.api_endpoint && request.user));
-    const busy$ = this.update$.map(update => update.busy).startWith(false);
+    ).pipe(
+      map(request => !!(request && request.api_endpoint && request.user)));
+    const busy$ = this.update$.pipe(map(update => update.busy),startWith(false),);
     this.connecting$ = busy$.pipe(
       pairwise(),
       switchMap(([oldBusy, newBusy]) => {
@@ -139,7 +139,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
             startWith(true)
           );
         }
-        return Observable.of(newBusy);
+        return observableOf(newBusy);
       })
     );
     this.connectingError$ = this.update$.pipe(
@@ -153,18 +153,18 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
   }
 
   setupCombinedObservables() {
-    this.isBusy$ = Observable.combineLatest(
-      this.connecting$.startWith(false),
-      this.fetchingInfo$.startWith(false)
-    )
-      .map(([connecting, fetchingInfo]) => connecting || fetchingInfo);
+    this.isBusy$ = observableCombineLatest(
+      this.connecting$.pipe(startWith(false)),
+      this.fetchingInfo$.pipe(startWith(false))
+    ).pipe(
+      map(([connecting, fetchingInfo]) => connecting || fetchingInfo));
 
-    this.canSubmit$ = Observable.combineLatest(
-      this.connecting$.startWith(false),
-      this.fetchingInfo$.startWith(false),
-      this.valid$.startWith(false)
-    )
-      .map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid);
+    this.canSubmit$ = observableCombineLatest(
+      this.connecting$.pipe(startWith(false)),
+      this.fetchingInfo$.pipe(startWith(false)),
+      this.valid$.pipe(startWith(false))
+    ).pipe(
+      map(([connecting, fetchingInfo, valid]) => !connecting && !fetchingInfo && valid));
   }
 
   private getUpdateSelector() {

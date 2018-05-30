@@ -1,6 +1,7 @@
+
+import {combineLatest as observableCombineLatest,  BehaviorSubject ,  Observable } from 'rxjs';
 import { AfterContentInit, Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject ,  Observable } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { IOrganization } from '../../../../../core/cf-api.types';
@@ -181,7 +182,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
     this.changes$ = this.updateChanges.pipe(
       withLatestFrom(this.cfAndOrgGuid$),
       mergeMap(([changed, { cfGuid, orgGuid }]) => {
-        return Observable.combineLatest(
+        return observableCombineLatest(
           this.cfUserService.getUsers(cfGuid),
           this.cfRolesService.fetchOrgEntity(cfGuid, orgGuid)
         );

@@ -1,6 +1,7 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Action, Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
-import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, pairwise, skipWhile, withLatestFrom } from 'rxjs/operators';
 
 import { isEntityBlocked } from '../../core/entity-service';
@@ -465,7 +466,7 @@ function childEntitiesAsGuids(childEntitiesAsArray: any[]): string[] {
  */
 export function populatePaginationFromParent(store: Store<AppState>, action: PaginatedAction): Observable<Action> {
   if (!isEntityInlineChildAction(action) || !action.flattenPagination) {
-    return Observable.of(null);
+    return observableOf(null);
   }
   const parentEntitySchema = action['parentEntitySchema'] as EntitySchema;
   const parentGuid = action['parentGuid'];
@@ -476,7 +477,7 @@ export function populatePaginationFromParent(store: Store<AppState>, action: Pag
     first(),
     mergeMap(entity => {
       if (!entity) {
-        return Observable.of(null);
+        return observableOf(null);
       }
       return store.select(selectRequestInfo(parentEntitySchema.key, parentGuid));
     }),

@@ -1,7 +1,8 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
 import { combineLatest, filter, first, map, tap, startWith } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -93,10 +94,10 @@ export class UsersRolesComponent implements OnDestroy {
 
   startApply: StepOnNextFunction = () => {
     if (this.applyStarted) {
-      return Observable.of({ success: true, redirect: true });
+      return observableOf({ success: true, redirect: true });
     }
     this.applyStarted = true;
     this.store.dispatch(new UsersRolesExecuteChanges());
-    return Observable.of({ success: true, ignoreSuccess: true });
+    return observableOf({ success: true, ignoreSuccess: true });
   }
 }

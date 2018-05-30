@@ -1,9 +1,12 @@
+
+import {of as observableOf, throwError as observableThrowError,  Observable } from 'rxjs';
+
+import {catchError, map, withLatestFrom, switchMap} from 'rxjs/operators';
 import { selectNewAppCFDetails } from '../selectors/create-application.selectors';
 import { Injectable } from '@angular/core';
 import { Headers, Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
@@ -31,9 +34,9 @@ export class CreateAppPageEffects {
   proxyAPIVersion: string;
   cfAPIVersion: string;
 
-  @Effect() CheckAppNameIsFree$ = this.actions$.ofType<IsNewAppNameFree>(CHECK_NAME)
-    .withLatestFrom(this.store.select(selectNewAppCFDetails))
-    .switchMap(([action, cfDetails]: [any, NewAppCFDetails]) => {
+  @Effect() CheckAppNameIsFree$ = this.actions$.ofType<IsNewAppNameFree>(CHECK_NAME).pipe(
+    withLatestFrom(this.store.select(selectNewAppCFDetails)),
+    switchMap(([action, cfDetails]: [any, NewAppCFDetails]) => {
       const { cloudFoundry, org, space } = cfDetails;
       const headers = new Headers({ 'x-cap-cnsi-list': cloudFoundry });
       return this.http.get(`/pp/${this.proxyAPIVersion}/proxy/${this.cfAPIVersion}/apps`, {
@@ -41,19 +44,19 @@ export class CreateAppPageEffects {
           'q': `name:${action.name};space_guid:${space}`
         },
         headers
-      })
-        .map(res => {
+      }).pipe(
+        map(res => {
           const apps = res.json();
           const ourCfApps = apps[cloudFoundry];
           if (ourCfApps.total_results) {
-            throw Observable.throw('Taken');
+            throw observableThrowError('Taken');
           }
           return new AppNameFree(action.name);
-        })
-        .catch(err => {
-          return Observable.of(new AppNameTaken(action.name));
-        });
-    });
+        }),
+        catchError(err => {
+          return observableOf(new AppNameTaken(action.name));
+        }),);
+    }),);
 }
 
 export const selectNewAppState = (state: AppState): CreateNewApplicationState => state.createApplication;

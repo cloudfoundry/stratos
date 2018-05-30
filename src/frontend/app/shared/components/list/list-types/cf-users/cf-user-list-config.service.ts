@@ -1,3 +1,5 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -13,7 +15,6 @@ import { ListConfig, ListViewTypes, IMultiListAction, IBaseListAction, IListActi
 import { CfOrgPermissionCellComponent } from './cf-org-permission-cell/cf-org-permission-cell.component';
 import { CfSpacePermissionCellComponent } from './cf-space-permission-cell/cf-space-permission-cell.component';
 import { CfUserDataSourceService } from './cf-user-data-source.service';
-import { Observable } from 'rxjs';
 
 @Injectable()
 export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
@@ -77,7 +78,7 @@ export class CfUserListConfigService extends ListConfig<APIResource<CfUser>> {
     icon: 'people',
     label: 'Manage',
     description: ``,
-    visible$: Observable.of(true)
+    visible$: observableOf(true)
   };
 
   createManagerUsersUrl(user: APIResource<CfUser> = null): string {

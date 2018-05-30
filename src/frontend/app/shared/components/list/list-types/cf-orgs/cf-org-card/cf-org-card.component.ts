@@ -1,6 +1,7 @@
+
+import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
@@ -67,14 +68,14 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       switchMap(u => {
         // This is null if the endpoint is disconnected. Probably related to https://github.com/cloudfoundry-incubator/stratos/issues/1727
         if (!u) {
-          return Observable.of(createUserRoleInOrg(false, false, false, false));
+          return observableOf(createUserRoleInOrg(false, false, false, false));
         }
         return this.cfUserService.getUserRoleInOrg(u.guid, this.row.metadata.guid, this.row.entity.cfGuid);
       }),
       map(u => getOrgRolesString(u)),
     );
 
-    const fetchData$ = Observable.combineLatest(
+    const fetchData$ = observableCombineLatest(
       userRole$,
       this.cfEndpointService.getAppsInOrg(this.row)
     ).pipe(

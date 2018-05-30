@@ -1,8 +1,11 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
+
+import {tap, debounceTime, filter, first, map} from 'rxjs/operators';
 import { Directive, forwardRef } from '@angular/core';
 import { NG_ASYNC_VALIDATORS, Validator, AbstractControl } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
-import { Observable } from 'rxjs';
 import { CheckProjectExists } from '../../../store/actions/deploy-applications.actions';
 import { selectDeployAppState } from '../../../store/selectors/deploy-application.selector';
 
@@ -23,24 +26,24 @@ export class GithubProjectExistsDirective implements Validator {
 
   validate(c: AbstractControl): Observable<{ githubProjectExists: boolean } | null> {
     if (c.value) {
-      return this.store.select(selectDeployAppState)
-        .debounceTime(250)
-        .do(createAppState => {
+      return this.store.select(selectDeployAppState).pipe(
+        debounceTime(250),
+        tap(createAppState => {
           if (createAppState.projectExists && createAppState.projectExists.name !== c.value) {
             this.store.dispatch(new CheckProjectExists(c.value));
           }
-        })
-        .filter(createAppState => {
+        }),
+        filter(createAppState => {
           return !createAppState.projectExists.checking &&
             createAppState.projectExists.name === c.value;
-        })
-        .map(createAppState => {
+        }),
+        map(createAppState => {
           return createAppState.projectExists.exists ? null : {
             githubProjectExists: !createAppState.projectExists.exists
           };
-        }).first();
+        }),first(),);
     } else {
-      return Observable.of(null).first();
+      return observableOf(null).pipe(first());
     }
   }
 

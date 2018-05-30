@@ -1,8 +1,9 @@
-import { Observable } from 'rxjs';
+
+import {of as observableOf,  Observable } from 'rxjs';
 
 export class ServicesServiceMock {
-  servicePlanVisibilities$ = Observable.of([]);
-  service$ = Observable.of(
+  servicePlanVisibilities$ = observableOf([]);
+  service$ = observableOf(
     {
       entity: {
         label: 'app-autoscaler',
@@ -39,7 +40,7 @@ export class ServicesServiceMock {
         updated_at: '2017-11-27T17:07:02Z'
       }
     });
-  servicePlans$ = Observable.of([{
+  servicePlans$ = observableOf([{
     entity: {
       name: 'shared',
       free: true,
@@ -65,11 +66,11 @@ export class ServicesServiceMock {
   }]);
 
   getVisibleServicePlans = () => this.servicePlans$;
-  getOrgsForSelectedServicePlan = () => Observable.of([]);
-  getSelectedServicePlanAccessibility = () => Observable.of({
+  getOrgsForSelectedServicePlan = () => observableOf([]);
+  getSelectedServicePlanAccessibility = () => observableOf({
     isPublic: true
   })
-  getServicePlanAccessibility = () => Observable.of({
+  getServicePlanAccessibility = () => observableOf({
     isPublic: true
   })
 

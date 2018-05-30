@@ -78,10 +78,10 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.validate = this.stepperForm.statusChanges
-      .map(() => {
+    this.validate = this.stepperForm.statusChanges.pipe(
+      map(() => {
         return this.stepperForm.valid;
-      });
+      }));
   }
 
   submit = () => {

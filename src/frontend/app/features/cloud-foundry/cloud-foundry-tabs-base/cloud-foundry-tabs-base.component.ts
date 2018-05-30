@@ -1,6 +1,7 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
@@ -48,7 +49,7 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.isFetching$ = Observable.of(false);
+    this.isFetching$ = observableOf(false);
     this.canAddOrg$ = this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_CREATE, this.cfEndpointService.cfGuid);
 
   }

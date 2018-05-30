@@ -1,5 +1,6 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
 
 import { EntityServiceFactory } from '../core/entity-service-factory.service';
 import { ApplicationData, ApplicationService } from '../features/applications/application.service';
@@ -31,7 +32,7 @@ function createEntity<T>(entity: T): APIResource<T> {
 export class ApplicationServiceMock {
   cfGuid = 'mockCfGuid';
   appGuid = 'mockAppGuid';
-  application$: Observable<ApplicationData> = Observable.of(({
+  application$: Observable<ApplicationData> = observableOf(({
     cf: {
       guid: 'mockCfGuid'
     },
@@ -47,13 +48,13 @@ export class ApplicationServiceMock {
     },
     fetching: false
   } as ApplicationData));
-  appSummary$: Observable<EntityInfo<AppSummary>> = Observable.of(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
-  appStats$: Observable<APIResource<AppStat>[]> = Observable.of(new Array<APIResource<AppStat>>());
-  applicationStratProject$: Observable<EnvVarStratosProject> = Observable.of({ deploySource: { type: '', timestamp: 0, commit: '' } });
-  isFetchingApp$: Observable<boolean> = Observable.of(false);
-  isFetchingEnvVars$: Observable<boolean> = Observable.of(false);
-  isUpdatingEnvVars$: Observable<boolean> = Observable.of(false);
-  waitForAppEntity$: Observable<EntityInfo> = Observable.of({
+  appSummary$: Observable<EntityInfo<AppSummary>> = observableOf(({ entityRequestInfo: { fetching: false } } as EntityInfo<AppSummary>));
+  appStats$: Observable<APIResource<AppStat>[]> = observableOf(new Array<APIResource<AppStat>>());
+  applicationStratProject$: Observable<EnvVarStratosProject> = observableOf({ deploySource: { type: '', timestamp: 0, commit: '' } });
+  isFetchingApp$: Observable<boolean> = observableOf(false);
+  isFetchingEnvVars$: Observable<boolean> = observableOf(false);
+  isUpdatingEnvVars$: Observable<boolean> = observableOf(false);
+  waitForAppEntity$: Observable<EntityInfo> = observableOf({
     entity: createEntity({
       space: {
         metadata: {},
@@ -64,15 +65,15 @@ export class ApplicationServiceMock {
     })
   } as EntityInfo);
   appEnvVars = {
-    entities$: Observable.of(new Array<APIResource<any>>())
+    entities$: observableOf(new Array<APIResource<any>>())
   };
-  applicationState$: Observable<ApplicationStateData> = Observable.of({
+  applicationState$: Observable<ApplicationStateData> = observableOf({
     label: '',
     indicator: null,
     actions: {}
   });
-  appSpace$: Observable<APIResource<ISpace>> = Observable.of(createEntity<ISpace>({} as ISpace));
-  applicationRunning$: Observable<boolean> = Observable.of(false);
+  appSpace$: Observable<APIResource<ISpace>> = observableOf(createEntity<ISpace>({} as ISpace));
+  applicationRunning$: Observable<boolean> = observableOf(false);
 }
 
 export function generateTestApplicationServiceProvider(appGuid, cfGuid) {

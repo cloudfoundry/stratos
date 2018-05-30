@@ -48,10 +48,10 @@ export class VariablesTabComponent implements OnInit {
   allEnvVars$: Observable<VariableTabAllEnvVarType[] | any[]>;
 
   ngOnInit() {
-    this.envVars$ = this.appService.waitForAppEntity$.map(app => ({
+    this.envVars$ = this.appService.waitForAppEntity$.pipe(map(app => ({
       names: app.entity.entity.environment_json ? Object.keys(app.entity.entity.environment_json) : [],
       values: app.entity.entity.environment_json || {}
-    }));
+    })));
     this.allEnvVars$ = this.appService.appEnvVars.entities$.pipe(
       map(allEnvVars => {
         if (!allEnvVars || !allEnvVars.length || !allEnvVars[0] || !allEnvVars[0].entity) {

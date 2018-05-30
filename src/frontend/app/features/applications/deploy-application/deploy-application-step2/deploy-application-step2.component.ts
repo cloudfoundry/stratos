@@ -1,8 +1,9 @@
+
+import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable ,  Subscription } from 'rxjs';
 import { filter, map, take, tap ,  withLatestFrom } from 'rxjs/operators';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -99,7 +100,7 @@ export class DeployApplicationStep2Component
         branch: this.repositoryBranch
       })
     );
-    return Observable.of({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
+    return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   }
 
   ngOnInit() {
@@ -172,7 +173,7 @@ export class DeployApplicationStep2Component
       map(([p, q]) => p)
     );
 
-    const updateBranchAndCommit = Observable.combineLatest(
+    const updateBranchAndCommit = observableCombineLatest(
       this.repositoryBranches$,
       deployBranchName$,
       this.projectInfo$,
@@ -248,8 +249,8 @@ export class DeployApplicationStep2Component
   }
 
   ngAfterContentInit() {
-    this.validate = this.sourceSelectionForm.statusChanges.map(() => {
+    this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
       return this.sourceSelectionForm.valid || this.isRedeploy;
-    });
+    }));
   }
 }

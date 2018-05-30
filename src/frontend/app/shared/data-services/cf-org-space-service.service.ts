@@ -83,9 +83,9 @@ export class CfOrgSpaceDataService implements OnDestroy {
       entityFactory(this.paginationAction.entityKey)
     )
   });
-  private allOrgsLoading$ = this.allOrgs.pagination$.map(
+  private allOrgsLoading$ = this.allOrgs.pagination$.pipe(map(
     pag => getCurrentPageRequestInfo(pag).busy
-  );
+  ));
 
   private getEndpointsAndOrgs$: Observable<any>;
   private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
@@ -122,11 +122,11 @@ export class CfOrgSpaceDataService implements OnDestroy {
 
   private init() {
     this.getEndpointsAndOrgs$ = combineLatest(
-      this.allOrgs.pagination$
-        .filter(paginationEntity => {
+      this.allOrgs.pagination$.pipe(
+        filter(paginationEntity => {
           return !getCurrentPageRequestInfo(paginationEntity).busy;
-        })
-        .first(),
+        }),
+        first(),),
       this.cf.list$
     );
   }
@@ -134,12 +134,12 @@ export class CfOrgSpaceDataService implements OnDestroy {
   private createCf() {
     this.cf = {
       list$: this.store
-        .select(endpointsRegisteredEntitiesSelector)
-        .first()
-        .map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf'))
-        .map((endpoints: EndpointModel[]) => {
+        .select(endpointsRegisteredEntitiesSelector).pipe(
+        first(),
+        map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
+        map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
-        }),
+        }),),
       loading$: this.allOrgsLoading$,
       select: new BehaviorSubject(undefined)
     };
@@ -150,7 +150,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.cf.select.asObservable(),
       this.getEndpointsAndOrgs$,
       this.allOrgs.entities$
-    ).map(
+    ).pipe(map(
       ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
         const [pag, cfList] = endpointsAndOrgs;
         if (selectedCF && entities) {
@@ -161,7 +161,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         }
         return [];
       }
-    );
+    ));
 
     this.org = {
       list$: orgList$,
@@ -175,7 +175,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       this.org.select.asObservable(),
       this.getEndpointsAndOrgs$,
       this.allOrgs.entities$
-    ).map(([selectedOrgGuid, data, orgs]) => {
+    ).pipe(map(([selectedOrgGuid, data, orgs]) => {
       const [orgList, cfList] = data;
       const selectedOrg = orgs.find(org => {
         return org.metadata.guid === selectedOrgGuid;
@@ -188,7 +188,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         }).sort((a, b) => a.name.localeCompare(b.name));
       }
       return [];
-    });
+    }));
 
     this.space = {
       list$: spaceList$,

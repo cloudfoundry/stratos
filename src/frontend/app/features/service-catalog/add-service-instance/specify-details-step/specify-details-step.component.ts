@@ -139,10 +139,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
 
   ngAfterContentInit() {
-    this.validate = this.stepperForm.statusChanges
-      .map(() => {
+    this.validate = this.stepperForm.statusChanges.pipe(
+      map(() => {
         return this.stepperForm.valid;
-      });
+      }));
 
     this.orgSubscription = this.orgs$.pipe(
       filter(p => !!p && p.length > 0),

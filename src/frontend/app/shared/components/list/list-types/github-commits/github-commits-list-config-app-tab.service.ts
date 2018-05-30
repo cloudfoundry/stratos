@@ -1,3 +1,5 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -23,7 +25,6 @@ import { GithubCommit } from '../../../../../store/types/github.types';
 import { IListAction } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
-import { Observable } from 'rxjs';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {
@@ -64,8 +65,8 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     },
     label: 'Deploy',
     description: ``,
-    createVisible: (commit: APIResource<GithubCommit>) => Observable.of(true),
-    createEnabled: (commit: APIResource<GithubCommit>) => Observable.of(true)
+    createVisible: (commit: APIResource<GithubCommit>) => observableOf(true),
+    createEnabled: (commit: APIResource<GithubCommit>) => observableOf(true)
   };
 
   private listActionCompare: IListAction<APIResource<GithubCommit>> = {
@@ -74,16 +75,16 @@ export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfi
     },
     label: 'Compare',
     description: '',
-    createVisible: (commit: APIResource<GithubCommit>) => Observable.of(true),
+    createVisible: (commit: APIResource<GithubCommit>) => observableOf(true),
     createEnabled: (commit: APIResource<GithubCommit>) => {
       const isDeployedCommit = commit.entity.sha === this.deployedCommitSha;
       if (!isDeployedCommit) {
         // The github url will show 'no change' if the compare to commit is earlier in the tree than the deployed commit. We could swap
         // these around for those cases... however the diff +/- is then incorrect. So until we have a better way of doing this disable
         // the button instead
-        return Observable.of(this.deployedTime < moment(commit.entity.commit.author.date).unix());
+        return observableOf(this.deployedTime < moment(commit.entity.commit.author.date).unix());
       }
-      return Observable.of(false);
+      return observableOf(false);
     }
   };
 
