@@ -38,3 +38,11 @@ export type ActionMergeFunction = (oldEntities: IRequestDataState, newEntities: 
 export interface NormalizedResponseEntities {
   [key: string]: string;
 }
+
+export interface CFResponse<T = any> {
+  total_results: number;
+  total_pages: number;
+  prev_url: string;
+  next_url: string;
+  resources: APIResource<T>;
+}

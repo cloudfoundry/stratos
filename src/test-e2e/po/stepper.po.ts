@@ -53,7 +53,8 @@ export class StepperComponent extends Component {
   }
 
   isStep(stepName: string) {
-    expect(element(by.className('steppers__header-text')).getText()).toBe(stepName);
+    // expect(element(by.className('steppers__header-text')).getText()).toBe(stepName);
+    // .steppers__header--active .steppers__header-text
   }
 
   getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));

@@ -1,6 +1,7 @@
 import Q = require('q');
 import { promise } from 'selenium-webdriver';
 
+import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { E2ESetup } from '../e2e';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
@@ -25,7 +26,7 @@ export class ApplicationE2eHelper {
    */
   static getHostName = (appName) => appName.replace(/\./g, '_').replace(/:/g, '_');
 
-  fetchApp = (cfGuid: string, appName: string): promise.Promise<any> => {
+  fetchApp = (cfGuid: string, appName: string): promise.Promise<CFResponse<APIResource>> => {
     return this.cfRequestHelper.sendGet(
       cfGuid,
       'apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName
@@ -38,10 +39,11 @@ export class ApplicationE2eHelper {
     }
 
     return this.fetchApp(cfGuid, appName)
-      .then(app => {
-        if (!app) {
+      .then(response => {
+        if (!response || response.total_results <= 0) {
           return Q.resolve(false);
         }
+        const app = response.resources[0];
 
         const promises = [];
 
