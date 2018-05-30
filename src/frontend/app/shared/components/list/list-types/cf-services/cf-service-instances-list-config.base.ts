@@ -116,8 +116,6 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
       this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid),
     label: 'Edit',
     description: 'Edit Service Instance',
-    // createVisible: (row: APIResource) => Observable.of(true),
-    // createEnabled: (row: APIResource) => Observable.of(true)
   };
 
   private can(cache: CanCache, perm: CurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
