@@ -21,7 +21,7 @@ export abstract class Page {
   // Helpers
   public helpers = new E2EHelpers();
 
-  constructor(public navLink?: string) {}
+  constructor(public navLink?: string) { }
 
   navigateTo(): promise.Promise<any> {
     return browser.get(this.navLink);

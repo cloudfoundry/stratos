@@ -103,7 +103,7 @@ export class FormComponent extends Component {
   }
 
   // Fill the form fields in the specified object
-  fill(fields: any): promise.Promise<void> {
+  fill(fields: { [fieldKey: string]: string | boolean }): promise.Promise<void> {
     return this.getControlsMap().then(ctrls => {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
@@ -119,12 +119,13 @@ export class FormComponent extends Component {
           ctrl.clear();
           ctrl.sendKeys(value);
         }
+        expect(this.getField(field).getText()).toBe(value);
       });
     });
   }
 
   // Clear the specified field
-  clearField(name: string): promise.Promise<void>  {
+  clearField(name: string): promise.Promise<void> {
     this.getField(name).click();
     this.getField(name).clear();
     // If we type something and delete, this works around an issue with clear and validation.
@@ -144,7 +145,7 @@ export class FormField {
   }
 
   set(v: string): promise.Promise<void> {
-    return this.form.fill( { [this.name]: v} );
+    return this.form.fill({ [this.name]: v });
   }
 
   clear(): promise.Promise<void> {

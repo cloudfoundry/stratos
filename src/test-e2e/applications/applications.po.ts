@@ -4,7 +4,12 @@ import { CFPage } from '../po/cf-page.po';
 
 export class ApplicationsPage extends CFPage {
 
+
   constructor() {
     super('/applications');
+  }
+
+  clickCreateApp(): any {
+    this.helpers.waitForElementAndClick(element(by.css('button[ng-reflect-router-link]="/applications/new/"')));
   }
 }

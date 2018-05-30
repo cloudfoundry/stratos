@@ -1,16 +1,10 @@
-import { ApplicationsPage } from '../applications/applications.po';
-import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { MenuComponent } from '../po/menu.po';
-import { ServicesPage } from '../services/services.po';
 import { EndpointsPage } from './endpoints.po';
 
 describe('Endpoints', () => {
   const endpointsPage = new EndpointsPage();
-  const applications = new ApplicationsPage();
-  const services = new ServicesPage();
-  const cloudFoundry = new CloudFoundryPage();
 
   describe('Unregister Endpoints -', () => {
 
@@ -23,8 +17,8 @@ describe('Endpoints', () => {
         beforeAll(() => {
           // Only register the default Cloud Foundry endpoint
           e2e.setup(ConsoleUserType.admin)
-          .clearAllEndpoints()
-          .registerDefaultCloudFoundry();
+            .clearAllEndpoints()
+            .registerDefaultCloudFoundry();
         });
 
         it('Successfully unregister', () => {
@@ -50,8 +44,8 @@ describe('Endpoints', () => {
         beforeAll(() => {
           // Ensure we have multiple endpoints registered
           e2e.setup(ConsoleUserType.admin)
-          .clearAllEndpoints()
-          .registerMultipleCloudFoundries();
+            .clearAllEndpoints()
+            .registerMultipleCloudFoundries();
         });
 
         it('Successfully unregister', () => {
@@ -79,8 +73,8 @@ describe('Endpoints', () => {
 
       beforeAll(() => {
         e2e.setup(ConsoleUserType.user)
-        .clearAllEndpoints()
-        .registerDefaultCloudFoundry();
+          .clearAllEndpoints()
+          .registerDefaultCloudFoundry();
       });
 
       it('unregister is not visible', () => {

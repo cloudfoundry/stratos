@@ -1,6 +1,7 @@
 import { by, element } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
+import { FormComponent } from './form.po';
 
 export class StepperStep {
   index: number;
@@ -50,5 +51,12 @@ export class StepperComponent extends Component {
   canPrevious() {
     return this.isPresentNotDisabled(element(by.id('stepper_previous')));
   }
+
+  isStep(stepName: string) {
+    expect(element(by.className('steppers__header-text')).getText()).toBe(stepName);
+  }
+
+  getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));
+
 
 }
