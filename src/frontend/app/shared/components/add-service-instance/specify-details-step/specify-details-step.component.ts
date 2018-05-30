@@ -251,15 +251,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return { success: true };
   }
 
-  // private setServiceInstanceGuid(request: { creating: boolean; error: boolean; response: { result: any[]; }; }) {
-  //   let serviceInstanceGuid = '';
-  //   if (this.bindExistingInstance) {
-  //     serviceInstanceGuid = this.selectExistingInstanceForm.controls.serviceInstances.value;
-  //   } else {
-  //     serviceInstanceGuid = request.response.result[0];
-  //   }
-  //   return serviceInstanceGuid;
-  // }
 
   private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[]; }; }) =>
     this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0]
