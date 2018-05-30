@@ -6,6 +6,7 @@ import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
+import { CsiModeService } from '../csi-mode.service';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -19,7 +20,8 @@ describe('SpecifyDetailsStepComponent', () => {
         CreateServiceInstanceHelperServiceFactory,
         CsiGuidsService,
         PaginationMonitorFactory,
-        EntityMonitorFactory
+        EntityMonitorFactory,
+        CsiModeService
       ]
     })
       .compileComponents();
