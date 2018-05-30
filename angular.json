@@ -5,7 +5,7 @@
   "projects": {
     "stratos": {
       "root": "",
-      "sourceRoot": "src",
+      "sourceRoot": "src/frontend",
       "projectType": "application",
       "architect": {
         "build": {
