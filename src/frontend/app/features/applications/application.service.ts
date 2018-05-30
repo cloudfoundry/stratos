@@ -1,7 +1,7 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 
-import {startWith, combineLatest, first, publishReplay, refCount,  filter, map, switchMap } from 'rxjs/operators';
+import { startWith, combineLatest, first, publishReplay, refCount, filter, map, switchMap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 
@@ -171,7 +171,7 @@ export class ApplicationService {
           });
         return appStateService.get(app, appInstances);
       })
-    ).pipe(publishReplay(1),refCount(),);
+    ).pipe(publishReplay(1), refCount(), );
   }
 
   private constructCoreObservables() {
@@ -179,10 +179,10 @@ export class ApplicationService {
     this.app$ = this.appEntityService.waitForEntity$;
     const moreWaiting$ = this.app$.pipe(
       filter(entityInfo => !!(entityInfo.entity && entityInfo.entity.entity && entityInfo.entity.entity.cfGuid)),
-      map(entityInfo => entityInfo.entity.entity),);
+      map(entityInfo => entityInfo.entity.entity), );
     this.appSpace$ = moreWaiting$.pipe(
       first(),
-      switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid))),);
+      switchMap(app => this.store.select(selectEntity(spaceSchemaKey, app.space_guid))), );
     this.appOrg$ = moreWaiting$.pipe(
       first(),
       switchMap(app => this.appSpace$.pipe(
@@ -191,13 +191,17 @@ export class ApplicationService {
           return this.store.select(selectEntity(organizationSchemaKey, orgGuid));
         }),
         filter(org => !!org)
-      )),);
+      )), );
 
-    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1),refCount(),);
+    this.isDeletingApp$ = this.appEntityService.isDeletingEntity$.pipe(publishReplay(1), refCount(), );
 
-    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.pipe(publishReplay(1),refCount(),);
+    this.waitForAppEntity$ = this.appEntityService.waitForEntity$.pipe(publishReplay(1), refCount(), );
 
-    this.appSummary$ = this.waitForAppEntity$.pipe(switchMap(() => this.appSummaryEntityService.entityObs$),publishReplay(1),refCount(),);
+    this.appSummary$ = this.waitForAppEntity$.pipe(
+      switchMap(() => this.appSummaryEntityService.entityObs$),
+      publishReplay(1),
+      refCount()
+    );
     const action = new GetAppEnvVarsAction(this.appGuid, this.cfGuid);
     this.appEnvVars = getPaginationObservables<APIResource>({
       store: this.store,
@@ -225,7 +229,7 @@ export class ApplicationService {
     // willing to do this to speed up the initial fetch for a running application.
     this.appStats$ = appStats.entities$;
 
-    this.appStatsFetching$ = appStats.pagination$.pipe(publishReplay(1),refCount(),);
+    this.appStatsFetching$ = appStats.pagination$.pipe(publishReplay(1), refCount(), );
 
     this.application$ = this.waitForAppEntity$.pipe(
       combineLatest(this.store.select(endpointEntitiesSelector)),
@@ -239,17 +243,17 @@ export class ApplicationService {
           stack: entity.entity.stack,
           cf: endpoints[entity.entity.cfGuid],
         };
-      }),publishReplay(1),refCount(),);
+      }), publishReplay(1), refCount(), );
 
     this.applicationState$ = this.waitForAppEntity$.pipe(
       combineLatest(this.appStats$.pipe(startWith(null))),
       map(([appInfo, appStatsArray]: [EntityInfo, APIResource<AppStat>[]]) => {
         return this.appStateService.get(appInfo.entity.entity, appStatsArray ? appStatsArray.map(apiResource => apiResource.entity) : null);
-      }),publishReplay(1),refCount(),);
+      }), publishReplay(1), refCount(), );
 
     this.applicationStratProject$ = this.appEnvVars.entities$.pipe(map(applicationEnvVars => {
       return this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity);
-    }),publishReplay(1),refCount(),);
+    }), publishReplay(1), refCount(), );
 
     this.applicationRunning$ = this.application$.pipe(
       map(app => app ? app.app.entity.state === 'STARTED' : false)
@@ -270,15 +274,15 @@ export class ApplicationService {
       map(ev => getCurrentPageRequestInfo(ev).busy),
       startWith(false),
       publishReplay(1),
-      refCount(),);
+      refCount(), );
 
     this.isUpdatingEnvVars$ = this.appEnvVars.pagination$.pipe(map(
       ev => getCurrentPageRequestInfo(ev).busy && ev.ids[ev.currentPage]
-    ),startWith(false),publishReplay(1),refCount(),);
+    ), startWith(false), publishReplay(1), refCount(), );
 
     this.isFetchingStats$ = this.appStatsFetching$.pipe(map(
       appStats => appStats ? getCurrentPageRequestInfo(appStats).busy : false
-    ),startWith(false),publishReplay(1),refCount(),);
+    ), startWith(false), publishReplay(1), refCount(), );
 
     this.applicationUrl$ = this.app$.pipe(
       map(({ entity }) => entity),
@@ -312,7 +316,7 @@ export class ApplicationService {
             );
         }
       })
-    ).pipe(publishReplay(1),refCount(),);
+    ).pipe(publishReplay(1), refCount(), );
   }
 
   isEntityComplete(value, requestInfo: { fetching: boolean }): boolean {

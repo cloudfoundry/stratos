@@ -20,7 +20,7 @@
     "test": "ng test --code-coverage",
     "test-debug": "ng test",
     "codecov": "codecov -f coverage/*.json",
-    "lint": "ng lint --type-check --format stylish",
+    "lint": "ng lint",
     "sass-lint": "sass-lint -v",
     "e2e": "ng e2e --proxy-config proxy.conf.js --ssl 1 --ssl-key dev-ssl/server.key --ssl-cert dev-ssl/server.crt",
     "e2e-dev": "ng e2e --serve false --base-href https://127.0.0.1:4200",

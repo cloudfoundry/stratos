@@ -24,5 +24,5 @@ export class RouterEffect {
         path = path.split('/');
       }
       this.router.navigate(path, extraParams);
-    }),);
+    }), );
 }

@@ -53,6 +53,6 @@ export class GithubEffects {
         }),
         catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]),);
+        ]), );
     }));
 }

@@ -68,7 +68,7 @@ export class EndpointsService implements CanActivate {
         }
 
         return false;
-      }),);
+      }), );
   }
 
   hasMetrics(endpointId: string) {

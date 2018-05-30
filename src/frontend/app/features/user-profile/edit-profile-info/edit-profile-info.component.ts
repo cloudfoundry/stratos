@@ -115,7 +115,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       }
     }
     const obs$ = this.userProfileService.updateProfile(this.profile, updates);
-    return obs$.pipe(take(1),map(([profileErr, passwordErr]) => {
+    return obs$.pipe(take(1), map(([profileErr, passwordErr]) => {
       const okay = !profileErr && !passwordErr;
       this.error = !okay;
       if (!okay) {
@@ -126,6 +126,6 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
         success: okay,
         redirect: okay
       };
-    }),);
+    }), );
   }
 }

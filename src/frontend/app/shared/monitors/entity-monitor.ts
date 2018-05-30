@@ -50,7 +50,7 @@ export class EntityMonitor<T = any> {
       distinctUntilChanged()
     );
 
-    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1),refCount(),);
+    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount(), );
     this.entity$ = this.getEntityObservable(
       schema,
       store.select(selectEntity<T>(entityKey, id)),

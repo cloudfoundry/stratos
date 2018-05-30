@@ -87,6 +87,8 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
+            "typeCheck": true,
+            "format": "stylish",
             "tsConfig": [
               "src/frontend/tsconfig.app.json",
               "src/frontend/tsconfig.spec.json"

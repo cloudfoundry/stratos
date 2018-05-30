@@ -46,7 +46,7 @@ export class UAASetupEffect {
         headers
       }).pipe(
         map(data => new SetupUAASuccess(data.json())),
-        catchError((err, caught) => [new SetupUAAFailed(err)]),);
+        catchError((err, caught) => [new SetupUAAFailed(err)]), );
     }));
 
   @Effect() uassSetScope = this.actions$.ofType<SetUAAScope>(SETUP_UAA_SCOPE).pipe(
@@ -60,7 +60,7 @@ export class UAASetupEffect {
         headers
       }).pipe(
         map(data => new SetupUAASuccess({})),
-        catchError((err, caught) => [new SetupUAAFailed(err)]),);
+        catchError((err, caught) => [new SetupUAAFailed(err)]), );
     }));
 
 }

@@ -78,7 +78,7 @@ export class CreateApplicationStep3Component implements OnInit {
         this.store.dispatch(createGetApplicationAction(app.response.result[0], cloudFoundry));
         this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'summary'] }));
         return { success: true };
-      }),);
+      }), );
   }
 
   validate(): boolean {

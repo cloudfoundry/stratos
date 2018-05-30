@@ -41,7 +41,7 @@ export class GithubProjectExistsDirective implements Validator {
           return createAppState.projectExists.exists ? null : {
             githubProjectExists: !createAppState.projectExists.exists
           };
-        }),first(),);
+        }), first(), );
     } else {
       return observableOf(null).pipe(first());
     }

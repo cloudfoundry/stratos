@@ -56,11 +56,11 @@ export class UserProfileEffect {
               result: [UserProfileEffect.guid]
             }, apiAction)
           ];
-        }),catchError((e) => {
+        }), catchError((e) => {
           return [
             new WrapperRequestActionFailed('Could not get User Profile Info', apiAction),
           ];
-        }),);
+        }), );
     }));
 
   @Effect() updateUserProfileInfo$ = this.actions$.ofType<UpdateUserProfileAction>(UPDATE_USERPROFILE).pipe(
@@ -88,11 +88,11 @@ export class UserProfileEffect {
               result: [UserProfileEffect.guid]
             }, apiAction)
           ];
-        }),catchError((e) => {
+        }), catchError((e) => {
           return [
             new WrapperRequestActionFailed('Could not update User Profile Info', apiAction),
           ];
-        }),);
+        }), );
     }));
 
   @Effect() updateUserPrassword$ = this.actions$.ofType<UpdateUserPasswordAction>(UPDATE_USERPASSWORD).pipe(
@@ -119,10 +119,10 @@ export class UserProfileEffect {
               result: []
             }, apiAction)
           ];
-        }),catchError((e) => {
+        }), catchError((e) => {
           return [
             new WrapperRequestActionFailed('Could not update User Password', apiAction),
           ];
-        }),);
+        }), );
     }));
 }

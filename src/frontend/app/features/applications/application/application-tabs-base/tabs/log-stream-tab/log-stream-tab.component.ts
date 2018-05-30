@@ -62,7 +62,7 @@ export class LogStreamTabComponent implements OnInit {
         return [];
       }),
         share(),
-        filter(data => !!data && data.length),);
+        filter(data => !!data && data.length), );
 
       this.messages = messages;
       this.connectionStatus = connectionStatus;

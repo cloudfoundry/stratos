@@ -73,7 +73,7 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
         map(endpoints => {
           return Object.values(endpoints)
             .filter((endpoint: EndpointModel) => endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === 'cf');
-        }),),
+        }), ),
       loading$: observableOf(false),
       select: new BehaviorSubject(undefined)
     };

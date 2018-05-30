@@ -107,7 +107,7 @@ export class CreateEndpointCfStep1Component implements OnInit, IStepperStep, Aft
         return {
           success: !result.error
         };
-      }),);
+      }), );
   }
 
   private getUpdateSelector(guid) {

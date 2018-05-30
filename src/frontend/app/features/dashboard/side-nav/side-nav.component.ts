@@ -39,7 +39,7 @@ export class SideNavComponent implements OnInit {
     this.logoClicked.pipe(
       buffer(debounced$),
       map(toLength),
-      filter(x => x === 3),)
+      filter(x => x === 3), )
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
   }
 }

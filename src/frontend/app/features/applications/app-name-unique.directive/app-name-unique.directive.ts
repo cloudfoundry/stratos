@@ -81,7 +81,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
       catchError(err => {
         this.appApplicationNameUnique.set(false);
         return observableThrowError(err);
-      }),);
+      }), );
   }
 
   private appNameTaken(cfGuid, spaceGuid, currentName, name): Observable<any> {

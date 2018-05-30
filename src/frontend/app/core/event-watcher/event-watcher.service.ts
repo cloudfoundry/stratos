@@ -14,10 +14,10 @@ export class ResizeEventData {
 export class EventWatcherService {
   constructor(private windowRef: WindowRef) { }
 
-  resizeEvent$ = observableFromEvent(this.windowRef.nativeWindow, 'resize').pipe(debounceTime(250),map(() => {
+  resizeEvent$ = observableFromEvent(this.windowRef.nativeWindow, 'resize').pipe(debounceTime(250), map(() => {
     const { innerWidth } = this.windowRef.nativeWindow;
     return {
       innerWidth
     };
-  }),);
+  }), );
 }

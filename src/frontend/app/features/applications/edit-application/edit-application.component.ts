@@ -1,7 +1,7 @@
 
-import {of as observableOf,  Observable, Subscription } from 'rxjs';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
 
-import {map, filter, take} from 'rxjs/operators';
+import { map, filter, take } from 'rxjs/operators';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
@@ -70,7 +70,11 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private error = false;
 
   ngOnInit() {
-    this.sub = this.applicationService.application$.pipe(filter(app => app.app.entity),take(1),map(app => app.app.entity),).subscribe(app => {
+    this.sub = this.applicationService.application$.pipe(
+      filter(app => app.app.entity),
+      take(1),
+      map(app => app.app.entity)
+    ).subscribe(app => {
       this.app = app;
       this.store.dispatch(new SetCFDetails({
         cloudFoundry: this.applicationService.cfGuid,
@@ -109,13 +113,13 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       obs$ = observableOf({ success: true });
     }
 
-    return obs$.pipe(take(1),map(res => {
+    return obs$.pipe(take(1), map(res => {
       this.error = !res.success;
       return {
         success: res.success,
         redirect: res.success
       };
-    }),);
+    }), );
   }
 
   clearSub() {

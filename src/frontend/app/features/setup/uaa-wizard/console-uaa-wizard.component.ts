@@ -51,7 +51,7 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
           success: !state.error,
           message: state.message
         };
-      }),);
+      }), );
   }
 
   uaaScopeNext: StepOnNextFunction = () => {
@@ -83,7 +83,7 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
           success: !state[0].error,
           message: state[0].message
         };
-      }),);
+      }), );
   }
   ngOnInit() {
     this.uaaForm = new FormGroup({

@@ -47,8 +47,8 @@ export class DeployAppEffects {
         map(res => new ProjectExists(action.projectName, res)),
         catchError(err => {
           return observableOf(new ProjectDoesntExist(action.projectName));
-        }),);
-    }),);
+        }), );
+    }), );
 
   @Effect()
   fetchBranches$ = this.actions$
@@ -86,7 +86,7 @@ export class DeployAppEffects {
         }),
         catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]),);
+        ]), );
     }));
 
   @Effect()
@@ -114,7 +114,7 @@ export class DeployAppEffects {
         }),
         catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]),);
+        ]), );
     }));
 
   @Effect()
@@ -145,7 +145,7 @@ export class DeployAppEffects {
         }),
         catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]),);
+        ]), );
     }));
 
   addCommit(mappedData: NormalizedResponse, projectName: string, commit: GithubCommit) {

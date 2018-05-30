@@ -130,7 +130,7 @@ export class EntityService<T = any> {
           entityRequestInfo,
           entity: entity ? entity : null
         };
-      }),);
+      }), );
   }
 
   private isEntityAvailable(entity, entityRequestInfo: RequestInfoState) {

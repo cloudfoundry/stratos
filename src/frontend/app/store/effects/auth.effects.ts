@@ -63,7 +63,7 @@ export class AuthEffect {
         headers
       }).pipe(
         map(data => new VerifySession()),
-        catchError((err, caught) => [new LoginFailed(err)]),);
+        catchError((err, caught) => [new LoginFailed(err)]), );
     }));
 
   @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION).pipe(
@@ -87,7 +87,7 @@ export class AuthEffect {
           }
 
           return action.login ? [new InvalidSession(setupMode, isUpgrading)] : [new ResetAuth()];
-        }),);
+        }), );
     }));
 
   @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS).pipe(
@@ -107,7 +107,7 @@ export class AuthEffect {
     switchMap(() => {
       return this.http.post('/pp/v1/auth/logout', {}).pipe(
         mergeMap(data => [new LogoutSuccess(), new ResetAuth()]),
-        catchError((err, caught) => [new LogoutFailed(err)]),);
+        catchError((err, caught) => [new LogoutFailed(err)]), );
     }));
 
   @Effect({ dispatch: false }) resetAuth$ = this.actions$.ofType<ResetAuth>(RESET_AUTH).pipe(

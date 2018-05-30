@@ -41,12 +41,12 @@ export class SystemEffects {
             new GetSystemSuccess(info, action.login, associatedAction),
             new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)
           ];
-        }),catchError((e) => {
+        }), catchError((e) => {
           return [
             new GetSystemFailed(),
             new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
             new WrapperRequestActionFailed('Could not fetch system info', apiAction)
           ];
-        }),);
+        }), );
     }));
 }

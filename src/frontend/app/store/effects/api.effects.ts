@@ -69,7 +69,7 @@ export class APIEffect {
     withLatestFrom(this.store),
     mergeMap(([action, state]) => {
       return this.doApiRequest(action, state);
-    }),);
+    }), );
 
   private doApiRequest(action, state) {
     const actionClone = { ...action };

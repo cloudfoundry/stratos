@@ -55,8 +55,8 @@ export class CreateAppPageEffects {
         }),
         catchError(err => {
           return observableOf(new AppNameTaken(action.name));
-        }),);
-    }),);
+        }), );
+    }), );
 }
 
 export const selectNewAppState = (state: AppState): CreateNewApplicationState => state.createApplication;

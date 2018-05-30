@@ -113,7 +113,7 @@ export class ApplicationMonitorService {
       res.status.instance = res.running === statsCount ? 'ok' : 'warning';
 
       return res;
-    }),share(),);
+    }), share(), );
   }
 
   roundFourPlaces(num: number): number {

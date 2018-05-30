@@ -236,6 +236,6 @@ export class EndpointsEffect {
         const errorMessage = errorMessageHandler ? errorMessageHandler(e) : 'Could not perform action';
         actions.push(new WrapperRequestActionFailed(errorMessage, apiAction, apiActionType));
         return actions;
-      }),);
+      }), );
   }
 }

@@ -126,7 +126,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         filter(paginationEntity => {
           return !getCurrentPageRequestInfo(paginationEntity).busy;
         }),
-        first(),),
+        first(), ),
       this.cf.list$
     );
   }
@@ -139,7 +139,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
-        }),),
+        }), ),
       loading$: this.allOrgsLoading$,
       select: new BehaviorSubject(undefined)
     };
