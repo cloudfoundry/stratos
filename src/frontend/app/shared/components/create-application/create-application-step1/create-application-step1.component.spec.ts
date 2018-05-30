@@ -4,10 +4,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../../shared/shared.module';
+import { SharedModule } from '../../../shared.module';
 import { appReducers } from '../../../../store/reducers.module';
 import { CreateApplicationStep1Component } from './create-application-step1.component';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 
 describe('CreateApplicationStep1Component', () => {
   let component: CreateApplicationStep1Component;
@@ -21,7 +23,6 @@ describe('CreateApplicationStep1Component', () => {
       imports: [
         CommonModule,
         CoreModule,
-        SharedModule,
         BrowserAnimationsModule,
         StoreModule.forRoot(
           appReducers,
@@ -29,7 +30,8 @@ describe('CreateApplicationStep1Component', () => {
             initialState
           }
         )
-      ]
+      ],
+      providers: [CfOrgSpaceDataService, PaginationMonitorFactory]
     })
       .compileComponents();
   }));

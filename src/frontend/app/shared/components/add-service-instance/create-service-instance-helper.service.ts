@@ -9,7 +9,7 @@ import { IService, IServiceBroker, IServicePlan, IServicePlanVisibility, IServic
 import { IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { pathGet } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { GetServiceBroker } from '../../../store/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
 import { GetService } from '../../../store/actions/service.actions';
@@ -34,9 +34,9 @@ import {
 } from '../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../store/types/create-service-instance.types';
-import { CloudFoundryEndpointService } from '../../cloud-foundry/services/cloud-foundry-endpoint.service';
-import { fetchVisiblePlans, getSvcAvailability } from '../services-helper';
-import { ServicePlanAccessibility } from '../services.service';
+import { CloudFoundryEndpointService } from '../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { fetchVisiblePlans, getSvcAvailability } from '../../../features/service-catalog/services-helper';
+import { ServicePlanAccessibility } from '../../../features/service-catalog/services.service';
 import { EntityService } from '../../../core/entity-service';
 import { GetServiceInstances, DELETE_SERVICE_BINDING } from '../../../store/actions/service-instances.actions';
 import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';

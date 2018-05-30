@@ -38,7 +38,6 @@ import { ServiceCatalogModule } from '../service-catalog/service-catalog.module'
     CoreModule,
     SharedModule,
     ApplicationsRoutingModule,
-    ServiceCatalogModule,
   ],
   declarations: [
     ApplicationWallComponent,

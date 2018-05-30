@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 
