@@ -1,10 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BindAppsStepComponent } from './bind-apps-step.component';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServicesService } from '../../services.service';
-import { ServicesServiceMock } from '../../services.service.mock';
+import { BaseTestModules, BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServicesService } from '../../../../features/service-catalog/services.service';
+import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
 import { CsiGuidsService } from '../csi-guids.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 
 describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
@@ -13,10 +14,11 @@ describe('BindAppsStepComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [BindAppsStepComponent],
-      imports: [BaseTestModules],
+      imports: [BaseTestModulesNoShared],
       providers: [
         { provide: ServicesService, useClass: ServicesServiceMock },
-        CsiGuidsService
+        CsiGuidsService,
+        PaginationMonitorFactory
       ]
 
 

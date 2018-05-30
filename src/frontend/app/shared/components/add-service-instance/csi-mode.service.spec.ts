@@ -1,6 +1,6 @@
 import { TestBed, inject } from '@angular/core/testing';
-
 import { CsiModeService } from './csi-mode.service';
+
 
 describe('CsiModeService', () => {
   beforeEach(() => {

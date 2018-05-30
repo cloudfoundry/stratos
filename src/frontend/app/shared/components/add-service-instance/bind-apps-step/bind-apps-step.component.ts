@@ -8,7 +8,7 @@ import { combineLatest, filter, first, map, tap, switchMap } from 'rxjs/operator
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp } from '../../../../core/cf-api.types';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
@@ -21,7 +21,7 @@ import {
   selectCreateServiceInstance,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { appDataSort } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 
@@ -40,10 +40,8 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   validate = new BehaviorSubject(true);
   serviceInstanceGuid: string;
   stepperForm: FormGroup;
-  allAppsSubscription: Subscription;
   apps$: Observable<APIResource<IApp>[]>;
   guideText = 'Specify the application to bind (Optional)';
-  haveApps = false;
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
@@ -58,7 +56,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
 
   private fetchApps() {
-    this.allAppsSubscription = this.apps$.pipe(
+    this.apps$.pipe(
       map(apps => {
         if (this.boundAppId) {
           return apps.filter(a => a.metadata.guid === this.boundAppId);
@@ -69,9 +67,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       first(),
       map(apps => apps.slice(0, 50)),
       tap(apps => {
-        if (apps.length > 0) {
-          this.haveApps = true;
-        }
         if (this.boundAppId) {
           this.stepperForm.controls.apps.setValue(this.boundAppId);
           this.stepperForm.controls.apps.disable();
@@ -125,7 +120,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   )
 
   ngOnDestroy(): void {
-    this.allAppsSubscription.unsubscribe();
     this.validateSubscription.unsubscribe();
   }
   private displaySnackBar() {

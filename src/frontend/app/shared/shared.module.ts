@@ -110,6 +110,13 @@ import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
 import { ServiceActionHelperService } from './data-services/service-action-helper.service';
+import { SpecifyDetailsStepComponent } from './components/add-service-instance/specify-details-step/specify-details-step.component';
+import { NoServicePlansComponent } from './components/add-service-instance/no-service-plans/no-service-plans.component';
+import { AddServiceInstanceComponent } from './components/add-service-instance/add-service-instance/add-service-instance.component';
+import { SelectPlanStepComponent } from './components/add-service-instance/select-plan-step/select-plan-step.component';
+import { SelectServiceComponent } from './components/add-service-instance/select-service/select-service.component';
+import { CreateApplicationStep1Component } from './components/create-application/create-application-step1/create-application-step1.component';
+import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
 
 @NgModule({
   imports: [
@@ -199,7 +206,15 @@ import { ServiceActionHelperService } from './data-services/service-action-helpe
     AppActionMonitorIconComponent,
     UserProfileBannerComponent,
     TableCellRequestMonitorIconComponent,
-    UserPermissionDirective
+    UserPermissionDirective,
+    SpecifyDetailsStepComponent,
+    AddServiceInstanceComponent,
+    SelectPlanStepComponent,
+    SelectServiceComponent,
+    NoServicePlansComponent,
+    CreateApplicationStep1Component,
+    BindAppsStepComponent
+
   ],
   exports: [
     FormsModule,
@@ -273,12 +288,19 @@ import { ServiceActionHelperService } from './data-services/service-action-helpe
     CliCommandComponent,
     AppActionMonitorIconComponent,
     TableComponent,
-    UserPermissionDirective
+    UserPermissionDirective,
+    SpecifyDetailsStepComponent,
+    AddServiceInstanceComponent,
+    SelectPlanStepComponent,
+    SelectServiceComponent,
+    CreateApplicationStep1Component,
+    BindAppsStepComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    NoServicePlansComponent
   ],
   providers: [
     ListConfig,

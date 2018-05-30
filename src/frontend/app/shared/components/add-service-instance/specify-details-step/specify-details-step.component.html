@@ -1,6 +1,5 @@
-<div class="specify-details" *ngIf="initialised">
-  <div *ngIf="showModeSelection && !modeService.isEditServiceInstanceMode()">
-    <b>Create and bind to a new service instance or bind to an existing one.</b>
+<div class="specify-details">
+  <div *ngIf="!modeService.isEditServiceInstanceMode() || !(hasIntances$ | async) || showModeSelection">
     <div>
       <mat-radio-group [(ngModel)]="formMode" class="specify-details__radio-group" [disabled]="(serviceInstances$ | async)?.length === 0">
         <mat-radio-button *ngFor="let mode of formModes" [value]="mode.key" class="specify-details__radio-group__radio" (click)="resetForms(mode.key)">

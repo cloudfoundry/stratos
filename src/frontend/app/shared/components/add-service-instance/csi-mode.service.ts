@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
+import { getIdFromRoute } from '../../../features/cloud-foundry/cf.helpers';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
