@@ -1,5 +1,5 @@
 import { concat } from 'rxjs';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { Observable, Subscription } from 'rxjs';
 import { Component, OnInit, Input, OnDestroy, Output, AfterViewInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';

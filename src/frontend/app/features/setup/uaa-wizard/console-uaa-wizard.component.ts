@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { any } from 'codelyzer/util/function';
-import { Observable, BehaviorSubject } from 'rxjs/Rx';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';

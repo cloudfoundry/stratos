@@ -3,7 +3,7 @@ import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
 import websocketConnect from 'rxjs-websockets';
-import { Observable, Subject } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs';
 
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';

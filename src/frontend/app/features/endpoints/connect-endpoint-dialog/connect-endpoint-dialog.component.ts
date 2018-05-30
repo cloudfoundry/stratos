@@ -3,7 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
 
 import { ConnectEndpoint } from '../../../store/actions/endpoint.actions';

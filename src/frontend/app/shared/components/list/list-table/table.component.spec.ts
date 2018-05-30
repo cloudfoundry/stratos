@@ -2,7 +2,7 @@ import { IListPaginationController } from '../data-sources-controllers/list-pagi
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatPaginatorIntl } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
 import { CoreModule } from '../../../../core/core.module';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';

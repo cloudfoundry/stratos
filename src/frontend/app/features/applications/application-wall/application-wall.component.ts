@@ -3,7 +3,7 @@ import { Component, OnDestroy, HostBinding } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { debounceTime, distinctUntilChanged, filter, first, tap, withLatestFrom, map } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { EndpointsService } from '../../../core/endpoints.service';
 import {

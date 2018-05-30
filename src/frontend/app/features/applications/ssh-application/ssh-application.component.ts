@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import websocketConnect from 'rxjs-websockets';
 import { Observable, Subject } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { IApp } from '../../../core/cf-api.types';
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';

@@ -2,7 +2,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, MatSnackBar, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
 import { UserProfileService } from '../user-profile.service';
 import { first } from 'rxjs/operators';

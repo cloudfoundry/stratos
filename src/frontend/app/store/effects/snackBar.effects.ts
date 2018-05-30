@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
 import { Actions, Effect } from '@ngrx/effects';

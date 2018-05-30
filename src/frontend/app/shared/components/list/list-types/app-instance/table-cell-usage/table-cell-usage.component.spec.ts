@@ -26,11 +26,11 @@ describe('TableCellUsageComponent', () => {
         UtilsService,
       ]
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableCellUsageComponent);
+    fixture = TestBed.createComponent<TableCellUsageComponent<EntityInfo>>(TableCellUsageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

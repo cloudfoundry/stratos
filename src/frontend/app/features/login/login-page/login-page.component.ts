@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, startWith, takeWhile, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 import { Login, VerifySession } from '../../../store/actions/auth.actions';
 import { RouterNav } from '../../../store/actions/router.actions';

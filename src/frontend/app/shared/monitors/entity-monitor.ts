@@ -13,7 +13,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';

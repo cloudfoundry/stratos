@@ -1,6 +1,6 @@
-import { tap ,  skip } from 'rxjs/operators';
+import { tap, skip } from 'rxjs/operators';
 import { RowsState, RowState } from '../../data-sources-controllers/list-data-source-types';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 import { async } from '@angular/core/testing';
 import { TableRowStateManager } from './table-row-state-manager';
 import { Subscription } from 'rxjs';

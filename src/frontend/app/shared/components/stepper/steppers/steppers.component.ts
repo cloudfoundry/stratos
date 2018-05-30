@@ -11,7 +11,7 @@ import {
 import { Store } from '@ngrx/store';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { Observable, Subscription } from 'rxjs';
 
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';

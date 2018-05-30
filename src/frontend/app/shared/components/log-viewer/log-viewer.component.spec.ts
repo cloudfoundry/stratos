@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs';
 import { MDAppModule } from '../../../core/md.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CommonModule } from '@angular/common';

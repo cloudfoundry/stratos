@@ -3,7 +3,7 @@ import { Store, compose } from '@ngrx/store';
 import { tag } from 'rxjs-spy/operators/tag';
 import { interval } from 'rxjs';
 import { filter, map, publishReplay, refCount, share, tap, withLatestFrom } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { Observable } from 'rxjs';
 
 import { EntityMonitor } from '../shared/monitors/entity-monitor';
 import { ValidateEntitiesStart } from '../store/actions/request.actions';
