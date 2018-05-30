@@ -7,7 +7,7 @@ import { map, tap, take, filter, switchMap, first } from 'rxjs/operators';
 
 import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import {
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
@@ -17,16 +17,16 @@ import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { APIResource } from '../../../../store/types/api.types';
-import { getIdFromRoute } from '../../../cloud-foundry/cf.helpers';
-import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
-import { isMarketplaceMode } from '../../services-helper';
+import { getIdFromRoute } from '../../../../features/cloud-foundry/cf.helpers';
+import { servicesServiceFactoryProvider } from '../../../../features/service-catalog/service-catalog.helpers';
+import { isMarketplaceMode } from '../../../../features/service-catalog/services-helper';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { GetApplication } from '../../../../store/actions/application.actions';
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Component({

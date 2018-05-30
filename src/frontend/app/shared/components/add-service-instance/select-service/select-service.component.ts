@@ -9,7 +9,7 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { IService } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import {
@@ -17,7 +17,7 @@ import {
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { ServicesWallService } from '../../../services/services/services-wall.service';
+import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({

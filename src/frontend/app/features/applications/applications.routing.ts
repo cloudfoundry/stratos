@@ -22,7 +22,7 @@ import { AddRouteStepperComponent } from './routes/add-route-stepper/add-route-s
 import { SshApplicationComponent } from './ssh-application/ssh-application.component';
 import { CliInfoApplicationComponent } from './cli-info-application/cli-info-application.component';
 import { ApplicationDeleteComponent } from './application-delete/application-delete.component';
-import { AddServiceInstanceComponent } from '../service-catalog/add-service-instance/add-service-instance/add-service-instance.component';
+import { AddServiceInstanceComponent } from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
 
 const appplicationsRoutes: Routes = [
   {

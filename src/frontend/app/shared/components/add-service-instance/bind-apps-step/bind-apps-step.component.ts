@@ -8,7 +8,7 @@ import { combineLatest, filter, first, map, tap, switchMap } from 'rxjs/operator
 import { Subscription } from 'rxjs/Subscription';
 
 import { IApp } from '../../../../core/cf-api.types';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
@@ -21,7 +21,7 @@ import {
   selectCreateServiceInstance,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { appDataSort } from '../../../cloud-foundry/services/cloud-foundry-endpoint.service';
+import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 

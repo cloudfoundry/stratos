@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../../core/core.module';
-import { SharedModule } from '../../../../shared/shared.module';
+import { SharedModule } from '../../../shared.module';
 import { appReducers } from '../../../../store/reducers.module';
 import { CreateApplicationStep1Component } from './create-application-step1.component';
 import { getInitialTestStoreState } from '../../../../test-framework/store-test-helper';
