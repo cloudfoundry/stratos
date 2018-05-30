@@ -139,25 +139,18 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       }
       return;
     }
+
+    // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
     const isNextDirection = index > this.currentIndex;
-    // Tell onLeave if this is a Next or Previous transition
     this.steps[this.currentIndex].onLeave(isNextDirection);
 
-    // Ensure the step Determine the next step (taking into account 'skipped' state)
-    index = Math.min(index, this.steps.length - 1);
-    const nonSkipSteps = this.steps.filter(step => !step.skip);
-    while (true) {
-      const newIndex = nonSkipSteps.findIndex(step => step === this.steps[index]);
-      if (newIndex !== -1) {
-        break;
-      }
-      index = isNextDirection ? ++index : --index;
-      if (index < 0 || this.steps.length <= index) {
-        return;
-      }
+    // 2) Determine if the required step is ok (and if not find the next/previous valid step)
+    index = this.findValidStep(index, isNextDirection);
+    if (index === -1) {
+      return;
     }
 
-    // Valid next step so set state of stepper to match up
+    // 3) Set stepper state WRT required step
     this.steps.forEach((_step, i) => {
       _step.complete = i < index;
       _step.active = i === index;
@@ -165,6 +158,27 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.currentIndex = index;
     this.steps[this.currentIndex]._onEnter(this.enterData);
     this.enterData = undefined;
+  }
+
+  private findValidStep(index: number, isNextDirection: boolean) {
+    // Ensure the required step can be activated (not skipped), if not continue in the correct direction until we've found one that can be
+    index = Math.min(index, this.steps.length - 1);
+    // Create list of all not skipped stepped
+    const nonSkipSteps = this.steps.filter(step => !step.skip);
+    while (true) {
+      // Can this step be activated?
+      const newIndex = nonSkipSteps.findIndex(step => step === this.steps[index]);
+      if (newIndex !== -1) {
+        // Yes, step is valid
+        return newIndex;
+      }
+      // No? Try again with the next or previous step
+      index = isNextDirection ? ++index : --index;
+      if (index < 0 || this.steps.length <= index) {
+        break;
+      }
+    }
+    return -1;
   }
 
   canGoto(index: number): boolean {
