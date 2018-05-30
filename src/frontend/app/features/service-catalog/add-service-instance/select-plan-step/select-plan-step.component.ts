@@ -43,8 +43,8 @@ interface ServicePlan {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectPlanStepComponent implements OnDestroy {
+  selectedService$: Observable<ServicePlan>;
   cSIHelperService: CreateServiceInstanceHelperService;
-  selectedService$: BehaviorSubject<ServicePlan> = new BehaviorSubject(null);
   @ViewChild('noplans', { read: ViewContainerRef })
   noPlansDiv: ViewContainerRef;
 
@@ -116,30 +116,25 @@ export class SelectPlanStepComponent implements OnDestroy {
       refCount(),
     );
 
+    this.selectedService$ = Observable.combineLatest(
+      this.stepperForm.statusChanges.startWith(true),
+      this.servicePlans$).pipe(
+        filter(([p, q]) => !!q && q.length > 0),
+        map(([valid, servicePlans]) =>
+          this.servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0])
+      );
+
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
       tap(o => {
         this.stepperForm.controls.servicePlans.setValue(o[0].id);
-        this.selectedService$.next(o[0]);
+        this.stepperForm.updateValueAndValidity();
         this.servicePlans = o;
-        setTimeout(() => this.validate.next(this.stepperForm.valid));
-
+        this.validate.next(this.stepperForm.valid);
       }),
     ).subscribe();
 
-    this.watchForChanges();
 
-  }
-
-  watchForChanges = () => {
-    this.stepperForm.statusChanges.pipe(
-      combineLatest(this.servicePlans$),
-      filter(([p, q]) => !!q && q.length > 0),
-      tap(([valid, servicePlans]) => {
-        const servicePlan = this.servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0];
-        this.selectedService$.next(servicePlan);
-      }),
-    ).subscribe();
   }
 
   onNext = () => {
