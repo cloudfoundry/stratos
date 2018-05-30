@@ -279,7 +279,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return { success: true };
   }
 
-
   private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[]; }; }) =>
     this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0]
 
@@ -302,7 +301,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const servicePlanGuid = createServiceInstance.servicePlanGuid;
     const params = getServiceJsonParams(this.createNewInstanceForm.controls.params.value);
     let tagsStr = null;
-    tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : null;
+    tagsStr = this.tags.length > 0 ? this.tags.map(t => t.label) : [];
 
     let newServiceInstanceGuid;
 
