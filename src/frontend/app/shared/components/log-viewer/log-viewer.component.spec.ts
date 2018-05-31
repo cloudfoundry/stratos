@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, from as observableFrom } from 'rxjs';
 import { MDAppModule } from '../../../core/md.module';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CommonModule } from '@angular/common';
@@ -7,6 +7,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LogViewerComponent } from './log-viewer.component';
 import { Component, ViewChild } from '@angular/core';
+import { first, filter } from 'rxjs/operators';
 
 describe('LogViewerComponent', () => {
   @Component({
@@ -49,7 +50,7 @@ describe('LogViewerComponent', () => {
   });
 
   it('should be created', () => {
-    component.logViewer.logStream = Observable.from('jhgjgh');
+    component.logViewer.logStream = observableFrom('jhgjgh');
     expect(component).toBeTruthy();
   });
 
@@ -68,7 +69,7 @@ describe('LogViewerComponent', () => {
   it('should only allow max rows', (done) => {
     expect(contentEl.children.length).toEqual(0);
 
-    component.logViewer.isHighThroughput$.take(1).subscribe(high => {
+    component.logViewer.isHighThroughput$.pipe(first()).subscribe(high => {
       expect(high).toEqual(false);
     });
 
@@ -94,7 +95,7 @@ describe('LogViewerComponent', () => {
   it('should be in high throughput mode', (done) => {
     expect(contentEl.children.length).toEqual(0);
 
-    component.logViewer.isHighThroughput$.take(1).subscribe(high => {
+    component.logViewer.isHighThroughput$.pipe(first()).subscribe(high => {
       expect(high).toEqual(false);
     });
 
@@ -106,7 +107,7 @@ describe('LogViewerComponent', () => {
       }, 50 * i);
     }
 
-    component.logViewer.isHighThroughput$.filter(high => high).subscribe(high => {
+    component.logViewer.isHighThroughput$.pipe(filter(high => high)).subscribe(high => {
       expect(high).toEqual(true);
       done();
     });
