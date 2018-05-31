@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-- '8.9'
+- '9.11.1'
 sudo: required
 dist: trusty
 services:
