@@ -36,6 +36,7 @@ import { EntityMonitor } from '../../../shared/monitors/entity-monitor';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { PaginationMonitor } from '../../../shared/monitors/pagination-monitor';
 import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { GetAppRoutes } from '../../../store/actions/application-service-routes.actions';
 import { DeleteApplication, GetAllApplications, GetApplication } from '../../../store/actions/application.actions';
 import { DeleteRoute } from '../../../store/actions/route.actions';
 import { RouterNav } from '../../../store/actions/router.actions';
@@ -223,7 +224,7 @@ export class ApplicationDeleteComponent<T> {
     const serviceToInstanceRelationKey = createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey);
     const { appGuid, cfGuid } = this.applicationService;
     const instanceAction = AppServiceBindingDataSource.createGetAllServiceBindings(appGuid, cfGuid);
-    const routesAction = CfAppRoutesListConfigService.createAction(appGuid, cfGuid);
+    const routesAction = new GetAppRoutes(appGuid, cfGuid);
     const instancePaginationKey = instanceAction.paginationKey;
     const routesPaginationKey = routesAction.paginationKey;
 

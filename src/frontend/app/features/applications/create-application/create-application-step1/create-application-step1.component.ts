@@ -17,6 +17,8 @@ import { AppState } from '../../../../store/app-state';
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
+  @Input('isServiceInstanceMode')
+  isServiceInstanceMode: boolean;
   constructor(
     private store: Store<AppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService
@@ -31,6 +33,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   validate: Observable<boolean>;
 
+  @Input('stepperText')
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
   onNext = () => {
@@ -45,6 +48,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   ngOnInit() {
     if (this.isRedeploy) {
       this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
+    }
+    if (this.isServiceInstanceMode) {
+      this.stepperText = 'Select an organization and space for the service instance.';
     }
   }
 

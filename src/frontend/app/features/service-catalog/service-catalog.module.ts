@@ -11,8 +11,11 @@ import { SpecifyDetailsStepComponent } from './add-service-instance/specify-deta
 import { BindAppsStepComponent } from './add-service-instance/bind-apps-step/bind-apps-step.component';
 import { AddServiceInstanceComponent } from './add-service-instance/add-service-instance/add-service-instance.component';
 import { SelectPlanStepComponent } from './add-service-instance/select-plan-step/select-plan-step.component';
+import { CreateApplicationModule } from '../applications/create-application/create-application.module';
+import { SelectServiceComponent } from './add-service-instance/select-service/select-service.component';
 import { ServicePlansComponent } from './service-plans/service-plans.component';
 import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.component';
+import { NoServicePlansComponent } from './add-service-instance/no-service-plans/no-service-plans.component';
 
 @NgModule({
   imports: [
@@ -20,6 +23,7 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     SharedModule,
     ServiceCatalogRoutingModule,
     CoreModule,
+    CreateApplicationModule
   ],
   declarations: [
     ServiceCatalogPageComponent,
@@ -29,8 +33,18 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     BindAppsStepComponent,
     AddServiceInstanceComponent,
     SelectPlanStepComponent,
+    SelectServiceComponent,
     ServicePlansComponent,
+    NoServicePlansComponent,
     ServiceTabsBaseComponent,
+  ],
+  exports: [
+    AddServiceInstanceComponent,
+    // NoServicePlansComponent,
+    ServiceTabsBaseComponent,
+  ],
+  entryComponents: [
+    NoServicePlansComponent
   ]
 })
 export class ServiceCatalogModule { }

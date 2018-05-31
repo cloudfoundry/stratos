@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-backend": "gulp build-backend",
+    "build-backend-dev": "STRATOS_BACKEND_DEV=true npm run build-backend",
     "cf-get-backend-deps": "gulp cf-get-backend-deps",
     "cf-build-backend": "gulp cf-build-backend",
     "bosh-build-backend": "gulp bosh-build-backend",

@@ -1,4 +1,5 @@
 <div class="select-plan">
+  <div #noplans></div>
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
       <mat-select class="form-control" formControlName="servicePlans">
@@ -6,7 +7,7 @@
       </mat-select>
     </mat-form-field>
   </form>
-  <mat-card class="select-plan__details" *ngIf="getSelectedPlan() | async as selPlan">
+  <mat-card class="select-plan__details" *ngIf="selectedService$ | async as selPlan">
     <app-card-status *ngIf="(getPlanAccessibility(selPlan.entity) | async)" [status$]="getPlanAccessibility(selPlan.entity)"></app-card-status>
     <app-metadata-item label="Name"> {{ getDisplayName(selPlan)}} </app-metadata-item>
     <app-metadata-item label="Description"> {{selPlan.entity.entity.description}} </app-metadata-item>

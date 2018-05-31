@@ -1,5 +1,5 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 
 import { CoreModule } from '../../../../../core/core.module';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -31,7 +31,7 @@ describe('TableCellActionsComponent', () => {
     component = fixture.componentInstance;
     component.dataSource = {
     } as IListDataSource<APIResource>;
-    component.rowState = Observable.of({});
+    component.rowState = observableOf({});
     fixture.detectChanges();
   });
 

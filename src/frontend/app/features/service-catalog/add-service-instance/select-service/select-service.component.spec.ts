@@ -1,23 +1,26 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
+import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServicesWallService } from '../../../services/services/services-wall.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
-import { SelectPlanStepComponent } from './select-plan-step.component';
-import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
+import { SelectServiceComponent } from './select-service.component';
 import { CsiGuidsService } from '../csi-guids.service';
 
-describe('SelectPlanStepComponent', () => {
-  let component: SelectPlanStepComponent;
-  let fixture: ComponentFixture<SelectPlanStepComponent>;
+describe('SelectServiceComponent', () => {
+  let component: SelectServiceComponent;
+  let fixture: ComponentFixture<SelectServiceComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [SelectPlanStepComponent],
-      imports: [BaseTestModules],
+      declarations: [SelectServiceComponent],
+      imports: [...BaseTestModules],
       providers: [
+        PaginationMonitorFactory,
+        ServicesWallService,
         EntityServiceFactory,
-        CreateServiceInstanceHelperServiceFactory,
+        CreateServiceInstanceHelperService,
         CsiGuidsService
       ]
     })
@@ -25,7 +28,7 @@ describe('SelectPlanStepComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SelectPlanStepComponent);
+    fixture = TestBed.createComponent(SelectServiceComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
