@@ -72,7 +72,7 @@
     "zone.js": "~0.8.26"
   },
   "engines": {
-    "node": "9.x.x"
+    "node": "8.11.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^0.6.5",
