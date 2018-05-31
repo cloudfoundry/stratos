@@ -1,5 +1,6 @@
 import { browser } from 'protractor';
-import { E2EConfig, E2EConfigCloudFoundry, E2EEndpointConfig, E2EEndpointsConfig, E2EEndpointTypeConfig } from '../e2e.types';
+import { E2EConfig, E2EConfigCloudFoundry, E2ECred, E2EEndpointTypeConfig, E2EEndpointsConfig } from '../e2e.types';
+import { ConsoleUserType } from './e2e-helpers';
 
 const DEFAULT_CF_NAME = 'cf';
 
@@ -31,6 +32,11 @@ export class SecretsHelpers {
 
   getCloudFoundryEndpoints(): any {
     throw new Error('Not implemented');
+  }
+
+  getConsoleCredentials(userType: ConsoleUserType): E2ECred {
+    const isAdmin = userType === ConsoleUserType.admin;
+    return isAdmin ? this.secrets.consoleUsers.admin : this.secrets.consoleUsers.nonAdmin;
   }
 
   getEndpoints(): E2EEndpointsConfig {

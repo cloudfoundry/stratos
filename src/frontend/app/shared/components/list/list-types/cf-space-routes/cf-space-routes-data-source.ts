@@ -35,6 +35,7 @@ export class CfSpaceRoutesDataSource extends ListDataSource<APIResource> {
       createEntityRelationKey(routeSchemaKey, applicationSchemaKey),
       createEntityRelationKey(routeSchemaKey, domainSchemaKey),
     ]);
+    action.initialParams['order-direction-field'] = 'creation';
     const { rowStateManager, sub } = SpaceRouteDataSourceHelper.getRowStateManager(
       store,
       paginationKey

@@ -10,21 +10,21 @@ import {
   githubBranchesSchemaKey,
   githubCommitSchemaKey,
   githubRepoSchemaKey,
+  metricSchemaKey,
   organizationSchemaKey,
   privateDomainsSchemaKey,
   quotaDefinitionSchemaKey,
   routeSchemaKey,
   securityGroupSchemaKey,
   serviceBindingSchemaKey,
+  serviceBrokerSchemaKey,
   serviceInstancesSchemaKey,
   servicePlanSchemaKey,
+  servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
   spaceQuotaSchemaKey,
   spaceSchemaKey,
-  metricSchemaKey,
   userProfileSchemaKey,
-  servicePlanVisibilitySchemaKey,
-  serviceBrokerSchemaKey,
 } from '../helpers/entity-factory';
 import { endpointStoreNames } from '../types/endpoint.types';
 import { RequestTypes } from './../actions/request.actions';
@@ -36,8 +36,9 @@ import { updateApplicationRoutesReducer } from './application-route.reducer';
 import { endpointDisconnectApplicationReducer } from './endpoint-disconnect-application.reducer';
 import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 import { routeReducer } from './routes.reducer';
+import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
-import { userReducer } from './users.reducer';
+import { userReducer, userSpaceOrgReducer } from './users.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -125,15 +126,20 @@ export function requestDataReducer(state, action) {
   const extraReducers = {
     [cfUserSchemaKey]: [userReducer],
     [routeSchemaKey]: [routeReducer],
+    [serviceInstancesSchemaKey]: [serviceInstanceReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
     [applicationSchemaKey]: [
       updateApplicationRoutesReducer(),
       endpointDisconnectApplicationReducer('application')
     ],
-    [spaceSchemaKey]: [endpointDisconnectApplicationReducer('space')],
+    [spaceSchemaKey]: [
+      endpointDisconnectApplicationReducer('space'),
+      userSpaceOrgReducer(true)
+    ],
     [organizationSchemaKey]: [
       updateOrganizationSpaceReducer(),
-      endpointDisconnectApplicationReducer('organization')
+      endpointDisconnectApplicationReducer('organization'),
+      userSpaceOrgReducer(false)
     ]
   };
 

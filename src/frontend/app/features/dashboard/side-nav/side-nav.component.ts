@@ -1,9 +1,12 @@
-import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Component, Inject, InjectionToken, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs/Observable';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ActionHistoryDump } from '../../../store/actions/action-history.actions';
+import { AppState } from '../../../store/app-state';
+
+export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
 export interface SideNavItem {
   text: string;
@@ -20,7 +23,10 @@ export interface SideNavItem {
 
 export class SideNavComponent implements OnInit {
 
-  constructor(private store: Store<AppState>, ) { }
+  constructor(
+    private store: Store<AppState>,
+    @Inject(Customizations) public customizations: CustomizationsMetadata
+  ) { }
 
   @Input() tabs: SideNavItem[];
   // Button is not always visible on load, so manually push through an event

@@ -3,6 +3,10 @@ import { StoreModule } from '@ngrx/store';
 
 import { AppState } from '../store/app-state';
 import { appReducers } from '../store/reducers.module';
+import { getDefaultEndpointRoles } from '../store/types/current-user-roles.types';
+import { createUserRoleInOrg } from '../store/types/user.types';
+
+export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 
 /* tslint:disable */
 const testInitialStoreState: AppState = {
@@ -20,15 +24,17 @@ const testInitialStoreState: AppState = {
       user: {
         guid: '530170c7-5042-40ed-8654-c4a79e4d1302',
         name: 'admin',
-        admin: true
+        admin: true,
+        scopes: []
       },
       endpoints: {
         cf: {
-          '01ccda9d-8f40-4dd0-bc39-08eea68e364f': {
-            guid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f',
+          [testSCFGuid]: {
+            guid: testSCFGuid,
             name: 'SCF-2.2.0-beta',
             version: '',
             user: {
+              scopes: [],
               guid: 'a6254a42-a218-4f41-b77e-35a8d53d9dd1',
               name: 'admin',
               admin: true
@@ -40,6 +46,7 @@ const testInitialStoreState: AppState = {
             name: 'SCF',
             version: '',
             user: {
+              scopes: [],
               guid: 'ded8a59b-b21d-4da6-a07a-0d865a9b16e2',
               name: 'admin',
               admin: true
@@ -51,6 +58,7 @@ const testInitialStoreState: AppState = {
             name: 'TEST',
             version: '',
             user: {
+              scopes: [],
               guid: 'b2a8ed5c-5c63-4b5b-bdf8-04ea66a9db00',
               name: 'admin',
               admin: true
@@ -62,6 +70,7 @@ const testInitialStoreState: AppState = {
             name: 'SAP',
             version: '',
             user: {
+              scopes: [],
               guid: '7965e2cc-ef57-4373-bb0d-b45025355883',
               name: 'macdougall.neil@gmail.com',
               admin: false
@@ -73,6 +82,7 @@ const testInitialStoreState: AppState = {
             name: 'SCF 2.1.0-beta',
             version: '',
             user: {
+              scopes: [],
               guid: 'a1e15ade-2f3d-4354-8935-0553973afb2c',
               name: 'admin',
               admin: true
@@ -4046,7 +4056,7 @@ const testInitialStoreState: AppState = {
           audited_spaces_url: '/v2/users/bcf78136-6225-4515-bf8e-a32243deea0c/audited_spaces',
           audited_spaces: [],
           guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
-          cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          cfGuid: testSCFGuid
         },
         metadata: {
           guid: 'bcf78136-6225-4515-bf8e-a32243deea0c',
@@ -4075,7 +4085,7 @@ const testInitialStoreState: AppState = {
           audited_spaces_url: '/v2/users/hcf_auto_config/audited_spaces',
           audited_spaces: [],
           guid: 'hcf_auto_config',
-          cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          cfGuid: testSCFGuid
         },
         metadata: {
           guid: 'hcf_auto_config',
@@ -4159,7 +4169,7 @@ const testInitialStoreState: AppState = {
           audited_spaces_url: '/v2/users/b950b10c-c360-4bec-83c9-333c76cbbbe1/audited_spaces',
           audited_spaces: [],
           guid: 'b950b10c-c360-4bec-83c9-333c76cbbbe1',
-          cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          cfGuid: testSCFGuid
         },
         metadata: {
           guid: 'b950b10c-c360-4bec-83c9-333c76cbbbe1',
@@ -4228,7 +4238,7 @@ const testInitialStoreState: AppState = {
           service_bindings: [],
           route_mappings_url: '/v2/apps/4e4858c4-24ab-4caf-87a8-7703d1da58a0/route_mappings',
           guid: '4e4858c4-24ab-4caf-87a8-7703d1da58a0',
-          cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          cfGuid: testSCFGuid
         },
         metadata: {
           guid: '4e4858c4-24ab-4caf-87a8-7703d1da58a0',
@@ -4352,7 +4362,7 @@ const testInitialStoreState: AppState = {
           service_bindings: [],
           route_mappings_url: '/v2/apps/40a8cd59-956c-483c-ba7d-a7161e39e5eb/route_mappings',
           guid: '40a8cd59-956c-483c-ba7d-a7161e39e5eb',
-          cfGuid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f'
+          cfGuid: testSCFGuid
         },
         metadata: {
           guid: '40a8cd59-956c-483c-ba7d-a7161e39e5eb',
@@ -4372,7 +4382,7 @@ const testInitialStoreState: AppState = {
           detected_buildpack_guid: '184826e2-57f6-4dec-a09d-3af3cdc81646',
           environment_json: {
             STRATOS_PROJECT: '{"deploySource":{"type":"github","timestamp":1506186204,"project":"nwmac/cf-demo-app"' +
-            ',"branch":"master","url":"https://github.com/nwmac/cf-demo-app","commit":"9249fe2f739b93770e0d85ce5578df0cd22355b8\\n"}}'
+              ',"branch":"master","url":"https://github.com/nwmac/cf-demo-app","commit":"9249fe2f739b93770e0d85ce5578df0cd22355b8\\n"}}'
           },
           memory: 64,
           instances: 1,
@@ -4427,8 +4437,8 @@ const testInitialStoreState: AppState = {
                   username: 'Ylgy7uLdvkyzTMKe',
                   password: 'wScrF2EvIdScRHgW',
                   uri: 'mysql://Ylgy7uLdvkyzTMKe:wScrF2EvIdScRHgW@mysql-proxy.cf.svc.cluster.local'
-                  +
-                  ':3306/cf_bfae68fb_b981_4ee2_88ec_70176f7a7c93?reconnect=true',
+                    +
+                    ':3306/cf_bfae68fb_b981_4ee2_88ec_70176f7a7c93?reconnect=true',
                   jdbcUrl: 'jdbc:mysql://mysql-proxy.cf.svc.cluster.local:3306/cf_bfae68fb_b981_4ee2_88ec_70176f7a7c93?user=Ylgy7uLdvkyzTMKe&password=wScrF2EvIdScRHgW'
                 },
                 binding_options: {},
@@ -5205,8 +5215,8 @@ const testInitialStoreState: AppState = {
           detected_buildpack_guid: 'e9635bf5-a0aa-42d6-bdda-b703fb080677',
           environment_json: {
             STRATOS_PROJECT:
-            '{"url":"https://github.com/troytop/presentation-template", ' +
-            ' "commit":"bcb2cd228ed26fa72f5e029f6979f4e0c971de29\\n","branch":"cap-roadmap","timestamp":1505336909}'
+              '{"url":"https://github.com/troytop/presentation-template", ' +
+              ' "commit":"bcb2cd228ed26fa72f5e029f6979f4e0c971de29\\n","branch":"cap-roadmap","timestamp":1505336909}'
           },
           memory: 64,
           instances: 1,
@@ -21582,8 +21592,8 @@ const testInitialStoreState: AppState = {
     route: {},
     event: {},
     endpoint: {
-      '01ccda9d-8f40-4dd0-bc39-08eea68e364f': {
-        guid: '01ccda9d-8f40-4dd0-bc39-08eea68e364f',
+      [testSCFGuid]: {
+        guid: testSCFGuid,
         name: 'SCF',
         cnsi_type: 'cf',
         api_endpoint: {
@@ -21640,10 +21650,10 @@ const testInitialStoreState: AppState = {
   routing: {
     previousState: {
       id: 4,
-      url: '/service-catalog',
-      urlAfterRedirects: '/service-catalog',
+      url: '/marketplace',
+      urlAfterRedirects: '/marketplace',
       state: {
-        url: '/service-catalog',
+        url: '/marketplace',
         params: {},
         queryParams: {}
       }
@@ -21659,8 +21669,33 @@ const testInitialStoreState: AppState = {
       }
     }
   },
+  manageUsersRoles: {
+    users: [],
+    cfGuid: '',
+    newRoles: {
+      name: '',
+      orgGuid: '',
+      spaces: {},
+      permissions: createUserRoleInOrg(
+        undefined,
+        undefined,
+        undefined,
+        undefined
+      )
+    },
+    changedRoles: []
+  },
   internalEvents: {
     types: {}
+  },
+  currentUserRoles: {
+    internal: {
+      isAdmin: false,
+      scopes: []
+    },
+    cf: {
+      [testSCFGuid]: getDefaultEndpointRoles()
+    }
   }
 };
 /* tslint:enable */
@@ -21679,4 +21714,3 @@ export function createBasicStoreModule(): ModuleWithProviders {
   );
 }
 
-export const testSCFGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';

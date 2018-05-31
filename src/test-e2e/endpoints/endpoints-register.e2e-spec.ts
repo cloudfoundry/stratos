@@ -1,27 +1,27 @@
 import { ApplicationsPage } from '../applications/applications.po';
 import { CloudFoundryPage } from '../cloud-foundry/cloud-foundry.po';
-import { E2EHelpers } from '../helpers/e2e-helpers';
-import { ResetsHelpers } from '../helpers/reset-helpers';
-import { SecretsHelpers } from '../helpers/secrets-helpers';
+import { e2e } from '../e2e';
+import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavMenuItem } from '../po/side-nav.po';
 import { ServicesPage } from '../services/services.po';
-import { EndpointMetadata, EndpointsPage, resetToLoggedIn } from './endpoints.po';
+import { EndpointMetadata, EndpointsPage } from './endpoints.po';
 import { RegisterDialog } from './register-dialog.po';
 
 describe('Endpoints', () => {
-  const helpers = new E2EHelpers();
-  const secrets = new SecretsHelpers();
-  const resets = new ResetsHelpers();
   const endpointsPage = new EndpointsPage();
   const applications = new ApplicationsPage();
   const services = new ServicesPage();
   const cloudFoundry = new CloudFoundryPage();
   const register = new RegisterDialog();
 
+  const validEndpoint = e2e.secrets.getDefaultCFEndpoint();
+
+
   describe('Register Endpoints -', () => {
 
     beforeAll(() => {
-      resetToLoggedIn(resets.removeAllEndpoints, true);
+      e2e.setup(ConsoleUserType.admin)
+      .clearAllEndpoints();
     });
 
     beforeEach(() => {
@@ -38,8 +38,6 @@ describe('Endpoints', () => {
     });
 
     describe('Form -', () => {
-
-      const validEndpoint = secrets.getDefaultCFEndpoint();
 
       describe('Invalid address -', () => {
 

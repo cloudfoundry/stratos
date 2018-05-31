@@ -12,6 +12,7 @@ import { getActiveRouteCfOrgSpaceProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../services/cloud-foundry-space.service';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
 
 @Component({
   selector: 'app-cloud-foundry-space-base',
@@ -46,7 +47,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       link: 'users',
       label: 'Users',
       // Hide the users tab unless we are in development
-      hidden: environment.production
+      hidden: Observable.of(environment.production)
     }
   ];
 
@@ -58,6 +59,9 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
 
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
+
+  public permsSpaceEdit = CurrentUserPermissions.SPACE_EDIT;
+  public permsSpaceDelete = CurrentUserPermissions.SPACE_DELETE;
 
   constructor(
     public cfEndpointService: CloudFoundryEndpointService,

@@ -1,21 +1,18 @@
+import { DatePipe } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import {
   ApplicationEnvVarsService,
 } from '../../../../../../features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
 import { generateTestApplicationServiceProvider } from '../../../../../../test-framework/application-service-helper';
-import {
-  BaseTestModulesNoShared,
-  MetadataCardTestComponents,
-} from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '../../../../../../test-framework/store-test-helper';
+import { ServiceActionHelperService } from '../../../../../data-services/service-action-helper.service';
 import { EntityMonitorFactory } from '../../../../../monitors/entity-monitor.factory.service';
-import { AppChipsComponent } from '../../../../chips/chips.component';
-import { ServiceIconComponent } from '../../../../service-icon/service-icon.component';
-import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
-import { ApplicationStateService } from '../../../../application-state/application-state.service';
 import { PaginationMonitorFactory } from '../../../../../monitors/pagination-monitor.factory';
+import { ApplicationStateService } from '../../../../application-state/application-state.service';
 import { ConfirmationDialogService } from '../../../../confirmation-dialog.service';
-import { DatePipe } from '@angular/common';
+import { AppServiceBindingCardComponent } from './app-service-binding-card.component';
 
 describe('AppServiceBindingCardComponent', () => {
   let component: AppServiceBindingCardComponent;
@@ -23,13 +20,10 @@ describe('AppServiceBindingCardComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        AppServiceBindingCardComponent,
-        MetadataCardTestComponents,
-        ServiceIconComponent,
-        AppChipsComponent,
+      imports: [
+        ...BaseTestModules,
+        createBasicStoreModule(),
       ],
-      imports: [...BaseTestModulesNoShared],
       providers: [
         EntityMonitorFactory,
         generateTestApplicationServiceProvider('1', '1'),
@@ -37,7 +31,8 @@ describe('AppServiceBindingCardComponent', () => {
         ApplicationStateService,
         PaginationMonitorFactory,
         ConfirmationDialogService,
-        DatePipe
+        DatePipe,
+        ServiceActionHelperService,
       ]
     })
       .compileComponents();

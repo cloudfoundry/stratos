@@ -15,6 +15,7 @@ import { PageHeaderService } from './../../../core/page-header-service/page-head
 import { ChangeSideNavMode, CloseSideNav, OpenSideNav } from './../../../store/actions/dashboard-actions';
 import { DashboardState } from './../../../store/reducers/dashboard-reducer';
 import { SideNavItem } from './../side-nav/side-nav.component';
+import { GetCurrentUsersRelations } from '../../../store/actions/permissions.actions';
 
 @Component({
   selector: 'app-dashboard-base',
@@ -63,9 +64,14 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
       link: '/applications'
     },
     {
+      text: 'Marketplace',
+      matIcon: 'store',
+      link: '/marketplace'
+    },
+    {
       text: 'Services',
       matIcon: 'library_books',
-      link: '/service-catalog'
+      link: '/services'
     },
     {
       text: 'Cloud Foundry',
@@ -80,8 +86,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   ];
 
   sideNaveMode = 'side';
-
+  dispatchRelations() {
+    this.store.dispatch(new GetCurrentUsersRelations());
+  }
   ngOnInit() {
+    this.dispatchRelations();
     const dashboardState$ = this.store.select('dashboard');
     this.fullView = this.isFullView(this.activatedRoute.snapshot);
     this.routeChangeSubscription = this.router.events.pipe(
@@ -113,9 +122,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterContentIn
   }
 
   ngAfterContentInit() {
-    this.breakpointSub = this.breakpointObserver.observe([
-      Breakpoints.HandsetPortrait
-    ]).pipe(
+    this.breakpointSub = this.breakpointObserver.observe([Breakpoints.HandsetPortrait]).pipe(
       debounceTime(250)
     ).subscribe(result => {
       if (result.matches) {

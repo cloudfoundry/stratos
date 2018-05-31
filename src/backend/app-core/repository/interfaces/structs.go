@@ -93,10 +93,11 @@ type VCapApplicationData struct {
 }
 
 type LoginRes struct {
-	Account     string   `json:"account"`
-	TokenExpiry int64    `json:"token_expiry"`
-	APIEndpoint *url.URL `json:"api_endpoint"`
-	Admin       bool     `json:"admin"`
+	Account     string   	 		 `json:"account"`
+	TokenExpiry int64    		 	 `json:"token_expiry"`
+	APIEndpoint *url.URL 		 	 `json:"api_endpoint"`
+	Admin       bool    		 	 `json:"admin"`
+	User				*ConnectedUser `json:"user"`
 }
 
 type LoginHookFunc func(c echo.Context) error
@@ -118,9 +119,10 @@ type SessionStorer interface {
 
 // ConnectedUser - details about the user connected to a specific service or UAA
 type ConnectedUser struct {
-	GUID  string `json:"guid"`
-	Name  string `json:"name"`
-	Admin bool   `json:"admin"`
+	GUID   string   `json:"guid"`
+	Name   string   `json:"name"`
+	Admin  bool     `json:"admin"`
+	Scopes []string `json:"scopes"`
 }
 
 type JWTUserTokenInfo struct {

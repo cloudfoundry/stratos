@@ -37,6 +37,7 @@ import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/ca
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
+import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CliCommandComponent } from './components/cli-info/cli-command/cli-command.component';
 import { CliInfoComponent } from './components/cli-info/cli-info.component';
@@ -48,6 +49,7 @@ import { DialogErrorComponent } from './components/dialog-error/dialog-error.com
 import { DisplayValueComponent } from './components/display-value/display-value.component';
 import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
 import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EnumerateComponent } from './components/enumerate/enumerate.component';
 import { EnvVarViewComponent } from './components/env-var-view/env-var-view.component';
 import { FileInputComponent } from './components/file-input/file-input.component';
 import { FocusDirective } from './components/focus.directive';
@@ -65,6 +67,7 @@ import { MetaCardValueComponent } from './components/list/list-cards/meta-card/m
 import {
   TableCellRequestMonitorIconComponent,
 } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+import { TableComponent } from './components/list/list-table/table.component';
 import { listTableComponents } from './components/list/list-table/table.types';
 import {
   EventTabActorIconPipe,
@@ -89,6 +92,9 @@ import { TileGridComponent } from './components/tile/tile-grid/tile-grid.compone
 import { TileGroupComponent } from './components/tile/tile-group/tile-group.component';
 import { TileComponent } from './components/tile/tile/tile.component';
 import { UniqueDirective } from './components/unique.directive';
+import {
+  UploadProgressIndicatorComponent,
+} from './components/upload-progress-indicator/upload-progress-indicator.component';
 import { UsageGaugeComponent } from './components/usage-gauge/usage-gauge.component';
 import { UserProfileBannerComponent } from './components/user-profile-banner/user-profile-banner.component';
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
@@ -102,7 +108,8 @@ import { PercentagePipe } from './pipes/percentage.pipe';
 import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
-import { UploadProgressIndicatorComponent } from './components/upload-progress-indicator/upload-progress-indicator.component';
+import { UserPermissionDirective } from './user-permission.directive';
+import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 
 @NgModule({
   imports: [
@@ -183,13 +190,16 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     IntroScreenComponent,
     CliInfoComponent,
     CliCommandComponent,
+    CfRoleCheckboxComponent,
+    EnumerateComponent,
     UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     UserProfileBannerComponent,
     AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     UserProfileBannerComponent,
-    TableCellRequestMonitorIconComponent
+    TableCellRequestMonitorIconComponent,
+    UserPermissionDirective
   ],
   exports: [
     FormsModule,
@@ -255,11 +265,15 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     UserProfileBannerComponent,
     CliInfoComponent,
     CliCommandComponent,
+    CfRoleCheckboxComponent,
+    EnumerateComponent,
     UploadProgressIndicatorComponent,
     GithubCommitAuthorComponent,
     AppActionMonitorComponent,
     CliCommandComponent,
-    AppActionMonitorIconComponent
+    AppActionMonitorIconComponent,
+    TableComponent,
+    UserPermissionDirective
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
@@ -275,7 +289,8 @@ import { UploadProgressIndicatorComponent } from './components/upload-progress-i
     EntityMonitorFactory,
     PaginationMonitorFactory,
     CloudFoundryService,
-    InternalEventMonitorFactory
+    InternalEventMonitorFactory,
+    ServiceActionHelperService
   ]
 })
 export class SharedModule { }

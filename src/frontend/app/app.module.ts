@@ -6,6 +6,7 @@ import { RouterStateSerializer, StoreRouterConnectingModule } from '@ngrx/router
 import { AppComponent } from './app.component';
 import { RouteModule } from './app.routing';
 import { CoreModule } from './core/core.module';
+import { CustomModule } from './custom.module';
 import { AboutModule } from './features/about/about.module';
 import { ApplicationsModule } from './features/applications/applications.module';
 import { DashboardModule } from './features/dashboard/dashboard.module';
@@ -72,6 +73,7 @@ export class CustomRouterStateSerializer
     ServiceCatalogModule,
     StoreRouterConnectingModule, // Create action for router navigation
     AboutModule,
+    CustomModule,
     XSRFModule,
   ],
   providers: [
