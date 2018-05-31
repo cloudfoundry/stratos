@@ -102,7 +102,6 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   onEnter = () => {
-
     this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstanceOrgGuid).pipe(

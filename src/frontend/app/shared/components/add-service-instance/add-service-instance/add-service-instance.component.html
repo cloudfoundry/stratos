@@ -4,12 +4,12 @@
 <div class="add-service-instance">
   <app-steppers [cancel]="serviceInstancesUrl">
     <app-step *ngIf="modeService.viewDetail.showSelectCf" title="Cloud Foundry" [valid]="selectCF.validate | async" [onNext]="onNext" [blocked]="cfOrgSpaceService.isLoading$ | async">
-      <app-create-application-step1 [isServiceInstanceMode]="modeService.isMarketplaceMode" #selectCF></app-create-application-step1>
+      <app-create-application-step1 [stepperText]="stepperText" [isMarketplaceMode]="modeService.isMarketplaceMode()" #selectCF></app-create-application-step1>
     </app-step>
     <app-step title="Select Service" *ngIf="modeService.viewDetail.showSelectService" [valid]="selectService.validate | async" [onNext]="selectService.onNext">
       <app-select-service #selectService></app-select-service>
     </app-step>
-    <app-step title="Select Plan" [onNext]="selectPlan.onNext" [onEnter]="selectPlan.onEnter" [valid]="selectPlan.validate | async" cancelButtonText="Cancel">
+    <app-step title="Select Plan" [onNext]="selectPlan.onNext" [blocked]="initialisedService$ | async" [onEnter]="selectPlan.onEnter" [valid]="selectPlan.validate | async" cancelButtonText="Cancel">
       <app-select-plan-step #selectPlan></app-select-plan-step>
     </app-step>
     <app-step [title]="bindAppStepperText" *ngIf="modeService.viewDetail.showBindApp" [skip]="skipApps$ | async" [onNext]="bindApp.submit " [valid]="bindApp.validate | async" cancelButtonText="Cancel" finishButtonText="Bind">

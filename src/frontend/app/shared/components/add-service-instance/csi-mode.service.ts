@@ -43,7 +43,6 @@ export class CsiModeService {
       this.mode = CreateServiceInstanceMode.MARKETPLACE_MODE;
       this.viewDetail = {
         ...defaultViewDetail,
-        showSelectCf: false,
         showSelectService: false,
       };
     }
