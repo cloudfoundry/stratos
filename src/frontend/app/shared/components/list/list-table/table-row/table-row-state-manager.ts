@@ -1,4 +1,4 @@
-import { Subject ,  ReplaySubject } from 'rxjs';
+import { Subject, ReplaySubject } from 'rxjs';
 import { RowState, RowsState } from '../../data-sources-controllers/list-data-source-types';
 import { debounceTime } from 'rxjs/operators';
 /**

@@ -36,7 +36,7 @@ describe('TableRowComponent', () => {
     fixture.elementRef.nativeElement.getElementsByClassName(className)[0],
     fixture.elementRef.nativeElement.getElementsByClassName(className)[1]
   ]);
-  const elementShown = element => window.getComputedStyle(element).display !== 'none';
+  const elementShown = (element: Element) => window.getComputedStyle(element).display !== 'none';
 
 
   beforeEach(async(() => {

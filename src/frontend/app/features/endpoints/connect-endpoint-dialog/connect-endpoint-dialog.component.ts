@@ -1,7 +1,7 @@
 
-import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
+import { combineLatest as observableCombineLatest, of as observableOf, Observable, Subscription } from 'rxjs';
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, Validators, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef, MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
 import { filter, map, pairwise, switchMap, delay, startWith } from 'rxjs/operators';
@@ -35,7 +35,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   connectingSub: Subscription;
   fetchSub: Subscription;
-  public endpointForm;
+  public endpointForm: FormGroup;
 
   private bodyContent = '';
 
@@ -147,7 +147,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       map(update => update.error)
     );
 
-    this.valid$ = this.endpointForm.valueChanges.map(() => this.endpointForm.valid);
+    this.valid$ = this.endpointForm.valueChanges.pipe(map(() => this.endpointForm.valid));
 
     this.setupCombinedObservables();
   }
