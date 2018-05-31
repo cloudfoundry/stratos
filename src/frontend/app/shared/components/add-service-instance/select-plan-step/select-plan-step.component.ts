@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { filter, first, map, publishReplay, refCount, switchMap, tap, combineLatest, take } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap, tap, combineLatest, take, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
@@ -18,6 +18,7 @@ import {
   selectCreateServiceInstanceServiceGuid,
   selectCreateServiceInstanceOrgGuid,
   selectCreateServiceInstanceSpaceGuid,
+  selectCreateServiceInstance,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource, EntityInfo } from '../../../../store/types/api.types';
 import { safeUnsubscribe, isMarketplaceMode } from '../../../../features/service-catalog/services-helper';
@@ -73,32 +74,16 @@ export class SelectPlanStepComponent implements OnDestroy {
     if (isMarketplaceMode(activatedRoute)) {
       this.store.dispatch(new SetCreateServiceInstanceCFDetails(activatedRoute.snapshot.params.cfId));
     }
-  }
 
-  mapToServicePlan = (visiblePlans: APIResource<IServicePlan>[]): ServicePlan[] => visiblePlans.map(p => ({
-    id: p.metadata.guid,
-    name: p.entity.name,
-    entity: p,
-    extra: p.entity.extra ? JSON.parse(p.entity.extra) : null
-  }))
-
-  getDisplayName(selectedPlan: ServicePlan) {
-    let name = selectedPlan.name;
-    if (selectedPlan.extra && selectedPlan.extra.displayName) {
-      name = selectedPlan.extra.displayName;
-    }
-    return name;
-  }
-  hasAdditionalInfo(selectedPlan: ServicePlan) {
-    return selectedPlan.extra && selectedPlan.extra.bullets;
-  }
-
-  onEnter = () => {
-    this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
-
-    this.servicePlans$ = this.store.select(selectCreateServiceInstanceOrgGuid).pipe(
-      combineLatest(this.store.select(selectCreateServiceInstanceSpaceGuid)),
-      switchMap(([orgGuid, spaceGuid]) => this.cSIHelperService.getVisibleServicePlansForSpaceAndOrg(orgGuid, spaceGuid)),
+    this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
+      filter(p => !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),
+      distinctUntilChanged((x, y) => {
+        return (x.cfGuid === y.cfGuid && x.spaceGuid === y.spaceGuid && x.orgGuid === y.orgGuid && x.serviceGuid === y.serviceGuid);
+      }),
+      switchMap(state => {
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
+        return this.cSIHelperService.getVisibleServicePlansForSpaceAndOrg(state.orgGuid, state.spaceGuid);
+      }),
       tap(o => {
         if (o.length === 0) {
           this.stepperForm.controls.servicePlans.disable();
@@ -121,8 +106,30 @@ export class SelectPlanStepComponent implements OnDestroy {
       this.servicePlans$).pipe(
         filter(([p, q]) => !!q && q.length > 0),
         map(([valid, servicePlans]) =>
-          this.servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0])
+          servicePlans.filter(s => s.entity.metadata.guid === this.stepperForm.controls.servicePlans.value)[0])
       );
+  }
+
+  mapToServicePlan = (visiblePlans: APIResource<IServicePlan>[]): ServicePlan[] => visiblePlans.map(p => ({
+    id: p.metadata.guid,
+    name: p.entity.name,
+    entity: p,
+    extra: p.entity.extra ? JSON.parse(p.entity.extra) : null
+  }))
+
+  getDisplayName(selectedPlan: ServicePlan) {
+    let name = selectedPlan.name;
+    if (selectedPlan.extra && selectedPlan.extra.displayName) {
+      name = selectedPlan.extra.displayName;
+    }
+    return name;
+  }
+  hasAdditionalInfo(selectedPlan: ServicePlan) {
+    return selectedPlan.extra && selectedPlan.extra.bullets;
+  }
+
+  onEnter = () => {
+
 
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
