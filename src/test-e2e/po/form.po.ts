@@ -48,8 +48,6 @@ export class FormComponent extends Component {
   }
 
   mapField(elm: ElementFinder, index: number): FormItem | any {
-    console.log(elm);
-    console.log(index);
     return {
       index: index,
       name: elm.getAttribute('name'),
@@ -71,18 +69,16 @@ export class FormComponent extends Component {
 
   // Get the form field with the specified name or formcontrolname
   getField(ctrlName: string): ElementFinder {
-    console.log('0', ctrlName);
-    return this.getFields().filter((elm => {
-      console.log('1');
+    const fields = this.getFields().filter((elm => {
       return elm.getAttribute('name').then(name => {
-        console.log('2', name);
         return elm.getAttribute('formcontrolname').then(formcontrolname => {
-          console.log('3', formcontrolname);
           const nameAtt = name || formcontrolname;
           return nameAtt.toLowerCase() === ctrlName;
         });
       });
-    })).first();
+    }));
+    expect(fields.count()).toBe(1);
+    return fields.first();
   }
 
   // Get form field object for the specfied field (see below for FormField)
@@ -105,13 +101,8 @@ export class FormComponent extends Component {
     return this.getField(ctrlName).getAttribute('aria-describedby').then(id => this.locator.element(by.id(id)).getText());
   }
 
-  getText(ctrlName: string, ctrl: FormItem): any {
-    const type = ctrl.type || ctrl.tag;
-    if (!!type) {
-      return this.getField(ctrlName).getText();
-    }
-    return this.getField(ctrlName).findElement(By.css('/deep/ div:nth-of-type(2)')).getText();
-  }
+  getText = (ctrlName: string, isTextInput: boolean): promise.Promise<string> =>
+    isTextInput ? this.getField(ctrlName).getAttribute('value') : this.getField(ctrlName).getText()
 
   // Focus the specified field by clicking it
   focusField(ctrlName: string): promise.Promise<void> {
@@ -135,19 +126,10 @@ export class FormComponent extends Component {
       Object.keys(fields).forEach(field => {
         const ctrl = ctrls[field] as FormItem;
         const value = fields[field];
-        console.log(ctrls);
-        console.log(fields);
-        console.log(field);
         expect(ctrl).toBeDefined();
         if (!ctrl) {
           return;
         }
-        // console.log(ctrl.name);
-        // console.log(ctrl.tag);
-        // console.log(ctrl.outerHtml);
-        // ctrl.name  .element.getTagName().then(tag => console.log(tag));
-        // ctrl.element.getTagName().then(tag => console.log(tag));
-        // console.log('!!!!!!!!!!!!!!!!!!!!!!!', ctrl.type);
         const type = ctrl.type || ctrl.tag;
         switch (type) {
           case 'checkbox':
@@ -167,8 +149,7 @@ export class FormComponent extends Component {
             ctrl.sendKeys(value);
             break;
         }
-        // browser.sleep(5000);
-        expect(this.getText(field, ctrl)).toBe(value);
+        expect(this.getText(field, ctrl.type === 'text')).toBe(value);
       });
     });
   }

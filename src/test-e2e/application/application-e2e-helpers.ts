@@ -18,7 +18,7 @@ export class ApplicationE2eHelper {
   }
 
 
-  static createApplicationName = (isoTime?: string): string => E2EHelpers.createCustomName(customAppLabel, isoTime);
+  static createApplicationName = (isoTime?: string): string => E2EHelpers.createCustomName(customAppLabel, isoTime).toLowerCase();
   /**
    * Get default sanitized URL name for App
    * @param {string} appName Name of the app
@@ -34,10 +34,6 @@ export class ApplicationE2eHelper {
   }
 
   deleteApplicationByName = (cfGuid: string, appName: string): promise.Promise<any> => {
-    if (!appName) {
-      return;
-    }
-
     return this.fetchApp(cfGuid, appName)
       .then(response => {
         if (!response || response.total_results <= 0) {

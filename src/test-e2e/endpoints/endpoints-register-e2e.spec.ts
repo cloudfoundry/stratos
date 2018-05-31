@@ -21,7 +21,7 @@ describe('Endpoints', () => {
 
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints();
+        .clearAllEndpoints();
     });
 
     beforeEach(() => {
@@ -39,61 +39,67 @@ describe('Endpoints', () => {
 
     describe('Form -', () => {
 
+      let name, address;
+      beforeEach(() => {
+        name = register.getName();
+        address = register.getAddress();
+      });
+
       describe('Invalid address -', () => {
 
         const invalidUrl = 'Invalid API URL';
 
         beforeEach(() => {
           // Enter a name so the form will become valid on valid address
-          register.name.set('abc');
+          name.set('abc');
           expect(register.stepper.canNext()).toBeFalsy();
         });
 
         it('Incorrect format', () => {
-          register.address.set(invalidUrl);
+          address.set(invalidUrl);
           // Move focus so that we get the validation of the address field
-          register.name.focus();
+          name.focus();
 
           // Check address is invalid
           expect(register.stepper.canNext()).toBeFalsy();
-          expect(register.address.isInvalid()).toBeTruthy();
-          expect(register.address.getError()).toEqual(invalidUrl);
+          expect(address.isInvalid()).toBeTruthy();
+          expect(address.getError()).toEqual(invalidUrl);
         });
 
         it('Valid format', () => {
-          register.address.set(validEndpoint.url);
+          address.set(validEndpoint.url);
           // Move focus so that we get the validation of the address field
-          register.name.focus();
+          name.focus();
 
           expect(register.stepper.canNext()).toBeTruthy();
-          expect(register.address.isInvalid()).toBeFalsy();
+          expect(address.isInvalid()).toBeFalsy();
         });
 
         it('Invalid to valid to invalid', () => {
           // Invalid
-          register.address.set(invalidUrl);
+          address.set(invalidUrl);
           // Move focus so that we get the validation of the address field
-          register.name.focus();
+          name.focus();
           expect(register.stepper.canNext()).toBeFalsy();
-          expect(register.address.isInvalid()).toBeTruthy();
-          expect(register.address.getError()).toEqual(invalidUrl);
+          expect(address.isInvalid()).toBeTruthy();
+          expect(address.getError()).toEqual(invalidUrl);
 
           // Valid
-          register.address.clear();
-          register.address.set(validEndpoint.url);
+          address.clear();
+          address.set(validEndpoint.url);
           // Move focus so that we get the validation of the address field
-          register.name.focus();
+          name.focus();
 
           expect(register.stepper.canNext()).toBeTruthy();
-          expect(register.address.isInvalid()).toBeFalsy();
+          expect(address.isInvalid()).toBeFalsy();
 
           // Invalid
-          register.address.set(invalidUrl);
+          address.set(invalidUrl);
           // Move focus so that we get the validation of the address field
-          register.name.focus();
+          name.focus();
           expect(register.stepper.canNext()).toBeFalsy();
-          expect(register.address.isInvalid()).toBeTruthy();
-          expect(register.address.getError()).toEqual(invalidUrl);
+          expect(address.isInvalid()).toBeTruthy();
+          expect(address.getError()).toEqual(invalidUrl);
 
         });
       });
@@ -102,36 +108,36 @@ describe('Endpoints', () => {
 
         beforeEach(() => {
           // Enter a url so the form will become valid on valid Name
-          register.address.set(validEndpoint.url);
+          address.set(validEndpoint.url);
           expect(register.stepper.canNext()).toBeFalsy();
         });
 
         it('Valid', () => {
-          register.name.set(validEndpoint.name);
+          name.set(validEndpoint.name);
           expect(register.stepper.canNext()).toBeTruthy();
-          expect(register.name.isInvalid()).toBeFalsy();
+          expect(name.isInvalid()).toBeFalsy();
         });
 
         it('Invalid', () => {
-          register.name.clear();
-          register.address.focus();
+          name.clear();
+          address.focus();
           expect(register.stepper.canNext()).toBeFalsy();
-          expect(register.name.isInvalid()).toBeTruthy();
-          expect(register.name.getError()).toEqual('Name is required');
+          expect(name.isInvalid()).toBeTruthy();
+          expect(name.getError()).toEqual('Name is required');
         });
 
         it('Valid to invalid to valid', () => {
-          register.name.set(validEndpoint.name);
+          name.set(validEndpoint.name);
           expect(register.stepper.canNext()).toBeTruthy();
-          expect(register.name.isInvalid()).toBeFalsy();
+          expect(name.isInvalid()).toBeFalsy();
 
-          register.name.clear();
+          name.clear();
           expect(register.stepper.canNext()).toBeFalsy();
-          expect(register.name.isInvalid()).toBeFalsy();
+          expect(name.isInvalid()).toBeFalsy();
 
-          register.name.set(validEndpoint.name);
+          name.set(validEndpoint.name);
           expect(register.stepper.canNext()).toBeTruthy();
-          expect(register.name.isInvalid()).toBeFalsy();
+          expect(name.isInvalid()).toBeFalsy();
         });
       });
 

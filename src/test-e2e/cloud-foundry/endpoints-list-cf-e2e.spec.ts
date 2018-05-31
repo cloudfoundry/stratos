@@ -14,7 +14,7 @@ describe('CF Endpoints Dashboard', () => {
   describe('No endpoints', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints();
+        .clearAllEndpoints();
     });
 
     beforeEach(() => {
@@ -22,7 +22,7 @@ describe('CF Endpoints Dashboard', () => {
     });
 
     it('should be the CF Endpoints page', () => {
-     expect(cloudFoundry.isActivePage()).toBeTruthy();
+      expect(cloudFoundry.isActivePage()).toBeTruthy();
     });
 
     it('should show the `no registered endpoints` message', () => {
@@ -34,9 +34,9 @@ describe('CF Endpoints Dashboard', () => {
     beforeAll(() => {
       // Only register and connect a single Cloud Foundry endpoint
       e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .registerDefaultCloudFoundry()
-      .connectAllEndpoints();
+        .clearAllEndpoints()
+        .registerDefaultCloudFoundry()
+        .connectAllEndpoints();
     });
 
     beforeEach(() => {
@@ -56,9 +56,9 @@ describe('CF Endpoints Dashboard', () => {
   describe('Multiple endpoints', () => {
     beforeAll(() => {
       e2e.setup(ConsoleUserType.admin)
-      .clearAllEndpoints()
-      .registerMultipleCloudFoundries()
-      .connectAllEndpoints();
+        .clearAllEndpoints()
+        .registerMultipleCloudFoundries()
+        .connectAllEndpoints();
     });
 
     beforeEach(() => {

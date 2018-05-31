@@ -20,8 +20,8 @@ describe('Endpoints', () => {
 
     beforeAll(() => {
       e2e.setup(ConsoleUserType.user)
-      .clearAllEndpoints()
-      .registerDefaultCloudFoundry();
+        .clearAllEndpoints()
+        .registerDefaultCloudFoundry();
     });
 
     describe('endpoint `Connect` -', () => {

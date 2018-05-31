@@ -1,4 +1,4 @@
-import { browser, promise } from 'protractor';
+import { browser, promise, protractor } from 'protractor';
 import { E2EHelpers } from '../helpers/e2e-helpers';
 import { BreadcrumbsComponent } from './breadcrumbs.po';
 import { PageHeader } from './page-header.po';
@@ -37,6 +37,11 @@ export abstract class Page {
     return browser.getCurrentUrl().then(url => {
       return url.startsWith(browser.baseUrl + this.navLink);
     });
+  }
+
+  protected waitFor(headerTitle: string) {
+    const until = protractor.ExpectedConditions;
+    browser.wait(until.textToBePresentInElement(this.header.getTitle(), headerTitle), 10000);
   }
 
 }
