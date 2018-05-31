@@ -6,6 +6,10 @@ import {
   entityFactory,
   routeSchemaKey,
   serviceBindingSchemaKey,
+  serviceInstancesSchemaKey,
+  servicePlanSchemaKey,
+  serviceInstancesWithNoBindingsSchemaKey,
+  serviceSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -66,7 +70,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
     public endpointGuid: string,
     public paginationKey: string = null,
     public includeRelations: string[] = [
-      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+      createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
     ],
     public populateMissing = true
   ) {
@@ -82,7 +86,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
     'results-per-page': 100,
     page: 1,
     'order-direction': 'desc',
-    'order-direction-field': 'createdAt',
+    'order-direction-field': 'creation',
   };
   entity = [entityFactory(serviceBindingSchemaKey)];
   entityKey = serviceBindingSchemaKey;

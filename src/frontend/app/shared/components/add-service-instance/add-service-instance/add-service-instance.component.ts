@@ -73,7 +73,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
     this.displaySelectCfStep = this.setupSelectCFStep(cfId, appId);
 
     // Check if the select service step needs to be displayed
-    this.displaySelectServiceStep = this.setupSelectServiceStep(serviceId, cfId);
+    this.displaySelectServiceStep = this.setupSelectServiceStep(serviceId, appId);
 
     if (!!cfId && !!appId) {
       // Setup wizard for App services mode
@@ -104,9 +104,9 @@ export class AddServiceInstanceComponent implements OnDestroy {
   }
 
 
-  setupSelectCFStep = (cfId: string, id: string) => !!(cfId || id);
+  setupSelectCFStep = (cfId: string, appId: string) => !(!!cfId && !!appId);
 
-  setupSelectServiceStep = (serviceId, cfId) => !!(serviceId || cfId);
+  setupSelectServiceStep = (serviceId: string, appId: string) => !serviceId;
 
   onNext = () => {
     this.store.dispatch(new SetCreateServiceInstanceCFDetails(

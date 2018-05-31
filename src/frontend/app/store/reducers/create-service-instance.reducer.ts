@@ -51,7 +51,7 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
     case SET_SPACE:
       return { ...state, spaceGuid: action.spaceGuid };
     case SET_SERVICE_INSTANCE_SVC_GUID:
-      return { ...state, serviceGuid: action.serviceGuid };
+      return { ...state, serviceGuid: action.serviceGuid, servicePlanGuid: null };
     case SET_SERVICE_INSTANCE_GUID:
       return { ...state, serviceInstanceGuid: action.guid };
     case SET_SERVICE_INSTANCE_APP:

@@ -58,6 +58,7 @@ const enum FormMode {
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
 
+  serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
   selectCreateInstance$: Observable<CreateServiceInstanceState>;
   formModes = [
@@ -126,33 +127,39 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupForms();
 
     this.selectCreateInstance$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
+      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
       share(),
     );
     this.serviceInstances$ = this.selectCreateInstance$.pipe(
       distinctUntilChanged((x, y) => {
-        return !(x.cfGuid === y.cfGuid && x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid);
+        return (x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid);
       }),
-      filter(p => !!this.cSIHelperService),
-      switchMap(guids => this.cSIHelperService.getServiceInstancesForService(
-        guids.servicePlanGuid,
-        guids.spaceGuid,
-        guids.cfGuid
-      )),
+      switchMap(guids => {
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(guids.cfGuid, guids.serviceGuid);
+        return this.cSIHelperService.getServiceInstancesForService(
+          guids.servicePlanGuid,
+          guids.spaceGuid,
+          guids.cfGuid
+        );
+      }),
       publishReplay(1),
       refCount(),
+    );
+
+    this.serviceInstancesInit$ = this.serviceInstances$.pipe(
+      filter(p => !!p),
+      map(o => false),
+    ).startWith(false);
+    this.hasInstances$ = this.serviceInstances$.pipe(
+      filter(p => !!p),
+      map(p => p.length > 0),
     );
   }
 
   onEnter = () => {
-    this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
+    this.formMode = FormMode.CreateServiceInstance;
     this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     this.subscriptions.push(this.setupFormValidatorData());
-    this.hasInstances$ = this.serviceInstances$.pipe(
-      filter(p => !!p),
-      map(p => p.length > 0)
-    );
-
   }
 
   resetForms = (mode: FormMode) => {
@@ -187,7 +194,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.selectExistingInstanceForm = new FormGroup({
       serviceInstances: new FormControl('', [Validators.required]),
     });
-    this.formMode = FormMode.CreateServiceInstance;
   }
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
