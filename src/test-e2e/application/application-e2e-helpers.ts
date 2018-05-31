@@ -27,7 +27,7 @@ export class ApplicationE2eHelper {
   static getHostName = (appName) => appName.replace(/\./g, '_').replace(/:/g, '_');
 
   fetchApp = (cfGuid: string, appName: string): promise.Promise<CFResponse<APIResource>> => {
-    return this.cfRequestHelper.sendGet(
+    return this.cfRequestHelper.sendCfGet(
       cfGuid,
       'apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName
     );
@@ -51,13 +51,13 @@ export class ApplicationE2eHelper {
         const serviceBindings = app.entity.service_bindings || [];
         serviceBindings.forEach(serviceBinding => {
           const url = 'service_instances/' + serviceBinding.entity.service_instance_guid + '?recursive=true&async=false';
-          promises.push(this.cfRequestHelper.sendDelete(cfGuid, url));
+          promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, url));
         });
 
         // Delete route
         const routes = app.entity.routes || [];
         routes.forEach(route => {
-          promises.push(this.cfRequestHelper.sendDelete(cfGuid, 'routes/' + route.metadata.guid + '?q=recursive=true&async=false'));
+          promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, 'routes/' + route.metadata.guid + '?q=recursive=true&async=false'));
         });
 
         // Delete app

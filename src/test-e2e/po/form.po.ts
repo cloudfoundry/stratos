@@ -48,6 +48,8 @@ export class FormComponent extends Component {
   }
 
   mapField(elm: ElementFinder, index: number): FormItem | any {
+    console.log(elm);
+    console.log(index);
     return {
       index: index,
       name: elm.getAttribute('name'),
@@ -186,11 +188,11 @@ export class FormComponent extends Component {
 export class FormField {
 
   public element: ElementFinder;
-  public ctrl: FormItem;
+  // public ctrl: FormItem;
 
   constructor(public form: FormComponent, public name: string) {
     this.element = this.form.getField(name);
-    this.ctrl = this.form.mapField(this.element, 0);
+    // this.ctrl = this.form.mapField(this.element, 0);
     // this.form.getField()
 
     // const type = ctrl.type || ctrl.tag;
