@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -642,14 +643,34 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, addSetupMiddleware *setupMidd
 
 	}
 
-	// TODO): revisit the API and fix these wonky calls.
 	adminGroup.POST("/unregister", p.unregisterCluster)
 	// sessionGroup.DELETE("/cnsis", p.removeCluster)
+
+	// Serve up static resources
 	if err == nil {
 		e.Static("/", staticDir)
+		e.SetHTTPErrorHandler(getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler))
 		log.Info("Serving static UI resources")
 	}
 
+}
+
+// Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
+func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPErrorHandler) echo.HTTPErrorHandler {
+	return func(err error, c echo.Context) {
+		code := http.StatusInternalServerError
+		if he, ok := err.(*echo.HTTPError); ok {
+			code = he.Code
+		}
+
+		// If this was not a back-end request and the error code is 404, serve the app and let it route
+		if strings.Index(c.Request().URI(), "/pp") != 0 && code == 404 {
+			c.File(path.Join(staticDir, "index.html"))
+		}
+
+		// Let the default handler handle it
+		defaultHandler(err, c)
+	}
 }
 
 func getStaticFiles() (string, error) {

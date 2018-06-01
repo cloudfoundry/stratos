@@ -4,8 +4,10 @@ import { Observable } from 'rxjs/Observable';
 import { AppState } from '../../store/app-state';
 import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 import { userProfileSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
-import { UserProfileInfo, UserProfilePasswordUpdate, UserProfileInfoUpdates,
-  UserProfileInfoEmail } from '../../store/types/user-profile.types';
+import {
+  UserProfileInfo, UserProfilePasswordUpdate, UserProfileInfoUpdates,
+  UserProfileInfoEmail
+} from '../../store/types/user-profile.types';
 import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../store/effects/user-profile.effects';
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
 import { FetchUserProfileAction, UpdateUserProfileAction, UpdateUserPasswordAction } from '../../store/actions/user-profile.actions';

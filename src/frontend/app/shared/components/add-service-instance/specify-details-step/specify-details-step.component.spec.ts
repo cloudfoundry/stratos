@@ -1,9 +1,11 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { BaseTestModules, BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 import { CsiGuidsService } from '../csi-guids.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -12,10 +14,12 @@ describe('SpecifyDetailsStepComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [SpecifyDetailsStepComponent],
-      imports: [BaseTestModules],
+      imports: [BaseTestModulesNoShared],
       providers: [
         CreateServiceInstanceHelperServiceFactory,
-        CsiGuidsService
+        CsiGuidsService,
+        PaginationMonitorFactory,
+        EntityMonitorFactory
       ]
     })
       .compileComponents();
