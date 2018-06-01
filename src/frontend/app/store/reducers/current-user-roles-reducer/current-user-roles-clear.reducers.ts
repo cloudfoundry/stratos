@@ -1,8 +1,9 @@
-import { DisconnectEndpoint } from '../../actions/endpoint.actions';
-import { ICurrentUserRolesState } from '../../types/current-user-roles.types';
+import { DisconnectEndpoint, RegisterEndpoint, EndpointActionComplete } from '../../actions/endpoint.actions';
+import { ICurrentUserRolesState, getDefaultEndpointRoles } from '../../types/current-user-roles.types';
 import { APISuccessOrFailedAction } from '../../types/request.types';
+import { EndpointModel } from '../../types/endpoint.types';
 
-export function removeEndpointRoles(state: ICurrentUserRolesState, action: DisconnectEndpoint) {
+export function removeEndpointRoles(state: ICurrentUserRolesState, action: EndpointActionComplete) {
   const cfState = {
     ...state.cf
   };
@@ -10,6 +11,23 @@ export function removeEndpointRoles(state: ICurrentUserRolesState, action: Disco
     return state;
   }
   delete cfState[action.guid];
+  return {
+    ...state,
+    cf: cfState
+  };
+}
+
+export function addEndpoint(state: ICurrentUserRolesState, action: EndpointActionComplete) {
+  const endpoint = action.endpoint as EndpointModel;
+  const guid = endpoint.guid;
+  if (action.endpointType !== 'cf' || state[guid]) {
+    return state;
+  }
+  const cfState = {
+    ...state.cf
+  };
+
+  cfState[guid] = getDefaultEndpointRoles();
   return {
     ...state,
     cf: cfState

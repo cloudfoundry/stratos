@@ -62,7 +62,7 @@ export class GetAllEndpoints implements PaginatedAction {
   actions = [
     GET_ENDPOINTS_START,
     GET_ENDPOINTS_SUCCESS,
-    GET_ENDPOINTS_SUCCESS
+    GET_ENDPOINTS_FAILED
   ];
   initialParams = {
     'order-direction': 'desc',
