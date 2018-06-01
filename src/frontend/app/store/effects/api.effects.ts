@@ -152,7 +152,8 @@ export class APIEffect {
         )];
       }),
     ).catch(error => {
-      const endpoints: string[] = options.headers.get(endpointHeader).split((','));
+      const endpointString = options.headers.get(endpointHeader) || '';
+      const endpoints: string[] = endpointString.split((','));
       endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
         eventCode: error.status || '500',
         severity: InternalEventSeverity.ERROR,
