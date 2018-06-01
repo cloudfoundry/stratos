@@ -1,11 +1,11 @@
 import Q = require('q');
-import { promise } from 'selenium-webdriver';
 
 import { CFResponse } from '../../frontend/app/store/types/api.types';
 import { EndpointModel } from '../../frontend/app/store/types/endpoint.types';
 import { E2ESetup } from '../e2e';
 import { ConsoleUserType, E2EHelpers } from './e2e-helpers';
 import { RequestHelpers } from './request-helpers';
+import { promise } from 'protractor';
 
 export class CFRequestHelpers extends RequestHelpers {
 
@@ -16,9 +16,10 @@ export class CFRequestHelpers extends RequestHelpers {
     super();
   }
 
+  //
   createCfHeader = (cfGuid: string) => ({
     'x-cap-cnsi-list': cfGuid,
-    'x-cap-passthrough': 'true'
+    'x-cap-passthrough': false
   })
 
   getCfCnsi = (cfName?: string): promise.Promise<EndpointModel> => {
@@ -43,8 +44,7 @@ export class CFRequestHelpers extends RequestHelpers {
   }
 
   private sendCfRequest = (cfGuid: string, url: string, method: string): promise.Promise<any> => {
-    const req = this.newRequest();
-    return this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid));
+    return this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid)); //
   }
 
   private sendRequestAdminSession(url: string, method: string, headers: object) {
@@ -52,14 +52,14 @@ export class CFRequestHelpers extends RequestHelpers {
     console.log(method);
     console.log(headers);
     let sessionPromise;
-    if (!this.adminRequest) {
-      this.adminRequest = this.newRequest();
-      sessionPromise = this.createSession(this.adminRequest, ConsoleUserType.admin);
-    } else {
-      sessionPromise = Q.resolve(this.adminRequest);
-    }
-    return sessionPromise.then(() => {
-      return this.sendRequest(this.adminRequest, {
+    // if (!this.adminRequest) {
+    const request = this.newRequest();
+    // sessionPromise = this.createSession(request, ConsoleUserType.admin);
+    // } else {
+    //   sessionPromise = Q.resolve(this.adminRequest);
+    // }
+    return this.createSession(request, ConsoleUserType.admin).then(() => {
+      return this.sendRequest(request, {
         headers,
         method,
         url

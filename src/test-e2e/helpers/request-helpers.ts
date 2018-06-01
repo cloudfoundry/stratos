@@ -1,10 +1,11 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { browser, promise } from 'protractor';
-import * as request from 'request-promise-native';
 
 import { E2E, e2e } from '../e2e';
 import { ConsoleUserType } from './e2e-helpers';
+
+import * as request from 'request-promise-native';
 
 // This helper is used internaly - tests should not need to use this class
 
@@ -29,10 +30,10 @@ export class RequestHelpers {
     if (skipSSLValidation) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     } else if (browser.params.caCert) {
-      let caCertFile = path.join(__dirname, '..', 'dev-ssl');
-      caCertFile = path.join(caCertFile, browser.params.caCert);
-      if (fs.existsSync(caCertFile)) {
-        ca = fs.readFileSync(caCertFile);
+      let caCertFile = join(__dirname, '..', 'dev-ssl');
+      caCertFile = join(caCertFile, browser.params.caCert);
+      if (existsSync(caCertFile)) {
+        ca = readFileSync(caCertFile);
       }
     }
 
@@ -75,6 +76,7 @@ export class RequestHelpers {
       p.fulfill(response);
     }).catch((e) => {
       E2E.debugLog('ERROR');
+      E2E.debugLog(e);
       E2E.debugLog(e.statusCode + ' : ' + e.message);
       p.reject(e);
     });

@@ -1,10 +1,10 @@
 import Q = require('q');
-import { promise } from 'selenium-webdriver';
 
 import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { E2ESetup } from '../e2e';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
 import { E2EHelpers } from '../helpers/e2e-helpers';
+import { promise } from 'protractor';
 
 
 const customAppLabel = E2EHelpers.e2eItemPrefix + (process.env.CUSTOM_APP_LABEL || process.env.USER);
@@ -31,7 +31,7 @@ export class ApplicationE2eHelper {
     console.log('FETCH APP appName: ', appName);
     return this.cfRequestHelper.sendCfGet(
       cfGuid,
-      encodeURI('apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName)
+      'apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName
     );
   }
 
@@ -60,7 +60,7 @@ export class ApplicationE2eHelper {
 
         // Delete app
         return Q.all(promises).then(function () {
-          promises.push(this.cfRequestHelper.sendDelete(cfGuid, 'pps/' + app.metadata.guid));
+          promises.push(this.cfRequestHelper.sendDelete(cfGuid, 'apps/' + app.metadata.guid));
         });
       });
   }

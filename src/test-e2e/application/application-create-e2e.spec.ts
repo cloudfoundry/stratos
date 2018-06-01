@@ -70,20 +70,22 @@ fdescribe('Application Create', function () {
     expect(createAppStepper.canNext()).toBeTruthy();
     createAppStepper.next();
 
-    browser.wait(applicationE2eHelper.cfRequestHelper.getCfCnsi()
-      .then(endpointModel => {
-        console.log('1 ', endpointModel);
-        this.cfGuid = endpointModel.guid;
-        return applicationE2eHelper.fetchApp(this.cfGuid, testAppName);
-      })
-      .then(response => {
-        console.log('2', response);
-        expect(response.total_results).toBe(1);
-        const app = response.resources[0];
+    const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfCnsi();
 
-        const appSummaryPage = new ApplicationSummary(this.cfGuid, app.metadata.guid, app.entity.name);
-        appSummaryPage.waitFor();
-      }));
+    const fetchApp = getCfCnsi.then(endpointModel => {
+      console.log('1 ', endpointModel);
+      this.cfGuid = endpointModel.guid;
+      return applicationE2eHelper.fetchApp(this.cfGuid, testAppName);
+    });
+
+    const appFetched = fetchApp.then(response => {
+      console.log('2', response);
+      expect(response.total_results).toBe(1);
+      const app = response.resources[0];
+
+      const appSummaryPage = new ApplicationSummary(this.cfGuid, app.metadata.guid, app.entity.name);
+      appSummaryPage.waitFor();
+    });
   });
 
   afterEach(function () {

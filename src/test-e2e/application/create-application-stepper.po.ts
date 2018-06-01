@@ -1,5 +1,5 @@
 import { StepperComponent } from '../po/stepper.po';
-import { promise } from 'selenium-webdriver';
+import { promise } from 'protractor';
 
 export class CreateApplicationStepper extends StepperComponent {
 

@@ -1,6 +1,5 @@
 import { Component } from './component.po';
-import { ElementFinder, by } from 'protractor';
-import { promise } from 'selenium-webdriver';
+import { ElementFinder, by, promise } from 'protractor';
 
 export class MetaCard extends Component {
 
