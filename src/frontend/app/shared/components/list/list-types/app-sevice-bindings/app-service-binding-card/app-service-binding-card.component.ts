@@ -48,7 +48,6 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
     super();
     this.cardMenu = [
       {
-        icon: 'settings',
         label: 'Detach',
         action: this.detach
       }
