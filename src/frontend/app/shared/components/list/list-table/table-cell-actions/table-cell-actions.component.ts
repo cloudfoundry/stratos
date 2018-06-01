@@ -61,9 +61,10 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
       visible: {},
       enabled: {}
     };
+    const subject = new BehaviorSubject(row);
+    this.subjects.push(subject);
+
     this.actions.forEach(action => {
-      const subject = new BehaviorSubject(row);
-      this.subjects.push(subject);
       this.obs.visible[action.label] = action.createVisible ? action.createVisible(subject) : Observable.of(true);
       this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(subject) : Observable.of(true);
     });
