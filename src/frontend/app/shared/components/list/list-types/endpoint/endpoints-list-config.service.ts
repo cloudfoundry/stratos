@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
+
 import { Store } from '@ngrx/store';
 
 import {
@@ -16,12 +17,16 @@ import { EndpointModel, endpointStoreNames } from '../../../../../store/types/en
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+
 import { Observable } from 'rxjs/Observable';
+
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -83,9 +88,17 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
-      this.handleDeleteAction(item, ([oldVal, newVal]) => {
-        this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+      const confirmation = new ConfirmationDialogConfig(
+        'Unregister Endpoint',
+        `Are you sure you want to unregister endpoint '${item.name}'?`,
+        'Unregister',
+        true
+      );
+      this.confirmDialog.open(confirmation, () => {
+        this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
+        this.handleDeleteAction(item, ([oldVal, newVal]) => {
+          this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+        });
       });
     },
     label: 'Unregister',
@@ -94,10 +107,18 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
 
   private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
-      this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-        this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
-        this.store.dispatch(new GetSystemInfo());
+      const confirmation = new ConfirmationDialogConfig(
+        'Disconnect Endpoint',
+        `Are you sure you want to disconnect endpoint '${item.name}'?`,
+        'Disconnect',
+        false
+      );
+      this.confirmDialog.open(confirmation, () => {
+        this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
+        this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
+          this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
+          this.store.dispatch(new GetSystemInfo());
+        });
       });
     },
     label: 'Disconnect',
@@ -174,7 +195,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private dialog: MatDialog,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,
-    private internalEventMonitorFactory: InternalEventMonitorFactory
+    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    private confirmDialog: ConfirmationDialogService
   ) {
     this.dataSource = new EndpointsDataSource(
       this.store,
