@@ -33,6 +33,7 @@ export class CFRequestHelpers extends RequestHelpers {
 
   sendCfGet = (cfGuid: string, url: string): promise.Promise<CFResponse> => {
     return this.sendCfRequest(cfGuid, url, 'GET').then(response => {
+      console.log('sendCfGet RESULT: ', response);
       return JSON.parse(response);
     });
   }
@@ -46,7 +47,10 @@ export class CFRequestHelpers extends RequestHelpers {
     return this.sendRequestAdminSession('pp/v1/proxy/v2/' + url, method, this.createCfHeader(cfGuid));
   }
 
-  private sendRequestAdminSession(url: string, method: string, headers) {
+  private sendRequestAdminSession(url: string, method: string, headers: object) {
+    console.log(url);
+    console.log(method);
+    console.log(headers);
     let sessionPromise;
     if (!this.adminRequest) {
       this.adminRequest = this.newRequest();

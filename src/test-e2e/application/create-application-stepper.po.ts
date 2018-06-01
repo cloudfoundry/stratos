@@ -9,6 +9,18 @@ export class CreateApplicationStepper extends StepperComponent {
   private appNameFieldName = 'appname';
   private routeHostNameFieldName = 'hostname';
 
+  isStepCloudFoundry = () => {
+    super.isStep('Cloud Foundry');
+  }
+
+  isStepName = () => {
+    super.isStep('Name');
+  }
+
+  isStepRoute = () => {
+    super.isStep('Create Route');
+  }
+
   setCf = (cfName: string) => {
     return this.getStepperForm().fill({ [this.cfFieldName]: cfName });
   }
@@ -30,7 +42,7 @@ export class CreateApplicationStepper extends StepperComponent {
   }
 
   isRouteHostValue(hostName: string) {
-    const formField = this.getStepperForm().getFormField(this.routeHostNameFieldName);
+    // const formField = this.getStepperForm().getFormField(this.routeHostNameFieldName);
     expect(this.getStepperForm().getText(this.routeHostNameFieldName, true)).toBe(hostName);
   }
 

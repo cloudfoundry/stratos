@@ -44,5 +44,5 @@ export interface CFResponse<T = any> {
   total_pages: number;
   prev_url: string;
   next_url: string;
-  resources: APIResource<T>;
+  resources: APIResource<T>[];
 }

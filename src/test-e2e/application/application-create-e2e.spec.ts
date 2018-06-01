@@ -7,6 +7,7 @@ import { StepperComponent } from '../po/stepper.po';
 import { browser } from 'protractor';
 import { CreateApplicationStepper } from './create-application-stepper.po';
 import { E2eScreenshot } from '../helpers/screenshots-helper';
+import { ApplicationSummary } from './application-summary.po';
 
 
 fdescribe('Application Create', function () {
@@ -29,7 +30,7 @@ fdescribe('Application Create', function () {
     nav.goto(SideNavMenuItem.Applications);
   });
 
-  let testAppName;
+  let testAppName, cfGuid;
 
   it('Should create app', () => {
     const testTime = (new Date()).toISOString();
@@ -41,7 +42,7 @@ fdescribe('Application Create', function () {
     createAppStepper.waitUntilShown();
 
     // Expect cf step
-    createAppStepper.isStep('Cloud Foundry');
+    createAppStepper.isStepCloudFoundry();
 
     // Enter cf, org + space
     createAppStepper.setCf(e2e.secrets.getDefaultCFEndpoint().name);
@@ -50,38 +51,49 @@ fdescribe('Application Create', function () {
 
     // Go to app name step
     expect(createAppStepper.canNext()).toBeTruthy();
-    browser.wait(createAppStepper.next());
+    createAppStepper.next();
+    createAppStepper.isStepName();
 
     // Enter app name
     createAppStepper.setAppName(testAppName);
 
     // Go to route step
     expect(createAppStepper.canNext()).toBeTruthy();
-    browser.wait(createAppStepper.next());
+    createAppStepper.next();
+    createAppStepper.isStepRoute();
 
-    // Check route details are autopopulated correctly, then correct (remove disallowed punctuation)
+    // Check route details is auto-populated correctly, then correct (remove disallowed punctuation)
     createAppStepper.isRouteHostValue(testAppName);
-    browser.wait(createAppStepper.fixRouteHost(testAppName));
+    createAppStepper.fixRouteHost(testAppName);
 
     // Finish stepper
     expect(createAppStepper.canNext()).toBeTruthy();
-    browser.sleep(5000);
-    browser.wait(createAppStepper.next());
+    createAppStepper.next();
 
-    browser.sleep(20000);
-    appWall.header.getTitleText().then(text => console.log('title', text));
-    // Expect page to become app wall
-    appWall.waitFor();
+    browser.wait(applicationE2eHelper.cfRequestHelper.getCfCnsi()
+      .then(endpointModel => {
+        console.log('1 ', endpointModel);
+        this.cfGuid = endpointModel.guid;
+        return applicationE2eHelper.fetchApp(this.cfGuid, testAppName);
+      })
+      .then(response => {
+        console.log('2', response);
+        expect(response.total_results).toBe(1);
+        const app = response.resources[0];
 
-    // Expect new app to be in app list
-    expect(appWall.appList.cards.getCard(1).getTitle()).toBe(testAppName);
+        const appSummaryPage = new ApplicationSummary(this.cfGuid, app.metadata.guid, app.entity.name);
+        appSummaryPage.waitFor();
+      }));
   });
 
   afterEach(function () {
-    const promise = applicationE2eHelper.cfRequestHelper.getCfCnsi().then(cnsi => {
-      // return browser.driver.wait(applicationE2eHelper.deleteApplicationByName(cnsi.guid, testAppName));
-    });
-    return browser.driver.wait(promise);
+    // return browser.driver.wait(applicationE2eHelper.deleteApplicationByName(cnsi.guid, testAppName));
+
+
+    // const promise = applicationE2eHelper.cfRequestHelper.getCfCnsi().then(cnsi => {
+    //   // return browser.driver.wait(applicationE2eHelper.deleteApplicationByName(cnsi.guid, testAppName));
+    // });
+    // return browser.driver.wait(promise);
   });
 
 });

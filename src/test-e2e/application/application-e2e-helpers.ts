@@ -26,10 +26,12 @@ export class ApplicationE2eHelper {
    */
   static getHostName = (appName) => appName.replace(/\./g, '_').replace(/:/g, '_');
 
-  fetchApp = (cfGuid: string, appName: string): promise.Promise<CFResponse<APIResource>> => {
+  fetchApp = (cfGuid: string, appName: string): promise.Promise<CFResponse> => {
+    console.log('FETCH APP cfGuid: ', cfGuid);
+    console.log('FETCH APP appName: ', appName);
     return this.cfRequestHelper.sendCfGet(
       cfGuid,
-      'apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName
+      encodeURI('apps?inline-relations-depth=1&include-relations=routes,service_bindings&q=name IN ' + appName)
     );
   }
 
