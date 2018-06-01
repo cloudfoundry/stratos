@@ -36,7 +36,32 @@ export function addEndpoint(state: ICurrentUserRolesState, action: EndpointActio
 
 export function removeSpaceRoles(state: ICurrentUserRolesState, action: APISuccessOrFailedAction) {
   const { endpointGuid, guid } = action.apiAction;
-  return removeOrgOrSpaceRoles(state, endpointGuid, guid, 'spaces');
+  const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid, guid, 'spaces');
+  return removeSpaceIdFromOrg(state, endpointGuid, guid);
+}
+
+function removeSpaceIdFromOrg(state: ICurrentUserRolesState, endpointGuid: string, spaceGuid: string) {
+  const space = state.cf[endpointGuid].spaces[spaceGuid];
+  if (!space) {
+    return state;
+  }
+  const { orgId } = space;
+  return {
+    ...state,
+    cf: {
+      ...state.cf,
+      [endpointGuid]: {
+        ...state.cf[endpointGuid],
+        organizations: {
+          ...state.cf[endpointGuid].organizations,
+          [orgId]: {
+            ...state.cf[endpointGuid].organizations[orgId],
+            spaceIds: state.cf[endpointGuid].organizations[orgId].spaceGuids.filter(id => id !== spaceGuid)
+          }
+        }
+      }
+    }
+  };
 }
 
 export function removeOrgRoles(state: ICurrentUserRolesState, action: APISuccessOrFailedAction) {
