@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs/Subscription';
 export class CardCfInfoComponent implements OnInit, OnDestroy {
   apiUrl: string;
   subs: Subscription[] = [];
-  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
+  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
 
   ngOnInit() {
     const obs$ = this.cfEndpointService.endpoint$.pipe(

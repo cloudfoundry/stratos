@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount } from 'rxjs/operators';
 
 import { IService } from '../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
@@ -43,7 +43,10 @@ export class ServicesWallService {
 
   getServicesInCf = (cfGuid: string) => this.services$.pipe(
     filter(p => !!p && p.length > 0),
-    map(services => services.filter(s => s.entity.cfGuid === cfGuid))
+    map(services => services.filter(s => s.entity.cfGuid === cfGuid)),
+    filter(p => !!p),
+    publishReplay(1),
+    refCount()
   )
 
   getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
