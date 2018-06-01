@@ -85,7 +85,7 @@ export class GetAppServiceBindings extends CFStartAction implements EntityInline
   initialParams = {
     'results-per-page': 100,
     page: 1,
-    'order-direction': 'desc',
+    'order-direction': 'asc',
     'order-direction-field': 'creation',
   };
   entity = [entityFactory(serviceBindingSchemaKey)];
