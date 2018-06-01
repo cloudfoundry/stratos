@@ -1,5 +1,5 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
@@ -21,11 +21,9 @@ import {
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { IOrganization, ISpace } from '../../../../core/cf-api.types';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
 import {
   SetCreateServiceInstanceOrg,
-  SetCreateServiceInstanceSpace,
   SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -37,12 +35,11 @@ import { RequestInfoState } from '../../../../store/reducers/api-request-reducer
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
-  selectCreateServiceInstanceOrgGuid,
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { getServiceJsonParams, isMarketplaceMode } from '../../../../features/service-catalog/services-helper';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
@@ -295,7 +292,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    params = params;
+    params = getServiceJsonParams(params);
 
     this.store.dispatch(new CreateServiceBinding(
       cfGuid,
@@ -307,7 +304,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
   }
-
 
   private displaySnackBar(isBindingFailure = false) {
     if (isBindingFailure) {

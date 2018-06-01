@@ -1,46 +1,44 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap, tap, take } from 'rxjs/operators';
+import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
-import { IService, IServiceBroker, IServicePlan, IServicePlanVisibility, IServiceInstance } from '../../../core/cf-api-svc.types';
+import {
+  IService,
+  IServiceBroker,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+} from '../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { pathGet } from '../../../core/utils.service';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { CloudFoundryEndpointService } from '../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
+import { fetchVisiblePlans, getSvcAvailability } from '../../../features/service-catalog/services-helper';
+import { ServicePlanAccessibility } from '../../../features/service-catalog/services.service';
 import { GetServiceBroker } from '../../../store/actions/service-broker.actions';
+import { GetServiceInstances } from '../../../store/actions/service-instances.actions';
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
+import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';
 import { GetService } from '../../../store/actions/service.actions';
-import { GetSpace, GetAllServicesForSpace, GetServiceInstancesForSpace } from '../../../store/actions/space.actions';
+import { GetAllServicesForSpace, GetServiceInstancesForSpace, GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   entityFactory,
   organizationSchemaKey,
   serviceBrokerSchemaKey,
+  serviceInstancesSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
   spaceWithOrgKey,
-  serviceInstancesSchemaKey,
-  serviceInstancesWithSpaceSchemaKey,
 } from '../../../store/helpers/entity-factory';
 import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  selectCreateServiceInstance,
-  selectCreateServiceInstanceServicePlan,
-} from '../../../store/selectors/create-service-instance.selectors';
+import { selectCreateServiceInstanceServicePlan } from '../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../store/types/api.types';
-import { CreateServiceInstanceState } from '../../../store/types/create-service-instance.types';
-import { CloudFoundryEndpointService } from '../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { fetchVisiblePlans, getSvcAvailability } from '../../../features/service-catalog/services-helper';
-import { ServicePlanAccessibility } from '../../../features/service-catalog/services.service';
-import { EntityService } from '../../../core/entity-service';
-import { GetServiceInstances, DELETE_SERVICE_BINDING } from '../../../store/actions/service-instances.actions';
-import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';
 import { QParam } from '../../../store/types/pagination.types';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -63,7 +61,6 @@ export class CreateServiceInstanceHelperService {
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-
     this.initBaseObservables();
   }
 
@@ -258,7 +255,6 @@ export class CreateServiceInstanceHelperService {
   }
 
   getServiceInstancesForService = (servicePlanGuid: string = null, spaceGuid: string = null, cfGuid: string = null) => {
-
     let action, paginationKey;
     if (spaceGuid) {
       paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, `${spaceGuid}-${servicePlanGuid}`);
