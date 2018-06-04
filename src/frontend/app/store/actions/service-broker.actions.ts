@@ -2,7 +2,7 @@ import { RequestOptions, URLSearchParams } from '@angular/http';
 
 import { entityFactory, serviceBrokerSchemaKey } from '../helpers/entity-factory';
 import { PaginationAction } from '../types/pagination.types';
-import { CFStartAction } from '../types/request.types';
+import { CFStartAction, IRequestAction } from '../types/request.types';
 import { getActions } from './action.helper';
 
 export class GetServiceBrokers extends CFStartAction implements PaginationAction {
@@ -29,4 +29,22 @@ export class GetServiceBrokers extends CFStartAction implements PaginationAction
     'order-direction-field': 'name',
   };
   flattenPagination = true;
+}
+export class GetServiceBroker extends CFStartAction implements IRequestAction {
+  constructor(
+    public serviceBrokerGuid: string,
+    public endpointGuid: string,
+    public includeRelations: string[] = [],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_brokers/${serviceBrokerGuid}`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Service Brokers', 'Get specific by ID');
+  entity = [entityFactory(serviceBrokerSchemaKey)];
+  entityKey = serviceBrokerSchemaKey;
+  options: RequestOptions;
 }

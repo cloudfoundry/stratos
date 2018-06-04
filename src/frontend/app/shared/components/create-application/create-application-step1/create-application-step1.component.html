@@ -1,6 +1,6 @@
 <b>{{ stepperText }}</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
-  <mat-form-field>
+  <mat-form-field *ngIf="!isServiceInstanceMode">
     <mat-select #cfSelect="ngModel" [disabled]="(cfOrgSpaceService.cf.loading$ | async)" [ngModel]="cfOrgSpaceService.cf.select.getValue()" (change)="cfOrgSpaceService.cf.select.next($event.value)" required name="cf" [disabled]="isRedeploy" placeholder="Cloud Foundry">
       <mat-option *ngFor="let cf of cfOrgSpaceService.cf.list$ | async" [value]="cf.guid">
         <span>{{ cf.name }}</span>

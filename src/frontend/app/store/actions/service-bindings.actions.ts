@@ -22,7 +22,7 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
     this.options.body = {
       app_guid: appGuid,
       service_instance_guid: serviceInstanceGuid,
-      parameters: params,
+      parameters: params ? params : null,
     };
   }
   actions = getActions('Service Bindings', 'Create Service Binding');
