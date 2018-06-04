@@ -1,4 +1,4 @@
-import { Observable, of as observableOf } from 'rxjs';
+import { of as observableOf } from 'rxjs';
 
 
 export class ServicesServiceMock {
@@ -65,8 +65,8 @@ export class ServicesServiceMock {
     }
   }]);
 
-  serviceInstances$ = Observable.of([]);
-  serviceBroker$ = Observable.of({
+  serviceInstances$ = observableOf([]);
+  serviceBroker$ = observableOf({
     entity: {
       name: 'app-autoscaler',
       broker_url: 'https://app-autoscaler-broker.cf-dev.io',
