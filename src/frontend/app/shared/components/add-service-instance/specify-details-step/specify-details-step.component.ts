@@ -155,6 +155,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       filter(p => !!p),
       map(p => p.length > 0),
     );
+  }
+
+  onEnter = () => {
+    this.formMode = FormMode.CreateServiceInstance;
+    this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     if (this.modeService.isEditServiceInstanceMode()) {
       this.store.select(selectCreateServiceInstance).pipe(
         take(1),
@@ -170,11 +175,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         })
       ).subscribe();
     }
-  }
-
-  onEnter = () => {
-    this.formMode = FormMode.CreateServiceInstance;
-    this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
     this.subscriptions.push(this.setupFormValidatorData());
   }
 
