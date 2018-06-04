@@ -34,6 +34,8 @@ export function addEndpoint(state: ICurrentUserRolesState, action: EndpointActio
   };
 }
 
+
+
 export function removeSpaceRoles(state: ICurrentUserRolesState, action: APISuccessOrFailedAction) {
   const { endpointGuid, guid } = action.apiAction;
   const removedOrgOrSpaceState = removeOrgOrSpaceRoles(state, endpointGuid, guid, 'spaces');

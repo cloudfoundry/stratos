@@ -1,5 +1,6 @@
 import { RequestSectionKeys, TRequestTypeKeys } from '../reducers/api-request-reducer/types';
 import { endpointSchemaKey } from '../helpers/entity-factory';
+import { ScopeStrings } from '../../core/current-user-permissions.config';
 
 export interface INewlyConnectedEndpointInfo {
   account: string;
@@ -55,6 +56,7 @@ export interface EndpointUser {
   guid: string;
   name: string;
   admin: boolean;
+  scopes?: ScopeStrings[];
 }
 
 export interface EndpointState {
