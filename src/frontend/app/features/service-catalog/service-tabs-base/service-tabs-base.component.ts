@@ -1,15 +1,13 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
+import { map, publishReplay, refCount } from 'rxjs/operators';
+import { Subscription } from 'rxjs/Subscription';
 
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
+import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 import { AppState } from '../../../store/app-state';
 import { ServicesService } from '../services.service';
-import { map, tap, first, publishReplay, refCount } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
-import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';
 
 @Component({
   selector: 'app-service-tabs-base',
@@ -23,8 +21,17 @@ export class ServiceTabsBaseComponent {
 
   tabLinks: ISubHeaderTabs[] = [
     {
+      link: 'summary',
+      label: 'Summary'
+    },
+    {
       link: 'instances',
       label: 'Instances'
+    }
+  ];
+  breadcrumbs: IHeaderBreadcrumb[] = [
+    {
+      breadcrumbs: [{ value: 'Marketplace', routerLink: '/marketplace' }]
     }
   ];
 

@@ -158,7 +158,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       {
         key: 'marketplace-services',
         breadcrumbs: [
-          { value: 'Marketplace', routerLink: `/service-catalog` }
+          { value: 'Marketplace', routerLink: `/marketplace` }
         ]
       },
       {
