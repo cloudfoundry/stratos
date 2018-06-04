@@ -33,7 +33,7 @@ export class CliInfoApplicationComponent implements OnInit {
 
   public context$: Observable<CFAppCLIInfoContext>;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  public route$: Observable<{ url: string, queryParams: any}>;
+  public route$: Observable<{ url: string, queryParams: any }>;
 
   constructor(
     private store: Store<AppState>,

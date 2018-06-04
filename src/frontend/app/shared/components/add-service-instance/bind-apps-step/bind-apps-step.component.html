@@ -1,12 +1,9 @@
-<div *ngIf="(apps$ | async)?.length === 0">
-  There are no apps available in the selected Space and Organization
-</div>
-<div class="bind-apps" *ngIf="(apps$ | async)?.length > 0">
-  <b>Specify the application to bind (Optional)</b>
+<div class="bind-apps">
+  <b>{{guideText}}</b>
   <form class="stepper-form" [formGroup]="stepperForm">
     <mat-form-field>
       <mat-select class="form-control" placeholder="App" formControlName="apps">
-        <mat-option></mat-option>
+        <mat-option *ngIf="!boundAppId"></mat-option>
         <mat-option *ngFor="let app of apps$ | async" [value]="app.metadata.guid">{{ app.entity.name }}</mat-option>
       </mat-select>
     </mat-form-field>

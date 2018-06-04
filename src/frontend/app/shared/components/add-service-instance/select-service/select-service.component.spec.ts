@@ -1,12 +1,13 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
-import { BaseTestModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServicesWallService } from '../../../services/services/services-wall.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { BaseTestModules, BaseTestModulesNoShared } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { SelectServiceComponent } from './select-service.component';
 import { CsiGuidsService } from '../csi-guids.service';
+import { EntityMonitorFactory } from '../../../monitors/entity-monitor.factory.service';
 
 describe('SelectServiceComponent', () => {
   let component: SelectServiceComponent;
@@ -15,13 +16,14 @@ describe('SelectServiceComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [SelectServiceComponent],
-      imports: [...BaseTestModules],
+      imports: [...BaseTestModulesNoShared],
       providers: [
         PaginationMonitorFactory,
         ServicesWallService,
         EntityServiceFactory,
         CreateServiceInstanceHelperService,
-        CsiGuidsService
+        CsiGuidsService,
+        EntityMonitorFactory
       ]
     })
       .compileComponents();

@@ -1,11 +1,5 @@
 import { Action } from '@ngrx/store';
 
-import { GitAppDetails, SourceType } from '../types/deploy-application.types';
-import { GitBranch, GithubCommit } from '../types/github.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { IRequestAction } from '../types/request.types';
-import { githubBranchesSchemaKey, githubCommitSchemaKey } from '../helpers/entity-factory';
-
 export const SET_SERVICE_PLAN = '[Create SI] Set Plan';
 export const SET_ORG = '[Create SI] Set Org';
 export const SET_SPACE = '[Create SI] Set Space';
@@ -16,6 +10,7 @@ export const SET_SERVICE_INSTANCE_GUID = '[Create SI] Set Service Instance Guid'
 export const SET_SERVICE_INSTANCE_SPACE_SCOPED = '[Create SI] Set Service Instance Space Scoped Property';
 export const SET_SERVICE_INSTANCE_SVC_GUID = '[Create SI] Set Service Instance Service Guid';
 export const SET_SERVICE_INSTANCE_APP = '[Create SI] Set Service Instance App';
+export const RESET_CREATE_SERVICE_INSTANCE_STATE = '[Create SI] Reset State';
 
 export class SetServicePlan implements Action {
   constructor(public servicePlanGuid: string) { }
@@ -58,6 +53,11 @@ export class SetCreateServiceInstance implements Action {
 
   }
   type = SET_CREATE_SERVICE_INSTANCE;
+}
+
+export class ResetCreateServiceInstanceState implements Action {
+  constructor() { }
+  type = RESET_CREATE_SERVICE_INSTANCE_STATE;
 }
 export class SetCreateServiceInstanceCFDetails implements Action {
   constructor(

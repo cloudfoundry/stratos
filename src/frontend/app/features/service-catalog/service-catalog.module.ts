@@ -30,24 +30,13 @@ import { ServiceTabsBaseComponent } from './service-tabs-base/service-tabs-base.
     ServiceCatalogPageComponent,
     ServiceBaseComponent,
     ServiceInstancesComponent,
-    SpecifyDetailsStepComponent,
-    BindAppsStepComponent,
-    AddServiceInstanceComponent,
-    SelectPlanStepComponent,
-    SelectServiceComponent,
     ServicePlansComponent,
-    NoServicePlansComponent,
     ServiceTabsBaseComponent,
     ServiceSummaryComponent,
 
   ],
   exports: [
-    AddServiceInstanceComponent,
-    // NoServicePlansComponent,
     ServiceTabsBaseComponent,
   ],
-  entryComponents: [
-    NoServicePlansComponent
-  ]
 })
 export class ServiceCatalogModule { }

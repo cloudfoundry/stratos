@@ -15,6 +15,7 @@ import { AppState } from '../../store/app-state';
 import { entityFactory, serviceInstancesSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 
@@ -22,7 +23,6 @@ export const fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
     svcPlanVis: APIResource<IServicePlanVisibility>[],
     svcBroker: APIResource<IServiceBroker>,
-    svc: APIResource<IService>,
     spaceGuid: string = null
   ): APIResource<IServicePlan>[] => {
     const visiblePlans: APIResource<IServicePlan>[] = [];
