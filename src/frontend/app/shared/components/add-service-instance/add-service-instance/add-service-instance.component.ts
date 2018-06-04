@@ -3,34 +3,35 @@ import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs/Observable';
-import { map, tap, take, filter, switchMap, first } from 'rxjs/operators';
+import { filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { getIdFromRoute } from '../../../../features/cloud-foundry/cf.helpers';
+import { servicesServiceFactoryProvider } from '../../../../features/service-catalog/service-catalog.helpers';
+import { isMarketplaceMode } from '../../../../features/service-catalog/services-helper';
+import { GetApplication } from '../../../../store/actions/application.actions';
 import {
   ResetCreateServiceInstanceState,
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
+import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
 } from '../../../../store/helpers/entity-relations.types';
+import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { getIdFromRoute } from '../../../../features/cloud-foundry/cf.helpers';
-import { servicesServiceFactoryProvider } from '../../../../features/service-catalog/service-catalog.helpers';
-import { isMarketplaceMode } from '../../../../features/service-catalog/services-helper';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
-import { GetApplication } from '../../../../store/actions/application.actions';
-import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
-import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
-import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -111,7 +112,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
 
   setupSelectServiceStep = (serviceId: string, appId: string) => !serviceId;
 
-  onNext = () => {
+  onNext = (): Observable<StepOnNextResult> => {
     this.store.dispatch(new SetCreateServiceInstanceCFDetails(
       this.cfOrgSpaceService.cf.select.getValue(),
       this.cfOrgSpaceService.org.select.getValue(),

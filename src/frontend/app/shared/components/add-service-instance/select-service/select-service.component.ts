@@ -3,12 +3,12 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
-import { combineLatest, map, filter, switchMap, tap } from 'rxjs/operators';
+import { combineLatest, filter, switchMap, tap } from 'rxjs/operators';
 import { Subscription } from 'rxjs/Subscription';
 
 import { IService } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import {
@@ -16,7 +16,8 @@ import {
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
@@ -55,7 +56,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     );
   }
 
-  onNext = () => {
+  onNext = (): Observable<StepOnNextResult> => {
     const serviceGuid = this.stepperForm.controls.service.value;
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
     this.csiGuidService.serviceGuid = serviceGuid;

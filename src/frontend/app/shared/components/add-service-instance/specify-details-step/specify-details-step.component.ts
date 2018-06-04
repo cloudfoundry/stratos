@@ -1,7 +1,7 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { MatChipInputEvent, MatSnackBar } from '@angular/material';
+import { MatChipInputEvent } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
@@ -40,6 +40,7 @@ import {
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
@@ -118,7 +119,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private snackBar: MatSnackBar,
     private csiGuidsService: CsiGuidsService
   ) {
     this.setupForms();
@@ -203,7 +203,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
-  onNext = () => {
+  onNext = (): Observable<StepOnNextResult> => {
     return this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p),
       switchMap(p => {
@@ -225,7 +225,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       first(),
       switchMap(([request, state]) => {
         if (request.error) {
-          return this.handleException();
+          return Observable.of({ success: false, message: `Failed to create service instance: ${request.message}` });
         } else {
           const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
@@ -235,7 +235,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                 filter(s => {
                   return s && !s.creating;
                 }),
-                map(req => req.error ? this.handleException(true) : this.routeToServices(state.cfGuid, state.bindAppGuid))
+                map(req => req.error ?
+                  { success: false, message: `Failed to create service instance binding: ${req.message}` } :
+                  this.routeToServices(state.cfGuid, state.bindAppGuid))
               );
           } else {
             return Observable.of(this.routeToServices());
@@ -245,7 +247,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   }
 
-  routeToServices = (cfGuid: string = null, appGuid: string = null) => {
+  routeToServices = (cfGuid: string = null, appGuid: string = null): StepOnNextResult => {
     if (this.cSIHelperService.isAppServices()) {
       this.store.dispatch(new RouterNav({ path: ['/applications', cfGuid, appGuid, 'services'] }));
     } else {
@@ -257,11 +259,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   private setServiceInstanceGuid = (request: { creating: boolean; error: boolean; response: { result: any[]; }; }) =>
     this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstances.value : request.response.result[0]
-
-  private handleException(bindingFailed: boolean = false) {
-    this.displaySnackBar(bindingFailed);
-    return Observable.of({ success: false });
-  }
 
   private setupValidate() {
     this.subscriptions.push(this.createNewInstanceForm.statusChanges.pipe(
@@ -303,14 +300,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     ));
 
     return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
-  }
-
-  private displaySnackBar(isBindingFailure = false) {
-    if (isBindingFailure) {
-      this.snackBar.open('Failed to bind app! Please re-check the details.', 'Dismiss');
-    } else {
-      this.snackBar.open('Failed to create service instance! Please re-check the details.', 'Dismiss');
-    }
   }
 
   addTag(event: MatChipInputEvent): void {
