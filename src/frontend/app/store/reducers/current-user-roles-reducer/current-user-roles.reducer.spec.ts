@@ -152,6 +152,7 @@ describe('currentUserReducer', () => {
     const toEqual = getState('spaces', [{
       guid: testSpaceGuid,
       roles: {
+        orgId: testOrgGuid,
         isManager: false,
         isAuditor: false,
         isDeveloper: true
@@ -160,6 +161,7 @@ describe('currentUserReducer', () => {
     {
       guid: generalGuid,
       roles: {
+        orgId: generalGuid,
         isManager: true,
         isAuditor: false,
         isDeveloper: false
@@ -204,6 +206,7 @@ describe('currentUserReducer', () => {
     const spaceState = getState('spaces', [{
       guid: testSpaceGuid,
       roles: {
+        orgId: testOrgGuid,
         isManager: false,
         isAuditor: false,
         isDeveloper: true
@@ -212,6 +215,7 @@ describe('currentUserReducer', () => {
     {
       guid: generalGuid,
       roles: {
+        orgId: generalGuid,
         isManager: true,
         isAuditor: false,
         isDeveloper: false
@@ -243,6 +247,8 @@ describe('currentUserReducer', () => {
       }
     }]);
     spaceState.organizations = orgState.organizations;
+    console.log(cfPermissions.organizations);
+    console.log(cfPermissions.spaces);
     expect(cfPermissions).toEqual(spaceState);
   });
 });

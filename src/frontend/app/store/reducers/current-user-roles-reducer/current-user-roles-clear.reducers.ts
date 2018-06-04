@@ -56,7 +56,7 @@ function removeSpaceIdFromOrg(state: ICurrentUserRolesState, endpointGuid: strin
           ...state.cf[endpointGuid].organizations,
           [orgId]: {
             ...state.cf[endpointGuid].organizations[orgId],
-            spaceIds: state.cf[endpointGuid].organizations[orgId].spaceGuids.filter(id => id !== spaceGuid)
+            spaceGuids: state.cf[endpointGuid].organizations[orgId].spaceGuids.filter(id => id !== spaceGuid)
           }
         }
       }
