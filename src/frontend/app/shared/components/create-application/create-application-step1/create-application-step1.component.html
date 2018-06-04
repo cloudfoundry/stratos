@@ -14,19 +14,20 @@
         <span>{{ org.name }}</span>
       </mat-option>
     </mat-select>
-    <mat-error *ngIf="!(cfOrgSpaceService.space.list$ | async)?.length">
+    <mat-error *ngIf="!(hasSpaces$ | async)">
       There are no organizations in this Cloud Foundry
     </mat-error>
   </mat-form-field>
   <mat-form-field>
     <mat-select #spaceSelect="ngModel" [disabled]="!cfOrgSpaceService.org.select.getValue() || (cfOrgSpaceService.space.loading$ | async) || isRedeploy" [ngModel]="cfOrgSpaceService.space.select.getValue()" (change)="cfOrgSpaceService.space.select.next($event.value)"
       required placeholder="Space" name="space">
-      <mat-option *ngFor="let space of cfOrgSpaceService.space.list$ | async" [value]="space.guid">
+      <mat-option *ngFor="let space of spaces$ | async" [value]="space.guid">
         <span>{{ space.name }}</span>
       </mat-option>
     </mat-select>
-    <mat-error *ngIf="!(cfOrgSpaceService.space.list$ | async)?.length">
+    <mat-error *ngIf="!(hasSpaces$ | async)">
       There are no spaces in this organization
     </mat-error>
   </mat-form-field>
+  <p>Not seeing your spaces? Please make sure you have the relevant space permissions.</p>
 </form>

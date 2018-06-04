@@ -30,7 +30,10 @@ function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResourc
     const orgGuid = space.entity.organization_guid;
     const org = newOrganizations[orgGuid] || createOrgRoleStateState();
     const spaceGuids = org.spaceGuids || [];
-    return spaceGuids.includes(space.metadata.guid) ? newOrganizations : {
+    if (spaceGuids.includes(space.metadata.guid)) {
+      return newOrganizations;
+    }
+    return {
       ...newOrganizations,
       [orgGuid]: {
         ...org,

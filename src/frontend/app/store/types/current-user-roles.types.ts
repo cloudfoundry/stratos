@@ -21,7 +21,10 @@ export function getDefaultEndpointRoles(): ICfRolesState {
   };
 }
 
-
+export enum RoleEntities {
+  ORGS = 'organizations',
+  SPACES = 'spaces'
+}
 export interface IGlobalRolesState {
   isAdmin: boolean;
   isReadOnlyAdmin: boolean;

@@ -4,6 +4,7 @@ import {
   ICfRolesState,
   IOrgRoleState,
   ISpaceRoleState,
+  RoleEntities,
 } from '../../types/current-user-roles.types';
 import { createOrgRoleStateState } from './current-user-roles-org.reducer';
 import { currentUserRolesReducer } from './current-user-roles.reducer';
@@ -30,14 +31,14 @@ function getOrgAction(type: UserRelationTypes, orgGuid: string = testOrgGuid) {
 }
 
 function getState(
-  orgOrSpace: 'organizations' | 'spaces',
+  orgOrSpace: RoleEntities,
   allRoles: { guid: string, roles: ISpaceRoleState | IOrgRoleState }[] = [],
   roles?: ISpaceRoleState | IOrgRoleState
 ): ICfRolesState {
   const baseState = getDefaultEndpointRoles();
   if (!allRoles.length) {
     let guid = testSpaceGuid;
-    if (orgOrSpace === 'organizations') {
+    if (orgOrSpace === RoleEntities.ORGS) {
       guid = testOrgGuid;
     }
     allRoles.push({ guid, roles });
@@ -45,7 +46,7 @@ function getState(
   const orgSpaceRoles = {
     [orgOrSpace]: {}
   };
-  if (orgOrSpace === 'spaces') {
+  if (orgOrSpace === RoleEntities.SPACES) {
     orgSpaceRoles.organizations = {
       [testOrgGuid]: createOrgRoleStateState()
     };
