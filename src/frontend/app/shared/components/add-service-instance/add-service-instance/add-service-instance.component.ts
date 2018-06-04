@@ -16,19 +16,14 @@ import { GetApplication } from '../../../../store/actions/application.actions';
 import {
   ResetCreateServiceInstanceState,
   SetCreateServiceInstance,
+  SetServiceInstanceGuid,
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
-  SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
-import {
-  applicationSchemaKey,
-  entityFactory,
-  serviceInstancesSchemaKey,
-  spaceSchemaKey,
-} from '../../../../store/helpers/entity-factory';
+import { applicationSchemaKey, entityFactory, spaceSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,

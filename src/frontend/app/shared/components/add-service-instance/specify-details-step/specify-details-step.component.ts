@@ -1,5 +1,5 @@
 import { COMMA, ENTER, SPACE } from '@angular/cdk/keycodes';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
@@ -22,11 +22,9 @@ import {
 import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
-import { IOrganization, ISpace } from '../../../../core/cf-api.types';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
 import {
   SetCreateServiceInstanceOrg,
-  SetCreateServiceInstanceSpace,
   SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
@@ -38,12 +36,11 @@ import { RequestInfoState } from '../../../../store/reducers/api-request-reducer
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import {
   selectCreateServiceInstance,
-  selectCreateServiceInstanceOrgGuid,
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { getServiceJsonParams, isMarketplaceMode } from '../../../../features/service-catalog/services-helper';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
@@ -60,6 +57,7 @@ const enum FormMode {
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
 
+  serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
   serviceInstanceName: string;
   serviceInstanceGuid: string;
@@ -130,33 +128,33 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupForms();
 
     this.selectCreateInstance$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid),
+      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
       share(),
     );
     this.serviceInstances$ = this.selectCreateInstance$.pipe(
       distinctUntilChanged((x, y) => {
-        return !(x.cfGuid === y.cfGuid && x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid);
+        return (x.servicePlanGuid === y.servicePlanGuid && x.spaceGuid === y.spaceGuid);
       }),
-      filter(p => !!this.cSIHelperService),
-      switchMap(guids => this.cSIHelperService.getServiceInstancesForService(
-        guids.servicePlanGuid,
-        guids.spaceGuid,
-        guids.cfGuid
-      )),
+      switchMap(guids => {
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(guids.cfGuid, guids.serviceGuid);
+        return this.cSIHelperService.getServiceInstancesForService(
+          guids.servicePlanGuid,
+          guids.spaceGuid,
+          guids.cfGuid
+        );
+      }),
       publishReplay(1),
       refCount(),
     );
-  }
 
-  onEnter = () => {
-    this.cSIHelperService = this.cSIHelperServiceFactory.create(this.csiGuidsService.cfGuid, this.csiGuidsService.serviceGuid);
-    this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
-    this.subscriptions.push(this.setupFormValidatorData());
+    this.serviceInstancesInit$ = this.serviceInstances$.pipe(
+      filter(p => !!p),
+      map(o => false),
+    ).startWith(false);
     this.hasInstances$ = this.serviceInstances$.pipe(
       filter(p => !!p),
-      map(p => p.length > 0)
+      map(p => p.length > 0),
     );
-
     if (this.modeService.isEditServiceInstanceMode()) {
       this.store.select(selectCreateServiceInstance).pipe(
         take(1),
@@ -172,7 +170,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         })
       ).subscribe();
     }
+  }
 
+  onEnter = () => {
+    this.formMode = FormMode.CreateServiceInstance;
+    this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
+    this.subscriptions.push(this.setupFormValidatorData());
   }
 
   resetForms = (mode: FormMode) => {
@@ -216,7 +219,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.selectExistingInstanceForm = new FormGroup({
       serviceInstances: new FormControl('', [Validators.required]),
     });
-    this.formMode = FormMode.CreateServiceInstance;
   }
 
   setOrg = (guid) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
@@ -325,7 +327,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   createBinding = (serviceInstanceGuid: string, cfGuid: string, appGuid: string, params: {}) => {
 
     const guid = `${cfGuid}-${appGuid}-${serviceInstanceGuid}`;
-    params = params;
+    params = getServiceJsonParams(params);
 
     this.store.dispatch(new CreateServiceBinding(
       cfGuid,
@@ -337,7 +339,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     return this.store.select(selectRequestInfo(serviceBindingSchemaKey, guid));
   }
-
 
   private displaySnackBar(isBindingFailure = false) {
     if (isBindingFailure) {
