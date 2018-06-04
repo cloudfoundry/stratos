@@ -247,8 +247,6 @@ describe('currentUserReducer', () => {
       }
     }]);
     spaceState.organizations = orgState.organizations;
-    console.log(cfPermissions.organizations);
-    console.log(cfPermissions.spaces);
     expect(cfPermissions).toEqual(spaceState);
   });
 });
