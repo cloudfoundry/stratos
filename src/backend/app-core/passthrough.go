@@ -277,7 +277,6 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 
 		// we don't care if this fails
 		_, err := c.Response().Write(res.Response)
-		log.Error("DSFFDSGFSDFGFDGFDGFDGDFGFDG")
 		if err != nil {
 			log.Errorf("Failed to write passthrough response %v", err)
 		}
@@ -289,9 +288,6 @@ func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*
 	e := json.NewEncoder(c.Response())
 	err := e.Encode(jsonResponse)
 	if err != nil {
-		for guid, response := range responses {
-			fmt.Printf("%s-%v\n", guid, response)
-		}
 		log.Errorf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
 	}
 	return err
