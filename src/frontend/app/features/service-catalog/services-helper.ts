@@ -1,9 +1,15 @@
-import { IService, IServiceBroker, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
-import { APIResource } from '../../store/types/api.types';
-import { CreateServiceInstanceState } from '../../store/types/create-service-instance.types';
-import { Observable, Subscription } from 'rxjs';
-import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
 import { ActivatedRoute } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Subscription } from 'rxjs';
+
+import { IServiceBroker, IServiceInstance, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
+import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { GetServiceInstances } from '../../store/actions/service-instances.actions';
+import { AppState } from '../../store/app-state';
+import { entityFactory, serviceInstancesSchemaKey } from '../../store/helpers/entity-factory';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
+import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 
 export const fetchVisiblePlans =
@@ -79,3 +85,11 @@ export const isServicesWallMode = (activatedRoute: ActivatedRoute) => {
   return !isAppServicesMode(activatedRoute) && !isMarketplaceMode(activatedRoute);
 };
 
+export const getServiceInstancesInCf = (cfGuid: string, store: Store<AppState>, paginationMonitorFactory: PaginationMonitorFactory) => {
+  const paginationKey = createEntityRelationPaginationKey(serviceInstancesSchemaKey, cfGuid);
+  return getPaginationObservables<APIResource<IServiceInstance>>({
+    store: store,
+    action: new GetServiceInstances(cfGuid, paginationKey),
+    paginationMonitor: paginationMonitorFactory.create(paginationKey, entityFactory(serviceInstancesSchemaKey))
+  }, true).entities$;
+};
