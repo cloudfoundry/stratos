@@ -1,10 +1,9 @@
-import Q = require('q');
-
 import { CFResponse } from '../../frontend/app/store/types/api.types';
 import { EndpointModel } from '../../frontend/app/store/types/endpoint.types';
 import { E2ESetup } from '../e2e';
-import { ConsoleUserType, E2EHelpers } from './e2e-helpers';
+import { E2EHelpers } from './e2e-helpers';
 import { RequestHelpers } from './request-helpers';
+
 import { promise } from 'protractor';
 
 export class CFRequestHelpers extends RequestHelpers {
@@ -19,7 +18,7 @@ export class CFRequestHelpers extends RequestHelpers {
   //
   createCfHeader = (cfGuid: string) => ({
     'x-cap-cnsi-list': cfGuid,
-    'x-cap-passthrough': false
+    'x-cap-passthrough': true
   })
 
   getCfCnsi = (cfName?: string): promise.Promise<EndpointModel> => {
@@ -58,12 +57,18 @@ export class CFRequestHelpers extends RequestHelpers {
     // } else {
     //   sessionPromise = Q.resolve(this.adminRequest);
     // }
-    return this.createSession(request, ConsoleUserType.admin).then(() => {
-      return this.sendRequest(request, {
-        headers,
-        method,
-        url
-      });
+    // return this.createSession(request, ConsoleUserType.admin).then(() => {
+    //   return this.sendRequest(request, {
+    //     headers,
+    //     method,
+    //     url
+    //   });
+    // });
+
+    return this.sendRequest(this.e2eSetup.adminReq, {
+      headers,
+      method,
+      url
     });
   }
 }

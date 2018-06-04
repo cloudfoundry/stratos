@@ -1,13 +1,10 @@
+import { ApplicationsPage } from '../applications/applications.po';
 import { e2e } from '../e2e';
 import { ConsoleUserType } from '../helpers/e2e-helpers';
 import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
-import { ApplicationsPage } from '../applications/applications.po';
-import { StepperComponent } from '../po/stepper.po';
-import { browser } from 'protractor';
-import { CreateApplicationStepper } from './create-application-stepper.po';
-import { E2eScreenshot } from '../helpers/screenshots-helper';
 import { ApplicationSummary } from './application-summary.po';
+import { CreateApplicationStepper } from './create-application-stepper.po';
 
 
 fdescribe('Application Create', function () {
@@ -22,7 +19,8 @@ fdescribe('Application Create', function () {
     const setup = e2e.setup(ConsoleUserType.user)
       .clearAllEndpoints()
       .registerDefaultCloudFoundry()
-      .connectAllEndpoints(ConsoleUserType.user);
+      .connectAllEndpoints(ConsoleUserType.user)
+      .connectAllEndpoints(ConsoleUserType.admin);
     applicationE2eHelper = new ApplicationE2eHelper(setup);
   });
 
@@ -32,7 +30,7 @@ fdescribe('Application Create', function () {
 
   let testAppName, cfGuid;
 
-  it('Should create app', () => {
+  fit('Should create app', () => {
     const testTime = (new Date()).toISOString();
     testAppName = ApplicationE2eHelper.createApplicationName(testTime);
 
@@ -69,6 +67,8 @@ fdescribe('Application Create', function () {
     // Finish stepper
     expect(createAppStepper.canNext()).toBeTruthy();
     createAppStepper.next();
+
+    e2e.sleep(5000);
 
     const getCfCnsi = applicationE2eHelper.cfRequestHelper.getCfCnsi();
 
