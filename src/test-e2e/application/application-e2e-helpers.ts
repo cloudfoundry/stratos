@@ -1,5 +1,3 @@
-import Q = require('q');
-
 import { APIResource, CFResponse } from '../../frontend/app/store/types/api.types';
 import { E2ESetup } from '../e2e';
 import { CFRequestHelpers } from '../helpers/cf-request-helpers';
@@ -24,7 +22,7 @@ export class ApplicationE2eHelper {
    * @param {string} appName Name of the app
    * @returns {string} URL friendly name
    */
-  static getHostName = (appName) => appName.replace(/\./g, '_').replace(/:/g, '_');
+  static getHostName = (appName) => appName.replace(/[\.:-]/g, '_');
 
   fetchApp = (cfGuid: string, appName: string): promise.Promise<CFResponse> => {
     console.log('FETCH APP cfGuid: ', cfGuid);
@@ -35,34 +33,39 @@ export class ApplicationE2eHelper {
     );
   }
 
-  deleteApplicationByName = (cfGuid: string, appName: string): promise.Promise<any> => {
-    return this.fetchApp(cfGuid, appName)
-      .then(response => {
-        if (!response || response.total_results <= 0) {
-          return Q.resolve(false);
-        }
-        const app = response.resources[0];
+  deleteApplication = (cfGuid: string, app: APIResource): promise.Promise<any> => {
+    if (!cfGuid || !app) {
+      return promise.fullyResolved({});
+    }
 
-        const promises = [];
+    const promises = [];
 
-        // Delete service instance
-        const serviceBindings = app.entity.service_bindings || [];
-        serviceBindings.forEach(serviceBinding => {
-          const url = 'service_instances/' + serviceBinding.entity.service_instance_guid + '?recursive=true&async=false';
-          promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, url));
-        });
+    // Delete service instance
+    const serviceBindings = app.entity.service_bindings || [];
+    serviceBindings.forEach(serviceBinding => {
+      const url = 'service_instances/' + serviceBinding.entity.service_instance_guid + '?recursive=true&async=false';
+      promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, url));
+    });
 
-        // Delete route
-        const routes = app.entity.routes || [];
-        routes.forEach(route => {
-          promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, 'routes/' + route.metadata.guid + '?q=recursive=true&async=false'));
-        });
+    // Delete route
+    const routes = app.entity.routes || [];
+    routes.forEach(route => {
+      promises.push(this.cfRequestHelper.sendCfDelete(cfGuid, 'routes/' + route.metadata.guid + '?q=recursive=true&async=false'));
+    });
 
-        // Delete app
-        return Q.all(promises).then(function () {
-          promises.push(this.cfRequestHelper.sendDelete(cfGuid, 'apps/' + app.metadata.guid));
-        });
-      });
+    const deps = promise.all(promises).catch(err => {
+      const errorString = `Failed to delete routes or services attached to an app`;
+      console.log(`${errorString}: ${err}`);
+      return promise.rejected(errorString);
+    });
+
+    const cfRequestHelper = this.cfRequestHelper;
+
+    // Delete app
+    return deps.then(() => {
+      // console.log('Successfully delete deps: ', this.cfRequestHelper.sendCfDelete);
+      return cfRequestHelper.sendCfDelete(cfGuid, 'apps/' + app.metadata.guid);
+    }).catch(err => fail(`Failed to delete app or associated dependencies: ${err}`));
   }
 
 }

@@ -1,5 +1,7 @@
-import { StepperComponent } from '../po/stepper.po';
 import { promise } from 'protractor';
+
+import { StepperComponent } from '../po/stepper.po';
+import { ApplicationE2eHelper } from './application-e2e-helpers';
 
 export class CreateApplicationStepper extends StepperComponent {
 
@@ -9,16 +11,16 @@ export class CreateApplicationStepper extends StepperComponent {
   private appNameFieldName = 'appname';
   private routeHostNameFieldName = 'hostname';
 
-  isStepCloudFoundry = () => {
-    super.isStep('Cloud Foundry');
+  waitForStepCloudFoundry = () => {
+    return super.waitForStep('Cloud Foundry');
   }
 
-  isStepName = () => {
-    super.isStep('Name');
+  waitForStepName = () => {
+    return super.waitForStep('Name');
   }
 
-  isStepRoute = () => {
-    super.isStep('Create Route');
+  waitForStepRoute = () => {
+    return super.waitForStep('Create Route');
   }
 
   setCf = (cfName: string) => {
@@ -47,7 +49,7 @@ export class CreateApplicationStepper extends StepperComponent {
   }
 
   fixRouteHost(hostName: string): promise.Promise<void> {
-    const fixedHostName = hostName.replace(/[\.:-]/g, '');
+    const fixedHostName = ApplicationE2eHelper.getHostName(hostName);
     return this.setRouteHostName(fixedHostName);
   }
 }

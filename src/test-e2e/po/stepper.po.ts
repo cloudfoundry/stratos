@@ -1,7 +1,9 @@
-import { by, element } from 'protractor';
+import { by, element, browser, protractor } from 'protractor';
 import { ElementFinder } from 'protractor/built';
 import { Component } from './component.po';
 import { FormComponent } from './form.po';
+
+const until = protractor.ExpectedConditions;
 
 export class StepperStep {
   index: number;
@@ -52,12 +54,11 @@ export class StepperComponent extends Component {
     return this.isPresentNotDisabled(element(by.id('stepper_previous')));
   }
 
-  isStep(stepName: string) {
-    // expect(element(by.className('steppers__header-text')).getText()).toBe(stepName);
-    // .steppers__header--active .steppers__header-text
+  waitForStep(stepName: string) {
+    const lastActiveHeader = element.all(by.css('.steppers__header.steppers__header--active')).last();
+    return browser.wait(until.textToBePresentInElement(lastActiveHeader, stepName), 5000);
   }
 
   getStepperForm = (): FormComponent => new FormComponent(this.locator.element(by.className('stepper-form')));
-
 
 }
