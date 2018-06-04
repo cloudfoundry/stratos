@@ -3,10 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelperService, CreateServiceInstanceMode } from './create-service-instance-helper.service';
 import { AppState } from '../../../store/app-state';
-import { isMarketplaceMode, isAppServicesMode, isServicesWallMode } from '../services-helper';
+import { isMarketplaceMode, isAppServicesMode, isServicesWallMode } from '../../../features/service-catalog/services-helper';
 
 @Injectable()
 export class CreateServiceInstanceHelperServiceFactory {

@@ -259,6 +259,45 @@ export class GetAllServicesForSpace extends CFStartAction implements PaginationA
 }
 
 
+export class GetServiceInstancesForSpace
+  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  constructor(
+    public spaceGuid: string,
+    public endpointGuid: string,
+    public paginationKey: string,
+    public q: QParam[] = null,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceInstancesSchemaKey, serviceBindingSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, servicePlanSchemaKey),
+      createEntityRelationKey(serviceInstancesSchemaKey, spaceSchemaKey),
+      createEntityRelationKey(spaceSchemaKey, organizationSchemaKey),
+      createEntityRelationKey(servicePlanSchemaKey, serviceSchemaKey),
+      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `spaces/${spaceGuid}/service_instances`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+    if (q) {
+      this.initialParams['q'] = q;
+    }
+  }
+  actions = getActions('Space', 'Get all service instances');
+  entity = [entityFactory(serviceInstancesSchemaKey)];
+  entityKey = serviceInstancesSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'creation',
+  };
+  flattenPagination = true;
+}
+
 export class GetServicesForSpace
   extends CFStartAction implements PaginationAction, EntityInlineParentAction {
   constructor(

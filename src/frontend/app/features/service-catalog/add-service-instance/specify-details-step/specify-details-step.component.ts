@@ -32,9 +32,13 @@ import {
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
 import { getServiceJsonParams, isMarketplaceMode, safeUnsubscribe } from '../../services-helper';
-import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
-import { CsiGuidsService } from '../csi-guids.service';
+import {
+  CreateServiceInstanceHelperService
+} from '../../../../shared/components/add-service-instance/create-service-instance-helper.service';
+import {
+  CreateServiceInstanceHelperServiceFactory
+} from '../../../../shared/components/add-service-instance/create-service-instance-helper-service-factory.service';
+import { CsiGuidsService } from '../../../../shared/components/add-service-instance/csi-guids.service';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -87,7 +91,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     private snackBar: MatSnackBar,
     private csiGuidsService: CsiGuidsService
   ) {
-
     this.stepperForm = new FormGroup({
       name: new FormControl('', [Validators.required, this.nameTakenValidator()]),
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),

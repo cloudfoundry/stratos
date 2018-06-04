@@ -1,7 +1,7 @@
-import { Injectable, Optional, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject ,  Observable ,  combineLatest ,  Subscription } from 'rxjs';
-import { distinctUntilChanged, map, tap, withLatestFrom, first, startWith, filter } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subscription, of as observableOf } from 'rxjs';
+import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
@@ -13,10 +13,10 @@ import {
   getPaginationObservables,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { endpointsRegisteredEntitiesSelector } from '../../store/selectors/endpoint.selectors';
+import { selectPaginationState } from '../../store/selectors/pagination.selectors';
+import { APIResource } from '../../store/types/api.types';
 import { EndpointModel } from '../../store/types/endpoint.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
-import { APIResource } from '../../store/types/api.types';
-import { selectPaginationState } from '../../store/selectors/pagination.selectors';
 
 export interface CfOrgSpaceItem<T = any> {
   list$: Observable<T[]>;
@@ -121,47 +121,70 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private init() {
-    this.getEndpointsAndOrgs$ = combineLatest(
-      this.allOrgs.pagination$.pipe(
-        filter(paginationEntity => {
-          return !getCurrentPageRequestInfo(paginationEntity).busy;
-        }),
-        first(), ),
-      this.cf.list$
+    const orgs = this.allOrgs.pagination$.pipe(
+      filter(paginationEntity => {
+        return !getCurrentPageRequestInfo(paginationEntity).busy;
+      }),
+      first()
+    );
+    this.getEndpointsAndOrgs$ = this.cf.list$.pipe(
+      switchMap(endpoints => {
+        return combineLatest(
+          observableOf(endpoints),
+          orgs
+        );
+      })
     );
   }
 
   private createCf() {
     this.cf = {
-      list$: this.store
-        .select(endpointsRegisteredEntitiesSelector).pipe(
-        first(),
+      list$: this.store.select(endpointsRegisteredEntitiesSelector).pipe(
+        // Ensure we have endpoints
+        filter(endpoints => endpoints && !!Object.keys(endpoints).length),
+        // Filter out non-cf endpoints
         map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === 'cf')),
+        // Ensure we have at least one connected cf
+        filter(cfs => {
+          for (let i = 0; i < cfs.length; i++) {
+            if (cfs[i].connectionStatus === 'connected') {
+              return true;
+            }
+          }
+          return false;
+        }),
+        first(),
         map((endpoints: EndpointModel[]) => {
           return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => a.name.localeCompare(b.name));
-        }), ),
+        })
+      ),
       loading$: this.allOrgsLoading$,
       select: new BehaviorSubject(undefined)
     };
   }
 
   private createOrg() {
-    const orgList$ = combineLatest(
-      this.cf.select.asObservable(),
-      this.getEndpointsAndOrgs$,
-      this.allOrgs.entities$
-    ).pipe(map(
-      ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
-        const [pag, cfList] = endpointsAndOrgs;
-        if (selectedCF && entities) {
-          return entities
-            .map(org => org.entity)
-            .filter(org => org.cfGuid === selectedCF)
-            .sort((a, b) => a.name.localeCompare(b.name));
+    const orgList$ = this.getEndpointsAndOrgs$.pipe(
+      switchMap(endpoints => {
+        return combineLatest(
+          this.cf.select.asObservable(),
+          observableOf(endpoints),
+          this.allOrgs.entities$
+        );
+      }),
+      map(
+        ([selectedCF, endpointsAndOrgs, entities]: [string, any, APIResource<IOrganization>[]]) => {
+          const [pag, cfList] = endpointsAndOrgs;
+          if (selectedCF && entities) {
+            return entities
+              .map(org => org.entity)
+              .filter(org => org.cfGuid === selectedCF)
+              .sort((a, b) => a.name.localeCompare(b.name));
+          }
+          return [];
         }
-        return [];
-      }
-    ));
+      )
+    );
 
     this.org = {
       list$: orgList$,
@@ -171,24 +194,29 @@ export class CfOrgSpaceDataService implements OnDestroy {
   }
 
   private createSpace() {
-    const spaceList$ = combineLatest(
-      this.org.select.asObservable(),
-      this.getEndpointsAndOrgs$,
-      this.allOrgs.entities$
-    ).pipe(map(([selectedOrgGuid, data, orgs]) => {
-      const [orgList, cfList] = data;
-      const selectedOrg = orgs.find(org => {
-        return org.metadata.guid === selectedOrgGuid;
-      });
-      if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
-        return selectedOrg.entity.spaces.map(space => {
-          const entity = { ...space.entity };
-          entity.guid = space.metadata.guid;
-          return entity;
-        }).sort((a, b) => a.name.localeCompare(b.name));
-      }
-      return [];
-    }));
+    const spaceList$ = this.getEndpointsAndOrgs$.pipe(
+      switchMap(endpoints => {
+        return combineLatest(
+          this.org.select.asObservable(),
+          observableOf(endpoints),
+          this.allOrgs.entities$
+        );
+      }),
+      map(([selectedOrgGuid, data, orgs]) => {
+        const [orgList, cfList] = data;
+        const selectedOrg = orgs.find(org => {
+          return org.metadata.guid === selectedOrgGuid;
+        });
+        if (selectedOrg && selectedOrg.entity && selectedOrg.entity.spaces) {
+          return selectedOrg.entity.spaces.map(space => {
+            const entity = { ...space.entity };
+            entity.guid = space.metadata.guid;
+            return entity;
+          }).sort((a, b) => a.name.localeCompare(b.name));
+        }
+        return [];
+      })
+    );
 
     this.space = {
       list$: spaceList$,

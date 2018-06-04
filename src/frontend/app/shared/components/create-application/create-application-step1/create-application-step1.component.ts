@@ -5,7 +5,7 @@ import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 
-import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
 

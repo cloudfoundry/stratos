@@ -1,12 +1,12 @@
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription, of as observableOf } from 'rxjs';
+import { Observable, Subscription, of as observableOf, BehaviorSubject } from 'rxjs';
 import { combineLatest, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { IService } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { SetCreateServiceInstanceServiceGuid } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import {
@@ -14,7 +14,7 @@ import {
   selectCreateServiceInstanceSpaceGuid,
 } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { ServicesWallService } from '../../../services/services/services-wall.service';
+import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { CsiGuidsService } from '../csi-guids.service';
 
 @Component({
@@ -30,15 +30,16 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   serviceSubscription: Subscription;
   services$: Observable<APIResource<IService>[]>;
   stepperForm: FormGroup;
-  validate: Observable<boolean>;
+  validate: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private servicesWallService: ServicesWallService,
     private entityServiceFactory: EntityServiceFactory,
-    private csiGuidService: CsiGuidsService
+    private csiGuidService: CsiGuidsService,
+    private servicesWallService: ServicesWallService
   ) {
+
     this.stepperForm = new FormGroup({
       service: new FormControl(''),
     });
@@ -50,7 +51,6 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
       switchMap(([cfGuid, spaceGuid]) => servicesWallService.getServicesInSpace(cfGuid, spaceGuid)),
       filter(p => !!p),
     );
-
   }
 
   onNext = () => {
@@ -62,16 +62,13 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-
-    this.validate = this.stepperForm.statusChanges.pipe(
-      map(() => this.stepperForm.valid)
-    );
-
     this.serviceSubscription = this.services$.pipe(
       tap(services => {
         const guid = services[0].metadata.guid;
         this.stepperForm.controls.service.setValue(guid);
-        this.store.dispatch(new SetCreateServiceInstanceServiceGuid(guid));
+        setTimeout(() => {
+          this.validate.next(true);
+        });
       })
     ).subscribe();
   }

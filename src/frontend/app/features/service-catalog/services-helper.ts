@@ -10,7 +10,6 @@ export const fetchVisiblePlans =
   (svcPlans: APIResource<IServicePlan>[],
     svcPlanVis: APIResource<IServicePlanVisibility>[],
     svcBroker: APIResource<IServiceBroker>,
-    svc: APIResource<IService>,
     spaceGuid: string = null
   ): APIResource<IServicePlan>[] => {
     const visiblePlans: APIResource<IServicePlan>[] = [];

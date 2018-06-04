@@ -13,10 +13,13 @@ import {
 import { AppState } from '../../../../store/app-state';
 import { servicesServiceFactoryProvider } from '../../service-catalog.helpers';
 import { isMarketplaceMode } from '../../services-helper';
-import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
-import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
-import { CsiGuidsService } from '../csi-guids.service';
-
+import {
+  CreateServiceInstanceHelperServiceFactory
+} from '../../../../shared/components/add-service-instance/create-service-instance-helper-service-factory.service';
+import { CsiGuidsService } from '../../../../shared/components/add-service-instance/csi-guids.service';
+import {
+  CreateServiceInstanceHelperService
+} from '../../../../shared/components/add-service-instance/create-service-instance-helper.service';
 @Component({
   selector: 'app-add-service-instance',
   templateUrl: './add-service-instance.component.html',

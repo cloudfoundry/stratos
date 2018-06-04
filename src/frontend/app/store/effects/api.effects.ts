@@ -1,9 +1,7 @@
 
-import {of as observableOf,  Observable ,  forkJoin } from 'rxjs';
+import { of as observableOf, Observable, forkJoin } from 'rxjs';
 
-import {catchError, withLatestFrom,  map, mergeMap } from 'rxjs/operators';
-
-
+import { catchError, withLatestFrom, map, mergeMap } from 'rxjs/operators';
 
 import { Injectable } from '@angular/core';
 import { Headers, Http, Request, URLSearchParams } from '@angular/http';
@@ -152,25 +150,26 @@ export class APIEffect {
           }
         )];
       }),
-    ).pipe(catchError(error => {
-      const endpoints: string[] = options.headers.get(endpointHeader).split((','));
-      endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
-        eventCode: error.status || '500',
-        severity: InternalEventSeverity.ERROR,
-        message: 'Jetstream API request error',
-        metadata: {
-          url: error.url || apiAction.options.url
-        }
-      })));
-      return [
-        new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
-        new WrapperRequestActionFailed(
-          error.message,
-          actionClone,
-          requestType
-        )
-      ];
-    }));
+      catchError(error => {
+        const endpointString = options.headers.get(endpointHeader) || '';
+        const endpoints: string[] = endpointString.split((','));
+        endpoints.forEach(endpoint => this.store.dispatch(new SendEventAction(endpointSchemaKey, endpoint, {
+          eventCode: error.status || '500',
+          severity: InternalEventSeverity.ERROR,
+          message: 'Jetstream API request error',
+          metadata: {
+            url: error.url || apiAction.options.url
+          }
+        })));
+        return [
+          new APISuccessOrFailedAction(actionClone.actions[2], actionClone),
+          new WrapperRequestActionFailed(
+            error.message,
+            actionClone,
+            requestType
+          )
+        ];
+      }));
   }
 
   private completeResourceEntity(resource: APIResource | any, cfGuid: string, guid: string): APIResource {
