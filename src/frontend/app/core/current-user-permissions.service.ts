@@ -1,9 +1,8 @@
+
+import { of as observableOf, Observable, combineLatest } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
-
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { AppState } from '../store/app-state';
 import {
   CHECKER_GROUPS,
@@ -51,7 +50,7 @@ export class CurrentUserPermissionsService {
     const obs$ = this.getCanObservable(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
     return obs$ ? obs$.pipe(
       distinctUntilChanged(),
-    ) : Observable.of(false);
+    ) : observableOf(false);
   }
 
   private getCanObservable(
@@ -149,10 +148,10 @@ export class CurrentUserPermissionsService {
       distinctUntilChanged(),
       switchMap(([isAdmin, isReadOnly]) => {
         if (isAdmin) {
-          return Observable.of(true);
+          return observableOf(true);
         }
         if (isReadOnly) {
-          return Observable.of(false);
+          return observableOf(false);
         }
         return check$;
       })

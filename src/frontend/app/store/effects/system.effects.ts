@@ -1,3 +1,5 @@
+
+import {catchError, mergeMap} from 'rxjs/operators';
 import { StartRequestAction, WrapperRequestActionSuccess, WrapperRequestActionFailed } from './../types/request.types';
 import {
   IRequestAction
@@ -22,8 +24,8 @@ export class SystemEffects {
 
   static guid = 'info';
 
-  @Effect() getInfo$ = this.actions$.ofType<GetSystemInfo>(GET_SYSTEM_INFO)
-    .mergeMap(action => {
+  @Effect() getInfo$ = this.actions$.ofType<GetSystemInfo>(GET_SYSTEM_INFO).pipe(
+    mergeMap(action => {
       const apiAction = {
         entityKey: systemStoreNames.type,
         guid: SystemEffects.guid,
@@ -33,18 +35,18 @@ export class SystemEffects {
       const { associatedAction } = action;
       const actionType = 'fetch';
       this.store.dispatch(new StartRequestAction(associatedAction, actionType));
-      return this.httpClient.get('/pp/v1/info')
-        .mergeMap((info: SystemInfo) => {
+      return this.httpClient.get('/pp/v1/info').pipe(
+        mergeMap((info: SystemInfo) => {
           return [
             new GetSystemSuccess(info, action.login, associatedAction),
             new WrapperRequestActionSuccess({ entities: {}, result: [] }, apiAction)
           ];
-        }).catch((e) => {
+        }), catchError((e) => {
           return [
             new GetSystemFailed(),
             new WrapperRequestActionFailed('Could not get system endpoints', associatedAction),
             new WrapperRequestActionFailed('Could not fetch system info', apiAction)
           ];
-        });
-    });
+        }), );
+    }));
 }

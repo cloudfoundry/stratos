@@ -2,16 +2,16 @@ import { TitleCasePipe } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of as observableOf } from 'rxjs';
 import { map, tap, take, filter, switchMap, first } from 'rxjs/operators';
 
 import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import {
-  ResetCreateServiceInstanceState,
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
+  ResetCreateServiceInstanceState,
 } from '../../../../store/actions/create-service-instance.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
@@ -86,7 +86,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.serviceInstancesUrl = `/services`;
-      this.title$ = Observable.of(`Create Service Instance`);
+      this.title$ = observableOf(`Create Service Instance`);
     }
 
     this.skipApps$ = this.store.select(selectCreateServiceInstance).pipe(
@@ -117,7 +117,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
       this.cfOrgSpaceService.org.select.getValue(),
       this.cfOrgSpaceService.space.select.getValue()
     ));
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   private getIdsFromRoute() {
@@ -140,7 +140,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
     entityService.waitForEntity$.pipe(filter(p => !!p), tap(app => {
       const spaceEntity = app.entity.entity.space as APIResource<ISpace>;
       this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid));
-      this.title$ = Observable.of(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
+      this.title$ = observableOf(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
     }), take(1)).subscribe();
   }
 

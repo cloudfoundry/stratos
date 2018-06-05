@@ -1,12 +1,22 @@
+
+import { of as observableOf, BehaviorSubject, Observable, Subscription, combineLatest as observableCombineLatest } from 'rxjs';
 import { TitleCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { filter, first, map, publishReplay, refCount, switchMap, tap, combineLatest, take, distinctUntilChanged } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import {
+  filter,
+  first,
+  map,
+  publishReplay,
+  refCount,
+  switchMap,
+  tap,
+  combineLatest,
+  distinctUntilChanged,
+  startWith
+} from 'rxjs/operators';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -101,8 +111,8 @@ export class SelectPlanStepComponent implements OnDestroy {
       refCount(),
     );
 
-    this.selectedService$ = Observable.combineLatest(
-      this.stepperForm.statusChanges.startWith(true),
+    this.selectedService$ = observableCombineLatest(
+      this.stepperForm.statusChanges.pipe(startWith(true)),
       this.servicePlans$).pipe(
         filter(([p, q]) => !!q && q.length > 0),
         map(([valid, servicePlans]) =>
@@ -146,7 +156,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   onNext = () => {
     this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   ngOnDestroy(): void {

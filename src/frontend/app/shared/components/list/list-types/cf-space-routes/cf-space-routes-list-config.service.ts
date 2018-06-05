@@ -1,6 +1,8 @@
+
+import { of as observableOf, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { take, tap } from 'rxjs/operators';
+import { take, tap, map } from 'rxjs/operators';
 
 import { getRoute } from '../../../../../features/applications/routes/routes.helper';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
@@ -18,7 +20,6 @@ import {
   TableCellRouteAppsAttachedComponent,
 } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { DatePipe } from '@angular/common';
-import { Observable } from 'rxjs/Observable';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 
@@ -76,16 +77,15 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
     action: (item: APIResource) => this.deleteSingleRoute(item),
     label: 'Delete',
     description: 'Unmap and delete route',
-    createVisible: (row: APIResource) => this.canEditApp$,
-    createEnabled: () => Observable.of(true)
+    createVisible: () => this.canEditApp$,
   };
 
   private listActionUnmap: IListAction<APIResource> = {
     action: (item: APIResource) => this.unmapSingleRoute(item),
     label: 'Unmap',
     description: 'Unmap route',
-    createVisible: (row: APIResource) => this.canEditApp$,
-    createEnabled: (row: APIResource) => Observable.of(row.entity.apps && row.entity.apps.length)
+    createVisible: () => this.canEditApp$,
+    createEnabled: (row$: Observable<APIResource>) => row$.pipe(map(row => row.entity.apps && row.entity.apps.length))
   };
 
   columns: Array<ITableColumn<APIResource>> = [

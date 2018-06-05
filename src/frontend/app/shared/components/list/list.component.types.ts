@@ -1,5 +1,5 @@
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+
+import {of as observableOf,  BehaviorSubject ,  Observable } from 'rxjs';
 
 import { IListDataSource } from './data-sources-controllers/list-data-source-types';
 import { ITableColumn, ITableText } from './list-table/table.types';
@@ -118,7 +118,7 @@ export class ListConfig<T> implements IListConfig<T> {
   getColumns = (): ITableColumn<T>[] => null;
   getDataSource = (): ListDataSource<T> => null;
   getMultiFiltersConfigs = (): IListMultiFilterConfig[] => [];
-  getInitialised = () => Observable.of(true);
+  getInitialised = () => observableOf(true);
 }
 
 export interface IBaseListAction<T> {
@@ -129,8 +129,8 @@ export interface IBaseListAction<T> {
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
-  createVisible?: (row: T) => Observable<boolean>;
-  createEnabled?: (row: T) => Observable<boolean>;
+  createVisible?: (row$: Observable<T>) => Observable<boolean>;
+  createEnabled?: (row$: Observable<T>) => Observable<boolean>;
 }
 
 export interface IOptionalAction<T> extends IBaseListAction<T> {

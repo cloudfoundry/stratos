@@ -1,5 +1,5 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 import { ListStateActionTypes, ListView, SetListViewAction } from '../actions/list.actions';
 import { AppState } from '../app-state';

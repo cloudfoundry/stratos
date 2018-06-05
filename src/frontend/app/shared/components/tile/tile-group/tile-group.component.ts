@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterContentInit, HostBinding, ContentChildren, QueryList, ViewEncapsulation } from '@angular/core';
 
 import { TileComponent} from '../tile/tile.component';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-tile-group',

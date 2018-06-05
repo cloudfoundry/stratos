@@ -8,8 +8,7 @@ import { getPaginationObservables } from '../../store/reducers/pagination-reduce
 import { APIResource } from '../../store/types/api.types';
 import { getPaginationKey } from '../../store/actions/pagination.actions';
 import { filter, map, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable ,  Subscription } from 'rxjs';
 import { RequestInfoState } from '../../store/reducers/api-request-reducer/types';
 import { RouterNav } from '../../store/actions/router.actions';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';

@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
+
 import { Store } from '@ngrx/store';
 
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
@@ -21,7 +24,10 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { Observable } from 'rxjs/Observable';
+
+import { map, pairwise } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -89,7 +95,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       });
     },
     label: 'Unregister',
-    description: 'Remove the endpoint'
+    description: 'Remove the endpoint',
+    createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
   };
 
   private listActionDisconnect: IListAction<EndpointModel> = {
@@ -102,8 +109,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'connected'),
-    createEnabled: (row: EndpointModel) => Observable.of(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'connected'))
   };
 
   private listActionConnect: IListAction<EndpointModel> = {
@@ -119,8 +125,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Connect',
     description: '',
-    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'disconnected'),
-    createEnabled: (row: EndpointModel) => Observable.of(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
   };
 
   private singleActions = [
@@ -158,8 +163,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   }
 
   private handleAction(storeSelect, handleChange) {
-    const disSub = this.store.select(storeSelect)
-      .pairwise()
+    const disSub = this.store.select(storeSelect).pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
@@ -174,7 +179,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private dialog: MatDialog,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,
-    private internalEventMonitorFactory: InternalEventMonitorFactory
+    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.dataSource = new EndpointsDataSource(
       this.store,

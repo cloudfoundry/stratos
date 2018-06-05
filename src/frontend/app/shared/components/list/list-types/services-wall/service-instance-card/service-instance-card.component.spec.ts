@@ -35,7 +35,7 @@ describe('ServiceInstanceCardComponent', () => {
     component = fixture.componentInstance;
     component.row = {
       entity: {
-        service_plan_guid: '',
+        service_plan_guid: 'test',
         space_guid: '',
         dashboard_url: '',
         type: '',
