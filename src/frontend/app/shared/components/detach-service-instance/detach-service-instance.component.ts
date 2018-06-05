@@ -13,7 +13,9 @@ import { ActivatedRoute } from '@angular/router';
 import { BindingPipe } from '@angular/compiler';
 import { ServiceActionHelperService } from '../../data-services/service-action-helper.service';
 import { RouterNav } from '../../../store/actions/router.actions';
-
+import {
+  serviceBindingSchemaKey,
+} from '../../../store/helpers/entity-factory';
 @Component({
   selector: 'app-detach-service-instance',
   templateUrl: './detach-service-instance.component.html',
@@ -24,6 +26,7 @@ export class DetachServiceInstanceComponent implements OnInit {
   cfGuid: any;
   selectedBindings: APIResource<IServiceBinding>[];
   deleteStarted: boolean;
+  serviceBindingSchemaKey = serviceBindingSchemaKey;
   public confirmColumns: ITableColumn<APIResource<IServiceBinding>>[] = [
     {
       headerCell: () => 'Name',
@@ -79,7 +82,7 @@ export class DetachServiceInstanceComponent implements OnInit {
     }
     this.deleteStarted = true;
     if (this.selectedBindings && this.selectedBindings.length) {
-     return this.selectedBindings.forEach(binding => {
+     this.selectedBindings.forEach(binding => {
         this.serviceActionHelperService.detachServiceBinding([binding], binding.entity.service_instance_guid, this.cfGuid, true);
       });
     }
