@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../store/app-state';
-import { Observable } from 'rxjs/Observable';
 import { APIResource } from '../../../../store/types/api.types';
 import { IServiceBroker } from '../../../../core/cf-api-svc.types';
 import { filter, map, switchMap } from 'rxjs/operators';
@@ -11,6 +10,7 @@ import { ISpace } from '../../../../core/cf-api.types';
 import { spaceSchemaKey, entityFactory, spaceWithOrgKey, domainSchemaKey } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
 import { GetSpace } from '../../../../store/actions/space.actions';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-service-broker-card',

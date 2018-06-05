@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
-import { APIResource } from '../../../../store/types/api.types';
+
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { ServicesService } from '../../../../features/service-catalog/services.service';
+import { APIResource } from '../../../../store/types/api.types';
 
 const RECENT_ITEMS_COUNT = 10;
 

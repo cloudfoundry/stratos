@@ -1,9 +1,8 @@
 import { Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';

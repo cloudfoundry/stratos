@@ -1,21 +1,14 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
-import {
-  IService,
-  IServiceBroker,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-} from '../../core/cf-api-svc.types';
+import { IServiceBroker, IServiceInstance, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceInstances } from '../../store/actions/service-instances.actions';
 import { AppState } from '../../store/app-state';
 import { entityFactory, serviceInstancesSchemaKey } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
 

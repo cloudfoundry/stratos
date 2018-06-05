@@ -1,11 +1,11 @@
+
+import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
 import { Component, ContentChild, ContentChildren, Input, QueryList } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
 import { CardStatus } from '../../../../application-state/application-state.service';
 import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 import { IPermissionConfigs } from '../../../../../../core/current-user-permissions.config';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { map, tap } from 'rxjs/operators';
 
 export interface MetaCardMenuItem {
@@ -35,7 +35,7 @@ export class MetaCardComponent {
   set actionMenu(actionMenu: MetaCardMenuItem[]) {
     this._actionMenu = actionMenu.map(menuItem => {
       if (!menuItem.can) {
-        menuItem.can = Observable.of(true);
+        menuItem.can = observableOf(true);
       }
       return menuItem;
     });
@@ -54,7 +54,7 @@ export class MetaCardComponent {
     if (this.actionMenu) {
       this.actionMenu = this.actionMenu.map(element => {
         if (!element.disabled) {
-          element.disabled = Observable.of(false);
+          element.disabled = observableOf(false);
         }
         return element;
       });

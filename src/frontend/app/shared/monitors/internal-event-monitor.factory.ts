@@ -1,16 +1,16 @@
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, publishReplay, refCount, tap } from 'rxjs/operators';
 
 import { AppState } from '../../store/app-state';
 import { internalEventStateSelector } from '../../store/selectors/internal-events.selectors';
-import { InternalEventSubjectState } from '../../store/types/internal-events.types';
+import { InternalEventsState } from '../../store/types/internal-events.types';
 import { InternalEventMonitor } from './internal-event.monitor';
 import { Injectable, NgZone } from '@angular/core';
 @Injectable()
 export class InternalEventMonitorFactory {
 
-  private events$: Observable<InternalEventSubjectState>;
+  private events$: Observable<InternalEventsState>;
 
   constructor(private store: Store<AppState>, private ngZone: NgZone) {
 
