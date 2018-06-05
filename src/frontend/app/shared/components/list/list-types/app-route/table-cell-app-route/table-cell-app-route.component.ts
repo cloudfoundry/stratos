@@ -1,7 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
-import { ApplicationService } from '../../../../../../features/applications/application.service';
-import { getMappedApps } from '../../../../../../features/applications/routes/routes.helper';
 import { TableCellCustom } from '../../../list.types';
 
 @Component({

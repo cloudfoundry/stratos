@@ -78,6 +78,9 @@
   &__navigation-right {
     flex: 1;
     text-align: right;
+    button {
+      margin-left: 8px;
+    }
   }
   .stepper-form {
     // Use a specific style instead of form element selected. This prevents these generic styles bleading into child components of a stepper

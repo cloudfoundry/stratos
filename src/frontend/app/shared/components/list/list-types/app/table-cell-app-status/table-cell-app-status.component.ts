@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { startWith } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../../../features/applications/application.service';

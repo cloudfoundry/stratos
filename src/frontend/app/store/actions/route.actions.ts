@@ -82,7 +82,8 @@ export class UnmapRoute extends BaseRouteAction {
   constructor(
     public routeGuid: string,
     public appGuid: string,
-    public endpointGuid: string
+    public endpointGuid: string,
+    public removeEntityOnDelete = true
   ) {
     super(routeGuid, endpointGuid, appGuid);
     this.options = new RequestOptions();
@@ -115,7 +116,3 @@ export class CheckRouteExists extends CFStartAction implements ICFAction {
   options: RequestOptions;
 }
 
-export class MapRouteSelected implements Action {
-  constructor(routeEntity: EntityInfo) { }
-  type = MAP_ROUTE_SELECTED;
-}

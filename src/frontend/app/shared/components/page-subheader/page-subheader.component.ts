@@ -1,9 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, AfterContentInit } from '@angular/core';
 import { MatTabNav, MatButton } from '@angular/material';
-import { fromEvent } from 'rxjs/observable/fromEvent';
-import { interval } from 'rxjs/observable/interval';
+import { fromEvent, interval, Subscription } from 'rxjs';
 import { debounceTime, filter, tap, distinctUntilChanged, delay } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ISubHeaderTabs } from './page-subheader.types';
 
@@ -84,7 +82,7 @@ export class PageSubheaderComponent implements AfterViewInit, OnDestroy {
     });
     this.resizeSub = fromEvent(window, 'resize').pipe(
       debounceTime(100),
-      tap(this.checkNavOverflow),
+      tap(() => this.checkNavOverflow())
     ).subscribe();
 
     // We do an overflow check when the navbar state changes as this

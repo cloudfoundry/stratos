@@ -2,6 +2,39 @@
 
 Weekly status updates are published here.
 
+## 01 June 2018
+
+The team have been working on the following issues and PRs this week:
+
+- Upgrade to Angular 6 [#2227](https://github.com/cloudfoundry-incubator/stratos/pull/2227) - Completed work and testing. Will merge early next week.
+
+- Edit service instance from Services Wall [#2233](https://github.com/cloudfoundry-incubator/stratos/pull/2233) - Added ability to edit an existing service instance.
+
+- E2E Tests [#1523](https://github.com/cloudfoundry-incubator/stratos/issues/1523) - Continuing to extend E2E test suite.
+
+- Fix compression issue [#2248](https://github.com/cloudfoundry-incubator/stratos/pull/2248) - Fixed an issue when Stratos accessed a Cloud Foundry instance with gzip compression enabled. Thanks to everyone for their help with this one.
+
+- Fix App SSH (Broken when auth and token endpoints are different) [#2250](https://github.com/cloudfoundry-incubator/stratos/pull/2250) - Fixed an issue with Application SSH for some CF deplyoments.
+
+- Fix application issue on reload when served by backend [#2238](https://github.com/cloudfoundry-incubator/stratos/pull/2238) - Fixed an issue where refreshing the browser on application pages resulted in a 404 (when deployed via cf push)
+
+
+
+## 25 May 2018
+
+The team have been working on the following issues and PRs this week:
+
+- Upgrade to Angular 6 [#2227](https://github.com/cloudfoundry-incubator/stratos/pull/2227)
+
+- Handle async request progress/success/failure in modals [#2223](https://github.com/cloudfoundry-incubator/stratos/pull/2223) - Improving busy state and error feedback in modals - e.g. when creating an application, creating a space etc
+
+- Service Summary tab [#2219](https://github.com/cloudfoundry-incubator/stratos/pull/2219) - add a summary tab to the view for a service, to show summary metadata
+
+- Add support for back-end custom plugins [#2217](https://github.com/cloudfoundry-incubator/stratos/pull/2217)
+
+- Apply user permissions to CF pages (2) [#2212](https://github.com/cloudfoundry-incubator/stratos/pull/2212) - Completion of work to wire in user permissions into the Cloud Foundry view
+
+
 ## 18 May 2018
 
 The team have been working on the following issues and PRs this week:

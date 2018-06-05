@@ -1,5 +1,8 @@
 FROM {{BASE_IMAGE}}
-RUN zypper in -y ca-certificates git &&\
-    mkdir -p /srv
-
+RUN zypper in -y ca-certificates git && \
+    mkdir -p /srv && \
+    mkdir -p /root/.npm-global
+ENV USER=root
+ENV PATH=/root/.npm-global/bin:$PATH
+ENV NPM_CONFIG_PREFIX=/root/.npm-global
 WORKDIR /srv

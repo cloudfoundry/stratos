@@ -20,7 +20,6 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
     store: Store<AppState>,
     appService: ApplicationService,
     action: PaginatedAction,
-    paginationKey: string,
     listConfig: IListConfig<APIResource>
   ) {
     super({
@@ -28,7 +27,7 @@ export class CfAppRoutesDataSource extends ListDataSource<APIResource> {
       action,
       schema: entityFactory(routeSchemaKey),
       getRowUniqueId: getRowMetadata,
-      paginationKey,
+      paginationKey: action.paginationKey,
       isLocal: true,
       listConfig,
       transformEntity: map((routes) => {

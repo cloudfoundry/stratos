@@ -8,6 +8,8 @@ export const selectCreateServiceInstance = (state: AppState) => state.createServ
 const getOrgGuid = (state: CreateServiceInstanceState) => state.orgGuid;
 const getSpaceGuid = (state: CreateServiceInstanceState) => state.spaceGuid;
 const getServicePlanGuid = (state: CreateServiceInstanceState) => state.servicePlanGuid;
+const getCfGuid = (state: CreateServiceInstanceState) => state.cfGuid;
+const getServiceGuid = (state: CreateServiceInstanceState) => state.serviceGuid;
 
 
 export const selectCreateServiceInstanceOrgGuid = compose(
@@ -22,4 +24,11 @@ export const selectCreateServiceInstanceServicePlan = compose(
   getServicePlanGuid,
   selectCreateServiceInstance
 );
-
+export const selectCreateServiceInstanceCfGuid = compose(
+  getCfGuid,
+  selectCreateServiceInstance
+);
+export const selectCreateServiceInstanceServiceGuid = compose(
+  getServiceGuid,
+  selectCreateServiceInstance
+);

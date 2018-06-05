@@ -1,8 +1,11 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
+
+import {catchError, map, mergeMap, switchMap, filter, withLatestFrom} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
 import {
   CHECK_PROJECT_EXISTS,
@@ -33,24 +36,24 @@ export class DeployAppEffects {
 
   @Effect()
   checkAppExists$ = this.actions$
-    .ofType<CheckProjectExists>(CHECK_PROJECT_EXISTS)
-    .withLatestFrom(this.store.select(selectDeployAppState))
-    .filter(([action, state]) => {
+    .ofType<CheckProjectExists>(CHECK_PROJECT_EXISTS).pipe(
+    withLatestFrom(this.store.select(selectDeployAppState)),
+    filter(([action, state]) => {
       return state.projectExists && state.projectExists.checking;
-    })
-    .switchMap(([action, state]: any) => {
+    }),
+    switchMap(([action, state]: any) => {
       return this.http
-        .get(`https://api.github.com/repos/${action.projectName}`)
-        .map(res => new ProjectExists(action.projectName, res))
-        .catch(err => {
-          return Observable.of(new ProjectDoesntExist(action.projectName));
-        });
-    });
+        .get(`https://api.github.com/repos/${action.projectName}`).pipe(
+        map(res => new ProjectExists(action.projectName, res)),
+        catchError(err => {
+          return observableOf(new ProjectDoesntExist(action.projectName));
+        }), );
+    }), );
 
   @Effect()
   fetchBranches$ = this.actions$
-    .ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT)
-    .flatMap(action => {
+    .ofType<FetchBranchesForProject>(FETCH_BRANCHES_FOR_PROJECT).pipe(
+    mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: githubBranchesSchemaKey,
@@ -59,8 +62,8 @@ export class DeployAppEffects {
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return this.http
-        .get(`https://api.github.com/repos/${action.projectName}/branches`)
-        .mergeMap(response => {
+        .get(`https://api.github.com/repos/${action.projectName}/branches`).pipe(
+        mergeMap(response => {
           const branches = response.json();
           const mappedData = {
             entities: { githubBranches: {} },
@@ -80,16 +83,16 @@ export class DeployAppEffects {
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
           ];
-        })
-        .catch(err => [
+        }),
+        catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]);
-    });
+        ]), );
+    }));
 
   @Effect()
   fetchCommit$ = this.actions$
-    .ofType<FetchCommit>(FETCH_COMMIT)
-    .flatMap(action => {
+    .ofType<FetchCommit>(FETCH_COMMIT).pipe(
+    mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: githubCommitSchemaKey,
@@ -97,8 +100,8 @@ export class DeployAppEffects {
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return this.http
-        .get(action.commit.url)
-        .mergeMap(response => {
+        .get(action.commit.url).pipe(
+        mergeMap(response => {
           const commit = response.json();
           const mappedData = {
             entities: { [githubCommitSchemaKey]: {} },
@@ -108,16 +111,16 @@ export class DeployAppEffects {
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
           ];
-        })
-        .catch(err => [
+        }),
+        catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]);
-    });
+        ]), );
+    }));
 
   @Effect()
   fetchCommits$ = this.actions$
-    .ofType<FetchCommits>(FETCH_COMMITS)
-    .flatMap(action => {
+    .ofType<FetchCommits>(FETCH_COMMITS).pipe(
+    mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: githubCommitSchemaKey,
@@ -126,8 +129,8 @@ export class DeployAppEffects {
       };
       this.store.dispatch(new StartRequestAction(apiAction, actionType));
       return this.http
-        .get(`https://api.github.com/repos/${action.projectName}/commits?sha=${action.sha}`)
-        .mergeMap(response => {
+        .get(`https://api.github.com/repos/${action.projectName}/commits?sha=${action.sha}`).pipe(
+        mergeMap(response => {
           const commits: GithubCommit[] = response.json();
           const mappedData = {
             entities: { [githubCommitSchemaKey]: {} },
@@ -139,11 +142,11 @@ export class DeployAppEffects {
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
           ];
-        })
-        .catch(err => [
+        }),
+        catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]);
-    });
+        ]), );
+    }));
 
   addCommit(mappedData: NormalizedResponse, projectName: string, commit: GithubCommit) {
     const id = projectName + '-' + commit.sha;

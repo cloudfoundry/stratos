@@ -1,8 +1,7 @@
 import { Component, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { BehaviorSubject ,  Subscription } from 'rxjs';
 import { combineLatest, filter, first } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { CfRolesService } from '../../../features/cloud-foundry/users/manage-users/cf-roles.service';
 import { UsersRolesSetOrgRole, UsersRolesSetSpaceRole } from '../../../store/actions/users-roles.actions';

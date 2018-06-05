@@ -1,8 +1,9 @@
+
+import {catchError, mergeMap,  map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
 
 import { METRICS_START, MetricsAction } from '../actions/metrics.actions';
 import { AppState } from '../app-state';
@@ -20,8 +21,8 @@ export class MetricsEffect {
     private httpClient: HttpClient,
   ) { }
 
-  @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START)
-    .mergeMap(action => {
+  @Effect() metrics$ = this.actions$.ofType<MetricsAction>(METRICS_START).pipe(
+    mergeMap(action => {
       const fullUrl = this.buildFullUrl(action);
       const apiAction = {
         guid: action.guid,
@@ -46,7 +47,7 @@ export class MetricsEffect {
             apiAction
           );
         })
-      ).catch(errObservable => {
+      ).pipe(catchError(errObservable => {
         return [
           new WrapperRequestActionFailed(
             errObservable.message,
@@ -54,8 +55,8 @@ export class MetricsEffect {
             'fetch'
           )
         ];
-      });
-    });
+      }));
+    }));
 
   private buildFullUrl(action: MetricsAction) {
     return `${action.url}/query?query=${action.query}`;

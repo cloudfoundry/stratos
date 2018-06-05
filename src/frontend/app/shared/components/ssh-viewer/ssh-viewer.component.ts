@@ -3,10 +3,7 @@ import {
   EventEmitter, HostListener
 } from '@angular/core';
 
-import { Observable } from 'rxjs/Rx';
-import { Subscription } from 'rxjs/Subscription';
-import { QueueingSubject } from 'queueing-subject';
-import { Subject } from 'rxjs/Subject';
+import { Observable ,  Subscription, Subject } from 'rxjs';
 
 // Import Xterm
 import * as Terminal from 'xterm/dist/xterm.js';
@@ -27,7 +24,7 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
   sshStream: Observable<any>;
 
   @Input('sshInput')
-  sshInput: QueueingSubject<string>;
+  sshInput: Subject<string>;
 
   @Input('connectionStatus')
   public connectionStatus: Observable<number>;
@@ -104,20 +101,20 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.xterm.reset();
     this.msgSubscription = this.sshStream
       .subscribe(
-      (data: string) => {
-        for (const c of data.split(' ')) {
-          this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+        (data: string) => {
+          for (const c of data.split(' ')) {
+            this.xterm.write(String.fromCharCode(parseInt(c, 16)));
+          }
+        },
+        (err) => {
+          this.disconnect();
+        },
+        () => {
+          this.disconnect();
+          if (!this.isDestroying) {
+            this.changeDetector.detectChanges();
+          }
         }
-      },
-      (err) => {
-        this.disconnect();
-      },
-      () => {
-        this.disconnect();
-        if (!this.isDestroying) {
-          this.changeDetector.detectChanges();
-        }
-      }
       );
   }
 

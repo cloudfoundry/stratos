@@ -1,3 +1,5 @@
+
+import {take} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { DialogConfirmComponent } from './dialog-confirm/dialog-confirm.component';
@@ -16,7 +18,7 @@ export class ConfirmationDialogService {
       data: dialog
     });
 
-    dialogRef.afterClosed().take(1).subscribe(result => {
+    dialogRef.afterClosed().pipe(take(1)).subscribe(result => {
       if (result) {
         doFn(result);
       }

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-card-cf-info',
@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs/Subscription';
 export class CardCfInfoComponent implements OnInit, OnDestroy {
   apiUrl: string;
   subs: Subscription[] = [];
-  constructor(private cfEndpointService: CloudFoundryEndpointService) {}
+  constructor(private cfEndpointService: CloudFoundryEndpointService) { }
 
   ngOnInit() {
     const obs$ = this.cfEndpointService.endpoint$.pipe(

@@ -11,7 +11,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { StoreModule } from '@ngrx/store';
 import { appReducers } from '../reducers.module';
-import { Store } from '@ngrx/store/src/store';
+import { Store } from '@ngrx/store';
 
 describe('EndpointsPageComponent', () => {
   beforeEach(async(() => {
