@@ -6,7 +6,7 @@ $material-icons-font-path: 'assets/fonts/iconfont' !default;
   font-family: 'Material Icons';
   font-style: normal;
   font-weight: 400;
-  src: url('#{$material-icons-font-path}/MaterialIcons-Regular.eot'); /* For IE6-8 */
+  src: url('#{$material-icons-font-path}/MaterialIcons-Regular.eot'); // For IE6-8
   src: local('Material Icons'),
     local('MaterialIcons-Regular'),
     url('#{$material-icons-font-path}/MaterialIcons-Regular.woff2') format('woff2'),
@@ -15,26 +15,23 @@ $material-icons-font-path: 'assets/fonts/iconfont' !default;
 }
 
 .material-icons {
+  // Support for all WebKit browsers.
+  -webkit-font-smoothing: antialiased;
+  // Support for Firefox.
+  -moz-osx-font-smoothing: grayscale;
+  display: inline-block;
+  direction: ltr;
   font-family: 'Material Icons';
+  // Support for IE.
+  font-feature-settings: 'liga';
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;  /* Preferred icon size */
-  display: inline-block;
+  font-size: 24px;  // Preferred icon size
   line-height: 1;
-  text-transform: none;
   letter-spacing: normal;
+  // Support for Safari and Chrome.
+  text-rendering: optimizeLegibility;
+  text-transform: none;
   word-wrap: normal;
   white-space: nowrap;
-  direction: ltr;
-
-  /* Support for all WebKit browsers. */
-  -webkit-font-smoothing: antialiased;
-  /* Support for Safari and Chrome. */
-  text-rendering: optimizeLegibility;
-
-  /* Support for Firefox. */
-  -moz-osx-font-smoothing: grayscale;
-
-  /* Support for IE. */
-  font-feature-settings: 'liga';
 }
