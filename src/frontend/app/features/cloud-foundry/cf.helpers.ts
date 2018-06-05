@@ -1,7 +1,10 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, first, tap } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map, tap } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
 import { pathGet } from '../../core/utils.service';
 import { SetClientFilter } from '../../store/actions/pagination.actions';
 import { RouterNav } from '../../store/actions/router.actions';
@@ -11,8 +14,9 @@ import { selectPaginationState } from '../../store/selectors/pagination.selector
 import { APIResource } from '../../store/types/api.types';
 import { PaginationEntityState } from '../../store/types/pagination.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
-import { ActiveRouteCfOrgSpace } from './cf-page.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
+import { ActiveRouteCfOrgSpace } from './cf-page.types';
+
 
 export interface IUserRole<T> {
   string: string;
@@ -195,4 +199,17 @@ export function goToAppWall(store: Store<AppState>, cfGuid: string, orgGuid?: st
       store.dispatch(new RouterNav({ path: ['applications'] }));
     })
   ).subscribe();
+}
+
+export function canUpdateOrgSpaceRoles(
+  perms: CurrentUserPermissionsService,
+  cfGuid: string,
+  orgGuid?: string,
+  spaceGuid?: string): Observable<boolean> {
+  return combineLatest(
+    perms.can(CurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
+    perms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
+  ).pipe(
+    map((checks: boolean[]) => checks.some(check => check))
+  );
 }
