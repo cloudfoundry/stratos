@@ -20,7 +20,7 @@ export class ServiceActionHelperService {
   ) { }
 
   detachServiceBinding = (
-    serviceBindings: APIResource<IServiceBinding>[],
+    serviceBindings: APIResource<IServiceBinding>[] ,
     serviceInstanceGuid: string,
     endpointGuid: string,
     noConfirm = false

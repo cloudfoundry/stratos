@@ -79,7 +79,7 @@ export class DetachServiceInstanceComponent implements OnInit {
     }
     this.deleteStarted = true;
     if (this.selectedBindings && this.selectedBindings.length) {
-      this.selectedBindings.forEach(binding => {
+     return this.selectedBindings.forEach(binding => {
         this.serviceActionHelperService.detachServiceBinding([binding], binding.entity.service_instance_guid, this.cfGuid, true);
       });
     }

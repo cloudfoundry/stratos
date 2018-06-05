@@ -7,6 +7,10 @@ import { entityFactory, serviceBindingSchemaKey } from '../helpers/entity-factor
 export const DELETE_SERVICE_BINDING_ACTION = '[ Service Instances ] Delete Service Binding';
 export const DELETE_SERVICE_BINDING_ACTION_SUCCESS = '[ Service Instances ] Delete Service Binding success';
 export const DELETE_SERVICE_BINDING_ACTION_FAILURE = '[ Service Instances ] Delete Service Binding failure';
+
+export const CREATE_SERVICE_BINDING_ACTION = '[ Service Instances ] Create Service Binding';
+export const CREATE_SERVICE_BINDING_ACTION_SUCCESS = '[ Service Instances ] Create Service Binding success';
+export const CREATE_SERVICE_BINDING_ACTION_FAILURE = '[ Service Instances ] Create Service Binding failure';
 export class CreateServiceBinding extends CFStartAction implements ICFAction {
   constructor(
     public endpointGuid: string,
@@ -25,8 +29,11 @@ export class CreateServiceBinding extends CFStartAction implements ICFAction {
       parameters: params ? params : null,
     };
   }
-  actions = getActions('Service Bindings', 'Create Service Binding');
-  entity = [entityFactory(serviceBindingSchemaKey)];
+  actions = [
+    CREATE_SERVICE_BINDING_ACTION,
+    CREATE_SERVICE_BINDING_ACTION_SUCCESS,
+    CREATE_SERVICE_BINDING_ACTION_FAILURE
+  ];  entity = [entityFactory(serviceBindingSchemaKey)];
   entityKey = serviceBindingSchemaKey;
   options: RequestOptions;
 }
