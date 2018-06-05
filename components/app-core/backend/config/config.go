@@ -204,7 +204,7 @@ func LoadConfigFile(path string) error {
 		line = strings.TrimSpace(line)
 		if strings.Index(line, "#") != 0 {
 			// Not a comment
-			keyValue := strings.Split(line, "=")
+			keyValue := strings.SplitN(line, "=",2)
 			if len(keyValue) == 2 {
 				loadedConfig[keyValue[0]] = keyValue[1]
 			}
