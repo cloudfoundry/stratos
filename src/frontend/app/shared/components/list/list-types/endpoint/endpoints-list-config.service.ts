@@ -1,7 +1,7 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf, Observable } from 'rxjs';
 
-import {pairwise} from 'rxjs/operators';
+import { pairwise, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -25,6 +25,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -105,8 +106,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    createVisible: (row: EndpointModel) => observableOf(row.connectionStatus === 'connected'),
-    createEnabled: (row: EndpointModel) => observableOf(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'connected'))
   };
 
   private listActionConnect: IListAction<EndpointModel> = {
@@ -122,8 +122,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Connect',
     description: '',
-    createVisible: (row: EndpointModel) => observableOf(row.connectionStatus === 'disconnected'),
-    createEnabled: (row: EndpointModel) => observableOf(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
   };
 
   private singleActions = [

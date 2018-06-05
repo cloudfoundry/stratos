@@ -19,9 +19,10 @@ export interface SessionUser {
   scopes: ScopeStrings[];
 }
 export interface SessionEndpoints {
-  [type: string]: {
-    [guid: string]: SessionDataEndpoint
-  };
+  [type: string]: SessionEndpoint;
+}
+export interface SessionEndpoint {
+  [guid: string]: SessionDataEndpoint;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;
