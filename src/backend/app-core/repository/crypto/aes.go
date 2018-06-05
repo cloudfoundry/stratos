@@ -72,7 +72,7 @@ func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 
 // ReadEncryptionKey - Read the encryption key from the shared volume
 func ReadEncryptionKey(v, f string) ([]byte, error) {
-	log.Println("ReadEncryptionKey")
+	log.Debug("ReadEncryptionKey")
 
 	encryptionKey := fmt.Sprintf("/%s/%s", v, f)
 	if string(f[0]) == "/" {
