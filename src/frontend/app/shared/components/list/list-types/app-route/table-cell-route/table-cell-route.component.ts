@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 import { getRoute, isTCPRoute } from '../../../../../../features/applications/routes/routes.helper';
 import { AppState } from '../../../../../../store/app-state';

@@ -15,7 +15,7 @@ describe('TableCellEventTypeComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TableCellEventTypeComponent);
+    fixture = TestBed.createComponent<TableCellEventTypeComponent<EntityInfo>>(TableCellEventTypeComponent);
     component = fixture.componentInstance;
     component.row = {
       entity: {

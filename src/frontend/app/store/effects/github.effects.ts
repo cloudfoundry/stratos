@@ -1,3 +1,5 @@
+
+import {catchError, mergeMap} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -18,8 +20,8 @@ export class GithubEffects {
   ) { }
   @Effect()
   fetchCommit$ = this.actions$
-    .ofType<FetchGitHubRepoInfo>(FETCH_GITHUB_REPO)
-    .flatMap(action => {
+    .ofType<FetchGitHubRepoInfo>(FETCH_GITHUB_REPO).pipe(
+    mergeMap(action => {
       const actionType = 'fetch';
       const apiAction = {
         entityKey: githubRepoSchemaKey,
@@ -32,8 +34,8 @@ export class GithubEffects {
           `https://api.github.com/repos/${
           action.stProject.deploySource.project
           }`
-        )
-        .mergeMap(response => {
+        ).pipe(
+        mergeMap(response => {
           const repoDetails = response.json();
           const mappedData = {
             entities: { githubRepo: {} },
@@ -48,9 +50,9 @@ export class GithubEffects {
           return [
             new WrapperRequestActionSuccess(mappedData, apiAction, actionType)
           ];
-        })
-        .catch(err => [
+        }),
+        catchError(err => [
           new WrapperRequestActionFailed(err.message, apiAction, actionType)
-        ]);
-    });
+        ]), );
+    }));
 }

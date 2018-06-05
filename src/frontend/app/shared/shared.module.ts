@@ -36,6 +36,14 @@ import { CardCfUsageComponent } from './components/cards/card-cf-usage/card-cf-u
 import { CardCfUserInfoComponent } from './components/cards/card-cf-user-info/card-cf-user-info.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
 import { CardStatusComponent } from './components/cards/card-status/card-status.component';
+import {
+  CompactServiceInstanceCardComponent,
+} from './components/cards/compact-service-instance-card/compact-service-instance-card.component';
+import { ServiceBrokerCardComponent } from './components/cards/service-broker-card/service-broker-card.component';
+import {
+  ServiceRecentInstancesCardComponent,
+} from './components/cards/service-recent-instances-card/service-recent-instances-card.component';
+import { ServiceSummaryCardComponent } from './components/cards/service-summary-card/service-summary-card.component';
 import { CfAuthModule } from './components/cf-auth/cf-auth.module';
 import { CfRoleCheckboxComponent } from './components/cf-role-checkbox/cf-role-checkbox.component';
 import { AppChipsComponent } from './components/chips/chips.component';
@@ -100,6 +108,7 @@ import { UserProfileBannerComponent } from './components/user-profile-banner/use
 import { CfOrgSpaceDataService } from './data-services/cf-org-space-service.service';
 import { CfUserService } from './data-services/cf-user.service';
 import { CloudFoundryService } from './data-services/cloud-foundry.service';
+import { ServiceActionHelperService } from './data-services/service-action-helper.service';
 import { EntityMonitorFactory } from './monitors/entity-monitor.factory.service';
 import { InternalEventMonitorFactory } from './monitors/internal-event-monitor.factory';
 import { PaginationMonitorFactory } from './monitors/pagination-monitor.factory';
@@ -109,7 +118,13 @@ import { UptimePipe } from './pipes/uptime.pipe';
 import { UsageBytesPipe } from './pipes/usage-bytes.pipe';
 import { ValuesPipe } from './pipes/values.pipe';
 import { UserPermissionDirective } from './user-permission.directive';
-import { ServiceActionHelperService } from './data-services/service-action-helper.service';
+import { SpecifyDetailsStepComponent } from './components/add-service-instance/specify-details-step/specify-details-step.component';
+import { NoServicePlansComponent } from './components/add-service-instance/no-service-plans/no-service-plans.component';
+import { AddServiceInstanceComponent } from './components/add-service-instance/add-service-instance/add-service-instance.component';
+import { SelectPlanStepComponent } from './components/add-service-instance/select-plan-step/select-plan-step.component';
+import { SelectServiceComponent } from './components/add-service-instance/select-service/select-service.component';
+import { CreateApplicationStep1Component } from './components/create-application/create-application-step1/create-application-step1.component';
+import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
 
 @NgModule({
   imports: [
@@ -199,7 +214,19 @@ import { ServiceActionHelperService } from './data-services/service-action-helpe
     AppActionMonitorIconComponent,
     UserProfileBannerComponent,
     TableCellRequestMonitorIconComponent,
-    UserPermissionDirective
+    UserPermissionDirective,
+    ServiceSummaryCardComponent,
+    ServiceBrokerCardComponent,
+    ServiceRecentInstancesCardComponent,
+    CompactServiceInstanceCardComponent,
+    SpecifyDetailsStepComponent,
+    AddServiceInstanceComponent,
+    SelectPlanStepComponent,
+    SelectServiceComponent,
+    NoServicePlansComponent,
+    CreateApplicationStep1Component,
+    BindAppsStepComponent
+
   ],
   exports: [
     FormsModule,
@@ -272,13 +299,26 @@ import { ServiceActionHelperService } from './data-services/service-action-helpe
     AppActionMonitorComponent,
     CliCommandComponent,
     AppActionMonitorIconComponent,
+    UserPermissionDirective,
+    BooleanIndicatorComponent,
+    ServiceSummaryCardComponent,
+    ServiceBrokerCardComponent,
+    ServiceRecentInstancesCardComponent,
+    CompactServiceInstanceCardComponent,
     TableComponent,
-    UserPermissionDirective
+    UserPermissionDirective,
+    SpecifyDetailsStepComponent,
+    AddServiceInstanceComponent,
+    SelectPlanStepComponent,
+    SelectServiceComponent,
+    CreateApplicationStep1Component,
+    BindAppsStepComponent
   ],
   entryComponents: [
     AppEventDetailDialogComponentComponent,
     DialogConfirmComponent,
-    EnvVarViewComponent
+    EnvVarViewComponent,
+    NoServicePlansComponent
   ],
   providers: [
     ListConfig,

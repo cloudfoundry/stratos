@@ -1,3 +1,5 @@
+
+import {take, map} from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
@@ -13,11 +15,11 @@ export class ActionHistoryEffect {
     private store: Store<AppState>,
   ) { }
 
-  @Effect({ dispatch: false }) dumpActionHistory$ = this.actions$.ofType<ActionHistoryDump>(ActionHistoryActions.DUMP)
-    .map(() => {
-      this.store.select('actionHistory')
-        .take(1)
+  @Effect({ dispatch: false }) dumpActionHistory$ = this.actions$.ofType<ActionHistoryDump>(ActionHistoryActions.DUMP).pipe(
+    map(() => {
+      this.store.select('actionHistory').pipe(
+        take(1))
         .subscribe();
-    });
+    }));
 }
 

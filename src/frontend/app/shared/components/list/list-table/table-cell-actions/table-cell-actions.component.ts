@@ -1,14 +1,14 @@
+
+import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
 import { Component, Input } from '@angular/core';
 import { OnInit } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -59,8 +59,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
       enabled: {}
     };
     this.actions.forEach(action => {
-      this.obs.visible[action.label] = action.createVisible ? action.createVisible(row) : Observable.of(true);
-      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(row) : Observable.of(true);
+      this.obs.visible[action.label] = action.createVisible ? action.createVisible(row) : observableOf(true);
+      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(row) : observableOf(true);
     });
 
     this.show$ = combineLatest(Object.values(this.obs.visible)).pipe(

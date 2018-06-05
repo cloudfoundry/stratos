@@ -1,6 +1,6 @@
 <div class="app-table">
   <div class="app-table__loading" *ngIf="dataSource.isTableLoading$">
-    <mat-progress-bar color="primary" *ngIf="dataSource.isTableLoading$ | async" [mode]="'query'"></mat-progress-bar>
+    <mat-progress-bar color="primary" *ngIf="dataSource.isTableLoading$ | async" mode="indeterminate"></mat-progress-bar>
   </div>
   <mat-card class="app-table__card">
     <mat-card-content class="app-table__content">
@@ -21,7 +21,7 @@
           </mat-cell>
         </ng-container>
         <mat-header-row [hidden]="hideTable" class="app-table__header-row" *matHeaderRowDef="columnNames"></mat-header-row>
-        <app-table-row [ngClass]="{'app-table__inner--fixed-row-height': fixedRowHeight}" class=" app-table__row" *matRowDef="let row; columns: columnNames;" [rowState]="getRowState(row)"></app-table-row>
+        <app-table-row [ngClass]="{'app-table__inner--fixed-row-height': fixedRowHeight}" class="app-table__row" *matRowDef="let row; columns: columnNames;" [rowState]="getRowState(row)"></app-table-row>
       </mat-table>
     </mat-card-content>
   </mat-card>
