@@ -133,14 +133,8 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
-
-    /**
-     * If only one binding exists, carry out the action otherwise
-     * take user to a form to select which app binding they want to remove
-    **/
-    const serviceBindingGuid = serviceInstance.entity.service_bindings[0].metadata.guid;
     this.serviceActionHelperService.detachServiceBinding(
-      serviceBindingGuid,
+      serviceInstance.entity.service_bindings,
       serviceInstance.metadata.guid,
       serviceInstance.entity.cfGuid
     );

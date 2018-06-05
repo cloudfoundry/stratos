@@ -39,6 +39,7 @@ export class DeleteServiceBinding extends CFStartAction implements ICFAction {
     this.options.method = 'delete';
     this.options.params = new URLSearchParams();
     this.options.params.set('async', 'false');
+    // Note: serviceInstanceGuid is used by the reducer to update the relevant serviceInstanceGuid, its not required for the action itself.
 
   }
   actions = [

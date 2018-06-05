@@ -37,7 +37,6 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       {
         label: 'Detach',
         action: this.detach,
-        disabled: this.hasMultipleBindings
       },
       {
         label: 'Delete',
@@ -54,14 +53,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     }));
 
     this.cfGuid = this.row.entity.cfGuid;
-    this.hasMultipleBindings.next(!(this.row.entity.service_bindings.length > 0));
-
   }
 
 
   detach = () => {
-    const serviceBindingGuid = this.row.entity.service_bindings[0].metadata.guid;
-    this.serviceActionHelperService.detachServiceBinding(serviceBindingGuid, this.row.metadata.guid, this.row.entity.cfGuid);
+    this.serviceActionHelperService.detachServiceBinding(this.row.entity.service_bindings, this.row.metadata.guid, this.row.entity.cfGuid);
   }
 
 

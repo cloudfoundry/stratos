@@ -127,7 +127,7 @@ export class AppServiceBindingCardComponent extends CardCell<APIResource<IServic
 
   detach = () => {
     this.serviceActionHelperService.detachServiceBinding(
-      this.row.metadata.guid,
+      [this.row],
       this.row.entity.service_instance_guid,
       this.appService.cfGuid
     );
