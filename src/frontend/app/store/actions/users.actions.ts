@@ -6,12 +6,14 @@ import {
   EntitySchema,
   organizationSchemaKey,
   spaceSchemaKey,
+  endpointSchemaKey,
 } from '../helpers/entity-factory';
-import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations.types';
+import { createEntityRelationKey, EntityInlineParentAction, createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
 import { PaginatedAction } from '../types/pagination.types';
 import { CFStartAction, IRequestAction } from '../types/request.types';
 import { getActions } from './action.helper';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+import { Action } from '@ngrx/store';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -37,6 +39,20 @@ const defaultUserRelations = [
 export const GET_CF_USER = '[Users] Get cf user ';
 export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
 export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
+
+export const GET_CF_USERS_BY_ORG = '[Users] Get cf users by org ';
+
+export class GetAllUsersByOrg implements Action {
+  type = GET_CF_USERS_BY_ORG;
+  paginationKey: string;
+  constructor(
+    public cfGuid: string,
+    public includeRelations: string[] = defaultUserRelations,
+    public populateMissing = true
+  ) {
+    this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+  }
+}
 
 export class GetAllUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(

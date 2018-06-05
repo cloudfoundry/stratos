@@ -14,7 +14,7 @@ import {
   isSpaceDeveloper,
   isSpaceManager,
 } from '../../features/cloud-foundry/cf.helpers';
-import { GetAllUsers, GetUser } from '../../store/actions/users.actions';
+import { GetAllUsers, GetUser, GetAllUsersByOrg } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
 import { cfUserSchemaKey, endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
@@ -46,6 +46,8 @@ export class CfUserService {
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private entityServiceFactory: EntityServiceFactory,
   ) {
+
+    store.dispatch(new GetAllUsersByOrg(activeRouteCfOrgSpace.cfGuid));
   }
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
