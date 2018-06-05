@@ -1,9 +1,10 @@
+
+import {of as observableOf, combineLatest as observableCombineLatest,  Observable } from 'rxjs';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { filter, map, mergeMap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
 
 import { IDomain } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -53,19 +54,19 @@ export class CreateApplicationStep3Component implements OnInit {
     const { cloudFoundryDetails, name } = this.newAppData;
 
     const { cloudFoundry } = cloudFoundryDetails;
-    return Observable.combineLatest(
+    return observableCombineLatest(
       this.createApp(),
       this.createRoute()
-    )
-      .filter(([app, route]) => {
+    ).pipe(
+      filter(([app, route]) => {
         return !app.creating && !route.creating;
-      })
-      .map(([app, route]) => {
+      }),
+      map(([app, route]) => {
         if (app.error || route.error) {
           throw new Error(app.error ? 'Could not create application' : 'Could not create route');
         }
         // Did we create a route?
-        const createdRoute = route !== 'NO_ROUTE';
+        const createdRoute = route !== null;
         if (createdRoute) {
           // Then assign it to the application
           this.store.dispatch(new AssociateRouteWithAppApplication(
@@ -77,7 +78,7 @@ export class CreateApplicationStep3Component implements OnInit {
         this.store.dispatch(createGetApplicationAction(app.response.result[0], cloudFoundry));
         this.store.dispatch(new RouterNav({ path: ['applications', cloudFoundry, app.response.result[0], 'summary'] }));
         return { success: true };
-      });
+      }), );
   }
 
   validate(): boolean {
@@ -100,7 +101,7 @@ export class CreateApplicationStep3Component implements OnInit {
     return this.store.select(selectRequestInfo(applicationSchemaKey, newAppGuid));
   }
 
-  createRoute(): Observable<RequestInfoState> | Observable<string> {
+  createRoute(): Observable<RequestInfoState> {
     const { cloudFoundryDetails, name } = this.newAppData;
 
     const { cloudFoundry, org, space } = cloudFoundryDetails;
@@ -119,7 +120,7 @@ export class CreateApplicationStep3Component implements OnInit {
         }
       ));
     }
-    return shouldCreate ? this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)) : Observable.of('NO_ROUTE');
+    return shouldCreate ? this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)) : observableOf(null);
   }
 
   ngOnInit() {

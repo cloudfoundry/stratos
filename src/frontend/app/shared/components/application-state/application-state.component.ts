@@ -1,8 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { CardStatus, ApplicationStateData } from './application-state.service';
-import { Observable } from 'rxjs/Observable';
-import { map, tap } from 'rxjs/operators';
-import { startWith } from 'rxjs/operators/startWith';
+import { Observable } from 'rxjs';
+import { map, tap ,  startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-application-state',

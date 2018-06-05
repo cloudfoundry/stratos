@@ -6,7 +6,7 @@ import { ApplicationServiceMock } from '../../../../../../test-framework/applica
 
 import { CoreModule } from '../../../../../../core/core.module';
 import { SharedModule } from '../../../../../../shared/shared.module';
-import { combineAll } from 'rxjs/operators/combineAll';
+import { combineAll } from 'rxjs/operators';
 import { APIResource } from '../../../../../../store/types/api.types';
 
 describe('TableCellAppRouteComponent', () => {

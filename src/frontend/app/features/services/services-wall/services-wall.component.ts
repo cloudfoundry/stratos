@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable ,  Subscription } from 'rxjs';
 import { filter, first, map, tap } from 'rxjs/operators';
 
 import {
@@ -13,7 +13,6 @@ import { serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory
 import { createEntityRelationPaginationKey } from '../../../store/helpers/entity-relations.types';
 import { selectPaginationState } from '../../../store/selectors/pagination.selectors';
 import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/data-services/cf-org-space-service.service';
-import { Subscription } from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-services-wall',

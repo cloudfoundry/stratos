@@ -1,3 +1,5 @@
+
+import { of as observableOf, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { take, tap, map } from 'rxjs/operators';
@@ -18,7 +20,6 @@ import {
   TableCellRouteAppsAttachedComponent,
 } from './table-cell-route-apps-attached/table-cell-route-apps-attached.component';
 import { DatePipe } from '@angular/common';
-import { Observable } from 'rxjs/Observable';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 
@@ -136,7 +137,8 @@ export class CfSpaceRoutesListConfigService implements IListConfig<APIResource> 
         new UnmapRoute(
           route.metadata.guid,
           p,
-          this.dataSource.cfGuid
+          this.dataSource.cfGuid,
+          false// We don't want to just remove the entity, we want to clear entities of this type forcing all to refresh
         )
       )
     );

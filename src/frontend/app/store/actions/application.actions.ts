@@ -53,6 +53,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
   entity = [applicationEntitySchema];
   entityKey = applicationSchemaKey;
   options: RequestOptions;
+  endpointGuid: string = null;
   initialParams = {
     'order-direction': 'asc',
     'order-direction-field': GetAllApplications.sortField,
