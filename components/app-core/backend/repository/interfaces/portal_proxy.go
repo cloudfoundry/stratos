@@ -11,7 +11,7 @@ type PortalProxy interface {
 	GetHttpClient(skipSSLValidation bool) http.Client
 	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
 
-	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, fetchInfo InfoFunc) (CNSIRecord, error)
+	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, fetchInfo InfoFunc) (CNSIRecord, error)
 
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 

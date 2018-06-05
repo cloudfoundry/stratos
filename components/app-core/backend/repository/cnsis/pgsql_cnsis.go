@@ -27,8 +27,8 @@ var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_en
 						FROM cnsis
 						WHERE api_endpoint=$1`
 
-var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation)
-						VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret)
+						VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`
 
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
@@ -210,8 +210,12 @@ func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.
 // Save - Persist a CNSI Record to a datastore
 func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord) error {
 	log.Println("Save")
+	println(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
+		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
+		cnsi.ClientId, cnsi.ClientSecret)
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation); err != nil {
+		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
+			cnsi.ClientId, cnsi.ClientSecret); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
 

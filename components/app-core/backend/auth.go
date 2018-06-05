@@ -215,7 +215,7 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
-	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.ClientId, "", tokenEndpoint)
+	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
