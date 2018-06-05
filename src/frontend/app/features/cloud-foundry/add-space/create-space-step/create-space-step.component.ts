@@ -1,9 +1,10 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { filter } from 'rxjs/operators';
 
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -62,7 +63,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
         'Failed to create space! Please select a different name and try again!'
       )
     ).subscribe();
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   ngOnDestroy() {

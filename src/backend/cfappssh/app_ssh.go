@@ -52,7 +52,7 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 	// Extract the Doppler endpoint from the CNSI record
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get endpoint information")
+		return sendSSHError("Could not get endpoint information")
 	}
 
 	// Make the info call to the SSH endpoint info
@@ -61,17 +61,17 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 
 	cfPlugin, err := p.GetEndpointTypeSpec("cf")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Can not get Cloud Foundry endpoint plugin")
+		return sendSSHError("Can not get Cloud Foundry endpoint plugin")
 	}
 
 	_, info, err := cfPlugin.Info(apiEndpoint.String(), cnsiRecord.SkipSSLValidation)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Can not get Cloud Foundry info")
+		return sendSSHError("Can not get Cloud Foundry info")
 	}
 
 	cfInfo, found := info.(interfaces.V2Info)
 	if !found {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Can not get Cloud Foundry info")
+		return sendSSHError("Can not get Cloud Foundry info")
 	}
 
 	appGUID := c.Param("appGuid")
@@ -88,19 +88,19 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 
 	clientID, err := p.GetClientId("cf")
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Could not get client ID forCloud Foundry")
+		return sendSSHError("Could not get client ID forCloud Foundry")
 	}
 
 	// Need to get SSH Code
 	// Refresh token first - makes sure it will be valid when we make the request to get the code
 	refreshedTokenRec, err := p.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userGUID, clientID, "", cnsiRecord.TokenEndpoint)
 	if err != nil {
-		return fmt.Errorf("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
+		return sendSSHError("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
 	}
 
-	code, err := getSSHCode(cnsiRecord.AuthorizationEndpoint, cfInfo.AppSSHOauthCLient, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
+	code, err := getSSHCode(cnsiRecord.TokenEndpoint, cfInfo.AppSSHOauthCLient, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
 	if err != nil {
-		return fmt.Errorf("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
+		return sendSSHError("Couldn't get SSH Code: %s", err)
 	}
 
 	sshConfig := &ssh.ClientConfig{
@@ -183,6 +183,15 @@ func (cfAppSsh *CFAppSsh) appSSH(c echo.Context) error {
 	return nil
 }
 
+func sendSSHError(format string, a ...interface{}) error {
+	if len(a) == 0 {
+		log.Error("App SSH Error: " + format)
+	} else {
+		log.Errorf("App SSH Error: "+format, a)
+	}
+	return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf(format, a))
+}
+
 func sshHostKeyChecker(fingerprint string) ssh.HostKeyCallback {
 	return func(hostname string, remote net.Addr, key ssh.PublicKey) error {
 		if fingerprint == ssh.FingerprintLegacyMD5(key) {
@@ -250,7 +259,7 @@ func getSSHCode(authorizeEndpoint, clientID, token string, skipSSLValidation boo
 	values.Set("grant_type", "authorization_code")
 	values.Set("client_id", clientID)
 
-	authorizeURL.Path = "/oauth/authorize"
+	authorizeURL.Path += "/oauth/authorize"
 	authorizeURL.RawQuery = values.Encode()
 
 	authorizeReq, err := http.NewRequest("GET", authorizeURL.String(), nil)

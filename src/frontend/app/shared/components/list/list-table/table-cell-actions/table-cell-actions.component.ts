@@ -1,15 +1,14 @@
+
+import { of as observableOf, Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { Component, Input } from '@angular/core';
 import { OnInit } from '@angular/core/src/metadata/lifecycle_hooks';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { map } from 'rxjs/operators';
 
 import { AppState } from '../../../../../store/app-state';
 import { RowState } from '../../data-sources-controllers/list-data-source-types';
 import { IListAction, ListConfig } from '../../list.component.types';
 import { TableCellCustom } from '../../list.types';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Component({
   selector: 'app-table-cell-actions',
@@ -65,8 +64,8 @@ export class TableCellActionsComponent<T> extends TableCellCustom<T> implements 
     this.subjects.push(subject);
 
     this.actions.forEach(action => {
-      this.obs.visible[action.label] = action.createVisible ? action.createVisible(subject) : Observable.of(true);
-      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(subject) : Observable.of(true);
+      this.obs.visible[action.label] = action.createVisible ? action.createVisible(subject) : observableOf(true);
+      this.obs.enabled[action.label] = action.createEnabled ? action.createEnabled(subject) : observableOf(true);
     });
 
     this.show$ = combineLatest(Object.values(this.obs.visible)).pipe(

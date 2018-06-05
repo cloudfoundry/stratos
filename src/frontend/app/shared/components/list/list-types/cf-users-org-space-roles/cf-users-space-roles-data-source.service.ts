@@ -21,7 +21,7 @@ import { IListConfig } from '../../list.component.types';
 import { getRowMetadata } from '../../../../../features/cloud-foundry/cf.helpers';
 import { GetAllOrganizationSpaces } from '../../../../../store/actions/organization.actions';
 import { PaginationEntityState } from '../../../../../store/types/pagination.types';
-import { OperatorFunction } from 'rxjs/interfaces';
+import { OperatorFunction } from 'rxjs';
 
 export class CfUsersSpaceRolesDataSourceService extends ListDataSource<APIResource> {
   constructor(cfGuid: string, orgGuid: string, spaceGuid: string, store: Store<AppState>, listConfig?: IListConfig<APIResource>) {

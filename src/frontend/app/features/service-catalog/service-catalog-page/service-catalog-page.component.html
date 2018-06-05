@@ -1,5 +1,5 @@
 <app-page-header [endpointIds$]="cfIds$">
-  <h1>Service Catalog</h1>
+  <h1>Services Marketplace</h1>
 </app-page-header>
 <app-endpoints-missing [showToolbarHint]="false" [showSnackForNoneConnected]="false"></app-endpoints-missing>
 <app-list *ngIf="!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)"></app-list>

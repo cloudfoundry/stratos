@@ -3875,10 +3875,124 @@ const testInitialStoreState: AppState = {
   },
   requestData: {
     servicePlanVisibility: {},
-    serviceBroker: {},
-    serviceInstance: {},
-    servicePlan: {},
-    service: {},
+    serviceBroker: {
+      'a55f1a04-e3a3-4a89-92ee-94e3f96103f3': {
+        entity: {
+          name: 'app-autoscaler',
+          broker_url: 'https://app-autoscaler-broker.cf-dev.io',
+          auth_username: 'admin',
+          space_guid: null,
+          guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+          cfGuid: '7d5e510b-8396-4db0-a91c-6abdc390c9d1'
+        },
+        metadata: {
+          guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+          url: '/v2/service_brokers/a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+          created_at: '2017-11-27T17:07:02Z',
+          updated_at: '2017-11-27T17:07:02Z'
+        }
+      },
+    },
+    serviceInstance: {
+      '250d8795-d49e-4669-acd5-b5cf94f97c7b': {
+        entity: {
+          name: 'Ntahtntest',
+          credentials: {},
+          service_plan_guid: '35f97198-390b-4d88-be93-dc917794b12d',
+          space_guid: 'fa4b5a9e-8324-48d9-9de5-491892ec1cb8',
+          gateway_data: null,
+          dashboard_url: 'https://cf-dev.io/manage/instances/250d8795-d49e-4669-acd5-b5cf94f97c7b',
+          type: 'managed_service_instance',
+          last_operation: {
+            type: 'create',
+            state: 'succeeded',
+            description: '',
+            updated_at: '2018-05-22T14:53:29Z',
+            created_at: '2018-05-22T14:53:29Z'
+          },
+          tags: [
+            'sd',
+            'asd',
+            'asf'
+          ],
+          service_guid: 'd10101a2-6faf-4468-a9db-1d65eb334fab',
+          space_url: '/v2/spaces/fa4b5a9e-8324-48d9-9de5-491892ec1cb8',
+          service_plan_url: '/v2/service_plans/35f97198-390b-4d88-be93-dc917794b12d',
+          service_bindings_url: '/v2/service_instances/250d8795-d49e-4669-acd5-b5cf94f97c7b/service_bindings',
+          service_keys_url: '/v2/service_instances/250d8795-d49e-4669-acd5-b5cf94f97c7b/service_keys',
+          routes_url: '/v2/service_instances/250d8795-d49e-4669-acd5-b5cf94f97c7b/routes',
+          service_url: '/v2/services/d10101a2-6faf-4468-a9db-1d65eb334fab',
+          guid: '250d8795-d49e-4669-acd5-b5cf94f97c7b',
+          cfGuid: '7d5e510b-8396-4db0-a91c-6abdc390c9d1'
+        },
+        metadata: {
+          guid: '250d8795-d49e-4669-acd5-b5cf94f97c7b',
+          url: '/v2/service_instances/250d8795-d49e-4669-acd5-b5cf94f97c7b',
+          created_at: '2018-05-22T14:53:29Z',
+          updated_at: '2018-05-22T14:53:29Z'
+        }
+      }
+    },
+    servicePlan: {
+      '00da4974-5037-485a-96f0-cbbbf98dc8e9': {
+        entity: {
+          name: 'shared',
+          free: true,
+          description: 'Shared service for public-service',
+          service_guid: '977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+          extra: null,
+          unique_id: '31f1eddd-af72-44bd-98d5-7ad8915c5852-plan-shared',
+          'public': true,
+          bindable: true,
+          active: true,
+          service_url: '/v2/services/977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+          service_instances_url: '/v2/service_plans/00da4974-5037-485a-96f0-cbbbf98dc8e9/service_instances',
+          guid: '00da4974-5037-485a-96f0-cbbbf98dc8e9',
+          cfGuid: '293a18c7-1504-410f-b59d-9536a5098d66'
+        },
+        metadata: {
+          guid: '00da4974-5037-485a-96f0-cbbbf98dc8e9',
+          url: '/v2/service_plans/00da4974-5037-485a-96f0-cbbbf98dc8e9',
+          created_at: '2018-05-04T15:58:44Z',
+          updated_at: '2018-05-04T15:58:45Z'
+        }
+      }
+    },
+    service: {
+      '977b0c26-9f39-46be-93f8-c33c0b37dcb0': {
+        entity: {
+          label: 'public-service',
+          provider: null,
+          url: null,
+          description: 'Shared service for public-service',
+          long_description: null,
+          version: null,
+          info_url: null,
+          active: true,
+          bindable: true,
+          unique_id: '31f1eddd-af72-44bd-98d5-7ad8915c5852-service-public-service',
+          extra: '{"displayName":"public-service","imageUrl":"","longDescription":"","providerDisplayName":"","documentationUrl":"","supportUrl":""}',
+          tags: [
+            'simple',
+            'shared'
+          ],
+          requires: [],
+          documentation_url: null,
+          service_broker_guid: '57eddf09-8b4a-484e-9a41-c006d219a57c',
+          plan_updateable: false,
+          service_plans_url: '/v2/services/977b0c26-9f39-46be-93f8-c33c0b37dcb0/service_plans',
+          service_plans: [],
+          guid: '977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+          cfGuid: '293a18c7-1504-410f-b59d-9536a5098d66'
+        },
+        metadata: {
+          guid: '977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+          url: '/v2/services/977b0c26-9f39-46be-93f8-c33c0b37dcb0',
+          created_at: '2018-05-04T15:58:44Z',
+          updated_at: '2018-05-04T15:58:44Z'
+        }
+      },
+    },
     serviceBinding: {},
     securityGroup: {},
     featureFlag: {},

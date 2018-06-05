@@ -84,7 +84,7 @@ export class GetServiceInstances
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'order-direction': 'desc',
+    'order-direction': 'asc',
     'order-direction-field': 'creation',
   };
   flattenPagination = true;

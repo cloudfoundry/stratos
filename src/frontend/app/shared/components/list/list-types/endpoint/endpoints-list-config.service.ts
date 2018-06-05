@@ -1,3 +1,7 @@
+
+import { of as observableOf, Observable } from 'rxjs';
+
+import { pairwise, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -21,8 +25,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { Observable } from 'rxjs/Observable';
-import { map } from 'rxjs/operators';
+
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -157,8 +160,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   }
 
   private handleAction(storeSelect, handleChange) {
-    const disSub = this.store.select(storeSelect)
-      .pairwise()
+    const disSub = this.store.select(storeSelect).pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {

@@ -1,11 +1,11 @@
+
+import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { filter, map, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../core/cf-api.types';
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
@@ -93,7 +93,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
         }
       })
     ).subscribe();
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   displaySnackBar = () => this.snackBar.open(

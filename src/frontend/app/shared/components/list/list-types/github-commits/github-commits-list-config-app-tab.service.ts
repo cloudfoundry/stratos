@@ -1,3 +1,5 @@
+
+import { of as observableOf, Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -23,7 +25,6 @@ import { GithubCommit } from '../../../../../store/types/github.types';
 import { IListAction } from '../../list.component.types';
 import { GithubCommitsDataSource } from './github-commits-data-source';
 import { GithubCommitsListConfigServiceBase } from './github-commits-list-config-base.service';
-import { Observable } from 'rxjs/Observable';
 
 @Injectable()
 export class GithubCommitsListConfigServiceAppTab extends GithubCommitsListConfigServiceBase {

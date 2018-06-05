@@ -3,7 +3,7 @@ import { EntityMonitorFactory } from '../../monitors/entity-monitor.factory.serv
 import { rootUpdatingKey, RequestInfoState, ActionState } from '../../../store/reducers/api-request-reducer/types';
 import { schema } from 'normalizr';
 import { EntityMonitor } from '../../monitors/entity-monitor';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map, pairwise, distinctUntilChanged, startWith, withLatestFrom, tap } from 'rxjs/operators';
 
 export enum AppMonitorComponentTypes {

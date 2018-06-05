@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store, Action } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { Action, Store } from '@ngrx/store';
+import { Observable, combineLatest } from 'rxjs';
 import { map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
-
 import {
-  createCfFeatureFlagFetchAction,
+  createCfFeatureFlagFetchAction
 } from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
 import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
 import {
@@ -15,14 +14,13 @@ import {
   GetCurrentUserRelationsComplete,
   GetCurrentUsersRelations,
   GetUserRelations,
-  UserRelationTypes,
+  UserRelationTypes
 } from '../actions/permissions.actions';
 import { AppState } from '../app-state';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { APIResource } from '../types/api.types';
-import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
-import { APISuccessOrFailedAction } from '../types/request.types';
-import { Observable } from 'rxjs/Observable';
+import { INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+
 
 interface IEndpointConnectionInfo {
   guid: string;

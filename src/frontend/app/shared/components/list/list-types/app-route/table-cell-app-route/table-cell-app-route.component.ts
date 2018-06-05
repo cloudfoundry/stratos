@@ -18,11 +18,10 @@ export class TableCellAppRouteComponent<T> extends TableCellCustom<T>
     super();
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     const apps = this.row.entity.apps;
     this.mappedAppsCount = this.row.entity.mappedAppsCount;
-    const foundApp =
-      apps && apps.find(a => a.metadata.guid === this.appService.appGuid);
+    const foundApp = apps && apps.find(a => a.metadata.guid === this.appService.appGuid);
     if (foundApp && foundApp.length !== 0) {
       this.mappedAppsCount = `Already attached`;
     }

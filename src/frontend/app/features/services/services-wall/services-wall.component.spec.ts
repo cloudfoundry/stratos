@@ -17,7 +17,7 @@ describe('ServicesWallComponent', () => {
       ],
       providers: [
         CloudFoundryService,
-        CfOrgSpaceDataService,
+        CfOrgSpaceDataService
       ]
     })
       .compileComponents();

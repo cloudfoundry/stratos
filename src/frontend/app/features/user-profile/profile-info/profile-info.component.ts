@@ -5,7 +5,7 @@ import { filter, map, first } from 'rxjs/operators';
 import { SessionData } from '../../../store/types/auth.types';
 import { AuthState } from '../../../store/reducers/auth.reducer';
 import { FetchUserProfileAction } from '../../../store/actions/user-profile.actions';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { UserProfileInfo } from '../../../store/types/user-profile.types';
 import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
 import { entityFactory, userProfileSchemaKey } from '../../../store/helpers/entity-factory';
