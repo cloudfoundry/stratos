@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS cnsis (
   token_endpoint            VARCHAR(255)  NOT NULL,
   doppler_logging_endpoint  VARCHAR(255)  NOT NULL,
   skip_ssl_validation       BOOLEAN       NOT NULL DEFAULT FALSE,
+  client_id                 VARCHAR(255)  NOT NULL DEFAULT 'cf',
+  client_secret             VARCHAR(255)  NOT NULL DEFAULT '',
   last_updated              TIMESTAMP DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

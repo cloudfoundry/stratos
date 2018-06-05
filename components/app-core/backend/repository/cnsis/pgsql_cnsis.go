@@ -12,18 +12,18 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+var listCNSIs = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret
 							FROM cnsis`
 
 var listCNSIsByUser = `SELECT c.guid, c.name, c.cnsi_type, c.api_endpoint, t.user_guid, t.token_expiry, c.skip_ssl_validation, t.disconnected
 										FROM cnsis c, tokens t
 										WHERE c.guid = t.cnsi_guid AND t.token_type=$1 AND t.user_guid=$2 AND t.disconnected = '0'`
 
-var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+var findCNSI = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret
 						FROM cnsis
 						WHERE guid=$1`
 
-var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation
+var findCNSIByAPIEndpoint = `SELECT guid, name, cnsi_type, api_endpoint, auth_endpoint, token_endpoint, doppler_logging_endpoint, skip_ssl_validation, client_id, client_secret
 						FROM cnsis
 						WHERE api_endpoint=$1`
 
@@ -75,7 +75,7 @@ func (p *PostgresCNSIRepository) List() ([]*interfaces.CNSIRecord, error) {
 
 		cnsi := new(interfaces.CNSIRecord)
 
-		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
+		err := rows.Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL, &cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cnsi.ClientSecret)
 		if err != nil {
 			return nil, fmt.Errorf("Unable to scan CNSI records: %v", err)
 		}
@@ -152,7 +152,7 @@ func (p *PostgresCNSIRepository) Find(guid string) (interfaces.CNSIRecord, error
 	cnsi := new(interfaces.CNSIRecord)
 
 	err := p.db.QueryRow(findCNSI, guid).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
-		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cnsi.ClientSecret)
 
 	switch {
 	case err == sql.ErrNoRows:
@@ -185,7 +185,7 @@ func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.
 	cnsi := new(interfaces.CNSIRecord)
 
 	err := p.db.QueryRow(findCNSIByAPIEndpoint, endpoint).Scan(&cnsi.GUID, &cnsi.Name, &pCNSIType, &pURL,
-		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation)
+		&cnsi.AuthorizationEndpoint, &cnsi.TokenEndpoint, &cnsi.DopplerLoggingEndpoint, &cnsi.SkipSSLValidation, &cnsi.ClientId, &cnsi.ClientSecret)
 
 	switch {
 	case err == sql.ErrNoRows:

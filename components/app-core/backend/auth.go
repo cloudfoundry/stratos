@@ -215,15 +215,7 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
-	clientID, err := p.GetClientId(cnsiRecord.CNSIType)
-	if err != nil {
-		return nil, nil, nil, interfaces.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Endpoint type has not been registered",
-			"Endpoint type has not been registered %s: %s", cnsiRecord.CNSIType, err)
-	}
-
-	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, clientID, "", tokenEndpoint)
+	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.ClientId, "", tokenEndpoint)
 
 	if err != nil {
 		return nil, nil, nil, interfaces.NewHTTPShadowError(
@@ -233,14 +225,6 @@ func (p *portalProxy) fetchToken(cnsiGUID string, c echo.Context) (*UAAResponse,
 	}
 	return uaaRes, u, &cnsiRecord, nil
 
-}
-
-func (p *portalProxy) GetClientId(cnsiType string) (string, error) {
-	plugin, err := p.GetEndpointTypeSpec(cnsiType)
-	if err != nil {
-		return "", errors.New("Endpoint type not registered")
-	}
-	return plugin.GetClientId(), nil
 }
 
 func (p *portalProxy) logoutOfCNSI(c echo.Context) error {

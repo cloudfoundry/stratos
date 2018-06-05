@@ -34,8 +34,6 @@ type PortalProxy interface {
 	GetCNSIUser(cnsiGUID string, userGUID string) (*ConnectedUser, bool)
 	GetConfig() *PortalConfig
 
-	GetClientId(cnsiType string) (string, error)
-
 	// UAA Token
 	GetUAATokenRecord(userGUID string) (TokenRecord, error)
 	RefreshUAAToken(userGUID string) (TokenRecord, error)

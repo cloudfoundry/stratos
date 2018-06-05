@@ -9,7 +9,6 @@ import (
 
 	"errors"
 
-	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/repository/interfaces"
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
@@ -43,14 +42,6 @@ func (c *CloudFoundrySpecification) GetMiddlewarePlugin() (interfaces.Middleware
 
 func (c *CloudFoundrySpecification) GetType() string {
 	return EndpointType
-}
-
-func (c *CloudFoundrySpecification) GetClientId() string {
-	if clientId, err := config.GetValue(CLIENT_ID_KEY); err == nil {
-		return clientId
-	}
-
-	return "cf"
 }
 
 func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
