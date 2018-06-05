@@ -3,9 +3,8 @@ import { ITableColumn } from '../../../shared/components/list/list-table/table.t
 import { APIResource } from '../../../store/types/api.types';
 import { IServiceBinding, IService } from '../../../core/cf-api-svc.types';
 import { DatePipe } from '@angular/common';
-import { Observable } from 'rxjs/Observable';
+import {of as observableOf, Observable, ReplaySubject } from 'rxjs';
 import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { DeleteServiceBinding } from '../../../store/actions/service-bindings.actions';
@@ -93,7 +92,7 @@ export class DetachServiceInstanceComponent {
         this.serviceActionHelperService.detachServiceBinding([binding], binding.entity.service_instance_guid, this.cfGuid, true);
       });
     }
-    return Observable.of({success: true});
+    return observableOf({success: true});
   }
 
 }

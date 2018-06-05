@@ -3,9 +3,8 @@ import { DetachAppsListConfigService } from '../../../../shared/components/list/
 import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { IServiceBinding } from '../../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../store/types/api.types';
-import { Subscription } from 'rxjs/Subscription';
+import { of as observableOf, Subscription, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
 
 @Component({
   selector: 'app-detach-apps',
@@ -42,6 +41,6 @@ export class DetachAppsComponent implements OnDestroy {
     this.selectedSub.unsubscribe();
   }
 
-  onNext = () => Observable.of({ success: true });
+  onNext = () => observableOf({ success: true });
 
 }
