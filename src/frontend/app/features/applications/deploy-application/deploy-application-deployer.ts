@@ -1,11 +1,10 @@
+
+import {of as observableOf,  BehaviorSubject, Observable, Subscription, Subject } from 'rxjs';
+
+import {combineLatest,  catchError, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { Store } from '@ngrx/store';
-import { QueueingSubject } from 'queueing-subject/lib';
 import websocketConnect from 'rxjs-websockets';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { catchError, filter, first, map, mergeMap, share, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { environment } from '../../../../environments/environment';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
@@ -108,7 +107,7 @@ export class DeployApplicationDeployer {
       mergeMap(appDetails => {
         const orgSubscription = this.store.select(selectEntity(organizationSchemaKey, appDetails.cloudFoundryDetails.org));
         const spaceSubscription = this.store.select(selectEntity(spaceSchemaKey, appDetails.cloudFoundryDetails.space));
-        return Observable.of(appDetails).combineLatest(orgSubscription, spaceSubscription);
+        return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));
       }),
       first(),
       tap(([appDetail, org, space]) => {
@@ -122,7 +121,7 @@ export class DeployApplicationDeployer {
           `?org=${org.entity.name}&space=${space.entity.name}`
         );
 
-        this.inputStream = new QueueingSubject<string>();
+        this.inputStream = new Subject<string>();
         this.messages = websocketConnect(streamUrl, this.inputStream)
           .messages.pipe(
             catchError(e => {

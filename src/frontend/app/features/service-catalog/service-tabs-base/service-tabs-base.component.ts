@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable, Subscription } from 'rxjs';
 import { map, publishReplay, refCount } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IHeaderBreadcrumb } from '../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../shared/components/page-subheader/page-subheader.types';

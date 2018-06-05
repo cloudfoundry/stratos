@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap, tap } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import {
   IService,
@@ -12,39 +12,24 @@ import {
   IServicePlan,
   IServicePlanVisibility,
 } from '../../core/cf-api-svc.types';
-import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { pathGet } from '../../core/utils.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceBrokers } from '../../store/actions/service-broker.actions';
-import { GetServiceInstances } from '../../store/actions/service-instances.actions';
 import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
 import { GetService } from '../../store/actions/service.actions';
-import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   entityFactory,
-  organizationSchemaKey,
   serviceBrokerSchemaKey,
-  serviceInstancesSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
 } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  selectCreateServiceInstanceCfGuid,
-  selectCreateServiceInstanceServicePlan,
-} from '../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
-import { getServiceInstancesInCf } from './services-helper';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { getSvcAvailability } from './services-helper';
+import { getServiceInstancesInCf, getSvcAvailability } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -172,7 +157,7 @@ export class ServicesService {
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
-      return Observable.of({
+      return observableOf({
         isPublic: true,
         guid: servicePlan.metadata.guid
       });
@@ -188,7 +173,7 @@ export class ServicesService {
 
 
   getServiceName = () => {
-    return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
+    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
         map(([extraInfo, service]) => {
           if (extraInfo && extraInfo.displayName) {
@@ -200,7 +185,7 @@ export class ServicesService {
   }
 
   getServiceDescription = () => {
-    return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
+    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
         map(([extraInfo, service]) => {
           if (extraInfo && extraInfo.longDescription) {

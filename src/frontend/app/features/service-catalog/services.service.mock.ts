@@ -1,9 +1,9 @@
-import { Observable } from 'rxjs/Observable';
-import { getInitialTestStoreState } from '../../test-framework/store-test-helper';
+import { of as observableOf } from 'rxjs';
+
 
 export class ServicesServiceMock {
-  servicePlanVisibilities$ = Observable.of([]);
-  service$ = Observable.of(
+  servicePlanVisibilities$ = observableOf([]);
+  service$ = observableOf(
     {
       entity: {
         label: 'app-autoscaler',
@@ -40,7 +40,7 @@ export class ServicesServiceMock {
         updated_at: '2017-11-27T17:07:02Z'
       }
     });
-  servicePlans$ = Observable.of([{
+  servicePlans$ = observableOf([{
     entity: {
       name: 'shared',
       free: true,
@@ -65,8 +65,8 @@ export class ServicesServiceMock {
     }
   }]);
 
-  serviceInstances$ = Observable.of([]);
-  serviceBroker$ = Observable.of({
+  serviceInstances$ = observableOf([]);
+  serviceBroker$ = observableOf({
     entity: {
       name: 'app-autoscaler',
       broker_url: 'https://app-autoscaler-broker.cf-dev.io',
@@ -83,11 +83,11 @@ export class ServicesServiceMock {
     }
   });
   getVisibleServicePlans = () => this.servicePlans$;
-  getOrgsForSelectedServicePlan = () => Observable.of([]);
-  getSelectedServicePlanAccessibility = () => Observable.of({
+  getOrgsForSelectedServicePlan = () => observableOf([]);
+  getSelectedServicePlanAccessibility = () => observableOf({
     isPublic: true
   })
-  getServicePlanAccessibility = () => Observable.of({
+  getServicePlanAccessibility = () => observableOf({
     isPublic: true
   })
 

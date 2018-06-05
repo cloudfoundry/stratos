@@ -1,10 +1,7 @@
 import { Injectable, OnDestroy, Optional } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+import { BehaviorSubject, combineLatest, Observable, Subscription, of as observableOf } from 'rxjs';
 import { distinctUntilChanged, filter, first, map, startWith, switchMap, tap, withLatestFrom } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { GetAllOrganizations } from '../../store/actions/organization.actions';
@@ -86,9 +83,9 @@ export class CfOrgSpaceDataService implements OnDestroy {
       entityFactory(this.paginationAction.entityKey)
     )
   });
-  private allOrgsLoading$ = this.allOrgs.pagination$.map(
+  private allOrgsLoading$ = this.allOrgs.pagination$.pipe(map(
     pag => getCurrentPageRequestInfo(pag).busy
-  );
+  ));
 
   private getEndpointsAndOrgs$: Observable<any>;
   private selectMode = CfOrgSpaceSelectMode.FIRST_ONLY;
@@ -133,7 +130,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
     this.getEndpointsAndOrgs$ = this.cf.list$.pipe(
       switchMap(endpoints => {
         return combineLatest(
-          Observable.of(endpoints),
+          observableOf(endpoints),
           orgs
         );
       })
@@ -171,7 +168,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       switchMap(endpoints => {
         return combineLatest(
           this.cf.select.asObservable(),
-          Observable.of(endpoints),
+          observableOf(endpoints),
           this.allOrgs.entities$
         );
       }),
@@ -201,7 +198,7 @@ export class CfOrgSpaceDataService implements OnDestroy {
       switchMap(endpoints => {
         return combineLatest(
           this.org.select.asObservable(),
-          Observable.of(endpoints),
+          observableOf(endpoints),
           this.allOrgs.entities$
         );
       }),

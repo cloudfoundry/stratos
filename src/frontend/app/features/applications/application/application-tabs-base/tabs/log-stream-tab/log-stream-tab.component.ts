@@ -1,10 +1,12 @@
+
+import {never as observableNever,  Observable, Subject } from 'rxjs';
+
+import {filter, share, catchError} from 'rxjs/operators';
 import { Component, HostBinding, OnInit, ViewChild } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import * as moment from 'moment';
-import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
-import { Observable } from 'rxjs/Rx';
 
 import { LoggerService } from '../../../../../../core/logger.service';
 import { AnsiColorizer } from '../../../../../../shared/components/log-viewer/ansi-colorizer';
@@ -45,22 +47,22 @@ export class LogStreamTabComponent implements OnInit {
 
   ngOnInit() {
     if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
-      this.messages = Observable.never();
+      this.messages = observableNever();
     } else {
       const host = window.location.host;
       const streamUrl = `wss://${host}/pp/v1/${
         this.applicationService.cfGuid
         }/apps/${this.applicationService.appGuid}/stream`;
 
-      const { messages, connectionStatus } = websocketConnect(streamUrl, new QueueingSubject<string>());
-      messages.catch(e => {
+      const { messages, connectionStatus } = websocketConnect(streamUrl, new Subject<string>());
+      messages.pipe(catchError(e => {
         this.logService.error(
           'Error while connecting to socket: ' + JSON.stringify(e)
         );
         return [];
-      })
-        .share()
-        .filter(data => !!data && data.length);
+      }),
+        share(),
+        filter(data => !!data && data.length), );
 
       this.messages = messages;
       this.connectionStatus = connectionStatus;

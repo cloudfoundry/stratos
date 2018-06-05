@@ -1,6 +1,7 @@
+
+import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { AppState } from '../../store/app-state';
 import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
 import { userProfileSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
@@ -15,7 +16,6 @@ import { AuthState } from '../../store/reducers/auth.reducer';
 import { filter, map, first } from 'rxjs/operators';
 import { selectUpdateInfo } from '../../store/selectors/api.selectors';
 import { UpdateExistingApplication } from '../../store/actions/application.actions';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 
 @Injectable()
@@ -79,8 +79,8 @@ export class UserProfileService {
   updateProfile(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<[boolean, boolean]> {
     const didChangeProfile = !!(profileChanges.givenName || profileChanges.familyName || profileChanges.emailAddress);
     const didChangePassword = !!(profileChanges.newPassword && profileChanges.currentPassword);
-    const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : Observable.of(false);
-    const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : Observable.of(false);
+    const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(false);
+    const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(false);
     return combineLatest(
       profileObs$,
       passwordObs$

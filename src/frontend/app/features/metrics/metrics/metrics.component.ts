@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MetricsService, MetricsEndpointProvider } from '../services/metrics-service';
 
 import { getNameForEndpointType } from '../../endpoints/endpoint-helpers';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
 import { map, first } from 'rxjs/operators';

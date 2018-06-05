@@ -4,7 +4,9 @@
   $text-color: map-get($status-colors, text);
   $primary: map-get($theme, primary);
   $primary-color: mat-color($primary);
+  $foreground: map-get($theme, foreground);
   .table-row {
+    border-bottom-color: mat-color($foreground, divider);
     &__error {
       background-color: $error-color;
       color: $text-color;

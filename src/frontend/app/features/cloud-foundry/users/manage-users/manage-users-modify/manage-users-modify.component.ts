@@ -1,3 +1,7 @@
+
+import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
+
+import {catchError,  debounceTime, distinctUntilChanged, filter, first, map, share, startWith, switchMap, tap } from 'rxjs/operators';
 import {
   ChangeDetectorRef,
   Component,
@@ -10,9 +14,6 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { debounceTime, distinctUntilChanged, filter, first, map, share, startWith, switchMap, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IOrganization } from '../../../../../core/cf-api.types';
 import { ITableListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source-types';
@@ -201,9 +202,9 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
       map(() => {
         return { success: true };
       })
-    ).catch(err => {
-      return Observable.of({ success: false });
-    });
+    ).pipe(catchError(err => {
+      return observableOf({ success: false });
+    }));
   }
 
 }

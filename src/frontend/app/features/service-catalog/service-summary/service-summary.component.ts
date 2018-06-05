@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { ServicesService } from '../services.service';
-import { Observable } from 'rxjs/Observable';
-import { APIResource } from '../../../store/types/api.types';
+import { Observable } from 'rxjs';
+
 import { IServiceInstance, IServicePlan } from '../../../core/cf-api-svc.types';
-import { ActivatedRoute } from '@angular/router';
 import { RouterNav } from '../../../store/actions/router.actions';
-import { getIdFromRoute } from '../../cloud-foundry/cf.helpers';
+import { AppState } from '../../../store/app-state';
+import { APIResource } from '../../../store/types/api.types';
+import { ServicesService } from '../services.service';
 
 @Component({
   selector: 'app-service-summary',
