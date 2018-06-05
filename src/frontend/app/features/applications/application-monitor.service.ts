@@ -1,6 +1,8 @@
+
+import {share, map} from 'rxjs/operators';
 import { ApplicationService } from './application.service';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export class AppMonitorState {
 
@@ -69,7 +71,7 @@ export class ApplicationMonitorService {
     private applicationService: ApplicationService,
   ) {
     // Do we need share()? Or should this be on the app stats observable?
-    this.appMonitor$ = this.applicationService.appStats$.map(stats => {
+    this.appMonitor$ = this.applicationService.appStats$.pipe(map(stats => {
       const res = new AppMonitorState();
       if (!stats) {
         return res;
@@ -111,7 +113,7 @@ export class ApplicationMonitorService {
       res.status.instance = res.running === statsCount ? 'ok' : 'warning';
 
       return res;
-    }).share();
+    }), share(), );
   }
 
   roundFourPlaces(num: number): number {

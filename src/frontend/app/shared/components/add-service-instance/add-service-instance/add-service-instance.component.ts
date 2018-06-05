@@ -2,8 +2,8 @@ import { TitleCasePipe } from '@angular/common';
 import { Component, OnDestroy, AfterContentInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { filter, first, map, switchMap, take, tap } from 'rxjs/operators';
+import { Observable, of as observableOf } from 'rxjs';
+import { map, tap, take, filter, switchMap, first } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../core/cf-api.types';
@@ -14,11 +14,11 @@ import { servicesServiceFactoryProvider } from '../../../../features/service-cat
 import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { GetApplication } from '../../../../store/actions/application.actions';
 import {
-  ResetCreateServiceInstanceState,
   SetCreateServiceInstance,
   SetServiceInstanceGuid,
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
+  ResetCreateServiceInstanceState,
 } from '../../../../store/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../store/actions/space.actions';
@@ -96,7 +96,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.serviceInstancesUrl = `/services`;
-      this.title$ = Observable.of(`Create Service Instance`);
+      this.title$ = observableOf(`Create Service Instance`);
     }
 
     this.skipApps$ = this.store.select(selectCreateServiceInstance).pipe(
@@ -122,7 +122,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       this.cfOrgSpaceService.org.select.getValue(),
       this.cfOrgSpaceService.space.select.getValue()
     ));
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   private getIdsFromRoute() {
@@ -152,7 +152,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
         this.store.dispatch(
           new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid)
         );
-        this.title$ = Observable.of(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
+        this.title$ = observableOf(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
       }),
       take(1),
       map(o => false)
@@ -168,7 +168,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
       tap(serviceInstance => {
         const serviceInstanceEntity = serviceInstance.entity.entity;
         this.csiGuidsService.cfGuid = cfId;
-        this.title$ = Observable.of(`Edit Service Instance: ${serviceInstanceEntity.name}`);
+        this.title$ = observableOf(`Edit Service Instance: ${serviceInstanceEntity.name}`);
         const serviceGuid = serviceInstance.entity.entity.service_guid;
         this.csiGuidsService.serviceGuid = serviceGuid;
         this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceGuid);

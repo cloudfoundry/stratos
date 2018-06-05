@@ -1,10 +1,8 @@
 import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest, map, filter, switchMap, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import { Observable, Subscription, of as observableOf, BehaviorSubject } from 'rxjs';
+import { combineLatest, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { IService } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -61,7 +59,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
     this.csiGuidService.serviceGuid = serviceGuid;
     this.csiGuidService.cfGuid = this.cfGuid;
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   ngAfterContentInit() {

@@ -1,3 +1,7 @@
+
+import { of as observableOf, combineLatest, Observable, Subscription } from 'rxjs';
+
+import { switchMap, catchError, first, map } from 'rxjs/operators';
 import {
   AfterContentInit,
   Component,
@@ -9,9 +13,6 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { first, map } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs/Rx';
 
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
@@ -98,10 +99,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
-      this.nextSub = obs$
-        .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false }))
-        .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
+      this.nextSub = obs$.pipe(
+        first(),
+        catchError(() => observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false })),
+        switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
           step.error = !success;
           step.busy = false;
           this.enterData = data;
@@ -114,7 +115,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             }
           }
           return [];
-        }).subscribe();
+        }), ).subscribe();
     }
   }
 

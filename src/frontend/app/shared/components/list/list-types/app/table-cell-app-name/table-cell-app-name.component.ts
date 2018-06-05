@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../../../../store/app-state';
 import { getCurrentRoutingState, RoutingHistory, RoutingEvent } from '../../../../../../store/types/routing.type';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({

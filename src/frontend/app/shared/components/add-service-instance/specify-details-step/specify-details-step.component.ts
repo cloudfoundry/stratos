@@ -4,8 +4,6 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 import { MatChipInputEvent, MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -18,8 +16,8 @@ import {
   switchMap,
   tap,
   take,
+  startWith,
 } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
@@ -45,6 +43,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CsiModeService } from '../csi-mode.service';
+import { Observable, BehaviorSubject, Subscription, of as observableOf } from 'rxjs';
 
 const enum FormMode {
   CreateServiceInstance = 'create-service-instance',
@@ -150,7 +149,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.serviceInstancesInit$ = this.serviceInstances$.pipe(
       filter(p => !!p),
       map(o => false),
-    ).startWith(false);
+      startWith(false)
+    );
     this.hasInstances$ = this.serviceInstances$.pipe(
       filter(p => !!p),
       map(p => p.length > 0),
@@ -237,7 +237,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       switchMap(p => {
         if (this.bindExistingInstance) {
           // Binding an existing instance, therefore, skip creation by returning a dummy response
-          return Observable.of({
+          return observableOf({
             creating: false,
             error: false,
             response: {
@@ -265,9 +265,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                 }),
                 map(req => req.error ? this.handleException(true) : this.routeToServices(state.cfGuid, state.bindAppGuid))
               );
+          } else {
+            return observableOf(this.routeToServices());
           }
         }
-        return Observable.of(this.routeToServices());
+        return observableOf(this.routeToServices());
       }),
     );
   }
@@ -286,7 +288,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   private handleException(bindingFailed: boolean = false) {
     this.displaySnackBar(bindingFailed);
-    return Observable.of({ success: false });
+    return observableOf({ success: false });
   }
 
   private setupValidate() {

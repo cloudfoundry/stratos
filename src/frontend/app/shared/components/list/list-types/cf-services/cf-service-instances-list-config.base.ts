@@ -1,3 +1,5 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -22,7 +24,6 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { Observable } from 'rxjs/Observable';
 import { RouterNav } from '../../../../../store/actions/router.actions';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
@@ -99,7 +100,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     description: 'Delete Service Instance',
     createVisible: (row: APIResource<IServiceInstance>) =>
       this.can(this.canDeleteCache, CurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid),
-    createEnabled: (row) => Observable.of(true)
+    createEnabled: (row) => observableOf(true)
   };
 
   private listActionDetach: IListAction<APIResource> = {
@@ -108,7 +109,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     description: 'Detach Service Instance',
     createVisible: (row: APIResource<IServiceInstance>) =>
       this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid),
-    createEnabled: (row: APIResource) => Observable.of(row.entity.service_bindings.length === 1)
+    createEnabled: (row: APIResource) => observableOf(row.entity.service_bindings.length === 1)
   };
 
   private listActionEdit: IListAction<APIResource> = {
