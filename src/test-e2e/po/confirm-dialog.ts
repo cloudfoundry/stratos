@@ -36,13 +36,6 @@ export class ConfirmDialogComponent extends Component {
     super(locator);
   }
 
-  // . mat-dialog-title
-  // .confirm-dialog__warn-icon
-  // .confirm-dialog__message.mat-dialog-content
-  // button
-  // .mat-primary
-  // .mat-warn
-
   // Cancel
   cancel(): promise.Promise<void> {
     return this.getButtons().then(btns => btns[0].click());
