@@ -1,4 +1,5 @@
 import { Observable } from 'rxjs/Observable';
+import { getInitialTestStoreState } from '../../test-framework/store-test-helper';
 
 export class ServicesServiceMock {
   servicePlanVisibilities$ = Observable.of([]);
@@ -64,6 +65,23 @@ export class ServicesServiceMock {
     }
   }]);
 
+  serviceInstances$ = Observable.of([]);
+  serviceBroker$ = Observable.of({
+    entity: {
+      name: 'app-autoscaler',
+      broker_url: 'https://app-autoscaler-broker.cf-dev.io',
+      auth_username: 'admin',
+      space_guid: null,
+      guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+      cfGuid: '7d5e510b-8396-4db0-a91c-6abdc390c9d1'
+    },
+    metadata: {
+      guid: 'a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+      url: '/v2/service_brokers/a55f1a04-e3a3-4a89-92ee-94e3f96103f3',
+      created_at: '2017-11-27T17:07:02Z',
+      updated_at: '2017-11-27T17:07:02Z'
+    }
+  });
   getVisibleServicePlans = () => this.servicePlans$;
   getOrgsForSelectedServicePlan = () => Observable.of([]);
   getSelectedServicePlanAccessibility = () => Observable.of({
@@ -72,5 +90,10 @@ export class ServicesServiceMock {
   getServicePlanAccessibility = () => Observable.of({
     isPublic: true
   })
+
+  getDocumentationUrl = () => '';
+  getSupportUrl = () => '';
+  getServiceName = () => '';
+  getServiceDescription = () => '';
 
 }
