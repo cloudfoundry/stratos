@@ -35,6 +35,7 @@ jobs:
     env:
     - CI_ENV=true
     script:
+    - npm install git+https://github.com/nwmac/karma-jasmine.git
     - npm test
     - npm run codecov
   - stage: Backend
