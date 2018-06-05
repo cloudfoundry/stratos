@@ -14,8 +14,8 @@ module.exports = function (config) {
       require('./build/karma.test.reporter.js')
     ],
     client: {
-      clearContext: false, // leave Jasmine Spec Runner output visible in browser
-      captureConsole: true,
+      clearContext: !!process.env.CI_ENV, // leave Jasmine Spec Runner output visible in browser
+      captureConsole: false,
     },
     coverageIstanbulReporter: {
       dir: require('path').join(__dirname, 'coverage'), reports: ['html', 'lcovonly', 'json'],
@@ -24,7 +24,7 @@ module.exports = function (config) {
     angularCli: {
       environment: 'dev'
     },
-    reporters: process.env.CI_ENV ? ['spec', 'stratos'] : ['spec', 'kjhtml', 'stratos'],
+    reporters: process.env.CI_ENV ? ['spec'] : ['spec', 'kjhtml', 'stratos'],
     port: 9876,
     colors: true,
     logLevel: config.DEBUG,
@@ -42,7 +42,8 @@ module.exports = function (config) {
         watched: false
       },
       {
-        pattern: './node_modules/@angular/material/prebuilt-themes/indigo-pink.css'
+        pattern: './node_modules/@angular/material/prebuilt-themes/indigo-pink.css',
+        watched: false
       }
     ],
   });
