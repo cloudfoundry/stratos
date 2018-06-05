@@ -117,10 +117,6 @@ import { SelectPlanStepComponent } from './components/add-service-instance/selec
 import { SelectServiceComponent } from './components/add-service-instance/select-service/select-service.component';
 import { CreateApplicationStep1Component } from './components/create-application/create-application-step1/create-application-step1.component';
 import { BindAppsStepComponent } from './components/add-service-instance/bind-apps-step/bind-apps-step.component';
-import { DetachServiceInstanceComponent } from './components/detach-service-instance/detach-service-instance.component';
-import { DetatchAppsComponent } from './components/detach-service-instance/detatch-apps/detatch-apps.component';
-import { DetachAppsComponent } from './components/detach-service-instance/detach-apps/detach-apps.component';
-import { ConfirmDetachComponent } from './components/detach-service-instance/confirm-detach/confirm-detach.component';
 
 @NgModule({
   imports: [
@@ -218,11 +214,6 @@ import { ConfirmDetachComponent } from './components/detach-service-instance/con
     NoServicePlansComponent,
     CreateApplicationStep1Component,
     BindAppsStepComponent,
-    DetachServiceInstanceComponent,
-    DetatchAppsComponent,
-    DetachAppsComponent,
-    ConfirmDetachComponent,
-
   ],
   exports: [
     FormsModule,

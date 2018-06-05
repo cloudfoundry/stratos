@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { ITableColumn } from '../list/list-table/table.types';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import { APIResource } from '../../../store/types/api.types';
 import { IServiceBinding, IService } from '../../../core/cf-api-svc.types';
 import { DatePipe } from '@angular/common';
 import { Observable } from 'rxjs/Observable';
-import { AppMonitorComponentTypes } from '../app-action-monitor-icon/app-action-monitor-icon.component';
+import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 import { Store } from '@ngrx/store';
 import { AppState } from '../../../store/app-state';
 import { DeleteServiceBinding } from '../../../store/actions/service-bindings.actions';
 import { ActivatedRoute } from '@angular/router';
 import { BindingPipe } from '@angular/compiler';
-import { ServiceActionHelperService } from '../../data-services/service-action-helper.service';
+import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
 import { RouterNav } from '../../../store/actions/router.actions';
 import {
   serviceBindingSchemaKey,

@@ -1,6 +1,6 @@
 import { Component, OnInit, EventEmitter, Output, OnDestroy } from '@angular/core';
-import { DetachAppsListConfigService } from '../../list/list-types/detach-apps/detach-apps-list-config.service';
-import { ListConfig } from '../../list/list.component.types';
+import { DetachAppsListConfigService } from '../../../../shared/components/list/list-types/detach-apps/detach-apps-list-config.service';
+import { ListConfig } from '../../../../shared/components/list/list.component.types';
 import { IServiceBinding } from '../../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../store/types/api.types';
 import { Subscription } from 'rxjs/Subscription';
