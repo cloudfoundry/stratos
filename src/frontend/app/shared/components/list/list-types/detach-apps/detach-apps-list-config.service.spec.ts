@@ -4,7 +4,7 @@ import { BaseTestModules } from '../../../../../test-framework/cloud-foundry-end
 import { DetachAppsListConfigService } from './detach-apps-list-config.service';
 import { DatePipe } from '@angular/common';
 
-fdescribe('DetachAppsListConfigService', () => {
+describe('DetachAppsListConfigService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [DetachAppsListConfigService, DatePipe],
