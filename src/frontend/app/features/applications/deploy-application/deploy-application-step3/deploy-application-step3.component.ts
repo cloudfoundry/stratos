@@ -1,12 +1,18 @@
+
+import {
+  of as observableOf,
+  combineLatest as observableCombineLatest,
+  BehaviorSubject,
+  Observable,
+  interval,
+  Subscription
+} from 'rxjs';
+
+import { startWith, catchError, filter, map, switchMap, takeWhile } from 'rxjs/operators';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { interval } from 'rxjs/observable/interval';
-import { catchError, filter, map, switchMap, takeWhile } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import {
   CfAppsDataSource,
@@ -64,8 +70,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
       filter((status) => status.error)
     ).subscribe(status => this.snackBar.open(status.errorMsg, 'Dismiss'));
 
-    this.closeable$ = Observable.combineLatest(
-      this.valid$.startWith(false),
+    this.closeable$ = observableCombineLatest(
+      this.valid$.pipe(startWith(false)),
       this.deployer.status$).pipe(
         map(([validated, status]) => {
           return validated || status.error;
@@ -112,7 +118,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // Take user to applications
     const { cfGuid } = this.deployer;
     this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   /**
@@ -128,7 +134,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
           this.store.dispatch(createGetAllAppAction(CfAppsDataSource.paginationKey));
           this.store.dispatch(new GetAppEnvVarsAction(this.appGuid, cfGuid));
           this.fetchedApp = true;
-          return Observable.of(true);
+          return observableOf(true);
         } else {
           const headers = new HttpHeaders({ 'x-cap-cnsi-list': cfGuid });
           return this.http.get(`/pp/${proxyAPIVersion}/proxy/v2/apps?q=space_guid:${spaceGuid}&q=name:${appData.Name}`,

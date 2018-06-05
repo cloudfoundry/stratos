@@ -3,7 +3,7 @@
   <div class="deploy-step2-form">
     <!-- This can be flipped when we add other deploy types -->
     <mat-form-field *ngIf="sourceTypes.length > 1">
-      <mat-select class="reset-margin" [disabled]="isRedeploy" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (change)="setSourceType($event.value)" required>
+      <mat-select class="reset-margin" [disabled]="isRedeploy" placeholder="Source Type" name="sourceType" [(ngModel)]="sourceType" (selectionChange)="setSourceType($event.value)" required>
         <mat-option *ngFor="let sourceType of sourceTypes" [value]="sourceType">
           {{ sourceType.name }}
         </mat-option>
@@ -45,7 +45,7 @@
           </div>
         </div>
         <mat-form-field>
-          <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (change)="updateBranchName($event.value)"
+          <mat-select class="reset-margin" placeholder="Branch" [disabled]="isRedeploy || !repository || sourceSelectionForm.controls.projectName?.hasError('githubProjectExists')" [(ngModel)]="repositoryBranch" name="repositoryBranch" (selectionChange)="updateBranchName($event.value)"
             required>
             <mat-option *ngFor="let branch of repositoryBranches$ | async" [value]="branch">
               {{ branch.name }}

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
 import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
 import {
@@ -21,7 +21,7 @@ import { GetServiceInstances } from '../../../store/actions/service-instances.ac
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
 import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';
 import { GetService } from '../../../store/actions/service.actions';
-import { GetAllServicesForSpace, GetServiceInstancesForSpace, GetSpace } from '../../../store/actions/space.actions';
+import { GetAllServicesForSpace, GetSpace, GetServiceInstancesForSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   entityFactory,
@@ -37,8 +37,8 @@ import { createEntityRelationKey, createEntityRelationPaginationKey } from '../.
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCreateServiceInstanceServicePlan } from '../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../store/types/api.types';
-import { QParam } from '../../../store/types/pagination.types';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
+import { QParam } from '../../../store/types/pagination.types';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -66,13 +66,14 @@ export class CreateServiceInstanceHelperService {
 
   initBaseObservables = () => {
 
-    const serviceEntityService = this.entityServiceFactory.create(
+    const serviceEntityService = this.entityServiceFactory.create<APIResource<IService>>(
       serviceSchemaKey,
       entityFactory(serviceSchemaKey),
       this.serviceGuid,
       new GetService(this.serviceGuid, this.cfGuid),
       true
     );
+
     this.service$ = serviceEntityService.waitForEntity$.pipe(
       filter(o => !!o && !!o.entity),
       map(o => o.entity),
@@ -83,7 +84,7 @@ export class CreateServiceInstanceHelperService {
     this.serviceBroker$ = this.service$.pipe(
       map(o => o.entity.service_broker_guid),
       switchMap(guid => {
-        const brokerEntityService = this.entityServiceFactory.create(
+        const brokerEntityService = this.entityServiceFactory.create<APIResource<IServiceBroker>>(
           serviceBrokerSchemaKey,
           entityFactory(serviceBrokerSchemaKey),
           guid,
@@ -167,7 +168,7 @@ export class CreateServiceInstanceHelperService {
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
-      return Observable.of({
+      return observableOf({
         isPublic: true,
         guid: servicePlan.metadata.guid
       });
@@ -180,7 +181,7 @@ export class CreateServiceInstanceHelperService {
   }
 
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
-    return Observable.combineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.getServicePlans())
+    return observableCombineLatest(this.store.select(selectCreateServiceInstanceServicePlan), this.getServicePlans())
       .pipe(
         filter(([p, q]) => !!p && !!q),
         map(([servicePlanGuid, servicePlans]) => servicePlans.filter(o => o.metadata.guid === servicePlanGuid)),

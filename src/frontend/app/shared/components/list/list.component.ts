@@ -1,3 +1,20 @@
+
+import { of as observableOf, BehaviorSubject, Observable, combineLatest as observableCombineLatest, Subscription } from 'rxjs';
+
+import {
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  pairwise,
+  publishReplay,
+  refCount,
+  startWith,
+  takeWhile,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 import { animate, style, transition, trigger } from '@angular/animations';
 import {
   AfterViewInit,
@@ -12,23 +29,6 @@ import {
 import { NgForm, NgModel } from '@angular/forms';
 import { MatPaginator, PageEvent, SortDirection } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import {
-  distinctUntilChanged,
-  filter,
-  first,
-  map,
-  pairwise,
-  publishReplay,
-  refCount,
-  startWith,
-  takeWhile,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ListFilter, ListPagination, ListSort, SetListViewAction } from '../../../store/actions/list.actions';
 import { AppState } from '../../../store/app-state';
@@ -88,7 +88,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     // The paginator component can do some smarts underneath (change page when page size changes). For non-local lists this means
     // multiple requests are made and stale data is added to the store. To prevent this only have one subscriber to the page change
     // event which handles either page or pageSize changes.
-    this.paginationWidgetToStore = paginator.page.startWith(this.initialPageEvent).pipe(
+    this.paginationWidgetToStore = paginator.page.pipe(startWith(this.initialPageEvent)).pipe(
       pairwise(),
     ).subscribe(([oldV, newV]) => {
       const pageSizeChanged = oldV.pageSize !== newV.pageSize;
@@ -108,13 +108,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     if (!filter) {
       return;
     }
-    this.filterWidgetToStore = filter.valueChanges
-      .debounceTime(this.dataSource.isLocal ? 150 : 250)
-      .distinctUntilChanged()
-      .map(value => value as string)
-      .do(filterString => {
+    this.filterWidgetToStore = filter.valueChanges.pipe(
+      debounceTime(this.dataSource.isLocal ? 150 : 250),
+      distinctUntilChanged(),
+      map(value => value as string),
+      tap(filterString => {
         return this.paginationController.filterByString(filterString);
-      }).subscribe();
+      }), ).subscribe();
   }
 
   private initialPageEvent: PageEvent;
@@ -199,7 +199,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       );
     } else {
       this.initialise();
-      this.initialised$ = Observable.of(true);
+      this.initialised$ = observableOf(true);
     }
   }
 
@@ -217,7 +217,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     this.multiFilterConfigs = this.config.getMultiFiltersConfigs();
 
     // Create convenience observables that make the html clearer
-    this.isAddingOrSelecting$ = combineLatest(
+    this.isAddingOrSelecting$ = observableCombineLatest(
       this.dataSource.isAdding$,
       this.dataSource.isSelecting$
     ).pipe(
@@ -239,14 +239,14 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     );
 
     // If this is the first time the user has used this list then set the view to the default
-    this.view$.first().subscribe(listView => {
+    this.view$.pipe(first()).subscribe(listView => {
       if (!listView) {
         this.updateListView(this.getDefaultListView(this.config));
       }
     });
 
     // Determine if this list view needs the control header bar at the top
-    this.hasControls$ = this.view$.map((viewType) => {
+    this.hasControls$ = this.view$.pipe(map((viewType) => {
       return !!(
         this.config.viewType === 'both' ||
         this.config.text && this.config.text.title ||
@@ -257,7 +257,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         this.multiFilterConfigs && this.multiFilterConfigs.length ||
         this.config.enableTextFilter
       );
-    });
+    }));
 
     this.paginationController = new ListPaginationController(this.store, this.dataSource);
 
@@ -267,15 +267,15 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     );
 
     // Determine if we should hide the paginator
-    this.hidePaginator$ = combineLatest(this.hasRows$, this.dataSource.pagination$)
-      .map(([hasRows, pagination]) => {
+    this.hidePaginator$ = observableCombineLatest(this.hasRows$, this.dataSource.pagination$).pipe(
+      map(([hasRows, pagination]) => {
         const minPageSize = (
           this.paginatorSettings.pageSizeOptions && this.paginatorSettings.pageSizeOptions.length ?
             this.paginatorSettings.pageSizeOptions[0] : -1
         );
         return !hasRows ||
           pagination && (pagination.totalResults <= minPageSize);
-      });
+      }));
 
 
     this.paginatorSettings.pageSizeOptions = this.config.pageSizeOptions ||
@@ -283,7 +283,7 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     // Ensure we set a pageSize that's relevant to the configured set of page sizes. The default is 9 and in some cases is not a valid
     // pageSize
-    this.paginationController.pagination$.first().subscribe(pagination => {
+    this.paginationController.pagination$.pipe(first()).subscribe(pagination => {
       this.initialPageEvent = new PageEvent;
       this.initialPageEvent.pageIndex = pagination.pageIndex - 1;
       this.initialPageEvent.pageSize = pagination.pageSize;
@@ -293,25 +293,25 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       }
     });
 
-    const paginationStoreToWidget = this.paginationController.pagination$.do((pagination: ListPagination) => {
+    const paginationStoreToWidget = this.paginationController.pagination$.pipe(tap((pagination: ListPagination) => {
       this.paginatorSettings.length = pagination.totalResults;
       this.paginatorSettings.pageIndex = pagination.pageIndex - 1;
       this.paginatorSettings.pageSize = pagination.pageSize;
-    });
+    }));
 
     this.sortColumns = this.columns.filter((column: ITableColumn<T>) => {
       return column.sort;
     });
 
-    const sortStoreToWidget = this.paginationController.sort$.do((sort: ListSort) => {
+    const sortStoreToWidget = this.paginationController.sort$.pipe(tap((sort: ListSort) => {
       this.headerSort.value = sort.field;
       this.headerSort.direction = sort.direction;
-    });
+    }));
 
-    const filterStoreToWidget = this.paginationController.filter$.do((filter: ListFilter) => {
+    const filterStoreToWidget = this.paginationController.filter$.pipe(tap((filter: ListFilter) => {
       this.filterString = filter.string;
       this.multiFilters = { ...filter.items };
-    });
+    }));
 
     // Multi filters (e.g. cf/org/space)
     // - Ensure the initial value is correct
@@ -323,13 +323,13 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
         const multiFiltersLoading = [];
         Object.values(this.multiFilterConfigs).forEach((filterConfig: IListMultiFilterConfig) => {
           filterConfig.select.next(this.multiFilters[filterConfig.key]);
-          const sub = filterConfig.select.asObservable().do((filterItem: string) => {
+          const sub = filterConfig.select.asObservable().pipe(tap((filterItem: string) => {
             this.paginationController.multiFilter(filterConfig, filterItem);
-          });
+          }));
           this.multiFilterWidgetObservables.push(sub.subscribe());
           multiFiltersLoading.push(filterConfig.loading$);
         });
-        this.multiFilterConfigsLoading$ = combineLatest(multiFiltersLoading).pipe(
+        this.multiFilterConfigsLoading$ = observableCombineLatest(multiFiltersLoading).pipe(
           map((isLoading: boolean[]) => !!isLoading.find(bool => bool))
         );
       })
@@ -343,24 +343,24 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
       })
     );
 
-    this.noRowsHaveFilter$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+    this.noRowsHaveFilter$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
       map(([hasRows, isFiltering]) => {
         return !hasRows && isFiltering;
       })
     );
-    this.noRowsNotFiltering$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+    this.noRowsNotFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
       map(([hasRows, isFiltering]) => {
         return !hasRows && !isFiltering;
       })
     );
 
-    this.hasRowsOrIsFiltering$ = combineLatest(this.hasRows$, this.isFiltering$).pipe(
+    this.hasRowsOrIsFiltering$ = observableCombineLatest(this.hasRows$, this.isFiltering$).pipe(
       map(([hasRows, isFiltering]) => {
         return hasRows || isFiltering;
       })
     );
 
-    this.disableActions$ = combineLatest(this.dataSource.isLoadingPage$, this.noRowsHaveFilter$).pipe(
+    this.disableActions$ = observableCombineLatest(this.dataSource.isLoadingPage$, this.noRowsHaveFilter$).pipe(
       map(([isLoading, noRowsHaveFilter]) => {
         return isLoading || noRowsHaveFilter;
       })
@@ -368,21 +368,21 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
 
     // Multi actions can be a list of actions that aren't visible. For those case, in effect, we don't have multi actions
     const visibles$ = (this.multiActions || []).map(multiAction => multiAction.visible$);
-    const haveMultiActions = combineLatest(visibles$).pipe(
+    const haveMultiActions = observableCombineLatest(visibles$).pipe(
       map(visibles => visibles.some(visible => visible)),
       tap(allowSelection => {
         this.haveMultiActions.next(allowSelection);
       })
     );
 
-    this.uberSub = Observable.combineLatest(
+    this.uberSub = observableCombineLatest(
       paginationStoreToWidget,
       filterStoreToWidget,
       sortStoreToWidget,
       haveMultiActions
     ).subscribe();
 
-    this.pageState$ = combineLatest(
+    this.pageState$ = observableCombineLatest(
       this.paginationController.pagination$,
       this.dataSource.isLoadingPage$,
       this.view$
@@ -521,10 +521,10 @@ export class ListComponent<T> implements OnInit, OnDestroy, AfterViewInit {
     if (Array.isArray(actions)) {
       return actions.map(action => {
         if (!action.visible$) {
-          action.visible$ = Observable.of(true);
+          action.visible$ = observableOf(true);
         }
         if (!action.enabled$) {
-          action.enabled$ = Observable.of(true);
+          action.enabled$ = observableOf(true);
         }
         return action;
       });

@@ -1,3 +1,5 @@
+
+import {mergeMap} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
@@ -24,8 +26,8 @@ export class UpdateAppEffects {
   ) {
   }
 
-  @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperRequestActionSuccess>(UPDATE_SUCCESS)
-    .mergeMap((action: WrapperRequestActionSuccess) => {
+  @Effect() UpdateAppInStore$ = this.actions$.ofType<WrapperRequestActionSuccess>(UPDATE_SUCCESS).pipe(
+    mergeMap((action: WrapperRequestActionSuccess) => {
       const updateAction = action.apiAction as UpdateExistingApplication;
       const updateEntities = updateAction.updateEntities || [AppMetadataTypes.ENV_VARS, AppMetadataTypes.STATS, AppMetadataTypes.SUMMARY];
       const actions = [];
@@ -54,6 +56,6 @@ export class UpdateAppEffects {
 
 
       return actions;
-    });
+    }));
 
 }

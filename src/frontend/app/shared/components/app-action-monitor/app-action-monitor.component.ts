@@ -1,8 +1,9 @@
+
+import {of as observableOf, never as observableNever,  Observable } from 'rxjs';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { schema } from 'normalizr';
 import { AppMonitorComponentTypes, IApplicationMonitorComponentState } from '../app-action-monitor-icon/app-action-monitor-icon.component';
 import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/types';
-import { Observable } from 'rxjs/Observable';
 import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/table';
 import { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
@@ -20,7 +21,7 @@ import {
 export class AppActionMonitorComponent<T> implements OnInit {
 
   @Input('data$')
-  private data$: Observable<Array<T>> = Observable.never();
+  private data$: Observable<Array<T>> = observableNever();
 
   @Input('entityKey')
   public entityKey: string;
@@ -75,7 +76,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
       connect: () => this.data$,
       disconnect: () => { },
       trackBy: this.getId ? (index, item) => this.getId(item) : this.trackBy,
-      isTableLoading$: Observable.of(false)
+      isTableLoading$: observableOf(false)
     } as ITableListDataSource<T>;
   }
 

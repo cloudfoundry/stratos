@@ -1,8 +1,11 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
+
+import {map} from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Rx';
 
 import { SetNewAppName } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
@@ -32,7 +35,7 @@ export class CreateApplicationStep2Component implements OnInit {
 
   onNext = () => {
     this.store.dispatch(new SetNewAppName(this.name));
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   onEnter = () => {
@@ -41,10 +44,10 @@ export class CreateApplicationStep2Component implements OnInit {
 
   ngOnInit() {
     this.form = new FormGroup({ appName: this.appName });
-    this.validate = this.form.statusChanges
-      .map(() => {
+    this.validate = this.form.statusChanges.pipe(
+      map(() => {
         return this.form.valid;
-      });
+      }));
   }
 
 }

@@ -1,8 +1,9 @@
+
+import {catchError,  first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { RequestMethod } from '@angular/http';
 import { Actions, Effect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { first, map, mergeMap, withLatestFrom } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import { UtilsService } from '../../core/utils.service';
@@ -110,7 +111,7 @@ export class RequestEffect {
             independentUpdates
           )];
         })
-      ).catch(error => {
+      ).pipe(catchError(error => {
         this.logger.warn(`Entity validation process failed`, error);
         if (validateAction.apiRequestStarted) {
           return [
@@ -125,7 +126,7 @@ export class RequestEffect {
           this.update(apiAction, false, error.message);
           return [];
         }
-      });
+      }));
     })
   );
 

@@ -1,5 +1,6 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../environments/environment';
@@ -37,7 +38,7 @@ export class CloudFoundryOrganizationBaseComponent {
       link: 'users',
       label: 'Users',
       // Hide the users tab unless we are in development
-      hidden: Observable.of(environment.production)
+      hidden: observableOf(environment.production)
     }
   ];
 
