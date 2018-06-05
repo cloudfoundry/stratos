@@ -1,3 +1,5 @@
+
+import {pairwise} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -32,8 +34,8 @@ export class CFEndpointsListConfigService implements IListConfig<EndpointModel> 
       endpointStoreNames.type,
       item.guid,
       effectKey,
-    ))
-      .pairwise()
+    )).pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
           handleChange([oldVal, newVal]);

@@ -49,7 +49,7 @@ describe('ListComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ListComponent);
+    fixture = TestBed.createComponent<ListComponent<EntityInfo>>(ListComponent);
     component = fixture.componentInstance;
     component.columns = [];
     fixture.detectChanges();

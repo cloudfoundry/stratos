@@ -26,7 +26,7 @@ import { CfAppRoutesDataSource } from './cf-app-routes-data-source';
 import { TableCellRouteComponent } from './table-cell-route/table-cell-route.component';
 import { TableCellTCPRouteComponent } from './table-cell-tcproute/table-cell-tcproute.component';
 import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class CfAppRoutesListConfigService extends ListConfig<APIResource> {

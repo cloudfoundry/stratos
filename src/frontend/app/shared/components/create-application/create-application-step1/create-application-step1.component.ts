@@ -1,7 +1,9 @@
+
+import { of as observableOf,  Observable } from 'rxjs';
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+
 import { map, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
@@ -47,7 +49,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
       org: this.cfOrgSpaceService.org.select.getValue(),
       space: this.cfOrgSpaceService.space.select.getValue()
     }));
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   ngOnInit() {
