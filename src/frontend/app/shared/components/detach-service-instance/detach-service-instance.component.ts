@@ -21,9 +21,9 @@ import {
   templateUrl: './detach-service-instance.component.html',
   styleUrls: ['./detach-service-instance.component.scss']
 })
-export class DetachServiceInstanceComponent implements OnInit {
+export class DetachServiceInstanceComponent {
 
-  cfGuid: any;
+  cfGuid: string;
   selectedBindings: APIResource<IServiceBinding>[];
   deleteStarted: boolean;
   serviceBindingSchemaKey = serviceBindingSchemaKey;
@@ -51,9 +51,6 @@ export class DetachServiceInstanceComponent implements OnInit {
 
   public selectedBindings$ = new ReplaySubject<APIResource<IServiceBinding>[]>(1);
 
-
-  redirectToServices = () => this.store.dispatch(new RouterNav({ path: ['/services'] }));
-
   constructor(
     private store: Store<AppState>,
     private datePipe: DatePipe,
@@ -63,10 +60,6 @@ export class DetachServiceInstanceComponent implements OnInit {
     this.cfGuid = activatedRoute.snapshot.params.cfId;
   }
 
-  ngOnInit() {
-  }
-
-
   getId = (el: APIResource) => el.metadata.guid;
   setSelectedBindings = (selectedBindings: APIResource<IServiceBinding>[]) => {
     this.selectedBindings = selectedBindings;
@@ -74,18 +67,13 @@ export class DetachServiceInstanceComponent implements OnInit {
   }
 
   public startDelete = () => {
-
-    console.log('Delete Started!!');
-    if (this.deleteStarted) {
-      /** Should redirect to bindings in the Service Instance detail View */
-      return this.redirectToServices();
-    }
     this.deleteStarted = true;
     if (this.selectedBindings && this.selectedBindings.length) {
      this.selectedBindings.forEach(binding => {
         this.serviceActionHelperService.detachServiceBinding([binding], binding.entity.service_instance_guid, this.cfGuid, true);
       });
     }
+    return Observable.of({success: true});
   }
 
 }

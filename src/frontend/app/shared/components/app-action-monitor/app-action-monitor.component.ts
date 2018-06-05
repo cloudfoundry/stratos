@@ -70,8 +70,6 @@ export class AppActionMonitorComponent<T> implements OnInit {
       cellFlex: '0 0 40px'
     };
 
-    console.log(`CellConfig: ${JSON.stringify(this.getCellConfig)}`)
-
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {
       connect: () => this.data$,

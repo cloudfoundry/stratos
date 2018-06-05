@@ -30,7 +30,6 @@ export class DetachAppsComponent implements OnDestroy {
     this.selectedSub = this.config.getDataSource().selectedRows$.subscribe(
       (selectedApps) => {
         this.selectedApps.emit(Array.from(selectedApps.values()));
-        console.log('fired!');
       }
     );
 
