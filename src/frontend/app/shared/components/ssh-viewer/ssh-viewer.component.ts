@@ -1,15 +1,20 @@
+import 'xterm/dist/addons/fit/fit.js';
+
 import {
-  Component, OnInit, OnDestroy, AfterViewChecked, Input, Output, ViewChild, ElementRef, ViewEncapsulation,
-  EventEmitter, HostListener
+  AfterViewChecked,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
 } from '@angular/core';
 
-import { Observable ,  Subscription, Subject } from 'rxjs';
+import * as Terminal from 'xterm/dist/xterm.js';
+import { Observable, Subject, Subscription } from 'rxjs';
 
 // Import Xterm
-import * as Terminal from 'xterm/dist/xterm.js';
-import 'xterm/dist/addons/fit/fit.js';
-import { map } from 'rxjs/operators';
-import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-ssh-viewer',
   templateUrl: './ssh-viewer.component.html',
@@ -80,17 +85,21 @@ export class SshViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   ngOnDestroy() {
     this.isDestroying = true;
-    this.xterm.off('data', this.onTermSendData);
-    this.xterm.off('resize', this.onTermResize);
+    if (this.xterm) {
+      this.xterm.off('data', this.onTermSendData);
+      this.xterm.off('resize', this.onTermResize);
+    }
     this.disconnect();
-    this.connectSubscription.unsubscribe();
+    if (this.connectSubscription && !this.connectSubscription.closed) {
+      this.connectSubscription.unsubscribe();
+    }
   }
 
   disconnect() {
     this.isConnecting = false;
     this.isConnected = false;
     this.errorMessage = undefined;
-    if (!this.msgSubscription.closed) {
+    if (this.msgSubscription && !this.msgSubscription.closed) {
       this.msgSubscription.unsubscribe();
     }
   }
