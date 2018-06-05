@@ -10,16 +10,16 @@ import {
 } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { first, map } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs/Rx';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
 
+import { LoggerService } from '../../../../core/logger.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
-import { LoggerService } from '../../../../core/logger.service';
+
 
 
 @Component({
@@ -114,13 +114,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         return;
       }
       this.showNextButtonProgress = this.nextButtonProgress;
-      this.nextSub = obs$
-        .first()
-        .catch(err => {
+      this.nextSub = obs$.pipe(
+        first(),
+        catchError(err => {
           this.logger.warn('Stepper failed: ', err);
-          return Observable.of({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false });
-        })
-        .switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
+          return observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false });
+        }),
+        switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
           this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
@@ -136,7 +136,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             this.snackBarRef = this.snackBar.open(message, 'Dismiss');
           }
           return [];
-        }).subscribe();
+        }), ).subscribe();
     }
   }
 

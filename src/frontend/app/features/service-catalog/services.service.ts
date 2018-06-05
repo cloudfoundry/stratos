@@ -1,40 +1,35 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { BehaviorSubject, combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
+import { combineLatest, filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
-import { IService, IServiceBroker, IServiceExtra, IServicePlan, IServicePlanVisibility } from '../../core/cf-api-svc.types';
-import { IOrganization, ISpace } from '../../core/cf-api.types';
+import {
+  IService,
+  IServiceBroker,
+  IServiceExtra,
+  IServiceInstance,
+  IServicePlan,
+  IServicePlanVisibility,
+} from '../../core/cf-api-svc.types';
 import { EntityService } from '../../core/entity-service';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
-import { pathGet } from '../../core/utils.service';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
 import { GetServiceBrokers } from '../../store/actions/service-broker.actions';
 import { GetServicePlanVisibilities } from '../../store/actions/service-plan-visibility.actions';
 import { GetService } from '../../store/actions/service.actions';
-import { GetSpace } from '../../store/actions/space.actions';
 import { AppState } from '../../store/app-state';
 import {
   entityFactory,
-  organizationSchemaKey,
   serviceBrokerSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
-  spaceSchemaKey,
-  spaceWithOrgKey,
 } from '../../store/helpers/entity-factory';
-import { createEntityRelationKey, createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  selectCreateServiceInstanceCfGuid,
-  selectCreateServiceInstanceServicePlan,
-} from '../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { CloudFoundryEndpointService } from '../cloud-foundry/services/cloud-foundry-endpoint.service';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { getSvcAvailability } from './services-helper';
+import { getServiceInstancesInCf, getSvcAvailability } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -46,16 +41,18 @@ export interface ServicePlanAccessibility {
 
 @Injectable()
 export class ServicesService {
+  allServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
   serviceGuid: any;
   cfGuid: any;
   serviceBrokers$: Observable<APIResource<IServiceBroker>[]>;
+  serviceBroker$: Observable<APIResource<IServiceBroker>>;
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
   servicePlans$: Observable<APIResource<IServicePlan>[]>;
   serviceExtraInfo$: Observable<IServiceExtra>;
   service$: Observable<APIResource<IService>>;
   serviceEntityService: EntityService<APIResource<IService>>;
   initialised$ = new BehaviorSubject(false);
-
 
   constructor(
     private store: Store<AppState>,
@@ -81,15 +78,8 @@ export class ServicesService {
       publishReplay(1),
       refCount()
     );
-    this.serviceExtraInfo$ = this.service$.pipe(
-      map(o => JSON.parse(o.entity.extra))
-    );
 
-    this.servicePlans$ = this.service$.pipe(
-      map(o => o.entity.service_plans)
-    );
-    this.servicePlanVisibilities$ = this.getServicePlanVisibilities();
-    this.serviceBrokers$ = this.getServiceBrokers();
+    this.initBaseObservables();
   }
 
 
@@ -107,8 +97,11 @@ export class ServicesService {
       true
     ).entities$;
   }
+  private getServiceInstances = () => {
+    return getServiceInstancesInCf(this.cfGuid, this.store, this.paginationMonitorFactory);
+  }
 
-  getServiceBrokers = () => {
+  private getServiceBrokers = () => {
     const paginationKey = createEntityRelationPaginationKey(serviceBrokerSchemaKey, this.cfGuid);
     return getPaginationObservables<APIResource<IServiceBroker>>(
       {
@@ -164,7 +157,7 @@ export class ServicesService {
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
-      return Observable.of({
+      return observableOf({
         isPublic: true,
         guid: servicePlan.metadata.guid
       });
@@ -180,7 +173,7 @@ export class ServicesService {
 
 
   getServiceName = () => {
-    return Observable.combineLatest(this.serviceExtraInfo$, this.service$)
+    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
       .pipe(
         map(([extraInfo, service]) => {
           if (extraInfo && extraInfo.displayName) {
@@ -189,5 +182,60 @@ export class ServicesService {
             return service.entity.label;
           }
         }));
+  }
+
+  getServiceDescription = () => {
+    return observableCombineLatest(this.serviceExtraInfo$, this.service$)
+      .pipe(
+        map(([extraInfo, service]) => {
+          if (extraInfo && extraInfo.longDescription) {
+            return extraInfo.longDescription;
+          } else {
+            return service.entity.description;
+          }
+        }));
+  }
+
+
+  getDocumentationUrl = () => this.serviceExtraInfo$.pipe(
+    map(p => p ? p.documentationUrl : null)
+  )
+
+  getSupportUrl = () => this.serviceExtraInfo$.pipe(
+    map(p => p ? p.supportUrl : null)
+  )
+
+  hasSupportUrl = () => this.getSupportUrl().pipe(
+    map(p => !!p)
+  )
+
+  hasDocumentationUrl = () => this.getDocumentationUrl().pipe(
+    map(p => !!p)
+  )
+
+  getServiceTags = () => this.service$.pipe(
+    first(),
+    map(service =>
+      service.entity.tags.map(t => ({
+        value: t,
+        hideClearButton: true
+      }))
+    )
+  )
+
+  private initBaseObservables() {
+    this.servicePlanVisibilities$ = this.getServicePlanVisibilities();
+    this.serviceExtraInfo$ = this.service$.pipe(map(o => JSON.parse(o.entity.extra)));
+    this.servicePlans$ = this.service$.pipe(map(o => o.entity.service_plans));
+    this.serviceBrokers$ = this.getServiceBrokers();
+    this.serviceBroker$ = this.serviceBrokers$.pipe(
+      filter(p => !!p && p.length > 0),
+      combineLatest(this.service$),
+      map(([brokers, service]) => brokers.filter(broker => broker.metadata.guid === service.entity.service_broker_guid)),
+      map(o => o[0]));
+    this.allServiceInstances$ = this.getServiceInstances();
+    this.serviceInstances$ = this.allServiceInstances$.pipe(
+      map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))
+    );
   }
 }

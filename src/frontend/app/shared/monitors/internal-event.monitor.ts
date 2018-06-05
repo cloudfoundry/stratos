@@ -1,12 +1,14 @@
-import * as moment from 'moment';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { IntervalObservable } from 'rxjs/observable/IntervalObservable';
-import { distinctUntilChanged, filter, map, tap, startWith, share } from 'rxjs/operators';
-
-import { InternalEventSeverity, InternalEventSubjectState } from '../../store/types/internal-events.types';
-
 import { NgZone } from '@angular/core';
+import * as moment from 'moment';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { distinctUntilChanged, map, share, startWith } from 'rxjs/operators';
+
+import {
+  InternalEventSeverity,
+  InternalEventsState,
+  InternalEventSubjectState,
+} from '../../store/types/internal-events.types';
+
 
 
 export function newNonnAngularInterval(ngZone: NgZone, intervalTime: number) {
@@ -36,14 +38,14 @@ export class InternalEventMonitor {
   public events$: Observable<InternalEventSubjectState>;
 
   constructor(
-    events$: Observable<InternalEventSubjectState>,
+    events$: Observable<InternalEventsState>,
     eventType: string,
-    subjectIds: string[] | Observable<string[]> = Observable.of(null),
+    subjectIds: string[] | Observable<string[]> = observableOf(null),
     private ngZone: NgZone,
   ) {
     const empty = {};
     if (Array.isArray(subjectIds)) {
-      subjectIds = Observable.of(subjectIds);
+      subjectIds = observableOf(subjectIds);
     }
     this.events$ = combineLatest(
       events$.pipe(

@@ -1,9 +1,12 @@
+
+import { of as observableOf, Observable, Subscription } from 'rxjs';
+
+import { map, filter, take } from 'rxjs/operators';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs/Rx';
 
 import { EntityService } from '../../../core/entity-service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
@@ -68,7 +71,11 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private error = false;
 
   ngOnInit() {
-    this.sub = this.applicationService.application$.filter(app => app.app.entity).take(1).map(app => app.app.entity).subscribe(app => {
+    this.sub = this.applicationService.application$.pipe(
+      filter(app => app.app.entity),
+      take(1),
+      map(app => app.app.entity)
+    ).subscribe(app => {
       this.app = app;
       this.store.dispatch(new SetCFDetails({
         cloudFoundry: this.applicationService.cfGuid,
@@ -102,21 +109,21 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     let obs$: Observable<any>;
     if (Object.keys(updates).length) {
       // We had at least one value to change - send update action
-      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).map(v => (
+      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).pipe(map(v => (
         {
           success: !v.error,
           message: `Could not update application: ${v.message}`
-        }));
+        })));
     } else {
-      obs$ = Observable.of({ success: true });
+      obs$ = observableOf({ success: true });
     }
 
-    return obs$.take(1).map(res => {
+    return obs$.pipe(take(1), map(res => {
       return {
         ...res,
         redirect: res.success
       };
-    });
+    }));
   }
 
   clearSub() {

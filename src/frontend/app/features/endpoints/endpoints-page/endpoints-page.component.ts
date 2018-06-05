@@ -6,6 +6,7 @@ import {
 } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
 import { ListConfig } from '../../../shared/components/list/list.component.types';
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { of } from 'rxjs';
 
 
 @Component({

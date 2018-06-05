@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, Input, OnDestroy } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
-import { delay, map, tap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
+import { delay, map, startWith, tap } from 'rxjs/operators';
 
 import { UserService } from '../../../core/user.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
@@ -45,7 +45,7 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
   constructor(private userService: UserService, private snackBar: MatSnackBar, public cloudFoundryService: CloudFoundryService) { }
 
   ngAfterViewInit() {
-    this.noContent$ = Observable.combineLatest(
+    this.noContent$ = observableCombineLatest(
       this.cloudFoundryService.hasRegisteredCFEndpoints$,
       this.cloudFoundryService.hasConnectedCFEndpoints$
     ).pipe(
@@ -62,7 +62,7 @@ export class EndpointsMissingComponent implements AfterViewInit, OnDestroy {
         }
         return null;
       })
-    ).startWith(null);
+    ).pipe(startWith(null));
   }
 
   ngOnDestroy() {

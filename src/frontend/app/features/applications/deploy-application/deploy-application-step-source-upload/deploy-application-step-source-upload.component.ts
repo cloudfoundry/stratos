@@ -1,5 +1,6 @@
+
+import { of as observableOf, Observable } from 'rxjs';
 import { Component, OnInit, Input, OnDestroy } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
 import { AppState } from '../../../../store/app-state';
@@ -48,7 +49,7 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
 
   // Make the deployer available to the next step
   onNext: StepOnNextFunction = () => {
-    return Observable.of({ success: true, data: this.deployer });
+    return observableOf({ success: true, data: this.deployer });
   }
 
   ngOnDestroy() {

@@ -1,10 +1,8 @@
 import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, first, map, switchMap, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IApp } from '../../../../core/cf-api.types';
 import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
@@ -78,13 +76,14 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.validateSubscription = this.stepperForm.statusChanges
-      .map(() => {
+    this.validateSubscription = this.stepperForm.statusChanges.pipe(
+      map(() => {
         if (this.stepperForm.pristine) {
           setTimeout(() => this.validate.next(true));
         }
         setTimeout(() => this.validate.next(this.stepperForm.valid));
-      }).subscribe();
+      })
+    ).subscribe();
 
 
     this.apps$ = this.store.select(selectCreateServiceInstance).pipe(
@@ -105,7 +104,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   submit = (): Observable<StepOnNextResult> => {
     this.setApp();
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   setApp = () => this.store.dispatch(

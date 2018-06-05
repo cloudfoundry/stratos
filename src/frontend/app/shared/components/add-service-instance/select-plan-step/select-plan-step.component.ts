@@ -10,10 +10,24 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
-import { distinctUntilChanged, filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
+import {
+  BehaviorSubject,
+  combineLatest as observableCombineLatest,
+  Observable,
+  of as observableOf,
+  Subscription,
+} from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  publishReplay,
+  refCount,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -32,6 +46,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
+
 
 interface ServicePlan {
   id: string;
@@ -106,8 +121,8 @@ export class SelectPlanStepComponent implements OnDestroy {
       refCount(),
     );
 
-    this.selectedService$ = Observable.combineLatest(
-      this.stepperForm.statusChanges.startWith(true),
+    this.selectedService$ = observableCombineLatest(
+      this.stepperForm.statusChanges.pipe(startWith(true)),
       this.servicePlans$).pipe(
         filter(([p, q]) => !!q && q.length > 0),
         map(([valid, servicePlans]) =>
@@ -147,7 +162,7 @@ export class SelectPlanStepComponent implements OnDestroy {
 
   onNext = (): Observable<StepOnNextResult> => {
     this.store.dispatch(new SetServicePlan(this.stepperForm.controls.servicePlans.value));
-    return Observable.of({ success: true });
+    return observableOf({ success: true });
   }
 
   ngOnDestroy(): void {

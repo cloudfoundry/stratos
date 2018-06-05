@@ -1,7 +1,5 @@
-import 'rxjs/add/observable/of';
-
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, TemplateRef, ViewChild } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of as observableOf } from 'rxjs';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -84,7 +82,7 @@ export class StepComponent {
   skip = false;
 
   @Input()
-  onNext: StepOnNextFunction = () => Observable.of({ success: true })
+  onNext: StepOnNextFunction = () => observableOf({ success: true })
 
   @Input()
   onEnter: (data: any) => void = () => { }

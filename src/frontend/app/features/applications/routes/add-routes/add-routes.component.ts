@@ -3,10 +3,8 @@ import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -34,6 +32,7 @@ import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
+
 
 @Component({
   selector: 'app-add-routes',
@@ -181,7 +180,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
         filter(route => !route.creating && !route.fetching),
         mergeMap(route => {
           if (route.error) {
-            return Observable.of({ success: false, message: `Failed to create route: ${route.message}` });
+            return observableOf({ success: false, message: `Failed to create route: ${route.message}` });
           } else {
             return this.mapRoute(route.response.result[0]);
           }

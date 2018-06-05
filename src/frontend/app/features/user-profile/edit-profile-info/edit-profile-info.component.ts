@@ -1,13 +1,12 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { first } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
+import { Subscription } from 'rxjs';
+import { first, map, take } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
 import { UserProfileService } from '../user-profile.service';
-
 
 
 @Component({
@@ -108,14 +107,16 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       }
     }
     const obs$ = this.userProfileService.updateProfile(this.profile, updates);
-    return obs$.take(1).map(([profileResult, passwordResult]) => {
-      const okay = !profileResult.error && !passwordResult.error;
-      const message = `${profileResult.message || ''}${passwordResult.message || ''}`;
-      return {
-        success: okay,
-        redirect: okay,
-        message: okay ? '' : `An error occurred whilst updating your profile: ${message}`
-      };
-    });
+    return obs$.pipe(
+      take(1),
+      map(([profileResult, passwordResult]) => {
+        const okay = !profileResult.error && !passwordResult.error;
+        const message = `${profileResult.message || ''}${passwordResult.message || ''}`;
+        return {
+          success: okay,
+          redirect: okay,
+          message: okay ? '' : `An error occurred whilst updating your profile: ${message}`
+        };
+      }), );
   }
 }

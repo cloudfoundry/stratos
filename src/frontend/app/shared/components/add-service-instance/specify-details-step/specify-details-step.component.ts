@@ -4,8 +4,7 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 import { MatChipInputEvent } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -15,10 +14,10 @@ import {
   publishReplay,
   refCount,
   share,
+  startWith,
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { getServiceJsonParams } from '../../../../features/service-catalog/services-helper';
@@ -146,7 +145,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.serviceInstancesInit$ = this.serviceInstances$.pipe(
       filter(p => !!p),
       map(o => false),
-    ).startWith(false);
+      startWith(false)
+    );
     this.hasInstances$ = this.serviceInstances$.pipe(
       filter(p => !!p),
       map(p => p.length > 0),
@@ -209,7 +209,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       switchMap(p => {
         if (this.bindExistingInstance) {
           // Binding an existing instance, therefore, skip creation by returning a dummy response
-          return Observable.of({
+          return observableOf({
             creating: false,
             error: false,
             response: {
@@ -225,7 +225,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       first(),
       switchMap(([request, state]) => {
         if (request.error) {
-          return Observable.of({ success: false, message: `Failed to create service instance: ${request.message}` });
+          return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
         } else {
           const serviceInstanceGuid = this.setServiceInstanceGuid(request);
           this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
@@ -240,7 +240,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
                   this.routeToServices(state.cfGuid, state.bindAppGuid))
               );
           } else {
-            return Observable.of(this.routeToServices());
+            return observableOf(this.routeToServices());
           }
         }
       }),

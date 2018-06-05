@@ -2,8 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { filter, map, mergeMap, switchMap, catchError, tap, first } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { catchError, filter, first, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { IDomain } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
@@ -23,12 +23,12 @@ import {
   routeSchemaKey,
 } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
-import { RequestInfoState, getDefaultRequestState } from '../../../../store/reducers/api-request-reducer/types';
+import { getDefaultRequestState, RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CreateNewApplicationState } from '../../../../store/types/create-application.types';
 import { createGetApplicationAction } from '../../application.service';
-import { combineLatest } from 'rxjs/observable/combineLatest';
+
 
 @Component({
   selector: 'app-create-application-step3',
@@ -57,7 +57,7 @@ export class CreateApplicationStep3Component implements OnInit {
     return this.createApp().pipe(
       switchMap(app => {
         return combineLatest(
-          Observable.of(app),
+          observableOf(app),
           this.createRoute()
         );
       }),
@@ -67,7 +67,7 @@ export class CreateApplicationStep3Component implements OnInit {
         // Then assign it to the application
         const obs$ = createdRoute ?
           this.associateRoute(app.response.result[0], route.response.result[0], cloudFoundry) :
-          Observable.of(null);
+          observableOf(null);
         return obs$.pipe(
           map(() => app.response.result[0] as string)
         );
@@ -78,7 +78,7 @@ export class CreateApplicationStep3Component implements OnInit {
         return { success: true };
       }),
       catchError((err: Error) => {
-        return Observable.of({ success: false, message: `Failed... ${err.message}` });
+        return observableOf({ success: false, message: `Failed... ${err.message}` });
       })
     );
   }
@@ -124,7 +124,7 @@ export class CreateApplicationStep3Component implements OnInit {
       return this.wrapObservable(this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid)),
         'Application created. Could not create route: ');
     }
-    return Observable.of({
+    return observableOf({
       ...getDefaultRequestState(),
       message: 'NO_ROUTE'
     });

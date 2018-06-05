@@ -1,9 +1,8 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Rx';
 
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';

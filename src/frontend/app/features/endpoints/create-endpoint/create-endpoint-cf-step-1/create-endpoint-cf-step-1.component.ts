@@ -1,10 +1,9 @@
-/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
-import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, ViewChild } from '@angular/core';
 import { NgForm, NgModel } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { denormalize } from 'normalizr';
-import { Observable } from 'rxjs/Observable';
-import { map, withLatestFrom } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, map, pairwise, withLatestFrom } from 'rxjs/operators';
 
 import { UtilsService } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
@@ -17,6 +16,8 @@ import { selectPaginationState } from '../../../../store/selectors/pagination.se
 import { endpointStoreNames } from '../../../../store/types/endpoint.types';
 import { DEFAULT_ENDPOINT_TYPE, getEndpointTypes, getFullEndpointApiUrl } from '../../endpoint-helpers';
 
+
+/* tslint:disable:no-access-missing-member https://github.com/mgechev/codelyzer/issues/191*/
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
@@ -79,16 +80,16 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
 
     const update$ = this.store.select(
       this.getUpdateSelector(action.guid())
-    ).filter(update => !!update);
+    ).pipe(filter(update => !!update));
 
-    return update$.pairwise()
-      .filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy))
-      .map(([oldVal, newVal]) => newVal)
-      .map(result => ({
+    return update$.pipe(pairwise(),
+      filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
+      map(([oldVal, newVal]) => newVal),
+      map(result => ({
         success: !result.error,
         redirect: !result.error,
         message: !result.error ? '' : result.message
-      }));
+      })));
   }
 
   private getUpdateSelector(guid) {
@@ -100,10 +101,10 @@ export class CreateEndpointCfStep1Component implements IStepperStep, AfterConten
   }
 
   ngAfterContentInit() {
-    this.validate = this.form.statusChanges
-      .map(() => {
+    this.validate = this.form.statusChanges.pipe(
+      map(() => {
         return this.form.valid;
-      });
+      }));
   }
 
   setUrlValidation(endpointValue: string) {

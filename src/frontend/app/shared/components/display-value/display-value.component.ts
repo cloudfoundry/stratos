@@ -1,6 +1,5 @@
-import { Observable } from 'rxjs/Rx';
+import { Observable ,  BehaviorSubject } from 'rxjs';
 import { Component, OnInit, Input, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 @Component({
   selector: 'app-display-value',
