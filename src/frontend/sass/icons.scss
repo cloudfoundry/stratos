@@ -15,8 +15,8 @@ $material-icons-font-path: 'assets/fonts/iconfont' !default;
 }
 
 .material-icons {
-  display: inline-block;
   direction: ltr;
+  display: inline-block;
   font-family: 'Material Icons';
   // Support for IE.
   font-feature-settings: 'liga';
