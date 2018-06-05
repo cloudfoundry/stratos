@@ -1,5 +1,10 @@
 import { IServiceInstance } from '../../core/cf-api-svc.types';
-import { DELETE_SERVICE_BINDING_ACTION_SUCCESS, CREATE_SERVICE_BINDING_ACTION_SUCCESS, DeleteServiceBinding, CreateServiceBinding } from '../actions/service-bindings.actions';
+import {
+  DELETE_SERVICE_BINDING_ACTION_SUCCESS,
+  CREATE_SERVICE_BINDING_ACTION_SUCCESS,
+  DeleteServiceBinding,
+  CreateServiceBinding
+} from '../actions/service-bindings.actions';
 import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';

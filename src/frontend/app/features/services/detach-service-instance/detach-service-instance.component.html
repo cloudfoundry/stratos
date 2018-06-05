@@ -3,7 +3,7 @@
 </app-page-header>
 <div class="detach-service-instance">
   <app-steppers cancel="/services">
-    <app-step title="Detach Apps" [valid]="detachApps.validate$ | async" [onNext]="detachApps.onNext">
+    <app-step title="Unbind Apps" [valid]="detachApps.validate$ | async" [onNext]="detachApps.onNext">
       <app-detach-apps #detachApps (selectedApps)="setSelectedBindings($event)"></app-detach-apps>
     </app-step>
     <app-step title="Confirm" [canClose]="!deleteStarted" [disablePrevious]="deleteStarted" [destructiveStep]="!deleteStarted" [onNext]="startDelete"  [finishButtonText]="deleteStarted ? 'Close' : 'Unbind'">

@@ -13,9 +13,13 @@ import { ActivatedRoute } from '@angular/router';
 import { BindingPipe } from '@angular/compiler';
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
 import { RouterNav } from '../../../store/actions/router.actions';
+import { GetServiceInstance } from '../../../store/actions/service-instances.actions';
 import {
-  serviceBindingSchemaKey,
+  serviceBindingSchemaKey, entityFactory, serviceInstancesSchemaKey
 } from '../../../store/helpers/entity-factory';
+import { IServiceInstance } from '../../../core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { filter, map } from 'rxjs/operators';
 @Component({
   selector: 'app-detach-service-instance',
   templateUrl: './detach-service-instance.component.html',
@@ -23,6 +27,7 @@ import {
 })
 export class DetachServiceInstanceComponent {
 
+  title$: Observable<string>;
   cfGuid: string;
   selectedBindings: APIResource<IServiceBinding>[];
   deleteStarted: boolean;
@@ -55,9 +60,24 @@ export class DetachServiceInstanceComponent {
     private store: Store<AppState>,
     private datePipe: DatePipe,
     private serviceActionHelperService: ServiceActionHelperService,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private entityServiceFactory: EntityServiceFactory
   ) {
     this.cfGuid = activatedRoute.snapshot.params.cfId;
+    const serviceInstanceId = activatedRoute.snapshot.params.serviceInstanceId;
+
+    const serviceBindingEntityService = this.entityServiceFactory.create<APIResource<IServiceInstance>>(
+      serviceInstancesSchemaKey,
+      entityFactory(serviceInstancesSchemaKey),
+      serviceInstanceId,
+      new GetServiceInstance(serviceInstanceId, this.cfGuid),
+      true
+    );
+    this.title$ = serviceBindingEntityService.waitForEntity$.pipe(
+      filter(o => !!o && !!o.entity),
+      map(o => `Unbind apps from '${o.entity.entity.name}'`),
+    );
+
   }
 
   getId = (el: APIResource) => el.metadata.guid;
