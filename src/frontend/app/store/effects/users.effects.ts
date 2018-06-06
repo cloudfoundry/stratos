@@ -34,6 +34,7 @@ export class UsersEffects {
 
   @Effect() fetchUsersByOrg$ = this.actions$.ofType<GetAllUsersAsNonAdmin>(GET_CF_USERS_BY_ORG).pipe(
     switchMap(action => {
+      //TODO: RC add comments
       const mockRequestType: ApiRequestTypes = 'fetch';
       const mockPaginationAction: PaginatedAction = {
         entityKey: cfUserSchemaKey,
@@ -41,9 +42,7 @@ export class UsersEffects {
         paginationKey: action.paginationKey,
         actions: null,
       };
-      // const actions: Action[] = [
       this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
-      // ];
 
       const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, organizationSchemaKey);
       const allOrganisations$ = getPaginationObservables<APIResource<IOrganization>>({
