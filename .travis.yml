@@ -21,11 +21,11 @@ cache:
   - "$HOME/.cache"
   - node_modules
 stages:
-  - Frontend Lint
+  #- Frontend Lint
   - Frontend Unit Tests
-  - Backend
-  - name: E2E tests
-    if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
+  #- Backend
+  #- name: E2E tests
+  #  if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
 jobs:
   include:
   - stage: Frontend Lint
@@ -35,8 +35,10 @@ jobs:
     env:
     - CI_ENV=true
     script:
+    - npm install git+https://github.com/nwmac/karma-jasmine.git
+    - cat node_modules/karma-jasmine/package.json
     - npm test
-    - npm run codecov
+    #- npm run codecov
   - stage: Backend
     before_script:
     - curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
