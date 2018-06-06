@@ -1,17 +1,22 @@
+
+import { of as observableOf, Observable, combineLatest } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { AppState } from '../store/app-state';
-import { CurrentUserPermissionsChecker, IConfigGroup, IConfigGroups, CHECKER_GROUPS } from './current-user-permissions.checker';
+import {
+  CHECKER_GROUPS,
+  CurrentUserPermissionsChecker,
+  IConfigGroup,
+  IConfigGroups,
+} from './current-user-permissions.checker';
 import {
   CurrentUserPermissions,
   PermissionConfig,
   PermissionConfigLink,
+  permissionConfigs,
   PermissionConfigType,
   PermissionTypes,
-  permissionConfigs
 } from './current-user-permissions.config';
 
 
@@ -42,6 +47,17 @@ export class CurrentUserPermissionsService {
     spaceGuid?: string
   ): Observable<boolean> {
     const actionConfig = this.getConfig(typeof action === 'string' ? permissionConfigs[action] : action);
+    const obs$ = this.getCanObservable(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
+    return obs$ ? obs$.pipe(
+      distinctUntilChanged(),
+    ) : observableOf(false);
+  }
+
+  private getCanObservable(
+    actionConfig: PermissionConfig[] | PermissionConfig,
+    endpointGuid: string,
+    orgOrSpaceGuid?: string,
+    spaceGuid?: string): Observable<boolean> {
     if (Array.isArray(actionConfig)) {
       return this.getComplexPermission(actionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
     } else if (actionConfig) {
@@ -49,7 +65,7 @@ export class CurrentUserPermissionsService {
     } else if (endpointGuid) {
       return this.checker.getAdminCheck(endpointGuid);
     }
-    return Observable.of(false);
+    return null;
   }
 
   private getSimplePermission(actionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
@@ -132,10 +148,10 @@ export class CurrentUserPermissionsService {
       distinctUntilChanged(),
       switchMap(([isAdmin, isReadOnly]) => {
         if (isAdmin) {
-          return Observable.of(true);
+          return observableOf(true);
         }
         if (isReadOnly) {
-          return Observable.of(false);
+          return observableOf(false);
         }
         return check$;
       })

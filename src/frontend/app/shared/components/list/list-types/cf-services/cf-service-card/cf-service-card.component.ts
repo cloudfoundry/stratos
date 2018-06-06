@@ -8,7 +8,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
 
-interface Tag {
+export interface ServiceTag {
   value: string;
   key: APIResource<IService>;
 }
@@ -21,7 +21,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
 
   @Input('row') row: APIResource<IService>;
   extraInfo: IServiceExtra;
-  tags: AppChip<Tag>[] = [];
+  tags: AppChip<ServiceTag>[] = [];
   constructor(private store: Store<AppState>) {
     super();
   }

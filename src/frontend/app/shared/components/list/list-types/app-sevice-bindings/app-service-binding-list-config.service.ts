@@ -69,7 +69,7 @@ export class AppServiceBindingListConfigService extends BaseCfListConfig<APIReso
         cellFlex: '2'
       },
       {
-        columnId: 'createdAt', headerCell: () => 'Creation Date',
+        columnId: 'creation', headerCell: () => 'Binding Date',
         cellDefinition: {
           getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
         },

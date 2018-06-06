@@ -23,7 +23,7 @@
       </app-code-block>
 
       <p>4. Target an org and space</p>
-      <app-code-block>cf target -o {{context.orgName || '[organization name]'}} -s {{context.spaceName || '[space name]'}}
+      <app-code-block>cf target -o "{{context.orgName || '[organization name]'}}" -s "{{context.spaceName || '[space name]'}}"
       </app-code-block>
     </div>
 

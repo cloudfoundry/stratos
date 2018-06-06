@@ -1,7 +1,8 @@
+
+import {interval as observableInterval,  combineLatest ,  Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { denormalize, schema } from 'normalizr';
 import { tag } from 'rxjs-spy/operators/tag';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import {
   distinctUntilChanged,
   filter,
@@ -13,7 +14,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { Observable } from 'rxjs/Rx';
 
 import { getAPIRequestDataState, selectEntity, selectRequestInfo } from '../../store/selectors/api.selectors';
 import { IRequestDataState } from '../../store/types/entity.types';
@@ -40,17 +40,17 @@ export class EntityMonitor<T = any> {
       startWith(defaultRequestState),
       publishReplay(1), refCount()
     );
-    this.isDeletingEntity$ = this.entityRequest$.map(request => request.deleting.busy).pipe(
+    this.isDeletingEntity$ = this.entityRequest$.pipe(map(request => request.deleting.busy)).pipe(
       distinctUntilChanged()
     );
-    this.isFetchingEntity$ = this.entityRequest$.map(request => request.fetching).pipe(
+    this.isFetchingEntity$ = this.entityRequest$.pipe(map(request => request.fetching)).pipe(
       distinctUntilChanged()
     );
-    this.updatingSection$ = this.entityRequest$.map(request => request.updating).pipe(
+    this.updatingSection$ = this.entityRequest$.pipe(map(request => request.updating)).pipe(
       distinctUntilChanged()
     );
 
-    this.apiRequestData$ = this.store.select(getAPIRequestDataState).publishReplay(1).refCount();
+    this.apiRequestData$ = this.store.select(getAPIRequestDataState).pipe(publishReplay(1), refCount(), );
     this.entity$ = this.getEntityObservable(
       schema,
       store.select(selectEntity<T>(entityKey, id)),
@@ -128,7 +128,7 @@ export class EntityMonitor<T = any> {
    * @param updateKey - The store updating key for the poll
    */
   poll(interval = 10000, action: Function, getActionState: (request: RequestInfoState) => ActionState) {
-    return Observable.interval(interval)
+    return observableInterval(interval)
       .pipe(
         tag('poll'),
         withLatestFrom(

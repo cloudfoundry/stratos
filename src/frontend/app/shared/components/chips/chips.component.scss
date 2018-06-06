@@ -17,17 +17,17 @@
   margin: 5px 0;
   &__limit {
     cursor: pointer;
-    padding-left: 5px;
+    padding: 0 5px;
   }
 }
 
 .mat-chip-list {
-  // Overriding mat-chips overly specific styles.
+  $chip-padding: 5px;
   mat-chip {
+    // Overriding mat-chips overly specific styles.
     &.app-chip,
     &.app-chip + &.app-chip {
-      $chip-padding: 5px;
-      margin: $chip-padding $chip-padding $chip-padding 0;
+      margin: $chip-padding 0 $chip-padding $chip-padding;
     }
   }
   &__stacked,
@@ -36,8 +36,7 @@
     mat-chip {
       &.app-chip,
       &.app-chip + &.app-chip {
-        $chip-padding: 5px;
-        margin: $chip-padding 0 $chip-padding $chip-padding;
+        margin: $chip-padding;
       }
     }
   }

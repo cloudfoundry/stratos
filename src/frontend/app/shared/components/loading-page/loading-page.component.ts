@@ -1,8 +1,8 @@
+
+import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, Input, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Rx';
 import { RouterState, Router, RouterStateSnapshot, ActivatedRoute } from '@angular/router';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { filter, first } from 'rxjs/operators';
 
 @Component({
@@ -25,8 +25,7 @@ export class LoadingPageComponent implements OnInit {
   constructor() { }
 
   @Input('isLoading')
-  isLoading: Observable<boolean> = Observable
-    .of(false)
+  isLoading: Observable<boolean> = observableOf(false)
     .pipe(
       first()
     );

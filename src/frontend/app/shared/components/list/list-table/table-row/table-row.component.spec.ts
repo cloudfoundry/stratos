@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TableRowComponent } from './table-row.component';
-import { Observable } from 'rxjs/Observable';
+import { Observable, of as observableOf } from 'rxjs';
 import { CoreModule } from '../../../../../core/core.module';
 import { SharedModule } from '../../../../shared.module';
 import { CdkTableModule } from '@angular/cdk/table';
@@ -19,11 +19,11 @@ describe('TableRowComponent', () => {
     `
   })
   class TestHostComponent {
-    rowState1 = Observable.of({
+    rowState1 = observableOf({
       error: true,
       blocked: true
     });
-    rowState2 = Observable.of({
+    rowState2 = observableOf({
       error: false,
       blocked: false
     });
@@ -36,7 +36,7 @@ describe('TableRowComponent', () => {
     fixture.elementRef.nativeElement.getElementsByClassName(className)[0],
     fixture.elementRef.nativeElement.getElementsByClassName(className)[1]
   ]);
-  const elementShown = element => window.getComputedStyle(element).display !== 'none';
+  const elementShown = (element: Element) => window.getComputedStyle(element).display !== 'none';
 
 
   beforeEach(async(() => {

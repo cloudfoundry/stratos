@@ -1,7 +1,7 @@
+
+import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { combineLatest } from 'rxjs/observable/combineLatest';
 import { first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../../environments/environment';
@@ -47,7 +47,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       link: 'users',
       label: 'Users',
       // Hide the users tab unless we are in development
-      hidden: Observable.of(environment.production)
+      hidden: observableOf(environment.production)
     }
   ];
 

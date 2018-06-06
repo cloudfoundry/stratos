@@ -1,3 +1,7 @@
+
+import { of as observableOf, Observable } from 'rxjs';
+
+import { pairwise, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Store } from '@ngrx/store';
@@ -21,7 +25,7 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { Observable } from 'rxjs/Observable';
+
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -102,8 +106,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'connected'),
-    createEnabled: (row: EndpointModel) => Observable.of(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'connected'))
   };
 
   private listActionConnect: IListAction<EndpointModel> = {
@@ -119,8 +122,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Connect',
     description: '',
-    createVisible: (row: EndpointModel) => Observable.of(row.connectionStatus === 'disconnected'),
-    createEnabled: (row: EndpointModel) => Observable.of(true),
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
   };
 
   private singleActions = [
@@ -158,8 +160,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   }
 
   private handleAction(storeSelect, handleChange) {
-    const disSub = this.store.select(storeSelect)
-      .pairwise()
+    const disSub = this.store.select(storeSelect).pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {

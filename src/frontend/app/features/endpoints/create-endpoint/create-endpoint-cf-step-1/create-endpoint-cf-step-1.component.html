@@ -1,6 +1,6 @@
 <form #form="ngForm" class="stepper-form">
   <mat-form-field>
-    <mat-select placeholder="Endpoint Type" id="ep-type" name="ep-type" [(ngModel)]="typeValue" (change)="setUrlValidation($event.value)" #typeField="ngModel" required>
+    <mat-select placeholder="Endpoint Type" id="ep-type" name="ep-type" [(ngModel)]="typeValue" (selectionChange)="setUrlValidation($event.value)" #typeField="ngModel" required>
       <mat-option *ngFor="let type of endpointTypes" [value]="type.value">
         {{ type.label }}
       </mat-option>

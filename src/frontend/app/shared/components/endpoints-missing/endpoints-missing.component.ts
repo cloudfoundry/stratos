@@ -1,12 +1,13 @@
-import { concat } from 'rxjs/observable/concat';
-import { Observable, Subscription } from 'rxjs/Rx';
+
+import {combineLatest as observableCombineLatest,  concat ,  Observable, Subscription } from 'rxjs';
+
+import {startWith,  map, tap, delay } from 'rxjs/operators';
 import { Component, OnInit, Input, OnDestroy, Output, AfterViewInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { UserService } from '../../../core/user.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
-import { map, tap, delay } from 'rxjs/operators';
 
 @Component({
   selector: 'app-endpoints-missing',
@@ -51,7 +52,7 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   ngAfterViewInit() {
-    this.noContent$ = Observable.combineLatest(
+    this.noContent$ = observableCombineLatest(
       this.cloudFoundryService.hasRegisteredCFEndpoints$,
       this.cloudFoundryService.hasConnectedCFEndpoints$
     ).pipe(
@@ -68,7 +69,7 @@ export class EndpointsMissingComponent implements OnInit, AfterViewInit, OnDestr
         }
         return null;
       })
-    ).startWith(null);
+    ).pipe(startWith(null));
   }
 
   ngOnDestroy() {

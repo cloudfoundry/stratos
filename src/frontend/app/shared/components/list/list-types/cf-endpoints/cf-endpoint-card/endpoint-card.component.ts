@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { ReplaySubject } from 'rxjs';
 
 import { EndpointModel } from '../../../../../../store/types/endpoint.types';
 import { CardStatus } from '../../../../application-state/application-state.service';

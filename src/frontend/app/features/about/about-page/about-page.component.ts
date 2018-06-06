@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { AppState } from '../../../store/app-state';
