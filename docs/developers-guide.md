@@ -67,6 +67,10 @@ The build artefacts will be stored in the `dist/` directory. Use the `-prod` fla
 To create a new angular component run `ng generate component component-name`. You can use a similar command to create other types of angular
 items `ng generate <directive|pipe|service|class|guard|interface|enum|module> <name>`.
 
+## Theming
+
+We use the angular material theming mechanism. See [here](https://material.angular.io/guide/theming-your-components) for more information about theming new components added to stratos.
+
 ## Test
 
 ### Lint
