@@ -18,7 +18,8 @@ module.exports = function (config) {
       captureConsole: true,
     },
     coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, 'coverage'), reports: ['html', 'lcovonly', 'json'],
+      dir: require('path').join(__dirname, 'coverage'),
+      reports: ['html', 'lcovonly', 'json'],
       fixWebpackSourcePaths: true
     },
     angularCli: {
@@ -29,10 +30,9 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.DEBUG,
     autoWatch: false,
-    //browsers: process.env.CI_ENV ? ['ChromeNoSandbox'] : ['Chrome'],
-    browsers: ['Chrome'],
+    browsers: process.env.HEADLESS ? ['StratosChromeHeadless'] : ['Chrome'],
     customLaunchers: {
-      StratosChromeHeadless:{
+      StratosChromeHeadless: {
         base: 'ChromeHeadless',
         flags: ['--no-sandbox']
       }
