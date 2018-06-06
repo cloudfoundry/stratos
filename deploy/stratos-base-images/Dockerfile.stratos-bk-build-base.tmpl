@@ -1,8 +1,9 @@
 FROM  {{GO_BUILD_BASE}}
 
 RUN cd / && wget https://nodejs.org/dist/v8.11.2/node-v8.11.2-linux-x64.tar.xz && \
-tar -xf node-v8.11.2-linux-x64.tar.xz && \
-    mkdir -p /root/.npm-global
-ENV USER=root
-ENV PATH=/root/.npm-global/bin:$PATH:/node-v8.11.2-linux-x64/bin
-ENV NPM_CONFIG_PREFIX=/root/.npm-global
+tar -xf node-v8.11.2-linux-x64.tar.xz
+ENV USER=stratos
+ENV PATH=$PATH:/node-v8.11.2-linux-x64/bin
+RUN useradd -ms /bin/bash stratos
+USER stratos
+WORKDIR /home/stratos

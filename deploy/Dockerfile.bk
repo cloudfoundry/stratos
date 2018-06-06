@@ -1,12 +1,12 @@
 FROM splatform/stratos-bk-build-base:opensuse as builder
-RUN mkdir -p /go/src/github.com/cloudfoundry-incubator/stratos
-WORKDIR /go/src/github.com/cloudfoundry-incubator/stratos
-COPY . /go/src/github.com/cloudfoundry-incubator/stratos
+RUN mkdir -p /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos
+WORKDIR /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos
+COPY . /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos
 RUN npm install
 RUN npm run build-backend
 
 FROM splatform/stratos-bk-base:opensuse as common-build
-COPY --from=builder /go/src/github.com/cloudfoundry-incubator/stratos/outputs/* /srv/
+COPY --from=builder /home/stratos/go/src/github.com/cloudfoundry-incubator/stratos/outputs/* /srv/
 RUN chmod +x /srv/portal-proxy
 
 # use --target=prod-build to build a backend image for Kubernetes
