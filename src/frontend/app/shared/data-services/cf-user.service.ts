@@ -41,7 +41,6 @@ export class CfUserService {
   private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
 
   public static createPaginationAction(endpointGuid: string, isAdmin: boolean): PaginatedAction {
-    // See issue #1741 - Will not work for non-admins //TODO: RC search for
     return isAdmin ? new GetAllUsersAsAdmin(endpointGuid) : new GetAllUsersAsNonAdmin(endpointGuid);
   }
 

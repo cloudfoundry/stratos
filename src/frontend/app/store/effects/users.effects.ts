@@ -19,7 +19,7 @@ import { EntityServiceFactory } from '../../core/entity-service-factory.service'
 import { IOrganization } from '../../core/cf-api.types';
 import { getPaginationObservables } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
-import { createPaginationCompleteWatcher, fetchPaginationStateFromAction } from '../helpers/store-helpers';
+import { fetchPaginationStateFromAction, createPaginationCompleteWatcher } from '../helpers/store-helpers';
 
 
 @Injectable()
@@ -31,10 +31,11 @@ export class UsersEffects {
     private paginationMonitorFactory: PaginationMonitorFactory,
   ) { }
 
-
+  /**
+   * Fetch users from each organisation. This is used when the user connected to cf is non-admin and cannot access the global users/ list
+   */
   @Effect() fetchUsersByOrg$ = this.actions$.ofType<GetAllUsersAsNonAdmin>(GET_CF_USERS_BY_ORG).pipe(
     switchMap(action => {
-      //TODO: RC add comments
       const mockRequestType: ApiRequestTypes = 'fetch';
       const mockPaginationAction: PaginatedAction = {
         entityKey: cfUserSchemaKey,
@@ -42,8 +43,11 @@ export class UsersEffects {
         paginationKey: action.paginationKey,
         actions: null,
       };
+
+      // START the 'list' fetch
       this.store.dispatch(new StartRequestAction(mockPaginationAction, mockRequestType));
 
+      // Discover all the orgs. In most cases we will already have this
       const getAllOrgsPaginationKey = createEntityRelationPaginationKey(endpointSchemaKey, organizationSchemaKey);
       const allOrganisations$ = getPaginationObservables<APIResource<IOrganization>>({
         store: this.store,
@@ -57,7 +61,6 @@ export class UsersEffects {
         first(),
       );
 
-
       return allOrganisations$.pipe(
         switchMap(organisations => {
           const requests: {
@@ -65,7 +68,9 @@ export class UsersEffects {
             succeeded$: Observable<boolean>
           }[] = [];
 
+          // For each org...
           organisations.forEach(organisation => {
+            // Fetch the users
             const getUsersAction = new GetAllOrgUsers(
               organisation.metadata.guid,
               createEntityRelationPaginationKey(organizationSchemaKey, organisation.metadata.guid),
@@ -73,6 +78,7 @@ export class UsersEffects {
               action.includeRelations,
               action.populateMissing
             );
+            // Create a way to monitor fetch users success
             const monitor = createPaginationCompleteWatcher(this.store, getUsersAction);
             this.store.dispatch(getUsersAction);
             requests.push({
@@ -80,12 +86,18 @@ export class UsersEffects {
               succeeded$: monitor
             });
           });
-          return combineLatest(requests.map(action => action.succeeded$)).pipe(
+
+          // Wait for all requests to complete and then act on their result
+          return combineLatest(requests.map(request => request.succeeded$)).pipe(
             switchMap((results: boolean[]) => {
               if (results.some(result => !result)) {
-                return observableOf(new WrapperRequestActionFailed('Failed to fetch users from one or more organisations', mockPaginationAction, mockRequestType));
+                // Some requests have failed, mark the list as errored
+                return observableOf(new WrapperRequestActionFailed(
+                  'Failed to fetch users from one or more organisations',
+                  mockPaginationAction, mockRequestType));
               }
 
+              // Fetch the list of user guids for each org from the store
               const userGuidsPerOrg: Observable<string[]>[] = requests.map(request =>
                 fetchPaginationStateFromAction(this.store, request.action).pipe(
                   first(),
@@ -96,15 +108,18 @@ export class UsersEffects {
                 )
               );
 
+              // Create the 'lists' page 1 which is a collection of unique user guids from above
               return combineLatest(userGuidsPerOrg).pipe(
                 map((userGuids: string[][]) => {
-                  const a = userGuids.reduce((allUserGuids, subsetUserGuids) => {
+                  // Create an object with keys of all users (eliminates dupes efficiently)
+                  return Object.keys(userGuids.reduce((allUserGuids, subsetUserGuids) => {
                     subsetUserGuids.forEach(userGuid => allUserGuids[userGuid] = true);
                     return allUserGuids;
-                  }, {});
-                  return Object.keys(a);
+                  }, {}));
                 }),
                 map(userGuids => {
+                  // Create a normalized response containing the list of guids. Note - we're not interested in the user entities as these
+                  // have already be stored
                   const mappedData = {
                     entities: { [cfUserSchemaKey]: {} },
                     result: []
@@ -114,6 +129,7 @@ export class UsersEffects {
                     userData[userGuid] = {};
                   });
                   mappedData.result = [...userGuids];
+                  // Dispatch the mock action with the info for the store
                   return new WrapperRequestActionSuccess(mappedData, mockPaginationAction, mockRequestType);
                 })
               );
@@ -129,18 +145,4 @@ export class UsersEffects {
 
   );
 
-  // private createPaginationWatcher = (store: Store<AppState>, entityKey: string, paginationKey: string): Observable<boolean> =>
-  //   store.select(selectPaginationState(entityKey, paginationKey)).pipe(
-  //     map((paginationState: PaginationEntityState) => {
-  //       const pageRequest: ActionState =
-  //         paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-  //       return pageRequest ? pageRequest.busy : true;
-  //     }),
-  //     pairwise(),
-  //     map(([oldFetching, newFetching]) => {
-  //       return oldFetching === true && newFetching === false;
-  //     }),
-  //     skipWhile(completed => !completed),
-  //     first(),
-  //   )
 }

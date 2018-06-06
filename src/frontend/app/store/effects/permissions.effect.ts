@@ -71,7 +71,7 @@ export class PermissionsEffects {
       const endpointsArray = Object.values(endpoints);
       const isAllAdmins = endpointsArray.every(endpoint => !!endpoint.user.admin);
 
-      // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permissions to be ready
+      // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised
       if (isAllAdmins) {
         return [
           successAction,
@@ -95,6 +95,7 @@ export class PermissionsEffects {
   private dispatchRoleRequests(endpoints: EndpointModel[]): CfsRequestState {
     const requests: CfsRequestState = {};
 
+    // Per endpoint fetch feature flags and user roles (unless admin, where we don't need to), then mark endpoint as initialised
     endpoints.forEach(endpoint => {
       if (endpoint.user.admin) {
         requests[endpoint.guid].push(observableOf(true));
@@ -148,7 +149,6 @@ export class PermissionEffects {
   @Effect() getCurrentUsersPermissions$ = this.actions$.ofType<GetUserRelations>(GET_CURRENT_USER_RELATION).pipe(
     map(action => {
       return executeRequest(this.store, action, this.httpClient).pipe(
-        tap(() => console.log('!!!!!!!!!!!!!!!!!!!!')),
         map((success) => ({ type: action.actions[1] }))
       );
     })
