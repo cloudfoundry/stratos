@@ -7,6 +7,7 @@ RUN wget https://storage.googleapis.com/golang/go1.8.4.linux-amd64.tar.gz && \
     tar -xzf go1.8.4.linux-amd64.tar.gz -C /usr/local/ && \
     mkdir -p /home/stratos/go/bin && \
     mkdir -p /home/stratos/go/src
+    
 ENV PATH $PATH:/usr/local/go/bin:/home/stratos/go/bin
 ENV GOPATH /home/stratos/go
 # Using modified glide install script, because the official one defaults to `curl` which is broken in SLE12
