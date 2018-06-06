@@ -24,11 +24,11 @@ module.exports = function (config) {
     angularCli: {
       environment: 'dev'
     },
-    reporters: ['spec', 'kjhtml', 'stratos'],
+    reporters: process.env.CI_ENV ? ['spec', 'stratos'] : ['spec', 'kjhtml', 'stratos'],
     port: 9876,
     colors: true,
     logLevel: config.DEBUG,
-    autoWatch: true,
+    autoWatch: false,
     browsers: process.env.CI_ENV ? ['StratosChromeHeadless'] : ['Chrome'],
     customLaunchers: {
       StratosChromeHeadless:{

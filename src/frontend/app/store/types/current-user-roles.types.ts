@@ -34,6 +34,7 @@ export interface IGlobalRolesState {
   scopes: string[];
 }
 export interface ISpaceRoleState {
+  orgId: string;
   isManager: boolean;
   isAuditor: boolean;
   isDeveloper: boolean;

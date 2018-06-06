@@ -153,6 +153,7 @@ describe('currentUserReducer', () => {
     const toEqual = getState(RoleEntities.SPACES, [{
       guid: testSpaceGuid,
       roles: {
+        orgId: testOrgGuid,
         isManager: false,
         isAuditor: false,
         isDeveloper: true
@@ -161,6 +162,7 @@ describe('currentUserReducer', () => {
     {
       guid: generalGuid,
       roles: {
+        orgId: generalGuid,
         isManager: true,
         isAuditor: false,
         isDeveloper: false
@@ -205,6 +207,7 @@ describe('currentUserReducer', () => {
     const spaceState = getState(RoleEntities.SPACES, [{
       guid: testSpaceGuid,
       roles: {
+        orgId: testOrgGuid,
         isManager: false,
         isAuditor: false,
         isDeveloper: true
@@ -213,6 +216,7 @@ describe('currentUserReducer', () => {
     {
       guid: generalGuid,
       roles: {
+        orgId: generalGuid,
         isManager: true,
         isAuditor: false,
         isDeveloper: false
