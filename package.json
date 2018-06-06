@@ -18,7 +18,7 @@
     "ng": "ng",
     "start": "npm run customize && ng serve",
     "start-prod": "ng serve --prod --aot=false --source-map=true",
-    "test": "ng test",
+    "test": "ng test --code-coverage",
     "test-debug": "ng test --watch=true --source-map=true",
     "test-headless": "CI_ENV=true npm run test",
     "codecov": "codecov -f coverage/*.json",
