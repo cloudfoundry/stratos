@@ -1,26 +1,31 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-
-import { AppState, IRequestEntityTypeState } from '../app-state';
-import { combineLatest ,  Observable } from 'rxjs';
-import { catchError, map, switchMap, withLatestFrom, tap, mergeMap } from 'rxjs/operators';
-import { APIResource } from '../types/api.types';
-import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
-import { EndpointModel } from '../types/endpoint.types';
-import { Action } from '@ngrx/store';
-import {
-  GetUserRelations,
-  GetCurrentUserRelationsComplete,
-  GetCurrentUsersRelations,
-  UserRelationTypes,
-  GET_CURRENT_USER_RELATIONS,
-  GET_CURRENT_USER_RELATION
-} from '../actions/permissions.actions';
+import { Action, Store } from '@ngrx/store';
+import { Observable, combineLatest } from 'rxjs';
+import { map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 import {
   createCfFeatureFlagFetchAction
 } from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { CONNECT_ENDPOINTS_SUCCESS, EndpointActionComplete } from '../actions/endpoint.actions';
+import {
+  GET_CURRENT_USER_RELATION,
+  GET_CURRENT_USER_RELATIONS,
+  GetCurrentUserRelationsComplete,
+  GetCurrentUsersRelations,
+  GetUserRelations,
+  UserRelationTypes
+} from '../actions/permissions.actions';
+import { AppState } from '../app-state';
+import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
+import { APIResource } from '../types/api.types';
+import { INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+
+
+interface IEndpointConnectionInfo {
+  guid: string;
+  userGuid: string;
+}
 
 function getRequestFromAction(action: GetUserRelations, httpClient: HttpClient) {
   return httpClient.get<{ [guid: string]: { resources: APIResource[] } }>(
@@ -59,7 +64,11 @@ export class PermissionsEffects {
       if (!noneAdminEndpoints.length) {
         return allActions;
       }
-      return combineLatest(this.getRequests(noneAdminEndpoints)).pipe(
+      const connectionInfo = noneAdminEndpoints.map(endpoint => ({
+        guid: endpoint.guid,
+        userGuid: endpoint.user.guid
+      }));
+      return combineLatest(this.getRequests(connectionInfo)).pipe(
         mergeMap(actions => {
           actions.push({ type: 'all-complete' });
           return [
@@ -70,10 +79,25 @@ export class PermissionsEffects {
       );
     }));
 
-  getRequests(endpoints: EndpointModel[]) {
+  @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS).pipe(
+    switchMap(action => {
+      const endpoint = action.endpoint as INewlyConnectedEndpointInfo;
+      if (endpoint.user.admin || action.endpointType !== 'cf') {
+        return [];
+      }
+      return combineLatest(this.getRequests([{
+        guid: action.guid,
+        userGuid: endpoint.user.guid
+      }])).pipe(
+        mergeMap(actions => actions)
+      );
+    })
+  );
+
+  getRequests(endpoints: IEndpointConnectionInfo[]): Observable<Action>[] {
     return [].concat(...endpoints.map(endpoint => {
       return Object.values(UserRelationTypes).map((type: UserRelationTypes) => {
-        return getRequestFromAction(new GetUserRelations(endpoint.user.guid, type, endpoint.guid), this.httpClient);
+        return getRequestFromAction(new GetUserRelations(endpoint.userGuid, type, endpoint.guid), this.httpClient);
       });
     }));
   }

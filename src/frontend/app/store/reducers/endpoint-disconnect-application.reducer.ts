@@ -1,11 +1,11 @@
 import { APIResource } from '../types/api.types';
 import { IRequestEntityTypeState } from '../app-state';
-import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS } from '../actions/endpoint.actions';
+import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, UNREGISTER_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
 export function endpointDisconnectApplicationReducer(entityKey) {
   return function (state: APIResource, action: DisconnectEndpoint) {
     switch (action.type) {
       case DISCONNECT_ENDPOINTS_SUCCESS:
-      case UNREGISTER_ENDPOINTS:
+      case UNREGISTER_ENDPOINTS_SUCCESS:
         return deletionApplicationFromEndpoint(state, action.guid, entityKey);
     }
     return state;

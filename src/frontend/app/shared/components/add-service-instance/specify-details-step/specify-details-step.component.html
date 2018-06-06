@@ -17,7 +17,7 @@
     </mat-form-field>
     <mat-form-field class="stepper-form__tags">
       <mat-chip-list #chipList formControlName="tags" class="stepper-form__tags__chip-list">
-        <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable" [removable]="tagsRemovable" (remove)="removeTag(tag)">
+        <mat-chip *ngFor="let tag of tags" class="stepper-form__tags__chip-list__chip" [selectable]="tagsSelectable" [removable]="tagsRemovable" (removed)="removeTag(tag)">
           {{tag.label}}
           <mat-icon matChipRemove *ngIf="tagsRemovable">cancel</mat-icon>
         </mat-chip>

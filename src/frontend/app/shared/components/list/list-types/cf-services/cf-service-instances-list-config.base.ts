@@ -1,10 +1,12 @@
-
-import {of as observableOf,  Observable } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ListDataSource } from '../../../../../shared/components/list/data-sources-controllers/list-data-source';
 import { ListView } from '../../../../../store/actions/list.actions';
 import { AppState } from '../../../../../store/app-state';
@@ -24,9 +26,8 @@ import {
 import {
   TableCellServicePlanComponent,
 } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
-import { RouterNav } from '../../../../../store/actions/router.actions';
-import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
-import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+
+
 
 interface CanCache {
   [spaceGuid: string]: Observable<boolean>;
@@ -98,18 +99,25 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
     action: (item: APIResource) => this.deleteServiceInstance(item),
     label: 'Delete',
     description: 'Delete Service Instance',
-    createVisible: (row: APIResource<IServiceInstance>) =>
-      this.can(this.canDeleteCache, CurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid),
-    createEnabled: (row) => observableOf(true)
+    createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
+      row$.pipe(
+        switchMap(
+          row => this.can(this.canDeleteCache, CurrentUserPermissions.SERVICE_INSTANCE_DELETE, row.entity.cfGuid, row.entity.space_guid)
+        )
+      )
   };
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
     label: 'Detach',
     description: 'Detach Service Instance',
-    createVisible: (row: APIResource<IServiceInstance>) =>
-      this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid),
-    createEnabled: (row: APIResource) => observableOf(row.entity.service_bindings.length === 1)
+    createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length === 1)),
+    createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
+      row$.pipe(
+        switchMap(
+          row => this.can(this.canDetachCache, CurrentUserPermissions.SERVICE_BINDING_EDIT, row.entity.cfGuid, row.entity.space_guid)
+        )
+      )
   };
 
   private listActionEdit: IListAction<APIResource> = {
