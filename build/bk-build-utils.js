@@ -138,7 +138,7 @@
   }
 
   function test(path) {
-    return spawnProcess('go', ['test', '-v'], path, env);
+    return spawnProcess('go', ['test', './...', '-v'], path, env);
   }
 
   function getVersion() {

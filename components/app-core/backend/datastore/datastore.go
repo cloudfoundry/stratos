@@ -99,6 +99,8 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
+		} else {
+			return dc, fmt.Errorf("Invalid SSL mode: %v", dc.SSLMode)
 		}
 	} else if dc.DatabaseProvider == MYSQL {
 		return dc, nil
