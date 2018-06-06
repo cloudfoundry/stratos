@@ -16,6 +16,8 @@ import { PaginationEntityState } from '../../store/types/pagination.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../store/types/user.types';
 import { UserRoleLabels } from '../../store/types/users-roles.types';
 import { ActiveRouteCfOrgSpace } from './cf-page.types';
+import { ICfRolesState } from '../../store/types/current-user-roles.types';
+import { getCurrentUserCFEndpointRolesState } from '../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
 
 
 export interface IUserRole<T> {
@@ -211,5 +213,12 @@ export function canUpdateOrgSpaceRoles(
     perms.can(CurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
   ).pipe(
     map((checks: boolean[]) => checks.some(check => check))
+  );
+}
+
+export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
+  return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
+    filter(cf => cf && cf.state.initialised),
+    first()
   );
 }

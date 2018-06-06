@@ -8,6 +8,10 @@ import { CfUser } from '../../../../../store/types/user.types';
 import { ITableColumn } from '../../list-table/table.types';
 import { IListConfig, ListViewTypes, IMultiListAction } from '../../list.component.types';
 import { CfSelectUsersDataSourceService } from './cf-select-users-data-source.service';
+import { waitForCFPermissions } from '../../../../../features/cloud-foundry/cf.helpers';
+import { Observable } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+import { CfUserService } from '../../../../data-services/cf-user.service';
 
 @Injectable()
 export class CfSelectUsersListConfigService implements IListConfig<APIResource<CfUser>> {
@@ -34,9 +38,16 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
       field: 'entity.username'
     }
   }];
+  private initialised: Observable<boolean>;
 
   constructor(private store: Store<AppState>, private cfGuid: string) {
-    this.dataSource = new CfSelectUsersDataSourceService(cfGuid, this.store, this);
+    this.initialised = waitForCFPermissions(store, cfGuid).pipe(
+      tap(cf => {
+        const action = CfUserService.createPaginationAction(cfGuid, cf.global.isAdmin);
+        this.dataSource = new CfSelectUsersDataSourceService(cfGuid, this.store, action, this);
+      }),
+      map(cf => cf && cf.state.initialised),
+    );
   }
 
   getColumns = () => this.columns;
@@ -49,4 +60,5 @@ export class CfSelectUsersListConfigService implements IListConfig<APIResource<C
   getSingleActions = () => [];
   getMultiFiltersConfigs = () => [];
   getDataSource = () => this.dataSource;
+  getInitialised = () => this.initialised;
 }

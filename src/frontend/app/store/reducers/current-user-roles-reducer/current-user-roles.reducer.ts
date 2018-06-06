@@ -1,20 +1,35 @@
 import { Action } from '@ngrx/store';
 
-import { GET_CURRENT_USER_RELATION_SUCCESS, GetCurrentUserRelationsComplete } from '../../actions/permissions.actions';
-import { ICurrentUserRolesState } from '../../types/current-user-roles.types';
+import { SESSION_VERIFIED, VerifiedSession } from '../../actions/auth.actions';
+import {
+  GET_CURRENT_USER_CF_RELATIONS,
+  GET_CURRENT_USER_CF_RELATIONS_FAILED,
+  GET_CURRENT_USER_CF_RELATIONS_SUCCESS,
+  GET_CURRENT_USER_RELATION_SUCCESS,
+  GET_CURRENT_USER_RELATIONS,
+  GET_CURRENT_USER_RELATIONS_FAILED,
+  GET_CURRENT_USER_RELATIONS_SUCCESS,
+  GetCurrentUserRelationsComplete,
+  GetUserCfRelations,
+} from '../../actions/permissions.actions';
+import { getDefaultRolesRequestState, ICurrentUserRolesState } from '../../types/current-user-roles.types';
 import { currentUserBaseCFRolesReducer } from './current-user-base-cf-role.reducer';
-import { VerifiedSession, SESSION_VERIFIED } from '../../actions/auth.actions';
+import {
+  currentUserCfRolesRequestStateReducer,
+  currentUserRolesRequestStateReducer,
+} from './current-user-request-state.reducers';
 import { roleInfoFromSessionReducer } from './current-user-role-session.reducer';
 
-const defaultState = {
+const getDefaultState = () => ({
   internal: {
     isAdmin: false,
     scopes: []
   },
-  cf: {}
-};
+  cf: {},
+  state: getDefaultRolesRequestState()
+});
 
-export function currentUserRolesReducer(state: ICurrentUserRolesState = defaultState, action: Action): ICurrentUserRolesState {
+export function currentUserRolesReducer(state: ICurrentUserRolesState = getDefaultState(), action: Action): ICurrentUserRolesState {
   switch (action.type) {
     case GET_CURRENT_USER_RELATION_SUCCESS:
       return {
@@ -24,6 +39,20 @@ export function currentUserRolesReducer(state: ICurrentUserRolesState = defaultS
     case SESSION_VERIFIED:
       const verifiedSession = action as VerifiedSession;
       return roleInfoFromSessionReducer(state, verifiedSession.sessionData.user, verifiedSession.sessionData.endpoints);
+    case GET_CURRENT_USER_RELATIONS:
+    case GET_CURRENT_USER_RELATIONS_SUCCESS:
+    case GET_CURRENT_USER_RELATIONS_FAILED:
+      return {
+        ...state,
+        state: currentUserRolesRequestStateReducer(state.state, action.type)
+      };
+    case GET_CURRENT_USER_CF_RELATIONS:
+    case GET_CURRENT_USER_CF_RELATIONS_SUCCESS:
+    case GET_CURRENT_USER_CF_RELATIONS_FAILED:
+      return {
+        ...state,
+        cf: currentUserCfRolesRequestStateReducer(state.cf, action as GetUserCfRelations)
+      };
   }
   return state;
 }

@@ -1,4 +1,4 @@
-import { RequestOptions } from '@angular/http';
+import { RequestOptions, RequestMethod } from '@angular/http';
 
 import {
   cfUserSchemaKey,
@@ -9,8 +9,8 @@ import {
   endpointSchemaKey,
 } from '../helpers/entity-factory';
 import { createEntityRelationKey, EntityInlineParentAction, createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, IRequestAction } from '../types/request.types';
+import { PaginatedAction, PaginationParam } from '../types/pagination.types';
+import { CFStartAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { getActions } from './action.helper';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
 import { Action } from '@ngrx/store';
@@ -42,25 +42,30 @@ export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 
 export const GET_CF_USERS_BY_ORG = '[Users] Get cf users by org ';
 
-export class GetAllUsersByOrg implements Action {
+const createGetAllUsersPaginationKey = cfGuid => createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+
+export class GetAllUsersAsNonAdmin implements PaginatedAction {
   type = GET_CF_USERS_BY_ORG;
   paginationKey: string;
+  actions: string[] = [];
+  entityKey = cfUserSchemaKey;
   constructor(
     public cfGuid: string,
     public includeRelations: string[] = defaultUserRelations,
     public populateMissing = true
   ) {
-    this.paginationKey = createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+    this.paginationKey = createGetAllUsersPaginationKey(cfGuid);
   }
 }
 
-export class GetAllUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  paginationKey: string;
   constructor(
-    public paginationKey: string,
     public endpointGuid: string,
     public includeRelations: string[] = defaultUserRelations,
     public populateMissing = true) {
     super();
+    this.paginationKey = createGetAllUsersPaginationKey(endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';

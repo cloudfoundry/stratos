@@ -5,7 +5,7 @@ import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, first, map, pairwise, skipWhile, switchMap, filter } from 'rxjs/operators';
 
 import { GetAllOrgUsers, GetAllOrganizations } from '../actions/organization.actions';
-import { GET_CF_USERS_BY_ORG, GetAllUsersByOrg } from '../actions/users.actions';
+import { GET_CF_USERS_BY_ORG, GetAllUsersAsNonAdmin } from '../actions/users.actions';
 import { AppState } from '../app-state';
 import { cfUserSchemaKey, endpointSchemaKey, organizationSchemaKey, entityFactory } from '../helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
@@ -19,6 +19,7 @@ import { EntityServiceFactory } from '../../core/entity-service-factory.service'
 import { IOrganization } from '../../core/cf-api.types';
 import { getPaginationObservables } from '../reducers/pagination-reducer/pagination-reducer.helper';
 import { PaginationMonitorFactory } from '../../shared/monitors/pagination-monitor.factory';
+import { createPaginationCompleteWatcher, fetchPaginationStateFromAction } from '../helpers/store-helpers';
 
 
 @Injectable()
@@ -31,7 +32,7 @@ export class UsersEffects {
   ) { }
 
 
-  @Effect() fetchUsersByOrg$ = this.actions$.ofType<GetAllUsersByOrg>(GET_CF_USERS_BY_ORG).pipe(
+  @Effect() fetchUsersByOrg$ = this.actions$.ofType<GetAllUsersAsNonAdmin>(GET_CF_USERS_BY_ORG).pipe(
     switchMap(action => {
       const mockRequestType: ApiRequestTypes = 'fetch';
       const mockPaginationAction: PaginatedAction = {
@@ -62,7 +63,7 @@ export class UsersEffects {
         switchMap(organisations => {
           const requests: {
             action: GetAllOrgUsers,
-            monitor: Observable<boolean>
+            succeeded$: Observable<boolean>
           }[] = [];
 
           organisations.forEach(organisation => {
@@ -73,21 +74,21 @@ export class UsersEffects {
               action.includeRelations,
               action.populateMissing
             );
-            const monitor = this.createPaginationWatcher(this.store, getUsersAction.entityKey, getUsersAction.paginationKey);
+            const monitor = createPaginationCompleteWatcher(this.store, getUsersAction);
             this.store.dispatch(getUsersAction);
             requests.push({
               action: getUsersAction,
-              monitor
+              succeeded$: monitor
             });
           });
-          return combineLatest(requests.map(action => action.monitor)).pipe(
+          return combineLatest(requests.map(action => action.succeeded$)).pipe(
             switchMap((results: boolean[]) => {
               if (results.some(result => !result)) {
                 return observableOf(new WrapperRequestActionFailed('Failed to fetch users from one or more organisations', mockPaginationAction, mockRequestType));
               }
 
               const userGuidsPerOrg: Observable<string[]>[] = requests.map(request =>
-                this.fetchPaginationState(this.store, request.action.entityKey, request.action.paginationKey).pipe(
+                fetchPaginationStateFromAction(this.store, request.action).pipe(
                   first(),
                   map((paginationState: PaginationEntityState) => {
                     console.log(paginationState);
@@ -128,24 +129,6 @@ export class UsersEffects {
     }),
 
   );
-
-  private fetchPaginationState = (store: Store<AppState>, entityKey: string, paginationKey: string) =>
-    store.select(selectPaginationState(entityKey, paginationKey))
-
-  private createPaginationWatcher = (store: Store<AppState>, entityKey: string, paginationKey: string): Observable<boolean> =>
-    this.fetchPaginationState(store, entityKey, paginationKey).pipe(
-      map((paginationState: PaginationEntityState) => {
-        const pageRequest: ActionState =
-          paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-        return pageRequest ? pageRequest.busy : true;
-      }),
-      pairwise(),
-      map(([oldFetching, newFetching]) => {
-        return oldFetching === true && newFetching === false;
-      }),
-      skipWhile(completed => !completed),
-      first(),
-    )
 
   // private createPaginationWatcher = (store: Store<AppState>, entityKey: string, paginationKey: string): Observable<boolean> =>
   //   store.select(selectPaginationState(entityKey, paginationKey)).pipe(

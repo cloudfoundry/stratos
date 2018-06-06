@@ -1,28 +1,42 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { Store, Action } from '@ngrx/store';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { catchError, first, map, mergeMap, switchMap, withLatestFrom, tap, share } from 'rxjs/operators';
 
-import { AppState, IRequestEntityTypeState } from '../app-state';
-import { combineLatest ,  Observable } from 'rxjs';
-import { catchError, map, switchMap, withLatestFrom, tap, mergeMap } from 'rxjs/operators';
-import { APIResource } from '../types/api.types';
-import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
-import { EndpointModel } from '../types/endpoint.types';
-import { Action } from '@ngrx/store';
+import { LoggerService } from '../../core/logger.service';
 import {
-  GetUserRelations,
+  createCfFeatureFlagFetchAction,
+} from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import {
+  GET_CURRENT_USER_CF_RELATIONS,
+  GET_CURRENT_USER_CF_RELATIONS_FAILED,
+  GET_CURRENT_USER_CF_RELATIONS_SUCCESS,
+  GET_CURRENT_USER_RELATION,
+  GET_CURRENT_USER_RELATIONS,
+  GET_CURRENT_USER_RELATIONS_FAILED,
+  GET_CURRENT_USER_RELATIONS_SUCCESS,
   GetCurrentUserRelationsComplete,
   GetCurrentUsersRelations,
+  GetUserRelations,
   UserRelationTypes,
-  GET_CURRENT_USER_RELATIONS,
-  GET_CURRENT_USER_RELATION
+  GetUserCfRelations,
 } from '../actions/permissions.actions';
-import {
-  createCfFeatureFlagFetchAction
-} from '../../shared/components/list/list-types/cf-feature-flags/cf-feature-flags-data-source.helpers';
+import { AppState } from '../app-state';
+import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
+import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
+import { APIResource } from '../types/api.types';
+import { EndpointModel } from '../types/endpoint.types';
 
-function getRequestFromAction(action: GetUserRelations, httpClient: HttpClient) {
+interface CfsRequestState {
+  [cfGuid: string]: Observable<boolean>[];
+}
+
+const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
+const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
+
+function executeRequest(store: Store<AppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
   return httpClient.get<{ [guid: string]: { resources: APIResource[] } }>(
     `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`, {
       headers: {
@@ -31,8 +45,12 @@ function getRequestFromAction(action: GetUserRelations, httpClient: HttpClient) 
     }
   ).pipe(
     map(data => {
-      return new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data[action.endpointGuid].resources);
-    })
+      store.dispatch(new GetCurrentUserRelationsComplete(action.relationType, action.endpointGuid, data[action.endpointGuid].resources));
+      return true;
+    }),
+    first(),
+    catchError(err => observableOf(false)),
+    share()
   );
 }
 
@@ -41,7 +59,8 @@ export class PermissionsEffects {
   constructor(
     private httpClient: HttpClient,
     private actions$: Actions,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private logService: LoggerService
   ) { }
 
   @Effect() getCurrentUsersPermissions$ = this.actions$.ofType<GetCurrentUsersRelations>(GET_CURRENT_USER_RELATIONS).pipe(
@@ -50,34 +69,74 @@ export class PermissionsEffects {
     ),
     switchMap(([action, endpoints]) => {
       const endpointsArray = Object.values(endpoints);
-      const noneAdminEndpoints = endpointsArray.filter(endpoint => !endpoint.user.admin);
-      // Dispatch feature flags fetch actions
-      noneAdminEndpoints.forEach(endpoint => this.store.dispatch(createCfFeatureFlagFetchAction(endpoint.guid)));
-      const allActions = [
-        { type: 'all-complete' }
-      ];
-      if (!noneAdminEndpoints.length) {
-        return allActions;
-      }
-      return combineLatest(this.getRequests(noneAdminEndpoints)).pipe(
-        mergeMap(actions => {
-          actions.push({ type: 'all-complete' });
-          return [
-            ...actions,
-            ...allActions
-          ];
-        })
-      );
-    }));
+      const isAllAdmins = endpointsArray.every(endpoint => !!endpoint.user.admin);
 
-  getRequests(endpoints: EndpointModel[]) {
-    return [].concat(...endpoints.map(endpoint => {
-      return Object.values(UserRelationTypes).map((type: UserRelationTypes) => {
-        return getRequestFromAction(new GetUserRelations(endpoint.user.guid, type, endpoint.guid), this.httpClient);
-      });
-    }));
+      // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permissions to be ready
+      if (isAllAdmins) {
+        return [
+          successAction,
+          ...endpointsArray.map(endpoint => new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS))
+        ];
+      }
+
+      // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
+      const flagsAndRoleRequests = this.dispatchRoleRequests(endpointsArray);
+      const allRequestsCompleted = this.handleCfRequests(flagsAndRoleRequests);
+      return combineLatest(allRequestsCompleted).pipe(
+        switchMap(succeeds => succeeds.every(succeeded => !!succeeded) ? [successAction] : [failedAction])
+      );
+    }),
+    catchError(err => {
+      this.logService.warn('Failed to fetch current user permissions: ', err);
+      return observableOf([failedAction]);
+    })
+  );
+
+  private dispatchRoleRequests(endpoints: EndpointModel[]): CfsRequestState {
+    const requests: CfsRequestState = {};
+
+    endpoints.forEach(endpoint => {
+      if (endpoint.user.admin) {
+        requests[endpoint.guid].push(observableOf(true));
+      } else {
+        // START fetching cf roles for current user
+        this.store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS));
+
+        // Dispatch feature flags fetch actions
+        const ffAction = createCfFeatureFlagFetchAction(endpoint.guid);
+        requests[endpoint.guid] = [createPaginationCompleteWatcher(this.store, ffAction)];
+        this.store.dispatch(ffAction);
+
+        // Dispatch requests to fetch roles per role type for current user
+        Object.values(UserRelationTypes).forEach((type: UserRelationTypes) => {
+          const relAction = new GetUserRelations(endpoint.user.guid, type, endpoint.guid);
+          requests[endpoint.guid].push(executeRequest(this.store, relAction, this.httpClient));
+        });
+
+        // FINISH fetching cf roles for current user
+        combineLatest(requests[endpoint.guid]).pipe(
+          first()
+        ).subscribe(succeeds => {
+          this.store.dispatch(new GetUserCfRelations(
+            endpoint.guid,
+            succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_USER_CF_RELATIONS_SUCCESS : GET_CURRENT_USER_CF_RELATIONS_FAILED)
+          );
+        });
+      }
+    });
+    return requests;
+  }
+
+  private handleCfRequests(requests: CfsRequestState): Observable<boolean>[] {
+    const allCompleted: Observable<boolean>[] = [];
+    Object.keys(requests).forEach(cfGuid => {
+      const successes = requests[cfGuid];
+      allCompleted.push(...successes);
+    });
+    return allCompleted;
   }
 }
+
 @Injectable()
 export class PermissionEffects {
   constructor(
@@ -87,9 +146,10 @@ export class PermissionEffects {
   ) { }
 
   @Effect() getCurrentUsersPermissions$ = this.actions$.ofType<GetUserRelations>(GET_CURRENT_USER_RELATION).pipe(
-    mergeMap(action => {
-      return getRequestFromAction(action, this.httpClient).pipe(
-        map(() => ({ type: action.actions[1] }))
+    map(action => {
+      return executeRequest(this.store, action, this.httpClient).pipe(
+        tap(() => console.log('!!!!!!!!!!!!!!!!!!!!')),
+        map((success) => ({ type: action.actions[1] }))
       );
     })
   );

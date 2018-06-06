@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject ,  Observable } from 'rxjs';
-import { first, map, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { first, map, switchMap, tap } from 'rxjs/operators';
 
 import {
   CfSelectUsersListConfigService,
@@ -42,7 +42,10 @@ export class UsersRolesSelectComponent {
     public cfRolesService: CfRolesService
   ) {
     const dataSource = listConfig.getDataSource();
-    this.selectedUsers$ = dataSource.selectedRows$.pipe(
+
+    this.selectedUsers$ = listConfig.getInitialised().pipe(
+      first(),
+      switchMap(() => listConfig.getDataSource().selectedRows$),
       map(users => {
         const arrayUsers = Array.from<APIResource<CfUser>>(users.values()).map(row => row.entity);
         this.valid$.next(!!arrayUsers.length);

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
 import { EntityServiceFactory } from '../../core/entity-service-factory.service';
@@ -13,16 +13,17 @@ import {
   isSpaceAuditor,
   isSpaceDeveloper,
   isSpaceManager,
+  waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
-import { GetAllUsers, GetUser, GetAllUsersByOrg } from '../../store/actions/users.actions';
+import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import { cfUserSchemaKey, endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { cfUserSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
+import { PaginatedAction } from '../../store/types/pagination.types';
 import {
   CfUser,
   createUserRoleInOrg,
@@ -37,21 +38,23 @@ import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.ty
 
 @Injectable()
 export class CfUserService {
-  public allUsersAction: GetAllUsers;
-  private allUsers$: PaginationObservables<APIResource<CfUser>>;
+  private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
+
+  public static createPaginationAction(endpointGuid: string, isAdmin: boolean): PaginatedAction {
+    // See issue #1741 - Will not work for non-admins //TODO: RC search for
+    return isAdmin ? new GetAllUsersAsAdmin(endpointGuid) : new GetAllUsersAsNonAdmin(endpointGuid);
+  }
 
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
     public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     private entityServiceFactory: EntityServiceFactory,
-  ) {
-
-    store.dispatch(new GetAllUsersByOrg(activeRouteCfOrgSpace.cfGuid));
-  }
+  ) { }
 
   getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
-    this.getAllUsers(endpointGuid).entities$.pipe(
+    this.getAllUsers(endpointGuid).pipe(
+      switchMap(paginationObservables => paginationObservables.entities$),
       publishReplay(1),
       refCount(),
       filter(p => {
@@ -165,25 +168,21 @@ export class CfUserService {
     );
   }
 
-  public createPaginationAction(endpointGuid: string): GetAllUsers {
-    // See issue #1741 - Will not work for non-admins
-    return new GetAllUsers(
-      createEntityRelationPaginationKey(endpointSchemaKey, endpointGuid),
-      endpointGuid
-    );
-  }
-
-  private getAllUsers(endpointGuid: string): PaginationObservables<APIResource<CfUser>> {
-    const allUsersAction = this.createPaginationAction(endpointGuid);
+  private getAllUsers(endpointGuid: string): Observable<PaginationObservables<APIResource<CfUser>>> {
     if (!this.allUsers$) {
-      this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
-        store: this.store,
-        action: allUsersAction,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          allUsersAction.paginationKey,
-          entityFactory(cfUserSchemaKey)
-        )
-      });
+      this.allUsers$ = waitForCFPermissions(this.store, endpointGuid).pipe(
+        map(cfPermissions => {
+          const allUsersAction = CfUserService.createPaginationAction(endpointGuid, cfPermissions.global.isAdmin);
+          return getPaginationObservables<APIResource<CfUser>>({
+            store: this.store,
+            action: allUsersAction,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              allUsersAction.paginationKey,
+              entityFactory(cfUserSchemaKey)
+            )
+          });
+        })
+      );
     }
     return this.allUsers$;
   }
