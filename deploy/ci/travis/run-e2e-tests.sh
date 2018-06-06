@@ -21,7 +21,9 @@ export CERTS_PATH=./dev-certs
 # There are two ways of running - building and deploying a full docker-compose deploymenty
 # or doing a local build and running that with sqlite
 
-if [ "${TRAVIS_EVENT_TYPE}" == "pull_request"]; then
+
+if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
+  echo "Pull Request: Using local deployment for e2e tests"
   # Quick deploy locally
   # Start a local UAA - this will take a few seconds to come up in the background
   docker run -d -p 8080:8080 splatform/stratos-uaa
@@ -33,6 +35,7 @@ if [ "${TRAVIS_EVENT_TYPE}" == "pull_request"]; then
   ./portal-proxy > backend.log 2>&1
   popd
 else
+  echo "Using docker-compose deployment for e2e tests"
   # Full deploy in docker compose - this is slow
   # Move the node_modules folder - the docker build will remove it anyway
   mv ./node_modules /tmp/node_modules
