@@ -1,11 +1,10 @@
-
-import { of as observableOf, Observable } from 'rxjs';
-
-import { pairwise, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
+
 import { Store } from '@ngrx/store';
 
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
@@ -25,6 +24,9 @@ import { IListAction, IListConfig, ListViewTypes } from '../../list.component.ty
 import { EndpointsDataSource } from './endpoints-data-source';
 import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+
+import { map, pairwise } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 
 
@@ -93,7 +95,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
       });
     },
     label: 'Unregister',
-    description: 'Remove the endpoint'
+    description: 'Remove the endpoint',
+    createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
   };
 
   private listActionDisconnect: IListAction<EndpointModel> = {
@@ -176,7 +179,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private dialog: MatDialog,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,
-    private internalEventMonitorFactory: InternalEventMonitorFactory
+    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     this.dataSource = new EndpointsDataSource(
       this.store,
