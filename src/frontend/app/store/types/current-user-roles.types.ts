@@ -21,7 +21,6 @@ export function getDefaultEndpointRoles(): ICfRolesState {
   };
 }
 
-
 export interface IGlobalRolesState {
   isAdmin: boolean;
   isReadOnlyAdmin: boolean;
@@ -31,6 +30,7 @@ export interface IGlobalRolesState {
   scopes: string[];
 }
 export interface ISpaceRoleState {
+  orgId: string;
   isManager: boolean;
   isAuditor: boolean;
   isDeveloper: boolean;

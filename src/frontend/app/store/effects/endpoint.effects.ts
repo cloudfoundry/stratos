@@ -24,6 +24,7 @@ import {
   UNREGISTER_ENDPOINTS_FAILED,
   UNREGISTER_ENDPOINTS_SUCCESS,
   UnregisterEndpoint,
+  EndpointActionComplete,
 } from '../actions/endpoint.actions';
 import { ClearPaginationOfEntity } from '../actions/pagination.actions';
 import { GET_SYSTEM_INFO_SUCCESS, GetSystemInfo, GetSystemSuccess } from '../actions/system.actions';
@@ -175,7 +176,7 @@ export class EndpointsEffect {
 
   private processRegisterError(e: HttpErrorResponse): string {
     let message = 'There was a problem creating the endpoint. ' +
-    `Please ensure the endpoint address is correct and try again (${e.error.error})`;
+      `Please ensure the endpoint address is correct and try again (${e.error.error})`;
     if (e.status === 403) {
       message = `${e.error.error}. Please check \"Skip SSL validation for the endpoint\" if the certificate issuer is trusted"`;
     }
@@ -217,7 +218,7 @@ export class EndpointsEffect {
     }).pipe(mergeMap((endpoint: EndpointModel) => {
       const actions = [];
       if (actionStrings[0]) {
-        actions.push({ type: actionStrings[0], guid: apiAction.guid, endpointType: endpointType, endpoint });
+        actions.push(new EndpointActionComplete(actionStrings[0], apiAction.guid, endpointType, endpoint));
       }
       if (apiActionType === 'delete') {
         actions.push(new ClearPaginationOfEntity(apiAction.entityKey, apiAction.guid));
