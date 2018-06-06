@@ -7,6 +7,10 @@ services:
 - docker
 addons:
   chrome: stable
+before_install:
+ - export DISPLAY=:99.0
+ - sh -e /etc/init.d/xvfb start
+ - sleep 3 # give xvfb some time to start  
 install:
 - npm install npm@5.6.0 -g
 - npm install
@@ -35,10 +39,6 @@ jobs:
     env:
     - CI_ENV=true
     script:
-    - "export DISPLAY=:99.0"
-    - "sh -e /etc/init.d/xvfb start"
-    - sleep 3 # give xvfb some time to start
-    - unset CI_ENV # Don't use headless browser
     - npm test
     - npm run codecov
   - stage: Backend

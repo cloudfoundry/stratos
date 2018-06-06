@@ -29,12 +29,17 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.DEBUG,
     autoWatch: false,
-    browsers: process.env.CI_ENV ? ['StratosChromeHeadless'] : ['Chrome'],
+    browsers: process.env.CI_ENV ? ['ChromeNoSandbox'] : ['Chrome'],
     customLaunchers: {
       StratosChromeHeadless:{
         base: 'ChromeHeadless',
         flags: ['--no-sandbox']
+      },
+      ChromeNoSandbox:{
+        base: 'Chrome',
+        flags: ['--no-sandbox']
       }
+      
     },
     singleRun: process.env.CI_ENV ? true : false,
     files: [{
