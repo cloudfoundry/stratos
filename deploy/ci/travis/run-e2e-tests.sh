@@ -27,6 +27,15 @@ if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
   # Quick deploy locally
   # Start a local UAA - this will take a few seconds to come up in the background
   docker run -d -p 8080:8080 splatform/stratos-uaa
+
+  # Get go 1.0 and glide
+  curl -sL -o ~/bin/gimme https://raw.githubusercontent.com/travis-ci/gimme/master/gimme
+  chmod +x ~/bin/gimme
+  eval "$(gimme 1.9)"
+  curl https://glide.sh/get | sh
+  go version
+  glide --version
+  
   npm run build
   npm run build-backend-dev
   # Patch the config file so local version runs on port 443
