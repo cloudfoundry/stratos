@@ -38,8 +38,10 @@ jobs:
   - stage: Frontend Unit Tests
     env:
     - CI_ENV=true
+    before_script:
+    - chmod +x ./deploy/ci/travis/run-unit-tests.sh
     script:
-    - npm test
+    - "./deploy/ci/travis/run-unit-tests.sh"
     - npm run codecov
   - stage: Backend
     before_script:
