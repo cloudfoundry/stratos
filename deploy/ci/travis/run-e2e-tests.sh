@@ -40,8 +40,8 @@ if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
   npm run build-backend-dev
   # Patch the config file so local version runs on port 443
   pushd outputs
-  sed -i "s/5443/443/g" config.properties
-  ./portal-proxy > backend.log 2>&1
+  sed -i.bak "s/5443/443/g" config.properties
+  ./portal-proxy &
   popd
 else
   echo "Using docker-compose deployment for e2e tests"
