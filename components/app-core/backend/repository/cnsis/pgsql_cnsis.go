@@ -210,9 +210,6 @@ func (p *PostgresCNSIRepository) FindByAPIEndpoint(endpoint string) (interfaces.
 // Save - Persist a CNSI Record to a datastore
 func (p *PostgresCNSIRepository) Save(guid string, cnsi interfaces.CNSIRecord) error {
 	log.Println("Save")
-	println(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
-		cnsi.ClientId, cnsi.ClientSecret)
 	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
 		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
 			cnsi.ClientId, cnsi.ClientSecret); err != nil {

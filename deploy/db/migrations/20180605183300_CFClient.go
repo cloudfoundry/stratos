@@ -7,7 +7,7 @@ import (
 )
 
 // Up is executed when this migration is applied
-func Up_20170829154900(txn *sql.Tx) {
+func Up_20180605183300(txn *sql.Tx) {
 	databaseProvider := os.Getenv("DATABASE_PROVIDER")
 	fmt.Printf("ENV is: %s", databaseProvider)
 
@@ -27,7 +27,7 @@ func Up_20170829154900(txn *sql.Tx) {
 }
 
 // Down is executed when this migration is rolled back
-func Down_20170829154900(txn *sql.Tx) {
+func Down_20180605183300(txn *sql.Tx) {
 	dropColumn := "ALTER TABLE cnsis DROP COLUMN client_id;"
 	_, err := txn.Exec(dropColumn)
 	if err != nil {
