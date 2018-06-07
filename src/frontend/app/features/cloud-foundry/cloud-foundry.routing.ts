@@ -117,16 +117,15 @@ const cloudFoundry: Routes = [{
         },
         {
           path: '',
-          // Root for Tabs
-          component: CloudFoundryTabsBaseComponent,
           data: {
             uiFullView: true
           },
+          component: CloudFoundryTabsBaseComponent,
           children: [
             {
               path: '',
               redirectTo: 'summary',
-              pathMatch: 'full'
+              pathMatch: 'full',
             },
             {
               path: 'summary',
@@ -136,6 +135,15 @@ const cloudFoundry: Routes = [{
               path: 'organizations',
               component: CloudFoundryOrganizationsComponent,
             },
+          ]
+        },
+        {
+          path: '',
+          // Root for Tabs
+          data: {
+            uiFullView: true
+          },
+          children: [
             {
               path: 'organizations/:orgId',
               component: CloudFoundryOrganizationBaseComponent,
@@ -160,6 +168,9 @@ const cloudFoundry: Routes = [{
             },
             {
               path: 'organizations/:orgId/spaces/:spaceId',
+              data: {
+                uiFullView: true
+              },
               component: CloudFoundrySpaceBaseComponent,
               children: [
                 {
