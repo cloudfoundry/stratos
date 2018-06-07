@@ -41,7 +41,7 @@ if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
   npm run build-backend-dev
   # Patch the config file so local version runs on port 443
   pushd outputs
-  ./portal-proxy &
+  ./portal-proxy > backend.log &
   popd
 
   E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
