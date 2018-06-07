@@ -102,7 +102,6 @@ export class UsersEffects {
                 fetchPaginationStateFromAction(this.store, request.action).pipe(
                   first(),
                   map((paginationState: PaginationEntityState) => {
-                    console.log(paginationState);
                     return paginationState.ids[1];
                   })
                 )

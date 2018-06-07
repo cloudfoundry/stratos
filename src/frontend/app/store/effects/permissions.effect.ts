@@ -147,12 +147,7 @@ export class PermissionsEffects {
         this.store.dispatch(ffAction);
 
         // Dispatch requests to fetch roles per role type for current user
-        this.fetchCfUserRoles({ guid: endpoint.guid, userGuid: endpoint.user.guid });
-
-        // Object.values(UserRelationTypes).forEach((type: UserRelationTypes) => {
-        //   const relAction = new GetUserRelations(endpoint.user.guid, type, endpoint.guid);
-        //   requests[endpoint.guid].push(executeRequest(this.store, relAction, this.httpClient));
-        // });
+        requests[endpoint.guid].push(...this.fetchCfUserRoles({ guid: endpoint.guid, userGuid: endpoint.user.guid }));
 
         // FINISH fetching cf roles for current user
         combineLatest(requests[endpoint.guid]).pipe(
