@@ -97,7 +97,7 @@ type PortalConfig struct {
 	EncryptionKeyFilename       string   `configName:"ENCRYPTION_KEY_FILENAME"`
 	EncryptionKey               string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl           string   `configName:"AUTO_REG_CF_URL"`
-	SSOredirectURL				string	 `configName:"SSO_REDIRECT_URL"`
+	SSOLogin					bool	 `configName:"SSO_LOGIN"`
 	CFAdminIdentifier           string
 	CloudFoundryInfo            *CFInfo
 	HTTPS                       bool

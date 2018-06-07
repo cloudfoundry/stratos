@@ -76,14 +76,10 @@ func (p *portalProxy) GetUsername(userid string) (string, error) {
 }
 
 func (p *portalProxy) initSSOlogin(c echo.Context) error {
-//<<<<<<< HEAD
-//	authUrl :=fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s/pp/v1/auth/sso_login_callback&state=stratos_portal_proxy", p.GetConfig().ConsoleConfig.UAAEndpoint, p.GetConfig().ConsoleConfig.ConsoleClient, p.GetConfig().SSOredirectURL)
-//	c.Redirect(http.StatusTemporaryRedirect, authUrl)
-//=======
 	state := c.QueryParam("state")
 	redirectUrl := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.UAAEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectUri(state)))
 	c.Redirect(http.StatusTemporaryRedirect, redirectUrl)
-//>>>>>>> parent/oauth
+
 	return nil
 }
 
@@ -371,15 +367,7 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 	if c.Request().Method() == http.MethodGet {
 		code := c.QueryParam("code")
 		state := c.QueryParam("state")
-//<<<<<<< HEAD
-//
-//		if len(code) == 0 || state != "stratos_portal_proxy" {
-//			return uaaRes, u, errors.New("no code query parameter provided or invalid state query parameter")
-//		}
-//		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint)
-//=======
 		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint, state)
-//>>>>>>> parent/oauth
 	} else {
 		username := c.FormValue("username")
 		password := c.FormValue("password")
@@ -417,18 +405,13 @@ func (p *portalProxy) logout(c echo.Context) error {
 func (p *portalProxy) getUAATokenWithAuthorizationCode(skipSSLValidation bool, code, client, clientSecret, authEndpoint string, state string) (*UAAResponse, error) {
 	log.Debug("getUAATokenWithCreds")
 
-	//redirectUrl:=fmt.Sprintf("%s/pp/v1/auth/sso_login_callback",p.GetConfig().SSOredirectURL)
 	body := url.Values{}
 	body.Set("grant_type", "authorization_code")
 	body.Set("code", code)
-//<<<<<<< HEAD
-//	body.Set("redirect_uri", redirectUrl)
-//=======
 	body.Set("client_id", client)
 	body.Set("client_secret", clientSecret)
 	body.Set("redirect_uri", getSSORedirectUri(state))
 	log.Info(getSSORedirectUri(state))
-//>>>>>>> parent/oauth
 
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }

@@ -22,7 +22,7 @@ const cfSessionCookieName = "JSESSIONID"
 func handleSessionError(config interfaces.PortalConfig, c echo.Context, err error) error {
 
 	// Add header so front-end knows SSO login is enabled
-	if len(config.SSOredirectURL) > 0 {
+	if config.SSOLogin {
 		c.Response().Header().Set("x-stratos-sso-login", "true")
 	}
 
