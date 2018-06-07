@@ -34,7 +34,11 @@ module.exports = function (config) {
     customLaunchers: {
       StratosChromeHeadless: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox']
+        flags: [
+          '--no-sandbox',
+          '--disable-web-security',
+          '--user-data-dir=./chrome-user-data'
+        ]
       }
     },
     singleRun: process.env.CI_ENV ? true : false,
