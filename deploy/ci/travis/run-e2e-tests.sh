@@ -21,6 +21,7 @@ export CERTS_PATH=./dev-certs
 # There are two ways of running - building and deploying a full docker-compose deploymenty
 # or doing a local build and running that with sqlite
 
+E2E_TARGET="e2e-local"
 
 if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
   echo "Pull Request: Using local deployment for e2e tests"
@@ -40,9 +41,10 @@ if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
   npm run build-backend-dev
   # Patch the config file so local version runs on port 443
   pushd outputs
-  sed -i.bak "s/5443/443/g" config.properties
   ./portal-proxy &
   popd
+
+  E2E_TARGET="e2e -- --dev-server-target= --base-url=https://127.0.0.1:5443"
 else
   echo "Using docker-compose deployment for e2e tests"
   # Full deploy in docker compose - this is slow
@@ -67,7 +69,7 @@ fi
 
 set +e
 echo "Running e2e tests"
-npm run e2e-local
+npm run ${E2E_TARGET}
 RESULT=$?
 set -e
 
