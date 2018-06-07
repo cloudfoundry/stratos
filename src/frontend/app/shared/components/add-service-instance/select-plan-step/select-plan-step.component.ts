@@ -101,7 +101,7 @@ export class SelectPlanStepComponent implements OnDestroy {
       }),
       switchMap(state => {
         this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
-        return this.cSIHelperService.getVisibleServicePlansForSpaceAndOrg(state.orgGuid, state.spaceGuid);
+        return this.cSIHelperService.getServicePlans();
       }),
       tap(o => {
         if (o.length === 0) {
