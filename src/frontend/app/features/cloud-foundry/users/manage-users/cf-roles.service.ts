@@ -11,7 +11,6 @@ import {
   refCount,
   startWith,
   switchMap,
-  tap,
 } from 'rxjs/operators';
 
 import { IOrganization } from '../../../../core/cf-api.types';
@@ -72,7 +71,6 @@ export class CfRolesService {
       }),
       // Filter out orgs than the current user cannot edit
       map(([orgs, canEdit]) => orgs.filter(org => canEdit.find(canEditOrgOrSpace => canEditOrgOrSpace.guid === org.metadata.guid).canEdit)),
-      tap(a => console.log('res ', a))
     );
   }
 
