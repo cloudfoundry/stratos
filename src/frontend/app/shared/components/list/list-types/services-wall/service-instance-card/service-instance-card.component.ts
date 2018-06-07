@@ -25,10 +25,10 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
-  
+
   serviceInstanceTags: AppChip[];
   hasMultipleBindings = new BehaviorSubject(true);
-  
+
   @Input('row')
   set row(row) {
     if (row) {
@@ -40,7 +40,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       this.hasMultipleBindings.next(!(row.entity.service_bindings.length > 0));
     }
   }
-  
+
   constructor(
     private store: Store<AppState>,
     private servicesWallService: ServicesWallService,
@@ -49,7 +49,7 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   ) {
     super();
   }
-  
+
   ngOnInit(): void {
 
     this.cardMenu = [
