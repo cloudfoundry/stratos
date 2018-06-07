@@ -18,20 +18,18 @@ module.exports = function (config) {
       captureConsole: true,
     },
     coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, 'coverage'), reports: ['html', 'lcovonly', 'json'],
+      dir: require('path').join(__dirname, 'coverage'),
+      reports: ['html', 'lcovonly', 'json'],
       fixWebpackSourcePaths: true
     },
-    angularCli: {
-      environment: 'dev'
-    },
-    reporters: process.env.CI_ENV ? ['spec', 'stratos'] : ['spec', 'kjhtml', 'stratos'],
+    reporters: ['spec', 'kjhtml', 'stratos'],
     port: 9876,
     colors: true,
-    logLevel: config.DEBUG,
-    autoWatch: false,
+    logLevel: config.LOG_INFO,
+    autoWatch: true,
     browsers: process.env.CI_ENV ? ['StratosChromeHeadless'] : ['Chrome'],
     customLaunchers: {
-      StratosChromeHeadless:{
+      StratosChromeHeadless: {
         base: 'ChromeHeadless',
         flags: ['--no-sandbox']
       }
