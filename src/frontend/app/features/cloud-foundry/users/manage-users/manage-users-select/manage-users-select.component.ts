@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { first, map, switchMap, tap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, switchMap, tap } from 'rxjs/operators';
 
 import {
   CfSelectUsersListConfigService,
@@ -41,16 +41,17 @@ export class UsersRolesSelectComponent {
     private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
     public cfRolesService: CfRolesService
   ) {
-    const dataSource = listConfig.getDataSource();
-
     this.selectedUsers$ = listConfig.getInitialised().pipe(
+      filter(initialised => initialised),
       first(),
       switchMap(() => listConfig.getDataSource().selectedRows$),
       map(users => {
         const arrayUsers = Array.from<APIResource<CfUser>>(users.values()).map(row => row.entity);
         this.valid$.next(!!arrayUsers.length);
         return arrayUsers;
-      })
+      }),
+      publishReplay(1),
+      refCount(),
     );
   }
 

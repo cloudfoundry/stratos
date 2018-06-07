@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, tap } from 'rxjs/operators';
+import { filter, first, map, tap, share, publishReplay, refCount } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../core/current-user-permissions.service';
@@ -219,6 +219,8 @@ export function canUpdateOrgSpaceRoles(
 export function waitForCFPermissions(store: Store<AppState>, cfGuid: string): Observable<ICfRolesState> {
   return store.select<ICfRolesState>(getCurrentUserCFEndpointRolesState(cfGuid)).pipe(
     filter(cf => cf && cf.state.initialised),
-    first()
+    first(),
+    publishReplay(1),
+    refCount(),
   );
 }
