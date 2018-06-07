@@ -24,7 +24,5 @@ describe('LoggedInService', () => {
 
   it('should be created', inject([LoggedInService], (service: LoggedInService) => {
     expect(service).toBeTruthy();
-    service.start();
-    service.stop();
   }));
 });
