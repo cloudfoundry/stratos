@@ -87,7 +87,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 		case !ok:
 			response = []byte(`{"error": {"statusCode": 500, "status": "Request timed out"}}`)
 		case cnsiResponse.Error != nil:
-			response = []byte(fmt.Sprintf(`{"error": {"statusCode": 500, "status": "%q"}}`, cnsiResponse.Error.Error()))
+			response = []byte(fmt.Sprintf(`{"error": {"statusCode": 500, "status": %q}}`, cnsiResponse.Error.Error()))
 		case cnsiResponse.Response != nil:
 			response = cnsiResponse.Response
 		}
@@ -95,9 +95,9 @@ func buildJSONResponse(cnsiList []string, responses map[string]*interfaces.CNSIR
 		if cnsiResponse.StatusCode >= 400 {
 			errorJson, err := json.Marshal(cnsiResponse)
 			if err != nil {
-				errorJson = []byte(fmt.Sprintf(`{"statusCode": 500, "status": "Failed to proxy request"}"`))
+				errorJson = []byte(fmt.Sprintf(`{"statusCode": 500, "status": "Failed to proxy request"}`))
 			}
-			response = []byte(fmt.Sprintf(`{"error": %s, "errorResponse": %s}`, errorJson, string(cnsiResponse.Response)))
+			response = []byte(fmt.Sprintf(`{"error": %s, "errorResponse": %q}`, errorJson, string(cnsiResponse.Response)))
 		}
 		if len(response) > 0 {
 			jsonResponse[guid] = (*json.RawMessage)(&response)

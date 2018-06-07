@@ -1,12 +1,15 @@
-
-import {map, take,  first } from 'rxjs/operators';
-
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ErrorStateMatcher, MatSnackBar, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { Subscription } from 'rxjs';
+
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
 import { UserProfileService } from '../user-profile.service';
+
+import { first, map, take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+
 
 
 @Component({
@@ -24,7 +27,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   constructor(
     private userProfileService: UserProfileService,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.editProfileForm = this.fb.group({
       givenName: '',
@@ -49,8 +53,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   private errorSnack;
 
-  // Wire up to permissions and only allow password change if user has the 'password.write' group
-  private canChangePassword = true;
+  // Only allow password change if user has the 'password.write' group
+  private canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
 
   private passwordRequired = false;
 
