@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Actions, Effect } from '@ngrx/effects';
-import { Store, Action } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { catchError, first, map, mergeMap, switchMap, withLatestFrom, tap, share } from 'rxjs/operators';
+import { catchError, first, map, share, switchMap, withLatestFrom, mergeMap, tap } from 'rxjs/operators';
 
 import { LoggerService } from '../../core/logger.service';
 import {
@@ -19,24 +19,30 @@ import {
   GET_CURRENT_USER_RELATIONS_SUCCESS,
   GetCurrentUserRelationsComplete,
   GetCurrentUsersRelations,
+  GetUserCfRelations,
   GetUserRelations,
   UserRelationTypes,
-  GetUserCfRelations,
 } from '../actions/permissions.actions';
 import { AppState } from '../app-state';
 import { createPaginationCompleteWatcher } from '../helpers/store-helpers';
 import { endpointsRegisteredCFEntitiesSelector } from '../selectors/endpoint.selectors';
 import { APIResource } from '../types/api.types';
-import { EndpointModel } from '../types/endpoint.types';
+import { EndpointModel, INewlyConnectedEndpointInfo } from '../types/endpoint.types';
+import { EndpointActionComplete, CONNECT_ENDPOINTS_SUCCESS } from '../actions/endpoint.actions';
 
 interface CfsRequestState {
   [cfGuid: string]: Observable<boolean>[];
 }
 
+interface IEndpointConnectionInfo {
+  guid: string;
+  userGuid: string;
+}
+
 const successAction: Action = { type: GET_CURRENT_USER_RELATIONS_SUCCESS };
 const failedAction: Action = { type: GET_CURRENT_USER_RELATIONS_FAILED };
 
-function executeRequest(store: Store<AppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
+function fetchCfUserRole(store: Store<AppState>, action: GetUserRelations, httpClient: HttpClient): Observable<boolean> {
   return httpClient.get<{ [guid: string]: { resources: APIResource[] } }>(
     `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`, {
       headers: {
@@ -92,6 +98,38 @@ export class PermissionsEffects {
     })
   );
 
+
+  @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS).pipe(
+    switchMap(action => {
+      if (action.endpointType !== 'cf') {
+        return [];
+      }
+
+      const endpoint = action.endpoint as INewlyConnectedEndpointInfo;
+      if (endpoint.user.admin) {
+        return [new GetUserCfRelations(action.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS)];
+      }
+
+      // START fetching cf roles for current user
+      this.store.dispatch(new GetUserCfRelations(action.guid, GET_CURRENT_USER_CF_RELATIONS));
+
+      return combineLatest(this.fetchCfUserRoles({
+        guid: action.guid,
+        userGuid: endpoint.user.guid
+      })).pipe(
+        // FINISH fetching cf roles for current user
+        mergeMap(succeeds => [new GetUserCfRelations(
+          action.guid,
+          succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_USER_CF_RELATIONS_SUCCESS : GET_CURRENT_USER_CF_RELATIONS_FAILED
+        )]),
+        catchError(err => {
+          this.logService.warn('Failed to fetch current user permissions for a cf: ', err);
+          return [new GetUserCfRelations(action.guid, GET_CURRENT_USER_CF_RELATIONS_FAILED)];
+        })
+      );
+    })
+  );
+
   private dispatchRoleRequests(endpoints: EndpointModel[]): CfsRequestState {
     const requests: CfsRequestState = {};
 
@@ -109,20 +147,28 @@ export class PermissionsEffects {
         this.store.dispatch(ffAction);
 
         // Dispatch requests to fetch roles per role type for current user
-        Object.values(UserRelationTypes).forEach((type: UserRelationTypes) => {
-          const relAction = new GetUserRelations(endpoint.user.guid, type, endpoint.guid);
-          requests[endpoint.guid].push(executeRequest(this.store, relAction, this.httpClient));
-        });
+        this.fetchCfUserRoles({ guid: endpoint.guid, userGuid: endpoint.user.guid });
+
+        // Object.values(UserRelationTypes).forEach((type: UserRelationTypes) => {
+        //   const relAction = new GetUserRelations(endpoint.user.guid, type, endpoint.guid);
+        //   requests[endpoint.guid].push(executeRequest(this.store, relAction, this.httpClient));
+        // });
 
         // FINISH fetching cf roles for current user
         combineLatest(requests[endpoint.guid]).pipe(
-          first()
-        ).subscribe(succeeds => {
-          this.store.dispatch(new GetUserCfRelations(
-            endpoint.guid,
-            succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_USER_CF_RELATIONS_SUCCESS : GET_CURRENT_USER_CF_RELATIONS_FAILED)
-          );
-        });
+          first(),
+          tap(succeeds => {
+            this.store.dispatch(new GetUserCfRelations(
+              endpoint.guid,
+              succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_USER_CF_RELATIONS_SUCCESS : GET_CURRENT_USER_CF_RELATIONS_FAILED)
+            );
+          }),
+          catchError(err => {
+            this.logService.warn('Failed to fetch current user permissions for a cf: ', err);
+            this.store.dispatch(new GetUserCfRelations(endpoint.guid, GET_CURRENT_USER_CF_RELATIONS_FAILED));
+            return observableOf(err);
+          })
+        ).subscribe();
       }
     });
     return requests;
@@ -136,6 +182,19 @@ export class PermissionsEffects {
     });
     return allCompleted;
   }
+
+  fetchCfUserRoles(endpoint: IEndpointConnectionInfo): Observable<boolean>[] {
+    return Object.values(UserRelationTypes).map((type: UserRelationTypes) => {
+      const relAction = new GetUserRelations(endpoint.userGuid, type, endpoint.guid);
+      return fetchCfUserRole(this.store, relAction, this.httpClient);
+    });
+
+    // return [].concat(...endpoints.map(endpoint => {
+    //   return Object.values(UserRelationTypes).map((type: UserRelationTypes) => {
+    //     return getRequestFromAction(new GetUserRelations(endpoint.userGuid, type, endpoint.guid), this.httpClient);
+    //   });
+    // }));
+  }
 }
 
 @Injectable()
@@ -148,7 +207,7 @@ export class PermissionEffects {
 
   @Effect() getCurrentUsersPermissions$ = this.actions$.ofType<GetUserRelations>(GET_CURRENT_USER_RELATION).pipe(
     map(action => {
-      return executeRequest(this.store, action, this.httpClient).pipe(
+      return fetchCfUserRole(this.store, action, this.httpClient).pipe(
         map((success) => ({ type: action.actions[1] }))
       );
     })

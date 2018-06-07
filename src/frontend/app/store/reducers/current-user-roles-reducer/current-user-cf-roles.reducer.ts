@@ -25,6 +25,7 @@ export function currentUserCFRolesReducer(
   }
   return state;
 }
+
 function assignSpaceToOrg(organizations: IOrgsRoleState = {}, spaces: APIResource<ISpace>[]): IOrgsRoleState {
   return spaces.reduce((newOrganizations: IOrgsRoleState, space) => {
     const orgGuid = space.entity.organization_guid;
