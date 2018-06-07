@@ -201,7 +201,8 @@ export class ServicesService {
       filter(p => !!p && p.length > 0),
       combineLatest(this.service$),
       map(([brokers, service]) => brokers.filter(broker => broker.metadata.guid === service.entity.service_broker_guid)),
-      map(o => o[0]));
+      map(o => (o.length === 0 ? null : o[0]))
+    );
     this.allServiceInstances$ = this.getServiceInstances();
     this.serviceInstances$ = this.allServiceInstances$.pipe(
       map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))
