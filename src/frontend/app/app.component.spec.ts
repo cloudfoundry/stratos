@@ -1,14 +1,8 @@
-import {
-  RouterTestingModule
-} from '@angular/router/testing';
-
-import { StoreModule } from '@ngrx/store';
-
-import { TestBed, async } from '@angular/core/testing';
+import { async, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { AppComponent } from './app.component';
 import { LoggedInService } from './logged-in.service';
-import { CoreModule } from './core/core.module';
 import { SharedModule } from './shared/shared.module';
 import { createBasicStoreModule } from './test-framework/store-test-helper';
 
@@ -23,7 +17,7 @@ describe('AppComponent', () => {
         AppComponent
       ],
       providers: [
-        { provide: LoggedInService, useClass: LoggedInServiceMock }
+        LoggedInService
       ],
       imports: [
         SharedModule,
@@ -34,8 +28,9 @@ describe('AppComponent', () => {
   }));
 
   it('should create the app', async(() => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.debugElement.componentInstance;
+    const fixture = TestBed.createComponent<AppComponent>(AppComponent);
+    const app = fixture.componentInstance;
     expect(app).toBeTruthy();
+    app.loggedInService.stop();
   }));
 });

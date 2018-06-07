@@ -21,7 +21,7 @@ export class AppComponent implements OnInit, AfterContentInit {
   constructor(
     private store: Store<AppState>,
     private router: Router,
-    private loggedInService: LoggedInService
+    public loggedInService: LoggedInService
   ) {
     loggedInService.start();
     if (!environment.production) {
