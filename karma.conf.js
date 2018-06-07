@@ -1,6 +1,16 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 module.exports = function (config) {
+
+  // Choose browser based on env vars
+  var browsers = ['Chrome'];
+  if (process.env.HEADLESS) {
+    browsers = ['StratosChromeHeadless']
+  }
+  if (process.env.CI_ENV) {
+    browsers = ['StratosChromeCI']
+  }
+
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -30,10 +40,18 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.DEBUG,
     autoWatch: false,
-    browsers: process.env.HEADLESS ? ['StratosChromeHeadless'] : ['Chrome'],
+    browsers: browsers,
     customLaunchers: {
       StratosChromeHeadless: {
         base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-web-security',
+          '--user-data-dir=./chrome-user-data'
+        ]
+      },
+      StratosChromeCI: {
+        base: 'Chrome',
         flags: [
           '--no-sandbox',
           '--disable-web-security',
