@@ -8,7 +8,7 @@ import { IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { pathGet } from '../../../core/utils.service';
 import { CloudFoundryEndpointService } from '../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { getServicePlans } from '../../../features/service-catalog/services-helper';
+import { getServicePlans, getSvcAvailability } from '../../../features/service-catalog/services-helper';
 import { ServicePlanAccessibility } from '../../../features/service-catalog/services.service';
 import { GetServiceInstances } from '../../../store/actions/service-instances.actions';
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
@@ -92,7 +92,7 @@ export class CreateServiceInstanceHelperService {
     )
 
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
-    return getServicePlans(this.service$, this.cfGuid);
+    return getServicePlans(this.service$, this.cfGuid, this.store, this.paginationMonitorFactory);
     }
 
   getServiceName = () => {
@@ -110,10 +110,16 @@ export class CreateServiceInstanceHelperService {
   }
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
+    if (servicePlan.entity.public) {
       return observableOf({
-        isPublic: servicePlan.entity.public,
+        isPublic: true,
         guid: servicePlan.metadata.guid
       });
+    }
+    return this.getServicePlanVisibilities().pipe(
+      filter(p => !!p),
+      map((allServicePlanVisibilities) => getSvcAvailability(servicePlan, null, allServicePlanVisibilities))
+    );
   }
 
   getSelectedServicePlan = (): Observable<APIResource<IServicePlan>> => {
