@@ -101,22 +101,15 @@ export class PermissionsEffects {
 
   @Effect() getPermissionForNewlyConnectedEndpoint$ = this.actions$.ofType<EndpointActionComplete>(CONNECT_ENDPOINTS_SUCCESS).pipe(
     switchMap(action => {
-      if (action.endpointType !== 'cf') {
-        return [];
-      }
-
       const endpoint = action.endpoint as INewlyConnectedEndpointInfo;
-      if (endpoint.user.admin) {
-        return [new GetUserCfRelations(action.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS)];
+      if (endpoint.user.admin || action.endpointType !== 'cf') {
+        return endpoint.user.admin ? [new GetUserCfRelations(action.guid, GET_CURRENT_USER_CF_RELATIONS_SUCCESS)] : [];
       }
 
       // START fetching cf roles for current user
       this.store.dispatch(new GetUserCfRelations(action.guid, GET_CURRENT_USER_CF_RELATIONS));
 
-      return combineLatest(this.fetchCfUserRoles({
-        guid: action.guid,
-        userGuid: endpoint.user.guid
-      })).pipe(
+      return combineLatest(this.fetchCfUserRoles({ guid: action.guid, userGuid: endpoint.user.guid })).pipe(
         // FINISH fetching cf roles for current user
         mergeMap(succeeds => [new GetUserCfRelations(
           action.guid,
