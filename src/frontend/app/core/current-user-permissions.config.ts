@@ -18,7 +18,8 @@ export enum CurrentUserPermissions {
   SERVICE_BINDING_EDIT = 'edit.service-binding',
   FIREHOSE_VIEW = 'view-firehose',
   ENDPOINT_REGISTER = 'register.endpoint',
-  PASSWORD_CHANGE = 'change-password'
+  PASSWORD_CHANGE = 'change-password',
+  SERVICE_INSTANCE_EDIT = 'edit.service-instance',
 }
 export type PermissionConfigType = PermissionConfig[] | PermissionConfig | PermissionConfigLink;
 export interface IPermissionConfigs {
@@ -116,6 +117,7 @@ export const permissionConfigs: IPermissionConfigs = {
   [CurrentUserPermissions.ORGANIZATION_EDIT]: new PermissionConfigLink(CurrentUserPermissions.ORGANIZATION_DELETE),
   [CurrentUserPermissions.ORGANIZATION_SUSPEND]: new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_ADMIN_GROUP),
   [CurrentUserPermissions.SERVICE_INSTANCE_DELETE]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
+  [CurrentUserPermissions.SERVICE_INSTANCE_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.SERVICE_BINDING_EDIT]: new PermissionConfig(PermissionTypes.SPACE, PermissionStrings.SPACE_DEVELOPER),
   [CurrentUserPermissions.FIREHOSE_VIEW]: [
     new PermissionConfig(PermissionTypes.ENDPOINT_SCOPE, ScopeStrings.CF_READ_ONLY_ADMIN_GROUP)
