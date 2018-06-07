@@ -10,6 +10,6 @@ npm run build
 
 # Copy dist folder to the /usr/dist folder when running in docker compose
 if [ "$1" == "-u" ]; then
-  mkdir /usr/dist
+  mkdir -p /usr/dist
   cp -R dist/* /usr/dist
 fi

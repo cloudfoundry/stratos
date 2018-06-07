@@ -27,7 +27,7 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: process.env.CI_ENV ? ['StratosChromeHeadless'] : ['Chrome'],
+    browsers: process.env.HEADLESS ? ['StratosChromeHeadless'] : ['Chrome'],
     customLaunchers: {
       StratosChromeHeadless: {
         base: 'ChromeHeadless',
