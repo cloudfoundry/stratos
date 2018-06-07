@@ -71,6 +71,7 @@ type TokenRecord struct {
 	Disconnected bool
 	AuthType     string
 	Metadata     string
+	SystemShared bool
 }
 
 type CFInfo struct {
@@ -93,11 +94,11 @@ type VCapApplicationData struct {
 }
 
 type LoginRes struct {
-	Account     string   	 		 `json:"account"`
-	TokenExpiry int64    		 	 `json:"token_expiry"`
-	APIEndpoint *url.URL 		 	 `json:"api_endpoint"`
-	Admin       bool    		 	 `json:"admin"`
-	User				*ConnectedUser `json:"user"`
+	Account     string         `json:"account"`
+	TokenExpiry int64          `json:"token_expiry"`
+	APIEndpoint *url.URL       `json:"api_endpoint"`
+	Admin       bool           `json:"admin"`
+	User        *ConnectedUser `json:"user"`
 }
 
 type LoginHookFunc func(c echo.Context) error
@@ -144,9 +145,10 @@ type Info struct {
 // Extends CNSI Record and adds the user
 type EndpointDetail struct {
 	*CNSIRecord
-	User          *ConnectedUser    `json:"user"`
-	Metadata      map[string]string `json:"metadata,omitempty"`
-	TokenMetadata string            `json:"-"`
+	User              *ConnectedUser    `json:"user"`
+	Metadata          map[string]string `json:"metadata,omitempty"`
+	TokenMetadata     string            `json:"-"`
+	SystemSharedToken bool              `json:"system_shared_token"`
 }
 
 // Versions - response returned to caller from a getVersions action

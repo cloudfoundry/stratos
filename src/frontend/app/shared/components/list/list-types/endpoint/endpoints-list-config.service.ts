@@ -26,7 +26,7 @@ import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table
 import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
 
 import { map, pairwise } from 'rxjs/operators';
-import { Observable } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 
 
 
@@ -109,7 +109,15 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'connected'))
+    createVisible: (row$: Observable<EndpointModel>) => combineLatest(
+      this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER),
+      row$
+    ).pipe(
+      map(([isAdmin, row]) => {
+        const isConnected = row.connectionStatus === 'connected';
+        return isConnected && (!row.system_shared_token || row.system_shared_token && isAdmin);
+      })
+    )
   };
 
   private listActionConnect: IListAction<EndpointModel> = {

@@ -26,13 +26,13 @@ var updateAuthToken = `UPDATE tokens
 									SET auth_token = $1, refresh_token = $2, token_expiry = $3
 									WHERE user_guid = $4 AND token_type = $5`
 
-var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data
+var findCNSIToken = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid
 										FROM tokens
-										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi'`
+										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi'`
 
-var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data
+var findCNSITokenConnected = `SELECT auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid
 										FROM tokens
-										WHERE cnsi_guid = $1 AND user_guid = $2 AND token_type = 'cnsi' AND disconnected = '0'`
+										WHERE cnsi_guid = $1 AND (user_guid = $2 OR user_guid = $3) AND token_type = 'cnsi' AND disconnected = '0'`
 
 var countCNSITokens = `SELECT COUNT(*)
 											FROM tokens
@@ -304,13 +304,14 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 		disconnected           bool
 		authType               string
 		metadata               string
+		tokenUserGUID          string
 	)
 
 	var err error
 	if includeDisconnected {
-		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata)
+		err = p.db.QueryRow(findCNSIToken, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID)
 	} else {
-		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata)
+		err = p.db.QueryRow(findCNSITokenConnected, cnsiGUID, userGUID, SystemSharedUserGuid).Scan(&ciphertextAuthToken, &ciphertextRefreshToken, &tokenExpiry, &disconnected, &authType, &metadata, &tokenUserGUID)
 	}
 
 	if err != nil {
@@ -339,6 +340,7 @@ func (p *PgsqlTokenRepository) findCNSIToken(cnsiGUID string, userGUID string, e
 	tr.Disconnected = disconnected
 	tr.AuthType = authType
 	tr.Metadata = metadata
+	tr.SystemShared = tokenUserGUID == SystemSharedUserGuid
 
 	return *tr, nil
 }
