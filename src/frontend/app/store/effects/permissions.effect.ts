@@ -183,12 +183,6 @@ export class PermissionsEffects {
       const relAction = new GetUserRelations(endpoint.userGuid, type, endpoint.guid);
       return fetchCfUserRole(this.store, relAction, this.httpClient);
     });
-
-    // return [].concat(...endpoints.map(endpoint => {
-    //   return Object.values(UserRelationTypes).map((type: UserRelationTypes) => {
-    //     return getRequestFromAction(new GetUserRelations(endpoint.userGuid, type, endpoint.guid), this.httpClient);
-    //   });
-    // }));
   }
 }
 
