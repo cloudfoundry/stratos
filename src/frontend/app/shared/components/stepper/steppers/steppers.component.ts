@@ -163,15 +163,18 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private findValidStep(index: number, isNextDirection: boolean) {
     // Ensure the required step can be activated (not skipped), if not continue in the correct direction until we've found one that can be
+
+    // Candidate step index
     index = Math.min(index, this.steps.length - 1);
-    // Create list of all not skipped stepped
+    // Create list of all not skipped stepped. Any candidate step to go to should exist in here
     const nonSkipSteps = this.steps.filter(step => !step.skip);
+    // Iterate through steps until we find a valid one
     while (true) {
-      // Can this step be activated?
-      const newIndex = nonSkipSteps.findIndex(step => step === this.steps[index]);
-      if (newIndex !== -1) {
+      // Can this step be activated (exists in nonSkippedSteps)?
+      const found = nonSkipSteps.findIndex(step => step === this.steps[index]) >= 0;
+      if (found) {
         // Yes, step is valid
-        return newIndex;
+        return index;
       }
       // No? Try again with the next or previous step
       index = isNextDirection ? ++index : --index;

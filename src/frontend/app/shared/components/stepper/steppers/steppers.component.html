@@ -8,7 +8,7 @@
             <mat-spinner *ngIf="step.blocked; else notBlocked" diameter="20"></mat-spinner>
             <!-- Not Blocked -->
             <ng-template #notBlocked>
-              <app-dot-content class="buildpack-card__title-dot" [disabled]="step.skip">
+              <app-dot-content [disabled]="step.skip">
                 <mat-icon class="steppers__header-complete" *ngIf="step.complete">{{ this.getIconLigature() }}</mat-icon>
                 <div *ngIf="!step.complete ">{{ i + 1 }}</div>
               </app-dot-content>
