@@ -23,7 +23,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/engine/standard"
 	"github.com/labstack/echo/middleware"
-	"github.com/andrewghobrial/sqlitestore"
+	"github.com/nwmac/sqlitestore"
 
 	"github.com/SUSE/stratos-ui/components/app-core/backend/config"
 	"github.com/SUSE/stratos-ui/components/app-core/backend/datastore"
