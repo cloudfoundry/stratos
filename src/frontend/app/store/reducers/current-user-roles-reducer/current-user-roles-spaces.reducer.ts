@@ -7,3 +7,5 @@ export function currentUserSpaceRolesReducer(state: ISpacesRoleState = {}, actio
   const { newState, addedIds } = addNewRoles(state, action, currentUserSpaceRoleReducer);
   return removeOldRoles(newState, action, addedIds, currentUserSpaceRoleReducer);
 }
+
+
