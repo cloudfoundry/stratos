@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from './store/app-state';
 import { AuthState } from './store/reducers/auth.reducer';
 import { VerifySession } from './store/actions/auth.actions';
-import { MatDialog } from '@angular/material';
+import { MatDialog, MatDialogRef } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { Observable, interval, Subscription, fromEvent, merge } from 'rxjs';
 import { SessionData } from './store/types/auth.types';
@@ -36,6 +36,8 @@ export class LoggedInService {
   private _userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
   private _activityPromptShown = false;
+  public dialogRef: MatDialogRef<LogOutDialogComponent, any>;
+  private auth$: Subscription;
 
 
   constructor(
@@ -44,12 +46,14 @@ export class LoggedInService {
     private dialog: MatDialog,
     private ngZone: NgZone
   ) {
+  }
 
+  public start() {
     const eventStreams = this._userActiveEvents.map((eventName) => {
       return fromEvent(document, eventName);
     });
 
-    this.store.select(s => s.auth)
+    this.auth$ = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
         this._sessionData = auth.sessionData;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
@@ -63,11 +67,23 @@ export class LoggedInService {
           }
         } else {
           this.closeSessionCheckerPoll();
-          if (this._userInteractionChecker) {
-            this._userInteractionChecker.unsubscribe();
-          }
+          this.stopUserInteractionChecker();
         }
       });
+  }
+
+  public stop() {
+    this.closeSessionCheckerPoll();
+    this.stopUserInteractionChecker();
+    if (this.auth$) {
+      this.auth$.unsubscribe();
+    }
+  }
+
+  private stopUserInteractionChecker() {
+    if (this._userInteractionChecker) {
+      this._userInteractionChecker.unsubscribe();
+    }
   }
 
   // Run outside Angular zone for protractor tests to work
@@ -96,12 +112,12 @@ export class LoggedInService {
   private _promptInactiveUser(expiryDate) {
     this._activityPromptShown = true;
 
-    const dialogRef = this.dialog.open(LogOutDialogComponent, {
+    this.dialogRef = this.dialog.open(LogOutDialogComponent, {
       data: { expiryDate },
       disableClose: true
     });
 
-    dialogRef.afterClosed().subscribe((verify = false) => {
+    this.dialogRef.afterClosed().subscribe((verify = false) => {
       if (verify) {
         this.store.dispatch(new VerifySession(false, false));
         this.openSessionCheckerPoll();

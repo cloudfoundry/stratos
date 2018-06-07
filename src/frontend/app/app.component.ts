@@ -23,6 +23,7 @@ export class AppComponent implements OnInit, AfterContentInit {
     private router: Router,
     private loggedInService: LoggedInService
   ) {
+    loggedInService.start();
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();
