@@ -4,6 +4,7 @@ import { IRequestEntityTypeState } from '../app-state';
 import { APIResource } from '../types/api.types';
 import { APISuccessOrFailedAction } from '../types/request.types';
 import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+import { DISCONNECT_ENDPOINTS_SUCCESS, DisconnectEndpoint, EndpointAction } from '../actions/endpoint.actions';
 
 const properties = {
   org: {
@@ -33,6 +34,19 @@ export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>,
           entity: updatePermission(state[userGuid].entity, entityGuid, isSpace, permissionTypeKey, action.type === ADD_PERMISSION_SUCCESS),
         }
       };
+  }
+  return state;
+}
+export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint) {
+  switch (action.type) {
+    case DISCONNECT_ENDPOINTS_SUCCESS:
+      const cfGuid = action.guid;
+      // remove users that belong to this CF
+      const newUsers = {};
+      Object.values(state)
+      .filter(u => u.entity.cfGuid !== cfGuid)
+      .forEach(u => newUsers[u.metadata.guid] = u);
+      return newUsers;
   }
   return state;
 }

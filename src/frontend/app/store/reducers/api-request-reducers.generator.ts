@@ -38,7 +38,7 @@ import { updateOrganizationSpaceReducer } from './organization-space.reducer';
 import { routeReducer } from './routes.reducer';
 import { serviceInstanceReducer } from './service-instance.reducer';
 import { systemEndpointsReducer } from './system-endpoints.reducer';
-import { userReducer, userSpaceOrgReducer } from './users.reducer';
+import { userReducer, userSpaceOrgReducer, endpointDisconnectUserReducer } from './users.reducer';
 
 /**
  * This module uses the request data reducer and request reducer factories to create
@@ -124,7 +124,7 @@ export function requestDataReducer(state, action) {
   const baseDataReducer = requestDataReducerFactory(entities, requestActions);
 
   const extraReducers = {
-    [cfUserSchemaKey]: [userReducer],
+    [cfUserSchemaKey]: [userReducer, endpointDisconnectUserReducer],
     [routeSchemaKey]: [routeReducer],
     [serviceInstancesSchemaKey]: [serviceInstanceReducer],
     [endpointStoreNames.type]: [systemEndpointsReducer],
