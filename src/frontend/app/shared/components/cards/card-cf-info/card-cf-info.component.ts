@@ -58,8 +58,6 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
         desc = metadata.description;
         desc += metadata.build ? ` (${metadata.build})` : '';
       }
-
-
     }
     return desc;
   }
