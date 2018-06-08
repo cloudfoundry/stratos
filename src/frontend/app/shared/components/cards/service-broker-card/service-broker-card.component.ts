@@ -28,6 +28,7 @@ export class ServiceBrokerCardComponent {
   ) {
     this.serviceBroker$ = this.servicesService.serviceBroker$;
     this.spaceLink$ = this.serviceBroker$.pipe(
+      filter(o => !!o),
       switchMap(broker => {
         const spaceGuid = broker.entity.space_guid;
         const spaceService = this.entityServiceFactory.create<APIResource<ISpace>>(spaceSchemaKey,

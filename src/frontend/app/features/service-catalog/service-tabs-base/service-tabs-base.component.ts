@@ -35,7 +35,7 @@ export class ServiceTabsBaseComponent {
   ];
 
   constructor(private servicesService: ServicesService, private store: Store<AppState>) {
-    this.hasVisiblePlans$ = this.servicesService.getVisibleServicePlans().pipe(
+    this.hasVisiblePlans$ = this.servicesService.servicePlans$.pipe(
       map(p => p.length > 0));
     this.toolTipText$ = this.hasVisiblePlans$.pipe(
       map(hasPlans => {
