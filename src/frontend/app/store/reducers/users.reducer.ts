@@ -38,8 +38,9 @@ export function userReducer(state: IRequestEntityTypeState<APIResource<CfUser>>,
   return state;
 }
 export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<APIResource<CfUser>>, action: DisconnectEndpoint) {
-  switch (action.type) {
-    case DISCONNECT_ENDPOINTS_SUCCESS:
+  if (action.endpointType === 'cf') {
+    switch (action.type) {
+      case DISCONNECT_ENDPOINTS_SUCCESS:
       const cfGuid = action.guid;
       // remove users that belong to this CF
       const newUsers = {};
@@ -47,6 +48,7 @@ export function endpointDisconnectUserReducer(state: IRequestEntityTypeState<API
       .filter(u => u.entity.cfGuid !== cfGuid)
       .forEach(u => newUsers[u.metadata.guid] = u);
       return newUsers;
+    }
   }
   return state;
 }
