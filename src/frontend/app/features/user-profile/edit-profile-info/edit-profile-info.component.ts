@@ -1,9 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
+import {
+  ErrorStateMatcher,
+  ShowOnDirtyErrorStateMatcher,
+} from '@angular/material';
 import { Subscription } from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 
+import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../core/current-user-permissions.service';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { UserProfileInfo, UserProfileInfoUpdates } from '../../../store/types/user-profile.types';
 import { UserProfileService } from '../user-profile.service';
@@ -24,6 +29,7 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   constructor(
     private userProfileService: UserProfileService,
     private fb: FormBuilder,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
   ) {
     this.editProfileForm = this.fb.group({
       givenName: '',
@@ -44,8 +50,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
 
   private emailAddress: string;
 
-  // Wire up to permissions and only allow password change if user has the 'password.write' group
-  private canChangePassword = true;
+
+  // Only allow password change if user has the 'password.write' group
+  private canChangePassword = this.currentUserPermissionsService.can(CurrentUserPermissions.PASSWORD_CHANGE);
 
   private passwordRequired = false;
 

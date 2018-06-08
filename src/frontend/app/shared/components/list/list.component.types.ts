@@ -129,8 +129,8 @@ export interface IBaseListAction<T> {
 
 export interface IListAction<T> extends IBaseListAction<T> {
   action: (item: T) => void;
-  createVisible?: (row: T) => Observable<boolean>;
-  createEnabled?: (row: T) => Observable<boolean>;
+  createVisible?: (row$: Observable<T>) => Observable<boolean>;
+  createEnabled?: (row$: Observable<T>) => Observable<boolean>;
 }
 
 export interface IOptionalAction<T> extends IBaseListAction<T> {
