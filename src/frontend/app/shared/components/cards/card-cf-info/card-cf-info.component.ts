@@ -1,7 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CloudFoundryEndpointService } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+import { Subscription, Observable } from 'rxjs';
+import { EntityInfo, APIResource } from '../../../../store/types/api.types';
+import { EndpointModel } from '../../../../store/types/endpoint.types';
+import { ICfV2Info } from '../../../../core/cf-api.types';
 
 @Component({
   selector: 'app-card-cf-info',
@@ -13,6 +16,8 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
   subs: Subscription[] = [];
   constructor(private cfEndpointService: CloudFoundryEndpointService) { }
 
+  description$: Observable<string>;
+
   ngOnInit() {
     const obs$ = this.cfEndpointService.endpoint$.pipe(
       tap(endpoint => {
@@ -21,6 +26,10 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
     );
 
     this.subs.push(obs$.subscribe());
+
+    this.description$ = this.cfEndpointService.info$.pipe(
+      map(entity => this.getDescription(entity))
+    );
   }
 
   getApiEndpointUrl(apiEndpoint) {
@@ -34,5 +43,24 @@ export class CardCfInfoComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.forEach(s => s.unsubscribe());
+  }
+
+  private getDescription(entity: EntityInfo<APIResource<ICfV2Info>>): string {
+    let desc = '-';
+    if (entity && entity.entity && entity.entity.entity) {
+      const metadata = entity.entity.entity;
+      if (metadata.description.length === 0 ) {
+        // No descripion - custom overrides
+        if (metadata.support === 'pcfdev@pivotal.io') {
+          desc = 'PCF Dev';
+        }
+      } else {
+        desc = metadata.description;
+        desc += metadata.build ? ` (${metadata.build})` : '';
+      }
+
+
+    }
+    return desc;
   }
 }
