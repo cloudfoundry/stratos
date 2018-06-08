@@ -30,4 +30,16 @@
       font-weight: 500;
     }
   }
+  &__admin-card {
+    border-left-style: solid;
+    border-left-width: 4px;
+  }
+  &__admin {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+  }
+  &__warning-icon {
+    margin-right: 8px;
+  }
 }
