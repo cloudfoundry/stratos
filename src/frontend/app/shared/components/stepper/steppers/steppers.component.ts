@@ -119,13 +119,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
-  skipToNext() {
-    this.unsubscribeNext();
-    if (this.currentIndex < this.steps.length) {
-      this.setActive(this.currentIndex + 1);
-    }
-  }
-
   redirect() {
     return combineLatest(
       this.cancel$,
@@ -144,6 +137,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           // Execute `onEnter` for the first step as soon as step is unblocked
           const timer = setInterval(() => {
             if (this.allSteps[index].blocked === false) {
+              this.allSteps[index].active = true;
               this.allSteps[index]._onEnter(this.enterData);
               clearInterval(timer);
             }
@@ -152,24 +146,49 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       }
       return;
     }
-    // We do allow next beyond the last step to
-    // allow the last step to finish up
-    // This shouldn't effect the state of the stepper though.
-    index = Math.min(index, this.steps.length - 1);
+
+    // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
+    const isNextDirection = index > this.currentIndex;
+    this.steps[this.currentIndex].onLeave(isNextDirection);
+
+    // 2) Determine if the required step is ok (and if not find the next/previous valid step)
+    index = this.findValidStep(index, isNextDirection);
+    if (index === -1) {
+      return;
+    }
+
+    // 3) Set stepper state WRT required step
     this.steps.forEach((_step, i) => {
-      if (i < index) {
-        _step.complete = true;
-      } else {
-        _step.complete = false;
-      }
-      _step.active = i === index ? true : false;
+      _step.complete = i < index;
+      _step.active = i === index;
     });
-    // Tell onLeave if this is a Next or Previous transition
-    this.steps[this.currentIndex].onLeave(index > this.currentIndex);
-    index = this.steps[index].skip ? ++index : index;
     this.currentIndex = index;
     this.steps[this.currentIndex]._onEnter(this.enterData);
     this.enterData = undefined;
+  }
+
+  private findValidStep(index: number, isNextDirection: boolean) {
+    // Ensure the required step can be activated (not skipped), if not continue in the correct direction until we've found one that can be
+
+    // Candidate step index
+    index = Math.min(index, this.steps.length - 1);
+    // Create list of all not skipped stepped. Any candidate step to go to should exist in here
+    const nonSkipSteps = this.steps.filter(step => !step.skip);
+    // Iterate through steps until we find a valid one
+    while (true) {
+      // Can this step be activated (exists in nonSkippedSteps)?
+      const found = nonSkipSteps.findIndex(step => step === this.steps[index]) >= 0;
+      if (found) {
+        // Yes, step is valid
+        return index;
+      }
+      // No? Try again with the next or previous step
+      index = isNextDirection ? ++index : --index;
+      if (index < 0 || this.steps.length <= index) {
+        break;
+      }
+    }
+    return -1;
   }
 
   canGoto(index: number): boolean {
