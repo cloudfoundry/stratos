@@ -218,7 +218,7 @@ export class ServicesService {
     map(service =>
       service.entity.tags.map(t => ({
         value: t,
-        hideClearButton: true
+        hideClearButton$: observableOf(true)
       }))
     )
   )

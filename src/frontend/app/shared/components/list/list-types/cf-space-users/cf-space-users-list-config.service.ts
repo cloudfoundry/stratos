@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
 import { CloudFoundrySpaceService } from '../../../../../features/cloud-foundry/services/cloud-foundry-space.service';
 import { AppState } from '../../../../../store/app-state';
@@ -16,8 +17,9 @@ export class CfSpaceUsersListConfigService extends CfUserListConfigService {
     cfSpaceService: CloudFoundrySpaceService,
     cfUserService: CfUserService,
     router: Router,
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace) {
-    super(store, cfUserService, router, activeRouteCfOrgSpace);
+    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    userPerms: CurrentUserPermissionsService) {
+    super(store, cfUserService, router, activeRouteCfOrgSpace, userPerms);
     this.dataSource = new CfUserDataSourceService(store, cfSpaceService.allSpaceUsersAction, this);
   }
 }

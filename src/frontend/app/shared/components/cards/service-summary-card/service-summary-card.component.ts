@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { IService } from '../../../../core/cf-api-svc.types';
@@ -30,7 +30,7 @@ export class ServiceSummaryCardComponent {
       tap(service => {
         this.tags = service.entity.tags.map(t => ({
           value: t,
-          hideClearButton: true
+          hideClearButton$: observableOf(true)
         }));
       })
     ).subscribe();
