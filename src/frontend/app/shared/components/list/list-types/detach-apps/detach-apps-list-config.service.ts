@@ -39,7 +39,7 @@ export class DetachAppsListConfigService implements IListConfig<APIResource> {
     }
   }, {
     columnId: 'createdAt',
-    headerCell: () => 'Creation',
+    headerCell: () => 'Binding Date',
     cellDefinition: {
       getValue: (row: APIResource) => `${this.datePipe.transform(row.metadata.created_at, 'medium')}`
     },

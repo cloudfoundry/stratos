@@ -1,24 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
-import { APIResource } from '../../../store/types/api.types';
-import { IServiceBinding, IService } from '../../../core/cf-api-svc.types';
 import { DatePipe } from '@angular/common';
-import {of as observableOf, Observable, ReplaySubject } from 'rxjs';
-import { AppMonitorComponentTypes } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
-import { DeleteServiceBinding } from '../../../store/actions/service-bindings.actions';
+import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { BindingPipe } from '@angular/compiler';
-import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { GetServiceInstance } from '../../../store/actions/service-instances.actions';
-import {
-  serviceBindingSchemaKey, entityFactory, serviceInstancesSchemaKey
-} from '../../../store/helpers/entity-factory';
-import { IServiceInstance } from '../../../core/cf-api-svc.types';
-import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import { Store } from '@ngrx/store';
+import { Observable, of as observableOf, ReplaySubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
+
+import { IServiceBinding, IServiceInstance } from '../../../core/cf-api-svc.types';
+import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
+import {
+  AppMonitorComponentTypes,
+} from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
+import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
+import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
+import { GetServiceInstance } from '../../../store/actions/service-instances.actions';
+import { AppState } from '../../../store/app-state';
+import { entityFactory, serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
+import { APIResource } from '../../../store/types/api.types';
+
 @Component({
   selector: 'app-detach-service-instance',
   templateUrl: './detach-service-instance.component.html',
@@ -40,7 +38,6 @@ export class DetachServiceInstanceComponent {
         getLink: row => `/applications/${row.entity.app.metadata.guid}`,
         newTab: true,
       },
-      cellFlex: '0 0 200px'
     },
     {
       columnId: 'creation',
@@ -88,11 +85,11 @@ export class DetachServiceInstanceComponent {
   public startDelete = () => {
     this.deleteStarted = true;
     if (this.selectedBindings && this.selectedBindings.length) {
-     this.selectedBindings.forEach(binding => {
+      this.selectedBindings.forEach(binding => {
         this.serviceActionHelperService.detachServiceBinding([binding], binding.entity.service_instance_guid, this.cfGuid, true);
       });
     }
-    return observableOf({success: true});
+    return observableOf({ success: true });
   }
 
 }
