@@ -86,13 +86,10 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     // Check if wizard has been initiated to edit a service instance
     if (this.modeService.isEditServiceInstanceMode()) {
       this.initialisedService$ = this.configureForEditServiceInstanceMode();
-    }
-
-    if (this.modeService.isAppServicesMode()) {
+    } else if (this.modeService.isAppServicesMode()) {
       // Setup wizard for App services mode
       this.initialisedService$ = this.setupForAppServiceMode();
-    }
-    if (this.modeService.isServicesWallMode()) {
+    } else if (this.modeService.isServicesWallMode()) {
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.serviceInstancesUrl = `/services`;
@@ -192,7 +189,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           }),
           take(1)
         ).subscribe();
-        this.serviceInstancesUrl = `/services`;
       }),
       take(1),
       map(o => false),

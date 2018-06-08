@@ -16,7 +16,6 @@ import {
 import { APIResource } from '../../../../store/types/api.types';
 import { ServicesWallService } from '../../../../features/services/services/services-wall.service';
 import { CsiGuidsService } from '../csi-guids.service';
-import { CsiModeService } from '../csi-mode.service';
 
 @Component({
   selector: 'app-select-service',
