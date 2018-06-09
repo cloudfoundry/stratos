@@ -6,7 +6,7 @@
       <mat-spinner *ngIf="chip.busy && (chip.busy | async)" diameter="15" class="app-chip__busy-spinner"></mat-spinner>
     </ng-container>
   </mat-chip>
-  <a class="app-chips__limit" *ngIf="chips.length > lowerLimit" (click)="toggleLimit()">
+  <a class="app-chips__limit" *ngIf="chips.length > lowerLimit" (click)="toggleLimit()" appClickStopPropagation>
     <span *ngIf="atLowerLimit">+{{ chips.length - limit }}</span>
     <span *ngIf="!atLowerLimit">Show less</span>
     </a>
