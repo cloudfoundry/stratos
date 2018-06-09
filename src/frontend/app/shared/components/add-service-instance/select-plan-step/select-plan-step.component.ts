@@ -139,8 +139,6 @@ export class SelectPlanStepComponent implements OnDestroy {
   }
 
   onEnter = () => {
-
-
     this.subscription = this.servicePlans$.pipe(
       filter(p => !!p && p.length > 0),
       tap(o => {
@@ -150,8 +148,6 @@ export class SelectPlanStepComponent implements OnDestroy {
         this.validate.next(this.stepperForm.valid);
       }),
     ).subscribe();
-
-
   }
 
   onNext = () => {

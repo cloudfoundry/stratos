@@ -195,7 +195,7 @@ export class ServicesService {
   private initBaseObservables() {
     this.servicePlanVisibilities$ = this.getServicePlanVisibilities();
     this.serviceExtraInfo$ = this.service$.pipe(map(o => JSON.parse(o.entity.extra)));
-    this.servicePlans$ = getServicePlans(this.service$, this.cfGuid);
+    this.servicePlans$ = getServicePlans(this.service$, this.cfGuid, this.store, this.paginationMonitorFactory);
     this.serviceBrokers$ = this.getServiceBrokers();
     this.serviceBroker$ = this.serviceBrokers$.pipe(
       filter(p => !!p && p.length > 0),

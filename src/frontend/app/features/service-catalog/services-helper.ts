@@ -27,7 +27,7 @@ export const getSvcAvailability = (servicePlan: APIResource<IServicePlan>,
   const svcAvailability = {
     isPublic: false, spaceScoped: false, hasVisibilities: false, guid: servicePlan.metadata.guid, spaceGuid: null
   };
-  if (serviceBroker.entity.space_guid) {
+  if (serviceBroker && serviceBroker.entity.space_guid) {
     svcAvailability.spaceScoped = true;
     svcAvailability.spaceGuid = serviceBroker.entity.space_guid;
   } else {
@@ -80,7 +80,9 @@ export const getServiceInstancesInCf = (cfGuid: string, store: Store<AppState>, 
 
 export const getServicePlans = (
   service$: Observable<APIResource<IService>>,
-  cfGuid: string
+  cfGuid: string,
+  store: Store<AppState>,
+  paginationMonitorFactory: PaginationMonitorFactory
 ): Observable<APIResource<IServicePlan>[]>  => {
   return service$.pipe(
     filter(p => !!p),
@@ -93,9 +95,9 @@ export const getServicePlans = (
       const getServicePlansAction = new GetServicePlansForService(guid, cfGuid, paginationKey);
       // Could be a space-scoped service, make a request to fetch the plan
       return getPaginationObservables<APIResource<IServicePlan>>({
-        store: this.store,
+        store: store,
         action: getServicePlansAction,
-        paginationMonitor: this.paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
+        paginationMonitor: paginationMonitorFactory.create(getServicePlansAction.paginationKey, entityFactory(servicePlanSchemaKey))
       }, true)
         .entities$.pipe(share(), first());
     }
