@@ -78,6 +78,7 @@ deploy/stratos-ui-release/dev_releases/
 output/fissile
 deploy/ci/travis/temp/
 deploy/glide-cache/
+chrome-user-data/
 
 .dist/
 deploy/uaa/tmp/
