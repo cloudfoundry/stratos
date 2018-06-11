@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnInit, HostBinding } from '@angular/core';
+import { AfterContentInit, Component, OnInit, OnDestroy, HostBinding } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { create } from 'rxjs-spy';
@@ -13,7 +13,7 @@ import { AppState } from './store/app-state';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit, AfterContentInit {
+export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   @HostBinding('@.disabled')
   public animationsDisabled = false;
@@ -21,9 +21,8 @@ export class AppComponent implements OnInit, AfterContentInit {
   constructor(
     private store: Store<AppState>,
     private router: Router,
-    public loggedInService: LoggedInService
+    private loggedInService: LoggedInService
   ) {
-    loggedInService.start();
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();
@@ -52,7 +51,13 @@ export class AppComponent implements OnInit, AfterContentInit {
   }
   title = 'app';
 
-  ngOnInit() { }
+  ngOnInit() {
+    this.loggedInService.init();
+  }
+
+  ngOnDestroy() {
+    this.loggedInService.destroy();
+  }
 
   ngAfterContentInit() { }
 }

@@ -8,9 +8,6 @@ import { createBasicStoreModule } from './test-framework/store-test-helper';
 
 describe('AppComponent', () => {
 
-  class LoggedInServiceMock {
-  }
-
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
@@ -31,6 +28,5 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent<AppComponent>(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
-    app.loggedInService.stop();
   }));
 });

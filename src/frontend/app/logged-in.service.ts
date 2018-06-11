@@ -4,7 +4,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from './store/app-state';
 import { AuthState } from './store/reducers/auth.reducer';
 import { VerifySession } from './store/actions/auth.actions';
-import { MatDialog, MatDialogRef } from '@angular/material';
+import { MatDialog } from '@angular/material';
 import { LogOutDialogComponent } from './core/log-out-dialog/log-out-dialog.component';
 import { Observable, interval, Subscription, fromEvent, merge } from 'rxjs';
 import { SessionData } from './store/types/auth.types';
@@ -36,9 +36,10 @@ export class LoggedInService {
   private _userActiveEvents = ['keydown', 'DOMMouseScroll', 'mousewheel', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
 
   private _activityPromptShown = false;
-  public dialogRef: MatDialogRef<LogOutDialogComponent, any>;
-  private auth$: Subscription;
 
+  private _sub: Subscription;
+
+  private _destroying = false;
 
   constructor(
     @Inject(DOCUMENT) private document: Document,
@@ -48,12 +49,12 @@ export class LoggedInService {
   ) {
   }
 
-  public start() {
+  init() {
     const eventStreams = this._userActiveEvents.map((eventName) => {
       return fromEvent(document, eventName);
     });
 
-    this.auth$ = this.store.select(s => s.auth)
+    this._sub = this.store.select(s => s.auth)
       .subscribe((auth: AuthState) => {
         this._sessionData = auth.sessionData;
         if (auth.loggedIn && auth.sessionData && auth.sessionData.valid) {
@@ -67,20 +68,19 @@ export class LoggedInService {
           }
         } else {
           this.closeSessionCheckerPoll();
-          this.stopUserInteractionChecker();
+          if (this._userInteractionChecker) {
+            this._userInteractionChecker.unsubscribe();
+          }
         }
       });
   }
 
-  public stop() {
-    this.closeSessionCheckerPoll();
-    this.stopUserInteractionChecker();
-    if (this.auth$) {
-      this.auth$.unsubscribe();
+  destroy() {
+    this._destroying = true;
+    if (this._sub) {
+      this._sub.unsubscribe();
     }
-  }
-
-  private stopUserInteractionChecker() {
+    this.closeSessionCheckerPoll();
     if (this._userInteractionChecker) {
       this._userInteractionChecker.unsubscribe();
     }
@@ -112,12 +112,12 @@ export class LoggedInService {
   private _promptInactiveUser(expiryDate) {
     this._activityPromptShown = true;
 
-    this.dialogRef = this.dialog.open(LogOutDialogComponent, {
+    const dialogRef = this.dialog.open(LogOutDialogComponent, {
       data: { expiryDate },
       disableClose: true
     });
 
-    this.dialogRef.afterClosed().subscribe((verify = false) => {
+    dialogRef.afterClosed().subscribe((verify = false) => {
       if (verify) {
         this.store.dispatch(new VerifySession(false, false));
         this.openSessionCheckerPoll();
@@ -127,7 +127,7 @@ export class LoggedInService {
   }
 
   private _checkSession() {
-    if (this._activityPromptShown) {
+    if (this._activityPromptShown || this._destroying) {
       return;
     }
 

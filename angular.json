@@ -69,7 +69,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-	    "sourceMap": false,
+            "sourceMap": false,
             "main": "src/frontend/test.ts",
             "karmaConfig": "./karma.conf.js",
             "polyfills": "src/frontend/polyfills.ts",
