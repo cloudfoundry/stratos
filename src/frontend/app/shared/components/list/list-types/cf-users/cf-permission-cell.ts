@@ -1,5 +1,6 @@
 import { Input } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of as observableOf } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { IUserRole } from '../../../../../features/cloud-foundry/cf.helpers';
 import { APIResource } from '../../../../../store/types/api.types';
@@ -7,11 +8,15 @@ import { CfUser } from '../../../../../store/types/user.types';
 import { AppChip } from '../../../chips/chips.component';
 import { TableCellCustom } from '../../list.types';
 
+
 export interface ICellPermissionList<T> extends IUserRole<T> {
   busy: Observable<boolean>;
   name: string;
   guid: string;
   userGuid: string;
+  cfGuid: string;
+  orgGuid: string;
+  spaceGuid?: string;
 }
 
 interface ICellPermissionUpdates {
@@ -41,8 +46,9 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
         const permission = chip.key;
         this.removePermission(permission);
       };
-      // // Disable removal of role, since we can't add any
-      // chipConfig.hideClearButton = true;
+      chipConfig.hideClearButton$ = this.canRemovePermission(perm.cfGuid, perm.orgGuid, perm.spaceGuid).pipe(
+        map(can => !can),
+      );
       return chipConfig;
     });
   }
@@ -50,4 +56,6 @@ export abstract class CfPermissionCell<T> extends TableCellCustom<APIResource<Cf
   protected removePermission(cellPermission: ICellPermissionList<T>) {
 
   }
+
+  protected canRemovePermission = (cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> => observableOf(false);
 }

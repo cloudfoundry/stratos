@@ -19,7 +19,7 @@ import (
 
 const cfSessionCookieName = "JSESSIONID"
 
-func handleSessionError(err error) error {
+func handleSessionError(err error, doNotLog bool) error {
 	if strings.Contains(err.Error(), "dial tcp") {
 		return interfaces.NewHTTPShadowError(
 			http.StatusServiceUnavailable,
@@ -28,10 +28,14 @@ func handleSessionError(err error) error {
 		)
 	}
 
+	var logMessage = ""
+	if !doNotLog {
+		logMessage = "User session could not be found: %v"
+	}
+
 	return interfaces.NewHTTPShadowError(
 		http.StatusUnauthorized,
-		"User session could not be found",
-		"User session could not be found: %v", err,
+		"User session could not be found", logMessage, err,
 	)
 }
 
@@ -46,7 +50,10 @@ func (p *portalProxy) sessionMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			c.Set("user_id", userID)
 			return h(c)
 		}
-		return handleSessionError(err)
+
+		// Don't log an error if we are verifying the session, as a failure is not an error
+		isVerify := strings.HasSuffix(c.Request().URI(), "/auth/session/verify")
+		return handleSessionError(err, isVerify)
 	}
 }
 
@@ -80,7 +87,7 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			}
 		}
 
-		return handleSessionError(err)
+		return handleSessionError(err, false)
 	}
 }
 
@@ -89,7 +96,9 @@ func errorLoggingMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 		log.Debug("errorLoggingMiddleware")
 		err := h(c)
 		if shadowError, ok := err.(interfaces.ErrHTTPShadow); ok {
-			log.Error(shadowError.LogMessage)
+			if len(shadowError.LogMessage) > 0 {
+				log.Error(shadowError.LogMessage)
+			}
 			return shadowError.HTTPError
 		}
 

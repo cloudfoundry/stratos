@@ -1,7 +1,6 @@
-
-import {of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { IOrganization } from '../../../../../../core/cf-api.types';
 import { ActiveRouteCfOrgSpace } from '../../../../../../features/cloud-foundry/cf-page.types';
@@ -11,6 +10,7 @@ import { AppState } from '../../../../../../store/app-state';
 import { selectUsersRolesOrgGuid } from '../../../../../../store/selectors/users-roles.selector';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { TableCellCustom } from '../../../list.types';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-table-cell-select-org',
@@ -37,8 +37,11 @@ export class TableCellSelectOrgComponent extends TableCellCustom<APIResource<IOr
     if (this.activeRouteCfOrgSpace.orgGuid) {
       this.singleOrg$ = this.cfRolesService.fetchOrgEntity(this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid);
     } else {
-      this.singleOrg$ = observableOf(null);
       this.organizations$ = this.cfRolesService.fetchOrgs(this.activeRouteCfOrgSpace.cfGuid);
+      this.singleOrg$ = this.organizations$.pipe(
+        // Also count as single org when there's only one org in the list (due to only one org... only one permissable org to edit, etc)
+        map(orgs => orgs && orgs.length === 1 ? orgs[0] : null)
+      );
     }
     this.orgGuidChangedSub = this.store.select(selectUsersRolesOrgGuid).subscribe(orgGuid => this.selectedOrgGuid = orgGuid);
   }

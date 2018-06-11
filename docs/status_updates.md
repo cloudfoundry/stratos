@@ -2,6 +2,42 @@
 
 Weekly status updates are published here.
 
+## 08 June 2018
+
+The team have been working on the following issues and PRs this week:
+
+- Front-end unit tests are unreliable in Travis [#3208](https://github.com/cloudfoundry-incubator/stratos/issues/2308) - we're seeing a lot of problems with the front-end unit tests when running in Travis - we're continuing to dig into this issue to understand what the cause is, since this is affecting reliability of PR gate checks.
+
+- Services permissions [#2284](https://github.com/cloudfoundry-incubator/stratos/pull/2284) - wiring the user permissions service into the Service UI to ensure users are only presented with actions that they are permitted to perform.
+
+- Allow metrics endpoint token to be shared [#2283](https://github.com/cloudfoundry-incubator/stratos/pull/2283) - adding support for the admin user to connect to a Prometheus metrics endpoint and then make that connection available to all users. Note that non-admins can only see metrics for applications that they have permission to view.
+
+- Show whether user is an admin on the about page [#2306](https://github.com/cloudfoundry-incubator/stratos/pull/2306) - we now indicate on the about page if the current user is an administrator of Stratos.
+
+- Add Permissions to CF Users tables [#2291](https://github.com/cloudfoundry-incubator/stratos/pull/2291) - wired in the user permissions service into the Cloud Foundry user management UI.
+
+- Wire in actions to app state [#2288](https://github.com/cloudfoundry-incubator/stratos/pull/2288) - actions on the application view now use the same rules as in V1 to determine which actions should be shown based on the current application state.
+
+- Quicker e2e tests for PRs  [#2273](https://github.com/cloudfoundry-incubator/stratos/pull/2273) - changed the way e2e tests run for PRs. They will now use a quicker local deployment rather than a full deployment in docker.
+
+- Only show add and deploy buttons when there is at least 1 connected CF [#2285](https://github.com/cloudfoundry-incubator/stratos/pull/2285) - we now only show the add and deploy buttons on the application wall when there is a Cloud Foundry available.
+
+- Fetch cf users when not cf admin [#2282](https://github.com/cloudfoundry-incubator/stratos/pull/2282) - ensuring that we use different APIs call when the user is not an admin in order to retrieve the data to display for the user list.
+
+- Hide service broker card if broker information isn't available [#2287](https://github.com/cloudfoundry-incubator/stratos/pull/2287) - we now hide the service broker card if we can not retrieve the broker metadata.
+
+- Only allow password change if user has password.write scope [#2278](https://github.com/cloudfoundry-incubator/stratos/pull/2278) - user is now only presented with the option to change their password if they have permission to do so.
+
+- Backend logging improvements [#2267](https://github.com/cloudfoundry-incubator/stratos/pull/2267) - first round of tidy up to the back-end logging, including not logging an error when verifying the user's seesion when they don't have a valid session.
+
+- Use local fonts [#2260](https://github.com/cloudfoundry-incubator/stratos/pull/2260) - all fonts are now served up by the app itself to allow air-gapped deployment.
+
+- Endpoint confirmation modals [#2258](https://github.com/cloudfoundry-incubator/stratos/pull/2258) - added confirmation modals when disconnecting or un-registering and endpoint.
+
+- Added theming section to developer guide readme [#2249](https://github.com/cloudfoundry-incubator/stratos/pull/2249) - added documentation on how theming is done for Stratos.
+
+- Update permissions when when entities are updated [#2221](https://github.com/cloudfoundry-incubator/stratos/pull/2221) - we now ensure that permissions are updated when endpoints (and other entities) are updated in Stratos.
+
 ## 01 June 2018
 
 The team have been working on the following issues and PRs this week:
