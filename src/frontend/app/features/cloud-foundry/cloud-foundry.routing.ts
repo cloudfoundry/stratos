@@ -140,13 +140,13 @@ const cloudFoundry: Routes = [{
         {
           path: '',
           // Root for Tabs
-          data: {
-            uiFullView: true
-          },
           children: [
             {
               path: 'organizations/:orgId',
               component: CloudFoundryOrganizationBaseComponent,
+              data: {
+                uiFullView: true
+              },
               children: [
                 {
                   path: '',
