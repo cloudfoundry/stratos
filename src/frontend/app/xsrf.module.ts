@@ -8,8 +8,8 @@ import {
   HttpXsrfTokenExtractor,
 } from '@angular/common/http';
 import { Inject, Injectable, NgModule, PLATFORM_ID } from '@angular/core';
-
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 const STRATOS_XSRF_HEADER_NAME = 'X-XSRF-Token';
 
@@ -34,16 +34,16 @@ export class HttpXsrfHeaderExtractor implements HttpXsrfTokenExtractor {
 @Injectable()
 export class HttpXsrfHeaderInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req).do((ev: HttpEvent<any>) => {
-      if (ev instanceof HttpResponse) {
-        console.log('processing response');
-        console.log(ev);
-        // Look for the XSRF-Token Header
-        if (ev.headers.has(STRATOS_XSRF_HEADER_NAME)) {
-          HttpXsrfHeaderExtractor.stratosXSRFToken = ev.headers.get(STRATOS_XSRF_HEADER_NAME);
+    return next.handle(req).pipe(
+      tap((ev: HttpEvent<any>) => {
+        if (ev instanceof HttpResponse) {
+          // Look for the XSRF-Token Header
+          if (ev.headers.has(STRATOS_XSRF_HEADER_NAME)) {
+            HttpXsrfHeaderExtractor.stratosXSRFToken = ev.headers.get(STRATOS_XSRF_HEADER_NAME);
+          }
         }
-      }
-    });
+      })
+    );
   }
 }
 

@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import {mergeMap, tap, switchMap, catchError, map} from 'rxjs/operators';
+import { mergeMap, tap, switchMap, catchError, map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
@@ -66,15 +66,15 @@ export class AuthEffect {
     }));
 
   @Effect() verifyAuth$ = this.actions$.ofType<VerifySession>(VERIFY_SESSION).pipe(
-    .switchMap(action => {
+    switchMap(action => {
       const headers = new HttpHeaders();
       headers.set('x-cap-request-date', (Math.floor(Date.now() / 1000)).toString());
       return this.http.get<SessionData>('/pp/v1/auth/session/verify', {
         headers: headers,
         observe: 'response',
         withCredentials: true,
-      })
-        .mergeMap(response => {
+      }).pipe(
+        mergeMap(response => {
           const sessionData = response.body;
           sessionData.sessionExpiresOn = parseInt(response.headers.get('x-cap-session-expires-on'), 10) * 1000;
           return [new GetSystemInfo(true), new VerifiedSession(sessionData, action.updateEndpoints)];
@@ -88,7 +88,7 @@ export class AuthEffect {
           }
 
           return action.login ? [new InvalidSession(setupMode, isUpgrading)] : [new ResetAuth()];
-        }), );
+        }));
     }));
 
   @Effect() EndpointsSuccess$ = this.actions$.ofType<GetAllEndpointsSuccess>(GET_ENDPOINTS_SUCCESS).pipe(
