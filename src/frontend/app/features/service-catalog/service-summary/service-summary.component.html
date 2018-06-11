@@ -4,7 +4,7 @@
       <app-tile>
         <app-service-summary-card></app-service-summary-card>
       </app-tile>
-      <app-tile>
+      <app-tile *ngIf="servicesService.serviceBroker$ | async">
         <app-service-broker-card></app-service-broker-card>
       </app-tile>
     </app-tile-group>
