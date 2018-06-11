@@ -51,7 +51,7 @@ const ClientRequestDateHeader = "X-Cap-Request-Date"
 var EmptyCookieMatcher *regexp.Regexp = regexp.MustCompile(portalSessionName + "=(?:;[ ]*|$)")
 
 func (p *portalProxy) getUAAIdentityEndpoint() string {
-	log.Info("getUAAIdentityEndpoint")
+	log.Debug("getUAAIdentityEndpoint")
 	return fmt.Sprintf("%s/oauth/token", p.Config.ConsoleConfig.UAAEndpoint)
 }
 
@@ -705,7 +705,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*in
 	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		msg := "Unable to retrieve CNSI token record."
-		log.Error(msg)
+		log.Debug(msg)
 		return nil, nil, false
 	}
 
