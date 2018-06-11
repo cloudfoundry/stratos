@@ -225,8 +225,7 @@ import { BindAppsStepComponent } from './components/add-service-instance/bind-ap
     SelectServiceComponent,
     NoServicePlansComponent,
     CreateApplicationStep1Component,
-    BindAppsStepComponent
-
+    BindAppsStepComponent,
   ],
   exports: [
     FormsModule,
