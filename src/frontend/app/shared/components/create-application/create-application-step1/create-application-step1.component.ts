@@ -1,14 +1,21 @@
 
-import {of as observableOf,  Observable } from 'rxjs';
+import { of as observableOf,  Observable } from 'rxjs';
 import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
+
+import { map, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
+
+import { getSpacesFromOrgWithRole } from '../../../../store/selectors/current-user-roles-permissions-selectors/role.selectors';
+import { PermissionStrings } from '../../../../core/current-user-permissions.config';
+import { ISpace } from '../../../../core/cf-api.types';
+
 import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
+
 
 
 @Component({
@@ -24,6 +31,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     private store: Store<AppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService
   ) { }
+
+  public spaces$: Observable<ISpace[]>;
+  public hasSpaces$: Observable<boolean>;
 
   cfValid$: Observable<boolean>;
 
@@ -47,6 +57,10 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngOnInit() {
+    this.spaces$ = this.getSpacesFromPermissions();
+    this.hasSpaces$ = this.spaces$.pipe(
+      map(spaces => !!spaces.length)
+    );
     if (this.isRedeploy) {
       this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
     }
@@ -63,4 +77,24 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     );
   }
 
+  private getSpacesFromPermissions() {
+    return this.cfOrgSpaceService.org.select.pipe(
+      withLatestFrom(this.cfOrgSpaceService.cf.select),
+      switchMap(([orgGuid, endpointGuid]) => {
+        return this.store.select(getSpacesFromOrgWithRole(endpointGuid, orgGuid, PermissionStrings.SPACE_DEVELOPER));
+      }),
+      switchMap((spacesOrAll => {
+        if (spacesOrAll === 'all') {
+          return this.cfOrgSpaceService.space.list$;
+        }
+        const spaceIds = spacesOrAll as string[];
+        return this.cfOrgSpaceService.space.list$.pipe(
+          map(spaces => {
+            const filteredSpaces = spaces.filter(space => spaceIds.find(spaceGuid => spaceGuid === space.guid));
+            return filteredSpaces;
+          })
+        );
+      }))
+    );
+  }
 }
