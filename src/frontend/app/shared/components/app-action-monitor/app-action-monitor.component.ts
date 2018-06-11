@@ -1,8 +1,9 @@
+
+import {of as observableOf, never as observableNever,  Observable } from 'rxjs';
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { schema } from 'normalizr';
 import { AppMonitorComponentTypes, IApplicationMonitorComponentState } from '../app-action-monitor-icon/app-action-monitor-icon.component';
 import { rootUpdatingKey } from '../../../store/reducers/api-request-reducer/types';
-import { Observable } from 'rxjs/Observable';
 import { MatTableDataSource } from '@angular/material';
 import { DataSource } from '@angular/cdk/table';
 import { ITableListDataSource } from '../list/data-sources-controllers/list-data-source-types';
@@ -20,7 +21,7 @@ import {
 export class AppActionMonitorComponent<T> implements OnInit {
 
   @Input('data$')
-  private data$: Observable<Array<T>> = Observable.never();
+  private data$: Observable<Array<T>> = observableNever();
 
   @Input('entityKey')
   public entityKey: string;
@@ -41,15 +42,7 @@ export class AppActionMonitorComponent<T> implements OnInit {
   public trackBy = ((index: number, item: T) => index.toString());
 
   @Input('getCellConfig')
-  public getCellConfig = ((element): ITableCellRequestMonitorIconConfig => {
-    return {
-      entityKey: this.entityKey,
-      schema: this.schema,
-      monitorState: this.monitorState,
-      updateKey: this.updateKey,
-      getId: this.getId
-    };
-  });
+  public getCellConfig: (element) => ITableCellRequestMonitorIconConfig;
 
   @Input('columns')
   public columns: ITableColumn<T>[] = [];
@@ -64,25 +57,26 @@ export class AppActionMonitorComponent<T> implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    const cellConfig: ITableCellRequestMonitorIconConfig = {
+    const _getCellConfig = () => ({
       entityKey: this.entityKey,
       schema: this.schema,
       monitorState: this.monitorState,
       updateKey: this.updateKey,
       getId: this.getId
-    };
+    });
     const monitorColumn = {
       columnId: 'monitorState',
       cellComponent: TableCellRequestMonitorIconComponent,
-      cellConfig: this.getCellConfig,
+      cellConfig: this.getCellConfig || _getCellConfig,
       cellFlex: '0 0 40px'
     };
+
     this.allColumns = [...this.columns, monitorColumn];
     this.dataSource = {
       connect: () => this.data$,
       disconnect: () => { },
       trackBy: this.getId ? (index, item) => this.getId(item) : this.trackBy,
-      isTableLoading$: Observable.of(false)
+      isTableLoading$: observableOf(false)
     } as ITableListDataSource<T>;
   }
 

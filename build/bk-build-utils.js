@@ -106,7 +106,11 @@
   }
 
   function test(path) {
-    return spawnProcess('go', ['test', '-v'], path, env);
+    if (process.env.STRATOS_USE_GO_CONVEY) {
+      return spawnProcess('goconvey', [], path, env);
+    } else {
+      return spawnProcess('go', ['test', './...', '-v'], path, env);
+    }
   }
 
   function getVersion() {

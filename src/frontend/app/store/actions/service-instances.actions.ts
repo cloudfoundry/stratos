@@ -10,6 +10,7 @@ import {
   servicePlanSchemaKey,
   serviceSchemaKey,
   spaceSchemaKey,
+  serviceBindingNoBindingsSchemaKey,
 } from '../helpers/entity-factory';
 import {
   createEntityRelationKey,
@@ -84,7 +85,7 @@ export class GetServiceInstances
   initialParams = {
     page: 1,
     'results-per-page': 100,
-    'order-direction': 'desc',
+    'order-direction': 'asc',
     'order-direction-field': 'creation',
   };
   flattenPagination = true;
@@ -158,3 +159,33 @@ export class CreateServiceInstance extends CFStartAction implements ICFAction {
 }
 
 
+export class ListServiceBindingsForInstance
+  extends CFStartAction implements PaginationAction, EntityInlineParentAction {
+  constructor(
+    public endpointGuid: string,
+    public serviceInstanceGuid: string,
+    public paginationKey: string,
+    public includeRelations: string[] = [
+      createEntityRelationKey(serviceBindingSchemaKey, serviceInstancesSchemaKey),
+      createEntityRelationKey(serviceBindingSchemaKey, applicationSchemaKey)
+    ],
+    public populateMissing = true
+  ) {
+    super();
+    this.options = new RequestOptions();
+    this.options.url = `service_instances/${serviceInstanceGuid}/service_bindings`;
+    this.options.method = 'get';
+    this.options.params = new URLSearchParams();
+  }
+  actions = getActions('Service Instances', 'Get all service bindings for instance');
+  entity = [entityFactory(serviceBindingNoBindingsSchemaKey)];
+  entityKey = serviceBindingSchemaKey;
+  options: RequestOptions;
+  initialParams = {
+    page: 1,
+    'results-per-page': 100,
+    'order-direction': 'desc',
+    'order-direction-field': 'creation',
+  };
+  flattenPagination = true;
+}

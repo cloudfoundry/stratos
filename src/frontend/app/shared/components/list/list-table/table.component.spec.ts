@@ -2,7 +2,7 @@ import { IListPaginationController } from '../data-sources-controllers/list-pagi
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatPaginatorIntl } from '@angular/material';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Observable } from 'rxjs/Rx';
+import { Observable, of as observableOf, empty } from 'rxjs';
 
 import { CoreModule } from '../../../../core/core.module';
 import { createBasicStoreModule } from '../../../../test-framework/store-test-helper';
@@ -58,13 +58,13 @@ describe('TableComponent', () => {
     const mdPaginatorIntl: MatPaginatorIntl = new MatPaginatorIntl();
     component.columns = new Array<ITableColumn<any>>();
     component.paginationController = {
-      sort$: Observable.of({} as ListSort)
+      sort$: observableOf({} as ListSort)
     } as IListPaginationController<any>;
     component.dataSource = {
       trackBy: () => '1',
-      connect: () => Observable.empty(),
+      connect: () => empty(),
       disconnect: () => null,
-      isTableLoading$: Observable.of(false)
+      isTableLoading$: observableOf(false)
     };
     fixture.detectChanges();
   });

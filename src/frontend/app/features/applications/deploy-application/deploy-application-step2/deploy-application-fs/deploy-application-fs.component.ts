@@ -2,8 +2,7 @@ import { Component, OnInit, Input, forwardRef, ViewChild } from '@angular/core';
 import { DeployApplicatioNFsUtils } from './deploy-application-fs-utils';
 import { filter, first, map } from 'rxjs/operators';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject ,  Observable } from 'rxjs';
 import { FileScannerInfo } from './deploy-application-fs-scanner';
 
 @Component({
@@ -25,7 +24,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
 
   sourceData$ = new BehaviorSubject<FileScannerInfo>(undefined);
 
-    // Handle result of a file input form field selection
+  // Handle result of a file input form field selection
   onFileChange(event) {
     const files = event.srcElement.files;
     const utils = new DeployApplicatioNFsUtils();

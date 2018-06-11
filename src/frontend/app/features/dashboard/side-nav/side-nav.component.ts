@@ -1,7 +1,8 @@
+
+import {filter, map, buffer, debounceTime} from 'rxjs/operators';
 import { Component, Inject, InjectionToken, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
+import { BehaviorSubject ,  Observable } from 'rxjs';
 import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ActionHistoryDump } from '../../../store/actions/action-history.actions';
 import { AppState } from '../../../store/app-state';
@@ -34,11 +35,11 @@ export class SideNavComponent implements OnInit {
 
   ngOnInit() {
     const toLength = a => a.length;
-    const debounced$ = this.logoClicked.debounceTime(250); // debounce the click stream
-    this.logoClicked
-      .buffer(debounced$)
-      .map(toLength)
-      .filter(x => x === 3)
+    const debounced$ = this.logoClicked.pipe(debounceTime(250)); // debounce the click stream
+    this.logoClicked.pipe(
+      buffer(debounced$),
+      map(toLength),
+      filter(x => x === 3), )
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
   }
 }

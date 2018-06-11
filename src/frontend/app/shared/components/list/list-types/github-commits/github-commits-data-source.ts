@@ -1,3 +1,5 @@
+
+import {of as observableOf,  Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 
 import { GetAllEndpoints } from '../../../../../store/actions/endpoint.actions';
@@ -11,7 +13,6 @@ import { IListConfig } from '../../list.component.types';
 import { GithubCommit } from '../../../../../store/types/github.types';
 import { FetchCommits } from '../../../../../store/actions/deploy-applications.actions';
 import { APIResource } from '../../../../../store/types/api.types';
-import { Observable } from 'rxjs/Observable';
 
 export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCommit>> {
   store: Store<AppState>;
@@ -32,7 +33,7 @@ export class GithubCommitsDataSource extends ListDataSource<APIResource<GithubCo
   ) {
     const action = new FetchCommits(projectName, sha);
     const paginationKey = action.paginationKey;
-    const rowsState = Observable.of(commitSha ? {
+    const rowsState = observableOf(commitSha ? {
       [commitSha]: {
         highlighted: true
       }

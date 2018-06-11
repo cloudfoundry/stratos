@@ -6,7 +6,7 @@
     <mat-card-content>
       <div class="app-metadata">
         <div class="app-metadata__two-cols">
-          <app-metadata-item icon="title" label="Description">{{ (cfEndpointService.info$ | async)?.entity.entity.description }} ({{ (cfEndpointService.info$ | async)?.entity.entity.build }})</app-metadata-item>
+          <app-metadata-item icon="title" label="Description">{{ (description$ | async) }}</app-metadata-item>
           <app-metadata-item icon="link" label="Instance Address">{{ apiUrl }}</app-metadata-item>
           <!--
           <app-metadata-item icon="developer_mode" label="CF Interactions">N/A</app-metadata-item>

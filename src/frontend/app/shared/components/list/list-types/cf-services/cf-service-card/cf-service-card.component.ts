@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { of as observableOf } from 'rxjs';
 
 import { IService, IServiceExtra } from '../../../../../../core/cf-api-svc.types';
 import { RouterNav } from '../../../../../../store/actions/router.actions';
@@ -8,7 +9,7 @@ import { APIResource } from '../../../../../../store/types/api.types';
 import { AppChip } from '../../../../chips/chips.component';
 import { CardCell } from '../../../list.types';
 
-interface Tag {
+export interface ServiceTag {
   value: string;
   key: APIResource<IService>;
 }
@@ -21,7 +22,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
 
   @Input('row') row: APIResource<IService>;
   extraInfo: IServiceExtra;
-  tags: AppChip<Tag>[] = [];
+  tags: AppChip<ServiceTag>[] = [];
   constructor(private store: Store<AppState>) {
     super();
   }
@@ -31,7 +32,7 @@ export class CfServiceCardComponent extends CardCell<APIResource<IService>> impl
     this.row.entity.tags.forEach(t => {
       this.tags.push({
         value: t,
-        hideClearButton: true
+        hideClearButton$: observableOf(true)
       });
     });
   }

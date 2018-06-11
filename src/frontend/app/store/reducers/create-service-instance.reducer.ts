@@ -8,6 +8,7 @@ import {
   SET_CREATE_SERVICE_INSTANC_CF_DETAILS,
   SET_SERVICE_INSTANCE_SVC_GUID,
   SET_SERVICE_INSTANCE_APP,
+  RESET_CREATE_SERVICE_INSTANCE_STATE,
 } from '../actions/create-service-instance.actions';
 import { CreateServiceInstanceState } from '../types/create-service-instance.types';
 
@@ -31,7 +32,7 @@ const setCreateServiceInstance = (state: CreateServiceInstanceState, action) => 
   spaceScoped: action.spaceScoped,
   spaceGuid: action.spaceGuid,
   name: action.name, params:
-  action.jsonParams,
+    action.jsonParams,
   tags: action.tags
 });
 
@@ -50,7 +51,7 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
     case SET_SPACE:
       return { ...state, spaceGuid: action.spaceGuid };
     case SET_SERVICE_INSTANCE_SVC_GUID:
-      return { ...state, serviceGuid: action.serviceGuid };
+      return { ...state, serviceGuid: action.serviceGuid, servicePlanGuid: null };
     case SET_SERVICE_INSTANCE_GUID:
       return { ...state, serviceInstanceGuid: action.guid };
     case SET_SERVICE_INSTANCE_APP:
@@ -61,6 +62,8 @@ export function createServiceInstanceReducer(state: CreateServiceInstanceState =
       return setCreateServiceInstance(state, action);
     case SET_CREATE_SERVICE_INSTANC_CF_DETAILS:
       return setCreateServiceInstanceCfDetails(state, action);
+    case RESET_CREATE_SERVICE_INSTANCE_STATE:
+      return defaultState;
     default:
       return state;
   }

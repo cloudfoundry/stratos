@@ -25,6 +25,7 @@ import { UpdateAppEffects } from './effects/update-app-effects';
 import { UserProfileEffect } from './effects/user-profile.effects';
 import { UsersRolesEffects } from './effects/users-roles.effects';
 import { AppReducersModule } from './reducers.module';
+import { UsersEffects } from './effects/users.effects';
 
 @NgModule({
   imports: [
@@ -53,7 +54,8 @@ import { AppReducersModule } from './reducers.module';
       UserProfileEffect,
       UsersRolesEffects,
       PermissionsEffects,
-      PermissionEffects
+      PermissionEffects,
+      UsersEffects
     ])
   ]
 })

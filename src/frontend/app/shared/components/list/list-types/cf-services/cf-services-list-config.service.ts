@@ -1,7 +1,9 @@
+
+import {of as observableOf,  BehaviorSubject ,  Observable } from 'rxjs';
+
+import {map, first} from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
-import { Observable } from 'rxjs/Observable';
 
 import { EndpointsService } from '../../../../../core/endpoints.service';
 import { ActiveRouteCfOrgSpace } from '../../../../../features/cloud-foundry/cf-page.types';
@@ -66,13 +68,13 @@ export class CfServicesListConfigService implements IListConfig<APIResource> {
     this.dataSource = new CfServicesDataSource(this.store, activeRouteCfOrgSpace.cfGuid, this);
     this.cf = {
       list$: this.store
-        .select(endpointsRegisteredEntitiesSelector)
-        .first()
-        .map(endpoints => {
+        .select(endpointsRegisteredEntitiesSelector).pipe(
+        first(),
+        map(endpoints => {
           return Object.values(endpoints)
             .filter((endpoint: EndpointModel) => endpoint.connectionStatus === 'connected' && endpoint.cnsi_type === 'cf');
-        }),
-      loading$: Observable.of(false),
+        }), ),
+      loading$: observableOf(false),
       select: new BehaviorSubject(undefined)
     };
     this.multiFilterConfigs = [

@@ -1,8 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
+import {
+  AddServiceInstanceComponent,
+} from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
 import { ServicesWallComponent } from './services-wall/services-wall.component';
-import { AddServiceInstanceComponent } from '../service-catalog/add-service-instance/add-service-instance/add-service-instance.component';
+import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
 
 const services: Routes = [
   {
@@ -12,6 +15,10 @@ const services: Routes = [
   {
     path: 'new',
     component: AddServiceInstanceComponent
+  },
+  {
+    path: ':cfId/:serviceInstanceId/detach',
+    component: DetachServiceInstanceComponent
   }
 ];
 
