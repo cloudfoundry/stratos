@@ -8,6 +8,7 @@ DOCKER_ORG=splatform
 TAG=$(date -u +"%Y%m%dT%H%M%SZ")
 
 NO_PUSH="false"
+TAG_LATEST="false"
 
 while getopts ":ho:r:t:ln" opt; do
   case $opt in
