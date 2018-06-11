@@ -78,7 +78,7 @@ export class CreateApplicationStep3Component implements OnInit {
         return { success: true };
       }),
       catchError((err: Error) => {
-        return observableOf({ success: false, message: `${err.message}` });
+        return observableOf({ success: false, message: err.message });
       })
     );
   }
