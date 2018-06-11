@@ -51,7 +51,7 @@ func InitRepositoryProvider(databaseProvider string) {
 
 // ListByUser - Returns a list of CNSIs registered by a user
 func (c *ConsoleConfigRepository) GetConsoleConfig() (*interfaces.ConsoleConfig, error) {
-	log.Println("Get ConsoleConfig")
+	log.Debug("Get ConsoleConfig")
 	rows, err := c.db.Query(getConsoleConfig)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve console config record: %v", err)

@@ -1,8 +1,7 @@
 import { animate, query, style, transition, trigger } from '@angular/animations';
 import { Component, OnDestroy } from '@angular/core';
+
 import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissions } from '../../../core/current-user-permissions.config';
 import { CardAppComponent } from '../../../shared/components/list/list-types/app/card/card-app.component';
@@ -13,6 +12,9 @@ import { CfOrgSpaceDataService, initCfOrgSpaceService } from '../../../shared/da
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { AppState } from '../../../store/app-state';
 import { applicationSchemaKey } from '../../../store/helpers/entity-factory';
+
+import { map } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-application-wall',
@@ -43,6 +45,8 @@ export class ApplicationWallComponent implements OnDestroy {
 
   public canCreateApplication: string;
 
+  public haveConnectedCf$: Observable<boolean>;
+
   constructor(
     public cloudFoundryService: CloudFoundryService,
     private store: Store<AppState>,
@@ -52,6 +56,11 @@ export class ApplicationWallComponent implements OnDestroy {
       map(endpoints => endpoints.map(endpoint => endpoint.guid)),
     );
     this.canCreateApplication = CurrentUserPermissions.APPLICATION_CREATE;
+
+    this.haveConnectedCf$ = cloudFoundryService.cFEndpoints$.pipe(
+      map(endpoints => endpoints.map(endpoint => endpoint.connectionStatus === 'connected')),
+      map(connected => connected.reduce((a, v) => a || v, false))
+    );
 
     this.initCfOrgSpaceService = initCfOrgSpaceService(this.store,
       this.cfOrgSpaceService,

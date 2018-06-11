@@ -1,9 +1,9 @@
+import { DataSource } from '@angular/cdk/table';
 import { Action } from '@ngrx/store';
-import { BehaviorSubject ,  Observable ,  ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 
 import { IRequestEntityTypeState } from '../../../../store/app-state';
-import { PaginationEntityState, PaginatedAction } from '../../../../store/types/pagination.types';
-import { DataSource } from '@angular/cdk/table';
+import { PaginationEntityState } from '../../../../store/types/pagination.types';
 
 export interface AppEvent {
   actee_name: string;
