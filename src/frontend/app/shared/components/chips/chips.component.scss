@@ -27,7 +27,7 @@
     // Overriding mat-chips overly specific styles.
     &.app-chip,
     &.app-chip + &.app-chip {
-      margin: $chip-padding 0 $chip-padding $chip-padding;
+      margin: $chip-padding;
     }
   }
   &__stacked,

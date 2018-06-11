@@ -1,6 +1,6 @@
 import { Store } from '@ngrx/store';
-import { Observable, combineLatest, of as observableOf } from 'rxjs';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { distinctUntilChanged, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CFFeatureFlagTypes } from '../shared/components/cf-auth/cf-auth.types';
 import {
@@ -104,7 +104,8 @@ export class CurrentUserPermissionsChecker {
   }
 
   private checkAllSpacesInOrg(orgState: IOrgRoleState, endpointSpaces: ISpacesRoleState, permission: PermissionStrings) {
-    return orgState.spaceGuids.map(spaceGuid => {
+    const spaceGuids = !!orgState && orgState.spaceGuids ? orgState.spaceGuids : [];
+    return spaceGuids.map(spaceGuid => {
       const space = endpointSpaces[spaceGuid];
       return space ? space[permission] || false : false;
     }).some(check => check);
@@ -135,14 +136,9 @@ export class CurrentUserPermissionsChecker {
   public getEndpointScopesCheck(permission: ScopeStrings, endpointGuid?: string) {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      switchMap(guids => {
-        return combineLatest(guids.map(guid => {
-          return this.check(PermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid);
-        })).pipe(
-          map(checks => checks.some(check => check)),
-          distinctUntilChanged()
-        );
-      })
+      switchMap(guids => combineLatest(guids.map(guid => this.check(PermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
+      map(checks => checks.some(check => check)),
+      distinctUntilChanged()
     );
   }
 
@@ -182,14 +178,9 @@ export class CurrentUserPermissionsChecker {
     } else if (!actualGuid) {
       const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
       return endpointGuids$.pipe(
-        switchMap(guids => {
-          return combineLatest(guids.map(guid => {
-            return this.checkAllOfType(guid, type, cfPermissions);
-          })).pipe(
-            map(checks => checks.some(check => check)),
-            distinctUntilChanged()
-          );
-        })
+        switchMap(guids => combineLatest(guids.map(guid => this.checkAllOfType(guid, type, cfPermissions)))),
+        map(checks => checks.some(check => check)),
+        distinctUntilChanged()
       );
     }
     return observableOf(false);
@@ -211,12 +202,10 @@ export class CurrentUserPermissionsChecker {
         return combineLatest(
           paginationKeys.map(
             key => new PaginationMonitor<APIResource<IFeatureFlag>>(this.store, key, entityFactory(featureFlagSchemaKey)).currentPage$
-          )
-        ).pipe(
-          map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
-          distinctUntilChanged()
-        );
-      })
+          ));
+      }),
+      map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
+      distinctUntilChanged()
     );
   }
 

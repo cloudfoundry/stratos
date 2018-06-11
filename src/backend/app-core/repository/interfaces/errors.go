@@ -24,10 +24,13 @@ func (e ErrHTTPShadow) Error() string {
 }
 
 func NewHTTPShadowError(status int, userFacingError string, fmtString string, args ...interface{}) error {
-	return ErrHTTPShadow{
-		HTTPError:  echo.NewHTTPError(status, fmt.Sprintf(`{"error":%q}`, userFacingError)),
-		LogMessage: fmt.Sprintf(fmtString, args...),
+	shadowError := ErrHTTPShadow{
+		HTTPError: echo.NewHTTPError(status, fmt.Sprintf(`{"error":%q}`, userFacingError)),
 	}
+	if len(fmtString) > 0 {
+		shadowError.LogMessage = fmt.Sprintf(fmtString, args...)
+	}
+	return shadowError
 }
 
 func (e errHTTPRequest) Error() string {

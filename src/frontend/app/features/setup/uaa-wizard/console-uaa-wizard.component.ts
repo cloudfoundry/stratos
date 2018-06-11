@@ -1,13 +1,10 @@
-
-import {take, delay, filter, skipWhile, map} from 'rxjs/operators';
-import { AfterContentInit, Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { any } from 'codelyzer/util/function';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
 
-import { environment } from '../../../../environments/environment';
 import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { VerifySession } from '../../../store/actions/auth.actions';
 import { SetUAAScope, SetupUAA } from '../../../store/actions/setup.actions';
@@ -21,7 +18,7 @@ import { UAASetupState } from '../../../store/types/uaa-setup.types';
   styleUrls: ['./console-uaa-wizard.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
+export class ConsoleUaaWizardComponent implements OnInit {
 
   constructor(private store: Store<AppState>, private router: Router) { }
 
@@ -45,10 +42,13 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
         return state.settingUp;
       }),
       map((state: UAASetupState) => {
-        this.uaaScopes = state.payload.scope;
-        this.selectedScope = 'stratos.admin';
+        const success = !state.error;
+        if (success) {
+          this.uaaScopes = state.payload.scope;
+          this.selectedScope = 'stratos.admin';
+        }
         return {
-          success: !state.error,
+          success,
           message: state.message
         };
       }), );
@@ -104,9 +104,6 @@ export class ConsoleUaaWizardComponent implements OnInit, AfterContentInit {
       observer.next(this.uaaForm.valid);
     });
 
-  }
-
-  ngAfterContentInit() {
   }
 
 }

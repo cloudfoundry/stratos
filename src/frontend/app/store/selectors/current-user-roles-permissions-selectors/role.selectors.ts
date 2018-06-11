@@ -47,7 +47,10 @@ export const selectSpaceWithRoleFromOrg = (role: PermissionStrings, orgId: strin
 };
 
 export const selectCurrentUserCFRolesState = (state: ICurrentUserRolesState) => state.cf;
-export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) => (state: IAllCfRolesState) => state[endpointGuid];
+export const selectCurrentUserCFEndpointRolesState = (endpointGuid: string) =>
+  (state: IAllCfRolesState) => state ? state[endpointGuid] : null;
+
+export const selectCurrentUserRequestState = (state: ICurrentUserRolesState | ICfRolesState) => state.state;
 
 export const selectCurrentUserCFGlobalRolesStates = (state: ICfRolesState) => state.global;
 export const selectCurrentUserCFGlobalRolesState = (role: PermissionValues) => (state: IGlobalRolesState) => state[role] || false;
@@ -95,6 +98,14 @@ export const getCurrentUserCFRolesState = compose(
 );
 // ============================
 
+// Top level request state
+// ============================
+export const getCurrentUserRequestState = compose(
+  selectCurrentUserRequestState,
+  selectCurrentUserRolesState
+);
+// ============================
+
 // Specific endpoint roles
 // ============================
 export const getCurrentUserCFEndpointRolesState = (endpointGuid: string) => compose(
@@ -119,6 +130,13 @@ export const getCurrentUserCFGlobalState = (endpointGuid: string, role: Permissi
 );
 // ============================
 
+// CF Request state
+// ============================
+export const getCurrentUserCFRequestState = (endpointGuid: string) => compose(
+  selectCurrentUserRequestState,
+  getCurrentUserCFGlobalStates(endpointGuid)
+);
+// ============================
 
 // Specific endpoint scopes
 // ============================

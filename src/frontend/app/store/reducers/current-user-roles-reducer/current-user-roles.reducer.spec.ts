@@ -1,7 +1,9 @@
 import { GetCurrentUserRelationsComplete, UserRelationTypes } from '../../actions/permissions.actions';
 import {
   getDefaultEndpointRoles,
+  getDefaultRolesRequestState,
   ICfRolesState,
+  ICurrentUserRolesState,
   IOrgRoleState,
   ISpaceRoleState,
   RoleEntities,
@@ -66,13 +68,15 @@ function getState(
 describe('currentUserReducer', () => {
   it('set defaults', () => {
     const state = currentUserRolesReducer(undefined, { type: 'FAKE_ACTION' });
-    expect(state).toEqual({
+    const expectedState: ICurrentUserRolesState = {
       internal: {
         isAdmin: false,
         scopes: []
       },
-      cf: {}
-    });
+      cf: {},
+      state: getDefaultRolesRequestState()
+    };
+    expect(state).toEqual(expectedState);
   });
   it('should add org manager role to org', () => {
     const state = currentUserRolesReducer(undefined, getOrgAction(UserRelationTypes.MANAGED_ORGANIZATION));
