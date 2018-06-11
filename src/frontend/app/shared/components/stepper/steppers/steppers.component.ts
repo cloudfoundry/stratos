@@ -1,7 +1,3 @@
-
-import { of as observableOf, combineLatest, Observable, Subscription } from 'rxjs';
-
-import { switchMap, catchError, first, map } from 'rxjs/operators';
 import {
   AfterContentInit,
   Component,
@@ -12,13 +8,18 @@ import {
   QueryList,
   ViewEncapsulation,
 } from '@angular/core';
+import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
+import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { catchError, first, map, switchMap } from 'rxjs/operators';
 
+import { LoggerService } from '../../../../core/logger.service';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
 import { getPreviousRoutingState } from '../../../../store/types/routing.type';
 import { SteppersService } from '../steppers.service';
 import { StepComponent } from './../step/step.component';
+
 
 
 @Component({
@@ -36,15 +37,18 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
   @Input('cancel') cancel = null;
+  @Input('nextButtonProgress') nextButtonProgress = true;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
+  showNextButtonProgress = false;
 
   hiddenSubs: Subscription[] = [];
 
   stepValidateSub: Subscription = null;
 
   private enterData;
+  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
 
   currentIndex = 0;
   cancelQueryParams$: Observable<{
@@ -52,7 +56,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }>;
   constructor(
     private steppersService: SteppersService,
-    private store: Store<AppState>
+    private store: Store<AppState>,
+    private snackBar: MatSnackBar,
+    private logger: LoggerService,
   ) {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
@@ -72,6 +78,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnDestroy() {
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
+    if (this.snackBarRef) {
+      this.snackBar.dismiss();
+    }
   }
 
   ngAfterContentInit() {
@@ -91,6 +100,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   goNext() {
+    // Close previous error snackbar if there was one
+    if (this.snackBarRef) {
+      this.snackBar.dismiss();
+    }
+
     this.unsubscribeNext();
     if (this.currentIndex < this.steps.length) {
       const step = this.steps[this.currentIndex];
@@ -99,10 +113,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
+      this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$.pipe(
         first(),
-        catchError(() => observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false })),
+        catchError(err => {
+          this.logger.warn('Stepper failed: ', err);
+          return observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false });
+        }),
         switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
+          this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
           this.enterData = data;
@@ -113,6 +132,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             } else {
               this.setActive(this.currentIndex + 1);
             }
+          } else if (!success && message) {
+            this.snackBarRef = this.snackBar.open(message, 'Dismiss');
           }
           return [];
         }), ).subscribe();

@@ -6,7 +6,7 @@
       </button>
   </div>
 </app-page-header>
-<app-steppers cancel="/userProfile">
+<app-steppers cancel="/user-profile">
   <app-step [title]="'Edit User Profile'" [valid]="editProfileForm.valid && editProfileForm.dirty" [onNext]="updateProfile" finishButtonText="Save">
     <div>
       <form [formGroup]="editProfileForm" validate class="edit-profile edit-profile__group">
@@ -33,7 +33,6 @@
             <input matInput placeholder="Confirm New Password" type="password" formControlName="confirmPassword">
           </mat-form-field>
         </div>
-        <p *ngIf="error" class="edit-app__error">There was an error updating the profile.</p>
       </form>
     </div>
   </app-step>

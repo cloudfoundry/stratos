@@ -1,22 +1,23 @@
-
-import {of as observableOf,  Observable ,  combineLatest } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../store/app-state';
-import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
-import { userProfileSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
-import {
-  UserProfileInfo, UserProfilePasswordUpdate, UserProfileInfoUpdates,
-  UserProfileInfoEmail
-} from '../../store/types/user-profile.types';
-import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../store/effects/user-profile.effects';
+import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { filter, first, map } from 'rxjs/operators';
+
 import { EntityMonitor } from '../../shared/monitors/entity-monitor';
-import { FetchUserProfileAction, UpdateUserProfileAction, UpdateUserPasswordAction } from '../../store/actions/user-profile.actions';
+import { EntityMonitorFactory } from '../../shared/monitors/entity-monitor.factory.service';
+import {
+  FetchUserProfileAction,
+  UpdateUserPasswordAction,
+  UpdateUserProfileAction,
+} from '../../store/actions/user-profile.actions';
+import { AppState } from '../../store/app-state';
+import { UserProfileEffect, userProfilePasswordUpdatingKey } from '../../store/effects/user-profile.effects';
+import { entityFactory, userProfileSchemaKey } from '../../store/helpers/entity-factory';
+import { ActionState, getDefaultActionState, rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
 import { AuthState } from '../../store/reducers/auth.reducer';
-import { filter, map, first } from 'rxjs/operators';
 import { selectUpdateInfo } from '../../store/selectors/api.selectors';
-import { UpdateExistingApplication } from '../../store/actions/application.actions';
-import { rootUpdatingKey } from '../../store/reducers/api-request-reducer/types';
+import { UserProfileInfo, UserProfileInfoEmail, UserProfileInfoUpdates } from '../../store/types/user-profile.types';
+
 
 @Injectable()
 export class UserProfileService {
@@ -76,18 +77,18 @@ export class UserProfileService {
   /*
   * Update profile
   */
-  updateProfile(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<[boolean, boolean]> {
+  updateProfile(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<[ActionState, ActionState]> {
     const didChangeProfile = !!(profileChanges.givenName || profileChanges.familyName || profileChanges.emailAddress);
     const didChangePassword = !!(profileChanges.newPassword && profileChanges.currentPassword);
-    const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(false);
-    const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(false);
+    const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(getDefaultActionState());
+    const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(getDefaultActionState());
     return combineLatest(
       profileObs$,
       passwordObs$
     );
   }
 
-  private updateProfileInfo(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<boolean> {
+  private updateProfileInfo(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<ActionState> {
     const updatedProfile = {
       ...profile,
       name: { ...profile.name },
@@ -102,12 +103,11 @@ export class UserProfileService {
       UserProfileEffect.guid,
       rootUpdatingKey);
     return this.store.select(actionState).pipe(
-      filter(item => item && !item.busy),
-      map(item => item.error)
+      filter(item => item && !item.busy)
     );
   }
 
-  private updatePassword(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<boolean> {
+  private updatePassword(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<ActionState> {
     const passwordUpdates = {
       oldPassword: profileChanges.currentPassword,
       password: profileChanges.newPassword
@@ -117,8 +117,7 @@ export class UserProfileService {
       UserProfileEffect.guid,
       userProfilePasswordUpdatingKey);
     return this.store.select(actionState).pipe(
-      filter(item => item && !item.busy),
-      map(item => item.error)
+      filter(item => item && !item.busy)
     );
   }
 }

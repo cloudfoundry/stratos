@@ -9,6 +9,7 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { Store } from '@ngrx/store';
 
 import { EntityService } from '../../../core/entity-service';
+import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
 import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
 import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../store/app-state';
@@ -96,7 +97,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     });
   }
 
-  updateApp = () => {
+  updateApp: StepOnNextFunction = () => {
     const updates = {};
     // We will only send the values that were actually edited
     for (const key of Object.keys(this.editAppForm.value)) {
@@ -108,18 +109,21 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     let obs$: Observable<any>;
     if (Object.keys(updates).length) {
       // We had at least one value to change - send update action
-      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).pipe(map(v => ({ success: !v.error })));
+      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).pipe(map(v => (
+        {
+          success: !v.error,
+          message: `Could not update application: ${v.message}`
+        })));
     } else {
       obs$ = observableOf({ success: true });
     }
 
     return obs$.pipe(take(1), map(res => {
-      this.error = !res.success;
       return {
-        success: res.success,
+        ...res,
         redirect: res.success
       };
-    }), );
+    }));
   }
 
   clearSub() {
