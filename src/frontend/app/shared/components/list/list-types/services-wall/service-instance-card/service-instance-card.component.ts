@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
@@ -19,7 +19,7 @@ import { CardCell } from '../../../list.types';
     ServicesWallService
   ]
 })
-export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> {
+export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceInstance>> implements OnInit {
   serviceInstanceEntity: APIResource<IServiceInstance>;
   cfGuid: string;
   cardMenu: MetaCardMenuItem[];
@@ -46,15 +46,24 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
   ) {
     super();
 
+
+  }
+
+  ngOnInit() {
+
+    this.serviceInstanceTags = this.serviceInstanceEntity.entity.tags.map(t => ({
+      value: t
+    }));
+
     this.cardMenu = [
       {
         label: 'Edit',
         action: this.edit,
       },
       {
-        label: 'Detach',
+        label: 'Unbind',
         action: this.detach,
-        disabled: this.hasMultipleBindings
+        disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0)
       },
       {
         label: 'Delete',
@@ -62,15 +71,15 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
       }
     ];
 
+    this.cfGuid = this.serviceInstanceEntity.entity.cfGuid;
   }
 
+
   detach = () => {
-    const serviceBindingGuid = this.serviceInstanceEntity.entity.service_bindings[0].metadata.guid;
-    this.serviceActionHelperService.detachServiceBinding(
-      serviceBindingGuid,
+    this.serviceActionHelperService.detachServiceBinding
+      (this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
-      this.serviceInstanceEntity.entity.cfGuid
-    );
+      this.serviceInstanceEntity.entity.cfGuid);
   }
 
 

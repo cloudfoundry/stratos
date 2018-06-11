@@ -29,7 +29,7 @@ import { createEntityRelationPaginationKey } from '../../store/helpers/entity-re
 import { getPaginationObservables } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
 import { getIdFromRoute } from '../cloud-foundry/cf.helpers';
-import { getServiceInstancesInCf, getSvcAvailability } from './services-helper';
+import { getServiceInstancesInCf, getSvcAvailability, getServicePlans } from './services-helper';
 
 export interface ServicePlanAccessibility {
   spaceScoped?: boolean;
@@ -82,7 +82,6 @@ export class ServicesService {
     this.initBaseObservables();
   }
 
-
   getServicePlanVisibilities = () => {
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, this.cfGuid);
     return getPaginationObservables<APIResource<IServicePlanVisibility>>(
@@ -124,36 +123,6 @@ export class ServicesService {
       map(s => s[0]),
       first()
     )
-
-  getVisibleServicePlans = () => {
-    return this.servicePlans$.pipe(
-      filter(p => !!p && p.length > 0),
-      map(o => o.filter(s => s.entity.bindable)),
-      combineLatest(this.servicePlanVisibilities$, this.serviceBrokers$, this.service$),
-      map(([svcPlans, svcPlanVis, svcBrokers, svc]) => this.fetchVisiblePlans(svcPlans, svcPlanVis, svcBrokers, svc)),
-
-    );
-  }
-
-  fetchVisiblePlans =
-    (svcPlans: APIResource<IServicePlan>[],
-      svcPlanVis: APIResource<IServicePlanVisibility>[],
-      svcBrokers: APIResource<IServiceBroker>[],
-      svc: APIResource<IService>): APIResource<IServicePlan>[] => {
-      const visiblePlans: APIResource<IServicePlan>[] = [];
-      svcPlans.forEach(p => {
-        if (p.entity.public) {
-          visiblePlans.push(p);
-        } else if (svcPlanVis.filter(svcVis => svcVis.entity.service_plan_guid === p.metadata.guid).length > 0) {
-          // plan is visibilities
-          visiblePlans.push(p);
-        } else if (svcBrokers.filter(s => s.metadata.guid === svc.entity.service_broker_guid)[0].entity.space_guid) {
-          // Plan is space-scoped
-          visiblePlans.push(p);
-        }
-      });
-      return visiblePlans;
-    }
 
   getServicePlanAccessibility = (servicePlan: APIResource<IServicePlan>): Observable<ServicePlanAccessibility> => {
     if (servicePlan.entity.public) {
@@ -226,13 +195,14 @@ export class ServicesService {
   private initBaseObservables() {
     this.servicePlanVisibilities$ = this.getServicePlanVisibilities();
     this.serviceExtraInfo$ = this.service$.pipe(map(o => JSON.parse(o.entity.extra)));
-    this.servicePlans$ = this.service$.pipe(map(o => o.entity.service_plans));
+    this.servicePlans$ = getServicePlans(this.service$, this.cfGuid, this.store, this.paginationMonitorFactory);
     this.serviceBrokers$ = this.getServiceBrokers();
     this.serviceBroker$ = this.serviceBrokers$.pipe(
       filter(p => !!p && p.length > 0),
       combineLatest(this.service$),
       map(([brokers, service]) => brokers.filter(broker => broker.metadata.guid === service.entity.service_broker_guid)),
-      map(o => o[0]));
+      map(o => (o.length === 0 ? null : o[0]))
+    );
     this.allServiceInstances$ = this.getServiceInstances();
     this.serviceInstances$ = this.allServiceInstances$.pipe(
       map(instances => instances.filter(instance => instance.entity.service_guid === this.serviceGuid))

@@ -1,32 +1,24 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { combineLatest as observableCombineLatest, Observable, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
+import { filter, first, map, publishReplay, refCount, share, switchMap } from 'rxjs/operators';
 
-import {
-  IService,
-  IServiceBroker,
-  IServiceInstance,
-  IServicePlan,
-  IServicePlanVisibility,
-} from '../../../core/cf-api-svc.types';
+import { IService, IServiceInstance, IServicePlan, IServicePlanVisibility } from '../../../core/cf-api-svc.types';
 import { IOrganization, ISpace } from '../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../core/entity-service-factory.service';
 import { pathGet } from '../../../core/utils.service';
 import { CloudFoundryEndpointService } from '../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { fetchVisiblePlans, getSvcAvailability } from '../../../features/service-catalog/services-helper';
+import { getServicePlans, getSvcAvailability } from '../../../features/service-catalog/services-helper';
 import { ServicePlanAccessibility } from '../../../features/service-catalog/services.service';
-import { GetServiceBroker } from '../../../store/actions/service-broker.actions';
 import { GetServiceInstances } from '../../../store/actions/service-instances.actions';
 import { GetServicePlanVisibilities } from '../../../store/actions/service-plan-visibility.actions';
 import { GetServicePlanServiceInstances } from '../../../store/actions/service-plan.actions';
 import { GetService } from '../../../store/actions/service.actions';
-import { GetAllServicesForSpace, GetSpace, GetServiceInstancesForSpace } from '../../../store/actions/space.actions';
+import { GetAllServicesForSpace, GetServiceInstancesForSpace, GetSpace } from '../../../store/actions/space.actions';
 import { AppState } from '../../../store/app-state';
 import {
   entityFactory,
   organizationSchemaKey,
-  serviceBrokerSchemaKey,
   serviceInstancesSchemaKey,
   servicePlanVisibilitySchemaKey,
   serviceSchemaKey,
@@ -37,14 +29,13 @@ import { createEntityRelationKey, createEntityRelationPaginationKey } from '../.
 import { getPaginationObservables } from '../../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { selectCreateServiceInstanceServicePlan } from '../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../store/types/api.types';
-import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 import { QParam } from '../../../store/types/pagination.types';
+import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
 
 @Injectable()
 export class CreateServiceInstanceHelperService {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
-  serviceBroker$: Observable<APIResource<IServiceBroker>>;
   service$: Observable<APIResource<IService>>;
   // Is instance being created from the Marketplace
   public marketPlaceMode = false;
@@ -76,25 +67,6 @@ export class CreateServiceInstanceHelperService {
       refCount()
     );
 
-    this.serviceBroker$ = this.service$.pipe(
-      map(o => o.entity.service_broker_guid),
-      switchMap(guid => {
-        const brokerEntityService = this.entityServiceFactory.create<APIResource<IServiceBroker>>(
-          serviceBrokerSchemaKey,
-          entityFactory(serviceBrokerSchemaKey),
-          guid,
-          new GetServiceBroker(guid, this.cfGuid),
-          true
-        );
-        return brokerEntityService.waitForEntity$.pipe(
-          filter(o => !!o && !!o.entity),
-          map(o => o.entity),
-        );
-      }),
-      publishReplay(1),
-      refCount()
-    );
-
     const paginationKey = createEntityRelationPaginationKey(servicePlanVisibilitySchemaKey, this.cfGuid);
     this.servicePlanVisibilities$ = getPaginationObservables<APIResource<IServicePlanVisibility>>(
       {
@@ -110,24 +82,6 @@ export class CreateServiceInstanceHelperService {
 
   }
 
-  getVisibleServicePlans = () => {
-    return this.getServicePlans().pipe(
-      filter(p => !!p && p.length > 0),
-      map(o => o.filter(s => s.entity.bindable)),
-      combineLatest(this.getServicePlanVisibilities(), this.serviceBroker$),
-      map(([svcPlans, svcPlanVis, svcBrokers]) => fetchVisiblePlans(svcPlans, svcPlanVis, svcBrokers)),
-    );
-  }
-
-  getVisibleServicePlansForSpaceAndOrg = (orgGuid: string, spaceGuid: string): Observable<APIResource<IServicePlan>[]> => {
-    return this.getServicePlans().pipe(
-      filter(p => !!p),
-      map(o => o.filter(s => s.entity.bindable)),
-      combineLatest(this.getServicePlanVisibilitiesForOrg(orgGuid), this.serviceBroker$, this.service$),
-      map(([svcPlans, svcPlanVis, svcBrokers, svc]) => fetchVisiblePlans(svcPlans, svcPlanVis, svcBrokers, spaceGuid)),
-    );
-  }
-
   getServicePlanVisibilities = (): Observable<APIResource<IServicePlanVisibility>[]> =>
     this.servicePlanVisibilities$.pipe(filter(p => !!p))
 
@@ -138,17 +92,14 @@ export class CreateServiceInstanceHelperService {
     )
 
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
-    return this.service$.pipe(
-      filter(p => !!p),
-      map(o => o.entity.service_plans)
-    );
+    return getServicePlans(this.service$, this.cfGuid, this.store, this.paginationMonitorFactory);
   }
 
   getServiceName = () => {
     return this.service$
       .pipe(
         filter(p => !!p),
-        map(service => {
+        map((service: APIResource<IService>) => {
           const extraInfo = JSON.parse(service.entity.extra);
           if (extraInfo && extraInfo.displayName) {
             return extraInfo.displayName;
@@ -165,10 +116,9 @@ export class CreateServiceInstanceHelperService {
         guid: servicePlan.metadata.guid
       });
     }
-    return this.serviceBroker$.pipe(
-      combineLatest(this.getServicePlanVisibilities()),
-      filter(([p, q]) => !!p && !!q),
-      map(([serviceBroker, allServicePlanVisibilities]) => getSvcAvailability(servicePlan, serviceBroker, allServicePlanVisibilities))
+    return this.getServicePlanVisibilities().pipe(
+      filter(p => !!p),
+      map((allServicePlanVisibilities) => getSvcAvailability(servicePlan, null, allServicePlanVisibilities))
     );
   }
 

@@ -109,8 +109,8 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
   private listActionDetach: IListAction<APIResource> = {
     action: (item: APIResource) => this.deleteServiceBinding(item),
-    label: 'Detach',
-    description: 'Detach Service Instance',
+    label: 'Unbind',
+    description: 'Unbind Service Instance',
     createEnabled: (row$: Observable<APIResource<IServiceInstance>>) => row$.pipe(map(row => row.entity.service_bindings.length === 1)),
     createVisible: (row$: Observable<APIResource<IServiceInstance>>) =>
       row$.pipe(
@@ -150,14 +150,8 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
 
   deleteServiceBinding = (serviceInstance: APIResource<IServiceInstance>) => {
-
-    /**
-     * If only one binding exists, carry out the action otherwise
-     * take user to a form to select which app binding they want to remove
-    **/
-    const serviceBindingGuid = serviceInstance.entity.service_bindings[0].metadata.guid;
     this.serviceActionHelperService.detachServiceBinding(
-      serviceBindingGuid,
+      serviceInstance.entity.service_bindings,
       serviceInstance.metadata.guid,
       serviceInstance.entity.cfGuid
     );
