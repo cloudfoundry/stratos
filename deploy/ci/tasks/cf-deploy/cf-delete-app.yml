@@ -1,0 +1,17 @@
+---
+platform: linux
+inputs:
+- name: stratos-ui
+image_resource:
+  type: docker-image
+  source:
+   repository: governmentpaas/cf-cli 
+   tag: latest
+
+run:
+  path: sh
+  args:
+    - -exc
+    - |
+      cf login --skip-ssl-validation -a ${CF_API_URL} -u ${CF_USER} -p ${CF_PASSWORD} -o ${CF_ORG} -s ${CF_SPACE}
+      cf delete ${APP_NAME}

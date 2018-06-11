@@ -14,7 +14,7 @@
 
     getCfs: getCfs,
 
-    skipIfNoCF: skipIfNoCF,
+    skipIfNoCFOrInCF: skipIfNoCFOrInCF,
     skipIfNoSecondCF: skipIfNoSecondCF,
     skipIfOnlyOneCF: skipIfOnlyOneCF,
     skipIfNoAppWithLogStream: skipIfNoAppWithLogStream,
@@ -30,8 +30,9 @@
   }
 
   // Test skip helpers
-  function skipIfNoCF() {
-    return !getCfs() || !getCfs().cf1;
+  function skipIfNoCFOrInCF() {
+    return true;
+    // return !getCfs() || !getCfs().cf1;
   }
 
   function skipIfNoSecondCF() {

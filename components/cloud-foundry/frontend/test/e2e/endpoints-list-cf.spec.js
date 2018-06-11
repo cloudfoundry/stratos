@@ -93,5 +93,5 @@
       });
 
     }).skipWhen(cfHelpers.skipIfOnlyOneCF);
-  }).skipWhen(cfHelpers.skipIfNoCF);
+  }).skipWhen(cfHelpers.skipIfNoCFOrInCF);
 })();
