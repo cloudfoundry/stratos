@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { SetCFDetails } from '../../../../store/actions/create-applications-page.actions';
 import { AppState } from '../../../../store/app-state';
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 
 
 @Component({
@@ -36,7 +37,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @Input('stepperText')
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     this.store.dispatch(new SetCFDetails({
       cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
       org: this.cfOrgSpaceService.org.select.getValue(),

@@ -99,7 +99,6 @@ export class CfAppMapRoutesListConfigService implements IListConfig<APIResource>
     private appService: ApplicationService,
     private confirmDialog: ConfirmationDialogService,
     private activatedRoute: ActivatedRoute,
-    private snackBar: MatSnackBar
   ) {
     const spaceGuid = activatedRoute.snapshot.queryParamMap.get('spaceGuid');
     const action = new GetSpaceRoutes(spaceGuid, appService.cfGuid, createEntityRelationPaginationKey(spaceSchemaKey, spaceGuid), [

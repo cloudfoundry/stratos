@@ -1,34 +1,29 @@
-import { AfterContentInit, Component, OnDestroy, Input } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, Subscription, of as observableOf } from 'rxjs';
-import { combineLatest, filter, first, map, tap, switchMap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { filter, first, map, switchMap, tap } from 'rxjs/operators';
 
 import { IApp } from '../../../../core/cf-api.types';
-import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
 import { SetCreateServiceInstanceApp } from '../../../../store/actions/create-service-instance.actions';
 import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
 import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationPaginationKey } from '../../../../store/helpers/entity-relations.types';
 import { getPaginationObservables } from '../../../../store/reducers/pagination-reducer/pagination-reducer.helper';
-import {
-  selectCreateServiceInstanceCfGuid,
-  selectCreateServiceInstanceSpaceGuid,
-  selectCreateServiceInstance,
-} from '../../../../store/selectors/create-service-instance.selectors';
+import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
-import { appDataSort } from '../../../../features/cloud-foundry/services/cloud-foundry-endpoint.service';
-import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
+import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CsiGuidsService } from '../csi-guids.service';
+import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 
 @Component({
   selector: 'app-bind-apps-step',
   templateUrl: './bind-apps-step.component.html',
   styleUrls: ['./bind-apps-step.component.scss']
 })
-
 export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   @Input('boundAppId')
@@ -43,7 +38,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   constructor(
     private store: Store<AppState>,
     private paginationMonitorFactory: PaginationMonitorFactory,
-    private snackBar: MatSnackBar,
     private csiGuidsService: CsiGuidsService
   ) {
     this.stepperForm = new FormGroup({
@@ -51,7 +45,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
       params: new FormControl('', SpecifyDetailsStepComponent.isValidJsonValidatorFn()),
     });
   }
-
 
   private fetchApps() {
     this.apps$.pipe(
@@ -109,7 +102,7 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
     this.fetchApps();
   }
 
-  submit = () => {
+  submit = (): Observable<StepOnNextResult> => {
     this.setApp();
     return observableOf({ success: true });
   }
@@ -120,9 +113,6 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
 
   ngOnDestroy(): void {
     this.validateSubscription.unsubscribe();
-  }
-  private displaySnackBar() {
-    this.snackBar.open('Failed to create service binding! ', 'Dismiss');
   }
 
 }

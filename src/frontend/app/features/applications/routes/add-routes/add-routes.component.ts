@@ -1,17 +1,19 @@
-
-import { of as observableOf, BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { Component, OnInit } from '@angular/core';
 import { OnDestroy } from '@angular/core/src/metadata/lifecycle_hooks';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatSnackBar } from '@angular/material';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, mergeMap, pairwise, switchMap, take, tap } from 'rxjs/operators';
 
 import { ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { pathGet } from '../../../../core/utils.service';
-import { AssociateRouteWithAppApplication, GetAppRoutes } from '../../../../store/actions/application-service-routes.actions';
+import { StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import {
+  AssociateRouteWithAppApplication,
+  GetAppRoutes,
+} from '../../../../store/actions/application-service-routes.actions';
 import { CreateRoute } from '../../../../store/actions/route.actions';
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { GetSpace } from '../../../../store/actions/space.actions';
@@ -24,11 +26,13 @@ import {
   spaceSchemaKey,
 } from '../../../../store/helpers/entity-factory';
 import { createEntityRelationKey } from '../../../../store/helpers/entity-relations.types';
+import { RequestInfoState } from '../../../../store/reducers/api-request-reducer/types';
 import { selectRequestInfo } from '../../../../store/selectors/api.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { Domain } from '../../../../store/types/domain.types';
 import { Route, RouteMode } from '../../../../store/types/route.types';
 import { ApplicationService } from '../../application.service';
+
 
 @Component({
   selector: 'app-add-routes',
@@ -37,7 +41,6 @@ import { ApplicationService } from '../../application.service';
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
-  submitted: boolean;
   model: Route;
   domains: APIResource<Domain>[] = [];
   addTCPRoute: FormGroup;
@@ -62,7 +65,6 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private applicationService: ApplicationService,
     private store: Store<AppState>,
-    private snackBar: MatSnackBar,
     private entityServiceFactory: EntityServiceFactory
   ) {
     this.appGuid = applicationService.appGuid;
@@ -145,7 +147,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     }
   }
 
-  submit = () => {
+  submit: StepOnNextFunction = () => {
     if (this.addRouteMode && this.addRouteMode.id === 'create') {
       // Creating new route
       return this.createTCPRoute ? this.onSubmit('tcp') : this.onSubmit('http');
@@ -154,10 +156,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSubmit(routeType) {
-    this.submitted = true;
-    const formGroup =
-      routeType === 'tcp' ? this.addTCPRoute : this.addHTTPRoute;
+  onSubmit(routeType): Observable<StepOnNextResult> {
+    const formGroup = routeType === 'tcp' ? this.addTCPRoute : this.addHTTPRoute;
 
     const newRouteGuid =
       this._getValueForKey('host', formGroup) +
@@ -165,97 +165,70 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       this._getValueForKey('path', formGroup) +
       formGroup.value.domain.metadata.guid;
 
-    this.store.dispatch(
-      new CreateRoute(
-        newRouteGuid,
-        this.cfGuid,
-        new Route(
-          formGroup.value.domain.metadata.guid,
-          this.spaceGuid,
-          this._getValue('host', formGroup),
-          this._getValue('path', formGroup),
-          this._getValue('port', formGroup)
-        )
-      )
-    );
-    const associateRoute$ = this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid))
+    return this.createAndMapRoute(
+      newRouteGuid,
+      formGroup.value.domain.metadata.guid,
+      this._getValue('host', formGroup),
+      this._getValue('path', formGroup),
+      this._getValue('port', formGroup));
+  }
+
+  private createAndMapRoute(newRouteGuid: string, domainGuid: string, host, path, port): Observable<StepOnNextResult> {
+    this.store.dispatch(new CreateRoute(newRouteGuid, this.cfGuid, new Route(domainGuid, this.spaceGuid, host, path, port)));
+    return this.store.select(selectRequestInfo(routeSchemaKey, newRouteGuid))
       .pipe(
         filter(route => !route.creating && !route.fetching),
         mergeMap(route => {
           if (route.error) {
-            this.submitted = false;
-            this.displaySnackBar();
-            return observableOf(null);
+            return observableOf({ success: false, message: `Failed to create route: ${route.message}` });
           } else {
-            this.store.dispatch(new AssociateRouteWithAppApplication(
-              this.appGuid,
-              route.response.result[0],
-              this.cfGuid
-            ));
-            return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
-              pairwise(),
-              filter(([oldApp, newApp]) => {
-                return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);
-              }),
-              tap(appState => {
-                this.submitted = false;
-                this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
-              })
-            );
+            return this.mapRoute(route.response.result[0]);
           }
         })
       );
-
-    this.subscriptions.push(associateRoute$.subscribe());
-    return observableOf({ success: true });
   }
 
-  private displaySnackBar() {
-    if (this.createTCPRoute) {
-      this.snackBar.open('Failed to create route! Please ensure the domain has a TCP routing group associated', 'Dismiss');
-    } else {
-      this.snackBar.open('Failed to create route! The hostname may have been taken, please try again with a different name', 'Dismiss');
-    }
+  private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
+    this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, routeGuid, this.cfGuid));
+    return this.store.select(selectRequestInfo(applicationSchemaKey, this.appGuid)).pipe(
+      pairwise(),
+      filter(([oldApp, newApp]) => {
+        return pathGet('updating.Assigning-Route.busy', oldApp) && !pathGet('updating.Assigning-Route.busy', newApp);
+      }),
+      map(([oldApp, newApp]) => newApp),
+      map((requestState: RequestInfoState) => {
+        if (requestState.error) {
+          return { success: false, message: `Failed to associate route with app: ${requestState.error}` };
+        }
+        this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
+        return { success: true };
+      })
+    );
   }
 
-  mapRouteSubmit() {
-    this.selectedRoute$.subscribe(route => {
-      this.associateRoute(route);
-      const appServiceSub$ = this.appService.app$.pipe(
-        map(p => p.entityRequestInfo.updating['Assigning-Route']),
-        filter(p => !p.busy),
-        take(1),
-        tap(p => {
-          if (p.error) {
-            this.snackBar.open('Failed to associate route with the app!', 'Dismiss');
-          } else {
-            this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
-            this.store.dispatch(new RouterNav({
-              path: ['applications', this.cfGuid, this.appGuid, 'routes']
-            }));
-          }
-        })
-      );
-
-      this.subscriptions.push(appServiceSub$.subscribe());
-    });
-    return observableOf({ success: true });
-  }
-
-  private associateRoute(route: any) {
-    this.store.dispatch(
-      new AssociateRouteWithAppApplication(
-        this.appGuid,
-        route.metadata.guid,
-        this.cfGuid
-      )
+  private mapRouteSubmit(): Observable<StepOnNextResult> {
+    return this.selectedRoute$.pipe(
+      tap(route => this.store.dispatch(new AssociateRouteWithAppApplication(this.appGuid, route.metadata.guid, this.cfGuid))),
+      switchMap(() => this.appService.app$),
+      map(requestInfo => requestInfo.entityRequestInfo.updating['Assigning-Route']),
+      filter(requestInfo => !requestInfo.busy),
+      take(1),
+      map(requestInfo => {
+        if (requestInfo.error) {
+          return { success: false, message: `Failed to associate route with app: ${requestInfo.message}` };
+        } else {
+          this.store.dispatch(new GetAppRoutes(this.appGuid, this.cfGuid));
+          return { success: true, redirect: true };
+        }
+      })
     );
   }
 
   toggleCreateTCPRoute() {
     this.createTCPRoute = !this.createTCPRoute;
   }
-  ngOnDestroy(): void {
+
+  ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 }
