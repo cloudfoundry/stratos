@@ -17,6 +17,10 @@ const services: Routes = [
     component: AddServiceInstanceComponent
   },
   {
+    path: ':cfId/:serviceInstanceId/edit',
+    component: AddServiceInstanceComponent
+  },
+  {
     path: ':cfId/:serviceInstanceId/detach',
     component: DetachServiceInstanceComponent
   }

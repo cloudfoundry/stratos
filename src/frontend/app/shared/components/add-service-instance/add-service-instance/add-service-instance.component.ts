@@ -1,24 +1,32 @@
 import { TitleCasePipe } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 
+import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../../features/cloud-foundry/cf.helpers';
 import { servicesServiceFactoryProvider } from '../../../../features/service-catalog/service-catalog.helpers';
-import { isMarketplaceMode } from '../../../../features/service-catalog/services-helper';
 import { GetApplication } from '../../../../store/actions/application.actions';
 import {
   ResetCreateServiceInstanceState,
+  SetCreateServiceInstance,
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
+  SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
-import { GetAllAppsInSpace } from '../../../../store/actions/space.actions';
+import { GetServiceInstance } from '../../../../store/actions/service-instances.actions';
+import { GetAllAppsInSpace, GetSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
-import { applicationSchemaKey, entityFactory, spaceSchemaKey } from '../../../../store/helpers/entity-factory';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  serviceInstancesSchemaKey,
+  spaceSchemaKey,
+} from '../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -28,10 +36,10 @@ import { selectCreateServiceInstance } from '../../../../store/selectors/create-
 import { APIResource } from '../../../../store/types/api.types';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
-import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
+import { CsiModeService } from '../csi-mode.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -41,11 +49,14 @@ import { CsiGuidsService } from '../csi-guids.service';
     servicesServiceFactoryProvider,
     CreateServiceInstanceHelperServiceFactory,
     TitleCasePipe,
-    CsiGuidsService
+    CsiGuidsService,
+    CsiModeService
   ]
 })
-export class AddServiceInstanceComponent implements OnDestroy {
+export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit {
 
+
+  initialisedService$: Observable<boolean>;
   skipApps$: Observable<boolean>;
   cancelUrl: string;
   marketPlaceMode: boolean;
@@ -65,25 +76,25 @@ export class AddServiceInstanceComponent implements OnDestroy {
     private cfOrgSpaceService: CfOrgSpaceDataService,
     private csiGuidsService: CsiGuidsService,
     private entityServiceFactory: EntityServiceFactory,
+    private modeService: CsiModeService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
 
-    const { serviceId, cfId, appId } = this.getIdsFromRoute();
+  }
+  ngAfterContentInit(): void {
 
     // Check if wizard has been initiated from the Services Marketplace
-    this.checkAndConfigureServiceForMarketplaceMode();
-
-    // Check if the CF Select step needs to be displayed
-    this.displaySelectCfStep = this.setupSelectCFStep(cfId, appId);
-
-    // Check if the select service step needs to be displayed
-    this.displaySelectServiceStep = this.setupSelectServiceStep(serviceId, appId);
-
-    if (!!cfId && !!appId) {
-      // Setup wizard for App services mode
-      this.setupForAppServiceMode(appId, cfId);
+    if (this.modeService.isMarketplaceMode()) {
+      this.initialisedService$ = this.initialiseForMarketplaceMode();
     }
-    if (!cfId && !appId && !serviceId) {
+
+    // Check if wizard has been initiated to edit a service instance
+    if (this.modeService.isEditServiceInstanceMode()) {
+      this.initialisedService$ = this.configureForEditServiceInstanceMode();
+    } else if (this.modeService.isAppServicesMode()) {
+      // Setup wizard for App services mode
+      this.initialisedService$ = this.setupForAppServiceMode();
+    } else if (this.modeService.isServicesWallMode()) {
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.serviceInstancesUrl = `/services`;
@@ -107,12 +118,7 @@ export class AddServiceInstanceComponent implements OnDestroy {
     );
   }
 
-
-  setupSelectCFStep = (cfId: string, appId: string) => !(!!cfId && !!appId);
-
-  setupSelectServiceStep = (serviceId: string, appId: string) => !serviceId;
-
-  onNext = (): Observable<StepOnNextResult> => {
+  onNext = () => {
     this.store.dispatch(new SetCreateServiceInstanceCFDetails(
       this.cfOrgSpaceService.cf.select.getValue(),
       this.cfOrgSpaceService.org.select.getValue(),
@@ -128,7 +134,10 @@ export class AddServiceInstanceComponent implements OnDestroy {
     return { serviceId, cfId, appId };
   }
 
-  private setupForAppServiceMode(appId: string, cfId: string) {
+  private setupForAppServiceMode() {
+
+    const appId = getIdFromRoute(this.activatedRoute, 'id');
+    const cfId = getIdFromRoute(this.activatedRoute, 'cfId');
     this.appId = appId;
     this.serviceInstancesUrl = `/applications/${cfId}/${appId}/services`;
     this.bindAppStepperText = 'Binding Params (Optional)';
@@ -138,37 +147,97 @@ export class AddServiceInstanceComponent implements OnDestroy {
       appId,
       new GetApplication(appId, cfId, [createEntityRelationKey(applicationSchemaKey, spaceSchemaKey)]),
       true);
-    entityService.waitForEntity$.pipe(filter(p => !!p), tap(app => {
-      const spaceEntity = app.entity.entity.space as APIResource<ISpace>;
-      this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid));
-      this.title$ = observableOf(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
-    }), take(1)).subscribe();
+    return entityService.waitForEntity$.pipe(
+      filter(p => !!p),
+      tap(app => {
+        const spaceEntity = app.entity.entity.space as APIResource<ISpace>;
+        this.store.dispatch(
+          new SetCreateServiceInstanceCFDetails(cfId, spaceEntity.entity.organization_guid, app.entity.entity.space_guid)
+        );
+        this.title$ = observableOf(`Create and/or Bind Service Instance to '${app.entity.entity.name}'`);
+      }),
+      take(1),
+      map(o => false)
+    );
   }
 
-  private checkAndConfigureServiceForMarketplaceMode() {
-    if (isMarketplaceMode(this.activatedRoute)) {
-      this.initialiseForMarketplaceMode();
-    }
+  private configureForEditServiceInstanceMode() {
+    const { cfId, serviceInstanceId } = this.activatedRoute.snapshot.params;
+    const entityService = this.getServiceInstanceEntityService(serviceInstanceId, cfId);
+    this.serviceInstancesUrl = `/services`;
+    return entityService.waitForEntity$.pipe(
+      filter(p => !!p),
+      tap(serviceInstance => {
+        const serviceInstanceEntity = serviceInstance.entity.entity;
+        this.csiGuidsService.cfGuid = cfId;
+        this.title$ = observableOf(`Edit Service Instance: ${serviceInstanceEntity.name}`);
+        const serviceGuid = serviceInstance.entity.entity.service_guid;
+        this.csiGuidsService.serviceGuid = serviceGuid;
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceGuid);
+        this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceGuid));
+        this.store.dispatch(new SetServiceInstanceGuid(serviceInstance.entity.metadata.guid));
+        this.store.dispatch(new SetCreateServiceInstance(
+          serviceInstanceEntity.name,
+          serviceInstanceEntity.space_guid,
+          serviceInstanceEntity.tags,
+          ''
+        ));
+        const spaceEntityService = this.getSpaceEntityService(serviceInstanceEntity.space_guid, cfId);
+        spaceEntityService.waitForEntity$.pipe(
+          filter(p => !!p),
+          tap(spaceEntity => {
+            this.store.dispatch(new SetCreateServiceInstanceCFDetails(
+              cfId,
+              spaceEntity.entity.entity.organization_guid,
+              spaceEntity.entity.metadata.guid)
+            );
+          }),
+          take(1)
+        ).subscribe();
+      }),
+      take(1),
+      map(o => false),
+    );
+  }
+
+  private getServiceInstanceEntityService(serviceInstanceId: string, cfId: string) {
+    return this.entityServiceFactory.create<APIResource<IServiceInstance>>(
+      serviceInstancesSchemaKey,
+      entityFactory(serviceInstancesSchemaKey),
+      serviceInstanceId,
+      new GetServiceInstance(serviceInstanceId,
+        cfId),
+      true);
+  }
+
+  private getSpaceEntityService(spaceGuid: string, cfGuid: string) {
+    return this.entityServiceFactory.create<APIResource<ISpace>>(
+      spaceSchemaKey,
+      entityFactory(spaceSchemaKey),
+      spaceGuid,
+      new GetSpace(spaceGuid, cfGuid),
+      true);
   }
 
   ngOnDestroy(): void {
     this.store.dispatch(new ResetCreateServiceInstanceState());
   }
 
-  private initialiseForMarketplaceMode() {
+  private initialiseForMarketplaceMode(): Observable<boolean> {
     const { cfId, serviceId } = this.activatedRoute.snapshot.params;
     this.csiGuidsService.cfGuid = cfId;
     this.csiGuidsService.serviceGuid = serviceId;
     this.cSIHelperService = this.cSIHelperServiceFactory.create(cfId, serviceId);
     this.store.dispatch(new SetCreateServiceInstanceCFDetails(cfId));
     this.store.dispatch(new SetCreateServiceInstanceServiceGuid(serviceId));
-    const serviceGuid = serviceId;
-    this.serviceInstancesUrl = `/marketplace/${cfId}/${serviceGuid}/instances`;
+    this.serviceInstancesUrl = `/marketplace/${cfId}/${serviceId}/instances`;
     this.title$ = this.cSIHelperService.getServiceName().pipe(map(label => `Create Instance: ${label}`));
     this.marketPlaceMode = true;
-    this.cfOrgSpaceService.cf.list$.pipe(
+    return this.cfOrgSpaceService.cf.list$.pipe(
       filter(p => !!p),
-      first()
-    ).subscribe(e => this.cfOrgSpaceService.cf.select.next(cfId));
+      first(),
+      tap(e => this.cfOrgSpaceService.cf.select.next(cfId)),
+      map(o => false),
+    );
   }
 }

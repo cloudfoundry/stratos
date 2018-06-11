@@ -32,11 +32,7 @@ import { APIResource } from '../../../store/types/api.types';
 import { QParam } from '../../../store/types/pagination.types';
 import { PaginationMonitorFactory } from '../../monitors/pagination-monitor.factory';
 
-export enum CreateServiceInstanceMode {
-  MARKETPLACE_MODE = 'marketPlaceMode',
-  APP_SERVICES_MODE = 'appServicesMode',
-  SERVICES_WALL_MODE = 'servicesWallMode'
-}
+
 @Injectable()
 export class CreateServiceInstanceHelperService {
   servicePlanVisibilities$: Observable<APIResource<IServicePlanVisibility>[]>;
@@ -48,7 +44,6 @@ export class CreateServiceInstanceHelperService {
     private store: Store<AppState>,
     public serviceGuid: string,
     public cfGuid: string,
-    public mode: CreateServiceInstanceMode,
     private entityServiceFactory: EntityServiceFactory,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
@@ -66,7 +61,8 @@ export class CreateServiceInstanceHelperService {
     );
 
     this.service$ = serviceEntityService.waitForEntity$.pipe(
-      filter(o => !!o && !!o.entity),
+      filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.service_plans),
+      // filter(o => !!o && !!o.entity),
       map(o => o.entity),
       publishReplay(1),
       refCount()
@@ -87,9 +83,6 @@ export class CreateServiceInstanceHelperService {
 
   }
 
-  isMarketplace = () => this.mode === CreateServiceInstanceMode.MARKETPLACE_MODE;
-  isAppServices = () => this.mode === CreateServiceInstanceMode.APP_SERVICES_MODE;
-
   getServicePlanVisibilities = (): Observable<APIResource<IServicePlanVisibility>[]> =>
     this.servicePlanVisibilities$.pipe(filter(p => !!p))
 
@@ -101,7 +94,7 @@ export class CreateServiceInstanceHelperService {
 
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
     return getServicePlans(this.service$, this.cfGuid, this.store, this.paginationMonitorFactory);
-    }
+  }
 
   getServiceName = () => {
     return this.service$

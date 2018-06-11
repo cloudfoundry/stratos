@@ -25,8 +25,8 @@ import { StepOnNextFunction } from '../../../../shared/components/stepper/step/s
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
 
-  @Input('isServiceInstanceMode')
-  isServiceInstanceMode: boolean;
+  @Input('isMarketplaceMode')
+  isMarketplaceMode: boolean;
   constructor(
     private store: Store<AppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService
@@ -64,7 +64,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     if (this.isRedeploy) {
       this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
     }
-    if (this.isServiceInstanceMode) {
+
+    if (this.isMarketplaceMode) {
       this.stepperText = 'Select an organization and space for the service instance.';
     }
   }

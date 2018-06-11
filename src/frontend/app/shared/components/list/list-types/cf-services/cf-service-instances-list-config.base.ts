@@ -1,9 +1,9 @@
-
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
+
 import { IServiceInstance } from '../../../../../core/cf-api-svc.types';
 import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
 import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
@@ -15,13 +15,18 @@ import { ServiceActionHelperService } from '../../../../data-services/service-ac
 import { ITableColumn } from '../../list-table/table.types';
 import { IListAction, IListConfig, ListConfig, ListViewTypes } from '../../list.component.types';
 import {
-  TableCellServiceInstanceAppsAttachedComponent
+  TableCellServiceInstanceAppsAttachedComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-apps-attached/table-cell-service-instance-apps-attached.component';
 import {
-  TableCellServiceInstanceTagsComponent
+  TableCellServiceInstanceTagsComponent,
 } from '../cf-spaces-service-instances/table-cell-service-instance-tags/table-cell-service-instance-tags.component';
-import { TableCellServiceNameComponent } from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
-import { TableCellServicePlanComponent } from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+import {
+  TableCellServiceNameComponent,
+} from '../cf-spaces-service-instances/table-cell-service-name/table-cell-service-name.component';
+import {
+  TableCellServicePlanComponent,
+} from '../cf-spaces-service-instances/table-cell-service-plan/table-cell-service-plan.component';
+
 
 
 interface CanCache {
@@ -115,6 +120,13 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
       )
   };
 
+  private listActionEdit: IListAction<APIResource> = {
+    action: (item: APIResource<IServiceInstance>) =>
+      this.serviceActionHelperService.editServiceBinding(item.metadata.guid, item.entity.cfGuid),
+    label: 'Edit',
+    description: 'Edit Service Instance',
+  };
+
   private can(cache: CanCache, perm: CurrentUserPermissions, cfGuid: string, spaceGuid: string): Observable<boolean> {
     let can = cache[spaceGuid];
     if (!can) {
@@ -147,7 +159,7 @@ export class CfServiceInstancesListConfigBase extends ListConfig<APIResource<ISe
 
   getGlobalActions = () => [];
   getMultiActions = () => [];
-  getSingleActions = () => [this.listActionDetach, this.listActionDelete];
+  getSingleActions = () => [this.listActionEdit, this.listActionDetach, this.listActionDelete];
   getMultiFiltersConfigs = () => [];
 
 }

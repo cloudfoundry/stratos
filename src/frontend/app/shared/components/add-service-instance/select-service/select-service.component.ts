@@ -38,7 +38,7 @@ export class SelectServiceComponent implements OnDestroy, AfterContentInit {
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityServiceFactory: EntityServiceFactory,
     private csiGuidService: CsiGuidsService,
-    private servicesWallService: ServicesWallService
+    private servicesWallService: ServicesWallService,
   ) {
 
     this.stepperForm = new FormGroup({

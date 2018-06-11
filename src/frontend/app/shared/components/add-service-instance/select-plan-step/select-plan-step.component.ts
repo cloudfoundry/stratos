@@ -31,7 +31,7 @@ import {
 
 import { IServicePlan, IServicePlanExtra } from '../../../../core/cf-api-svc.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
-import { isMarketplaceMode, safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
+import { safeUnsubscribe } from '../../../../features/service-catalog/services-helper';
 import { ServicePlanAccessibility } from '../../../../features/service-catalog/services.service';
 import {
   SetCreateServiceInstanceCFDetails,
@@ -45,6 +45,7 @@ import { StepOnNextResult } from '../../stepper/step/step.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
+import { CsiModeService } from '../csi-mode.service';
 import { NoServicePlansComponent } from '../no-service-plans/no-service-plans.component';
 
 
@@ -84,16 +85,19 @@ export class SelectPlanStepComponent implements OnDestroy {
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
     private csiGuidsService: CsiGuidsService,
-    private componentFactoryResolver: ComponentFactoryResolver
+    private componentFactoryResolver: ComponentFactoryResolver,
+    private modeService: CsiModeService
+
   ) {
 
     this.stepperForm = new FormGroup({
       servicePlans: new FormControl('', Validators.required),
     });
 
-    if (isMarketplaceMode(activatedRoute)) {
+    if (modeService.isMarketplaceMode()) {
       this.store.dispatch(new SetCreateServiceInstanceCFDetails(activatedRoute.snapshot.params.cfId));
     }
+
 
     this.servicePlans$ = this.store.select(selectCreateServiceInstance).pipe(
       filter(p => !!p.orgGuid && !!p.spaceGuid && !!p.serviceGuid),

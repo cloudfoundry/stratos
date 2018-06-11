@@ -70,7 +70,7 @@ export class StepComponent {
   disablePrevious = false;
 
   @Input('blocked')
-  blocked: boolean;
+  blocked = false;
 
   @Input('destructiveStep')
   public destructiveStep = false;
