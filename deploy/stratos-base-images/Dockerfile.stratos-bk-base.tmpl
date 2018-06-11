@@ -1,5 +1,5 @@
 FROM {{BASE_IMAGE}}
-RUN zypper in -y ca-certificates git &&\
-    mkdir -p /srv
-
+RUN zypper in -y ca-certificates git && \
+    mkdir -p /srv && \
+    mkdir -p /root/.npm-global
 WORKDIR /srv

@@ -1,21 +1,19 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ApplicationService } from '../application.service';
-import { EntityService } from '../../../core/entity-service';
-import { AppState } from '../../../store/app-state';
-import { Store } from '@ngrx/store';
-import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { selectUpdateInfo } from '../../../store/selectors/api.selectors';
-import { selectNewAppState } from '../../../store/effects/create-app-effects';
 
-// import { UpdateApplication } from '../../../store/actions/application.actions';
-import { Observable, Subscription } from 'rxjs/Rx';
-import { Router } from '@angular/router';
-import { AppNameUniqueDirective, AppNameUniqueChecking } from '../app-name-unique.directive/app-name-unique.directive';
-import { RouterNav } from '../../../store/actions/router.actions';
-import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { of as observableOf, Observable, Subscription } from 'rxjs';
+
+import { map, filter, take } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Http } from '@angular/http';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material';
-import { SetNewAppName, SetCFDetails } from '../../../store/actions/create-applications-page.actions';
+import { Store } from '@ngrx/store';
+
+import { EntityService } from '../../../core/entity-service';
+import { AppMetadataTypes } from '../../../store/actions/app-metadata.actions';
+import { SetCFDetails, SetNewAppName } from '../../../store/actions/create-applications-page.actions';
+import { AppState } from '../../../store/app-state';
+import { AppNameUniqueChecking, AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
+import { ApplicationService } from '../application.service';
 
 @Component({
   selector: 'app-edit-application',
@@ -72,7 +70,11 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private error = false;
 
   ngOnInit() {
-    this.sub = this.applicationService.application$.filter(app => app.app.entity).take(1).map(app => app.app.entity).subscribe(app => {
+    this.sub = this.applicationService.application$.pipe(
+      filter(app => app.app.entity),
+      take(1),
+      map(app => app.app.entity)
+    ).subscribe(app => {
       this.app = app;
       this.store.dispatch(new SetCFDetails({
         cloudFoundry: this.applicationService.cfGuid,
@@ -106,18 +108,18 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     let obs$: Observable<any>;
     if (Object.keys(updates).length) {
       // We had at least one value to change - send update action
-      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).map(v => ({ success: !v.error }));
+      obs$ = this.applicationService.updateApplication(updates, [AppMetadataTypes.SUMMARY]).pipe(map(v => ({ success: !v.error })));
     } else {
-      obs$ = Observable.of({ success: true });
+      obs$ = observableOf({ success: true });
     }
 
-    return obs$.take(1).map(res => {
+    return obs$.pipe(take(1), map(res => {
       this.error = !res.success;
       return {
         success: res.success,
         redirect: res.success
       };
-    });
+    }), );
   }
 
   clearSub() {

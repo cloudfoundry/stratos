@@ -1,13 +1,12 @@
-import { DatePipe } from '@angular/common';
-import { APIResource } from '../../../../../store/types/api.types';
-import { CoreModule } from '../../../../../core/core.module';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { Observable, of as observableOf } from 'rxjs';
 
-import { TableCellActionsComponent } from './table-cell-actions.component';
+import { CoreModule } from '../../../../../core/core.module';
+import { APIResource } from '../../../../../store/types/api.types';
 import { createBasicStoreModule } from '../../../../../test-framework/store-test-helper';
-import { ListActions, IListDataSource } from '../../data-sources-controllers/list-data-source-types';
+import { IListDataSource } from '../../data-sources-controllers/list-data-source-types';
 import { ListConfig } from '../../list.component.types';
-import { Observable } from 'rxjs/Observable';
+import { TableCellActionsComponent } from './table-cell-actions.component';
 
 describe('TableCellActionsComponent', () => {
   let component: TableCellActionsComponent<any>;
@@ -32,7 +31,7 @@ describe('TableCellActionsComponent', () => {
     component = fixture.componentInstance;
     component.dataSource = {
     } as IListDataSource<APIResource>;
-    component.rowState = Observable.of({});
+    component.rowState = observableOf({});
     fixture.detectChanges();
   });
 

@@ -1,10 +1,12 @@
+
+import {combineLatest as observableCombineLatest, of as observableOf,  Observable ,  Subscription } from 'rxjs';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { Subscription } from 'rxjs/Subscription';
 
 import { IApp, IOrganization } from '../../../../../../core/cf-api.types';
+import { CurrentUserPermissions } from '../../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../../core/current-user-permissions.service';
 import { EntityServiceFactory } from '../../../../../../core/entity-service-factory.service';
 import { getOrgRolesString } from '../../../../../../features/cloud-foundry/cf.helpers';
 import {
@@ -14,6 +16,7 @@ import { RouterNav } from '../../../../../../store/actions/router.actions';
 import { AppState } from '../../../../../../store/app-state';
 import { APIResource } from '../../../../../../store/types/api.types';
 import { EndpointUser } from '../../../../../../store/types/endpoint.types';
+import { createUserRoleInOrg } from '../../../../../../store/types/user.types';
 import { CfUserService } from '../../../../../data-services/cf-user.service';
 import { MetaCardMenuItem } from '../../../list-cards/meta-card/meta-card-base/meta-card.component';
 import { CardCell } from '../../../list.types';
@@ -42,17 +45,20 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
     private cfEndpointService: CloudFoundryEndpointService,
     private entityServiceFactory: EntityServiceFactory,
     private store: Store<AppState>,
+    private currentUserPermissionsService: CurrentUserPermissionsService
   ) {
     super();
 
     this.cardMenu = [
       {
         label: 'Edit',
-        action: this.edit
+        action: this.edit,
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_EDIT, this.cfEndpointService.cfGuid)
       },
       {
         label: 'Delete',
-        action: this.delete
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(CurrentUserPermissions.ORGANIZATION_DELETE, this.cfEndpointService.cfGuid)
       }
     ];
   }
@@ -62,26 +68,21 @@ export class CfOrgCardComponent extends CardCell<APIResource<IOrganization>> imp
       switchMap(u => {
         // This is null if the endpoint is disconnected. Probably related to https://github.com/cloudfoundry-incubator/stratos/issues/1727
         if (!u) {
-          return Observable.of({
-            orgManager: false,
-            billingManager: false,
-            auditor: false,
-            user: false
-          });
+          return observableOf(createUserRoleInOrg(false, false, false, false));
         }
         return this.cfUserService.getUserRoleInOrg(u.guid, this.row.metadata.guid, this.row.entity.cfGuid);
       }),
       map(u => getOrgRolesString(u)),
     );
 
-    const fetchData$ = Observable.combineLatest(
+    const fetchData$ = observableCombineLatest(
       userRole$,
       this.cfEndpointService.getAppsInOrg(this.row)
     ).pipe(
       tap(([role, apps]) => {
         this.setValues(role, apps);
       })
-      );
+    );
 
     this.subscriptions.push(fetchData$.subscribe());
     this.orgGuid = this.row.metadata.guid;

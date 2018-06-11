@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
-import { filter, first, map, publishReplay, refCount } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, first, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../core/cf-api.types';
+import { EntityServiceFactory } from '../../core/entity-service-factory.service';
 import {
   isOrgAuditor,
   isOrgBillingManager,
@@ -12,80 +13,122 @@ import {
   isSpaceAuditor,
   isSpaceDeveloper,
   isSpaceManager,
+  waitForCFPermissions,
 } from '../../features/cloud-foundry/cf.helpers';
-import { GetAllUsers } from '../../store/actions/users.actions';
+import { GetAllUsersAsAdmin, GetAllUsersAsNonAdmin, GetUser } from '../../store/actions/users.actions';
 import { AppState } from '../../store/app-state';
-import { cfUserSchemaKey, endpointSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
-import { createEntityRelationPaginationKey } from '../../store/helpers/entity-relations.types';
+import { cfUserSchemaKey, entityFactory } from '../../store/helpers/entity-factory';
 import {
   getPaginationObservables,
   PaginationObservables,
 } from '../../store/reducers/pagination-reducer/pagination-reducer.helper';
 import { APIResource } from '../../store/types/api.types';
-import { CfUser, IUserPermissionInOrg, UserRoleInOrg, UserRoleInSpace, IUserPermissionInSpace } from '../../store/types/user.types';
+import { PaginatedAction } from '../../store/types/pagination.types';
+import {
+  CfUser,
+  createUserRoleInOrg,
+  createUserRoleInSpace,
+  IUserPermissionInOrg,
+  IUserPermissionInSpace,
+  UserRoleInOrg,
+  UserRoleInSpace,
+} from '../../store/types/user.types';
 import { PaginationMonitorFactory } from '../monitors/pagination-monitor.factory';
 import { ActiveRouteCfOrgSpace } from './../../features/cloud-foundry/cf-page.types';
 
 @Injectable()
 export class CfUserService {
-  public allUsersAction: GetAllUsers;
-  private allUsers$: PaginationObservables<APIResource<CfUser>>;
+  private allUsers$: Observable<PaginationObservables<APIResource<CfUser>>>;
+
+  public static createPaginationAction(endpointGuid: string, isAdmin: boolean): PaginatedAction {
+    return isAdmin ? new GetAllUsersAsAdmin(endpointGuid) : new GetAllUsersAsNonAdmin(endpointGuid);
+  }
 
   constructor(
     private store: Store<AppState>,
     public paginationMonitorFactory: PaginationMonitorFactory,
-    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
-    // See issue #1741
-    this.allUsersAction = new GetAllUsers(
-      createEntityRelationPaginationKey(endpointSchemaKey, activeRouteCfOrgSpace.cfGuid),
-      activeRouteCfOrgSpace.cfGuid
+    public activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
+    private entityServiceFactory: EntityServiceFactory,
+  ) { }
+
+  getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
+    this.getAllUsers(endpointGuid).pipe(
+      switchMap(paginationObservables => paginationObservables.entities$),
+      publishReplay(1),
+      refCount(),
+      filter(p => {
+        return !!p;
+      }),
+      map(users => {
+        return users.filter(p => p.entity.cfGuid === endpointGuid);
+      }),
+      filter(p => {
+        return p.length > 0;
+      }),
+    )
+
+  getUser = (endpointGuid: string, userGuid: string): Observable<APIResource<CfUser>> => {
+    return this.entityServiceFactory.create<APIResource<CfUser>>(
+      cfUserSchemaKey,
+      entityFactory(cfUserSchemaKey),
+      userGuid,
+      new GetUser(endpointGuid, userGuid),
+      true
+    ).entityObs$.pipe(
+      filter(entity => !!entity),
+      map(entity => entity.entity)
     );
   }
 
-  getUsers = (endpointGuid: string): Observable<APIResource<CfUser>[]> =>
-    this.getAllUsers().entities$.pipe(
-      filter(p => !!p),
-      map(users => users.filter(p => p.entity.cfGuid === endpointGuid)),
-      filter(p => p.length > 0),
-      publishReplay(1),
-      refCount()
-    )
-
   getOrgRolesFromUser(user: CfUser): IUserPermissionInOrg[] {
+    // User must be an 'org user' aka in the organizations collection, so loop through to get all orgs user might be in
     const role = user['organizations'] as APIResource<IOrganization>[];
     return role.map(org => {
       const orgGuid = org.metadata.guid;
       return {
         name: org.entity.name as string,
         orgGuid: org.metadata.guid,
-        permissions: {
-          orgManager: isOrgManager(user, orgGuid),
-          billingManager: isOrgBillingManager(user, orgGuid),
-          auditor: isOrgAuditor(user, orgGuid),
-          user: isOrgUser(user, orgGuid)
-        }
+        permissions: createUserRoleInOrg(
+          isOrgManager(user, orgGuid),
+          isOrgBillingManager(user, orgGuid),
+          isOrgAuditor(user, orgGuid),
+          isOrgUser(user, orgGuid)
+        )
       };
+    });
+  }
 
-
+  private parseSpaceRole(user: CfUser,
+    processedSpaces: Set<string>,
+    spacesToProcess: APIResource<ISpace>[],
+    result: IUserPermissionInSpace[]) {
+    spacesToProcess.forEach(space => {
+      const spaceGuid = space.entity.guid;
+      if (processedSpaces.has(spaceGuid)) {
+        return;
+      }
+      result.push({
+        name: space.entity.name as string,
+        orgGuid: space.entity.organization_guid,
+        spaceGuid,
+        permissions: createUserRoleInSpace(
+          isSpaceManager(user, spaceGuid),
+          isSpaceAuditor(user, spaceGuid),
+          isSpaceDeveloper(user, spaceGuid)
+        )
+      });
+      processedSpaces.add(spaceGuid);
     });
   }
 
   getSpaceRolesFromUser(user: CfUser): IUserPermissionInSpace[] {
-    const role = user['spaces'] as APIResource<ISpace>[];
-    return role.map(space => {
-      const spaceGuid = space.metadata.guid;
-      return {
-        name: space.entity.name as string,
-        orgGuid: space.entity.organization_guid,
-        spaceGuid: spaceGuid,
-        permissions: {
-          manager: isSpaceManager(user, spaceGuid),
-          auditor: isSpaceAuditor(user, spaceGuid),
-          developer: isSpaceDeveloper(user, spaceGuid)
-        }
-      };
-    });
+    const res: IUserPermissionInSpace[] = [];
+    const spaceGuids = new Set<string>();
+    // User might have unique spaces in any of the space role collections, so loop through each
+    this.parseSpaceRole(user, spaceGuids, user.spaces, res);
+    this.parseSpaceRole(user, spaceGuids, user.audited_spaces, res);
+    this.parseSpaceRole(user, spaceGuids, user.managed_spaces, res);
+    return res;
   }
 
   getUserRoleInOrg = (
@@ -94,14 +137,14 @@ export class CfUserService {
     cfGuid: string
   ): Observable<UserRoleInOrg> => {
     return this.getUsers(cfGuid).pipe(
-      this.getUser(userGuid),
+      this.getUserFromUsers(userGuid),
       map(user => {
-        return {
-          orgManager: isOrgManager(user.entity, orgGuid),
-          billingManager: isOrgBillingManager(user.entity, orgGuid),
-          auditor: isOrgAuditor(user.entity, orgGuid),
-          user: isOrgUser(user.entity, orgGuid)
-        };
+        return createUserRoleInOrg(
+          isOrgManager(user.entity, orgGuid),
+          isOrgBillingManager(user.entity, orgGuid),
+          isOrgAuditor(user.entity, orgGuid),
+          isOrgUser(user.entity, orgGuid)
+        );
       }),
       first()
     );
@@ -113,32 +156,37 @@ export class CfUserService {
     cfGuid: string
   ): Observable<UserRoleInSpace> => {
     return this.getUsers(cfGuid).pipe(
-      this.getUser(userGuid),
+      this.getUserFromUsers(userGuid),
       map(user => {
-        return {
-          manager: isSpaceManager(user.entity, spaceGuid),
-          auditor: isSpaceAuditor(user.entity, spaceGuid),
-          developer: isSpaceDeveloper(user.entity, spaceGuid)
-        };
+        return createUserRoleInSpace(
+          isSpaceManager(user.entity, spaceGuid),
+          isSpaceAuditor(user.entity, spaceGuid),
+          isSpaceDeveloper(user.entity, spaceGuid)
+        );
       })
     );
   }
 
-  private getAllUsers(): PaginationObservables<APIResource<CfUser>> {
+  private getAllUsers(endpointGuid: string): Observable<PaginationObservables<APIResource<CfUser>>> {
     if (!this.allUsers$) {
-      this.allUsers$ = getPaginationObservables<APIResource<CfUser>>({
-        store: this.store,
-        action: this.allUsersAction,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          this.allUsersAction.paginationKey,
-          entityFactory(cfUserSchemaKey)
-        )
-      });
+      this.allUsers$ = waitForCFPermissions(this.store, endpointGuid).pipe(
+        map(cfPermissions => {
+          const allUsersAction = CfUserService.createPaginationAction(endpointGuid, cfPermissions.global.isAdmin);
+          return getPaginationObservables<APIResource<CfUser>>({
+            store: this.store,
+            action: allUsersAction,
+            paginationMonitor: this.paginationMonitorFactory.create(
+              allUsersAction.paginationKey,
+              entityFactory(cfUserSchemaKey)
+            )
+          });
+        })
+      );
     }
     return this.allUsers$;
   }
 
-  private getUser(userGuid: string): (source: Observable<APIResource<CfUser>[]>) => Observable<APIResource<CfUser>> {
+  private getUserFromUsers(userGuid: string): (source: Observable<APIResource<CfUser>[]>) => Observable<APIResource<CfUser>> {
     return map(users => {
       return users.filter(o => o.metadata.guid === userGuid)[0];
     });

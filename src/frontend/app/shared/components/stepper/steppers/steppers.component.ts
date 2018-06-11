@@ -1,3 +1,7 @@
+
+import { of as observableOf, combineLatest, Observable, Subscription } from 'rxjs';
+
+import { switchMap, catchError, first, map } from 'rxjs/operators';
 import {
   AfterContentInit,
   Component,
@@ -9,9 +13,6 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { combineLatest } from 'rxjs/observable/combineLatest';
-import { first, map } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs/Rx';
 
 import { RouterNav } from '../../../../store/actions/router.actions';
 import { AppState } from '../../../../store/app-state';
@@ -34,8 +35,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @ContentChildren(StepComponent) _steps: QueryList<StepComponent>;
 
-  @Input('cancel')
-  cancel = null;
+  @Input('cancel') cancel = null;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
@@ -57,11 +57,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     const previousRoute$ = store.select(getPreviousRoutingState).pipe(first());
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {
-        return previousState ? previousState.url.split('?')[0] : this.cancel;
+        // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
+        // cancel state is
+        return previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : this.cancel;
       })
     );
     this.cancelQueryParams$ = previousRoute$.pipe(
-      map(previousState => previousState ? previousState.state.queryParams : {})
+      map(previousState => previousState && previousState.url !== '/login' ? previousState.state.queryParams : {})
     );
   }
 
@@ -97,22 +99,23 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (!(obs$ instanceof Observable)) {
         return;
       }
-      this.nextSub = obs$
-        .first()
-        .catch(() => Observable.of({ success: false, message: 'Failed', redirect: false, data: {} }))
-        .switchMap(({ success, data, message, redirect }) => {
+      this.nextSub = obs$.pipe(
+        first(),
+        catchError(() => observableOf({ success: false, message: 'Failed', redirect: false, data: {}, ignoreSuccess: false })),
+        switchMap(({ success, data, message, redirect, ignoreSuccess }) => {
           step.error = !success;
           step.busy = false;
           this.enterData = data;
-          if (success) {
+          if (success && !ignoreSuccess) {
             if (redirect) {
+              // Must sub to this
               return this.redirect();
             } else {
               this.setActive(this.currentIndex + 1);
             }
           }
           return [];
-        }).subscribe();
+        }), ).subscribe();
     }
   }
 
@@ -129,26 +132,57 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   setActive(index: number) {
     if (!this.canGoto(index)) {
+      if (index === 0) {
+        if (this.allSteps && this.allSteps.length > 0) {
+          this.allSteps[index].active = true;
+          this.allSteps[index]._onEnter(this.enterData);
+        }
+      }
       return;
     }
-    // We do allow next beyond the last step to
-    // allow the last step to finish up
-    // This shouldn't effect the state of the stepper though.
-    index = Math.min(index, this.steps.length - 1);
+
+    // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
+    const isNextDirection = index > this.currentIndex;
+    this.steps[this.currentIndex].onLeave(isNextDirection);
+
+    // 2) Determine if the required step is ok (and if not find the next/previous valid step)
+    index = this.findValidStep(index, isNextDirection);
+    if (index === -1) {
+      return;
+    }
+
+    // 3) Set stepper state WRT required step
     this.steps.forEach((_step, i) => {
-      if (i < index) {
-        _step.complete = true;
-      } else {
-        _step.complete = false;
-      }
-      _step.active = i === index ? true : false;
+      _step.complete = i < index;
+      _step.active = i === index;
     });
-    // Tell onLeave if this is a Next or Previous transition
-    this.steps[this.currentIndex].onLeave(index > this.currentIndex);
-    index = this.steps[index].skip ? ++index : index;
     this.currentIndex = index;
     this.steps[this.currentIndex]._onEnter(this.enterData);
     this.enterData = undefined;
+  }
+
+  private findValidStep(index: number, isNextDirection: boolean) {
+    // Ensure the required step can be activated (not skipped), if not continue in the correct direction until we've found one that can be
+
+    // Candidate step index
+    index = Math.min(index, this.steps.length - 1);
+    // Create list of all not skipped stepped. Any candidate step to go to should exist in here
+    const nonSkipSteps = this.steps.filter(step => !step.skip);
+    // Iterate through steps until we find a valid one
+    while (true) {
+      // Can this step be activated (exists in nonSkippedSteps)?
+      const found = nonSkipSteps.findIndex(step => step === this.steps[index]) >= 0;
+      if (found) {
+        // Yes, step is valid
+        return index;
+      }
+      // No? Try again with the next or previous step
+      index = isNextDirection ? ++index : --index;
+      if (index < 0 || this.steps.length <= index) {
+        break;
+      }
+    }
+    return -1;
   }
 
   canGoto(index: number): boolean {

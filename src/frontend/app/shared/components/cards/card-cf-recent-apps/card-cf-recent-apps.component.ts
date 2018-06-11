@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
 import { IOrganization, ISpace } from '../../../../core/cf-api.types';

@@ -1,9 +1,13 @@
-import { Component, Input, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+
+import {filter, map, buffer, debounceTime} from 'rxjs/operators';
+import { Component, Inject, InjectionToken, Input, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { AppState } from '../../../store/app-state';
+import { BehaviorSubject ,  Observable } from 'rxjs';
+import { Customizations, CustomizationsMetadata } from '../../../core/customizations.types';
 import { ActionHistoryDump } from '../../../store/actions/action-history.actions';
+import { AppState } from '../../../store/app-state';
+
+export const SIDENAV_COPYRIGHT = new InjectionToken<string>('Optional copyright string for side nav');
 
 export interface SideNavItem {
   text: string;
@@ -20,7 +24,10 @@ export interface SideNavItem {
 
 export class SideNavComponent implements OnInit {
 
-  constructor(private store: Store<AppState>, ) { }
+  constructor(
+    private store: Store<AppState>,
+    @Inject(Customizations) public customizations: CustomizationsMetadata
+  ) { }
 
   @Input() tabs: SideNavItem[];
   // Button is not always visible on load, so manually push through an event
@@ -28,11 +35,11 @@ export class SideNavComponent implements OnInit {
 
   ngOnInit() {
     const toLength = a => a.length;
-    const debounced$ = this.logoClicked.debounceTime(250); // debounce the click stream
-    this.logoClicked
-      .buffer(debounced$)
-      .map(toLength)
-      .filter(x => x === 3)
+    const debounced$ = this.logoClicked.pipe(debounceTime(250)); // debounce the click stream
+    this.logoClicked.pipe(
+      buffer(debounced$),
+      map(toLength),
+      filter(x => x === 3), )
       .subscribe(event => this.store.dispatch(new ActionHistoryDump()));
   }
 }

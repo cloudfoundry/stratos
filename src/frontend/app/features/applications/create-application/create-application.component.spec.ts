@@ -1,19 +1,27 @@
 import { CommonModule } from '@angular/common';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ConnectionBackend, Http, HttpModule } from '@angular/http';
+import { MockBackend } from '@angular/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { StoreModule } from '@ngrx/store';
 
 import { CoreModule } from '../../../core/core.module';
-import { SharedModule } from '../../../shared/shared.module';
+import {
+  CreateApplicationStep1Component,
+} from '../../../shared/components/create-application/create-application-step1/create-application-step1.component';
+import { PageHeaderModule } from '../../../shared/components/page-header/page-header.module';
+import { StatefulIconComponent } from '../../../shared/components/stateful-icon/stateful-icon.component';
+import { SteppersModule } from '../../../shared/components/stepper/steppers.module';
+import { EntityMonitorFactory } from '../../../shared/monitors/entity-monitor.factory.service';
+import { InternalEventMonitorFactory } from '../../../shared/monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../shared/monitors/pagination-monitor.factory';
 import { appReducers } from '../../../store/reducers.module';
 import { AppNameUniqueDirective } from '../app-name-unique.directive/app-name-unique.directive';
-import { CreateApplicationStep1Component } from './create-application-step1/create-application-step1.component';
 import { CreateApplicationStep2Component } from './create-application-step2/create-application-step2.component';
 import { CreateApplicationStep3Component } from './create-application-step3/create-application-step3.component';
 import { CreateApplicationComponent } from './create-application.component';
-import { Http, HttpModule, ConnectionBackend } from '@angular/http';
-import { MockBackend } from '@angular/http/testing';
+import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 describe('CreateApplicationComponent', () => {
   let component: CreateApplicationComponent;
@@ -26,15 +34,17 @@ describe('CreateApplicationComponent', () => {
         CreateApplicationStep1Component,
         CreateApplicationStep2Component,
         CreateApplicationStep3Component,
-        AppNameUniqueDirective
+        AppNameUniqueDirective,
+        StatefulIconComponent
       ],
       imports: [
         CommonModule,
         CoreModule,
         HttpModule,
-        SharedModule,
         RouterTestingModule,
         BrowserAnimationsModule,
+        PageHeaderModule,
+        SteppersModule,
         StoreModule.forRoot(
           appReducers
         )
@@ -45,6 +55,10 @@ describe('CreateApplicationComponent', () => {
           provide: ConnectionBackend,
           useClass: MockBackend
         },
+        PaginationMonitorFactory,
+        EntityMonitorFactory,
+        InternalEventMonitorFactory,
+        CloudFoundryService
       ]
     })
       .compileComponents();

@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material';
+
 import { Store } from '@ngrx/store';
 
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import {
   ConnectEndpointDialogComponent,
 } from '../../../../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
@@ -14,19 +17,18 @@ import { EndpointsEffect } from '../../../../../store/effects/endpoint.effects';
 import { selectDeletionInfo, selectUpdateInfo } from '../../../../../store/selectors/api.selectors';
 import { EndpointModel, endpointStoreNames } from '../../../../../store/types/endpoint.types';
 import { EntityMonitorFactory } from '../../../../monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
-import { ITableColumn } from '../../list-table/table.types';
-import {
-  defaultPaginationPageSizeOptionsTable,
-  IListAction,
-  IListConfig,
-  IMultiListAction,
-  ListViewTypes,
-} from '../../list.component.types';
-import { EndpointsDataSource } from './endpoints-data-source';
-import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
 import { InternalEventMonitorFactory } from '../../../../monitors/internal-event-monitor.factory';
+import { PaginationMonitorFactory } from '../../../../monitors/pagination-monitor.factory';
+import { ConfirmationDialogConfig } from '../../../confirmation-dialog.config';
+import { ConfirmationDialogService } from '../../../confirmation-dialog.service';
+import { ITableColumn } from '../../list-table/table.types';
+import { IListAction, IListConfig, ListViewTypes } from '../../list.component.types';
+import { EndpointsDataSource } from './endpoints-data-source';
+import { TableCellEndpointNameComponent } from './table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellEndpointStatusComponent } from './table-cell-endpoint-status/table-cell-endpoint-status.component';
+
+import { map, pairwise } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 
 function getEndpointTypeString(endpoint: EndpointModel): string {
@@ -88,29 +90,43 @@ export const endpointColumns: ITableColumn<EndpointModel>[] = [
 export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   private listActionDelete: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
-      this.handleDeleteAction(item, ([oldVal, newVal]) => {
-        this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+      const confirmation = new ConfirmationDialogConfig(
+        'Unregister Endpoint',
+        `Are you sure you want to unregister endpoint '${item.name}'?`,
+        'Unregister',
+        true
+      );
+      this.confirmDialog.open(confirmation, () => {
+        this.store.dispatch(new UnregisterEndpoint(item.guid, item.cnsi_type));
+        this.handleDeleteAction(item, ([oldVal, newVal]) => {
+          this.store.dispatch(new ShowSnackBar(`Unregistered ${item.name}`));
+        });
       });
     },
     label: 'Unregister',
     description: 'Remove the endpoint',
-    visible: row => true,
-    enabled: row => true,
+    createVisible: () => this.currentUserPermissionsService.can(CurrentUserPermissions.ENDPOINT_REGISTER)
   };
 
   private listActionDisconnect: IListAction<EndpointModel> = {
     action: (item) => {
-      this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
-      this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
-        this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
-        this.store.dispatch(new GetSystemInfo());
+      const confirmation = new ConfirmationDialogConfig(
+        'Disconnect Endpoint',
+        `Are you sure you want to disconnect endpoint '${item.name}'?`,
+        'Disconnect',
+        false
+      );
+      this.confirmDialog.open(confirmation, () => {
+        this.store.dispatch(new DisconnectEndpoint(item.guid, item.cnsi_type));
+        this.handleUpdateAction(item, EndpointsEffect.disconnectingKey, ([oldVal, newVal]) => {
+          this.store.dispatch(new ShowSnackBar(`Disconnected ${item.name}`));
+          this.store.dispatch(new GetSystemInfo());
+        });
       });
     },
     label: 'Disconnect',
     description: ``, // Description depends on console user permission
-    visible: row => row.connectionStatus === 'connected',
-    enabled: row => true,
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'connected'))
   };
 
   private listActionConnect: IListAction<EndpointModel> = {
@@ -126,8 +142,7 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     },
     label: 'Connect',
     description: '',
-    visible: row => row.connectionStatus === 'disconnected',
-    enabled: row => true,
+    createVisible: (row$: Observable<EndpointModel>) => row$.pipe(map(row => row.connectionStatus === 'disconnected'))
   };
 
   private singleActions = [
@@ -165,8 +180,8 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
   }
 
   private handleAction(storeSelect, handleChange) {
-    const disSub = this.store.select(storeSelect)
-      .pairwise()
+    const disSub = this.store.select(storeSelect).pipe(
+      pairwise())
       .subscribe(([oldVal, newVal]) => {
         // https://github.com/SUSE/stratos/issues/29 Generic way to handle errors ('Failed to disconnect X')
         if (!newVal.error && (oldVal.busy && !newVal.busy)) {
@@ -181,7 +196,9 @@ export class EndpointsListConfigService implements IListConfig<EndpointModel> {
     private dialog: MatDialog,
     private paginationMonitorFactory: PaginationMonitorFactory,
     private entityMonitorFactory: EntityMonitorFactory,
-    private internalEventMonitorFactory: InternalEventMonitorFactory
+    private internalEventMonitorFactory: InternalEventMonitorFactory,
+    private currentUserPermissionsService: CurrentUserPermissionsService,
+    private confirmDialog: ConfirmationDialogService
   ) {
     this.dataSource = new EndpointsDataSource(
       this.store,

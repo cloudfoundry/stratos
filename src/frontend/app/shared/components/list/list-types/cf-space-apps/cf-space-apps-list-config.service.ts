@@ -19,7 +19,6 @@ export class CfSpaceAppsListConfigService implements IListConfig<APIResource> {
   isLocal?: boolean;
   viewType = ListViewTypes.TABLE_ONLY;
   enableTextFilter = false;
-  tableFixedRowHeight?: boolean;
   dataSource: CfSpaceAppsDataSource;
   defaultView = 'table' as ListView;
   text = {

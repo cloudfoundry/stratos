@@ -1,19 +1,19 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
 
 export interface IAppChip<T = string> {
-  key: T;
-  value: string;
-  clearAction?: (chip: IAppChip) => void;
-  hideClearButton?: boolean;
-  busy?: Observable<boolean>;
-  color?: string;
-}
-export class AppChip<T = string> {
   key?: T;
   value: string;
   clearAction?: (chip: IAppChip<T>) => void;
-  hideClearButton?: boolean;
+  hideClearButton$?: Observable<boolean>;
+  busy?: Observable<boolean>;
+  color?: string;
+}
+export class AppChip<T = string> implements IAppChip<T> {
+  key?: T;
+  value: string;
+  clearAction?: (chip: IAppChip<T>) => void;
+  hideClearButton$?: Observable<boolean>;
   busy?: Observable<boolean>;
   color?: string;
 }

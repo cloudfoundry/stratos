@@ -36,18 +36,6 @@
     }
   }
 
-  // Get dev config from the dev config file if it exists
-  function getDevConfig() {
-    if (!devConfig) {
-      devConfig = {};
-      var devConfigFile = path.join(__dirname, 'dev_config.json');
-      if (fs.existsSync(devConfigFile)) {
-        devConfig = require(devConfigFile);
-      }
-    }
-    return devConfig;
-  }
-
   function skipGlideInstall() {
     if (isLocalDevBuild()) {
       // Skip glide install if ...
@@ -91,7 +79,7 @@
   }
 
   function isLocalDevBuild() {
-    return !!getDevConfig().localDevBuild;
+    return process.env.STRATOS_BACKEND_DEV === 'true';
   }
 
   function buildPlugin(pluginPath, pluginName) {
@@ -118,7 +106,11 @@
   }
 
   function test(path) {
-    return spawnProcess('go', ['test', '-v'], path, env);
+    if (process.env.STRATOS_USE_GO_CONVEY) {
+      return spawnProcess('goconvey', [], path, env);
+    } else {
+      return spawnProcess('go', ['test', './...', '-v'], path, env);
+    }
   }
 
   function getVersion() {

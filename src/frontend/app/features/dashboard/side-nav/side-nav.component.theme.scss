@@ -2,6 +2,7 @@
 @mixin side-nav-theme($theme, $app-theme) {
   $primary: map-get($theme, primary);
   $side-nav-colors: map-get($app-theme, side-nav);
+  $side-nav-bottom-color: map-get($app-theme, subdued-color);
 
   .side-nav {
     background-color: mat-color($side-nav-colors, background);
@@ -26,6 +27,9 @@
     }
     &__logo-text {
       color: mat-contrast($primary, 500);
+    }
+    &__bottom {
+      color: $side-nav-bottom-color;
     }
   }
 }

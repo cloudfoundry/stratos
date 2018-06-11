@@ -1,13 +1,17 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
+
+import { of as observableOf, Observable } from 'rxjs';
+import { Component } from '@angular/core';
 import { first, map } from 'rxjs/operators';
 
 import { environment } from '../../../../../../environments/environment';
+import { CurrentUserPermissions } from '../../../../../core/current-user-permissions.config';
+import { CurrentUserPermissionsService } from '../../../../../core/current-user-permissions.service';
 import { IHeaderBreadcrumb } from '../../../../../shared/components/page-header/page-header.types';
 import { ISubHeaderTabs } from '../../../../../shared/components/page-subheader/page-subheader.types';
-import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
+import { getActiveRouteCfOrgSpaceProvider, canUpdateOrgSpaceRoles } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { CurrentUserPermissionsChecker } from '../../../../../core/current-user-permissions.checker';
 
 @Component({
   selector: 'app-cloud-foundry-organization-base',
@@ -20,7 +24,7 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   ]
 })
 
-export class CloudFoundryOrganizationBaseComponent implements OnInit {
+export class CloudFoundryOrganizationBaseComponent {
 
   tabLinks: ISubHeaderTabs[] = [
     {
@@ -35,7 +39,7 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       link: 'users',
       label: 'Users',
       // Hide the users tab unless we are in development
-      hidden: environment.production
+      hidden: observableOf(environment.production)
     }
   ];
 
@@ -48,7 +52,15 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
 
-  constructor(public cfEndpointService: CloudFoundryEndpointService, public cfOrgService: CloudFoundryOrganizationService) {
+  public permsOrgEdit = CurrentUserPermissions.ORGANIZATION_EDIT;
+  public permsSpaceCreate = CurrentUserPermissions.SPACE_CREATE;
+  public canUpdateRoles$: Observable<boolean>;
+
+  constructor(
+    public cfEndpointService: CloudFoundryEndpointService,
+    public cfOrgService: CloudFoundryOrganizationService,
+    currentUserPermissionsService: CurrentUserPermissionsService
+  ) {
     this.isFetching$ = cfOrgService.org$.pipe(
       map(org => org.entityRequestInfo.fetching)
     );
@@ -70,9 +82,12 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
       ])),
       first()
     );
-  }
 
-  ngOnInit() {
+    this.canUpdateRoles$ = canUpdateOrgSpaceRoles(
+      currentUserPermissionsService,
+      cfOrgService.cfGuid,
+      cfOrgService.orgGuid,
+      CurrentUserPermissionsChecker.ALL_SPACES);
   }
 
 }

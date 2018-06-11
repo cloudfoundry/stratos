@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { of as observableOf } from 'rxjs';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { APIResource } from '../../../../../../store/types/api.types';
@@ -28,7 +29,15 @@ export class TableCellServiceInstanceTagsComponent<T> extends TableCellCustom<T>
         this.tags.push({
           value: t,
           key: this.row,
-          hideClearButton: true
+          hideClearButton$: observableOf(true)
+        });
+      });
+    } else if (this.row.entity && this.row.entity.tags) {
+      this.row.entity.tags.forEach(t => {
+        this.tags.push({
+          value: t,
+          key: this.row,
+          hideClearButton$: observableOf(true)
         });
       });
     }

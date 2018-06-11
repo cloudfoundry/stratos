@@ -1,5 +1,5 @@
 import { Directive, Input, EventEmitter, ElementRef, Renderer, Inject, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs/Subscription';
+import { Subscription } from 'rxjs';
 
 @Directive({
   selector: '[appFocus]'

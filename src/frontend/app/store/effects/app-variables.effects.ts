@@ -1,3 +1,5 @@
+
+import {map} from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { AppState } from '../app-state';
 import { Injectable } from '@angular/core';
@@ -15,8 +17,8 @@ export class AppVariablesEffect {
     private store: Store<AppState>,
   ) { }
 
-  @Effect() apiRequestStart$ = this.actions$.ofType<AppVariablesUpdate>(AppVariables.UPDATE)
-    .map((apiAction: AppVariablesUpdate) => {
+  @Effect() apiRequestStart$ = this.actions$.ofType<AppVariablesUpdate>(AppVariables.UPDATE).pipe(
+    map((apiAction: AppVariablesUpdate) => {
       return new UpdateExistingApplication(
         apiAction.appGuid,
         apiAction.cfGuid,
@@ -24,6 +26,6 @@ export class AppVariablesEffect {
         null,
         [AppMetadataTypes.ENV_VARS]
       );
-    });
+    }));
 }
 
