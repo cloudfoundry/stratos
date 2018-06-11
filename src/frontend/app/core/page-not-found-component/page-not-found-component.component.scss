@@ -1,4 +1,7 @@
+@import '../../../sass/mixins';
 .page-not-found {
+  $width: 200px;
+  $width-small: 150px;
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -13,5 +16,28 @@
   &__message {
     font-size: 36px;
     margin: 24px 0;
+  }
+  &__4,
+  &__0 {
+    font-size: $width-small;
+    line-height: $width-small;
+  }
+  &__0 {
+    height: $width-small;
+    width: $width-small;
+  }
+  &__404-outer {
+    display: flex;
+  }
+  @include breakpoint(tablet) {
+    &__4,
+    &__0 {
+      font-size: $width;
+      line-height: $width;
+    }
+    &__0 {
+      height: $width;
+      width: $width;
+    }
   }
 }

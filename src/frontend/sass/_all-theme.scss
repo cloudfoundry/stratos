@@ -33,6 +33,7 @@
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
+@import '../app/core/page-not-found-component/page-not-found-component.theme.component';
 @import './mat-themes';
 @import './fonts';
 @import './ansi-colors';
@@ -99,6 +100,7 @@ $side-nav-light-active: #484848;
   @include action-monitor-icon-theme($theme, $app-theme);
   @include app-deploy-app-fs-component-theme($theme, $app-theme);
   @include app-upload-progress-indicator-component-theme($theme, $app-theme);
+  @include page-404($theme, $app-theme);
 }
 
 @function app-generate-nav-theme($theme, $nav-theme: null) {
