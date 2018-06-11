@@ -23,8 +23,11 @@ export CERTS_PATH=./dev-certs
 
 E2E_TARGET="e2e-local"
 
-if [ "${TRAVIS_EVENT_TYPE}" == "pull_request" ]; then
-  echo "Pull Request: Using local deployment for e2e tests"
+# Single arg to script can change whether we do a quick of full deploy
+RUN_TYPE=$1
+
+if [ "${RUN_TYPE}" == "quick" ]; then
+  echo "Using local deployment for e2e tests"
   # Quick deploy locally
   # Start a local UAA - this will take a few seconds to come up in the background
   docker run -d -p 8080:8080 splatform/stratos-uaa

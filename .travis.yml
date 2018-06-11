@@ -28,7 +28,9 @@ stages:
   - Frontend Lint
   - Frontend Unit Tests
   - Backend
-  - name: E2E tests
+  - name: E2E tests (Full Docker Compose)
+    if: type != pull_request
+  - name: E2E tests quick (Quick Dev deployment)
     if: type != pull_request OR head_branch =~ ^(?i:e2e)-.*$
 jobs:
   include:
@@ -52,6 +54,11 @@ jobs:
   - stage: E2E tests
     before_script:
     - chmod +x ./deploy/ci/travis/run-e2e-tests.sh
+    script:
+    - "./deploy/ci/travis/run-e2e-tests.sh"
+  - stage: E2E tests quick
+    before_script:
+    - chmod +x ./deploy/ci/travis/run-e2e-tests.sh quick
     script:
     - "./deploy/ci/travis/run-e2e-tests.sh"
 notifications:
