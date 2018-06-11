@@ -1,4 +1,4 @@
-import { RequestOptions } from '@angular/http';
+import { RequestOptions, RequestMethod } from '@angular/http';
 
 import {
   cfUserSchemaKey,
@@ -6,12 +6,14 @@ import {
   EntitySchema,
   organizationSchemaKey,
   spaceSchemaKey,
+  endpointSchemaKey,
 } from '../helpers/entity-factory';
-import { createEntityRelationKey, EntityInlineParentAction } from '../helpers/entity-relations.types';
-import { PaginatedAction } from '../types/pagination.types';
-import { CFStartAction, IRequestAction } from '../types/request.types';
+import { createEntityRelationKey, EntityInlineParentAction, createEntityRelationPaginationKey } from '../helpers/entity-relations.types';
+import { PaginatedAction, PaginationParam } from '../types/pagination.types';
+import { CFStartAction, IRequestAction, RequestEntityLocation } from '../types/request.types';
 import { getActions } from './action.helper';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../types/user.types';
+import { Action } from '@ngrx/store';
 
 export const GET_ALL = '[Users] Get all';
 export const GET_ALL_SUCCESS = '[Users] Get all success';
@@ -38,13 +40,39 @@ export const GET_CF_USER = '[Users] Get cf user ';
 export const GET_CF_USER_SUCCESS = '[Users] Get cf user success';
 export const GET_CF_USER_FAILED = '[Users] Get cf user failed';
 
-export class GetAllUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+export const GET_CF_USERS_BY_ORG = '[Users] Get cf users by org ';
+
+const createGetAllUsersPaginationKey = cfGuid => createEntityRelationPaginationKey(endpointSchemaKey, cfGuid);
+const createGetAllUsersInitialParams = () => ({
+  page: 1,
+  'results-per-page': 100,
+  'order-direction': 'desc',
+  'order-direction-field': 'username',
+});
+
+export class GetAllUsersAsNonAdmin implements PaginatedAction {
+  type = GET_CF_USERS_BY_ORG;
+  paginationKey: string;
+  actions: string[] = [];
+  entityKey = cfUserSchemaKey;
   constructor(
-    public paginationKey: string,
+    public cfGuid: string,
+    public includeRelations: string[] = defaultUserRelations,
+    public populateMissing = true
+  ) {
+    this.paginationKey = createGetAllUsersPaginationKey(cfGuid);
+  }
+  initialParams = createGetAllUsersInitialParams();
+}
+
+export class GetAllUsersAsAdmin extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
+  paginationKey: string;
+  constructor(
     public endpointGuid: string,
     public includeRelations: string[] = defaultUserRelations,
     public populateMissing = true) {
     super();
+    this.paginationKey = createGetAllUsersPaginationKey(endpointGuid);
     this.options = new RequestOptions();
     this.options.url = 'users';
     this.options.method = 'get';
@@ -53,12 +81,7 @@ export class GetAllUsers extends CFStartAction implements PaginatedAction, Entit
   entity = [entityFactory(cfUserSchemaKey)];
   entityKey = cfUserSchemaKey;
   options: RequestOptions;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'order-direction': 'desc',
-    'order-direction-field': 'username',
-  };
+  initialParams = createGetAllUsersInitialParams();
   flattenPagination = true;
 }
 

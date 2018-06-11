@@ -1,29 +1,32 @@
 import { TitleCasePipe } from '@angular/common';
-import { Component, OnDestroy, AfterContentInit } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable, of as observableOf } from 'rxjs';
-import { map, tap, take, filter, switchMap, first } from 'rxjs/operators';
+import { filter, first, map, switchMap, take, tap } from 'rxjs/operators';
 
 import { IServiceInstance } from '../../../../core/cf-api-svc.types';
 import { IApp, ISpace } from '../../../../core/cf-api.types';
 import { EntityServiceFactory } from '../../../../core/entity-service-factory.service';
 import { getIdFromRoute } from '../../../../features/cloud-foundry/cf.helpers';
-import { CsiModeService } from '../csi-mode.service';
 import { servicesServiceFactoryProvider } from '../../../../features/service-catalog/service-catalog.helpers';
-import { PaginationMonitorFactory } from '../../../../shared/monitors/pagination-monitor.factory';
 import { GetApplication } from '../../../../store/actions/application.actions';
 import {
+  ResetCreateServiceInstanceState,
   SetCreateServiceInstance,
-  SetServiceInstanceGuid,
   SetCreateServiceInstanceCFDetails,
   SetCreateServiceInstanceServiceGuid,
-  ResetCreateServiceInstanceState,
+  SetServiceInstanceGuid,
 } from '../../../../store/actions/create-service-instance.actions';
 import { GetServiceInstance } from '../../../../store/actions/service-instances.actions';
 import { GetAllAppsInSpace, GetSpace } from '../../../../store/actions/space.actions';
 import { AppState } from '../../../../store/app-state';
-import { applicationSchemaKey, entityFactory, spaceSchemaKey, serviceInstancesSchemaKey } from '../../../../store/helpers/entity-factory';
+import {
+  applicationSchemaKey,
+  entityFactory,
+  serviceInstancesSchemaKey,
+  spaceSchemaKey,
+} from '../../../../store/helpers/entity-factory';
 import {
   createEntityRelationKey,
   createEntityRelationPaginationKey,
@@ -32,9 +35,11 @@ import { getPaginationObservables } from '../../../../store/reducers/pagination-
 import { selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
 import { APIResource } from '../../../../store/types/api.types';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { PaginationMonitorFactory } from '../../../monitors/pagination-monitor.factory';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelperService } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
+import { CsiModeService } from '../csi-mode.service';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -86,13 +91,10 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     // Check if wizard has been initiated to edit a service instance
     if (this.modeService.isEditServiceInstanceMode()) {
       this.initialisedService$ = this.configureForEditServiceInstanceMode();
-    }
-
-    if (this.modeService.isAppServicesMode()) {
+    } else if (this.modeService.isAppServicesMode()) {
       // Setup wizard for App services mode
       this.initialisedService$ = this.setupForAppServiceMode();
-    }
-    if (this.modeService.isServicesWallMode()) {
+    } else if (this.modeService.isServicesWallMode()) {
       // Setup wizard for default mode
       this.servicesWallCreateInstance = true;
       this.serviceInstancesUrl = `/services`;
@@ -192,7 +194,6 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
           }),
           take(1)
         ).subscribe();
-        this.serviceInstancesUrl = `/services`;
       }),
       take(1),
       map(o => false),

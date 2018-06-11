@@ -1,5 +1,5 @@
 <h1 class="confirm-dialog__header" mat-dialog-title>
-  {{data.title}}
+  <span class="confirm-dialog__header-title">{{data.title}}</span>
   <mat-icon class="confirm-dialog__warn-icon" color="warn" *ngIf="data.critical">warning</mat-icon>
 </h1>
 <div class="confirm-dialog__message" mat-dialog-content [innerHtml]="data.msg">

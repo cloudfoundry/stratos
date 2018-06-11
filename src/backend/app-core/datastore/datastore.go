@@ -99,6 +99,9 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
+		} else {
+			// Invalid SSL mode
+			return dc, fmt.Errorf("Invalid SSL mode: %s", dc.SSLMode)
 		}
 	} else if dc.DatabaseProvider == MYSQL {
 		return dc, nil
@@ -107,7 +110,7 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 }
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
-	log.Println("validateRequiredDatabaseParams")
+	log.Debug("validateRequiredDatabaseParams")
 
 	err = vala.BeginValidation().Validate(
 		vala.IsNotNil(username, "username"),
@@ -169,7 +172,7 @@ func GetSQLLiteConnection() (*sql.DB, error) {
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
-	log.Println("buildConnectionString")
+	log.Debug("buildConnectionString")
 	escapeStr := func(in string) string {
 		return strings.Replace(in, `'`, `\'`, -1)
 	}
@@ -208,7 +211,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 }
 
 func buildConnectionStringForMysql(dc DatabaseConfig) string {
-	log.Println("buildConnectionString")
+	log.Debug("buildConnectionString")
 	escapeStr := func(in string) string {
 		return strings.Replace(in, `'`, `\'`, -1)
 	}

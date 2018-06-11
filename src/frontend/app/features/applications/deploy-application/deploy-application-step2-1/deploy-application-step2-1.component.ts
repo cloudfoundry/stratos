@@ -11,6 +11,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { first, map, tap } from 'rxjs/operators';
 
+import { StepOnNextFunction } from '../../../../shared/components/stepper/step/step.component';
 import { SetDeployCommit } from '../../../../store/actions/deploy-applications.actions';
 import { AppState } from '../../../../store/app-state';
 import { APIResource } from '../../../../store/types/api.types';
@@ -58,7 +59,7 @@ export class DeployApplicationStep21Component {
     );
   }
 
-  onNext = () => {
+  onNext: StepOnNextFunction = () => {
     return this.selectedCommit$.pipe(
       first(),
       tap(commit => {

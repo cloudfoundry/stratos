@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, of as observableOf } from 'rxjs';
 
 import { IServiceInstance } from '../../../../../../core/cf-api-svc.types';
 import { ServicesWallService } from '../../../../../../features/services/services/services-wall.service';
@@ -50,7 +50,11 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
     super();
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
+
+    this.serviceInstanceTags = this.serviceInstanceEntity.entity.tags.map(t => ({
+      value: t
+    }));
 
     this.cardMenu = [
       {
@@ -63,33 +67,31 @@ export class ServiceInstanceCardComponent extends CardCell<APIResource<IServiceI
         )
       },
       {
-        label: 'Detach',
+        label: 'Unbind',
         action: this.detach,
-        disabled: this.hasMultipleBindings,
+        disabled: observableOf(this.serviceInstanceEntity.entity.service_bindings.length === 0),
         can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
-            this.serviceInstanceEntity.entity.cfGuid,
-            this.serviceInstanceEntity.entity.space_guid
-          )
-        },
-        {
-          label: 'Delete',
-          action: this.delete,
-          can: this.currentUserPermissionsService.can(
-            CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
-            this.serviceInstanceEntity.entity.cfGuid,
-            this.serviceInstanceEntity.entity.space_guid
-          )
-        }
-      ];
+          CurrentUserPermissions.SERVICE_INSTANCE_EDIT,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      },
+      {
+        label: 'Delete',
+        action: this.delete,
+        can: this.currentUserPermissionsService.can(
+          CurrentUserPermissions.SERVICE_INSTANCE_DELETE,
+          this.serviceInstanceEntity.entity.cfGuid,
+          this.serviceInstanceEntity.entity.space_guid
+        )
+      }
+    ];
   }
   detach = () => {
-    const serviceBindingGuid = this.serviceInstanceEntity.entity.service_bindings[0].metadata.guid;
-    this.serviceActionHelperService.detachServiceBinding(
-      serviceBindingGuid,
+    this.serviceActionHelperService.detachServiceBinding
+      (this.serviceInstanceEntity.entity.service_bindings,
       this.serviceInstanceEntity.metadata.guid,
-      this.serviceInstanceEntity.entity.cfGuid
-    );
+      this.serviceInstanceEntity.entity.cfGuid);
   }
 
   delete = () => this.serviceActionHelperService.deleteServiceInstance(

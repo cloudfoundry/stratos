@@ -61,7 +61,8 @@ export class CreateServiceInstanceHelperService {
     );
 
     this.service$ = serviceEntityService.waitForEntity$.pipe(
-      filter(o => !!o && !!o.entity),
+      filter(o => !!o && !!o.entity && !!o.entity.entity && !!o.entity.entity.service_plans),
+      // filter(o => !!o && !!o.entity),
       map(o => o.entity),
       publishReplay(1),
       refCount()
@@ -93,7 +94,7 @@ export class CreateServiceInstanceHelperService {
 
   getServicePlans(): Observable<APIResource<IServicePlan>[]> {
     return getServicePlans(this.service$, this.cfGuid, this.store, this.paginationMonitorFactory);
-    }
+  }
 
   getServiceName = () => {
     return this.service$
