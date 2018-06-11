@@ -36,16 +36,6 @@ export abstract class Component {
     return browser.wait(until.invisibilityOf(this.locator), 5000);
   }
 
-  waitUntilNotShown(): promise.Promise<void> {
-    return browser.wait(until.presenceOf(this.locator), 5000,
-    'Element taking too long to appear in the DOM').then(() => {
-      return browser.wait(until.not(until.visibilityOf(this.locator)), 5000, 'Element not visible timing out').then(v => {
-        // Slight delay for animations
-        return browser.driver.sleep(100);
-      });
-    });
-  }
-
   protected hasClass(cls, element = this.locator): promise.Promise<boolean> {
     return element.getAttribute('class')
       .then((classes) => {

@@ -4,8 +4,6 @@ import { ElementFinder } from 'protractor/built/element';
 import { LoginPage } from '../login/login.po';
 import { SecretsHelpers } from './secrets-helpers';
 
-// This makes identification of acceptance test apps easier in case they leak
-
 
 export enum ConsoleUserType {
   admin = 1,
@@ -20,6 +18,7 @@ export class E2EHelpers {
 
   constructor() { }
 
+  // This makes identification of acceptance test apps easier in case they leak
   static createCustomName = (prefix: string, isoTime?: string) => prefix + '.' + (isoTime || (new Date()).toISOString());
 
   getHost(): string {

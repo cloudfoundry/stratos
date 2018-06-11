@@ -14,8 +14,4 @@ export class ApplicationsPage extends CFPage {
   clickCreateApp(): any {
     this.helpers.waitForElementAndClick(element(by.css('button[ng-reflect-router-link="/applications/new/"]')));
   }
-
-  waitFor() {
-    return super.waitFor('Applications');
-  }
 }

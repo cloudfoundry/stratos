@@ -5,7 +5,6 @@ import { SideNavigation, SideNavMenuItem } from '../po/side-nav.po';
 import { ApplicationE2eHelper } from './application-e2e-helpers';
 import { ApplicationSummary } from './application-summary.po';
 import { CreateApplicationStepper } from './create-application-stepper.po';
-import { browser, protractor } from 'protractor';
 
 
 describe('Application Create', function () {

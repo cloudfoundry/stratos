@@ -44,8 +44,7 @@ export class CreateApplicationStepper extends StepperComponent {
   }
 
   isRouteHostValue(hostName: string) {
-    // const formField = this.getStepperForm().getFormField(this.routeHostNameFieldName);
-    expect(this.getStepperForm().getText(this.routeHostNameFieldName, true)).toBe(hostName);
+    expect(this.getStepperForm().getText(this.routeHostNameFieldName)).toBe(hostName);
   }
 
   fixRouteHost(hostName: string): promise.Promise<void> {

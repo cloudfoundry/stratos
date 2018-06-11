@@ -1,10 +1,8 @@
-import { protractor, ElementFinder, ElementArrayFinder } from 'protractor/built';
-import { browser, element, by, promise } from 'protractor';
+import { by, element, promise } from 'protractor';
+import { ElementArrayFinder, ElementFinder, protractor } from 'protractor/built';
+import { Key } from 'selenium-webdriver';
+
 import { Component } from './component.po';
-import { Key, By } from 'selenium-webdriver';
-import Q = require('q');
-
-
 
 export interface FormItemMap {
   [k: string]: FormItem;
@@ -20,7 +18,6 @@ export interface FormItem {
   checked: boolean;
   type: string;
   class: string;
-  // select: string;
   sendKeys: Function;
   clear: Function;
   click: Function;
@@ -40,7 +37,7 @@ export class FormComponent extends Component {
 
   // Get metadata for all of the fields in the form
   getFields(): ElementArrayFinder {
-    return this.locator.all(by.tagName('input, mat-select'));
+    return this.locator.all(by.tagName('input, mat-select, textarea'));
   }
 
   getFieldsMapped(): promise.Promise<FormItem[]> {
@@ -101,8 +98,14 @@ export class FormComponent extends Component {
     return this.getField(ctrlName).getAttribute('aria-describedby').then(id => this.locator.element(by.id(id)).getText());
   }
 
-  getText = (ctrlName: string, isTextInput: boolean): promise.Promise<string> =>
-    isTextInput ? this.getField(ctrlName).getAttribute('value') : this.getField(ctrlName).getText()
+  getText = (ctrlName: string): promise.Promise<string> => {
+    const field = this.getField(ctrlName);
+    const isInputOrTextAreaP = field.getTagName().then(tagName => tagName === 'input' || tagName === 'textarea');
+    const isMatInputFieldP = field.getAttribute('class').then(css => css.indexOf('mat-input-element') >= 0);
+
+    return promise.all([isInputOrTextAreaP, isMatInputFieldP]).then(([isInputOrTextArea, isMatInputField]) =>
+      isInputOrTextArea && isMatInputField ? field.getAttribute('value') : field.getText());
+  }
 
   // Focus the specified field by clicking it
   focusField(ctrlName: string): promise.Promise<void> {
@@ -140,7 +143,7 @@ export class FormComponent extends Component {
             break;
           case 'mat-select':
             ctrl.click();
-            ctrl.sendKeys(value); // TODO: RC ensure selected? find in list and click?
+            ctrl.sendKeys(value);
             ctrl.sendKeys(Key.RETURN);
             break;
           default:
@@ -149,7 +152,7 @@ export class FormComponent extends Component {
             ctrl.sendKeys(value);
             break;
         }
-        expect(this.getText(field, ctrl.type === 'text')).toBe(value);
+        expect(this.getText(field)).toBe(value);
       });
     });
   }
@@ -169,14 +172,9 @@ export class FormComponent extends Component {
 export class FormField {
 
   public element: ElementFinder;
-  // public ctrl: FormItem;
 
   constructor(public form: FormComponent, public name: string) {
     this.element = this.form.getField(name);
-    // this.ctrl = this.form.mapField(this.element, 0);
-    // this.form.getField()
-
-    // const type = ctrl.type || ctrl.tag;
   }
 
   set(v: string): promise.Promise<void> {
