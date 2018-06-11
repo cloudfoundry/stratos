@@ -1,3 +1,4 @@
+@import '../app/core/page-not-found-component/page-not-found-component.theme.component';
 @import '../app/features/dashboard/side-nav/side-nav.component.theme';
 @import '../app/features/dashboard/dashboard-base/dashboard-base.component.theme';
 @import '../app/features/login/login-page/login-page.component.theme';
@@ -34,7 +35,6 @@
 @import './components/mat-tabs.theme';
 @import './components/text-status.theme';
 @import './components/hyperlinks.theme';
-@import '../app/core/page-not-found-component/page-not-found-component.theme.component';
 @import './mat-themes';
 @import './fonts';
 @import './ansi-colors';
