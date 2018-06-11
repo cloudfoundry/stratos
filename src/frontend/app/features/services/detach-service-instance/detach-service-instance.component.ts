@@ -12,6 +12,7 @@ import {
 } from '../../../shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import { ITableColumn } from '../../../shared/components/list/list-table/table.types';
 import { ServiceActionHelperService } from '../../../shared/data-services/service-action-helper.service';
+import { RouterNav } from '../../../store/actions/router.actions';
 import { GetServiceInstance } from '../../../store/actions/service-instances.actions';
 import { AppState } from '../../../store/app-state';
 import { entityFactory, serviceBindingSchemaKey, serviceInstancesSchemaKey } from '../../../store/helpers/entity-factory';
@@ -83,6 +84,10 @@ export class DetachServiceInstanceComponent {
   }
 
   public startDelete = () => {
+
+    if (this.deleteStarted) {
+      return this.store.dispatch(new RouterNav({ path: '/services' }));
+    }
     this.deleteStarted = true;
     if (this.selectedBindings && this.selectedBindings.length) {
       this.selectedBindings.forEach(binding => {
