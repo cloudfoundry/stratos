@@ -94,7 +94,7 @@ export const getServicePlans = (
   return service$.pipe(
     filter(p => !!p),
     switchMap(service => {
-    if (service.entity.service_plans.length > 0) {
+    if (service.entity.service_plans && service.entity.service_plans.length > 0) {
       return observableOf(service.entity.service_plans);
     } else {
       const guid = service.metadata.guid;

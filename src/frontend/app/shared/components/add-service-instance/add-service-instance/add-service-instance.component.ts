@@ -69,6 +69,7 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
   stepperText = 'Select a Cloud Foundry instance, organization and space for the service instance.';
   bindAppStepperText = 'Bind App (Optional)';
   appId: string;
+  public inMarketplaceMode: boolean;
   constructor(
     private cSIHelperServiceFactory: CreateServiceInstanceHelperServiceFactory,
     private activatedRoute: ActivatedRoute,
@@ -79,12 +80,12 @@ export class AddServiceInstanceComponent implements OnDestroy, AfterContentInit 
     private modeService: CsiModeService,
     private paginationMonitorFactory: PaginationMonitorFactory
   ) {
-
+    this.inMarketplaceMode = this.modeService.isMarketplaceMode();
   }
   ngAfterContentInit(): void {
 
     // Check if wizard has been initiated from the Services Marketplace
-    if (this.modeService.isMarketplaceMode()) {
+    if (this.inMarketplaceMode) {
       this.initialisedService$ = this.initialiseForMarketplaceMode();
     }
 
