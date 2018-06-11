@@ -34,6 +34,7 @@ export function serviceInstanceReducer(state: IRequestEntityTypeState<APIResourc
       const name = updateServiceInstance.name;
       const params = updateServiceInstance.params;
       serviceInstanceGuid = updateServiceInstance.guid;
+      serviceInstanceEntity = state[serviceInstanceGuid];
       return {
         ...state,
         [serviceInstanceGuid]: {
